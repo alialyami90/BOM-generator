@@ -137,7 +137,7 @@ change small, and rebase on `main` before asking for review.
 | `docs/decisions/README.md` | Add one row for your own ADR. |
 | `pyproject.toml` | Add only the dependencies, extras and entry points your milestone needs. The `bomgen` console script is A2's. |
 | `src/bomgen/cli.py` | A2's. Other command groups live in their own module and attach with one `app.add_typer(...)` line. `build` calls `bomgen.build.build_substation`. |
-| `src/bomgen/build.py` | A2's. The one build sequence `bomgen build` and the app share: A8's layout, A9's pipeline, compare and check report, A10's sheets and writer; each owner adds its own step after telling A2. |
+| `src/bomgen/build.py` | A2's. The one build sequence `bomgen build` and the app share: A9's pipeline, compare and check report, A10's sheets and writer; each owner adds its own step after telling A2. The caller lays out first with A8's `with_layout` (`cli.build`, the app's `resolve()`). |
 | `.github/workflows/` | `ci.yml` is A1's; a new job must join `ci-status`'s `needs` (ADR 0006). Other workflows belong to the agent that adds them. |
 | `CLAUDE.md` | A1. Ask A1 for changes. |
 | `README.md` | A7, under A1's direction. |
