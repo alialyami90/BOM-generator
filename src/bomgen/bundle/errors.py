@@ -12,6 +12,10 @@ or offer a remedy without parsing the message:
 - `NOT_INSTALLED`: the named library or version is not in the store.
 - `STORE_DAMAGED`: the installed store is unreadable (for example a corrupt
   `active` file).
+- `INVALID_PROJECT`: a project folder cannot be exported (missing or unusable
+  `project.yaml`, unsafe project id).
+- `PROJECT_EXISTS`: a project with that id is already in the workspace; refused
+  unless forced.
 """
 
 from __future__ import annotations
@@ -27,6 +31,8 @@ class RefusalKind(StrEnum):
     ALREADY_INSTALLED = "already_installed"
     NOT_INSTALLED = "not_installed"
     STORE_DAMAGED = "store_damaged"
+    INVALID_PROJECT = "invalid_project"
+    PROJECT_EXISTS = "project_exists"
 
 
 class LibraryPackageError(Exception):
