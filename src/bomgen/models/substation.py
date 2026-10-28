@@ -8,7 +8,7 @@ substation file); the loader resolves them and applies the project defaults.
 from enum import StrEnum
 from pathlib import Path
 from string import Formatter
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import (
     Field,
@@ -97,18 +97,28 @@ class Network(InputModel):
     l3_uplinks_per_l2: NonNegativeInt = 2
 
 
-class DeviceMove(InputModel):
-    """Move one equipment entry (or its ``unit``-th unit, 1-based) into a panel."""
+UnitSide = Literal["a", "b"]
+
+
+class UnitRef(InputModel):
+    """Units of one equipment entry: ``unit`` (1-based) and ``side``; None means all."""
 
     device: PanelId
     unit: PositiveInt | None = None
+    side: UnitSide | None = None
+
+
+class DeviceMove(UnitRef):
+    """Move single units into a panel; a redundant entry's move names its side."""
+
     panel: PositiveInt
 
 
 class PairMove(InputModel):
-    """Move both units of a redundant equipment entry into two panels."""
+    """Move both sides of a redundant entry (its ``unit``-th pair, or all) into two panels."""
 
     pair: PanelId
+    unit: PositiveInt | None = None
     panel: tuple[PositiveInt, PositiveInt]
 
     @field_validator("panel")
@@ -124,7 +134,7 @@ class Layout(InputModel):
 
     blank_plate_u: NonNegativeInt = 1
     overrides: list[DeviceMove | PairMove] = Field(default_factory=list)
-    removed: list[PanelId] = Field(default_factory=list)  # equipment ids left out
+    removed: list[UnitRef] = Field(default_factory=list)  # units left out of the layout
 
 
 def _check_number_template(value: str) -> str:
@@ -176,6 +186,22 @@ _RENDERED: dict[str, TypeAdapter[str]] = {
 }
 
 
+def _equipment(by_id: dict[str, Equipment], name: str, where: str) -> Equipment:
+    if name not in by_id:
+        raise ValueError(f"{where} names no equipment id '{name}'")
+    return by_id[name]
+
+
+def _check_unit_ref(
+    by_id: dict[str, Equipment], ref: UnitRef, where: str, *, side_required: bool
+) -> None:
+    entry = _equipment(by_id, ref.device, where)
+    if entry.redundant and ref.side is None and side_required:
+        raise ValueError(f"{where}: '{ref.device}' is redundant; name the side (a or b) to move")
+    if not entry.redundant and ref.side is not None:
+        raise ValueError(f"{where}: '{ref.device}' is not redundant; leave side out")
+
+
 class Substation(InputModel):
     """The substation file (``substation.yaml``)."""
 
@@ -208,14 +234,16 @@ class Substation(InputModel):
                 raise ValueError(f"duplicate equipment id '{item.id}'")
             by_id[item.id] = item
         for move in self.layout.overrides:
-            name = move.device if isinstance(move, DeviceMove) else move.pair
-            if name not in by_id:
-                raise ValueError(f"layout override names no equipment id '{name}'")
-            if isinstance(move, PairMove) and not by_id[name].redundant:
-                raise ValueError(f"layout override: '{name}' is not redundant, so it has no pair")
-        for name in self.layout.removed:
-            if name not in by_id:
-                raise ValueError(f"layout.removed names no equipment id '{name}'")
+            if isinstance(move, PairMove):
+                entry = _equipment(by_id, move.pair, "layout override")
+                if not entry.redundant:
+                    raise ValueError(
+                        f"layout override: '{move.pair}' is not redundant, so it has no pair"
+                    )
+            else:
+                _check_unit_ref(by_id, move, "layout override", side_required=True)
+        for ref in self.layout.removed:
+            _check_unit_ref(by_id, ref, "layout.removed", side_required=False)
         if self.equipment:
             for role in (EquipmentRole.L1_SWITCH, EquipmentRole.L2_SWITCH):
                 entries = [e for e in self.equipment if e.role is role]

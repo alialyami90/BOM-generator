@@ -55,10 +55,11 @@ def substation_dict() -> dict[str, Any]:
         "layout": {
             "blank_plate_u": 1,
             "overrides": [
-                {"device": "l1", "unit": 3, "panel": 3},
+                {"device": "l1", "unit": 3, "side": "a", "panel": 3},
+                {"pair": "l1", "unit": 2, "panel": [3, 4]},
                 {"pair": "ext-fw", "panel": [3, 4]},
             ],
-            "removed": ["gps"],
+            "removed": [{"device": "gps"}, {"device": "ext-fw", "side": "a"}],
         },
         "generated_panels": {
             "id": "psa{n}",
@@ -80,6 +81,11 @@ def test_substation_from_design_example_validates() -> None:
     assert s.equipment[3].l2_media == "MM"
     assert s.equipment[3].side == "none"
     assert isinstance(s.layout.overrides[1], PairMove)
+    assert s.layout.overrides[1].unit == 2
+    assert [(r.device, r.unit, r.side) for r in s.layout.removed] == [
+        ("gps", None, None),
+        ("ext-fw", None, "a"),
+    ]
     assert s.spares is not None
     assert s.spares.model_fields_set == {"port_fraction"}
     assert s.constants is None
@@ -213,7 +219,10 @@ def test_equipment_ids_are_unique() -> None:
     [
         ({"overrides": [{"device": "nope", "panel": 2}]}, "equipment id 'nope'"),
         ({"overrides": [{"pair": "gps", "panel": [1, 2]}]}, "'gps' is not redundant"),
-        ({"removed": ["ghost"]}, "equipment id 'ghost'"),
+        ({"removed": [{"device": "ghost"}]}, "equipment id 'ghost'"),
+        ({"overrides": [{"device": "l1", "panel": 2}]}, "name the side"),
+        ({"overrides": [{"device": "gps", "side": "a", "panel": 2}]}, "leave side out"),
+        ({"removed": [{"device": "gps", "side": "b"}]}, "leave side out"),
     ],
 )
 def test_layout_overrides_name_equipment_ids(layout: dict[str, Any], message: str) -> None:

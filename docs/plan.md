@@ -223,9 +223,10 @@ network:
 layout:                                # panel capacity = enclosure_u − rack_u_reserved
   blank_plate_u: 1                     # space only, no BOM row (Q25)
   overrides:                           # written by the UI's Panels board; equipment ids
-    - { device: l1, unit: 3, panel: 3 } # unit: which of the entry's units (1-based)
-    - { pair: ext-fw, panel: [3, 4] }   # a redundant entry's two units
-  removed: [gw]                        # equipment ids left out
+    - { device: l1, unit: 3, side: a, panel: 3 }   # unit 1-based; side for redundant
+    - { pair: l1, unit: 2, panel: [3, 4] }         # both sides; no unit = every pair
+  removed:                             # None = every unit / both sides
+    - { device: gw, side: a }          # GW-1 only
 generated_panels:                      # needed when equipment is given; {n} = panel number
   id: "psa{n}"
   cabinet_number: "861-GIS01-PSA-{n:04d}"

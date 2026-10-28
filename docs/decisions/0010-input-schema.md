@@ -89,9 +89,11 @@ hand-written YAML.
     The panel's usable U is computed (`enclosure_u − rack_u_reserved`), never
     written.
 18. **Equipment ids.** Every equipment entry has a unique `id`. Layout
-    `overrides` (`device` with an optional 1-based `unit`, or `pair` for a
-    redundant entry) and `removed` name these ids, never tags, so a re-run of
-    the layout or a renumbering cannot break them.
+    `overrides` and `removed` name these ids, never tags, so a re-run of the
+    layout or a renumbering cannot break them. A unit is picked by a 1-based
+    `unit` and, on a redundant entry, a `side` (`a` or `b`); leaving either
+    out means every unit or both sides. A single-device move of a redundant
+    entry must name its side; a `pair` move takes both sides.
 
 ## Consequences
 
