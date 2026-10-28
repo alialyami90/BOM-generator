@@ -197,19 +197,6 @@
     { id: 'TH-1', make: 'Rittal', model: 'Thermostat', cat: 'housekeeping', supply: '230 VAC', w: 2, verified: 'confirmed', alt: null }
   ];
 
-  const importScenarios = {
-    ok: { label: 'Update available (1.5.0)', file: 'psa-devices-1.5.0.bomlib', size: '184 KB', name: 'psa-devices', version: '1.5.0', active: '1.4.0', schema: '1', minApp: '0.1.0', created: '2026-10-27 16:40', notes: 'Adds the SEL-2740S switch and a 6 mm² terminal block. Updates SEL-3555 ordering code and L1 switch wattage. Removes the retired 48-core FOPP.',
-      checks: [['ok', 'Checksums match for all 14 files'], ['ok', 'Library schema version 1 is supported'], ['ok', 'Needs app 0.1.0 or later; this is 0.2.0'], ['info', 'Signatures are not enabled for this install']],
-      diff: { added: [['SEL-2740S-L2', 'SEL-2740S managed switch'], ['UT-6-MT', 'Terminal block 6 mm²'], ['FAN-AXIAL-120', 'Axial fan 120 mm']], changed: [['SEL-3555-GW', 'ordering_code, unit_power_w'], ['RST2228-L1-24MM', 'unit_power_w, description_template']], removed: [['FOPP-48SM', '48-core SM patch panel']], catalogues: ['terminal_blocks'], files: { added: ['data/device-db/housekeeping.yaml'], changed: ['data/device-db/network.yaml'], removed: [] } }, impact: 'The current project was built with 1.3.2. After import, rebuilding uses 1.5.0 and the check report will say so.' },
-    downgrade: { label: 'Refused: older than installed', file: 'psa-devices-1.3.0.bomlib', size: '171 KB', name: 'psa-devices', version: '1.3.0', active: '1.4.0', schema: '1', minApp: '0.1.0', created: '2026-07-14 09:12', notes: 'First release with alternative brands.',
-      checks: [['ok', 'Checksums match for all 12 files'], ['ok', 'Library schema version 1 is supported'], ['bad', 'Version 1.3.0 is older than the active 1.4.0']], refused: { title: 'This package is older than the installed library', body: 'Installing 1.3.0 would replace 1.4.0 and reverse its changes. To go back to an earlier version you already have, use Installed versions → Make active.', force: 'Install anyway (downgrade)' }, diff: { added: [], changed: [['SEL-3555-GW', 'ordering_code']], removed: [['SEL-2730M-EXT', 'External switch']], catalogues: [], files: { added: [], changed: [], removed: [] } } },
-    tampered: { label: 'Refused: checksum mismatch', file: 'psa-devices-1.5.0.bomlib', size: '184 KB', name: 'psa-devices', version: '1.5.0', active: '1.4.0', schema: '1', minApp: '0.1.0', created: '2026-10-27 16:40', notes: '',
-      checks: [['bad', 'data/device-db/network.yaml does not match its checksum'], ['info', 'Other checks were skipped']], refused: { title: 'The package was changed or damaged after it was built', body: 'The file data/device-db/network.yaml does not match the checksum in the manifest. Nothing was installed. Ask the sender for a new copy, or download it again.', force: null }, diff: null },
-    schema: { label: 'Refused: needs a newer app', file: 'psa-devices-2.0.0.bomlib', size: '212 KB', name: 'psa-devices', version: '2.0.0', active: '1.4.0', schema: '2', minApp: '0.4.0', created: '2026-10-28 08:03', notes: 'New library schema with supplier pricing.',
-      checks: [['ok', 'Checksums match for all 16 files'], ['bad', 'Library schema version 2 is not supported by this app (supports 1)'], ['bad', 'Needs app 0.4.0 or later; this is 0.2.0']], refused: { title: 'This package needs a newer version of the app', body: 'Install app 0.4.0 or later, then import this package again. Your current library is unchanged.', force: null }, diff: null },
-    none: { label: 'No changes', file: 'psa-devices-1.4.0.bomlib', size: '181 KB', name: 'psa-devices', version: '1.4.0', active: '1.4.0', schema: '1', minApp: '0.1.0', created: '2026-10-20 11:30', notes: 'Adds firewall and external switch records; refreshes datasheet wattages.',
-      checks: [['ok', 'Checksums match for all 13 files'], ['ok', 'Library schema version 1 is supported'], ['info', 'Same version as the active library']], refused: { title: 'This version is already installed', body: 'Version 1.4.0 is the active library and the package has the same contents. There is nothing to import.', force: 'Reinstall anyway' }, diff: { added: [], changed: [], removed: [], catalogues: [], files: { added: [], changed: [], removed: [] } } }
-  };
 
   const problems = [
     { sev: 'error', file: 'substation.yaml', line: 18, where: 'GIS Substation 01 › Network › Equipment row 4', path: 'equipment[3].part_id', msg: 'SEL-2730M-EXT2 is not in library psa-devices 1.4.0.', fix: 'Did you mean SEL-2730M-EXT? Pick the device from the list or import a library that includes it.', route: '#/network' },
@@ -345,6 +332,6 @@
   const bom = { psa1: bomPsa(1, 'A'), psa2: bomPsa(2, 'B'), psa3: bomIo(3, 'A'), psa4: bomIo(4, 'B'), ws: bomWs() };
   const groupNames = { A: 'Enclosure', B: 'Main equipment', C: 'Network and IO accessories', D: 'Cabinet housekeeping', E: 'AC distribution', F: 'DC distribution', G: 'Terminal blocks', H: 'Grounding' };
 
-  window.DB = { sub, projects, equipment, networkPlan, dinParts, wsDevices, panels, library, devices, importScenarios, problems, engineChecks, bom, hwioTotal, power, heat, groupNames
+  window.DB = { sub, projects, equipment, networkPlan, dinParts, wsDevices, panels, library, devices, problems, engineChecks, bom, hwioTotal, power, heat, groupNames
   };
 })();

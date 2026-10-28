@@ -22,13 +22,15 @@ class FakeWebview(types.ModuleType):
     def __init__(self, start_error: Exception | None = None) -> None:
         super().__init__("webview")
         self.windows: list[dict[str, Any]] = []
+        self.created: list[object] = []
         self.started: dict[str, Any] | None = None
         self.start_error = start_error
         self.errors = types.SimpleNamespace(WebViewException=WebViewException)
 
     def create_window(self, title: str, **options: Any) -> object:
         self.windows.append({"title": title, **options})
-        return object()
+        self.created.append(object())
+        return self.created[-1]
 
     def start(self, **options: Any) -> None:
         if self.start_error:
@@ -119,6 +121,14 @@ def test_window_gives_the_page_an_api_that_knows_the_opened_project_file(tmp_pat
     api = fake.windows[0]["js_api"]
     assert isinstance(api, Api)
     assert api.app_info()["data"]["project_file"] == str(opened)  # type: ignore[index]
+
+
+def test_window_gives_the_api_the_window_for_file_dialogs() -> None:
+    fake = FakeWebview()
+
+    run(fake)
+
+    assert fake.windows[0]["js_api"]._window is fake.created[0]
 
 
 def test_gui_backend_failure_notifies_and_returns_1() -> None:

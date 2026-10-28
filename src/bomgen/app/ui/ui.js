@@ -12,8 +12,6 @@
     sub: 'gis01',              // open substation id, or null
     checks: 'errors',          // errors | clean
     dirty: false,
-    importScenario: 'ok',
-    importStep: 'choose',      // choose | review | importing | done
     libTab: 'import',
     build: 'ready',            // ready | building | success | locked
     buildStep: 0,
