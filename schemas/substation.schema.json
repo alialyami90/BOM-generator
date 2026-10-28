@@ -739,12 +739,19 @@
     },
     "OutputSettings": {
       "additionalProperties": false,
-      "description": "Workbook file name template and the names of the generated sheets.",
+      "description": "Workbook file name template, the names of the generated sheets, and the footnotes the\nPower Consumption sheet prints after its NOTES (spec: Power Consumption sheet).",
       "properties": {
         "file_name": {
           "default": "{doc_no}_PSA_BOM_Rev{rev}.xlsx",
           "title": "File Name",
           "type": "string"
+        },
+        "power_footnotes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Power Footnotes",
+          "type": "array"
         },
         "sheet_names": {
           "$ref": "#/$defs/SheetNames"
