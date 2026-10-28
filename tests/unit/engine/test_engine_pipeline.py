@@ -2,16 +2,18 @@
 generation order, steps 1-5; How each panel BOM groups its materials -> Loose material)."""
 
 from pathlib import Path
+from typing import Any
 
-from builders import default_library, write_project
-from engine_factories import device, library, loose, panel, powered
+from engine_factories import device, library, loose, panel, powered, switch
 
 from bomgen.engine.kits import loose_table
 from bomgen.engine.pipeline import build
 from bomgen.engine.units import expand_devices
-from bomgen.io.loader import load_project
+from bomgen.io.loader import LoadedProject
+from bomgen.io.mirror import mirror_panel
 from bomgen.models.bom import Group
-from bomgen.models.project import LooseMaterial
+from bomgen.models.panel import PanelMirror
+from bomgen.models.project import LooseMaterial, Project
 
 GPS = powered(
     "GPS",
@@ -32,31 +34,58 @@ LOOSE_PARTS = (
 )
 
 
-def project_file(tmp_path: Path) -> Path:
-    lib = default_library()
-    lib["devices"].append(device("CM", "cable_manager", tag_pattern="Cable Manager"))
-    return write_project(tmp_path, library=lib)
+def loaded(loose_material: dict[str, Any] | None = None) -> LoadedProject:
+    calc = {"doc_no": "DOC-9", "rev": "0", "issue_date": "2026-10-28", "scope": "All"}
+    project = Project.model_validate(
+        {
+            "project": {"name": "GIS 01", "substation": "Dhahran", "doc_no": "DOC-1"},
+            "library": "library.yaml",
+            "panels": ["p1.yaml", "p2.yaml"],
+            "documents": {
+                k: calc for k in ("power_consumption", "heat_dissipation", "heat_calculations")
+            },
+            "loose_material": loose_material,
+        }
+    )
+    lib = library(switch("L2", "L2"), device("CM", "cable_manager", tag_pattern="Cable Manager"))
+    p1 = panel([{"part_id": "L2"}], id="p1", cabinet_number="CAB-001", cabinet_name="Cabinet 1")
+    p2 = mirror_panel(
+        p1,
+        PanelMirror.model_validate(
+            {
+                "id": "p2",
+                "mirror_of": "p1",
+                "cabinet_number": "CAB-002",
+                "cabinet_name": "Cabinet 2",
+                "tag_prefix": "PSA2",
+                "lan": "B",
+                "sheet_name": "2",
+                "document": {"doc_no": "DOC-2", "rev": "0", "issue_date": "2026-10-28"},
+            }
+        ),
+    )
+    return LoadedProject(Path("project.yaml"), project, lib, (p1, p2), {})
 
 
-def test_groups_a_to_d_in_order_with_cabinet_title(tmp_path: Path) -> None:
-    result = build(load_project(project_file(tmp_path)))
+def test_groups_a_to_d_in_order_with_cabinet_title() -> None:
+    result = build(loaded())
     p1 = result.panels[0]
     assert (p1.panel_id, p1.sheet_name) == ("p1", "1")
     assert p1.title == ("CAB-001", "Dhahran - Cabinet 1")
     groups = [line.group for line in p1.lines]
     assert groups == sorted(groups)
-    assert {Group.A, Group.B, Group.D} <= set(groups)
+    assert {Group.A, Group.B, Group.C, Group.D} <= set(groups)
     assert p1.lines[0].tag == "PANEL"
 
 
-def test_mirrored_panel_takes_lan_b_tags(tmp_path: Path) -> None:
-    result = build(load_project(project_file(tmp_path)))
+def test_mirrored_panel_takes_lan_b_tags() -> None:
+    result = build(loaded())
     assert [p.panel_id for p in result.panels] == ["p1", "p2"]
-    assert result.panels[1].lines[1].tag == "P2-L2-ESW-B01"
+    assert result.panels[1].lines[1].tag == "PSA2-L2-ESW-B01"
 
 
-def test_no_loose_table_without_loose_material(tmp_path: Path) -> None:
-    assert build(load_project(project_file(tmp_path))).loose is None
+def test_no_loose_table_without_loose_material() -> None:
+    assert build(loaded()).loose is None
 
 
 def test_loose_table_lists_project_items_then_device_loose_items() -> None:

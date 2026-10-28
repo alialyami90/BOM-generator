@@ -60,10 +60,11 @@ def device_tags(
     if device.tag_type is None:
         return Tags(None, (None,) * qty)
     if device.purdue_level is not None:
-        head = f"{prefix}-{level}-{type_code}-{lan or ''}"
+        head = f"{prefix}-{level}-{type_code}"
         if device.purdue_level is PurdueLevel.EXT and qty == 1:
-            return Tags(head, (head,))
-        units = tuple(f"{head}{n:02d}" for n in numbers)
+            tag = f"{head}-{lan}" if lan else head
+            return Tags(tag, (tag,))
+        units = tuple(f"{head}-{lan or ''}{n:02d}" for n in numbers)
         return Tags(_range(units), units)
     if device.category in NUMBERED_CATEGORIES or qty > 1:
         units = tuple(f"{prefix}-{type_code}-{n}" for n in numbers)

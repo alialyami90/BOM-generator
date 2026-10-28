@@ -697,3 +697,18 @@ cables; nothing in the inputs says where they belong. *Default:* the project's
 `loose_material.items` in order, then each device's `loose_items` as one block in
 panel order (ADR 0014). If the workbook order matters, `loose_material.items` would
 need a marker naming the device whose loose items go at that position (A2's schema).
+
+**Q31 — Group A–D rules the spec states only by example** (A1 review of the M2 PR;
+defaults in ADR 0014, all in force until Ali answers):
+1. The loose-material title line 2, "PSA Panels Loose Material and Auxiliary
+   Equipment", is a constant; the spec only says the table has a title block.
+   *Default:* keep it; it could become a `loose_material` field (A2's schema).
+2. Which SFP part serves a port: matching speed and media, then the host's make,
+   then library order. *Alternative:* name the SFP part on each port allocation.
+   Cable managers and serial cables likewise take the first library record of
+   their category.
+3. Cable managers = one per switch and patch panel unit ("roughly one per
+   rack-mounted switch/patch panel"). *Confirm:* firewalls, gateways and RTACs get
+   none.
+4. Natural ventilation takes 2 vent filters (the workbook's WS console); the spec
+   says "vent filters" without a count.

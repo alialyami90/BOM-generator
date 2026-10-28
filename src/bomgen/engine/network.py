@@ -39,21 +39,22 @@ def _sfp_items(panel: Panel, row: DeviceRow, library: Library) -> list[BomItem]:
     plan = port_plan(panel, row)
     if plan is None:
         return []
-    terms: dict[str, list[int]] = {}
-    parts: dict[str, tuple[DeviceType, Media]] = {}
+    # One row per SFP part and media: the tag names the media.
+    terms: dict[tuple[str, Media], list[int]] = {}
+    parts: dict[str, DeviceType] = {}
     for allocation in (*plan.uplinks_l3, *plan.uplinks, *plan.downlinks):
         if allocation.media is Media.RJ45:
             continue
         part = _sfp_for(row, allocation, library)
-        parts[part.part_id] = (part, allocation.media)
-        counts = terms.setdefault(part.part_id, [])
+        parts[part.part_id] = part
+        counts = terms.setdefault((part.part_id, allocation.media), [])
         counts.append(allocation.count)
         if allocation.spare:
             counts.append(allocation.spare)
     host = without_prefix(row.tag, panel.tag_prefix) if row.tag else None
     items = []
-    for part_id, counts in terms.items():
-        part, media = parts[part_id]
+    for (part_id, media), counts in terms.items():
+        part = parts[part_id]
         qty: Qty = counts[0] if len(counts) == 1 else QtySum(parts=tuple(counts))
         tag = f"{host} SFP ({media.value})" if host else f"SFP ({media.value})"
         line = BomLine(

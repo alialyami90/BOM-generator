@@ -126,3 +126,13 @@ def test_description_fills_lan_level_purpose(template: str, expected: str) -> No
     l1 = lib.get("L1")
     assert l1 is not None
     assert describe(l1, "A", "for PCC") == expected
+
+
+def test_ext_device_in_a_panel_without_lan_has_no_dangling_hyphen() -> None:
+    (row,) = rows({"part_id": "EXT"}, lib_devices=SWITCHES, lan=None, tag_prefix="PSA3")
+    assert row.tag == "PSA3-EXT-ESW"
+
+
+def test_numbered_device_in_a_panel_without_lan_keeps_its_number() -> None:
+    (row,) = rows({"part_id": "L2"}, lib_devices=SWITCHES, lan=None, tag_prefix="PSA3")
+    assert row.tag == "PSA3-L2-ESW-01"

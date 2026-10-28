@@ -134,3 +134,29 @@ def test_sfps_come_before_cable_managers_and_serial_cables() -> None:
     }
     items = build([{"part_id": "L2"}, {"part_id": "RTAC"}], plans)
     assert [i.line.part_id for i in items] == ["SFP-FX", "CM", "C607"]
+
+
+def test_one_sfp_part_serving_two_media_gets_one_row_per_media() -> None:
+    # A1 review on #22: the SM uplinks must not disappear into an "SFP (MM)" row.
+    combo = device(
+        "SFP-COMBO",
+        "sfp",
+        make="Ruggedcom",
+        ports=[
+            {"count": 1, "speed": "1G", "media": "SM", "kind": "fixed"},
+            {"count": 1, "speed": "1G", "media": "MM", "kind": "fixed"},
+        ],
+    )
+    lib = library(switch("L2", "L2"), combo, device("CM", "cable_manager"))
+    plans = {
+        "L2": {
+            "uplinks_l3": [{"count": 2, "speed": "1G", "media": "SM"}],
+            "downlinks": [{"count": 15, "speed": "1G", "media": "MM"}],
+        }
+    }
+    p = panel([{"part_id": "L2"}], port_plans=plans)
+    items = accessories(p, expand_devices(p, lib), lib)
+    assert summary(items)[:2] == [
+        ("L2-ESW-A01 SFP (SM)", 2, "SFP-COMBO"),
+        ("L2-ESW-A01 SFP (MM)", 15, "SFP-COMBO"),
+    ]
