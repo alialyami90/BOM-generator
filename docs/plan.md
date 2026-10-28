@@ -237,6 +237,7 @@ layout:                                # panel capacity = enclosure_u − rack_u
   overrides:                           # written by the UI's Panels board; equipment ids
     - { device: l1, unit: 3, side: a, panel: 3 }   # unit 1-based; side for redundant
     - { pair: l1, unit: 2, panel: [3, 4] }         # both sides; no unit = every pair
+    - { device: gps, panel: 1, position: 1 }       # position 1 = top rack device
   removed:                             # None = every unit / both sides
     - { device: gw, side: a }          # GW-1 only
 generated_panels:                      # needed when equipment is given; {n} = panel number
