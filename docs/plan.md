@@ -922,6 +922,18 @@ writes its section's details when the work starts.
 
 Each has a proposed default that the plan assumes until Ali answers.
 
+**Q41 — FGR-60F below the DC float voltage** (M14, M15; #171). *Resolved 2026-10-28:* Ali
+chose "Keep it, accept the warning". The FortiGate FGR-60F's datasheet DC input stops at 125 V,
+below the 140 V float, so `dc_float` warns for it on every build that uses it, as for the iC60N
+under Q37. It stays the default firewall in the shipped library; no DC-rated alternative is
+researched.
+
+**Q40 — Power footnote in the print area** (M5–M6; #157). *Resolved 2026-10-28:* Ali chose
+"Print it". The printer footnote rows under the NOTES on the Power Consumption sheet are inside
+the print area, which now ends after the last footnote row instead of at the reference
+workbook's A1:L97. This corrects the reference, where the footnote is on the sheet but does not
+print.
+
 **Q35 — Branch MCB sizing rule** (M15; backlog point 3). *Resolved 2026-10-28:* Ali chose
 "Computed, 2 A floor". A branch MCB is the smallest catalogue rating that meets all three:
 at least 1.3 × the running current, at least the inrush current divided by the MCB set's
@@ -1156,7 +1168,8 @@ thermostat 0 W; SK 3243.100 fan 460 m³/h with the SK 3243.200 outlet filter (60
 so the per-fan airflow changes from 358. Applied when A2 next revises the library
 defaults, not to the example.
 
-**Q30 — Where a device's loose items go in the loose-material table.** The workbook
+**Q30 — Where a device's loose items go in the loose-material table.** *Resolved 2026-10-28:* Ali chose
+"Keep all the defaults": the default below stands. The workbook
 lists the GPS clock's accessories (`Aux` rows 53–57) between the software and the
 cables; nothing in the inputs says where they belong. *Default:* the project's
 `loose_material.items` in order, then each device's `loose_items` as one block in
@@ -1164,7 +1177,8 @@ panel order (ADR 0014). If the workbook order matters, `loose_material.items` wo
 need a marker naming the device whose loose items go at that position (A2's schema).
 
 **Q31 — Group A–D rules the spec states only by example** (A1 review of the M2 PR;
-defaults in ADR 0014, all in force until Ali answers):
+defaults in ADR 0014). *Resolved 2026-10-28:* Ali chose "Keep all the defaults"; items 1–4
+stand as written:
 1. The loose-material title line 2, "PSA Panels Loose Material and Auxiliary
    Equipment", is a constant; the spec only says the table has a title block.
    *Done in M1b/M3:* `loose_material.title`, with that text as the default.
