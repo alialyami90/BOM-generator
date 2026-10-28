@@ -774,12 +774,15 @@ switch to its own L2 side, and the A and B switches of a pair interconnected
 
 **Q32 — Cable managers against the usable 32U.** Cable managers are 1U each,
 nine per network cabinet today (spec: "roughly one per rack-mounted switch/patch
-panel"). *Default:* they do not count against the 32U; only devices and the blank
-gaps between them do (ADR 0013, rule R5). Asked 2026-10-28; waiting for Ali.
+panel"). *Resolved 2026-10-28:* Ali: they count against the 32U. Each rack switch,
+firewall or patch panel unit carries a 1U cable manager directly under it as one
+block with no blank plate inside (ADR 0013); generated panels take the
+cable-manager count from the layout.
 
 **Q33 — FOPP-96SM rack height.** The datasheet was not found; the device database
-assumes 2U from Hubbell's 48-fibre 1U unit (`data/device-db/`, PR #18). *Default:*
-2U until Ali confirms. Asked 2026-10-28; waiting for Ali.
+assumed 2U from Hubbell's 48-fibre 1U unit (`data/device-db/`, PR #18).
+*Resolved 2026-10-28:* Ali: 1U. A3 and A2 update the device database and the example
+library.
 
 **Q29 — Thermostat load and fan airflow in the library defaults.** The device
 research (`docs/device-db-findings.md`, items 1 and 2) found that the SK 3110.000

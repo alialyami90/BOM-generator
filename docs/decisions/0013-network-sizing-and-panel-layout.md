@@ -27,9 +27,15 @@ R1–R10 are in the design document named in ADR 0012.
   `blank_plate_u`, `overrides`, `removed`). Every spare is an input with
   today's values as defaults. The library adds `height_u` per device, a port
   role per port group and `enclosure_u` on the catalogue.
-- **Sizing** (R1–R4): per side, usable L1 ports = floor((ports − reserved) ×
-  (1 − spare)), where reserved is the uplink plus the A–B interlink in a star
-  (Q28) or two ring ports; L1 count = ceil(IEDs / usable). L2 demand = the
+- **Sizing** (R1–R4): every IED has an A port and a B port, so `ied_count`
+  ports are needed on each side. Per side, usable L1 ports = floor((ports −
+  reserved) × (1 − spare)), where reserved is the uplink plus the A–B interlink
+  in a star (Q28) or two ring ports, and spare is `spares.port_fraction`
+  (default 20 %, confirmed 2026-10-28); L1 count = ceil(IEDs / usable). The
+  L1 switch model comes from the library: the engine ranks every L1-capable
+  switch (fewest switches per side, then fewest ports, then part id) and picks
+  the first unless the `l1_switch` equipment entry pins a `part_id`; the UI
+  shows the ranking so the engineer can pin another (Ali, 2026-10-28). L2 demand = the
   equipment's L2 ports + one link per L1 switch in a star, or two per ring of
   at most `ring_max_switches` (Q27); L2 count from the same usable-port
   formula with the L3 uplinks reserved. Port plans and SFPs are generated from
@@ -37,7 +43,11 @@ R1–R10 are in the design document named in ADR 0012.
   count appears only on the check report.
 - **Layout** (R5–R9): devices fill panels in BOM group order; a panel holds
   `Σ height_u + (k − 1) × blank_plate_u ≤ panel_capacity_u` (32U), DIN-rail
-  parts cost 0U, overflow opens a new panel. Redundant pairs fill an A stream
+  parts cost 0U, overflow opens a new panel. Every rack-mounted switch,
+  firewall or patch panel unit carries a 1U cable manager directly under it as
+  one block with no blank plate inside, and the block counts against the 32U
+  (Q32, Ali 2026-10-28); the cable-manager BOM count therefore comes from the
+  layout when a generated panel exists. Redundant pairs fill an A stream
   (odd panels) and a B stream (even panels) in lock-step. Common devices go
   into those same panels, each into the panel with the most free U (Q26).
   Blank space produces no BOM row (Q25). `layout.overrides` move a device or
@@ -58,3 +68,6 @@ R1–R10 are in the design document named in ADR 0012.
   overrides and re-runs the layout.
 - The ring rule (two ports per ring, six switches per ring by default) was
   accepted by default and can be revisited without changing the inputs.
+- Hand-written panels keep the M2 rule "one cable manager per switch or patch
+  panel"; generated panels report the count from the layout. Both give nine
+  for the spec example.
