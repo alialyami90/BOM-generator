@@ -7,7 +7,7 @@ version. The edits come from the edit operations or a CSV import; this module on
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
@@ -16,11 +16,13 @@ import yaml
 from bomgen.bundle.container import sha256
 from bomgen.io.errors import InputError
 from bomgen.io.loader import load_library
+from bomgen.library_store.device_db import DeviceRecord, load_device_records, parse_device_records
 from bomgen.library_store.diff import LibraryDiff, diff_libraries, parse_library
 from bomgen.library_store.edit import Insert, Remove, SetValue, apply_edits
 from bomgen.library_store.errors import LibraryPackageError, RefusalKind
 from bomgen.library_store.manifest import FORMAT_VERSION, LIBRARY_FILE, Manifest
 from bomgen.library_store.package import PackageContents
+from bomgen.library_store.records import apply_record_edits, changed_records, write_records
 from bomgen.library_store.service import validate_library
 from bomgen.library_store.store import LibraryStore
 from bomgen.library_store.versions import Version
@@ -48,11 +50,14 @@ def save_local_version(
     library: Library,
     *,
     base: str | None = None,
+    records: Mapping[str, DeviceRecord] | None = None,
     note: str = "",
 ) -> LocalSave:
     """Install `library` as the next local version of `name` and make it active.
 
-    `base` is the installed version the edits started from (default: the active one). Raises
+    `base` is the installed version the edits started from (default: the active one).
+    `records`, when given, are the device-database records the version holds instead of the
+    base's (see `records.write_records`). Raises
     `LibraryPackageError` with `NO_CHANGES` when `library` equals the base, and with
     `VALIDATION_FAILED` when it fails the loader's checks; the store is untouched either way.
     """
@@ -72,6 +77,11 @@ def save_local_version(
     new_bytes = dump_library(library)
     old_files = {**base_contents.manifest.files, LIBRARY_FILE: sha256(old_bytes)}
     files = {**base_contents.files, LIBRARY_FILE: new_bytes}
+    records_changed = 0
+    if records is not None:
+        base_records = parse_device_records(base_contents.files)
+        records_changed = len(changed_records(base_records, records))
+        files = write_records(files, records)
     digests = {member: sha256(data) for member, data in sorted(files.items())}
     new_library = parse_library(new_bytes)
     diff = diff_libraries(parse_library(old_bytes), new_library, old_files, digests)
@@ -86,7 +96,7 @@ def save_local_version(
         version=str(next_local_version(store, name, Version.parse(base))),
         schema_version=base_contents.manifest.schema_version,
         min_app_version=base_contents.manifest.min_app_version,
-        release_notes=_release_notes(base, diff, note),
+        release_notes=_release_notes(base, diff, records_changed, note),
         created=datetime.now(UTC).replace(microsecond=0),
         files=digests,
     )
@@ -99,13 +109,15 @@ def save_edits(
     name: str,
     edits: Sequence[SetValue | Insert | Remove],
     *,
+    record_edits: Sequence[SetValue | Insert | Remove] = (),
     base: str | None = None,
     note: str = "",
 ) -> LocalSave:
     """Apply `edits` to the installed version `base` (default: the active one) and save the result.
 
-    Problems with the edits come back as one `VALIDATION_FAILED` refusal listing each; the
-    store is untouched.
+    `record_edits` edit its device-database records (`records.apply_record_edits`). Problems
+    with either come back as one `VALIDATION_FAILED` refusal listing each; the store is
+    untouched.
     """
     base = base or store.active_version(name)
     if base is None:
@@ -117,12 +129,18 @@ def save_edits(
             f"library {name} {base}: the installed library is damaged", RefusalKind.STORE_DAMAGED
         ) from exc
     result = apply_edits(current, edits)
-    if result.library is None:
-        listed = "\n".join(f"  {p.location}: {p.message}" for p in result.problems)
+    records = None
+    problems = list(result.problems)
+    if record_edits:
+        edited = apply_record_edits(load_device_records(store, name, base), record_edits)
+        records = edited.records
+        problems += edited.problems
+    if result.library is None or problems:
+        listed = "\n".join(f"  {p.location}: {p.message}" for p in problems)
         raise LibraryPackageError(
-            f"the edits leave {LIBRARY_FILE} invalid:\n{listed}", RefusalKind.VALIDATION_FAILED
+            f"the edits leave the library invalid:\n{listed}", RefusalKind.VALIDATION_FAILED
         )
-    return save_local_version(store, name, result.library, base=base, note=note)
+    return save_local_version(store, name, result.library, base=base, records=records, note=note)
 
 
 def next_local_version(store: LibraryStore, name: str, base: Version) -> Version:
@@ -135,12 +153,13 @@ def next_local_version(store: LibraryStore, name: str, base: Version) -> Version
     return release.with_local(max(used, default=0) + 1)
 
 
-def _release_notes(base: str, diff: LibraryDiff, note: str) -> str:
+def _release_notes(base: str, diff: LibraryDiff, records_changed: int, note: str) -> str:
     counts = [
         (len(diff.added), "part", "added"),
         (len(diff.changed), "part", "changed"),
         (len(diff.removed), "part", "removed"),
         (len(diff.catalogues_changed), "catalogue", "changed"),
+        (records_changed, "device record", "changed"),
     ]
     parts = [f"{n} {noun}{'s' if n != 1 else ''} {verb}" for n, noun, verb in counts if n]
     text = f"Local edit from {base}: {', '.join(parts)}."
