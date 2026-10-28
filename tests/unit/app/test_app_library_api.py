@@ -238,4 +238,55 @@ def test_choose_file_cancelled_is_none(app: api.Api) -> None:
 def test_choose_file_of_an_unknown_kind_is_an_error(app: api.Api) -> None:
     app._set_window(FakeWindow(None))
 
-    assert app.choose_file("exe")["ok"] is False
+    envelope = app.choose_file("exe")
+
+    assert envelope["ok"] is False
+    assert envelope["error"]["kind"] == "unknown_file_kind"  # type: ignore[index]
+
+
+def damage_manifest(tmp_path: Path, version: str) -> None:
+    (tmp_path / "libraries" / "psa" / version / "manifest.json").write_text("{not json")
+
+
+def test_versions_report_a_damaged_manifest_on_its_row(
+    app: api.Api, package: Any, tmp_path: Path
+) -> None:
+    ok(app.import_library(str(package("1.0.0", "First release"))))
+    ok(app.import_library(str(package("1.1.0"))))
+    damage_manifest(tmp_path, "1.1.0")
+
+    versions = ok(app.library_versions())["versions"]
+
+    assert [(v["version"], v["active"]) for v in versions] == [("1.1.0", True), ("1.0.0", False)]
+    assert versions[0]["problem"] == "psa 1.1.0: its manifest.json is damaged"
+    assert versions[0]["released"] is None
+    assert versions[1]["problem"] is None
+    assert versions[1]["notes"] == "First release"
+    assert ok(app.activate_library_version("psa", "1.0.0")) == "1.0.0"
+
+
+def test_overview_of_a_library_with_a_damaged_manifest_still_lists_its_devices(
+    app: api.Api, package: Any, tmp_path: Path
+) -> None:
+    ok(app.import_library(str(package("1.0.0"))))
+    damage_manifest(tmp_path, "1.0.0")
+
+    overview = ok(app.library_overview())
+
+    assert overview["library"]["name"] == "psa"
+    assert overview["library"]["version"] == "1.0.0"
+    assert overview["library"]["created"] is None
+    assert overview["library"]["problem"] == "psa 1.0.0: its manifest.json is damaged"
+    assert [d["part_id"] for d in overview["devices"]] == EXAMPLE_PART_IDS
+
+
+def test_overview_of_an_invalid_installed_library_is_store_damaged(
+    app: api.Api, package: Any, tmp_path: Path
+) -> None:
+    ok(app.import_library(str(package("1.0.0"))))
+    (tmp_path / "libraries" / "psa" / "1.0.0" / "library.yaml").write_text("devices: 7\n")
+
+    envelope = app.library_overview()
+
+    assert envelope["ok"] is False
+    assert envelope["error"]["kind"] == "store_damaged"  # type: ignore[index]

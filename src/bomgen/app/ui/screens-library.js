@@ -6,14 +6,22 @@
   const F = { q: '', cat: '', ver: '', alt: false };
 
   /* ---------- data from Python; the illustrative DB only when opened outside the app ---------- */
-  const LIB = { state: 'idle', overview: null, versions: null, offline: false };
+  const LIB = { state: 'idle', overview: null, versions: null, errors: {}, offline: false };
   function loadLibrary() {
     LIB.state = 'loading';
-    return Promise.all([Bridge.call('library_overview'), Bridge.call('library_versions')])
-      .then(([overview, versions]) => { Object.assign(LIB, { state: 'loaded', overview, versions, offline: false }); })
-      .catch((err) => { LIB.state = 'loaded'; LIB.offline = err.kind === 'no_backend'; if (!LIB.offline) toast(`Could not read the library: ${err.message}`, 'error'); })
-      .then(() => App.render());
+    // Loaded independently: a damaged active version must not hide the versions that can repair it.
+    const load = (name, key) => Bridge.call(name).then((data) => { LIB[key] = data; LIB.errors[key] = null; })
+      .catch((err) => { LIB[key] = null; LIB.errors[key] = err; });
+    return Promise.all([load('library_overview', 'overview'), load('library_versions', 'versions')]).then(() => {
+      LIB.state = 'loaded';
+      LIB.offline = Object.values(LIB.errors).some((e) => e && e.kind === 'no_backend');
+      App.render();
+    });
   }
+  const loadError = (key, what) => {
+    const err = !LIB.offline && LIB.errors[key];
+    return err ? `<div style="margin-bottom:var(--space-4)">${banner('bad', `<b>${what}</b> ${esc(err.message)}`, key === 'overview' && LIB.versions && LIB.versions.versions.length ? '<button class="btn btn--primary btn--sm" data-action="show-versions">Installed versions…</button>' : '')}</div>` : '';
+  };
   const reloadLibrary = () => { LIB.state = 'idle'; return Bridge.call('app_info').then(App.setAppInfo).catch(() => {}).then(loadLibrary); };
   const day = (iso) => (iso ? String(iso).slice(0, 10) : '—');
   const feeds = { 1: 'Single feed', 2: 'Dual feed (2 supplies)' };
@@ -48,7 +56,7 @@
     : LIB.overview && LIB.overview.library ? { name: LIB.overview.library.name, version: LIB.overview.library.version, date: day(LIB.overview.library.created), notes: LIB.overview.library.notes } : null;
   const devices = () => (LIB.offline ? DB.devices : LIB.overview ? LIB.overview.devices.map((d) => row(d, LIB.overview.records)) : []);
   const versions = () => (LIB.offline
-    ? DB.library.versions.map((v) => ({ version: v.v, released: v.date, notes: v.notes, active: v.active }))
+    ? DB.library.versions.map((v) => ({ version: v.v, released: v.date, notes: v.notes, active: v.active, problem: null }))
     : LIB.versions ? LIB.versions.versions : []);
   /* Data quality, datasheets and alternatives come from the device database a package may carry. */
   const hasDeviceDb = () => devices().some((d) => d.verified);
@@ -62,11 +70,13 @@
 
   function browse() {
     const L = lib();
-    const lede = L ? `${esc(L.name)} ${esc(L.version)}, released ${esc(L.date)}. This list is read-only. It changes only when you import an update package.` : 'No library is active.';
+    const lede = L ? `${esc(L.name)} ${esc(L.version)}${L.date !== '—' ? `, released ${esc(L.date)}` : ''}. This list is read-only. It changes only when you import an update package.` : LIB.errors.overview && !LIB.offline ? 'Make an installed version active, or import the package again.' : 'No library is active.';
     return `<div class="page">${pageHead('Device library', lede,
       `<button class="btn btn--secondary" data-action="goto" data-to="#/library/import">${icon('upload')}Import update…</button>`)}
+      ${loadError('overview', 'The active library could not be read.')}
+      ${LIB.overview && LIB.overview.library && LIB.overview.library.problem ? `<div style="margin-bottom:var(--space-4)">${banner('warn', `<b>Part of the active library is damaged.</b> ${esc(LIB.overview.library.problem)}`)}</div>` : ''}
       ${LIB.overview && LIB.overview.records_problem ? `<div style="margin-bottom:var(--space-4)">${banner('warn', `<b>Datasheets and alternatives could not be read.</b> ${esc(LIB.overview.records_problem)}`)}</div>` : ''}
-      ${L ? devicesView() : versions().length
+      ${L ? devicesView() : LIB.errors.overview && !LIB.offline ? '' : versions().length
         ? banner('warn', '<b>No library version is active.</b> Make an installed version active, or import a package.', '<button class="btn btn--primary btn--sm" data-action="show-versions">Installed versions…</button>')
         : banner('warn', '<b>No library is installed.</b> Import a <span class="mono">.bomlib</span> file to see devices here.', '<a class="btn btn--primary btn--sm" href="#/library/import">Import…</a>')}</div>`;
   }
@@ -132,7 +142,7 @@
   /* Refusals: what the first failed check means for the person importing (docs/ui/screens.md, Refusals). */
   const REFUSALS = {
     downgrade: { title: 'This package is older than the installed library', body: 'To go back to a version you already have, use Installed versions → Make active.', force: 'Install anyway (downgrade)' },
-    already_installed: { title: 'This version is already installed', body: 'There is nothing new to import.', force: 'Reinstall anyway' },
+    already_installed: { title: 'This version is already installed', body: 'There is nothing new to import.', force: 'Reinstall and make active' },
     incompatible: { title: 'This package needs a newer version of the app', body: 'Install the newer app, then import this package again. Your current library is unchanged.' },
     invalid_package: { title: 'The package is damaged or is not a library package', body: 'Nothing was installed. Ask the sender for a new copy, or download it again.' },
     validation_failed: { title: 'The library in this package has errors', body: 'Nothing was installed. Send the details below to whoever maintains the library.' },
@@ -144,7 +154,7 @@
   function importFlow() {
     const L = lib();
     if (IMP.step === 'choose') return `<div class="drop" data-action="pick-file" id="drop" tabindex="0" role="button" aria-label="Choose a library package">${icon('pkg', 'i--lg')}<h3 style="margin:8px 0 2px">Choose a .bomlib file</h3><p>The package is checked before anything is installed.</p><button class="btn btn--primary" data-action="pick-file">${icon('folder')}Choose package…</button></div>
-      <p class="muted small" style="margin-top:var(--space-3)">You can also double-click a .bomlib file in Windows to import it. ${L ? `Currently installed: ${esc(L.name)} ${esc(L.version)}.` : 'No library is installed yet.'}</p>`;
+      <p class="muted small" style="margin-top:var(--space-3)">You can also double-click a .bomlib file in Windows to import it. ${L ? `Currently installed: ${esc(L.name)} ${esc(L.version)}.` : LIB.errors.overview && !LIB.offline ? 'The active library could not be read; see Installed versions.' : 'No library is installed yet.'}</p>`;
     if (IMP.step === 'checking') return `<div class="stack" style="max-width:520px"><h3>Checking ${esc(IMP.path.split(/[\\/]/).pop())}</h3><div class="progress" role="progressbar" aria-label="Checking"><i style="width:40%"></i></div><p class="muted">Verifying checksums, the library and its version. Nothing is installed.</p></div>`;
     const p = IMP.preview, m = p.manifest;
     if (IMP.step === 'importing') return `<div class="stack" style="max-width:520px"><h3>Installing ${esc(m.name)} ${esc(m.version)}</h3><div class="progress" role="progressbar" aria-label="Installing"><i style="width:60%"></i></div><p class="muted">Copying files and keeping the previous version for rollback…</p></div>`;
@@ -223,9 +233,10 @@
 
   function versionsView() {
     const L = lib(), list = versions();
+    if (LIB.errors.versions && !LIB.offline) return loadError('versions', 'The installed versions could not be read.');
     if (!L && !list.length) return `<p class="muted">No library is installed yet.</p>`;
     return `<div class="table-wrap" style="max-width:980px"><table class="table table--comfort"><thead><tr><th>Version</th><th>Released</th><th>Notes</th><th>State</th><th style="width:130px"><span class="sr-only">Actions</span></th></tr></thead><tbody>
-      ${list.map((v) => `<tr><td class="mono">${esc(v.version)}</td><td class="nowrap">${esc(day(v.released))}</td><td class="wrap">${esc(v.notes || '')}</td><td>${v.active ? badge('ok', 'Active', 'check') : badge('plain', 'Installed')}</td><td>${v.active ? '' : `<button class="btn btn--secondary btn--sm" data-action="rollback" data-v="${esc(v.version)}">Make active</button>`}</td></tr>`).join('')}</tbody></table></div>
+      ${list.map((v) => `<tr><td class="mono">${esc(v.version)}</td><td class="nowrap">${esc(day(v.released))}</td><td class="wrap">${esc(v.notes || '')}</td><td>${v.active ? badge('ok', 'Active', 'check') : ''} ${v.problem ? `${badge('bad', 'Problem', 'error')}<span class="cell-sub">${esc(v.problem)}</span>` : v.active ? '' : badge('plain', 'Installed')}</td><td>${v.active ? '' : `<button class="btn btn--secondary btn--sm" data-action="rollback" data-v="${esc(v.version)}" ${v.problem ? 'disabled' : ''}>Make active</button>`}</td></tr>`).join('')}</tbody></table></div>
       <p class="muted small" style="margin-top:var(--space-3);max-width:68ch">Making an older version active does not change any project file. Projects keep the version they record, and the check report tells you when it differs from the active one.</p>`;
   }
   ACTIONS.rollback = (el) => { const L = lib(); dialog({ title: `Make ${esc(el.dataset.v)} active?`, body: `<p>The library switches to ${esc(el.dataset.v)} for every project on this PC. ${L ? `Version ${esc(L.version)} stays installed.` : ''}</p>`, actions: `<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="activate-version" data-v="${esc(el.dataset.v)}">Make ${esc(el.dataset.v)} active</button>` }); };

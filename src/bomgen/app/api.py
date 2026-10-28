@@ -20,12 +20,14 @@ from enum import Enum
 from pathlib import Path, PurePath
 from typing import Any, Protocol
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from bomgen import __version__
-from bomgen.bundle.errors import LibraryPackageError
+from bomgen.bundle.errors import LibraryPackageError, RefusalKind
+from bomgen.io.errors import InputError
 from bomgen.io.loader import load_library
 from bomgen.library_store.device_db import DeviceRecord, load_device_records
+from bomgen.library_store.manifest import Manifest
 from bomgen.library_store.preview import preview_library_import
 from bomgen.library_store.service import import_library
 from bomgen.library_store.store import InstalledLibrary, LibraryStore, default_library_home
@@ -46,6 +48,14 @@ class FileDialogWindow(Protocol):
     def create_file_dialog(
         self, dialog_type: int = ..., *, file_types: tuple[str, ...] = ...
     ) -> Any: ...
+
+
+class AppError(Exception):
+    """A refusal the API itself makes; ``kind`` reaches the page like a ``RefusalKind``."""
+
+    def __init__(self, kind: str, message: str) -> None:
+        super().__init__(message)
+        self.kind = kind
 
 
 Envelope = dict[str, object]
@@ -81,6 +91,8 @@ def endpoint[**P](method: Callable[P, object]) -> Callable[P, Envelope]:
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> Envelope:
         try:
             return {"ok": True, "data": to_json(method(*args, **kwargs))}
+        except AppError as exc:
+            return error(exc.kind, str(exc))
         except LibraryPackageError as exc:
             return error(exc.kind.value, str(exc))
         except OSError as exc:
@@ -115,6 +127,15 @@ class Api:
         installed = self._library_store().list()
         return next((lib for lib in installed if lib.active), installed[0] if installed else None)
 
+    def _manifest(self, name: str, version: str) -> tuple[Manifest | None, str | None]:
+        """An installed version's manifest, or why it cannot be read."""
+        try:
+            return self._library_store().manifest(name, version), None
+        except ValidationError:
+            return None, f"{name} {version}: its manifest.json is damaged"
+        except OSError as exc:
+            return None, f"{name} {version}: its manifest.json cannot be read ({exc.strerror})"
+
     @endpoint
     def app_info(self) -> dict[str, Any]:
         """Version, how the app was started, the workspace and the installed libraries."""
@@ -129,7 +150,9 @@ class Api:
     @endpoint
     def choose_file(self, kind: str) -> str | None:
         """Ask for a ``.bomlib`` or ``.bomproj`` file; None when the user cancels."""
-        file_type = FILE_TYPES[kind]
+        file_type = FILE_TYPES.get(kind)
+        if file_type is None:
+            raise AppError("unknown_file_kind", f"Unknown kind of file: {kind}")
         if self._window is None:
             return None
         chosen = self._window.create_file_dialog(OPEN_DIALOG, file_types=(file_type,))
@@ -144,8 +167,14 @@ class Api:
         if installed is None or installed.active is None:
             return {"library": None, "devices": [], "records": {}, "records_problem": None}
         store = self._library_store()
-        manifest = store.manifest(installed.name, installed.active)
-        library = load_library(store.library_file(installed.name, installed.active))
+        manifest, problem = self._manifest(installed.name, installed.active)
+        try:
+            library = load_library(store.library_file(installed.name, installed.active))
+        except InputError as exc:
+            raise LibraryPackageError(
+                f"library {installed.name} {installed.active} is damaged: {exc}",
+                RefusalKind.STORE_DAMAGED,
+            ) from exc
         records: dict[str, DeviceRecord] = {}
         records_problem: str | None = None
         try:
@@ -154,10 +183,11 @@ class Api:
             records_problem = str(exc)
         return {
             "library": {
-                "name": manifest.name,
-                "version": manifest.version,
-                "created": manifest.created,
-                "notes": manifest.release_notes,
+                "name": installed.name,
+                "version": installed.active,
+                "created": manifest.created if manifest else None,
+                "notes": manifest.release_notes if manifest else None,
+                "problem": problem,
             },
             "devices": [device.model_dump(mode="json") for device in library.devices],
             "records": records,
@@ -170,20 +200,19 @@ class Api:
         installed = self._active_library()
         if installed is None:
             return {"name": None, "versions": []}
-        store = self._library_store()
-        versions = sorted(installed.versions, key=Version.parse, reverse=True)
-        return {
-            "name": installed.name,
-            "versions": [
+        rows = []
+        for version in sorted(installed.versions, key=Version.parse, reverse=True):
+            manifest, problem = self._manifest(installed.name, version)
+            rows.append(
                 {
                     "version": version,
-                    "released": (manifest := store.manifest(installed.name, version)).created,
-                    "notes": manifest.release_notes,
+                    "released": manifest.created if manifest else None,
+                    "notes": manifest.release_notes if manifest else None,
                     "active": version == installed.active,
+                    "problem": problem,
                 }
-                for version in versions
-            ],
-        }
+            )
+        return {"name": installed.name, "versions": rows}
 
     @endpoint
     def preview_library_import(self, path: str, force: bool = False) -> dict[str, Any]:
