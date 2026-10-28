@@ -346,6 +346,7 @@ class LayoutResult:
     plan: NetworkPlan
     l1_candidates: list[L1Candidate]
     report: LayoutReport
+    rules: LayoutRules
 
 
 def network_inputs(loaded: LoadedSubstation) -> NetworkInputs:
@@ -582,7 +583,7 @@ def layout_preview(loaded: LoadedSubstation, overrides: LayoutInputs | None = No
         fill_lines=fill_lines(layout, rules),
         issues=issues + layout.issues,
     )
-    return LayoutResult(panels, layout.panels, plan, candidates, report)
+    return LayoutResult(panels, layout.panels, plan, candidates, report, rules)
 
 
 def layout_substation(loaded: LoadedSubstation) -> LayoutResult:
