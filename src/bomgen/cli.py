@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, NoReturn
 
 import typer
 
 from bomgen import __version__
+from bomgen.checks import check_report, render_text
+from bomgen.checks import render_json as render_checks_json
 from bomgen.engine.errors import EngineError
 from bomgen.engine.pipeline import build as build_bom
 from bomgen.io.errors import InputError
@@ -15,6 +17,7 @@ from bomgen.io.loader import LoadedProject, LoadedSubstation, load_inputs
 from bomgen.io.schema import write_json_schemas
 from bomgen.library_store.cli import library_app
 from bomgen.project_store.cli import project_app
+from bomgen.revision import compare_with_previous, read_previous_issue, render_revisions
 from bomgen.sheets.workbook import build_workbook
 from bomgen.writer import WriterError, write_workbook
 
@@ -49,14 +52,18 @@ def _panel_summary(substation: LoadedSubstation) -> str:
     return f"{len(substation.panels)} panels ({panel_ids})"
 
 
+def _exit_on_input_error(error: InputError) -> NoReturn:
+    for issue in error.issues:
+        typer.echo(str(issue), err=True)
+    typer.echo(f"{len(error.issues)} problem(s) found.", err=True)
+    raise typer.Exit(1) from None
+
+
 def _load_or_exit(path: Path) -> LoadedProject | LoadedSubstation:
     try:
         return load_inputs(path)
     except InputError as error:
-        for issue in error.issues:
-            typer.echo(str(issue), err=True)
-        typer.echo(f"{len(error.issues)} problem(s) found.", err=True)
-        raise typer.Exit(1) from None
+        _exit_on_input_error(error)
 
 
 @app.command()
@@ -126,18 +133,59 @@ def build(
         str | None,
         typer.Option("--substation", "-s", help="Build only the substation with this id."),
     ] = None,
+    compare: Annotated[
+        Path | None,
+        typer.Option(
+            "--compare",
+            help="Mark the cells changed since this previously issued workbook (OUT-8). "
+            "It is read from the values Excel last saved: a file re-saved by a non-Excel "
+            "tool has no formula results, so formula cells such as =24+3 show as changed.",
+            show_default=False,
+        ),
+    ] = None,
+    no_checks: Annotated[bool, typer.Option("--no-checks", help="Skip the check report.")] = False,
 ) -> None:
-    """Build one BOM workbook per substation and print each file's path."""
+    """Build one BOM workbook per substation, print each file's path and its check report.
+
+    Exits 1 when a check fails; the report is also written next to the workbook as
+    <name>.checks.json.
+    """
     loaded = _load_or_exit(file)
     targets = _selected(loaded, substation)
+    previous = None
+    if compare is not None:
+        if len(targets) != 1:
+            raise typer.BadParameter(
+                "compares one substation; choose it with --substation", param_hint="--compare"
+            )
+        try:
+            previous = read_previous_issue(compare)
+        except InputError as error:
+            _exit_on_input_error(error)
+    failed = False
     for target in targets:
         try:
-            workbook = build_workbook(target, build_bom(target), logo=target.logo)
+            result = build_bom(target)
+            marked = result
+            if previous is not None:
+                marked, revisions = compare_with_previous(result, previous)
+            workbook = build_workbook(target, marked, logo=target.logo)
             path = write_workbook(workbook, out / _workbook_name(target))
         except (EngineError, WriterError) as error:
             typer.echo(f"{target.substation.substation.id}: {error}", err=True)
             raise typer.Exit(1) from None
         typer.echo(str(path))
+        if previous is not None:
+            typer.echo(render_revisions(revisions))
+        if not no_checks:
+            report = check_report(target, result)
+            path.with_suffix(".checks.json").write_text(
+                render_checks_json(report), encoding="utf-8"
+            )
+            typer.echo(render_text(report), nl=False)
+            failed = failed or report.failed
+    if failed:
+        raise typer.Exit(1)
 
 
 @app.command()
