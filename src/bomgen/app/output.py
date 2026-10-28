@@ -12,13 +12,10 @@ import os
 from pathlib import Path
 from typing import Any
 
-import openpyxl
-
 from bomgen.app.projects import library_note
 from bomgen.app.substations import Resolved, resolve
 from bomgen.build import build_substation, workbook_name
 from bomgen.checks import check_report
-from bomgen.checks import render_json as render_checks_json
 from bomgen.engine.errors import EngineError
 from bomgen.engine.pipeline import build as build_bom
 from bomgen.io.errors import InputError
@@ -167,10 +164,10 @@ def build_file(
         except InputError as exc:
             raise OutputRefusedError("bad_previous", str(exc)) from None
     try:
-        outcome = build_substation(loaded, path, previous=previous, checks=False)
+        outcome = build_substation(loaded, path, previous=previous)
     except EngineError as exc:
         raise OutputRefusedError("engine", f"The engine stopped: {exc}") from None
-    except (WriterError, PermissionError) as exc:
+    except WriterError as exc:
         if _locked(exc) and folder.is_dir() and not os.access(folder, os.W_OK):
             raise OutputRefusedError(
                 "io", f"{folder} is read-only. Choose another folder."
@@ -181,22 +178,16 @@ def build_file(
                 f"{path.name} is open in another program, such as Excel.",
             ) from None
         raise OutputRefusedError("write", f"The workbook was not written: {exc}") from None
-    report = check_report(loaded, outcome.result)
-    try:
-        path.with_suffix(".checks.json").write_text(render_checks_json(report), encoding="utf-8")
-    except OSError as exc:
+    except OSError as exc:  # write_workbook wraps its own: only the .checks.json is left
         raise OutputRefusedError(
             "io", f"The workbook {path} was written, but its check report was not: {exc}"
         ) from None
-    book = openpyxl.load_workbook(path, read_only=True)
-    try:
-        sheets = book.sheetnames
-    finally:
-        book.close()
+    report = outcome.checks
+    assert report is not None
     return {
         "path": path,
         "size": path.stat().st_size,
-        "sheets": sheets,
+        "sheets": list(outcome.sheets),
         "checks": {"failed": report.failed, "items": report.items},
         "revisions": outcome.revisions,
     }

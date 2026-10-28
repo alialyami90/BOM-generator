@@ -10,7 +10,7 @@ import pytest
 import xlsxwriter.workbook
 
 from bomgen import build
-from bomgen.app import api, output
+from bomgen.app import api
 from bomgen.engine.errors import EngineError
 from bomgen.models.report import CheckItem, CheckReport, CheckStatus
 
@@ -210,7 +210,7 @@ def test_a_failed_check_still_writes_the_workbook(
     failed = CheckReport(
         items=(CheckItem(check="dc_main", status=CheckStatus.FAIL, panel_id="psa1", message="x"),)
     )
-    monkeypatch.setattr(output, "check_report", lambda loaded, result: failed)
+    monkeypatch.setattr(build, "check_report", lambda loaded, result: failed)
 
     result = ok(app.build_workbook(str(project), "gis01", str(tmp_path)))
 
