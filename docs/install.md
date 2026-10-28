@@ -16,9 +16,11 @@ a terminal (`"%LOCALAPPDATA%\Programs\BOM Generator\bomgen.exe" --version`).
 
 ## Library update packages
 
-Double-click a `.bomlib` file to open it in the app (ADR 0008). *Pending:*
-until library import ships (plan M8), the app only shows a "not available yet"
-message.
+Double-click a `.bomlib` file to import it (ADR 0008). The app installs the
+library and shows what changed, or says why it refused the package (a
+downgrade, a damaged file, a library newer than the app). `.bomproj` project
+files are registered too but *pending*: they open with the app after plan M8b,
+until then the app only says it can't open them yet.
 
 ## Updating and uninstalling
 

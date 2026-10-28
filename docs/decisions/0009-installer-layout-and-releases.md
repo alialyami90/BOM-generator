@@ -19,8 +19,13 @@ end to end now and let those milestones plug in without touching packaging.
   runtime. A windowed PyInstaller build has no stdout, so a single executable
   can't serve both.
 - **Entry points live in `bomgen.app.launcher`**, not in packaging scripts, so
-  they are unit-tested. `app_main` routes a single `.bomlib` argument to library
-  import (M8 placeholder) and everything else to the window (M10 placeholder).
+  they are unit-tested. `app_main` routes a single `.bomlib` argument to
+  `bomgen.library_store.import_library` and shows the result (or the refusal's
+  `kind` and message) in a message box, exiting 1 on a refusal. A `.bomproj`
+  argument shows an "opens with the app after M8b" message, and everything else
+  opens the window (M10 placeholder). The double-click import installs straight
+  away, as `bomgen library import` does; M10's window adds the preview and
+  confirmation.
   `cli_main` answers `--version` itself (the CI smoke test relies on it) and
   hands every other argument to the typer app in `bomgen.cli` once M1 adds it.
   The spec collects every `bomgen` submodule, so new modules need no spec edits.
@@ -36,10 +41,13 @@ end to end now and let those milestones plug in without touching packaging.
   the installed copy; it also runs `bomgen.exe --help`, which may exit 2 only
   while `bomgen.cli` is absent.
 - **Per-user install:** `PrivilegesRequired=lowest`, no override dialog,
-  installs to `%LOCALAPPDATA%\Programs\BOM Generator`, registers `.bomlib` under
+  installs to `%LOCALAPPDATA%\Programs\BOM Generator`, registers `.bomlib` and `.bomproj` under
   `HKCU\Software\Classes`, 64-bit Windows 10 21H2+ (Q20). Uninstall removes the
   app, shortcut and association but keeps `%LOCALAPPDATA%\bomgen\` (installed
   libraries, ADR 0008).
+- **Unattended runs.** `BOMGEN_NO_DIALOGS=1` makes the windowed app print to stderr
+  instead of showing a message box, so CI can open a `.bomlib` with the installed
+  app and check the library with `bomgen.exe library list`.
 - **WebView2** is checked at install time and fetched with Microsoft's
   bootstrapper when missing; failure warns but doesn't block, since the CLI
   doesn't need it.
@@ -55,7 +63,9 @@ end to end now and let those milestones plug in without touching packaging.
 
 ## Consequences
 
-- M1, M8 and M10 replace placeholders in `bomgen.app.launcher` only.
+- M10 replaces the window placeholder in `bomgen.app.launcher`, and M8b the
+  `.bomproj` one; both associations are already registered, so the installer
+  doesn't change again.
 - The release workflow isn't in `ci-status`'s `needs` (ADR 0006); it runs only
   for packaging paths and tags, so it can't block ordinary PRs. **Never make
   `release.yml` a required check:** a path-filtered workflow reports no status on
