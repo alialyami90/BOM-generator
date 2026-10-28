@@ -498,8 +498,11 @@ Delivered in small PRs by A11, one screen group each (ADR 0015 for the bridge):
 - **M10a shell:** the M9 prototype in `src/bomgen/app/ui/`, `bomgen.app.window.run_window`
   (the launcher's one call, wired by A6), `bomgen.app.api.Api` with `app_info`
   (version, the `.bomproj` the app was opened with, workspace, installed libraries),
-  `ui/bridge.js`. pywebview is the `app` extra. Screens still show the prototype's
-  illustrative data, marked "not connected yet".
+  `ui/bridge.js`. pywebview is the `app` extra. `run_window` refuses to open when
+  the UI files or (on Windows) the WebView2 Runtime are missing. Screens still show
+  the prototype's example project and data; their tables are marked "not connected
+  yet". A6's launcher wiring adds `bomgen/app/ui` to `packaging/bomgen.spec`
+  (`collect_data_files("bomgen.app")`), which `collect_submodules` does not cover.
 - **M10b:** Home, Project, Library and Backup and share on `bomgen.library_store` and
   `bomgen.project_store`.
 - **M10c:** Substation settings, Network and Panels after M1b and M1c.

@@ -22,7 +22,8 @@ app must not drift from it.
   `{"ok": false, "error": {"kind": …, "message": …}}`. `kind` is the
   `RefusalKind` value for store refusals (`already_installed`, `downgrade`,
   `project_exists`, …), `io` for file errors (such as a workbook open in Excel), and
-  `internal` for anything unexpected, which is also printed to stderr. Results are
+  `internal` for anything unexpected (its traceback goes to stderr, which only a
+  console run shows; the windowed exe has none). Results are
   converted to JSON (paths to strings, dataclasses and pydantic models to objects).
 - **No rule in the bridge.** Endpoints call engine and store functions and reshape
   their results; anything missing goes to the owning agent, not into `app/`.
@@ -38,9 +39,21 @@ app must not drift from it.
   from the network. Screens move from the prototype's illustrative `data.js` to
   endpoints one PR at a time (plan M10b–M10d); `data.js` and `engine-stub.js` go
   when the last screen is connected.
+- **The frozen app must bundle the UI.** `collect_submodules` collects no data
+  files, so `packaging/bomgen.spec` (A6) adds `bomgen/app/ui` with
+  `collect_data_files("bomgen.app")` or a `Tree` when it wires `run_window` into the
+  launcher. `run_window` checks `ui/index.html` exists and otherwise shows "Reinstall"
+  and returns 1, rather than opening a blank window.
+- **WebView2 is checked, not assumed.** On Windows pywebview silently falls back to
+  Internet Explorer (MSHTML) when it finds no WebView2 Runtime in the registry, which
+  would show a broken page. `run_window` reads the same registry keys first
+  (`webview2_version`) and, when none holds version 86.0.622.0 or later, shows how to
+  install the runtime and returns 1. The installer still bootstraps WebView2
+  (ADR 0009); this covers a runtime removed later.
 - **pywebview is optional.** It is the `app` extra; `bomgen.app` imports it only
   inside `run_window`, so the CLI and the frozen app's `--self-test` never need it.
-  Without it, or without WebView2, `run_window` shows a message and returns 1.
+  Without it, or when its GUI backend fails to start (pythonnet on Windows, GTK or
+  Qt elsewhere), `run_window` shows the error and returns 1.
 
 ## Consequences
 

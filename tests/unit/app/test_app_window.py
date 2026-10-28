@@ -36,9 +36,21 @@ class FakeWebview(types.ModuleType):
         self.started = options
 
 
-def run(fake: FakeWebview, project_file: Path | None = None) -> tuple[int, list[str]]:
+def run(
+    fake: FakeWebview,
+    project_file: Path | None = None,
+    platform: str = "linux",
+    webview2: str | None = "131.0.2903.70",
+) -> tuple[int, list[str]]:
     shown: list[str] = []
-    return window.run_window(project_file, shown.append, webview_module=fake), shown
+    code = window.run_window(
+        project_file,
+        shown.append,
+        webview_module=fake,
+        platform=platform,
+        find_webview2=lambda: webview2,
+    )
+    return code, shown
 
 
 def test_window_opens_the_bundled_ui_from_disk_without_a_server() -> None:
@@ -53,12 +65,49 @@ def test_window_opens_the_bundled_ui_from_disk_without_a_server() -> None:
     assert fake.started.get("http_server", False) is False
 
 
-def test_window_minimum_size_is_1280_by_720() -> None:
+def test_window_minimum_size_is_1280_by_720_and_it_opens_maximized() -> None:
     fake = FakeWebview()
 
     run(fake)
 
     assert fake.windows[0]["min_size"] == (1280, 720)
+    assert fake.windows[0]["maximized"] is True
+
+
+def test_missing_ui_files_notify_instead_of_opening_a_blank_window(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(window, "INDEX", tmp_path / "ui" / "index.html")
+    fake = FakeWebview()
+
+    code, shown = run(fake)
+
+    assert code == 1
+    assert fake.windows == []
+    assert "Reinstall" in shown[0]
+
+
+def test_windows_without_webview2_notifies_instead_of_falling_back_to_internet_explorer() -> None:
+    fake = FakeWebview()
+
+    code, shown = run(fake, platform="win32", webview2=None)
+
+    assert code == 1
+    assert fake.windows == []
+    assert "WebView2" in shown[0]
+
+
+def test_windows_with_webview2_opens_the_window() -> None:
+    fake = FakeWebview()
+
+    assert run(fake, platform="win32") == (0, [])
+    assert len(fake.windows) == 1
+
+
+def test_webview2_is_only_probed_on_windows() -> None:
+    fake = FakeWebview()
+
+    assert run(fake, platform="linux", webview2=None) == (0, [])
 
 
 def test_window_gives_the_page_an_api_that_knows_the_opened_project_file(tmp_path: Path) -> None:
@@ -72,14 +121,14 @@ def test_window_gives_the_page_an_api_that_knows_the_opened_project_file(tmp_pat
     assert api.app_info()["data"]["project_file"] == str(opened)  # type: ignore[index]
 
 
-def test_missing_webview_runtime_notifies_and_returns_1() -> None:
+def test_gui_backend_failure_notifies_and_returns_1() -> None:
+    # e.g. pythonnet cannot load on Windows, or no GTK/Qt elsewhere
     fake = FakeWebview(WebViewException("You must have either QT or GTK installed"))
 
     code, shown = run(fake)
 
     assert code == 1
     (message,) = shown
-    assert "WebView2" in message
     assert "QT or GTK" in message
 
 
@@ -87,7 +136,7 @@ def test_missing_pywebview_notifies_and_returns_1(monkeypatch: pytest.MonkeyPatc
     monkeypatch.setitem(sys.modules, "webview", None)  # makes `import webview` fail
     shown: list[str] = []
 
-    assert window.run_window(None, shown.append) == 1
+    assert window.run_window(None, shown.append, platform="linux") == 1
     assert "pywebview" in shown[0]
 
 
@@ -112,3 +161,32 @@ def test_app_modules_never_import_webview_at_import_time(module: str) -> None:
 def test_app_package_init_stays_import_free() -> None:
     tree = ast.parse((APP_PACKAGE / "__init__.py").read_text(encoding="utf-8"))
     assert not [node for node in tree.body if isinstance(node, ast.Import | ast.ImportFrom)]
+
+
+RUNTIME = "{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}"
+
+
+def registry(values: dict[tuple[str, str], str]) -> window.RegistryRead:
+    return lambda hive, path: values.get((hive, path))
+
+
+def test_webview2_found_in_the_machine_wide_install_on_64_bit_windows() -> None:
+    path = rf"SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{RUNTIME}"
+    read = registry({("HKEY_LOCAL_MACHINE", path): "131.0.2903.70"})
+
+    assert window.webview2_version(read, machine="AMD64") == "131.0.2903.70"
+
+
+def test_webview2_found_in_the_per_user_install() -> None:
+    path = rf"SOFTWARE\Microsoft\EdgeUpdate\Clients\{RUNTIME}"
+    read = registry({("HKEY_CURRENT_USER", path): "130.0.2849.80"})
+
+    assert window.webview2_version(read, machine="AMD64") == "130.0.2849.80"
+
+
+@pytest.mark.parametrize("pv", [None, "0.0.0.0", "86.0.600.0", "not a version"])
+def test_webview2_missing_uninstalled_or_too_old_is_not_found(pv: str | None) -> None:
+    path = rf"SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{RUNTIME}"
+    read = registry({} if pv is None else {("HKEY_LOCAL_MACHINE", path): pv})
+
+    assert window.webview2_version(read, machine="AMD64") is None

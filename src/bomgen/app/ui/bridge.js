@@ -13,7 +13,8 @@
   }
 
   async function call(name, ...args) {
-    if (!(await ready) || !api()) throw { kind: 'no_backend', message: 'Not running inside the app.' };
+    await ready;
+    if (!api()) throw { kind: 'no_backend', message: 'Not running inside the app.' };  // checked per call: a slow start may answer after WAIT_MS
     const method = api()[name];
     if (typeof method !== 'function') throw { kind: 'internal', message: `The app has no endpoint "${name}".` };
     let reply;

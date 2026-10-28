@@ -33,12 +33,14 @@
     S.app = info;
     const active = info.libraries.find((l) => l.active);
     S.library = active ? { name: active.name, version: active.active } : null;
-    S.firstRun = !S.library;
+    S.firstRun = info.libraries.length === 0;  // installed but broken is not a first run
     S.launch = info.project_file ? 'bomproj' : 'normal';
     S.launchFile = info.project_file ? info.project_file.split(/[\\/]/).pop() : '';
     render();
+    info.libraries.filter((l) => l.problem).forEach((l) => toast(`Library ${l.name} needs attention: ${l.problem}`, 'warn'));
   }
   const lib = () => S.library || { name: DB.library.name, version: DB.library.version };
+  const noActive = () => !!S.app && !S.library;  // libraries installed, none usable (see the toast)
   const counts = () => ({ errors: S.checks === 'errors' ? DB.problems.filter((p) => p.sev === 'error').length : 0, warnings: DB.problems.filter((p) => p.sev === 'warning').length });
 
   /* ---------- components ---------- */
@@ -92,8 +94,8 @@
       <div class="brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>BOM Generator</div>
       ${hasProject() ? `<span class="bar-divider"></span><div class="bar-project"><b>${esc(p.name)}</b><span>${s ? esc(s.name) : 'No substation open'}</span></div>` : ''}
       <div class="bar-spacer"></div>
-      <a class="bar-btn" href="#/library" style="text-decoration:none" aria-label="Device library ${S.firstRun ? 'not installed' : esc(lib().name + ' ' + lib().version)}">
-        <span class="dot ${S.firstRun ? 'dot--bad' : 'dot--ok'}" aria-hidden="true"></span>${S.firstRun ? 'No library installed' : `${esc(lib().name)} ${esc(lib().version)}`}</a>
+      <a class="bar-btn" href="#/library" style="text-decoration:none" aria-label="Device library ${S.firstRun ? 'not installed' : noActive() ? 'needs attention' : esc(lib().name + ' ' + lib().version)}">
+        <span class="dot ${S.firstRun || noActive() ? 'dot--bad' : 'dot--ok'}" aria-hidden="true"></span>${S.firstRun ? 'No library installed' : noActive() ? 'No active library' : `${esc(lib().name)} ${esc(lib().version)}`}</a>
       <button class="bar-btn bar-btn--icon" data-action="theme" aria-label="Theme: ${S.theme}. Change theme" title="Theme: ${S.theme}">${icon(S.theme === 'dark' ? 'moon' : 'sun')}</button>
       <button class="bar-btn bar-btn--icon" data-action="help" aria-label="Help" title="Help">${icon('help')}</button>`;
   }
@@ -107,7 +109,7 @@
     const switcher = np ? `<div class="nav-switch"><label class="sr-only" for="sub-switch">Substation</label><select class="select" id="sub-switch" data-action="sub-switch">${S.sub ? '' : '<option value="">Choose a substation…</option>'}${p.substations.map((x) => `<option value="${x.id}" ${x.id === S.sub ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>` : '';
     $('#nav').innerHTML = `
       ${navItem('#/home', 'home', 'Home', '', '', false, r === 'home')}
-      ${navItem('#/library', 'library', 'Library', S.firstRun ? '' : esc(lib().version), '', false, r === 'library')}
+      ${navItem('#/library', 'library', 'Library', S.firstRun || noActive() ? '' : esc(lib().version), '', false, r === 'library')}
       ${np ? `<div class="nav-group">Project</div>
       ${navItem('#/project', 'project', esc(p.name.replace(' (example)', '')), projTail, p.status === 'bad' ? 'bad' : p.status === 'warn' ? 'warn' : 'ok', false, r === 'project')}
       <div class="nav-group">Substation</div>${switcher}
