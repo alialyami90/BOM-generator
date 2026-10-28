@@ -31,9 +31,9 @@ workflow) to get the installer as an artifact without releasing.
 ```powershell
 pip install ".[app]" -r packaging/requirements.txt
 pyinstaller packaging/bomgen.spec --noconfirm --clean
-& "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" /DAppVersion=0.0.1 packaging\bomgen.iss
+& "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" /DAppVersion=0.1.0 packaging\bomgen.iss
 ```
 
-Output: `out\installer\bomgen-setup-0.0.1.exe` (`out/`, `build/` and `dist/`
+Output: `out\installer\bomgen-setup-0.1.0.exe` (`out/`, `build/` and `dist/`
 are git-ignored). PyInstaller also runs on Linux and macOS for checking the
 spec, but the installer is Windows-only.
