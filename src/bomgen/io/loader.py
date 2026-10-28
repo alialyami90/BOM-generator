@@ -8,7 +8,7 @@ found in every file is collected into one :class:`InputError` (ADR 0010 item 7).
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -59,6 +59,7 @@ class LoadedSubstation:
     panels: tuple[Panel, ...]  # ``panels`` then ``manual_panels``, in sheet order
     panel_files: Mapping[str, Path]  # panel id -> its own file (a mirror's is the mirror file)
     manual_panel_ids: frozenset[str]
+    logo: Path | None = None  # the project's logo file, resolved
 
     @property
     def panel_capacity_u(self) -> int:
@@ -74,6 +75,7 @@ class LoadedProject:
     project: Project
     library: Library
     substations: tuple[LoadedSubstation, ...]
+    logo: Path | None = None  # ``project.logo`` resolved against the project folder
 
 
 def load_inputs(
@@ -128,12 +130,11 @@ def load_project(project_file: Path, *, store: LibraryStore | None = None) -> Lo
     base = project_file.parent
 
     issues: list[Issue] = []
-    if project.project.logo is not None:
-        logo = base / project.project.logo
-        if not logo.is_file():
-            message = f"file not found: {logo.as_posix()}"
-            line = project_source.line_for(("project", "logo"))
-            issues.append(Issue(project_file, "project.logo", message, line))
+    logo = None if project.project.logo is None else base / project.project.logo
+    if logo is not None and not logo.is_file():
+        message = f"file not found: {logo.as_posix()}"
+        line = project_source.line_for(("project", "logo"))
+        issues.append(Issue(project_file, "project.logo", message, line))
 
     library_file = _library_file(project, project_source, store, issues)
     library_source = _read(library_file, issues) if library_file is not None else None
@@ -187,7 +188,8 @@ def load_project(project_file: Path, *, store: LibraryStore | None = None) -> Lo
             loaded.append(result)
     if issues:
         raise InputError(_sorted(issues))
-    return LoadedProject(project_file, project, library, tuple(loaded))
+    substations = tuple(replace(s, logo=logo) for s in loaded)
+    return LoadedProject(project_file, project, library, substations, logo)
 
 
 def _library_file(

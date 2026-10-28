@@ -322,7 +322,16 @@ def test_missing_logo_is_reported(tmp_path: Path) -> None:
     ]
     (tmp_path / "assets").mkdir()
     (tmp_path / "assets" / "logo.png").write_bytes(b"")
-    assert load_project(project_file).project.project.logo == Path("assets/logo.png")
+    loaded = load_project(project_file)
+    assert loaded.project.project.logo == Path("assets/logo.png")
+    assert loaded.logo == tmp_path / "assets" / "logo.png"
+    assert loaded.substations[0].logo == tmp_path / "assets" / "logo.png"
+
+
+def test_no_logo_resolves_to_none(tmp_path: Path) -> None:
+    loaded = load_project(write_project(tmp_path))
+    assert loaded.logo is None
+    assert loaded.substations[0].logo is None
 
 
 def test_loose_material_references_are_checked(tmp_path: Path) -> None:

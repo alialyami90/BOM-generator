@@ -8,11 +8,15 @@ from typing import Annotated
 import typer
 
 from bomgen import __version__
+from bomgen.engine.errors import EngineError
+from bomgen.engine.pipeline import build as build_bom
 from bomgen.io.errors import InputError
 from bomgen.io.loader import LoadedProject, LoadedSubstation, load_inputs
 from bomgen.io.schema import write_json_schemas
 from bomgen.library_store.cli import library_app
 from bomgen.project_store.cli import project_app
+from bomgen.sheets.workbook import build_workbook
+from bomgen.writer import WriterError, write_workbook
 
 app = typer.Typer(no_args_is_help=True, help="Substation SCADA BOM generator.")
 app.add_typer(library_app, name="library")
@@ -45,6 +49,16 @@ def _panel_summary(substation: LoadedSubstation) -> str:
     return f"{len(substation.panels)} panels ({panel_ids})"
 
 
+def _load_or_exit(path: Path) -> LoadedProject | LoadedSubstation:
+    try:
+        return load_inputs(path)
+    except InputError as error:
+        for issue in error.issues:
+            typer.echo(str(issue), err=True)
+        typer.echo(f"{len(error.issues)} problem(s) found.", err=True)
+        raise typer.Exit(1) from None
+
+
 @app.command()
 def validate(
     file: Annotated[
@@ -61,13 +75,7 @@ def validate(
         raise typer.BadParameter("give one project or substation file, as FILE or --project")
     path = file if file is not None else project
     assert path is not None
-    try:
-        loaded = load_inputs(path)
-    except InputError as error:
-        for issue in error.issues:
-            typer.echo(str(issue), err=True)
-        typer.echo(f"{len(error.issues)} problem(s) found.", err=True)
-        raise typer.Exit(1) from None
+    loaded = _load_or_exit(path)
     parts = f"{len(loaded.library.devices)} library parts"
     if isinstance(loaded, LoadedProject):
         substations = "; ".join(
@@ -82,6 +90,54 @@ def validate(
             f"OK: {loaded.project.project.name} / {loaded.substation.substation.id}: "
             f"{_panel_summary(loaded)}, {parts}"
         )
+
+
+def _workbook_name(substation: LoadedSubstation) -> str:
+    """The workbook file name (spec: Output requirements, OUT-2)."""
+    document = substation.documents[substation.substation.document]
+    return substation.substation.output.file_name.format(doc_no=document.doc_no, rev=document.rev)
+
+
+def _selected(
+    loaded: LoadedProject | LoadedSubstation, substation_id: str | None
+) -> list[LoadedSubstation]:
+    substations = list(loaded.substations) if isinstance(loaded, LoadedProject) else [loaded]
+    if substation_id is None:
+        return substations
+    chosen = [s for s in substations if s.substation.substation.id == substation_id]
+    if not chosen:
+        known = ", ".join(s.substation.substation.id for s in substations)
+        raise typer.BadParameter(
+            f"no substation '{substation_id}' (the project has: {known})",
+            param_hint="--substation",
+        )
+    return chosen
+
+
+@app.command()
+def build(
+    file: Annotated[
+        Path, typer.Argument(help="A project.yaml or a substation.yaml.", show_default=False)
+    ],
+    out: Annotated[
+        Path, typer.Option("--out", "-o", help="Directory to write the workbooks into.")
+    ] = Path("out"),
+    substation: Annotated[
+        str | None,
+        typer.Option("--substation", "-s", help="Build only the substation with this id."),
+    ] = None,
+) -> None:
+    """Build one BOM workbook per substation and print each file's path."""
+    loaded = _load_or_exit(file)
+    targets = _selected(loaded, substation)
+    for target in targets:
+        try:
+            workbook = build_workbook(target, build_bom(target), logo=target.logo)
+            path = write_workbook(workbook, out / _workbook_name(target))
+        except (EngineError, WriterError) as error:
+            typer.echo(f"{target.substation.substation.id}: {error}", err=True)
+            raise typer.Exit(1) from None
+        typer.echo(str(path))
 
 
 @app.command()
