@@ -1,5 +1,7 @@
 """Frozen-app entry points (plan M11; the window itself arrives in M10)."""
 
+import ast
+import importlib
 import sys
 import types
 from pathlib import Path
@@ -81,3 +83,79 @@ def test_cli_without_cli_module_reports_it_is_pending(
 
     assert launcher.cli_main(["validate"]) == 2
     assert "not available" in capsys.readouterr().err
+
+
+def test_self_test_imports_every_bomgen_submodule() -> None:
+    imported: list[str] = []
+
+    def record(name: str) -> object:
+        imported.append(name)
+        return importlib.import_module(name)
+
+    assert launcher.self_test(import_module=record) == []
+    assert "bomgen.app.launcher" in imported
+    assert len(imported) == len(set(imported))
+
+
+def test_self_test_reports_modules_that_fail_to_import() -> None:
+    def fail_on_launcher(name: str) -> object:
+        if name == "bomgen.app.launcher":
+            raise ImportError("dropped from the bundle")
+        return importlib.import_module(name)
+
+    assert launcher.self_test(import_module=fail_on_launcher) == ["bomgen.app.launcher"]
+
+
+def test_app_self_test_fails_when_a_module_is_missing(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(launcher, "self_test", lambda: ["bomgen.engine.power"])
+
+    assert launcher.app_main(["--self-test"], notify=lambda _: None) == 1
+    assert "bomgen.engine.power" in capsys.readouterr().err
+
+
+def test_cli_prints_a_string_exit_code_and_fails(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    def fake_app(*, args: list[str], prog_name: str) -> None:
+        raise SystemExit("bad project file")
+
+    fake_cli = types.ModuleType("bomgen.cli")
+    fake_cli.app = fake_app  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "bomgen.cli", fake_cli)
+
+    assert launcher.cli_main(["validate"]) == 1
+    assert "bad project file" in capsys.readouterr().err
+
+
+def test_app_package_init_stays_import_free() -> None:
+    # M10 owns the rest of bomgen/app/; importing the package must not pull in
+    # the window or its dependencies (ADR 0009).
+    init = Path(launcher.__file__).with_name("__init__.py")
+    tree = ast.parse(init.read_text(encoding="utf-8"))
+
+    assert not [n for n in ast.walk(tree) if isinstance(n, ast.Import | ast.ImportFrom)]
+
+
+def test_frozen_self_test_checks_the_build_time_module_manifest(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    # A frozen app can only walk the modules PyInstaller kept, so a dropped module
+    # would never be noticed; the spec records the source tree's modules instead.
+    (tmp_path / launcher.MODULE_MANIFEST).write_text(
+        "bomgen\nbomgen.app.launcher\nbomgen.engine.power\n", encoding="utf-8"
+    )
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    monkeypatch.setattr(sys, "_MEIPASS", str(tmp_path), raising=False)
+
+    assert launcher.self_test() == ["bomgen.engine.power"]
+
+
+def test_frozen_self_test_fails_without_the_manifest(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    monkeypatch.setattr(sys, "_MEIPASS", str(tmp_path), raising=False)
+
+    assert launcher.self_test() == [launcher.MODULE_MANIFEST]

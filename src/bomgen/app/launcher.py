@@ -12,6 +12,7 @@ milestones land; only their hand-off points live here.
 """
 
 import importlib
+import pkgutil
 import sys
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
@@ -23,6 +24,7 @@ from bomgen import __version__
 APP_TITLE = "BOM Generator"
 LIBRARY_SUFFIX = ".bomlib"
 SELF_TEST_FLAG = "--self-test"
+MODULE_MANIFEST = "bomgen_modules.txt"  # written by packaging/bomgen.spec
 
 Action = Literal["window", "import_library", "self_test"]
 
@@ -51,12 +53,51 @@ def show_message(text: str) -> None:
         print(text, file=sys.stderr)
 
 
+def module_names() -> list[str]:
+    """Every ``bomgen`` module that must be importable.
+
+    From source this walks the package. Frozen, the walk would only see modules
+    PyInstaller kept, so it reads the list ``bomgen.spec`` recorded at build time.
+    """
+    if getattr(sys, "frozen", False):
+        manifest = Path(getattr(sys, "_MEIPASS", ".")) / MODULE_MANIFEST
+        return manifest.read_text(encoding="utf-8").split()
+    package = importlib.import_module("bomgen")
+    return ["bomgen"] + [
+        info.name for info in pkgutil.walk_packages(package.__path__, prefix="bomgen.")
+    ]
+
+
+def self_test(
+    import_module: Callable[[str], object] = importlib.import_module,
+) -> list[str]:
+    """Import every ``bomgen`` module and return the names that failed.
+
+    Run from the frozen app (``--self-test``), this proves the bundle is complete;
+    a green build otherwise says nothing about modules added by later milestones.
+    """
+    try:
+        names = module_names()
+    except OSError:
+        return [MODULE_MANIFEST]
+    failed: list[str] = []
+    for name in names:
+        try:
+            import_module(name)
+        except Exception:  # a broken module must be reported, not abort the test
+            failed.append(name)
+    return sorted(set(failed))
+
+
 def app_main(
     argv: Sequence[str] | None = None, notify: Callable[[str], None] = show_message
 ) -> int:
     launch = parse_args(sys.argv[1:] if argv is None else argv)
     if launch.action == "self_test":
-        return 0
+        failed = self_test()
+        for name in failed:
+            print(f"self-test: cannot import {name}", file=sys.stderr)
+        return 1 if failed else 0
     if launch.action == "import_library":
         assert launch.path is not None
         notify(f"Importing library packages is not available yet (plan M8).\n\n{launch.path.name}")
@@ -86,5 +127,6 @@ def cli_main(argv: Sequence[str] | None = None) -> int:
     except SystemExit as exc:
         if exc.code is None or isinstance(exc.code, int):
             return exc.code or 0
+        print(exc.code, file=sys.stderr)
         return 1
     return 0

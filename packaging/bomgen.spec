@@ -10,6 +10,7 @@
 
 from pathlib import Path
 
+from PyInstaller.config import CONF
 from PyInstaller.utils.hooks import collect_submodules
 
 APP_EXE_NAME = "BOM Generator"
@@ -22,11 +23,19 @@ icon = [str(ICON)] if ICON.exists() else None
 hiddenimports = collect_submodules("bomgen")
 excludes = ["tkinter"]
 
+# `BOM Generator.exe --self-test` imports every module listed here (see
+# bomgen.app.launcher.module_names), so a module missing from the bundle fails
+# the release job instead of passing unnoticed.
+manifest = Path(CONF["workpath"]) / "bomgen_modules.txt"
+manifest.parent.mkdir(parents=True, exist_ok=True)
+manifest.write_text("\n".join(["bomgen", *hiddenimports]), encoding="utf-8")
+datas = [(str(manifest), ".")]
+
 app_analysis = Analysis(  # noqa: F821
-    [str(HERE / "entry_app.py")], hiddenimports=hiddenimports, excludes=excludes
+    [str(HERE / "entry_app.py")], datas=datas, hiddenimports=hiddenimports, excludes=excludes
 )
 cli_analysis = Analysis(  # noqa: F821
-    [str(HERE / "entry_cli.py")], hiddenimports=hiddenimports, excludes=excludes
+    [str(HERE / "entry_cli.py")], datas=datas, hiddenimports=hiddenimports, excludes=excludes
 )
 
 app_exe = EXE(  # noqa: F821

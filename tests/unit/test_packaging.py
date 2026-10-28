@@ -45,6 +45,7 @@ def test_installer_output_name_carries_the_version() -> None:
 
 
 def test_installer_keeps_user_libraries_on_uninstall() -> None:
+    assert "[UninstallDelete]" not in ISS
     assert "{localappdata}\\bomgen" not in ISS
 
 
