@@ -114,7 +114,7 @@ class LooseExtra(InputModel):
     def _part_or_description(self) -> "LooseExtra":
         text = (self.description or "").strip()
         if (self.part_id is None) == (not text):
-            raise ValueError("a loose item names a library part_id or a description, not both")
+            raise ValueError("a loose item names a library part_id or a description (exactly one)")
         if self.part_id is None:
             for key in ("children", "fed_from"):
                 if getattr(self, key):
