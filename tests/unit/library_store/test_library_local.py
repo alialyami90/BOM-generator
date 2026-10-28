@@ -7,8 +7,9 @@ import pytest
 
 from bomgen.bundle.container import MANIFEST_NAME, sha256
 from bomgen.io.loader import load_library
+from bomgen.library_store.edit import Insert, Remove, SetValue
 from bomgen.library_store.errors import LibraryPackageError, RefusalKind
-from bomgen.library_store.local import dump_library, save_local_version
+from bomgen.library_store.local import dump_library, save_edits, save_local_version
 from bomgen.library_store.package import pack, read_package
 from bomgen.library_store.store import LibraryStore
 from bomgen.library_store.versions import Version
@@ -231,3 +232,61 @@ def test_the_backup_of_a_tampered_version_is_refused(tmp_path: Path, store: Libr
 
     assert caught.value.kind is RefusalKind.STORE_DAMAGED
     assert not (tmp_path / "x.bomlib").exists()
+
+
+def test_edits_are_applied_to_the_active_version_and_saved(store: LibraryStore) -> None:
+    first = _active(store).devices[0].part_id
+    new = {"part_id": "NEW-1", "category": "component", "description_template": "New part"}
+
+    saved = save_edits(
+        store,
+        "psa",
+        [
+            SetValue(path=["devices", first, "make"], value="Acme"),
+            Insert(path=["devices"], value=new),
+        ],
+        note="two edits",
+    )
+
+    assert saved.manifest.version == "1.0.0+local.1"
+    assert saved.diff.added == ["NEW-1"]
+    assert saved.diff.changed == {first: ["make"]}
+    assert _active(store).devices[0].make == "Acme"
+
+
+def test_edits_with_problems_are_refused_with_every_problem_listed(store: LibraryStore) -> None:
+    first, second = (d.part_id for d in _active(store).devices[:2])
+
+    with pytest.raises(LibraryPackageError) as caught:
+        save_edits(
+            store,
+            "psa",
+            [
+                SetValue(path=["devices", first, "voltage_v"], value=-1),
+                SetValue(path=["devices", second, "voltage_v"], value=-2),
+            ],
+        )
+
+    assert caught.value.kind is RefusalKind.VALIDATION_FAILED
+    assert f"devices[{first}].voltage_v" in str(caught.value)
+    assert f"devices[{second}].voltage_v" in str(caught.value)
+    assert store.versions("psa") == ["1.0.0"]
+
+
+def test_edits_that_break_a_reference_are_refused(store: LibraryStore) -> None:
+    library = _active(store)
+    used = next(c.part_id for d in library.devices for c in d.children)
+
+    with pytest.raises(LibraryPackageError) as caught:
+        save_edits(store, "psa", [Remove(path=["devices", used])])
+
+    assert caught.value.kind is RefusalKind.VALIDATION_FAILED
+    assert f"unknown part_id '{used}'" in str(caught.value)
+    assert store.versions("psa") == ["1.0.0"]
+
+
+def test_edits_that_change_nothing_are_refused(store: LibraryStore) -> None:
+    with pytest.raises(LibraryPackageError) as caught:
+        save_edits(store, "psa", [])
+
+    assert caught.value.kind is RefusalKind.NO_CHANGES
