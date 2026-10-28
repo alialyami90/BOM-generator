@@ -19,7 +19,7 @@ agent; the milestones are in [`plan.md`](plan.md) → "Milestones".
 | A4 | UI designer | M9, the M10e polish findings (done) | `docs/ui/`, the M9 section |
 | A5 | Library update packages | M8, M8b | `src/bomgen/library_store/`, ADR 0008, the M8 section |
 | A6 | Windows installer and release | M11 | `packaging/`, `.github/workflows/release.yml`, `docs/install.md`, `src/bomgen/app/launcher.py`, ADR 0009, the M11 section |
-| A7 | Lead developer assistant | Documentation and small tasks A1 hands out | `README.md`, `tests/unit/README.md`, `tests/golden/README.md`; other files only when A1 assigns them |
+| A7 | Lead developer assistant | Documentation and small tasks A1 hands out | `README.md`, `CHANGELOG.md`, `tests/unit/README.md`, `tests/golden/README.md`; other files only when A1 assigns them |
 | A8 | Sizing and layout engine | M1c | `src/bomgen/engine/sizing.py`, `src/bomgen/engine/layout.py`, `tests/golden/layout/`, the M1c section |
 | A9 | BOM rule engine | M2, M3, M4, M7 (engine) | the rest of `src/bomgen/engine/`, `src/bomgen/checks.py`, `src/bomgen/revision.py`, `src/bomgen/models/bom.py`, `src/bomgen/models/calc.py`, `src/bomgen/models/output.py`, `src/bomgen/models/report.py`, `tests/golden/` (except `layout/`), `tests/unit/test_revision.py`, the M2–M4 sections and the M7 engine note |
 | A10 | Excel workbook writer | M6, then M5 | `src/bomgen/sheets/`, `src/bomgen/writer/`, `src/bomgen/models/sheet.py`, the M5–M6 sections |
@@ -164,9 +164,7 @@ the same one. Ask A1 before you add one.
    the branch has no conflict with `main`.
 4. A dependent PR rebases on `main` after the PR it depends on merges.
 
-Merge order while the current work is open: A2 M1b → A8 M1c → A5 M8b → A4 UI
-follow-up (ADR 0012/0013); A9's M2 → M3 → M4 and A10's M6 as they come, then
-M5 (A10) and M7; A3's data and A7's docs any time.
+A1 sets the merge order when open PRs touch the same files.
 
 ## Status
 

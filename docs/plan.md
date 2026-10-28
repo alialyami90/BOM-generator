@@ -1,6 +1,6 @@
 # Plan: Substation SCADA BOM generator
 
-Status: **draft for review** (no implementation code until Ali approves).
+Status: implemented. M0–M11 are on main; changes go through the review flow in `docs/agents.md`.
 Spec: [`docs/spec/generator-spec-v2.md`](spec/generator-spec-v2.md). Sections are
 cited by name; this plan does not restate them.
 
