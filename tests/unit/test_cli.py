@@ -1,12 +1,15 @@
 """The ``bomgen`` command line: ``validate``, ``build`` and ``schema``."""
 
+import io
+import sys
 from pathlib import Path
 
+import pytest
 from builders import SUBSTATION_DIR, default_p1, default_project, write_project
 from typer.testing import CliRunner
 
 from bomgen import __version__
-from bomgen.cli import app
+from bomgen.cli import app, main
 
 runner = CliRunner()
 
@@ -120,3 +123,20 @@ def test_build_unknown_substation_is_a_usage_error(tmp_path: Path) -> None:
     result = runner.invoke(app, ["build", str(substation_file), "-s", "s9"])
     assert result.exit_code == 2
     assert "no substation 's9'" in result.output
+
+
+def test_main_writes_utf8_to_a_cp1252_console(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The frozen bomgen.exe on Windows gets a cp1252 stdout; the check report has "ΣQ".
+    raw = io.BytesIO()
+    stdout = io.TextIOWrapper(raw, encoding="cp1252")
+    monkeypatch.setattr(sys, "stdout", stdout)
+    monkeypatch.setattr(sys, "stderr", io.TextIOWrapper(io.BytesIO(), encoding="cp1252"))
+    project = Path(__file__).resolve().parents[2] / "examples" / "project.yaml"
+    monkeypatch.setattr(sys, "argv", ["bomgen", "build", str(project), "-o", str(tmp_path)])
+    with pytest.raises(SystemExit) as exited:
+        main()
+    assert exited.value.code == 0
+    sys.stdout.flush()
+    assert "ΣQ" in raw.getvalue().decode("utf-8")
