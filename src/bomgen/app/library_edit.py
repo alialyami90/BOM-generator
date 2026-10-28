@@ -8,6 +8,7 @@ repeated edits of one field together and describes the result for the review.
 
 from __future__ import annotations
 
+import copy
 import json
 import os
 from collections.abc import Mapping, Sequence
@@ -17,9 +18,11 @@ from typing import Any
 
 from bomgen.io.errors import InputError
 from bomgen.io.loader import load_library
+from bomgen.library_store.device_db import load_device_records
 from bomgen.library_store.edit import apply_edits, check_field, parse_edits
 from bomgen.library_store.errors import LibraryPackageError, RefusalKind
 from bomgen.library_store.local import next_local_version, save_edits
+from bomgen.library_store.records import apply_record_edits, check_record_field
 from bomgen.library_store.store import LibraryStore
 from bomgen.library_store.versions import Version
 from bomgen.models.library import (
@@ -60,6 +63,9 @@ class Pending:
     base: str | None
     edits: list[dict[str, Any]] = field(default_factory=list)
     problem: str | None = None
+    # Edits of the device-database records: one `set` or `remove` per changed top-level key
+    # of a record ([part_id, key]), so a record's edits are always its whole new value.
+    record_edits: list[dict[str, Any]] = field(default_factory=list)
 
 
 class PendingEdits:
@@ -78,17 +84,21 @@ class PendingEdits:
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
             base, edits = data["base"], data["edits"]
+            records = data.get("record_edits", [])
             if not isinstance(base, str) or not isinstance(edits, list):
                 raise ValueError("base must be text and edits a list")
+            if not isinstance(records, list):
+                raise ValueError("record_edits must be a list")
         except (OSError, ValueError, KeyError, TypeError) as exc:
             return Pending(None, [], f"the pending changes file {path.name} cannot be read: {exc}")
-        return Pending(base, edits)
+        return Pending(base, edits, record_edits=records)
 
     def save(self, name: str, pending: Pending) -> None:
         self.folder.mkdir(parents=True, exist_ok=True)
         path = self.file(name)
         temp = path.with_suffix(".tmp")
-        temp.write_text(json.dumps({"base": pending.base, "edits": pending.edits}), "utf-8")
+        data = {"base": pending.base, "edits": pending.edits, "record_edits": pending.record_edits}
+        temp.write_text(json.dumps(data), "utf-8")
         os.replace(temp, path)
 
     def clear(self, name: str) -> None:
@@ -132,6 +142,28 @@ class LibraryEditor:
             raise EditRefusedError(listed)
         return result.library
 
+    def _records(self, pending: Pending, more: Sequence[dict[str, Any]] | None = None) -> Any:
+        """The base version's device records with the pending record edits (or `more`
+        instead of them) applied."""
+        assert pending.base is not None
+        edits = pending.record_edits if more is None else more
+        records = load_device_records(self.store, self.name, pending.base)
+        if not edits:
+            return records
+        result = apply_record_edits(records, parse_edits(edits))
+        if result.records is None:
+            listed = "; ".join(f"{p.location}: {p.message}" for p in result.problems)
+            raise EditRefusedError(listed)
+        return result.records
+
+    def _ready(self) -> Pending:
+        pending = self._current()
+        if pending.base is None or pending.problem:
+            raise LibraryPackageError(
+                pending.problem or "no library is active", RefusalKind.NOT_INSTALLED
+            )
+        return pending
+
     def page(self) -> dict[str, Any]:
         """The pending set for the bar and the review."""
         pending, active = self._current(), self._active()
@@ -144,6 +176,9 @@ class LibraryEditor:
         entries: list[dict[str, str]] = []
         if problem is None and pending.base is not None and pending.edits:
             entries = describe(self._library(pending.base), self._edited(pending))
+        if problem is None and pending.base is not None and pending.record_edits:
+            saved = load_device_records(self.store, self.name, pending.base)
+            entries += describe_records(saved, self._records(pending))
         base = pending.base or active
         return {
             "name": self.name,
@@ -160,11 +195,8 @@ class LibraryEditor:
 
     def device(self, part_id: str) -> dict[str, Any]:
         """A device as the editor shows it: with the pending edits, beside its saved values."""
-        pending = self._current()
-        if pending.base is None or pending.problem:
-            raise LibraryPackageError(
-                pending.problem or "no library is active", RefusalKind.NOT_INSTALLED
-            )
+        pending = self._ready()
+        assert pending.base is not None
         saved = next((d for d in self._library(pending.base).devices if d.part_id == part_id), None)
         library = self._edited(pending)
         edited = next((d for d in library.devices if d.part_id == part_id), None)
@@ -172,9 +204,13 @@ class LibraryEditor:
             raise KeyError(part_id)
         now = edited.model_dump(mode="json")
         was = saved.model_dump(mode="json") if saved else None
+        record = self._records(pending).get(part_id)
+        saved_record = load_device_records(self.store, self.name, pending.base).get(part_id)
         return {
             "device": now,
             "saved": was,
+            "record": record.model_dump(mode="json") if record else None,
+            "saved_record": saved_record.model_dump(mode="json") if saved_record else None,
             "pending_fields": [k for k, v in now.items() if was is None or was.get(k) != v],
             "used_by": [],
             "choices": CHOICES,
@@ -187,15 +223,67 @@ class LibraryEditor:
         assert pending.base is not None
         return check_field(self._edited(pending), ["devices", part_id, key], value)
 
-    def add(self, edits: Sequence[dict[str, Any]]) -> dict[str, Any]:
-        """Check `edits` against the pending library and keep them; refuse them all if one fails."""
-        pending = self._current()
-        if pending.base is None or pending.problem:
-            raise LibraryPackageError(
-                pending.problem or "no library is active", RefusalKind.NOT_INSTALLED
-            )
+    def check_record(self, part_id: str, path: str, value: object) -> str | None:
+        """The model's message for setting one record field (a dotted path), or None."""
+        pending = self._ready()
+        records = self._records(pending)
+        if part_id not in records:
+            raise KeyError(part_id)
+        record = records[part_id].model_dump(mode="json", exclude_none=True)
+        key, new = _with_field(record, path.split("."), value)
+        return check_record_field(records, [part_id, key], new)
+
+    def set_record_fields(self, part_id: str, fields: Mapping[str, object]) -> dict[str, Any]:
+        """Set fields of a device's record (dotted paths; None empties one) in the pending set.
+
+        The record's edits are rewritten as one `set` (or `remove`) per top-level key that now
+        differs from the saved record, so a value set back to the saved one leaves the set.
+        """
+        pending = self._ready()
+        assert pending.base is not None
+        records = self._records(pending)
+        if part_id not in records:
+            raise KeyError(part_id)
+        record = records[part_id].model_dump(mode="json", exclude_none=True)
+        for path, value in fields.items():
+            key, record[key] = _with_field(record, path.split("."), value)
+            if record[key] is None:
+                del record[key]
+        saved_records = load_device_records(self.store, self.name, pending.base)
+        saved = saved_records[part_id].model_dump(mode="json", exclude_none=True)
+        mine: list[dict[str, Any]] = []
+        for key in sorted(saved.keys() | record.keys()):
+            if key not in record:
+                mine.append({"op": "remove", "path": [part_id, key]})
+            elif record[key] != saved.get(key):
+                mine.append({"op": "set", "path": [part_id, key], "value": record[key]})
+        others = [e for e in pending.record_edits if e["path"][0] != part_id]
+        record_edits = others + mine
+        self._records(pending, record_edits)  # refused before anything is kept
+        kept = Pending(pending.base, pending.edits, record_edits=record_edits)
+        if kept.edits or kept.record_edits:
+            self.pending.save(self.name, kept)
+        else:
+            self.pending.clear(self.name)
+        return self.page()
+
+    def add(
+        self, edits: Sequence[dict[str, Any]], record_edits: Sequence[dict[str, Any]] = ()
+    ) -> dict[str, Any]:
+        """Check `edits` against the pending library and keep them; refuse them all if one fails.
+
+        `record_edits` (as `discard` returns them, for Undo) replace the pending record edits of
+        the parts they name."""
+        pending = self._ready()
+        assert pending.base is not None
         parse_edits(edits)  # a malformed edit is refused before anything is kept
         self._edited(pending, edits)
+        if record_edits:
+            parts = {e["path"][0] for e in record_edits}
+            mine = [e for e in pending.record_edits if e["path"][0] not in parts]
+            self._records(pending, [*mine, *record_edits])
+            pending = Pending(pending.base, pending.edits, record_edits=[*mine, *record_edits])
+        assert pending.base is not None
         base = self._library(pending.base).model_dump(mode="json")
         saved = {
             ("devices", d["part_id"], key): value
@@ -203,8 +291,10 @@ class LibraryEditor:
             for key, value in d.items()
         }
         merged = merge(pending.edits, edits, saved)
-        if merged:
-            self.pending.save(self.name, Pending(pending.base, merged))
+        if merged or pending.record_edits:
+            self.pending.save(
+                self.name, Pending(pending.base, merged, record_edits=pending.record_edits)
+            )
         else:
             self.pending.clear(self.name)
         return self.page()
@@ -213,11 +303,7 @@ class LibraryEditor:
         self, part_id: str, category: str, make: str, model: str, copy_of: str | None
     ) -> dict[str, Any]:
         """Add a device to the pending set: blank, or a copy of `copy_of` under a new identity."""
-        pending = self._current()
-        if pending.base is None or pending.problem:
-            raise LibraryPackageError(
-                pending.problem or "no library is active", RefusalKind.NOT_INSTALLED
-            )
+        pending = self._ready()
         body: dict[str, Any] = {}
         edited = self._edited(pending)
         if copy_of:
@@ -237,18 +323,27 @@ class LibraryEditor:
         """Drop the set; the edits come back so the page can offer Undo."""
         pending = self.pending.load(self.name)
         self.pending.clear(self.name)
-        return {"discarded": pending.edits if pending else [], "page": self.page()}
+        return {
+            "discarded": pending.edits if pending else [],
+            "discarded_records": pending.record_edits if pending else [],
+            "page": self.page(),
+        }
 
     def apply(self, note: str) -> dict[str, Any]:
         """Write the set as the next local version of its base, make it active, clear the set."""
         pending = self._current()
-        if pending.base is None or pending.problem or not pending.edits:
+        if pending.base is None or pending.problem or not (pending.edits or pending.record_edits):
             raise LibraryPackageError(
                 pending.problem or f"library {self.name}: there are no pending changes",
                 RefusalKind.NO_CHANGES,
             )
         saved = save_edits(
-            self.store, self.name, parse_edits(pending.edits), base=pending.base, note=note
+            self.store,
+            self.name,
+            parse_edits(pending.edits),
+            record_edits=parse_edits(pending.record_edits),
+            base=pending.base,
+            note=note,
         )
         self.pending.clear(self.name)
         return {"version": saved.manifest.version, "previous": saved.previous, "diff": saved.diff}
@@ -312,6 +407,53 @@ def describe(before: Library, after: Library) -> list[dict[str, str]]:
         if cat_new[key] != cat_old.get(key):
             entries.append(_entry("Catalogue", key, "changed", "", "", ""))
     return entries
+
+
+def describe_records(before: Mapping[str, Any], after: Mapping[str, Any]) -> list[dict[str, str]]:
+    """One review entry per changed record field (a dotted path such as datasheet.weight_kg)."""
+    entries: list[dict[str, str]] = []
+    for part_id in sorted(after.keys() & before.keys()):
+        old = _leaves(before[part_id].model_dump(mode="json", exclude_none=True))
+        new = _leaves(after[part_id].model_dump(mode="json", exclude_none=True))
+        for key in sorted(old.keys() | new.keys()):
+            if old.get(key) != new.get(key):
+                was, now = _text(old.get(key)), _text(new.get(key))
+                entries.append(_entry("Datasheet", part_id, "changed", key, was, now))
+    return entries
+
+
+def _leaves(data: Mapping[str, Any], prefix: str = "") -> dict[str, Any]:
+    """Nested dicts flattened to dotted paths; lists stay whole."""
+    flat: dict[str, Any] = {}
+    for key, value in data.items():
+        if isinstance(value, dict):
+            flat |= _leaves(value, f"{prefix}{key}.")
+        else:
+            flat[f"{prefix}{key}"] = value
+    return flat
+
+
+def _with_field(record: Mapping[str, Any], path: Sequence[str], value: object) -> tuple[str, Any]:
+    """The record's top-level key on `path` and its value with `path` set (None removes it,
+    and a parent left empty goes too); missing parents are made."""
+    key = path[0]
+    if len(path) == 1:
+        return key, value
+    top = copy.deepcopy(record.get(key)) or {}
+    node = top
+    trail = [top]
+    for part in path[1:-1]:
+        node = node.setdefault(part, {})
+        trail.append(node)
+    if value is None:
+        node.pop(path[-1], None)
+        for i in range(len(trail) - 1, 0, -1):
+            if trail[i]:
+                break
+            trail[i - 1].pop(path[i], None)
+    else:
+        node[path[-1]] = value
+    return key, top or None
 
 
 def _entry(area: str, label: str, kind: str, key: str, was: str, now: str) -> dict[str, str]:

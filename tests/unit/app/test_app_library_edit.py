@@ -323,3 +323,77 @@ def test_an_unused_part_has_no_users(app: api.Api, tmp_path: Path) -> None:
     assert (
         ok(app.library_part_users("NOPE-1", str(project / "project.yaml"), "gis01"))["uses"] == []
     )
+
+
+# -- datasheet records (device-db, B5's record edits) -----------------------------------------
+
+
+@pytest.fixture
+def app_db(tmp_path: Path) -> api.Api:
+    package = tmp_path / "lib.bomlib"
+    db = Path(__file__).parents[3] / "data" / "device-db"
+    pack(EXAMPLES / "library.yaml", package, name=NAME, version="1.0.0", extra_dirs=[db])
+    LibraryStore(tmp_path / "libraries").import_package(package)
+    return api.Api(
+        env={
+            "BOMGEN_LIBRARY_HOME": str(tmp_path / "libraries"),
+            "BOMGEN_WORKSPACE": str(tmp_path / "workspace"),
+            "BOMGEN_APP_HOME": str(tmp_path / "app"),
+        }
+    )
+
+
+def test_library_device_carries_its_datasheet_record(app_db: api.Api) -> None:
+    reply = ok(app_db.library_device(PART))
+    assert reply["record"]["datasheet"]["weight_kg"] == 9.07
+    assert reply["saved_record"]["verified"] == "partial"
+
+
+def test_a_datasheet_field_is_checked_with_the_records_message(app_db: api.Api) -> None:
+    assert ok(app_db.check_library_record(PART, "datasheet.weight_kg", 10)) is None
+    assert ok(app_db.check_library_record(PART, "verified", "maybe"))
+
+
+def test_datasheet_fields_are_saved_as_a_local_version(app_db: api.Api) -> None:
+    fields = {
+        "datasheet.weight_kg": 10.5,
+        "datasheet.power.typical_w": 60,
+        "datasheet.dimensions_mm.h": 133,
+        "verified": "confirmed",
+    }
+    page = ok(app_db.set_library_record_fields(PART, fields))
+    labels = {e["field"] for e in page["entries"] if e["area"] == "Datasheet"}
+    assert {"datasheet.weight_kg", "datasheet.power.typical_w", "verified"} <= labels
+    assert "datasheet.dimensions_mm.h" in labels
+    record = ok(app_db.library_device(PART))["record"]
+    assert record["datasheet"]["dimensions_mm"]["h"] == 133
+    applied = ok(app_db.apply_library_edits("datasheet"))
+    assert applied["version"] == "1.0.0+local.1"
+    assert ok(app_db.library_device(PART))["saved_record"]["datasheet"]["weight_kg"] == 10.5
+
+
+def test_an_emptied_datasheet_field_is_removed_and_set_back_drops_it(app_db: api.Api) -> None:
+    ok(app_db.set_library_record_fields(PART, {"datasheet.weight_kg": None}))
+    assert ok(app_db.library_device(PART))["record"]["datasheet"]["weight_kg"] is None
+    page = ok(app_db.set_library_record_fields(PART, {"datasheet.weight_kg": 9.07}))
+    assert page["count"] == 0
+
+
+def test_a_record_field_the_model_refuses_is_not_kept(app_db: api.Api) -> None:
+    error = refused(app_db.set_library_record_fields(PART, {"verified": "maybe"}))
+    assert error["kind"] == "invalid_edit"
+    assert ok(app_db.library_pending())["count"] == 0
+
+
+def test_a_device_without_a_record_has_none(app: api.Api) -> None:
+    reply = ok(app.library_device(PART))
+    assert reply["record"] is None
+    assert reply["saved_record"] is None
+
+
+def test_discarded_datasheet_edits_come_back_on_undo(app_db: api.Api) -> None:
+    ok(app_db.set_library_record_fields(PART, {"datasheet.weight_kg": 10.5}))
+    gone = ok(app_db.discard_library_edits())
+    assert ok(app_db.library_pending())["count"] == 0
+    page = ok(app_db.add_library_edits(gone["discarded"], gone["discarded_records"]))
+    assert page["count"] == 1

@@ -29,7 +29,7 @@
     closeDialog();
     Bridge.call('discard_library_edits').then((r) => {
       PEND.page = r.page; ED.key = ''; App.render();
-      toast('Pending changes discarded', 'trash', r.discarded.length ? () => Bridge.call('add_library_edits', r.discarded).then((p) => { PEND.page = p; ED.key = ''; App.render(); }).catch((e) => toast(e.message, 'error')) : null);
+      toast('Pending changes discarded', 'trash', r.discarded.length || r.discarded_records.length ? () => Bridge.call('add_library_edits', r.discarded, r.discarded_records).then((p) => { PEND.page = p; ED.key = ''; App.render(); }).catch((e) => toast(e.message, 'error')) : null);
     }).catch((e) => toast(e.message, 'error'));
   };
 
