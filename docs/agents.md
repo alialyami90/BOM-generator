@@ -14,12 +14,13 @@ agent; the milestones are in [`plan.md`](plan.md) → "Milestones".
 | Agent | Thread | Delivers | Owns (may change freely) |
 | --- | --- | --- | --- |
 | A1 | Lead developer | Reviews, cross-thread consistency, this file | `docs/agents.md`, `CLAUDE.md`, `.github/workflows/ci.yml`, plan sections 1, 2, 4 (intro), 5 |
-| A2 | Input models and examples | M1 | `src/bomgen/models/`, `src/bomgen/io/`, `src/bomgen/cli.py`, `examples/`, plan section 3 and the M1 section |
+| A2 | Input models and examples | M1, M1b | `src/bomgen/models/`, `src/bomgen/io/`, `src/bomgen/cli.py`, `examples/`, plan section 3 and the M1 section |
 | A3 | Device database researcher | Reference data, outside the milestones | `data/device-db/`, its validation test |
 | A4 | UI designer | M9 | `docs/ui/`, the M9 section |
-| A5 | Library update packages | M8 | `src/bomgen/library_store/`, ADR 0008, the M8 section |
+| A5 | Library update packages | M8, M8b | `src/bomgen/library_store/`, ADR 0008, the M8 section |
 | A6 | Windows installer and release | M11 | `packaging/`, `.github/workflows/release.yml`, `docs/install.md`, `src/bomgen/app/launcher.py`, ADR 0009, the M11 section |
 | A7 | Lead developer assistant | Documentation and small tasks A1 hands out | `README.md`, `tests/unit/README.md`, `tests/golden/README.md`; other files only when A1 assigns them |
+| A8 | Sizing and layout engine | M1c | `src/bomgen/engine/sizing.py`, `src/bomgen/engine/layout.py`, `tests/golden/layout/`, the M1c section |
 
 Each agent also owns its tests (`tests/unit/<area>/` or `tests/unit/test_<area>.py`)
 and its implementation plan under `docs/superpowers/plans/`.
@@ -74,6 +75,14 @@ PyInstaller spec, Inno Setup per-user installer, `.bomlib` file association,
 and the tag-driven release workflow. Built early with placeholders; it wires
 the real CLI, library import and window as M1, M8 and M10 land.
 
+### A8 — Sizing and layout engine (M1c)
+
+Rules R1–R10 of the approved design (ADR 0013): L1/L2 switch counts from the
+IED count and spares, generated port plans, 32U panel fill with A/B streams,
+common devices spread, overrides and removals, `bomgen layout`, and the layout
+golden. Pure functions in `engine/`; asks A2 for any input field it is missing
+and never edits `models/` or `io/` itself. Starts when M1b is on main.
+
 ### A7 — Lead developer assistant
 
 Supports A1 with documentation and small tasks: keeps `README.md` and the
@@ -105,8 +114,8 @@ the same one. Ask A1 before you add one.
 
 | Kind | Taken | Next free |
 | --- | --- | --- |
-| ADR | 0009 installer layout (A6), 0010 input models (A2), 0011 UI design language and bundled fonts (A4), 0012 projects/substations/.bomproj (A1), 0013 network sizing and panel layout (A1) | 0014 |
-| Open question | Q22 workbook corrections, Q23 issued sheets vs masters (A2), Q24–Q28 substations/layout design (A1), Q29 thermostat and fan library defaults (A3) | Q30 |
+| ADR | 0009 installer layout (A6), 0010 input models (A2), 0011 UI design language and bundled fonts (A4), 0012 projects/substations/.bomproj (A1, accepted), 0013 network sizing and panel layout (A1, accepted) | 0014 |
+| Open question | Q22 workbook corrections, Q23 issued sheets vs masters (A2), Q24–Q28 substations/layout (resolved), Q29 thermostat and fan library defaults (A3) | Q30 |
 
 ## Review and merge
 
@@ -118,20 +127,21 @@ the same one. Ask A1 before you add one.
    the branch has no conflict with `main`.
 4. A dependent PR rebases on `main` after the PR it depends on merges.
 
-Merge order while the current work is open: M11 (A6, PR #2) once its Windows
-build is green; then the substations/layout work in the order its design sets
-(A2 M1b → A8 M1c → A5 M8b → A4 UI follow-up); M2–M7 as they open.
+Merge order while the current work is open: A2 M1b → A8 M1c → A5 M8b → A4 UI
+follow-up (ADR 0012/0013); A3's data and A7's docs as they come; M2–M7 as they
+open.
 
 ## Not started
 
 | Milestone | Recommendation |
 | --- | --- |
-| M1b/M1c substations, sizing, layout | After Ali approves `docs/superpowers/specs/2026-10-28-substations-and-auto-layout-design.md`: A2 does the models (M1b), a new A8 does the sizing and layout engine (M1c). |
 | M2–M4 rule engine | Ready now (M1 is on main). One agent working M2, M3, M4 in order: they share `engine/` and build up the same golden test. Hand-written `examples/panels/` are enough to start; M1c's generated panels feed it later. |
 | M6 Excel writer | Ready now, in parallel with M2: it only needs `models/sheet.py`, which it defines. |
 | M5 sheet models | After M4 and M6, by the M6 agent. |
 | M7 check report, revision highlighting | After M5; also wires A5's `library_mismatch()` into the report. |
-| M8b `.bomproj` export/import/backup | A5, after the design is approved. |
 | M10 desktop app | After the UI follow-up design (projects, substations, panels board) is approved and M1c is on main. |
+
+M1b (A2), M1c (A8) and M8b (A5) are assigned; see ADR 0012 and 0013 and the
+design in `docs/superpowers/specs/`.
 
 New agents get the next `A` number and a row in "Roles" when Ali starts them.
