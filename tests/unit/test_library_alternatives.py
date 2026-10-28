@@ -188,3 +188,18 @@ def test_input_voltage_range_is_optional_and_ordered() -> None:
     assert (d.input_v_min, d.input_v_max) == (12, 125)
     with pytest.raises(ValidationError, match="input_v_min must not be above input_v_max"):
         DeviceType.model_validate({**switch_dict(), "input_v_min": 150, "input_v_max": 125})
+
+
+def test_mcb_brands_are_ac_rated_by_default() -> None:
+    library = Library.model_validate(library_with_brands())
+    assert library.catalogue_brands.mcb[0].ac_rated is True
+    dc_only = McbBrand.model_validate({**ABB_MCB, "id": "dc-only", "ac_rated": False})
+    assert dc_only.ac_rated is False
+
+
+def test_a_dc_only_choice_still_resolves_to_a_plain_catalogue() -> None:
+    data = library_with_brands()
+    data["catalogue_brands"]["mcb"][0]["ac_rated"] = False
+    library = Library.model_validate(data)
+    resolved = resolve_catalogues(library, CatalogueChoice(mcb="abb-s200m"))
+    assert type(resolved.catalogues.mcb) is McbCatalogue
