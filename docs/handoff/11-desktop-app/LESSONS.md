@@ -25,3 +25,10 @@
 - **A refused drop with `dropEffect = 'none'` never fires `drop`.** Keep it `'move'` and explain the refusal in the banner.
 - **E2E on the example needs generated panels.** Edit `fed_from: psa3` to `psa1` first, or the layout fails with "names panel 'psa3', which the layout does not write".
 - **The `pytest` and `mypy` binaries fail in this container.** Use `python -m …`.
+
+## B11 (2026-10-28)
+- **Drift at takeover:** origin/main had moved from `aad6094` to `502f564` (handoff docs only); the gate was green on main (2414 passed). The reported `check_layout` failures were an old editable install, not main: run `pip install -e ".[dev]"` in a fresh container, then `python -m pytest`.
+- **A successor cannot push to its predecessor's branch.** Each session may push only to its own designated branch. Carry the open PR's commits onto your branch, add the fixes, open a replacement PR that says so, and comment on the old PR (#131 → #146).
+- **Ctrl+S on a form must commit the focused field.** keydown fires before `change`, so the save ran without the typed value. Blur `document.activeElement` first.
+- **Never call `App.render()` synchronously from a `change` handler.** A blur during `innerHTML` (the focused input being removed) fires `change`, and a nested render throws "Failed to set the 'innerHTML' property". Queue it with `queueMicrotask(App.render)`.
+- **E2E without the window:** pack `examples/library.yaml` with `bomgen library pack … --name psa-devices --version 1.0.0` and import it into `BOMGEN_LIBRARY_HOME`, or Home shows the first-run page. The bridge stub: `page.exposeFunction('__py', …)` plus an init script setting `window.pywebview = { api: new Proxy({}, { get: (_, n) => (...a) => window.__py(n, a) }) }`, backed by a line-based Python process over `Api(env=…)`.

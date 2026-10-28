@@ -1,17 +1,18 @@
 # NEXT: role 11, Desktop app
 
-**Next action:** drive #131 (Loose material page) to green and merged: handle CI and A1's review. Then start task 2 on a branch restarted from main.
+**Next action:** task 2, Library editors (M16 app side), PR (a) first: device edit and save as a local version. Each PR needs a green "Build Windows installer" before role 1 merges.
 
-Order set by role 1 (2026-10-28): loose page → Library editors → project and substation creation. One PR at a time on `claude/project-thread-1345o0` (a task may span several PRs, one after another). Prepare the next PR on a local branch while one is open.
+Order set by role 1 (2026-10-28): loose page → Library editors → project and substation creation. One PR at a time on `claude/project-thread-apbolc` (a task may span several PRs, one after another). Prepare the next PR on a local branch while one is open.
 
 How to restart the branch after a squash merge:
-`git fetch origin main claude/project-thread-1345o0 && git checkout -B claude/project-thread-1345o0 origin/main`, then cherry-pick the commits of the next PR (prepared on a local branch, not yet on main), then `git merge -s ours origin/claude/project-thread-1345o0 -m "chore: merge the already-squashed #N branch history (no changes)"`, then `git push -u`.
-Force push is denied. Use the `-s ours` merge only when the remote branch holds nothing but already-squashed history (check `git log origin/main..origin/claude/project-thread-1345o0` against the merged PR).
+`git fetch origin main claude/project-thread-apbolc && git checkout -B claude/project-thread-apbolc origin/main`, then cherry-pick the commits of the next PR (prepared on a local branch, not yet on main), then `git merge -s ours origin/claude/project-thread-apbolc -m "chore: merge the already-squashed #N branch history (no changes)"`, then `git push -u`.
+Force push is denied. Use the `-s ours` merge only when the remote branch holds nothing but already-squashed history (check `git log origin/main..origin/claude/project-thread-apbolc` against the merged PR).
 E2E: write a Playwright script in the scratchpad (Chromium is preinstalled; `NODE_PATH=$(npm root -g) node x.js`) that starts a line-based Python bridge over `bomgen.app.api.Api` and exposes the endpoint names as `window.pywebview.api`; list every endpoint the screens call.
 
-## 1. #131 Loose material page (M18)
-- Done when CI is green (including "Build Windows installer") and A1 has merged it.
-- If role 1 asks for changes, or rejects the design, discuss it in role 1's thread (role 4 for screen design); otherwise edit `src/bomgen/app/loose.py`, `screens-loose.js` and `tests/unit/app/test_app_loose_api.py`.
+## 1. Loose material follow-ups (small, after task 2's first PR or when role 4 asks)
+- B4's #131 review points 4–8: data-quality badge in the library picker, clicking "1 field needs fixing" focuses the first invalid field, an sr-only reason beside the free-text Fed from "—", map dialog error keys to field labels (Part, Fed from, Comes with), save toast "Saved n changes".
+- B4's #146 wording nits: table foot "Quantity is a whole number, or 1 Lot."; the free-text banner ends "An item that needs power must be added to the library first." (design #142).
+- Files: `ui/screens-loose.js`; tests in `tests/unit/app/test_app_ui_assets.py` for copy.
 
 ## 2. Library editors (M16, app side)
 - Design: editing.md "Library editing (v0.2)", which covers the pending set, the Catalogues tab, the Device editor, Alternatives and Export and import. Prototype: `docs/ui/prototype/screens-libedit.js` and `data-lib.js`.
