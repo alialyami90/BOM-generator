@@ -808,7 +808,11 @@ writes its section's details when the work starts.
   becomes a full library part with its datasheet electrical data, and the catalogues get
   their alternative brands. The default library becomes psa-devices 1.1.0.
 - **M15 — Branch MCB sizing from device data (A9, ADR 0019).** Backlog point 3; the rule is
-  Ali's answer to Q35.
+  Ali's answer to Q35. `dc_dist.branch_sizing` sizes every Q1.n, Q2.n and QCOD-n from the
+  running current with margin, the inrush over the MCB set's magnetic trip multiple, and
+  the `min_branch_mcb_a` design constant; the device field of that name is deprecated.
+  `BuildResult.branch_mcbs` carries each sizing and the check report prints one
+  `branch_mcb` line per MCB. Builds on M13's fields (ADR 0017).
 - **M16 — Library editing and CSV exchange (A5 store and CSV, ADR 0018; A11 app; A4
   design).** Backlog points 1 and 10. Add and edit devices and catalogue entries, saved as
   a new local library version. Export and import the library as CSV, with alternatives
