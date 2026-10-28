@@ -7,8 +7,8 @@ for role 8's next engine task, and start that task from a fresh branch off `orig
 
 1. **Show `position` in the plan's override example** (A2's review follow-up on #100; A1 said
    to ride the next role-8 PR, not a PR of its own).
-   - File: `docs/plan.md` section 3, the `layout.overrides` example (A1 owns the plan
-     structure and asked for this line).
+   - File: `docs/plan.md` section 3, the `layout.overrides` example (A2 owns section 3; A2
+     suggested the line in review and A1 asked role 8 to add it).
    - Done when an example line such as `- { device: gps, panel: 1, position: 1 }  # 1 = top
      rack device` (`panel` is the integer panel number) is in the next role-8 PR.
    - If A1 has no role-8 PR coming by the next checkpoint, ask A1 whether to send it alone.

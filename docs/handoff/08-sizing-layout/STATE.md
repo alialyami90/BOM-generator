@@ -44,8 +44,8 @@ Not run: the Windows installer and the GUI (role 8 doesn't touch them).
 - `tests/unit/app/test_app_network_api.py` (A11's): values that follow from M12 and #100.
 - `docs/decisions/0013-network-sizing-and-panel-layout.md`: dated R5 and R7 amendments.
 - `docs/superpowers/specs/2026-10-28-substations-and-auto-layout-design.md`: R1/R2/R10 example numbers after Ali's golden answer.
-- Role 8 also owns (per its brief) `tests/unit/engine/test_sizing.py`, `test_layout.py`, `test_layout_cli.py`
-  and `docs/superpowers/plans/2026-10-28-m1c-sizing-and-layout.md`; agents.md "Owns" doesn't list them.
+- Role 8's tests (`tests/unit/engine/test_sizing.py`, `test_layout.py`, `test_layout_cli.py`) and
+  `docs/superpowers/plans/2026-10-28-m1c-sizing-and-layout.md` are its own (agents.md: each agent owns its tests and plan).
 
 ## Blockers and waiting on
 - Waiting on A1 (since 2026-10-28 18:50 UTC): the next M17 or M18 engine task. Nothing blocked.
@@ -55,7 +55,8 @@ Not run: the Windows installer and the GUI (role 8 doesn't touch them).
 ## Risks and unverified assumptions
 - `Equipment.l2_ports` counts once per entry (R2 text), not per unit; an entry with `qty` > 1 and
   L2 ports would be under-counted. No example has one. See LESSONS.
-- agents.md "Owns" for role 8 omits the test files and the `layout` CLI command; A8 told A1 with this checkpoint.
+- `src/bomgen/cli.py` is A2's; role 8 changed its `layout` command and `build --no-layout` with A1's leave.
+  Ask A2 or A1 before touching it again.
 
 ## Spec vs code
 No open disagreement. The spec example shows 6 L1 switches per side; the rules give 3, and
