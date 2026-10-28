@@ -901,6 +901,15 @@ Each has a proposed default that the plan assumes until Ali answers.
 at least 1.3 × the running current, at least the inrush current divided by the MCB set's
 magnetic trip multiple (C curve: 5) when the device has an inrush figure, and at least 2 A.
 This replaces the per-device `min_branch_mcb_a` as the floor (ADR 0019, A9).
+Ali also chose "Ignore spikes under 10 ms": the inrush counts only when it lasts at least
+`inrush_min_ms` (10 ms) or no duration is given, and a DC load uses the set's DC trip multiple when
+it has one. A device with no inrush figure is sized by the running current and the floor.
+
+**Q37 — Default MCB set for the 125 V DC feeds** (M14, M15). *Resolved 2026-10-28:* Ali chose
+"Keep iC60N as default". The Schneider iC60N 2P (A9F742xx) is rated to exactly 125 V DC, while the
+battery floats at about 135–140 V. It stays the default; the DC-rated ranges (Schneider C60H-DC,
+ABB S200M UC, Siemens 5SY5) become selectable brand sets (A3, M14). The check report warns when a
+DC MCB's `dc_rating_v` or a DC-fed device's `input_v_max` is below `dc_float_v` (140 V) (A9).
 
 **Q36 — Where loose material goes** (M18; backlog point 6). *Resolved 2026-10-28:* Ali chose
 "Its own sheet". Loose material moves off the WS console sheet onto a "Loose Material" sheet,
