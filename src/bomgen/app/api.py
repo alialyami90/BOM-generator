@@ -29,7 +29,7 @@ from pydantic import BaseModel, ValidationError
 
 from bomgen import __version__
 from bomgen.app.catalogues import catalogues_page
-from bomgen.app.editing import edit_reply, layout_issues, panel_options_page
+from bomgen.app.editing import edit_reply, layout_check, layout_issues, panel_options_page
 from bomgen.app.network import layout_page
 from bomgen.app.output import OutputRefusedError, build_file, build_target, checks_page
 from bomgen.app.preview import preview_page
@@ -524,17 +524,18 @@ class Api:
         overrides: list[dict[str, Any]],
         removed: list[dict[str, Any]],
     ) -> dict[str, Any]:
-        """Whether the layout can take these overrides and removed units, as the board asks
-        while a device is dragged; nothing is written."""
+        """Whether the layout can take these overrides and removed units, and the rack space
+        each panel would then use, as the board asks while a device is moved; nothing is
+        written."""
         with self._substation(substation_id):
-            issues = layout_issues(
+            check = layout_check(
                 Path(project_file),
                 substation_id,
                 self._library_store(),
                 overrides=overrides,
                 removed=removed,
             )
-        return {"fits": not issues, "issues": issues}
+        return {"fits": not check["issues"], **check}
 
     @endpoint
     def set_enclosure(

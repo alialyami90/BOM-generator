@@ -315,7 +315,7 @@
   }
 
   /* The Move… dialog: every destination, with panels that cannot take the unit greyed out and the reason. */
-  let mv = null;  // { u, from, alone, where, fits: {n: bool}, why: {n: text} }
+  let mv = null;  // { u, from, alone, where, fits: {n: bool}, why: {n: text}, after: {n: text} }
   const WHERE = [['auto', 'Where the layout puts it'], ['top', 'At the top'], ['bottom', 'At the bottom']];
   const dests = (m) => (m.u.side && !m.alone
     ? [...new Set(LAY.data.panels.map((p) => pairPanels(p.number)[0]))].filter((n) => panelOf(n) && panelOf(n + 1))
@@ -333,39 +333,45 @@
     if (!mv) return;
     $$('.mv-dests li[data-n]').forEach((li) => {
       const n = +li.dataset.n, ok = mv.fits[n], btn = li.querySelector('button'), why = li.querySelector('.mv-why');
-      btn.disabled = ok !== true;
+      btn.disabled = ok !== true || stays(mv, n);
       li.classList.toggle('is-off', ok === false);
-      why.textContent = ok === undefined ? 'Checking…' : ok ? '' : mv.why[n];
+      why.textContent = ok === undefined ? 'Checking…' : ok ? mv.after[n] : mv.why[n];
     });
   }
+  const positionOf = (m, n) => ({ auto: null, top: 1, bottom: rackCount(landsIn(m.u, n, m.alone)) + (here(m, n) ? 0 : 1) }[m.where]);
+  /* Moving to where it is changes nothing unless the position does. */
+  const stays = (m, n) => here(m, n) && (m.where === 'auto' ? !m.u.pinned : positionOf(m, n) === m.u.position);
+  const afterText = (m, n, panels) => {
+    const used = (m.u.side && !m.alone ? [n, n + 1] : [n]).map((k) => panels.find((p) => p.number === k)).filter(Boolean);
+    return used.length ? `After: ${used.map((p) => p.used_u + ' U').join(' and ')} of ${used[0].capacity_u} U` : '';
+  };
   function probeMove() {
     const m = mv;
     dests(m).forEach((n) => {
       if (!sideFits(m.u, n)) { m.fits[n] = false; m.why[n] = `A side ${m.u.side} unit goes in ${m.u.side === 'A' ? 'an odd' : 'an even'} panel.`; return; }
       Bridge.call('check_layout', S.project.file, S.sub, [...others(m.u, m.alone), moveOf(m.u, n, null, m.alone)], LAY.data.removed)
-        .then((r) => { if (mv === m) { m.fits[n] = r.fits; m.why[n] = r.issues[0] ? sentence(r.issues[0].message) : ''; paintMove(); } })
+        .then((r) => { if (mv === m) { m.fits[n] = r.fits; m.why[n] = r.issues[0] ? sentence(r.issues[0].message) : ''; m.after[n] = afterText(m, n, r.panels); paintMove(); } })
         .catch((err) => { if (mv === m) { m.fits[n] = false; m.why[n] = err.message; paintMove(); } });
     });
     paintMove();
   }
   ACTIONS['pv-move'] = () => {
     const sel = unitOf(selected); if (!sel || busy) return;
-    mv = { u: sel.u, from: sel.p.number, alone: false, where: 'auto', fits: {}, why: {} };
+    mv = { u: sel.u, from: sel.p.number, alone: false, where: 'auto', fits: {}, why: {}, after: {} };
     dialog({ title: `Move ${esc(name(sel.u))}`, body: moveBody(mv), actions: '<button class="btn btn--secondary" data-action="close">Cancel</button>' });
     probeMove();
   };
-  ACTIONS['pv-move-where'] = (el) => { if (mv) mv.where = el.value; };
+  ACTIONS['pv-move-where'] = (el) => { if (mv) { mv.where = el.value; paintMove(); } };
   ACTIONS['pv-move-alone'] = (el) => {
     if (!mv) return;
-    Object.assign(mv, { alone: el.checked, fits: {}, why: {} });
+    Object.assign(mv, { alone: el.checked, fits: {}, why: {}, after: {} });
     $('.dialog .body').innerHTML = moveBody(mv);
     $('.dialog [data-action="pv-move-alone"]').focus();
     probeMove();
   };
   ACTIONS['pv-move-go'] = (el) => {
     const m = mv; if (!m) return;
-    const n = +el.dataset.n, last = rackCount(landsIn(m.u, n, m.alone)) + (here(m, n) ? 0 : 1);
-    const position = { auto: null, top: 1, bottom: last }[m.where];
+    const n = +el.dataset.n, position = positionOf(m, n);
     mv = null; closeDialog();
     moveTo(m.u, m.from, m.alone ? n : landsIn(m.u, n, m.alone), position, m.alone);
   };
