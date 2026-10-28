@@ -67,4 +67,8 @@ Code: `src/bomgen/library_store/`.
   public entry points for the CLI, the double-click launcher and the desktop
   app. `bomgen library pack` validates the source library before writing, so a
   schema-invalid library is caught on the publisher's PC, not the recipient's.
+- The zip container (deterministic write, path and case checks, 64 MiB cap,
+  checksums) lives in `bomgen.bundle` and is shared with `.bomproj` project
+  files (ADR 0012, plan M8b). `LibraryPackageError` and `RefusalKind` moved
+  there too and are re-exported from `bomgen.library_store`.
 

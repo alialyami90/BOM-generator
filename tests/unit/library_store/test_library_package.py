@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from bomgen.library_store import package
+from bomgen.bundle import container
 from bomgen.library_store.errors import LibraryPackageError
 from bomgen.library_store.package import pack, read_package
 
@@ -185,7 +185,7 @@ def test_missing_package_file_is_rejected(tmp_path: Path) -> None:
 
 
 def test_oversized_package_is_rejected(monkeypatch: pytest.MonkeyPatch, package_file: Path) -> None:
-    monkeypatch.setattr(package, "MAX_UNCOMPRESSED_BYTES", 10)
+    monkeypatch.setattr(container, "MAX_UNCOMPRESSED_BYTES", 10)
 
     with pytest.raises(LibraryPackageError, match="too large"):
         read_package(package_file)
@@ -234,3 +234,13 @@ def test_members_that_differ_only_by_case_are_rejected_when_packing(
 
     with pytest.raises(LibraryPackageError, match="differ only by case"):
         pack(library_file, tmp_path / "c.bomlib", name="a", version="1.0.0", extra_dirs=[extra])
+
+
+def test_a_bomproj_given_to_library_import_is_explained(tmp_path: Path) -> None:
+    project = tmp_path / "p.bomproj"
+    manifest = {"format_version": 1, "project_id": "jfgp2", "files": {}}
+    with zipfile.ZipFile(project, "w") as zf:
+        zf.writestr("manifest.json", json.dumps(manifest))
+
+    with pytest.raises(LibraryPackageError, match=r"\.bomproj project.*bomgen project import"):
+        read_package(project)

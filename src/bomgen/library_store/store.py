@@ -24,9 +24,10 @@ from typing import Any
 
 from pydantic import ValidationError
 
+from bomgen.bundle.container import MANIFEST_NAME
 from bomgen.library_store.diff import LibraryDiff, diff_libraries, parse_library
 from bomgen.library_store.errors import LibraryPackageError, RefusalKind
-from bomgen.library_store.manifest import LIBRARY_FILE, MANIFEST_NAME, Manifest
+from bomgen.library_store.manifest import LIBRARY_FILE, Manifest
 from bomgen.library_store.package import PackageContents, read_package
 from bomgen.library_store.versions import Version
 

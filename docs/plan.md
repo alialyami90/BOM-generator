@@ -404,11 +404,41 @@ update package (ADR 0008).
   check report. Refusals carry a `RefusalKind` for the M10 import screen.
 
 ### M8b — `.bomproj` export, import and backup (A5, ADR 0012)
-- `bomgen project export|import|backup`: zip of the project folder without
-  `out/` plus a manifest with checksums and the library version, reusing the
-  `.bomlib` package code; overwrite warning on import; library-version
-  mismatch message naming the `.bomlib` to install (resolves Q21).
-- Starts when M1b is on main.
+- `bomgen project export <project.yaml> [-o file]`, `import <file.bomproj>
+  [--workspace dir] [--force]` and `backup <project.yaml>`; public functions
+  `export_project`, `import_project`, `backup_project` and `default_workspace` in
+  `bomgen.project_store`.
+- A `.bomproj` is a zip of the project folder without any `out/` folder, the
+  top-level `Backups/` folder, `.git/` and `*.bomproj` files, plus
+  `manifest.json` (format version, project id, library name and version, app
+  version, SHA-256 per file). The project id and library are read from
+  `project.yaml` (`project.id`, `library.name`, `library.version`) as plain
+  YAML, so M8b does not wait for the M1b models. Symlinks are never followed.
+- The zip container, path and case checks, size cap and checksums are shared
+  with `.bomlib` in `bomgen.bundle`; `.bomlib` behaviour did not change.
+- Workspace: `BOMGEN_WORKSPACE`, else `Documents\BOM Generator`; a project
+  lives in `<workspace>\<id>\`.
+- Import verifies every checksum and path before writing. An existing project
+  id is refused (`RefusalKind.PROJECT_EXISTS`) unless `--force`; a forced import
+  saves the old project to its `Backups/`, keeps its `Backups/` and `out/`
+  folders, replaces everything else, and restores the old project if the swap
+  fails. Backups are `Backups/<id>-<YYYYMMDD-HHMMSS>.bomproj` and never
+  overwrite one another.
+- Import compares the manifest's library with the active one and returns a
+  `library_note` naming the `.bomlib` to install, or the `bomgen library
+  rollback --to` command when that version is already installed (resolves Q21).
+  The CLI prints it as `note: ...`.
+- Import also keeps `.git/` and `__pycache__/` folders (never packed), and
+  refuses a package that holds `out/`, `.git/` or a top-level `Backups/`.
+  A leftover `.replaced-<id>` folder in the workspace (Windows file locks) holds
+  the previous project and is safe to delete once the new one looks right.
+- Sharing the container made `pack --add` and `.bomproj` skip symlinks, where
+  the first `.bomlib` code followed them; library names now also refuse
+  Windows device names such as `con`.
+- A `.bomlib` given to `project import` (and the reverse) gets a one-line
+  explanation.
+- Open item for M1b: once the `project.yaml` model is on main, read the id and
+  library through it instead of plain YAML.
 
 ### M9 — UI design with impeccable
 Use the `impeccable` skill to design the screens and elements: open or create a

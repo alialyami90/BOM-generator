@@ -6,7 +6,8 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from bomgen.library_store.manifest import Manifest, is_safe_member
+from bomgen.bundle.paths import is_safe_member
+from bomgen.library_store.manifest import Manifest
 from bomgen.library_store.versions import Version
 
 
@@ -58,7 +59,7 @@ def test_manifest_rejects_unknown_fields() -> None:
         Manifest.model_validate(_manifest(signature="abc"))
 
 
-@pytest.mark.parametrize("name", ["../evil", "My Lib", "", ".hidden", "a/b"])
+@pytest.mark.parametrize("name", ["../evil", "My Lib", "", ".hidden", "a/b", "con", "nul", "a."])
 def test_manifest_rejects_unsafe_library_name(name: str) -> None:
     with pytest.raises(ValidationError):
         Manifest.model_validate(_manifest(name=name))
