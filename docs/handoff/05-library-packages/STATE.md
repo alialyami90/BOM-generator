@@ -20,7 +20,7 @@
   restores the previous version (no `.replaced-<uuid>`).
 - B5: #164 device-record edits (`records.py`: `apply_record_edits`, `check_record_field`,
   `write_records`; `save_edits(record_edits=...)`), for B11's Datasheet tab. ADR 0018 amendment
-  "device-record edits" in the checkpoint PR.
+  "device-record edits" in its own docs(adr) PR after this checkpoint.
 - Not mine but in my files: #165 (`ac_rated` CSV column, brand sets in `diff_libraries`).
 
 ## In review
