@@ -16,7 +16,19 @@ A milestone with several modules may group them in a subfolder,
 | `library_store/test_library_manifest.py`, `test_library_package.py` | M8 | `.bomlib` manifest and versions; packing, checksums, tampered or mismatched packages rejected |
 | `library_store/test_library_store.py`, `test_library_diff.py` | M8 | per-user store: install, activate, downgrade refusal, rollback, safe failed imports; part diff |
 | `library_store/test_library_service.py`, `test_library_cli.py`, `test_library_wiring.py` | M8 | `bomgen library` commands and their wiring into `bomgen`, schema validation on pack and import |
-| `test_launcher.py` | M11 | frozen-app entry points: `.bomlib` argument routing, placeholders, CLI delegation, self-test module manifest |
-| `test_packaging.py` | M11 | Inno Setup script and PyInstaller spec: per-user install, Windows versions, `.bomlib` association, kept libraries on uninstall |
+| `test_launcher.py` | M11 | frozen-app entry points: `.bomlib` double-click import, `.bomproj` and window placeholders, `BOMGEN_NO_DIALOGS`, CLI delegation, self-test module manifest |
+| `test_packaging.py` | M11 | Inno Setup script and PyInstaller spec: per-user install, Windows versions, `.bomlib` and `.bomproj` associations, kept libraries on uninstall |
+| `test_bundle_container.py` | M8b | the zip container `.bomlib` and `.bomproj` packages share: round trip, changed-file and size-cap checks, Windows-unsafe or case-clashing names, skipped symlinks |
+| `project_store/test_project_export.py`, `test_project_import.py`, `test_project_backup.py`, `test_project_workspace.py` | M8b | `.bomproj` export without `out/`, import into the workspace with overwrite refusal and safety backup, library-version note, `Backups/`, workspace location |
+| `project_store/test_project_cli.py`, `test_project_public_api.py` | M8b | `bomgen project export\|import\|backup` and what the launcher and app may import |
+| `engine/test_engine_bom_model.py` | M2 | BOM line, quantity, separator and table models (ADR 0014) |
+| `engine/test_engine_tags.py` | M2 | tag naming: range tags, LAN and level tokens, gateway numbering, FOPP tag |
+| `engine/test_engine_kits.py`, `test_engine_network.py`, `test_engine_housekeeping.py` | M2 | groups A–D: enclosure and devices with kit children, network accessories (SFPs, FOPP, cable managers, serial cables), housekeeping kit |
+| `engine/test_engine_pipeline.py` | M2 | `pipeline.build` for groups A–D and the loose-material table |
+| `writer/test_sheet_model.py` | M6 | sheet model defaults and the inputs it rejects before writing |
+| `writer/test_xlsx_cells.py`, `test_xlsx_layout.py` | M6 | values, live formulas, styles, merges, column widths, row heights, hidden columns, read back with openpyxl |
+| `writer/test_xlsx_print.py`, `test_xlsx_header_footer.py` | M6 | print setup, sheet view, page header and footer |
+| `writer/test_no_xlsx_in_repo.py` | M6 | no generated `.xlsx` is committed |
 
-`builders.py` holds small input builders shared by these tests.
+`builders.py`, `engine/engine_factories.py`, `project_store/project_builders.py`
+and `writer/writer_helpers.py` hold the small builders those tests share.
