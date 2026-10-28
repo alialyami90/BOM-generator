@@ -33,3 +33,20 @@
   into the next.
 - The suite is slow (2 min on main). Run the module under test first, then the whole
   suite, in the background, before you commit.
+
+## B2, 2026-10-28
+- **Gate commands:** `mypy` and `pytest` on PATH are isolated installs without pydantic,
+  so they fail. Run `pip install -e ".[dev]"`, then use `python -m mypy` and
+  `python -m pytest`.
+- **One push branch per session.** A peer can't grant a second branch. After each squash
+  merge, `git checkout -B <branch> origin/main`, cherry-pick the next commit, then
+  `git merge -s ours origin/<branch>` so the push fast-forwards (force-push is blocked).
+  Keep queued commits on local `b2-*` branches, with a patch backup in project files.
+- **Editable install points at the main checkout.** To test another branch in a worktree,
+  run with `PYTHONPATH=src`, or you test the wrong `src/`.
+- **Suite speed:** the cost was YAML parsing, not pydantic. Profile one slow test with
+  `python -m cProfile -s cumtime -m pytest <test>` before adding fixtures. The parse cache
+  is keyed by text, so it can't go stale. Errors aren't cached, so each names its own file.
+- **Rebasing a test module both sides appended to:** take main's file, then add your own
+  appended tail from `git show <commit>` (old base vs new). That's simpler than resolving
+  interleaved hunks.

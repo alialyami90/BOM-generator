@@ -204,7 +204,7 @@ output:
   power_footnotes: ["*Printer Power Consumption: 622 watts (Printing), …"]  # rows after NOTES; optional
 constants: { t_max_c: 40 }             # optional overrides of the project defaults
 spares: { port_fraction: 0.25 }        # optional overrides of the project defaults
-catalogue_choice: { mcb: abb-s200m, mcb_dc: c60h-dc }   # optional; key by key; mcb_dc unset = as mcb (ADR 0023)
+catalogue_choice: { mcb: abb-s200m, mcb_dc: schneider-c60h-dc }   # optional; key by key; mcb_dc unset = as mcb (ADR 0023)
 loose_material:                        # extras not tied to a device
   title: "PSA Panels Loose Material and Auxiliary Equipment"   # the table's title row
   host_panel: ws                       # its document heads the Loose Material sheet (ADR 0020)
@@ -789,9 +789,10 @@ edit the YAML files instead.
   installer: per-user install (no admin rights), Start-menu shortcut,
   uninstaller, `.bomlib` file association so double-clicking an update
   package imports it, and a bundled default library.
-- GitHub Actions job on `windows-latest` builds the installer on version tags
-  and attaches `bomgen-setup-<version>.exe` and the default `.bomlib` to a
-  GitHub Release, so sharing is one download link.
+- GitHub Actions job on `windows-latest` builds the installer when a version
+  bump reaches main (or a version tag is pushed), tags the tested commit and
+  attaches `bomgen-setup-<version>.exe` and the default `.bomlib` to a GitHub
+  Release, so sharing is one download link.
 - Code-sign the installer if a certificate is available (Q19), otherwise
   document the SmartScreen "More info → Run anyway" step.
 - Tests: smoke test that the frozen app starts and builds the example
@@ -808,6 +809,9 @@ from the frozen and the installed CLI, asserting the printed workbook exists. Th
 default library is bundled: the workflow packs `out/default.bomlib`, the installer
 ships it, and the first start imports it into an empty library store (smoke-tested,
 including that a reinstall leaves the store unchanged).
+Releases start from main (ADR 0009, amended): merging a PR that bumps the version
+and adds its `CHANGELOG.md` section builds, tags and publishes in one run, so no
+one pushes a tag; the steps are in `packaging/README.md`.
 The app icon comes with the M9 design (`packaging/icons/bomgen.ico`).
 
 ### M12–M18 — Next version (v0.2)

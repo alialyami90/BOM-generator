@@ -7,6 +7,7 @@ not drift.
 
 import re
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -159,6 +160,68 @@ def test_release_job_attaches_to_a_release_that_already_exists_for_the_tag() -> 
     workflow = (PACKAGING.parent / ".github" / "workflows" / "release.yml").read_text(
         encoding="utf-8"
     )
-    assert 'gh release view "$GITHUB_REF_NAME"' in workflow
-    assert 'gh release upload "$GITHUB_REF_NAME"' in workflow
+    assert 'gh release view "$TAG"' in workflow
+    assert 'gh release upload "$TAG"' in workflow
     assert "--clobber" in workflow
+    # v0.1.1 was made in the UI with no title or notes: an empty release gets the usual ones.
+    assert 'gh release view "$TAG" --json body --jq .body' in workflow
+    assert 'gh release edit "$TAG" --title "BOM Generator $VERSION"' in workflow
+
+
+WORKFLOW_FILE = PACKAGING.parent / ".github" / "workflows" / "release.yml"
+
+
+def release_workflow() -> dict[Any, Any]:
+    # PyYAML reads the bare key `on` as True.
+    loaded: dict[Any, Any] = yaml.safe_load(WORKFLOW_FILE.read_text(encoding="utf-8"))
+    return loaded
+
+
+def test_release_workflow_runs_when_main_changes_the_version_or_the_changelog() -> None:
+    push = release_workflow()[True]["push"]
+    assert push["branches"] == ["main"]
+    assert push["tags"] == ["v*"]  # a tag pushed by hand still releases
+    # GitHub ignores paths for tag pushes, so the filter only limits the main pushes.
+    assert set(push["paths"]) >= {"src/bomgen/__init__.py", "pyproject.toml", "CHANGELOG.md"}
+
+
+def test_release_workflow_skips_main_when_the_version_tag_already_exists() -> None:
+    plan = release_workflow()["jobs"]["plan"]
+    script = "\n".join(step.get("run", "") for step in plan["steps"])
+    assert 'git ls-remote --tags origin "refs/tags/$tag"' in script
+    assert "build=false" in script
+    installer = release_workflow()["jobs"]["installer"]
+    assert "plan" in installer["needs"]
+    assert installer["if"] == "needs.plan.outputs.build == 'true'"
+
+
+def test_release_needs_a_changelog_section_and_matching_versions() -> None:
+    # Ali: never release with a missing changelog.
+    plan = release_workflow()["jobs"]["plan"]
+    script = "\n".join(step.get("run", "") for step in plan["steps"])
+    assert "CHANGELOG.md" in script
+    assert "## \\[" in script
+    assert "pyproject.toml" in script
+    assert "does not match bomgen.__version__" in script
+
+
+def test_release_from_main_tags_the_tested_commit_in_the_same_run() -> None:
+    # A tag made with GITHUB_TOKEN starts no other workflow, so build, tag and release share
+    # one run, and the release waits for the installer job that tested this commit.
+    jobs = release_workflow()["jobs"]
+    release = jobs["release"]
+    assert set(release["needs"]) == {"plan", "installer"}
+    assert release["if"] == "needs.plan.outputs.release == 'true'"
+    assert release["permissions"] == {"contents": "write"}
+    script = "\n".join(step.get("run", "") for step in release["steps"])
+    assert '--target "$GITHUB_SHA"' in script
+    assert "--verify-tag" not in script
+    env = next(
+        step["env"] for step in release["steps"] if "gh release create" in step.get("run", "")
+    )
+    assert env["TAG"] == "${{ needs.plan.outputs.tag }}"
+
+
+def test_release_runs_on_main_and_tags_are_never_cancelled() -> None:
+    concurrency = release_workflow()["concurrency"]
+    assert concurrency["cancel-in-progress"] == "${{ github.event_name == 'pull_request' }}"

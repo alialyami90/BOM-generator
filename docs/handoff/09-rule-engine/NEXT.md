@@ -1,6 +1,6 @@
 Next action: re-run the git commands and the gate (STATE.md → Verification), then check whether A3's Q38 follow-up PR (it adds `data/library/psa-devices.yaml`) has merged, and start task 1 if it has.
 
-A1 assigned tasks 1 and 2 on 2026-10-28. Task 3 waits on Ali. Find A1's thread with
+A1 assigned tasks 1 and 2 on 2026-10-28; task 2 is done (#154). Task 3 waits on Ali. Find A1's thread with
 `list_threads` and report each result there.
 
 ## 1. Check the engine against the shipped library (WAITING on A3's Q38 follow-up PR)
@@ -22,16 +22,8 @@ A1 assigned tasks 1 and 2 on 2026-10-28. Task 3 waits on Ali. Find A1's thread w
 - Done: the gate passes, `python -m pytest tests/golden` passes with the values unchanged,
   and either a PR is open for A1 or A1 is told that nothing needed changing.
 
-## 2. Separate AC and DC MCB choices: engine side (only if Ali picks it on A1's card)
-- Goal: the engine picks the AC branch MCBs from the AC choice and the DC ones from the DC
-  choice. This replaces the earlier question of whether a DC-only set such as C60H-DC
-  should be refused on AC branches. The milestone is whichever A1 names, in one PR.
-- Files: `src/bomgen/engine/ac_dist.py`, `dc_dist.py`, `mcb.py`, their unit tests and
-  `tests/unit/engine/test_checks.py` (role 9). The model fields are B2's (`models/`, `io/`).
-- Depends on: Ali's answer on A1's card, then B2's model PR merged.
-- Tests first, e.g. `test_ac_branches_use_the_ac_mcb_choice`,
-  `test_dc_branches_use_the_dc_mcb_choice`.
-- Done: the gate passes, the goldens are unchanged, and a PR is open for A1.
+## 2. Separate AC and DC MCB choices: engine side (DONE, #154)
+- Merged at f319f64. Nothing left; see STATE.md → Merged.
 
 ## 3. Q30 and Q31 answers (when Ali answers, through A1)
 - Goal: implement any rule Ali changes. Milestone: whichever A1 names, one PR.
@@ -46,7 +38,7 @@ A1 assigned tasks 1 and 2 on 2026-10-28. Task 3 waits on Ali. Find A1's thread w
   `engine/sizing.py` and `layout.py`. A10 has `sheets/` and `writer/`. Tell A10 before
   changing the shape of `BuildResult`.
 - Don't move golden values without an ADR. Don't settle a spec-vs-code gap by guessing:
-  ask Ali through A1 (next free Q39, ADR 0023: `docs/agents.md` → "Numbers").
+  ask Ali through A1 (next free Q40, ADR 0024: `docs/agents.md` → "Numbers").
 - Don't revive `DeviceType.min_branch_mcb_a` as a rating input (ADR 0019 item 4).
 - Don't count inrush peaks under `inrush_min_ms` (Ali, 2026-10-28; ADR 0019 item 3).
 - Don't switch the default DC MCB away from the iC60N (Q37: "Keep iC60N as default").
