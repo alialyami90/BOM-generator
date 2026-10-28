@@ -105,8 +105,8 @@ the same one. Ask A1 before you add one.
 
 | Kind | Taken | Next free |
 | --- | --- | --- |
-| ADR | 0009 installer layout (A6), 0010 input models (A2), 0011 UI design language and bundled fonts (A4) | 0012 |
-| Open question | Q22 workbook corrections, Q23 issued sheets vs masters (A2) | Q24 |
+| ADR | 0009 installer layout (A6), 0010 input models (A2), 0011 UI design language and bundled fonts (A4), 0012 projects/substations/.bomproj (A1), 0013 network sizing and panel layout (A1) | 0014 |
+| Open question | Q22 workbook corrections, Q23 issued sheets vs masters (A2), Q24–Q28 substations/layout design (A1), Q29 thermostat and fan library defaults (A3) | Q30 |
 
 ## Review and merge
 
@@ -118,19 +118,20 @@ the same one. Ask A1 before you add one.
    the branch has no conflict with `main`.
 4. A dependent PR rebases on `main` after the PR it depends on merges.
 
-Merge order while the current work is open: M1 (A2) first, since M8, M11 and the
-device database all read its schema; then M8 (A5) and the device database (A3);
-then M11 (A6), rebased so its launcher calls the real CLI. M9 (A4) is docs only
-and can merge whenever Ali approves the design.
+Merge order while the current work is open: M11 (A6, PR #2) once its Windows
+build is green; then the substations/layout work in the order its design sets
+(A2 M1b → A8 M1c → A5 M8b → A4 UI follow-up); M2–M7 as they open.
 
 ## Not started
 
 | Milestone | Recommendation |
 | --- | --- |
-| M2–M4 rule engine | Start when M1 merges, as one agent working M2, M3, M4 in order: they share `engine/` and build up the same golden test. |
-| M6 Excel writer | Can start when M1 merges, in parallel with M2: it only needs `models/sheet.py`, which it defines. |
-| M5 sheet models | Starts after M4 and M6, by the M6 agent. |
-| M7 check report, revision highlighting | After M5; also wires A5's library-version check into the report. |
-| M10 desktop app | After Ali approves the M9 design and M8 merges. |
+| M1b/M1c substations, sizing, layout | After Ali approves `docs/superpowers/specs/2026-10-28-substations-and-auto-layout-design.md`: A2 does the models (M1b), a new A8 does the sizing and layout engine (M1c). |
+| M2–M4 rule engine | Ready now (M1 is on main). One agent working M2, M3, M4 in order: they share `engine/` and build up the same golden test. Hand-written `examples/panels/` are enough to start; M1c's generated panels feed it later. |
+| M6 Excel writer | Ready now, in parallel with M2: it only needs `models/sheet.py`, which it defines. |
+| M5 sheet models | After M4 and M6, by the M6 agent. |
+| M7 check report, revision highlighting | After M5; also wires A5's `library_mismatch()` into the report. |
+| M8b `.bomproj` export/import/backup | A5, after the design is approved. |
+| M10 desktop app | After the UI follow-up design (projects, substations, panels board) is approved and M1c is on main. |
 
 New agents get the next `A` number and a row in "Roles" when Ali starts them.
