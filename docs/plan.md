@@ -457,6 +457,15 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
 - Tests: formulas from "Power Consumption sheet" and "Heat Dissipation and Heat
   Calculations sheets"; golden 2,177.5 W DC, 1,090.3 W AC, 3,267.8 W total;
   391/391/172 m³/h vs 716; Σ 954.8 vs 2,148 m³/h; WS A = 4.848 m², ΔT = 6.96 °C.
+- Delivered in M4: `models/calc.py` (`PowerConsumption`, `HeatResult` and their
+  parts, each power line pointing at its BOM row by `LineRef`; `OutputModel` moved
+  to `models/output.py`), `engine/power.py`, `engine/thermal.py`. `BuildResult`
+  gains `power` and `heat`. Ventilation `auto` follows the Q4 default: the natural
+  rise of every powered part except fans, filters and thermostats decides, before
+  groups D, E and G are built. The forced check compares each cabinet with the fan
+  pair (2 × `fan.airflow_m3h`, Q8); the line-up check covers the fan-ventilated
+  cabinets. Cable managers keep the M2 rule until M1c's layout gives a count for
+  generated panels (Q32).
 
 ### M5 — Sheet models with live formulas
 - Steps 12–13: BOM sheet (incl. loose-material table), Power Consumption,

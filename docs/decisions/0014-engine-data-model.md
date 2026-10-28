@@ -71,6 +71,18 @@ that reproduce them):
 10. Group H lists `options.grounding_busbars` from the busbar catalogue, tag and
     description only.
 
+**Power and heat** (M4):
+
+11. `BuildResult.power` lists one power line per powered BOM row (not
+    `excluded_from_power`), in BOM order, as DC and AC blocks per cabinet plus the
+    loose table's DC loads as "External Equipment"; each line keeps a `LineRef` to its
+    row. `BuildResult.heat` holds the Heat Dissipation blocks (no margin), both checks
+    for every cabinet from its block total, and the line-up check over the cabinets
+    that got fans.
+12. Ventilation `auto` is decided per panel before groups D–G from the heat of its
+    powered rows except fans, filters and thermostats (plan Q4): natural when the
+    rise stays within TMax − TInt, else forced.
+
 ## Consequences
 
 The sheet layer reads one flat list per sheet and needs no knowledge of the rules.
