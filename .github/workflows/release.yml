@@ -76,13 +76,15 @@ jobs:
           $ErrorActionPreference = "Continue"  # a native command's stderr must not abort here
           $help = & "dist\bomgen\bomgen.exe" --help 2>&1
           $expected = if (Test-Path src\bomgen\cli.py) { 0 } else { 2 }
-          if ($LASTEXITCODE -ne $expected) {
-            Write-Error "bomgen.exe --help exited $LASTEXITCODE (expected $expected): $help"
-            exit 1
-          }
+          $helpExit = $LASTEXITCODE
+          Write-Output "bomgen.exe --help exited $helpExit (expected $expected): $help"
+          if ($helpExit -ne $expected) { Write-Error "bomgen.exe --help exited $helpExit"; exit 1 }
+          $global:LASTEXITCODE = 0  # an expected non-zero exit must not leak out as the step's result
           # Imports every bomgen module from the frozen bundle (bomgen.app.launcher.self_test).
           $app = Start-Process "dist\bomgen\BOM Generator.exe" -ArgumentList "--self-test" -Wait -PassThru
+          Write-Output "BOM Generator.exe --self-test exited $($app.ExitCode)"
           if ($app.ExitCode) { Write-Error "BOM Generator.exe --self-test exited $($app.ExitCode)"; exit 1 }
+          exit 0
 
       - name: Compile the installer
         env:
