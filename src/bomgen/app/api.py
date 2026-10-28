@@ -29,7 +29,14 @@ from pydantic import BaseModel, ValidationError
 
 from bomgen import __version__
 from bomgen.app.catalogues import catalogues_page
-from bomgen.app.editing import edit_reply, layout_check, layout_issues, panel_options_page
+from bomgen.app.editing import (
+    Page,
+    edit_reply,
+    layout_check,
+    layout_issues,
+    panel_options_page,
+)
+from bomgen.app.loose import loose_page
 from bomgen.app.network import layout_page
 from bomgen.app.output import OutputRefusedError, build_file, build_target, checks_page
 from bomgen.app.preview import preview_page
@@ -40,7 +47,7 @@ from bomgen.app.substations import (
     substation_page,
 )
 from bomgen.bundle.errors import LibraryPackageError, RefusalKind
-from bomgen.io import edit
+from bomgen.io import edit, loose_edit
 from bomgen.io.edit import EditError, EditResult
 from bomgen.io.errors import InputError
 from bomgen.io.loader import PROJECT_FILE, load_library
@@ -474,13 +481,19 @@ class Api:
     # -- Editing (docs/ui/editing.md; writers in bomgen.io.edit, ADR 0021) --
 
     def _edit(
-        self, project_file: str, substation_id: str, write: Callable[..., EditResult], *args: Any
+        self,
+        project_file: str,
+        substation_id: str,
+        write: Callable[..., EditResult],
+        *args: Any,
+        page: Page = layout_page,
+        **kwargs: Any,
     ) -> dict[str, Any]:
         store = self._library_store()
         project = Path(project_file)
         with self._substation(substation_id), _edit_refusals():
-            result = write(project, substation_id, *args, store=store)
-            return edit_reply(result, project, substation_id, store)
+            result = write(project, substation_id, *args, store=store, **kwargs)
+            return edit_reply(result, project, substation_id, store, page)
 
     @endpoint
     def set_layout_overrides(
@@ -592,6 +605,85 @@ class Api:
     ) -> dict[str, Any]:
         """Write (or with ``None`` remove) an equipment row's port plan."""
         return self._edit(project_file, substation_id, edit.set_port_plan, equipment_id, port_plan)
+
+    @endpoint
+    def loose_material(self, project_file: str, substation_id: str) -> dict[str, Any]:
+        """The substation's loose material, for the Loose material page."""
+        with self._substation(substation_id):
+            return loose_page(Path(project_file), substation_id, self._library_store())
+
+    @endpoint
+    def add_loose_item(
+        self,
+        project_file: str,
+        substation_id: str,
+        item: dict[str, Any],
+        index: int | None,
+        host_panel: str | None,
+    ) -> dict[str, Any]:
+        """Insert a loose item at ``index`` (``None``: at the end); the first item also
+        names ``host_panel``."""
+        return self._edit(
+            project_file,
+            substation_id,
+            loose_edit.add_loose_item,
+            item,
+            index=index,
+            host_panel=host_panel,
+            page=loose_page,
+        )
+
+    @endpoint
+    def set_loose_item(
+        self, project_file: str, substation_id: str, index: int, item: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Replace loose item ``index`` with ``item``."""
+        return self._edit(
+            project_file, substation_id, loose_edit.set_loose_item, index, item, page=loose_page
+        )
+
+    @endpoint
+    def remove_loose_item(
+        self, project_file: str, substation_id: str, index: int
+    ) -> dict[str, Any]:
+        """Remove loose item ``index``."""
+        return self._edit(
+            project_file, substation_id, loose_edit.remove_loose_item, index, page=loose_page
+        )
+
+    @endpoint
+    def move_loose_item(
+        self, project_file: str, substation_id: str, source: int, target: int
+    ) -> dict[str, Any]:
+        """Move loose item ``source`` to position ``target``, the sheet's order."""
+        return self._edit(
+            project_file,
+            substation_id,
+            loose_edit.move_loose_item,
+            source,
+            target,
+            page=loose_page,
+        )
+
+    @endpoint
+    def set_loose_host_panel(
+        self, project_file: str, substation_id: str, panel_id: str
+    ) -> dict[str, Any]:
+        """Issue the Loose Material sheet under ``panel_id``'s document."""
+        return self._edit(
+            project_file, substation_id, loose_edit.set_host_panel, panel_id, page=loose_page
+        )
+
+    @endpoint
+    def validate_loose_item(
+        self, project_file: str, substation_id: str, index: int | None, item: dict[str, Any]
+    ) -> dict[str, str]:
+        """The engine's messages for ``item`` as item ``index`` (``None``: a new last item),
+        by field; nothing is written."""
+        with self._substation(substation_id), _edit_refusals():
+            return loose_edit.validate_loose_item(
+                Path(project_file), substation_id, index, item, store=self._library_store()
+            )
 
     @endpoint
     def preview_substation(self, project_file: str, substation_id: str) -> dict[str, Any]:

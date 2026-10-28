@@ -103,3 +103,25 @@ def test_every_endpoint_the_screens_call_exists() -> None:
     ] == []
     missing = sorted(n for n in names if n.startswith("_") or not callable(getattr(Api, n, None)))
     assert missing == []
+
+
+LOOSE = UI_DIR / "screens-loose.js"
+
+
+def test_no_side_stripe_markers_in_the_styles() -> None:
+    # A coloured inset or left border wider than a hairline is below the design's craft floor.
+    css = (UI_DIR / "styles.css").read_text(encoding="utf-8")
+    assert not re.search(r"inset\s+[2-9]px\s+0\s+0|border-left:\s*[2-9]px", css)
+
+
+def test_loose_quantity_copy_promises_only_what_the_model_takes() -> None:
+    js = LOOSE.read_text(encoding="utf-8")
+    assert "with a unit" not in js
+    assert js.count("A whole number, or 1 Lot.") >= 3  # the table foot and both add dialogs
+
+
+def test_loose_leave_dialog_offers_keep_discard_and_save() -> None:
+    js = LOOSE.read_text(encoding="utf-8")
+    for label in (">Keep editing<", ">Discard changes<", "Save and leave<"):
+        assert label in js
+    assert "Discard and leave" not in js
