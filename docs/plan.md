@@ -855,6 +855,10 @@ writes its section's details when the work starts.
   the `.bomlib` export of an edited library as the backup. Import and edit share one
   save-a-new-local-version function. The tests include the round trip
   (library, CSV, library is equal).
+  The store functions: `save_local_version`, `save_edits` (edit operations by path),
+  `check_field`, `export_csv` / `preview_csv_import` / `import_csv`, and
+  `LibraryStore.export_package` (the backup), with `bomgen library export`, `export-csv` and
+  `import-csv` on the command line.
 - **M17 — Project and substation editing (A2 writers; A11 app; A4 design).** Backlog points
   4, 7 and 9. Writers round-trip projects, substations and panels. The app creates projects
   and substations from scratch, every settings field is editable, and the Panels board gets

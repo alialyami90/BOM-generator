@@ -83,7 +83,7 @@ def save_local_version(
     manifest = Manifest(
         format_version=FORMAT_VERSION,
         name=name,
-        version=str(_next_local(store, name, Version.parse(base))),
+        version=str(next_local_version(store, name, Version.parse(base))),
         schema_version=base_contents.manifest.schema_version,
         min_app_version=base_contents.manifest.min_app_version,
         release_notes=_release_notes(base, diff, note),
@@ -125,7 +125,7 @@ def save_edits(
     return save_local_version(store, name, result.library, base=base, note=note)
 
 
-def _next_local(store: LibraryStore, name: str, base: Version) -> Version:
+def next_local_version(store: LibraryStore, name: str, base: Version) -> Version:
     release = base.base
     used = [
         parsed.local

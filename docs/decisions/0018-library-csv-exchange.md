@@ -148,3 +148,28 @@ port group of SW-1. Every model field is therefore editable without one function
 - A CSV import yields the same kind of change set (rows added, changed and removed, and rows
   with problems), so the app can add the valid rows to its pending set instead of saving at
   once. The all-or-nothing import in this ADR remains the command-line behaviour.
+
+## Amendment: how the import reads the tables (2026-10-28)
+
+Settled while building `preview_csv_import` and `import_csv`; where this differs from the
+checks table above, this wins.
+
+- **Partial files.** A table the file lacks is left as the installed version has it, so the
+  person can export only devices or only catalogues. A column the file lacks keeps the
+  installed values (a warning), so a CSV from an older app never wipes a newer field. A table
+  the file has replaces the library's rows of that table: a device with no row is removed,
+  and the `changes` check lists it. The device tables need `devices.csv`; `mcb_codes.csv`
+  needs `mcb.csv`.
+- **Row problems.** Each is `{table, row, column, message, key}` with the row number Excel
+  shows. By default any problem fails the `rows` check. With `skip_invalid` the rows are left
+  out (an existing device keeps its installed values) and the check is a warning, which is how
+  the app adds the valid rows to its pending set.
+- **Checks** run in this order: `files`, `encoding`, `columns`, `rows`, `links`, `cells`,
+  `library`, `base`, `changes`. There is no separate `version` check; `changes` says which
+  version a save would create.
+- **Result.** Besides the checks, the preview carries the changes as `LibraryDiff` lists and
+  as per-value `{area, key, field, old, new}` entries, the same changes as edit operations
+  (see the previous amendment) for the app's pending set, and the library the rows describe.
+  `import_csv` saves that library, in the order of the file's rows, so the round trip keeps
+  device order.
+- **Numbers.** A numeric column accepts `12`, `12.5` and, in a `;` file, `12,5`.
