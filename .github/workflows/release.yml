@@ -2,17 +2,28 @@ name: Release
 
 # Builds the Windows installer and publishes it (plan M11, ADR 0009).
 #
-#   - Version tags (v0.1.0) build, smoke-test, and attach
-#     bomgen-setup-<version>.exe (and the default .bomlib, once M8 makes one)
-#     to a GitHub Release. The tag must match bomgen.__version__.
+#   - A push to main whose bomgen.__version__ has no v<version> tag yet (a merged
+#     version bump) builds, smoke-tests, then creates the tag on that commit and
+#     the GitHub Release with bomgen-setup-<version>.exe and default.bomlib, all
+#     in this run: a tag made with GITHUB_TOKEN starts no other workflow.
+#   - A version tag pushed by hand (v0.1.0) does the same for the tagged commit.
+#     The tag must match bomgen.__version__.
+#   - Either way CHANGELOG.md needs a "## [<version>]" section, or nothing is built.
 #   - Pull requests that touch packaging, and manual runs, build and smoke-test
 #     only; the installer is kept as a workflow artifact.
 #
-# Not part of ci-status (ADR 0006): it runs only for packaging changes and tags.
+# Not part of ci-status (ADR 0006): it runs only for packaging changes, version
+# changes and tags.
 
 on:
   push:
+    branches: [main]
     tags: ["v*"]
+    # Not applied to tag pushes; on main, only these files can start a release.
+    paths:
+      - "src/bomgen/__init__.py"
+      - "pyproject.toml"
+      - "CHANGELOG.md"
   pull_request:
     paths:
       - "packaging/**"
@@ -23,14 +34,62 @@ on:
 
 concurrency:
   group: release-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref_type != 'tag' }}
+  # A release run on main or a tag queues behind the one before it, never cancels it.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
 
 jobs:
+  plan:
+    name: Decide what to release
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.plan.outputs.build }}
+      release: ${{ steps.plan.outputs.release }}
+      tag: ${{ steps.plan.outputs.tag }}
+      version: ${{ steps.plan.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decide
+        id: plan
+        run: |
+          fail() { echo "::error::$1"; exit 1; }
+          version=$(python3 -c 'import re, pathlib; print(re.search(r"__version__ = \"([^\"]+)\"", pathlib.Path("src/bomgen/__init__.py").read_text()).group(1))')
+          tag="v$version"
+          build=true
+          release=false
+          if [[ "$GITHUB_EVENT_NAME" == push && "$GITHUB_REF_TYPE" == tag ]]; then
+            [[ "$GITHUB_REF_NAME" == "$tag" ]] || fail "Tag $GITHUB_REF_NAME does not match bomgen.__version__ $version"
+            release=true
+          elif [[ "$GITHUB_EVENT_NAME" == push ]]; then
+            existing=$(git ls-remote --tags origin "refs/tags/$tag")
+            if [[ -n "$existing" ]]; then
+              echo "$tag already exists: nothing to release from this push"
+              build=false
+            else
+              release=true
+            fi
+          fi
+          if [[ "$release" == true ]]; then
+            project=$(python3 -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')
+            [[ "$project" == "$version" ]] || fail "pyproject.toml version $project does not match bomgen.__version__ $version"
+            # Ali: never release with a missing changelog.
+            grep -Eq "^## \[${version//./\\.}\]" CHANGELOG.md \
+              || fail "CHANGELOG.md has no '## [$version]' section; add it before releasing $tag"
+            echo "Releasing $tag from $GITHUB_SHA"
+          fi
+          {
+            echo "build=$build"
+            echo "release=$release"
+            echo "tag=$tag"
+            echo "version=$version"
+          } >> "$GITHUB_OUTPUT"
+
   installer:
     name: Build Windows installer
+    needs: plan
+    if: needs.plan.outputs.build == 'true'
     runs-on: windows-latest
     defaults:
       run:
@@ -47,14 +106,13 @@ jobs:
 
       - name: Resolve version
         id: version
+        env:
+          PLANNED: ${{ needs.plan.outputs.version }}
         run: |
           $version = python -c "import bomgen; print(bomgen.__version__)"
-          if ($env:GITHUB_REF_TYPE -eq "tag") {
-            $tag = $env:GITHUB_REF_NAME.TrimStart("v")
-            if ($tag -ne $version) {
-              Write-Error "Tag v$tag does not match bomgen.__version__ $version"
-              exit 1
-            }
+          if ($version -ne $env:PLANNED) {
+            Write-Error "The installed bomgen is $version but the plan read $env:PLANNED"
+            exit 1
           }
           "version=$version" >> $env:GITHUB_OUTPUT
 
@@ -267,8 +325,8 @@ jobs:
 
   release:
     name: Publish GitHub Release
-    needs: installer
-    if: github.ref_type == 'tag'
+    needs: [plan, installer]
+    if: needs.plan.outputs.release == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -281,17 +339,24 @@ jobs:
       - name: Create the release
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.plan.outputs.tag }}
           VERSION: ${{ needs.installer.outputs.version }}
         run: |
           mapfile -t assets < <(find release -type f \( -name '*.exe' -o -name '*.bomlib' \))
           prerelease=()
           # PEP 440 pre-releases (0.2.0rc1, 0.2.0b1, 0.2.0.dev1) carry a letter.
           [[ "$VERSION" =~ [a-z] ]] && prerelease=(--prerelease)
-          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+          if gh release view "$TAG" > /dev/null 2>&1; then
             # A release made by hand in the GitHub UI for this tag: attach to it, keep its notes.
-            gh release upload "$GITHUB_REF_NAME" "${assets[@]}" --clobber
+            gh release upload "$TAG" "${assets[@]}" --clobber
+            # Left empty there (v0.1.1): give it the title and notes a release made here gets.
+            if [[ -z "$(gh release view "$TAG" --json body --jq .body)" ]]; then
+              gh release edit "$TAG" --title "BOM Generator $VERSION" --notes-file packaging/release-notes.md
+            fi
           else
-            gh release create "$GITHUB_REF_NAME" "${assets[@]}" \
-              --verify-tag --title "BOM Generator $VERSION" \
+            # From main the tag is new: it is created on the commit the installer job tested.
+            # A pushed tag already exists, and GitHub ignores --target for it.
+            gh release create "$TAG" "${assets[@]}" \
+              --target "$GITHUB_SHA" --title "BOM Generator $VERSION" \
               --notes-file packaging/release-notes.md --generate-notes "${prerelease[@]}"
           fi
