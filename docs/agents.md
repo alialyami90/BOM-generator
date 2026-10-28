@@ -23,6 +23,7 @@ agent; the milestones are in [`plan.md`](plan.md) → "Milestones".
 | A8 | Sizing and layout engine | M1c | `src/bomgen/engine/sizing.py`, `src/bomgen/engine/layout.py`, `tests/golden/layout/`, the M1c section |
 | A9 | BOM rule engine | M2, M3, M4 | the rest of `src/bomgen/engine/`, `src/bomgen/models/bom.py`, `src/bomgen/models/calc.py`, `tests/golden/` (except `layout/`), the M2–M4 sections |
 | A10 | Excel workbook writer | M6, then M5 | `src/bomgen/sheets/`, `src/bomgen/writer/`, `src/bomgen/models/sheet.py`, the M5–M6 sections |
+| A11 | Desktop app | M10 | `src/bomgen/app/` except `launcher.py` (A6), `src/bomgen/app/ui/`, `tests/unit/app/`, the M10 section |
 
 Each agent also owns its tests (`tests/unit/<area>/` or `tests/unit/test_<area>.py`)
 and its implementation plan under `docs/superpowers/plans/`.
@@ -103,6 +104,19 @@ same `Panel` models. A new input field goes through A2; the sheets consume
 Writer tests reopen the file with openpyxl. Starts M6 now against a hand-built
 `SheetModel`; M5 waits for A9's M4.
 
+### A11 — Desktop app (M10)
+
+Builds the approved design (docs/ui, #8 and #23, ADR 0007 and 0011) as the
+pywebview app: the UI files move from the prototype into `src/bomgen/app/ui/`,
+the Python API behind `docs/ui/screens.md` "What the app needs from the
+engine" calls the engine, library store, project store and writer, and plugs
+into `launcher.app_main` with one call agreed with A6. Order: shell and Home,
+Project, Library, Backup/share screens against what is on main; Substation,
+Network and Panels once M1b and M1c land; Checks, Preview and Build once M5
+and M7 land. No business rule in the UI: anything missing from the engine goes
+to its owner. A4 owns the design and reviews the screens; the milestone ends
+with A4's impeccable polish pass.
+
 ### A7 — Lead developer assistant
 
 Supports A1 with documentation and small tasks: keeps `README.md` and the
@@ -134,7 +148,7 @@ the same one. Ask A1 before you add one.
 
 | Kind | Taken | Next free |
 | --- | --- | --- |
-| ADR | 0009 installer layout (A6), 0010 input models (A2), 0011 UI design language and bundled fonts (A4), 0012 projects/substations/.bomproj (A1, accepted), 0013 network sizing and panel layout (A1, accepted), 0014 engine data model (A9, proposed) | 0015 |
+| ADR | 0009 installer layout (A6), 0010 input models (A2), 0011 UI design language and bundled fonts (A4), 0012 projects/substations/.bomproj (A1, accepted), 0013 network sizing and panel layout (A1, accepted), 0014 engine data model (A9, proposed), 0015 app API (A11, reserved) | 0016 |
 | Open question | Q22 workbook corrections, Q23 issued sheets vs masters (A2), Q24–Q28 substations/layout (resolved), Q29 thermostat and fan library defaults (A3), Q30 loose-table order (A9), Q31 M2 engine rules bundle (A9), Q32 cable managers vs 32U (A1), Q33 FOPP-96SM height (A1), Q34 M3 terminal rules (A9, reserved) | Q35 |
 
 ## Review and merge
@@ -157,9 +171,8 @@ M5 (A10) and M7; A3's data and A7's docs any time.
 | --- | --- |
 | M5 sheet models | A10, after M4 and M6. |
 | M7 check report, revision highlighting | After M5; also wires A5's `library_mismatch()` into the report. |
-| M10 desktop app | After the UI follow-up design (projects, substations, panels board) is approved and M1c is on main. |
 
-M1b (A2), M1c (A8), M2–M4 (A9), M6 (A10) and M8b (A5) are assigned; see ADR 0012 and 0013 and the
+M1b (A2), M1c (A8), M2–M4 (A9), M6 (A10), M8b (A5) and M10 (A11) are assigned; see ADR 0012 and 0013 and the
 design in `docs/superpowers/specs/`.
 
 New agents get the next `A` number and a row in "Roles" when Ali starts them.
