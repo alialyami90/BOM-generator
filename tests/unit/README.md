@@ -65,6 +65,20 @@ A milestone with several modules may group them in a subfolder,
 | `app/test_app_output_api.py` | M10d | the Checks and Build API: checks, build target, the workbook and its report, every Build refusal (`has_errors`, `file_exists`, `file_open`, `bad_name`, `bad_folder`, `bad_previous`, `engine`) |
 | `app/test_app_network_api.py` | M10c | the Network result, L1 ranking and Panels board against the layout golden: the tool's L1 pick, moved devices, hand-written panels, layout errors |
 | `app/test_app_layout_api.py` | M10d | Checks, Build and Preview lay out generated panels as `bomgen build` does; layout errors block, warnings show, hand-written panels are built as they are |
+| `test_library_alternatives.py` | M13 | alternatives as parts (`alt_group`, `tier`), MCB trip curve, magnetic multiples, DC rating and codes, catalogue brands and the brand choice, input voltage range (ADR 0017) |
+| `test_catalogue_choice_loader.py` | M13 | the loader resolves the catalogue brand choice per substation: project default, key-by-key substation override, unknown brands named (ADR 0017) |
+| `library_store/test_library_local.py` | M16 | an edited library saved as the next local version (`+local.N`) with its manifest, refusals that write nothing, the `.bomlib` backup (ADR 0018) |
+| `library_store/test_library_edit.py` | M16 | library edit operations by path, problems located by part id, references kept, per-field validation for the editors |
+| `library_store/test_library_csv_export.py` | M16 | CSV export for Excel: one table per file, child tables keyed by part id and position, UTF-8 with a byte order mark, same bytes every time (ADR 0018) |
+| `library_store/test_library_csv_import.py` | M16 | CSV import: dry-run checks, Excel's semicolons and decimal commas, cell problems by table, row and column, formula warnings, `--skip-invalid`, the saved local version |
+| `library_store/test_library_alt_comparison.py` | M16 | the comparison rows of a device and its alternatives: order, deltas against the device, data quality from the device database |
+| `test_round_trip.py` | M17a | round-trip YAML writing keeps comments, quoting and blank lines of hand-written files; atomic replace (ADR 0021) |
+| `test_edit.py` | M17a | substation writers for the panel editor and board: only edited lines change, invalid values not written, options, port plan, layout overrides |
+| `test_panel_edit.py` | M17b | writers for hand-written panel files: write, create, delete, and the refusals |
+| `test_fields.py` | M17c | field writers for project defaults and substation overrides, per-field validation, list rows, the document register's users, assumed values |
+| `test_lifecycle.py` | M17d | create and delete projects and substations: ids, copies with panels and documents, backups before a delete |
+| `app/test_app_edit_api.py` | M17 | the app's editing endpoints: what is written, refused edits, the refreshed board, whether a move fits and the rack space it leaves (ADR 0021) |
+| `test_loose_edit.py` | M18 | loose-material writers: library and free-text items, move, remove, host panel, per-field checks (ADR 0022) |
 
 `builders.py`, `engine/engine_factories.py`, `project_store/project_builders.py`
 and `writer/writer_helpers.py` hold the small builders those tests share.
