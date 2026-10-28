@@ -13,7 +13,7 @@ from bomgen.io.loader import LoadedSubstation
 from bomgen.io.mirror import mirror_panel
 from bomgen.models.bom import Group
 from bomgen.models.library import Library
-from bomgen.models.panel import Panel, PanelMirror
+from bomgen.models.panel import Panel, PanelMirror, Ventilation
 from bomgen.models.project import DesignConstants, LooseMaterial, Project, Spares
 from bomgen.models.substation import Substation
 
@@ -171,8 +171,11 @@ AXION = (
 def test_xdin_defaults_to_the_hwio_total_of_every_panel() -> None:
     cable_manager = device("CM", "cable_manager", tag_pattern="Cable Manager")
     lib = library(switch("L2", "L2", hwio_points=1), cable_manager, *AXION)
-    p1 = panel([{"part_id": "L2"}], id="p1")
-    p3 = panel([{"part_id": "AXION"}], id="p3", kind="control", tag_prefix="PSA3", lan=None)
+    forced = {"ventilation": "forced"}
+    p1 = panel([{"part_id": "L2"}], id="p1", options=forced)
+    p3 = panel(
+        [{"part_id": "AXION"}], id="p3", kind="control", tag_prefix="PSA3", lan=None, options=forced
+    )
     result = build(loaded(lib=lib, panels=(p1, p3)))
     total = sum(line.hwio for p in result.panels for line in p.lines)
     xdin = [line.qty for line in result.panels[1].lines if line.tag == "PSA3-XDIN"]
@@ -194,3 +197,47 @@ def test_revision_marks_reach_lines_of_every_group() -> None:
     lines = build(loaded(panels=(p1,))).panels[0].lines
     revised = {line.tag: line.revised for line in lines if line.revised}
     assert revised == {"PSA1-L2-ESW-A01": {"D"}, "PSA1-X-AC": {"D", "F"}}
+
+
+def auto_panel(unit_power_w: float) -> LoadedSubstation:
+    cable_manager = device("CM", "cable_manager", tag_pattern="Cable Manager")
+    lib = library(switch("L2", "L2", unit_power_w=unit_power_w), cable_manager)
+    p1 = panel([{"part_id": "L2"}], id="p1", options={"ventilation": "auto"})
+    return loaded(lib=lib, panels=(p1,))
+
+
+def test_auto_ventilation_picks_filters_for_a_cool_cabinet() -> None:
+    # Heat Calculations, "Rule for the tool": dT <= TMax - TInt -> filters + 1 thermostat,
+    # which feeds groups D, E and G.
+    result = build(auto_panel(10))
+    tags = {line.tag for line in result.panels[0].lines}
+    assert {"PSA1-FILTER", "PSA1-TH-1"} <= tags
+    assert not any(tag and "FAN" in tag for tag in tags)
+    (thf,) = [line.qty for line in result.panels[0].lines if line.tag == "PSA1-THF"]
+    assert thf == 5
+    assert result.heat is not None
+    assert result.heat.cabinets[0].ventilation is Ventilation.NATURAL
+    assert result.heat.line_up is None
+
+
+def test_auto_ventilation_picks_fans_for_a_hot_cabinet() -> None:
+    # 800 W / (7.92 m2 x 5.5) = 18 C > 10 C -> fans, thermostats and their AC branches.
+    result = build(auto_panel(800))
+    tags = {line.tag for line in result.panels[0].lines}
+    assert {"PSA1-FAN-1,2", "PSA1-TH-1,2,3", "PSA1-C2", "PSA1-C3"} <= tags
+    assert result.heat is not None
+    (cabinet,) = result.heat.cabinets
+    assert cabinet.ventilation is Ventilation.FORCED
+    assert cabinet.forced.fan_m3h == 716
+    assert result.heat.line_up is not None
+
+
+def test_build_result_carries_power_and_heat_per_cabinet() -> None:
+    result = build(loaded())
+    assert result.power is not None
+    assert result.heat is not None
+    assert [c.panel_id for c in result.power.cabinets] == ["p1", "p2"]
+    assert [c.panel_id for c in result.heat.cabinets] == ["p1", "p2"]
+    dc = result.power.cabinets[0].dc
+    assert dc is not None
+    assert dc.lines[0].source.line == 1  # the L2 switch row of p1

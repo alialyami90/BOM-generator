@@ -9,8 +9,8 @@ import math
 
 from pydantic import NonNegativeFloat, NonNegativeInt, PositiveFloat, PositiveInt
 
-from bomgen.models.bom import OutputModel
 from bomgen.models.library import LoadType, SupplyType
+from bomgen.models.output import OutputModel
 from bomgen.models.panel import Ventilation
 
 

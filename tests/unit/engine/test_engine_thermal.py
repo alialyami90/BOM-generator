@@ -2,7 +2,7 @@
 sheets, including "Rule for the tool"; Data model and generation order, step 4)."""
 
 import pytest
-from engine_factories import panel
+from engine_factories import library, panel, powered
 
 from bomgen.engine.thermal import (
     choose_ventilation,
@@ -11,7 +11,9 @@ from bomgen.engine.thermal import (
     line_up_check,
     natural_check,
     surface_area_m2,
+    ventilation_heat_w,
 )
+from bomgen.models.bom import BomLine, Group
 from bomgen.models.calc import CabinetPower, LineRef, PowerBlock, PowerConsumption, PowerLine
 from bomgen.models.library import LoadType, SupplyType
 from bomgen.models.panel import Panel, Ventilation
@@ -106,3 +108,20 @@ def test_heat_dissipation_has_dc_then_ac_rows_per_cabinet_and_an_auxiliary_block
     assert cabinet.total_btu_h == pytest.approx((6 * 77 + 2 * 87) * 3.41)
     assert auxiliary.panel_id is None
     assert auxiliary.total_w == 100
+
+
+def test_ventilation_heat_leaves_out_fans_filters_and_thermostats() -> None:
+    # Plan Q4: decide ventilation from the heat of everything except its own parts.
+    ac = {"supply_type": "VAC", "voltage_v": 230, "power_supplies": 0, "min_branch_mcb_a": None}
+    lib = library(
+        powered("SW", "network_switch", unit_power_w=77),
+        powered("PFAN", "fan", unit_power_w=87, **ac),
+        powered("PTH", "thermostat", unit_power_w=30, **ac),
+        powered("PLAMP", "lamp", unit_power_w=11, **ac),
+    )
+
+    def line(part_id: str, qty: int) -> BomLine:
+        return BomLine(group=Group.B, description=part_id, qty=qty, part_id=part_id)
+
+    lines = [line("SW", 2), line("PFAN", 2), line("PTH", 3), line("PLAMP", 1), line("TH", 1)]
+    assert ventilation_heat_w(lines, lib) == 2 * 77 + 11

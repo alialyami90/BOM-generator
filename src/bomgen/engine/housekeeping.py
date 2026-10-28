@@ -18,12 +18,6 @@ NATURAL_FILTERS = 2
 NATURAL_THERMOSTATS = 1
 
 
-def resolve_ventilation(panel: Panel) -> Ventilation:
-    """The panel's ventilation; ``auto`` is forced until the heat check decides it (M4)."""
-    option = panel.options.ventilation
-    return Ventilation.FORCED if option is Ventilation.AUTO else option
-
-
 def needs_change_over(panel: Panel, library: Library, loose: Sequence[LooseExtra]) -> bool:
     """Whether the panel gets change-over diodes: the option, or on ``auto`` any
     single-fed DC load in the panel or fed from it."""

@@ -1,19 +1,26 @@
 """Heat checks and the ventilation choice (spec: Heat Dissipation and Heat Calculations
 sheets, "Rule for the tool"; Data model and generation order, step 4)."""
 
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 
+from bomgen.engine.units import lookup
+from bomgen.models.bom import BomLine
 from bomgen.models.calc import (
     CabinetHeat,
+    CabinetThermal,
     ForcedVentCheck,
     HeatLine,
+    HeatResult,
     LineUpCheck,
     NaturalConvCheck,
     PowerBlock,
     PowerConsumption,
 )
+from bomgen.models.library import Category, Library
 from bomgen.models.panel import Panel, Ventilation
 from bomgen.models.project import DesignConstants
+
+VENTILATION_PARTS = frozenset({Category.FAN, Category.VENT_FILTER, Category.THERMOSTAT})
 
 
 def forced_check(
@@ -66,6 +73,20 @@ def choose_ventilation(panel: Panel, heat_w: float, constants: DesignConstants) 
     return Ventilation.NATURAL if natural.passes else Ventilation.FORCED
 
 
+def ventilation_heat_w(lines: Iterable[BomLine], library: Library) -> float:
+    """The heat the ventilation choice is made from: every powered row except the
+    ventilation parts themselves (plan Q4)."""
+    total = 0.0
+    for line in lines:
+        if line.part_id is None or not isinstance(line.qty, int):
+            continue
+        device = lookup(library, line.part_id)
+        if device.excluded_from_power or device.category in VENTILATION_PARTS:
+            continue
+        total += line.qty * (device.unit_power_w or 0)
+    return total
+
+
 def heat_dissipation(
     power: PowerConsumption, constants: DesignConstants
 ) -> tuple[CabinetHeat, ...]:
@@ -85,3 +106,33 @@ def heat_dissipation(
     if power.external is not None:
         result.append(heat(None, power.external))
     return tuple(result)
+
+
+def heat_result(
+    panels: Sequence[tuple[Panel, Ventilation]],
+    power: PowerConsumption,
+    fan_pair_m3h: float,
+    constants: DesignConstants,
+) -> HeatResult:
+    """Both checks for every cabinet from its Heat Dissipation total, and the line-up
+    check over the fan-ventilated cabinets. The forced check compares with the fan
+    pair a cabinet has or would get."""
+    dissipation = heat_dissipation(power, constants)
+    heat_by_panel = {block.panel_id: block.total_w for block in dissipation}
+    cabinets = []
+    for panel, ventilation in panels:
+        heat_w = heat_by_panel.get(panel.id, 0.0)
+        cabinets.append(
+            CabinetThermal(
+                panel_id=panel.id,
+                ventilation=ventilation,
+                forced=forced_check(panel.id, heat_w, fan_pair_m3h, constants),
+                natural=natural_check(panel, heat_w, constants),
+            )
+        )
+    forced = [c.forced for c in cabinets if c.ventilation is Ventilation.FORCED]
+    return HeatResult(
+        dissipation=dissipation,
+        cabinets=tuple(cabinets),
+        line_up=line_up_check(forced) if forced else None,
+    )
