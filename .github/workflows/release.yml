@@ -87,15 +87,18 @@ jobs:
           Write-Output "bomgen.exe validate exited ${validateExit}: $validated"
           if ($validateExit -ne 0 -or "$validated" -notmatch "^OK:") { Write-Error "validate failed"; exit 1 }
           $global:LASTEXITCODE = 0
-          # Builds the example substation's workbook from the frozen bundle; it prints each path.
+          # Builds the example substation's workbook from the frozen bundle: the first output
+          # line is the workbook path, the rest is the check report.
           $buildDir = Join-Path $env:RUNNER_TEMP "frozen-build"
-          $built = & "dist\bomgen\bomgen.exe" build examples\project.yaml --out $buildDir
+          $built = @(& "dist\bomgen\bomgen.exe" build examples\project.yaml --out $buildDir)
           $buildExit = $LASTEXITCODE
-          Write-Output "bomgen.exe build exited ${buildExit}: $built"
+          Write-Output "bomgen.exe build exited ${buildExit}: $($built -join "`n")"
           if ($buildExit -ne 0 -or -not $built) { Write-Error "build failed"; exit 1 }
-          foreach ($workbook in $built) {
-            if ($workbook -notlike "*.xlsx" -or -not (Test-Path $workbook)) { Write-Error "build printed '$workbook', which is not a workbook"; exit 1 }
-          }
+          $workbook = [string]$built[0]
+          if ($workbook -notlike "*.xlsx" -or -not (Test-Path $workbook)) { Write-Error "build printed '$workbook' first, which is not a workbook"; exit 1 }
+          $checks = [IO.Path]::ChangeExtension($workbook, ".checks.json")
+          if (-not (Test-Path $checks)) { Write-Error "build wrote no $checks"; exit 1 }
+          if (($built -join "`n") -notmatch "\b0 failed\b") { Write-Error "the check report does not say '0 failed'"; exit 1 }
           $global:LASTEXITCODE = 0
           # Imports every bomgen module from the frozen bundle (bomgen.app.launcher.self_test).
           $app = Start-Process "dist\bomgen\BOM Generator.exe" -ArgumentList "--self-test" -Wait -PassThru
@@ -166,11 +169,13 @@ jobs:
           $validated = & "$dir\bomgen.exe" validate examples\project.yaml 2>&1
           if ($LASTEXITCODE -ne 0 -or "$validated" -notmatch "^OK:") { Fail "Installed bomgen.exe validate gave: $validated" }
           $buildDir = Join-Path $env:RUNNER_TEMP "installed-build"
-          $built = & "$dir\bomgen.exe" build examples\project.yaml --out $buildDir
-          if ($LASTEXITCODE -ne 0 -or -not $built) { Fail "Installed bomgen.exe build exited ${LASTEXITCODE}: $built" }
-          foreach ($workbook in $built) {
-            if ($workbook -notlike "*.xlsx" -or -not (Test-Path $workbook)) { Fail "Installed build printed '$workbook', which is not a workbook" }
-          }
+          $built = @(& "$dir\bomgen.exe" build examples\project.yaml --out $buildDir)
+          if ($LASTEXITCODE -ne 0 -or -not $built) { Fail "Installed bomgen.exe build exited ${LASTEXITCODE}: $($built -join "`n")" }
+          $workbook = [string]$built[0]
+          if ($workbook -notlike "*.xlsx" -or -not (Test-Path $workbook)) { Fail "Installed build printed '$workbook' first, which is not a workbook" }
+          $checks = [IO.Path]::ChangeExtension($workbook, ".checks.json")
+          if (-not (Test-Path $checks)) { Fail "Installed build wrote no $checks" }
+          if (($built -join "`n") -notmatch "\b0 failed\b") { Fail "The installed build's check report does not say '0 failed'" }
           $listing = (& "$dir\bomgen.exe" library list) -join "`n"
           if ($listing -notmatch "ci-library") { Fail "Imported library missing from: $listing" }
           Remove-Item Env:BOMGEN_LIBRARY_HOME, Env:BOMGEN_NO_DIALOGS
