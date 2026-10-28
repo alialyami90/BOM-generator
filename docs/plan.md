@@ -132,57 +132,122 @@ question Q4.
 
 ## 3. Input file schemas
 
-`bomgen build --project examples/project.yaml` loads the project file, which
-points at the library and panel files with paths relative to itself. All models
-use `extra="forbid"` so typos fail validation. `bomgen validate` runs loading
-plus engine checks without writing a workbook. JSON Schemas are exported from
-the models (for editor completion and the UI).
+A project is a folder (ADR 0012): `project.yaml` lists substations, each
+substation file lists its panel files, and every path is relative to the file
+that holds it. `bomgen validate FILE` loads a project or a substation (found
+through the nearest `project.yaml` above it that lists it) and runs every
+check without writing a workbook. All models use `extra="forbid"` so typos fail
+validation. JSON Schemas are exported from the models into `schemas/` (for
+editor completion and the UI). Layout of the example: `examples/project.yaml`,
+`examples/library.yaml`, `examples/substations/gis01/{substation.yaml,panels/}`.
 
-### 3.1 `project.yaml` (spec: Inputs → 3. Project settings)
+### 3.1 `project.yaml` (spec: Inputs → 3. Project settings; ADR 0012)
 
 ```yaml
 project:
+  id: jfgp2-pkg3
   name: "<project name>"               # header centre line 1
-  substation: "GIS Substation"         # BOM title line 2
-  doc_no: "<project doc no.>"          # OUT-2 default file name
-  rev: "0"                             # OUT-2 default file name
+  client: null
   logo: assets/logo.png                # header left (&G)
-library: library.yaml
-panels:                                # panel order = sheet order (OUT-3)
+library:                               # the installed library (ADR 0008)
+  name: psa-devices
+  version: 1.0.0
+  file: library.yaml                   # optional: load this file instead of the store
+documents:                             # the register (Q24); every key names its substation
+  - { key: gis01-bom,   substation: gis01, doc_no: "...-001", rev: "02", issue_date: 2026-10-28 }
+  - { key: gis01-power, substation: gis01, doc_no: "...-002", rev: "00", issue_date: 2026-10-28 }
+defaults:                              # inherited key by key by every substation
+  constants:                           # defaults = spec values
+    dc_voltage_v: 125
+    ac_voltage_v: 230
+    power_margin: 0.25
+    current_factor: 1.3
+    btu_per_w: 3.41
+    t_max_c: 35
+    t_int_c: 25
+    air_constant_m3k_per_wh: 4.1
+    steel_coefficient_w_per_m2c: 5.5
+    min_main_mcb_a: 6
+  spares:                              # ADR 0013; every spare is an input
+    port_fraction: 0.20
+    sfp_per_l1: 3                      # today's "=24+3"
+    dc_branches_per_feed: 3            # for generated panels; panel options keep their own
+    ac_branches: 1
+    rack_u_reserved: 10                # 42U enclosure → 32U usable
+substations:
+  - substations/gis01/substation.yaml
+```
+
+### 3.2 `substation.yaml` (ADR 0012/0013)
+
+```yaml
+substation: { id: gis01, name: "GIS Substation" }   # BOM title line 2
+document: gis01-bom                    # the workbook's document: OUT-2 file name
+calculations:                          # calc sheets: register key + scope line
+  power_consumption: { document: gis01-power, scope: "861-GIS01-PSA-001/002" }
+  heat_dissipation:  { document: gis01-heat,  scope: "..." }
+  heat_calculations: { document: gis01-heat,  scope: "..." }
+panels:                                # sheet order (OUT-3); the layout (M1c) rewrites these
   - panels/psa1.yaml
   - panels/psa2.yaml
   - panels/psa3.yaml
-  - panels/ws.yaml
-documents:                             # calc sheets; BOM docs live on each panel
-  power_consumption:   { doc_no: "...", rev: "0", issue_date: 2026-10-28, scope: "..." }
-  heat_dissipation:    { doc_no: "...", rev: "0", issue_date: 2026-10-28, scope: "..." }
-  heat_calculations:   { doc_no: "...", rev: "0", issue_date: 2026-10-28, scope: "..." }
+manual_panels: [panels/ws.yaml]        # never touched by the layout; after `panels`
 output:
   file_name: "{doc_no}_PSA_BOM_Rev{rev}.xlsx"   # OUT-2
-  sheet_names:
-    power_consumption: "Power Consumption"
-    heat_dissipation: "Heat Dissipation"
-    heat_calculations: "Heat Calculations"
-constants:                             # defaults = spec values; override per project
-  dc_voltage_v: 125
-  ac_voltage_v: 230
-  power_margin: 0.25
-  current_factor: 1.3
-  btu_per_w: 3.41
-  t_max_c: 35
-  t_int_c: 25
-  air_constant_m3k_per_wh: 4.1
-  steel_coefficient_w_per_m2c: 5.5
-  min_main_mcb_a: 6
+  sheet_names: { power_consumption: "Power Consumption", heat_dissipation: "Heat Dissipation",
+                 heat_calculations: "Heat Calculations" }
+constants: { t_max_c: 40 }             # optional overrides of the project defaults
+spares: { port_fraction: 0.25 }        # optional overrides of the project defaults
 loose_material:                        # extras not tied to a device
   host_panel: ws                       # table sits under this panel's BOM
   items:
-    - { part_id: ANNUNCIATOR-WALL, qty: 1, children: [ANN-MOUNT-KIT], fed_from: psa3 }  # Q13
-    - { part_id: HMI-SW, qty: 1 }
+    - { part_id: NAP-K55, children: [LPA37-696], fed_from: psa3 }   # Q13
     - { part_id: FO-PATCH-CORDS, qty: "1 Lot" }
+equipment:                             # what the layout places (design 3.2)
+  - { part_id: RST2228-L2, role: l2_switch, redundant: true }       # exactly one
+  - { part_id: RST2228-L1-24MM, role: l1_switch, redundant: true }  # exactly one; no qty
+  - { part_id: FGR-60F, role: firewall, redundant: true, l2_ports: 1 }
+  - { part_id: SEL-2488, role: other, l2_ports: 1, l2_speed: 100M } # side: none (common)
+  # role: l1_switch | l2_switch | ext_switch | firewall | fopp | other
+  # redundant (one unit per side) or side: none | a | b; qty (not on l1_switch);
+  # l2_ports, l2_speed (default 1G), l2_media (default MM)
+network:
+  ied_count: 40                        # never a BOM row (R4)
+  topology: star                       # star | ring
+  ring_max_switches: 6
+  l1_uplinks_per_switch: 1
+  l1_interlink: true
+  l3_uplinks_per_l2: 2
+layout:                                # panel capacity = enclosure_u − rack_u_reserved
+  blank_plate_u: 1                     # space only, no BOM row (Q25)
+  overrides:                           # written by the UI's Panels board
+    - { device: PSA1-L1-ESW-A13, panel: 3 }
+    - { pair: EXT-FW, panel: [3, 4] }
+  removed: [PSA1-DHPCC-GW-1]
+generated_panels:                      # needed when equipment is given; {n} = panel number
+  id: "psa{n}"
+  cabinet_number: "861-GIS01-PSA-{n:04d}"
+  cabinet_name: "PSA Cabinet - {n:03d}"
+  tag_prefix: "PSA{n}"
+  sheet_name: "{n}"
+  kind: network
+  enclosure: { make: Rawabi, model: "Fixed Frame", h_mm: 2100, d_mm: 1000, w_mm: 800,
+               cable_entry: top }
+  document: gis01-bom
+  options: { dc_spare_branches_per_feed: 3 }   # every generated panel
+  options_by_panel: { 2: { aux_socket_a: 10 } }
 ```
 
-### 3.2 `library.yaml` (spec: Inputs → 1. Device library)
+**Loading rules.** Substation `constants` and `spares` replace only the keys
+they write; the merged constants are checked again (`t_max_c > t_int_c`). Every
+document key a substation, its calculation sheets, `generated_panels` and its
+panels name must be one of that substation's register entries. Equipment parts
+must exist and carry `height_u`, and the two switch roles must be
+`network_switch` parts. `rack_u_reserved` must be below `enclosure_u`. A
+library given by name and version comes from the installed store; a missing
+version is a located error.
+
+### 3.3 `library.yaml` (spec: Inputs → 1. Device library)
 
 ```yaml
 devices:
@@ -203,9 +268,10 @@ devices:
     min_branch_mcb_a: 2
     alarm_on_branch_mcb: false
     hwio_points: 1
-    ports:
-      - { count: 24, speed: 100M, media: MM, kind: fixed }
-      - { count: 4, speed: 1G, kind: sfp_slot }
+    height_u: 1                        # rack units (ADR 0013); 0 = DIN rail; null = not given
+    ports:                             # usable_for: ied | uplink | any (default any)
+      - { count: 24, speed: 100M, media: MM, kind: fixed, usable_for: ied }
+      - { count: 4, speed: 1G, kind: sfp_slot, usable_for: uplink }
     cores: null                        # fibre cores, for children with qty "cores"
     children: []                       # [{ part_id, qty: <per parent unit> | "cores" }]
     terminals: []                      # [{ strip: "XDIP{slot}", block: UT-2.5-MT, count: 58,
@@ -214,6 +280,7 @@ devices:
     excluded_from_power: false
 
 catalogues:
+  enclosure_u: 42                      # rack units of the enclosure (ADR 0013)
   mcb:          { family: "Acti9 2P", make: Schneider, ratings_a: [1, 2, 6, 10, 16],
                   code_pattern: "A9F742{rating:02d}" }
   aux_contact:  { make: Schneider, model: A9A26924, ordering_code: A9A26924 }
@@ -235,10 +302,11 @@ catalogues:
     socket:      { part_id: ..., rating_a: 10 }
 ```
 
-### 3.3 `panels/<id>.yaml` (spec: Inputs → 2. Panel definition)
+### 3.4 `panels/<id>.yaml` (spec: Inputs → 2. Panel definition)
 
 ```yaml
 id: psa1
+generated: false                       # true when the layout (M1c) wrote this file
 cabinet_number: 861-GIS01-PSA-0001
 cabinet_name: "PSA Cabinet - 001"
 tag_prefix: PSA1
@@ -257,7 +325,7 @@ enclosure:
 devices:                               # group B display order
   - { part_id: FOPP-96SM, qty: 1, purpose: "L2-L3 uplink to CCR" }
   - { part_id: RST2228-L2, qty: 1 }
-  - { part_id: RST2228-L1-24MM, qty: 6 }
+  - { part_id: RST2228-L1-24MM, qty: 6 }   # first_nn: 15 continues a range (A15 to A16)
   - { part_id: RST2228-EXT, qty: 1 }
   - { part_id: GW-DHPCC, qty: 1, purpose: "for Dhahran PCC connection" }
   - { part_id: FW-EXT, qty: 1 }
@@ -281,10 +349,7 @@ options:
   inter_panel_terminals: 40
   terminal_overrides: {}               # e.g. { X4-DC1: 32 } where the spec gives no rule
   grounding_busbars: [ac_safety_ground, instrument_ground]
-document:                              # this panel's BOM header/footer
-  doc_no: "..."
-  rev: "0"
-  issue_date: 2026-10-28
+document: gis01-bom                    # register key: this panel's BOM header/footer
 revision:
   highlight: []                        # [{ tag: PSA1-Q1.3, columns: [D] }] → yellow (OUT-8)
 ```
@@ -300,7 +365,7 @@ tag_prefix: PSA2
 lan: B                                 # swaps A→B and 1→2 in tags
 sheet_name: "2"
 options: { aux_socket_a: 10 }          # merged over the mirrored options
-document: { doc_no: "...", rev: "0", issue_date: 2026-10-28 }
+document: gis01-bom
 ```
 
 ## 4. Milestones
@@ -332,7 +397,9 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
   `enclosure_u`; JSON Schemas; `bomgen validate` on a project or a substation.
 - `examples/` becomes one project with one substation; the hand-written panels
   and every golden value stay as they are.
-- Section 3 of this plan is rewritten by A2 with the new schemas.
+- Section 3 of this plan is rewritten by A2 with the new schemas (done).
+- Also for M1c: `generated_panels` (identity of generated panels), equipment
+  `qty`/`l2_speed`/`l2_media`, panel `generated` and device-row `first_nn`.
 
 ### M1c — Network sizing and automatic panel layout (A8, ADR 0013)
 - `engine/sizing.py` (rules R1–R4 of the design) and `engine/layout.py`
