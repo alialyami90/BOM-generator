@@ -531,8 +531,9 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
   DI capacity vs HWIO) as text and JSON; non-zero exit on failures.
 - OUT-8 yellow highlighting from panel `revision.highlight` and/or a comparison
   with the previous issue (Q10).
-- `bomgen build` final options (`--out`, `--sheet-name`, `--compare`),
-  README usage, example walkthrough.
+- `bomgen build` final options (`--out`, `--compare`), README usage, example
+  walkthrough. *`--sheet-name` dropped (A1, 2026-10-28):* sheet names come from the
+  inputs (each panel's `sheet_name`, the substation's `output.sheet_names`).
 
 *Engine half delivered (A9, ADR 0016):* `bomgen.checks.check_report(loaded,
 result)` with `library_check`, `render_text`, `render_json` and `report.failed` for
@@ -540,7 +541,7 @@ the exit code; `bomgen.revision.read_previous_issue(path)` and
 `compare_with_previous(result, previous)` mark changed cells and list the changes
 (`render_revisions`). `BuildResult.mains` carries each panel's ΣQ, rating and rule
 rating. ΣQ is now the cabinet's own DC loads, without loose loads it feeds through a
-QCOD. A2 wires them into `bomgen build` and `--compare`.
+QCOD. A2 wired them into `bomgen build` and `--compare` (#62); M7 is done.
 
 ### M8 — Library update packages
 Ali wants the device library updated on every installed copy by sharing an
@@ -730,7 +731,8 @@ Delivered in small PRs by A11, one screen group each (ADR 0015 for the bridge):
   (`<substation>/out`), the sheet names, library and revision; `build_workbook` runs the
   steps of `bomgen build` (engine, sheets, the optional comparison with a previous issue,
   the workbook and its `.checks.json`) and refuses `has_errors`, `file_exists` (the page
-  asks before replacing), `file_open` (another program holds the file) and `bad_name`.
+  asks before replacing), `file_open` (another program holds the file), `bad_name`,
+  `bad_folder` (no folder, or not an absolute one), `bad_previous`, `engine` and `write`.
   `open_file` opens a workbook the app wrote. The build is one call, so the page shows
   one busy state rather than four named stages. Then Preview (`bomgen.app.preview`):
   `preview_substation` gives each panel sheet's rows (SR numbers, tag spans, separator
