@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 
+from bomgen.app.api import Api
 from bomgen.app.window import INDEX, UI_DIR
 
 REPO = Path(__file__).parents[3]
@@ -78,3 +79,14 @@ def test_content_security_policy_allows_nothing_from_outside_the_ui_folder() -> 
     assert policy["default-src"] == ["'none'"]
     for directive, sources in policy.items():
         assert all(s.startswith("'") or s == "data:" for s in sources), directive
+
+
+def test_every_endpoint_the_screens_call_exists() -> None:
+    called = {
+        name
+        for script in UI_DIR.glob("*.js")
+        for name in re.findall(r"Bridge\.call\('(\w+)'", script.read_text(encoding="utf-8"))
+    }
+    assert called
+    missing = sorted(n for n in called if n.startswith("_") or not callable(getattr(Api, n, None)))
+    assert missing == []

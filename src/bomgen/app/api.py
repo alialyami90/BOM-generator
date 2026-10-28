@@ -11,11 +11,14 @@ results for JSON; they hold no business rule.
 from __future__ import annotations
 
 import dataclasses
+import errno
 import functools
 import os
+import subprocess
+import sys
 import traceback
-from collections.abc import Callable, Mapping
-from datetime import date
+from collections.abc import Callable, Mapping, Sequence
+from datetime import UTC, date, datetime
 from enum import Enum
 from pathlib import Path, PurePath
 from typing import Any, Protocol
@@ -23,19 +26,30 @@ from typing import Any, Protocol
 from pydantic import BaseModel, ValidationError
 
 from bomgen import __version__
+from bomgen.app.projects import RecentProjects, project_files, summarize
 from bomgen.bundle.errors import LibraryPackageError, RefusalKind
 from bomgen.io.errors import InputError
-from bomgen.io.loader import load_library
+from bomgen.io.loader import PROJECT_FILE, load_library
 from bomgen.library_store.device_db import DeviceRecord, load_device_records
 from bomgen.library_store.manifest import Manifest
 from bomgen.library_store.preview import preview_library_import
 from bomgen.library_store.service import import_library
 from bomgen.library_store.store import InstalledLibrary, LibraryStore, default_library_home
 from bomgen.library_store.versions import Version
+from bomgen.project_store import (
+    backup_project,
+    export_project,
+    import_project,
+    list_backups,
+    preview_project_import,
+    restore_backup,
+)
+from bomgen.project_store.manifest import PROJECT_SUFFIX
 from bomgen.project_store.workspace import default_workspace
 
 APP_TITLE = "BOM Generator"
-OPEN_DIALOG = 10  # webview.FileDialog.OPEN, kept here so pywebview is imported only by window.py
+# webview.FileDialog values, kept here so pywebview is imported only by window.py
+OPEN_DIALOG, FOLDER_DIALOG, SAVE_DIALOG = 10, 20, 30
 FILE_TYPES = {
     "bomlib": "Library packages (*.bomlib)",
     "bomproj": "Project files (*.bomproj)",
@@ -46,7 +60,7 @@ class FileDialogWindow(Protocol):
     """The part of ``webview.Window`` the API uses."""
 
     def create_file_dialog(
-        self, dialog_type: int = ..., *, file_types: tuple[str, ...] = ...
+        self, dialog_type: int = ..., *, file_types: tuple[str, ...] = ..., save_filename: str = ...
     ) -> Any: ...
 
 
@@ -56,6 +70,25 @@ class AppError(Exception):
     def __init__(self, kind: str, message: str) -> None:
         super().__init__(message)
         self.kind = kind
+
+
+def _first(chosen: object) -> str | None:
+    """The path a file dialog returned: a tuple of paths, one path, or None."""
+    if isinstance(chosen, str | PurePath):
+        return str(chosen) or None
+    if isinstance(chosen, Sequence) and chosen:
+        return str(chosen[0])
+    return None
+
+
+def reveal(
+    path: Path, platform: str = sys.platform, run: Callable[[list[str]], object] = subprocess.Popen
+) -> None:
+    """Show ``path`` in the file manager: selected in Explorer, its folder elsewhere."""
+    if platform == "win32":
+        run(["explorer", f"/select,{path}"])
+    else:
+        run(["open" if platform == "darwin" else "xdg-open", str(path.parent)])
 
 
 Envelope = dict[str, object]
@@ -111,6 +144,7 @@ class Api:
         self._project_file = project_file
         self._env = env
         self._window: FileDialogWindow | None = None
+        self._reveal: Callable[[Path], object] = reveal
 
     def _set_window(self, window: FileDialogWindow) -> None:
         """Called by ``run_window`` once the window exists (it owns the file dialogs)."""
@@ -118,6 +152,22 @@ class Api:
 
     def _library_store(self) -> LibraryStore:
         return LibraryStore(default_library_home(self._env))
+
+    def _workspace(self) -> Path:
+        return default_workspace(self._env)
+
+    def _recent(self) -> RecentProjects:
+        return RecentProjects(default_library_home(self._env).parent / "app")
+
+    def _dialog(self, dialog_type: int, kind: str, save_filename: str = "") -> str | None:
+        if kind not in FILE_TYPES:
+            raise AppError("unknown_file_kind", f"Unknown kind of file: {kind}")
+        if self._window is None:
+            return None
+        options: dict[str, Any] = {"file_types": (FILE_TYPES[kind],)}
+        if save_filename:
+            options["save_filename"] = save_filename
+        return _first(self._window.create_file_dialog(dialog_type, **options))
 
     def _active_library(self) -> InstalledLibrary | None:
         """The library the app shows: the first installed one with an active version.
@@ -150,13 +200,7 @@ class Api:
     @endpoint
     def choose_file(self, kind: str) -> str | None:
         """Ask for a ``.bomlib`` or ``.bomproj`` file; None when the user cancels."""
-        file_type = FILE_TYPES.get(kind)
-        if file_type is None:
-            raise AppError("unknown_file_kind", f"Unknown kind of file: {kind}")
-        if self._window is None:
-            return None
-        chosen = self._window.create_file_dialog(OPEN_DIALOG, file_types=(file_type,))
-        return str(chosen[0]) if chosen else None
+        return self._dialog(OPEN_DIALOG, kind)
 
     # -- Library (docs/ui/screens.md: Library, Import update and installed versions) --
 
@@ -236,3 +280,124 @@ class Api:
     def activate_library_version(self, name: str, version: str) -> str:
         """Make an installed version active again. Project files are not touched."""
         return self._library_store().rollback(name, to=version)
+
+    # -- Projects (docs/ui/screens.md: Home, Project, Back up and share) --
+
+    @endpoint
+    def list_projects(self) -> list[dict[str, Any]]:
+        """The workspace's projects and the ones opened from elsewhere, newest change first."""
+        store = self._library_store()
+        rows = [summarize(f, store) for f in project_files(self._workspace(), self._recent())]
+        return sorted(
+            rows, key=lambda r: r["changed"] or datetime.min.replace(tzinfo=UTC), reverse=True
+        )
+
+    @endpoint
+    def open_project(self, project_file: str) -> dict[str, Any]:
+        """The Project page: the summary plus info, defaults, register and located problems."""
+        file = Path(project_file)
+        if not file.is_file():
+            raise FileNotFoundError(errno.ENOENT, "No project file here", str(file))
+        page = summarize(file, self._library_store(), details=True)
+        workspace = self._workspace().resolve()
+        if workspace not in file.resolve().parents:
+            self._recent().add(file)
+        return page
+
+    @endpoint
+    def choose_project_folder(self) -> str | None:
+        """Ask for a folder holding ``project.yaml``; its path, or None when cancelled."""
+        if self._window is None:
+            return None
+        folder = _first(self._window.create_file_dialog(FOLDER_DIALOG))
+        if folder is None:
+            return None
+        project_file = Path(folder) / PROJECT_FILE
+        if not project_file.is_file():
+            raise AppError(
+                "not_a_project", f"{folder} has no {PROJECT_FILE}. Choose the project's folder."
+            )
+        return str(project_file)
+
+    @endpoint
+    def export_project(self, project_file: str) -> dict[str, Any] | None:
+        """Ask where to save, then write the project as one ``.bomproj``; None when cancelled."""
+        file = Path(project_file)
+        name = f"{file.parent.name}-{datetime.now():%Y-%m-%d}{PROJECT_SUFFIX}"
+        target = self._dialog(SAVE_DIALOG, "bomproj", save_filename=name)
+        if target is None:
+            return None
+        out = Path(target)
+        exported = export_project(
+            file, out if out.suffix == PROJECT_SUFFIX else out.with_suffix(PROJECT_SUFFIX)
+        )
+        return {"path": exported.path, "size": exported.path.stat().st_size}
+
+    @endpoint
+    def backup_project(self, project_file: str) -> dict[str, Any]:
+        """Save a backup in the project's ``Backups`` folder."""
+        path = backup_project(Path(project_file))
+        return {"path": path, "size": path.stat().st_size}
+
+    @endpoint
+    def list_backups(self, project_file: str) -> list[Any]:
+        """The project's backups, newest first."""
+        return list_backups(Path(project_file))
+
+    @endpoint
+    def show_in_folder(self, path: str) -> None:
+        """Open the file manager on a backup or a project file."""
+        target = Path(path)
+        if not target.exists():
+            raise FileNotFoundError(errno.ENOENT, "This file is no longer there", path)
+        self._reveal(target)
+
+    @endpoint
+    def preview_project_import(self, path: str) -> dict[str, Any]:
+        """The import review of a ``.bomproj``; nothing is written."""
+        package = Path(path)
+        preview = preview_project_import(
+            package, workspace=self._workspace(), store=self._library_store()
+        )
+        return self._preview(package, preview)
+
+    @endpoint
+    def import_project(self, path: str, replace: bool = False) -> dict[str, Any]:
+        """Import a ``.bomproj`` into the workspace; ``replace`` backs up and replaces a clash."""
+        result = import_project(
+            Path(path), workspace=self._workspace(), force=replace, store=self._library_store()
+        )
+        return self._imported(result)
+
+    @endpoint
+    def preview_backup_restore(self, backup: str) -> dict[str, Any]:
+        """The review before a restore: the same dry-run, against the backup's own project."""
+        package = Path(backup)
+        preview = preview_project_import(
+            package, workspace=package.parent.parent.parent, store=self._library_store()
+        )
+        return self._preview(package, preview)
+
+    @endpoint
+    def restore_backup(self, backup: str) -> dict[str, Any]:
+        """Put a backup back as its project; the current state is backed up first."""
+        return self._imported(restore_backup(Path(backup), store=self._library_store()))
+
+    @staticmethod
+    def _preview(package: Path, preview: Any) -> dict[str, Any]:
+        return {
+            **{f.name: getattr(preview, f.name) for f in dataclasses.fields(preview)},
+            "can_import": preview.can_import,
+            "file_name": package.name,
+            "package_size": package.stat().st_size if package.is_file() else None,
+        }
+
+    @staticmethod
+    def _imported(result: Any) -> dict[str, Any]:
+        return {
+            "project_file": result.project_dir / PROJECT_FILE,
+            "replaced": result.replaced,
+            "backup": result.backup,
+            "library_note": result.library_note,
+            "manifest": result.manifest,
+        }

@@ -6,13 +6,14 @@
   const F = { q: '', cat: '', ver: '', alt: false };
 
   /* ---------- data from Python; the illustrative DB only when opened outside the app ---------- */
-  const LIB = { state: 'idle', overview: null, versions: null, errors: {}, offline: false };
+  const LIB = { state: 'idle', overview: null, versions: null, projects: [], errors: {}, offline: false };
   function loadLibrary() {
     LIB.state = 'loading';
     // Loaded independently: a damaged active version must not hide the versions that can repair it.
     const load = (name, key) => Bridge.call(name).then((data) => { LIB[key] = data; LIB.errors[key] = null; })
       .catch((err) => { LIB[key] = null; LIB.errors[key] = err; });
-    return Promise.all([load('library_overview', 'overview'), load('library_versions', 'versions')]).then(() => {
+    const projects = Bridge.call('list_projects').then((list) => { LIB.projects = list; }).catch(() => { LIB.projects = []; });  // only for the Projects column
+    return Promise.all([load('library_overview', 'overview'), load('library_versions', 'versions'), projects]).then(() => {
       LIB.state = 'loaded';
       LIB.offline = Object.values(LIB.errors).some((e) => e && e.kind === 'no_backend');
       App.render();
@@ -56,8 +57,9 @@
     : LIB.overview && LIB.overview.library ? { name: LIB.overview.library.name, version: LIB.overview.library.version, date: day(LIB.overview.library.created), notes: LIB.overview.library.notes } : null;
   const devices = () => (LIB.offline ? DB.devices : LIB.overview ? LIB.overview.devices.map((d) => row(d, LIB.overview.records)) : []);
   const versions = () => (LIB.offline
-    ? DB.library.versions.map((v) => ({ version: v.v, released: v.date, notes: v.notes, active: v.active, problem: null }))
-    : LIB.versions ? LIB.versions.versions : []);
+    ? DB.library.versions.map((v) => ({ version: v.v, released: v.date, notes: v.notes, active: v.active, problem: null, projects: v.projects }))
+    : LIB.versions ? LIB.versions.versions.map((v) => ({ ...v, projects: builtWith(LIB.versions.name, v.version) })) : []);
+  const builtWith = (name, version) => LIB.projects.filter((p) => p.library && !p.library.local_file && p.library.name === name && p.library.version === version).length;
   /* Data quality, datasheets and alternatives come from the device database a package may carry. */
   const hasDeviceDb = () => devices().some((d) => d.verified);
 
@@ -148,7 +150,6 @@
     validation_failed: { title: 'The library in this package has errors', body: 'Nothing was installed. Send the details below to whoever maintains the library.' },
     store_damaged: { title: 'The installed libraries need attention', body: 'Make a version active under Installed versions, or import a package again.' }
   };
-  const CHECK = { ok: ['ok', 'check'], warning: ['warn', 'warn'], failed: ['bad', 'error'], skipped: ['info', 'info'] };
   const IMP = { step: 'choose', path: '', preview: null, force: false, result: null };
 
   function importFlow() {
@@ -177,7 +178,7 @@
         <section><h3>Package</h3><dl class="kv" style="margin-top:var(--space-2);grid-template-columns:130px 1fr"><dt>File</dt><dd class="mono">${esc(p.file_name)}</dd><dt>Size</dt><dd>${kb(p.package_size)}</dd>
           ${m ? `<dt>Library</dt><dd>${esc(m.name)}</dd><dt>Version</dt><dd><b>${esc(m.version)}</b> <span class="muted">(${active ? `active ${esc(active)}` : 'first install'})</span></dd><dt>Library schema</dt><dd>${esc(m.schema_version)}</dd><dt>Needs app</dt><dd>${esc(m.min_app_version)} or later</dd><dt>Built</dt><dd>${esc(String(m.created).replace('T', ' ').slice(0, 16))}</dd>` : ''}</dl>
         ${m && m.release_notes ? `<h3 style="margin-top:var(--space-4)">Release notes</h3><p style="margin-top:6px">${esc(m.release_notes)}</p>` : ''}</section>
-        <section><h3>Verification</h3><ul class="checklist" style="margin-top:var(--space-2)">${checkList(p.checks, !!failed)}</ul></section></div>
+        <section><h3>Verification</h3><ul class="checklist" style="margin-top:var(--space-2)">${App.checkList(p.checks)}</ul></section></div>
       ${d ? `<section><h3>What changes</h3>
         ${n.a + n.c + n.r + d.catalogues_changed.length + n.f === 0 ? '<p class="muted" style="margin-top:6px">No changes.</p>' : `
         <div class="row" style="margin:var(--space-2) 0 var(--space-3)">${badge('ok', `${n.a} added`)}${badge('info', `${n.c} changed`)}${badge('bad', `${n.r} removed`)}${d.catalogues_changed.length ? badge('plain', `${d.catalogues_changed.length} catalogues changed`) : ''}${n.f ? badge('plain', `${n.f} data files`) : ''}</div>
@@ -191,17 +192,6 @@
         <button class="btn btn--secondary" data-action="import-cancel">Choose a different package</button></div></div>`;
   }
   const group = (title, items, kind, fields) => items.length ? `<details ${kind === 'info' || kind === 'bad' ? 'open' : ''}><summary>${icon('chevr', 'chev')}${esc(title)} ${badge(kind, items.length)}</summary><div class="items">${items.map(([a, b]) => `<div><span class="mono">${esc(a)}</span><span class="muted">${fields && b ? 'fields: ' + esc(b) : esc(b)}</span></div>`).join('')}</div></details>` : '';
-  /* After a failure the later checks did not run: one muted line instead of a row each. */
-  function checkList(checks, failed) {
-    const item = (cls, ic, label, detail) => `<li class="${cls}">${icon(ic)}<span style="color:var(--color-text)">${esc(label)}${detail ? `<span class="cell-sub">${esc(detail)}</span>` : ''}</span></li>`;
-    const shown = failed ? checks.filter((c) => c.status !== 'skipped') : checks;
-    const skipped = checks.length - shown.length;
-    return shown.map((c) => {
-      if (c.id === 'signature' && c.status === 'skipped') return item('info', 'info', 'Not signed (not used)', c.detail);
-      const [cls, ic] = CHECK[c.status];
-      return item(cls, ic, c.label, c.detail);
-    }).join('') + (skipped ? `<li class="info">${icon('info')}<span>${skipped} later ${skipped === 1 ? 'check was' : 'checks were'} not run</span></li>` : '');
-  }
   const fail = (err) => { toast(err.kind === 'no_backend' ? 'Importing works in the app, not in a browser.' : err.message, 'error'); };
   function review(force) {
     IMP.force = force; IMP.step = 'checking'; App.render();
@@ -235,8 +225,8 @@
     const L = lib(), list = versions();
     if (LIB.errors.versions && !LIB.offline) return loadError('versions', 'The installed versions could not be read.');
     if (!L && !list.length) return `<p class="muted">No library is installed yet.</p>`;
-    return `<div class="table-wrap" style="max-width:980px"><table class="table table--comfort"><thead><tr><th>Version</th><th>Released</th><th>Notes</th><th>State</th><th style="width:130px"><span class="sr-only">Actions</span></th></tr></thead><tbody>
-      ${list.map((v) => `<tr><td class="mono">${esc(v.version)}</td><td class="nowrap">${esc(day(v.released))}</td><td class="wrap">${esc(v.notes || '')}</td><td>${v.active ? badge('ok', 'Active', 'check') : ''} ${v.problem ? `${badge('bad', 'Problem', 'error')}<span class="cell-sub">${esc(v.problem)}</span>` : v.active ? '' : badge('plain', 'Installed')}</td><td>${v.active ? '' : `<button class="btn btn--secondary btn--sm" data-action="rollback" data-v="${esc(v.version)}" ${v.problem ? 'disabled' : ''}>Make active</button>`}</td></tr>`).join('')}</tbody></table></div>
+    return `<div class="table-wrap" style="max-width:980px"><table class="table table--comfort"><thead><tr><th>Version</th><th>Released</th><th>Notes</th><th class="num">Projects</th><th>State</th><th style="width:130px"><span class="sr-only">Actions</span></th></tr></thead><tbody>
+      ${list.map((v) => `<tr><td class="mono">${esc(v.version)}</td><td class="nowrap">${esc(day(v.released))}</td><td class="wrap">${esc(v.notes || '')}</td><td class="num">${v.projects}</td><td>${v.active ? badge('ok', 'Active', 'check') : ''} ${v.problem ? `${badge('bad', 'Problem', 'error')}<span class="cell-sub">${esc(v.problem)}</span>` : v.active ? '' : badge('plain', 'Installed')}</td><td>${v.active ? '' : `<button class="btn btn--secondary btn--sm" data-action="rollback" data-v="${esc(v.version)}" ${v.problem ? 'disabled' : ''}>Make active</button>`}</td></tr>`).join('')}</tbody></table></div>
       <p class="muted small" style="margin-top:var(--space-3);max-width:68ch">Making an older version active does not change any project file. Projects keep the version they record, and the check report tells you when it differs from the active one.</p>`;
   }
   ACTIONS.rollback = (el) => { const L = lib(); dialog({ title: `Make ${esc(el.dataset.v)} active?`, body: `<p>The library switches to ${esc(el.dataset.v)} for every project on this PC. ${L ? `Version ${esc(L.version)} stays installed.` : ''}</p>`, actions: `<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="activate-version" data-v="${esc(el.dataset.v)}">Make ${esc(el.dataset.v)} active</button>` }); };

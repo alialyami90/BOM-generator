@@ -1,0 +1,176 @@
+"""The projects the app knows: the workspace's and the ones opened from elsewhere (plan M10b).
+
+Everything here reads project files through the loader and the stores; the status
+words match the Checks screen (``docs/ui/screens.md``, Home).
+"""
+
+from __future__ import annotations
+
+import json
+import os
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any
+
+from pydantic import ValidationError
+
+from bomgen.io.errors import InputError, Issue
+from bomgen.io.loader import PROJECT_FILE, LoadedProject, load_project
+from bomgen.io.yaml_source import read_yaml
+from bomgen.library_store.errors import LibraryPackageError
+from bomgen.library_store.store import LibraryRef, LibraryStore, library_mismatch
+from bomgen.models.project import Project
+
+RECENT_FILE = "recent-projects.json"
+MAX_RECENT = 50
+
+
+class RecentProjects:
+    """Project files opened outside the workspace, newest first, kept per user."""
+
+    def __init__(self, folder: Path) -> None:
+        self.file = folder / RECENT_FILE
+
+    def load(self) -> list[Path]:
+        try:
+            paths = json.loads(self.file.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return []
+        return [Path(p) for p in paths if isinstance(p, str)] if isinstance(paths, list) else []
+
+    def add(self, project_file: Path) -> None:
+        paths = [project_file, *(p for p in self.load() if p != project_file)][:MAX_RECENT]
+        self.file.parent.mkdir(parents=True, exist_ok=True)
+        partial = self.file.with_name(f".{self.file.name}.partial")
+        partial.write_text(json.dumps([str(p) for p in paths], indent=2), encoding="utf-8")
+        os.replace(partial, self.file)
+
+
+def project_files(workspace: Path, recent: RecentProjects) -> list[Path]:
+    """Every project file to list: the workspace's folders, then the remembered ones."""
+    found = sorted(workspace.glob(f"*/{PROJECT_FILE}")) if workspace.is_dir() else []
+    seen = {p.resolve() for p in found}
+    for path in recent.load():
+        if path.is_file() and path.resolve() not in seen:
+            found.append(path)
+            seen.add(path.resolve())
+    return found
+
+
+def _status(errors: int, library_note: str | None) -> dict[str, Any]:
+    if errors:
+        return {
+            "level": "bad",
+            "text": f"{errors} error{'s' if errors != 1 else ''}",
+            "errors": errors,
+        }
+    if library_note:
+        return {"level": "warn", "text": "Library out of date", "errors": 0}
+    return {"level": "ok", "text": "Ready", "errors": 0}
+
+
+def _project_only(project_file: Path) -> Project | None:
+    """project.yaml validated on its own, for the header when the whole project has errors."""
+    try:
+        return Project.model_validate(read_yaml(project_file).data)
+    except (InputError, ValidationError):
+        return None
+
+
+def _library_note(project: Project, store: LibraryStore) -> str | None:
+    """Why the recorded library differs from the active one; None when a local file is used."""
+    selection = project.library
+    if selection.file is not None:
+        return None
+    try:
+        active = store.active_version(selection.name)
+    except LibraryPackageError as exc:
+        return str(exc)
+    recorded = LibraryRef(selection.name, selection.version)
+    return library_mismatch(recorded, LibraryRef(selection.name, active) if active else None)
+
+
+def _changed(path: Path) -> datetime | None:
+    try:
+        return datetime.fromtimestamp(path.stat().st_mtime, UTC)
+    except OSError:
+        return None
+
+
+def _load(project_file: Path, store: LibraryStore) -> tuple[LoadedProject | None, list[Issue]]:
+    try:
+        return load_project(project_file, store=store), []
+    except InputError as exc:
+        return None, list(exc.issues)
+
+
+def _substations(
+    project_file: Path, project: Project | None, loaded: LoadedProject | None, issues: list[Issue]
+) -> list[dict[str, Any]]:
+    def errors_in(file: Path) -> int:
+        folder = file.parent.resolve()
+        return sum(1 for i in issues if folder in i.file.resolve().parents)
+
+    if loaded is not None:
+        return [
+            {
+                "id": s.substation.substation.id,
+                "name": s.substation.substation.name,
+                "file": s.file,
+                "panels": len(s.panels),
+                "changed": _changed(s.file),
+                "errors": 0,
+            }
+            for s in loaded.substations
+        ]
+    if project is None:
+        return []
+    rows = []
+    for path in project.substations:
+        file = project_file.parent / path
+        rows.append(
+            {
+                "id": file.parent.name,
+                "name": file.parent.name,
+                "file": file,
+                "panels": None,
+                "changed": _changed(file),
+                "errors": errors_in(file),
+            }
+        )
+    return rows
+
+
+def summarize(project_file: Path, store: LibraryStore, *, details: bool = False) -> dict[str, Any]:
+    """One project as Home lists it; with ``details`` also what the Project page shows."""
+    loaded, issues = _load(project_file, store)
+    project = loaded.project if loaded is not None else _project_only(project_file)
+    note = _library_note(project, store) if project is not None else None
+    summary: dict[str, Any] = {
+        "id": project.project.id if project else project_file.parent.name,
+        "name": project.project.name if project else project_file.parent.name,
+        "client": project.project.client if project else None,
+        "file": project_file,
+        "folder": project_file.parent,
+        "changed": _changed(project_file),
+        "library": (
+            {
+                "name": project.library.name,
+                "version": project.library.version,
+                "local_file": project.library.file is not None,
+                "note": note,
+            }
+            if project
+            else None
+        ),
+        "substations": _substations(project_file, project, loaded, issues),
+        "status": _status(len(issues), note),
+    }
+    if details:
+        summary |= {
+            "project": project.project if project else None,
+            "defaults": project.defaults if project else None,
+            "documents": project.documents if project else [],
+            "problems": issues,
+        }
+    return summary

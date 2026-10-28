@@ -20,6 +20,8 @@
     selectedDevice: 'RST2228-L1-24MM',
     yamlError: true,
     density: 'default',
+    backend: 'unknown',        // unknown | yes | no (opened in a plain browser: the prototype's illustrative data)
+    project: null,             // the open project's page from open_project, shaped for the screens
     app: null,                 // app_info from Python: version, project_file, workspace, libraries
     library: null,             // the active library { name, version }, or null
     launchFile: ''             // file name of the .bomproj the app was started with
@@ -28,6 +30,7 @@
   const SCREENS = {};
   /* Real state from bomgen.app.api.app_info; screens not connected yet still read the illustrative DB. */
   function setAppInfo(info) {
+    if (S.backend !== 'yes') { S.backend = 'yes'; S.proj = null; S.sub = null; }  // real projects replace the example
     S.app = info;
     const active = info.libraries.find((l) => l.active);
     S.library = active ? { name: active.name, version: active.active } : null;
@@ -59,6 +62,20 @@
   const pageHead = (title, lede = '', actions = '', crumbs = '') => `<div class="page-head"><div>${crumbs ? `<div class="crumbs">${crumbs}</div>` : ''}<h1>${title}</h1>${lede ? `<p class="lede">${lede}</p>` : ''}</div>${actions ? `<div class="actions">${actions}</div>` : ''}</div>`;
   const illus = () => `<span class="illus">${icon('info')}Illustrative data: not connected yet</span>`;
 
+  /* Import reviews (library and project): every check; after a failure the later ones collapse to one line. */
+  const CHECK = { ok: ['ok', 'check'], warning: ['warn', 'warn'], failed: ['bad', 'error'], skipped: ['info', 'info'] };
+  function checkList(checks) {
+    const failed = checks.some((c) => c.status === 'failed');
+    const item = (cls, ic, label, detail) => `<li class="${cls}">${icon(ic)}<span style="color:var(--color-text)">${esc(label)}${detail ? `<span class="cell-sub">${esc(detail)}</span>` : ''}</span></li>`;
+    const shown = failed ? checks.filter((c) => c.status !== 'skipped') : checks;
+    const skipped = checks.length - shown.length;
+    return shown.map((c) => {
+      if (c.id === 'signature' && c.status === 'skipped') return item('info', 'info', 'Not signed (not used)', c.detail);
+      const [cls, ic] = CHECK[c.status];
+      return item(cls, ic, c.label, c.detail);
+    }).join('') + (skipped ? `<li class="info">${icon('info')}<span>${skipped} later ${skipped === 1 ? 'check was' : 'checks were'} not run</span></li>` : '');
+  }
+
   /* ---------- overlay: dialog, toast ---------- */
   let lastFocus = null;
   function dialog({ title, body, actions }) {
@@ -81,7 +98,7 @@
     return { a, b, c };
   };
   const go = (hash) => { if (location.hash === hash) render(); else location.hash = hash; };
-  const curProject = () => DB.projects.find((p) => p.id === S.proj) || null;
+  const curProject = () => (S.backend === 'no' ? DB.projects.find((p) => p.id === S.proj) || null : S.project);
   const curSub = () => { const p = curProject(); return p ? p.substations.find((s) => s.id === S.sub) || null : null; };
   const hasProject = () => !S.firstRun && !!curProject();
   const hasSub = () => hasProject() && !!curSub();
@@ -101,8 +118,9 @@
     return `<a href="${disabled ? '#' : href}" ${cur ? 'aria-current="page"' : ''} ${disabled ? 'aria-disabled="true" tabindex="-1" style="opacity:.45;pointer-events:none"' : ''}>${icon(ic)}<span>${label}</span>${tail ? `<span class="tail ${tailCls}">${tail}</span>` : ''}</a>`;
   }
   function renderNav() {
-    const r = route().a, c = counts(), np = hasProject(), ns = hasSub(), p = curProject();
-    const buildTail = !ns ? '' : c.errors ? `${icon('error')}Blocked` : `${icon('check')}Ready`;
+    const r = route().a, c = counts(), np = hasProject(), p = curProject();
+    const ns = hasSub(), ex = ns && S.backend !== 'yes';  // ex: the example substation's figures (M10c and M10d connect the real ones)
+    const buildTail = !ex ? '' : c.errors ? `${icon('error')}Blocked` : `${icon('check')}Ready`;
     const projTail = !np ? '' : p.status === 'bad' ? `${icon('error')}${p.statusText}` : p.status === 'warn' ? `${icon('warn')}1` : `${icon('check')}`;
     const switcher = np ? `<div class="nav-switch"><label class="sr-only" for="sub-switch">Substation</label><select class="select" id="sub-switch" data-action="sub-switch">${S.sub ? '' : '<option value="">Choose a substation…</option>'}${p.substations.map((x) => `<option value="${x.id}" ${x.id === S.sub ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>` : '';
     $('#nav').innerHTML = `
@@ -111,25 +129,26 @@
       ${np ? `<div class="nav-group">Project</div>
       ${navItem('#/project', 'project', esc(p.name.replace(' (example)', '')), projTail, p.status === 'bad' ? 'bad' : p.status === 'warn' ? 'warn' : 'ok', false, r === 'project')}
       <div class="nav-group">Substation</div>${switcher}
-      ${navItem('#/settings', 'file', 'Settings', ns ? icon('check') : '', 'ok', !ns, r === 'settings')}
-      ${navItem('#/network', 'network', 'Network', ns ? (S.sub === 'cb03' ? `${icon('warn')}Not set up` : icon('check')) : '', S.sub === 'cb03' ? 'warn' : 'ok', !ns, r === 'network')}
-      ${navItem('#/panels', 'panels', 'Panels', ns ? String(S.sub === 'cb03' ? 0 : DB.panels.length) : '', '', !ns, r === 'panels')}
+      ${navItem('#/settings', 'file', 'Settings', ex ? icon('check') : '', 'ok', !ns, r === 'settings')}
+      ${navItem('#/network', 'network', 'Network', ex ? (S.sub === 'cb03' ? `${icon('warn')}Not set up` : icon('check')) : '', S.sub === 'cb03' ? 'warn' : 'ok', !ns, r === 'network')}
+      ${navItem('#/panels', 'panels', 'Panels', ex ? String(S.sub === 'cb03' ? 0 : DB.panels.length) : ns ? esc(curSub().panels) : '', '', !ns, r === 'panels')}
       <div class="nav-group">Verify and issue</div>
-      ${navItem('#/checks', 'checks', 'Checks', ns ? (c.errors ? `${icon('error')}${c.errors} errors` : `${icon('check')}Clear`) : '', c.errors ? 'bad' : 'ok', !ns, r === 'checks')}
+      ${navItem('#/checks', 'checks', 'Checks', ex ? (c.errors ? `${icon('error')}${c.errors} errors` : `${icon('check')}Clear`) : '', c.errors ? 'bad' : 'ok', !ns, r === 'checks')}
       ${navItem('#/preview', 'preview', 'Preview', '', '', !ns, r === 'preview')}
       ${navItem('#/build', 'build', 'Build', buildTail, c.errors ? 'bad' : 'ok', !ns, r === 'build')}` : ''}
       <div class="nav-foot">App ${S.app ? esc(S.app.version) : ''}<br>Works offline. Nothing leaves this PC.</div>`;
   }
   function renderStatus() {
     const c = counts(), ns = hasSub(), np = hasProject(), p = curProject();
-    $('#status').innerHTML = ns ? `
+    $('#status').innerHTML = ns && S.backend === 'yes' ? `<span class="mono" style="font-size:12px">${esc(curSub().file)}</span><span class="sp"></span>`
+      : ns ? `
       <span>${S.dirty ? `<b style="color:var(--color-warning)">Unsaved changes</b>` : `Substation saved ${esc(DB.sub.savedAt)}`}</span>
       <span class="mono" style="font-size:12px">${esc(DB.sub.path)}</span>
       <span class="sp"></span>
       <button data-action="goto" data-to="#/checks" aria-label="${c.errors} errors, ${c.warnings} warnings in ${esc(curSub().name)}. Open checks">
         ${c.errors ? `<span class="bad">${icon('error')} ${c.errors} errors</span>` : `<span class="ok">${icon('check')} No errors</span>`}
         <span>${icon('warn')} ${c.warnings} warnings</span></button>`
-      : np ? `<span>${esc(p.path)}</span><span class="sp"></span><span>${p.substations.length} substations</span>`
+      : np ? `<span>${esc(p.path)}</span><span class="sp"></span><span>${p.substations.length} ${p.substations.length === 1 ? 'substation' : 'substations'}</span>`
       : `<span>No project open</span><span class="sp"></span><span>${S.firstRun ? 'Library: none installed' : ''}</span>`;
   }
   function renderMain() {
@@ -138,6 +157,9 @@
     const needsProject = key === 'project', needsSub = ['settings', 'network', 'panels', 'checks', 'preview', 'build'].includes(key);
     const m = $('#main');
     m.innerHTML = (needsProject && !hasProject()) || (needsSub && !hasSub()) ? SCREENS.home() : SCREENS[key]();
+    if (needsSub && hasSub() && S.backend === 'yes') {  // M10c and M10d connect these screens
+      m.insertAdjacentHTML('afterbegin', `<div class="not-connected"><div class="page" style="padding-bottom:var(--space-3)">${banner('info', '<b>Not connected yet.</b> This screen still shows the example substation from the design, not your project.')}</div></div>`);
+    }
     if (SCREENS[key + 'After']) SCREENS[key + 'After']();
     document.title = 'BOM Generator';
   }
@@ -181,5 +203,5 @@
   ACTIONS.scrim = () => closeDialog();
   window.addEventListener('hashchange', () => { render(); $('#main').scrollTop = 0; });
 
-  window.App = { $, $$, esc, S, ACTIONS, SCREENS, counts, badge, verified, banner, tabs, field, input, select, pageHead, illus, dialog, closeDialog, toast, go, render, setAppInfo, route, hasProject, hasSub, curProject, curSub, renderStatus };
+  window.App = { $, $$, esc, S, ACTIONS, SCREENS, counts, badge, verified, banner, tabs, field, input, select, pageHead, illus, dialog, closeDialog, toast, go, render, setAppInfo, checkList, route, hasProject, hasSub, curProject, curSub, renderStatus };
 })();
