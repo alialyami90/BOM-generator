@@ -14,10 +14,7 @@
    Done when A11 has what it needs; no code unless a real gap appears.
 2. If a gap appears, one small PR per gap, tests first, named after the rule; gate passes, PR open
    for A1. Files: `src/bomgen/library_store/` and its tests only.
-3. Ask A1 whether ADR 0008 and ADR 0018 should move to Accepted (status line plus
-   `docs/decisions/README.md` row; A1 owns the README).
-4. Tell A1/A11 about the 3 failing `tests/unit/app/test_app_edit_api.py` tests on main if still
-   failing (see STATE).
+3. Run the gate with `PYTHONPATH=src` when in a worktree (see STATE environment note).
 
 ## Optional, not requested (A1 said skip until someone needs it)
 - `LibraryPackageError` carrying manifest and `active` data.

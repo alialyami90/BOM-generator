@@ -30,18 +30,19 @@
   `9313db1` (2026-10-28). `pytest tests/golden`: 94 passed.
 - Public API is in `src/bomgen/library_store/__init__.py` (docstring lists it).
 
-## Known problems (not mine)
-- Full `pytest` on `9313db1`: 2411 passed, **3 failed**, all in
-  `tests/unit/app/test_app_edit_api.py` (`'Api' object has no attribute 'check_layout'` and one
-  assertion). It belongs to A11 / M17. Reported to A1 in the checkpoint PR
-  thread message on 2026-10-28. Re-run on current main before trusting this.
+## Environment note (not a main failure)
+- My first full `pytest` run (in a git worktree) showed 3 failures in
+  `tests/unit/app/test_app_edit_api.py` (`'Api' object has no attribute 'check_layout'`). The cause was
+  a stale editable install: `bomgen` imported from another checkout (`/home/user/BOM-generator/src`,
+  an older tree), not from the worktree. A1 reports main passes 2414 in CI. In a worktree or any other
+  checkout, run `PYTHONPATH=src python -m pytest` and check `python -c "import bomgen;print(bomgen.__file__)"`.
 
 ## Verification table
 | Command | Result | Date |
 | --- | --- | --- |
 | `ruff check . && ruff format --check .` (main `9313db1`) | pass | 2026-10-28 |
 | `mypy` (main `9313db1`) | pass, 210 files | 2026-10-28 |
-| `pytest` (main `9313db1`) | 2411 passed, 3 failed (app edit API, not mine) | 2026-10-28 |
+| `pytest` (main `9313db1`, worktree, stale editable install) | 2411 passed, 3 failed: environment, see note | 2026-10-28 |
 | `pytest tests/golden` | 94 passed | 2026-10-28 |
 | Not run: Windows installer, GUI | n/a (not my role's files) | |
 
@@ -54,8 +55,7 @@
 - `src/bomgen/project_store/` was built by me for M8b though agents.md lists only `library_store/`.
 
 ## Blockers, risks, assumptions
-- ADR 0008 and ADR 0018 still say "Proposed" (decisions README too). Ask A1 whether to mark
-  them Accepted; I did not change the status.
+- ADR 0008 and ADR 0018 stay "Proposed" until Ali accepts them (A1's ruling); leave them as they are.
 - Waiting on: nobody. A11 is wiring the Library editors and will ask questions.
 - Spec vs code disagreements: none known.
 - Unverified: that A11's app code uses `check_field`, `save_edits` and `preview_csv_import`

@@ -24,3 +24,6 @@
   `git merge -s ours origin/<branch>` so a plain push works. PR bodies start "Written by A5 ... for
   A1 to review.", assign `alialyami90`, subscribe to PR activity.
 - **Drift:** none found; there was no earlier STATE.md to compare with.
+- **Environment trap:** `pip show bomgen` is an editable install of `/home/user/BOM-generator`; a git worktree
+  imports that checkout's `src`, not its own. Gate results from a worktree are wrong unless run with
+  `PYTHONPATH=src`. I misreported 3 failures as main's; A1 corrected it. Check `bomgen.__file__` first.
