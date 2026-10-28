@@ -12,34 +12,42 @@ from typing import Any
 import pytest
 import yaml
 
-DB_DIR = Path(__file__).resolve().parents[2] / "data" / "device-db"
 TIERS = ("low", "mid", "high")
 VERIFIED_LEVELS = {"confirmed", "partial", "unverified"}
 KINDS = {"device", "catalogue"}
 
-# Every distinct part in the example workbook. Device ids match examples/library.yaml;
-# catalogue ids are local to the database. Provisional: once M1 is complete, derive the
-# device set from examples/library.yaml so a rename there fails here.
-EXPECTED_DEVICE_IDS = {
-    "FOPP-96SM", "FOPP-SPOOL", "FOPP-SPLICE-HOLDER", "FOPP-PIGTAIL-LC-SM",
-    "RST2228-L2", "RST2228-L1-24MM", "SEL-2730M-EXT", "SEL-3555-GW", "FGR-60F",
-    "SEL-2488", "SEL-3555-RTAC", "SEL-2240", "SEL-2242", "SEL-2241", "SEL-2243",
-    "SEL-2244-2", "SEL-3355", "NAP-F23", "KEYTEK-KBM", "SFP-1G-LX-SM", "SFP-1G-SX-MM",
-    "SFP-100M-FX-MM", "FR-TRAN-SX", "PL1U12NEBK", "SEL-C607", "SZ2500-LAMP",
-    "SK3243-FAN", "SK3238-FILTER", "SK3110-TH", "IPR-2903685", "IPR-BASE-2900934",
-    "IPR-SUPP-2900944", "IPR-BRACKET-2900954", "COD-NEG-IRND150F12",
-    "COD-POS-IRMD150F12", "SOCKET-730076", "NAP-K55", "LPA37-696", "ZENON-V12",
-    "MS-OFFICE-2021", "ANN-DISPLAY-CABLE-10M", "ANN-USB-CABLE-10M", "MON-DVI-CABLE-3M",
-    "MON-USB-CABLE-3M", "FO-PATCH-CORDS", "SEL-9524B", "SEL-C961-050", "SEL-915900139",
-    "SEL-C961-025", "SEL-915900043",
-}  # fmt: skip
+REPO = Path(__file__).resolve().parents[2]
+DB_DIR = REPO / "data" / "device-db"
+LIBRARY = yaml.safe_load((REPO / "examples" / "library.yaml").read_text(encoding="utf-8"))
 
+# Catalogue ids are local to the database; each names the library catalogue entries it
+# describes in `library_refs`. Enclosures are per panel in the library, so have none.
 EXPECTED_CATALOGUE_IDS = {
     "ENCL-RAWABI-2100", "ENCL-RITTAL-PC5386",
     "MCB-A9F74201", "MCB-A9F74202", "MCB-A9F74206", "MCB-A9F74210", "MCB-A9F74216",
     "AUX-A9A26924", "TB-UT-16", "TB-UT-2.5-MTD", "TB-UT-2.5-MT",
     "BUSBAR-AC-SAFETY-GND", "BUSBAR-INSTRUMENT-GND",
 }  # fmt: skip
+
+
+def _library_device_ids() -> set[str]:
+    ids: set[str] = set()
+    for device in LIBRARY["devices"]:
+        ids.add(device["part_id"])
+        ids.update(child["part_id"] for child in device.get("children", []))
+        ids.update(item["part_id"] for item in device.get("loose_items", []))
+    for entry in LIBRARY["catalogues"]["housekeeping"].values():
+        ids.update(v for k, v in entry.items() if k in {"part_id", "negative", "positive"})
+    return ids
+
+
+def _library_catalogue_refs() -> set[str]:
+    catalogues = LIBRARY["catalogues"]
+    refs = {f"mcb.{rating}" for rating in catalogues["mcb"]["ratings_a"]}
+    refs.add("aux_contact")
+    refs.update(f"terminal_blocks.{key}" for key in catalogues["terminal_blocks"])
+    refs.update(f"busbars.{key}" for key in catalogues["busbars"])
+    return refs
 
 
 def _load_records() -> list[dict[str, Any]]:
@@ -62,11 +70,17 @@ def test_part_ids_are_unique() -> None:
     assert len(ids) == len(set(ids))
 
 
-def test_every_workbook_device_and_commodity_has_a_record() -> None:
+def test_device_records_match_the_example_library_parts_both_ways() -> None:
     devices = {r["part_id"] for r in RECORDS if r["kind"] == "device"}
-    catalogues = {r["part_id"] for r in RECORDS if r["kind"] == "catalogue"}
-    assert devices == EXPECTED_DEVICE_IDS
-    assert catalogues == EXPECTED_CATALOGUE_IDS
+    assert devices == _library_device_ids()
+
+
+def test_catalogue_records_cover_every_library_catalogue_entry() -> None:
+    catalogues = [r for r in RECORDS if r["kind"] == "catalogue"]
+    assert {r["part_id"] for r in catalogues} == EXPECTED_CATALOGUE_IDS
+    refs = [ref for r in catalogues for ref in r.get("library_refs", [])]
+    assert len(refs) == len(set(refs))
+    assert set(refs) == _library_catalogue_refs()
 
 
 @pytest.mark.parametrize("record", RECORDS, ids=_ids(RECORDS))

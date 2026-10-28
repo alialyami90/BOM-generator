@@ -9,6 +9,8 @@ title: 'Commodity catalogues: MCBs, auxiliary contacts, terminal blocks, groundi
 records:
 - part_id: MCB-A9F74201
   kind: catalogue
+  library_refs:
+  - mcb.1
   description: 1A, 2P MCB (Schneider A9F74201)
   make: Schneider
   verified: confirmed
@@ -136,6 +138,8 @@ records:
   - https://www.tme.eu/en/details/5sy6201-7/circuit-breakers/siemens/
 - part_id: MCB-A9F74202
   kind: catalogue
+  library_refs:
+  - mcb.2
   description: 2A, 2P MCB (Schneider A9F74202)
   make: Schneider
   verified: confirmed
@@ -261,6 +265,8 @@ records:
   - https://uk.rs-online.com/web/p/mcbs/7721278
 - part_id: MCB-A9F74206
   kind: catalogue
+  library_refs:
+  - mcb.6
   description: 6A, 2P MCB (Schneider A9F74206)
   make: Schneider
   verified: confirmed
@@ -386,6 +392,8 @@ records:
   - https://www.tme.eu/en/details/5sy6201-7/circuit-breakers/siemens/
 - part_id: MCB-A9F74210
   kind: catalogue
+  library_refs:
+  - mcb.10
   description: 10A, 2P MCB (Schneider A9F74210)
   make: Schneider
   verified: confirmed
@@ -512,6 +520,8 @@ records:
   - https://www.electricautomationnetwork.com/en/abb/miniature-circuit-breaker-s200-2p-c-16-a-abb-s202-c16-2cds252001r0164
 - part_id: MCB-A9F74216
   kind: catalogue
+  library_refs:
+  - mcb.16
   description: 16A, 2P MCB (Schneider A9F74216)
   make: Schneider
   verified: confirmed
@@ -638,6 +648,8 @@ records:
   - https://za.rs-online.com/web/p/mcbs/0132122
 - part_id: AUX-A9A26924
   kind: catalogue
+  library_refs:
+  - aux_contact
   description: AC/DC Auxiliary Contact for MCB (Schneider A9A26924)
   make: Schneider
   verified: confirmed
@@ -731,6 +743,8 @@ records:
   - https://eshop.se.com/id/auxiliary-contact-acti9-a9a-iof-1-c-o-100ma-to-6a-24vac-to-415vac-24-130-vdc-bottom-connection.html
 - part_id: TB-UT-16
   kind: catalogue
+  library_refs:
+  - terminal_blocks.UT-16
   description: Terminal block for incoming AC / DC circuits (Phoenix Contact 3044199)
   make: Phoenix Contact
   verified: confirmed
@@ -828,6 +842,8 @@ records:
   - https://pacificautomation.com.au/weidmuller-wdu-16-feed-through-terminal-block-16mm-1000v-76a-screw-connection-beige-ts-35-din-rail/
 - part_id: TB-UT-2.5-MTD
   kind: catalogue
+  library_refs:
+  - terminal_blocks.UT-2.5-MTD
   description: Terminal block for AC / DC distribution and housekeeping circuits (Phoenix Contact 3064085)
   make: Phoenix Contact
   verified: confirmed
@@ -929,6 +945,8 @@ records:
   - https://www.controldesign.com/vendors/products/2009/273
 - part_id: TB-UT-2.5-MT
   kind: catalogue
+  library_refs:
+  - terminal_blocks.UT-2.5-MT
   description: Knife-disconnect terminal block for DI, RTAC COM and inter-panel circuits (Phoenix Contact
     3046362)
   make: Phoenix Contact
@@ -1025,6 +1043,9 @@ records:
   - https://nz.rs-online.com/web/p/din-rail-terminal-blocks/8043276
 - part_id: BUSBAR-AC-SAFETY-GND
   kind: catalogue
+  library_refs:
+  - busbars.ac_safety_ground
+  - busbars.power_ground
   description: POWER/AC SAFETY GROUNDING BUSBAR - TINNED COPPER
   verified: partial
   datasheet:
@@ -1098,6 +1119,8 @@ records:
   - https://www.platt.com/p/0356434/nvent-erico/grounding-busbar-w-insulators-and-brackets-gg-12-x-6-x-025-tinned/782856623755/cadegba14612ggt
 - part_id: BUSBAR-INSTRUMENT-GND
   kind: catalogue
+  library_refs:
+  - busbars.instrument_ground
   description: INSTRUMENT GROUNDING BUSBAR - TINNED COPPER
   verified: partial
   datasheet:

@@ -12,8 +12,10 @@ only. Changing a part in a project means editing the library, not this folder.
 
 Records of `kind: device` key on the library's `part_id`s, so a tool or a person can
 join the two. Records of `kind: catalogue` (`MCB-*`, `AUX-*`, `TB-*`, `BUSBAR-*`,
-`ENCL-*`) use ids local to this database: the library keys MCBs by code pattern,
-terminal blocks by type, busbars by role, and enclosures per panel.
+`ENCL-*`) use ids local to this database, because the library keys MCBs by rating,
+terminal blocks by type, busbars by role, and enclosures per panel. Each catalogue
+record names the library catalogue entries it describes in `library_refs`, e.g.
+`mcb.16`, `terminal_blocks.UT-16`, `busbars.ac_safety_ground`; enclosures have none.
 
 `docs/device-db-findings.md` lists what the research found that disagrees with the
 workbook or the spec. Those are open questions for Ali, not changes.
@@ -37,6 +39,7 @@ title: ...
 records:
   - part_id: RST2228-L1-24MM      # device: same id as examples/library.yaml; catalogue: local id
     kind: device                  # device (a library part) | catalogue (MCBs, terminals, enclosures, busbars)
+    library_refs: [mcb.16]        # catalogue records only: the library catalogue entries covered
     description: ...              # BOM description, for reading the file on its own
     make: Ruggedcom               # brand as in the BOM, left out when the BOM has none
     verified: confirmed           # confirmed | partial | unverified (the original part's facts)
@@ -72,6 +75,8 @@ differ, `docs/device-db-findings.md` says so.
 
 ## Checks
 
-`tests/unit/test_device_db.py` checks that every workbook part has a record, that each
+`tests/unit/test_device_db.py` checks that the device records and the parts in
+`examples/library.yaml` match both ways, that catalogue records cover every library
+catalogue entry, that each
 record cites a source and repeats no library field, and that each has two other brands
 with low, mid and high parts (a repeated part only when marked `same_as`).
