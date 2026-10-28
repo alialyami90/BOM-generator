@@ -4,6 +4,7 @@ generation order, steps 1-11; How each panel BOM groups its materials -> Loose m
 from pathlib import Path
 from typing import Any
 
+import pytest
 from engine_factories import device, library, loose, panel, powered, switch
 
 from bomgen.engine.kits import loose_table
@@ -230,6 +231,12 @@ def test_auto_ventilation_picks_fans_for_a_hot_cabinet() -> None:
     assert cabinet.ventilation is Ventilation.FORCED
     assert cabinet.forced.fan_m3h == 716
     assert result.heat.line_up is not None
+
+
+def test_build_result_carries_the_dc_mains_per_panel() -> None:
+    (main, _p2) = build(loaded()).mains
+    assert (main.panel_id, main.rating_a, main.rule_rating_a) == ("p1", 6, 6)
+    assert main.design_current_a == pytest.approx(10 * 1.3 / 125)
 
 
 def test_build_result_carries_power_and_heat_per_cabinet() -> None:

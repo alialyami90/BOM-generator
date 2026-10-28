@@ -21,3 +21,4 @@ An ADR stays "Proposed" until Ali accepts it in review.
 | 0013 | [Switches sized from the IED count; panels laid out automatically](0013-network-sizing-and-panel-layout.md) | Accepted |
 | 0014 | [Engine output model and group A–H derivation choices](0014-engine-data-model.md) | Proposed |
 | 0015 | [Desktop app: how the UI calls the engine](0015-desktop-app-bridge.md) | Proposed |
+| 0016 | [Check report and revision comparison](0016-check-report-and-revision-comparison.md) | Proposed |

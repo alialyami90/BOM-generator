@@ -512,6 +512,14 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
 - `bomgen build` final options (`--out`, `--sheet-name`, `--compare`),
   README usage, example walkthrough.
 
+*Engine half delivered (A9, ADR 0016):* `bomgen.checks.check_report(loaded,
+result)` with `library_check`, `render_text`, `render_json` and `report.failed` for
+the exit code; `bomgen.revision.read_previous_issue(path)` and
+`compare_with_previous(result, previous)` mark changed cells and list the changes
+(`render_revisions`). `BuildResult.mains` carries each panel's ΣQ, rating and rule
+rating. ΣQ is now the cabinet's own DC loads, without loose loads it feeds through a
+QCOD. A2 wires them into `bomgen build` and `--compare`.
+
 ### M8 — Library update packages
 Ali wants the device library updated on every installed copy by sharing an
 update package (ADR 0008).

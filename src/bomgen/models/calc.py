@@ -195,6 +195,16 @@ class LineUpCheck(OutputModel):
         return self.fan_m3h >= self.required_m3h
 
 
+class DcMains(OutputModel):
+    """A panel's Q1/Q2 rating against its per-feed design current ΣQ (spec: Derivation
+    rules -> DC distribution; step 15 compares them)."""
+
+    panel_id: str
+    design_current_a: NonNegativeFloat
+    rating_a: NonNegativeInt  # 0 when the panel has no DC loads
+    rule_rating_a: NonNegativeInt  # without main_mcb_override_a (plan Q3)
+
+
 class HeatResult(OutputModel):
     dissipation: tuple[CabinetHeat, ...]
     cabinets: tuple[CabinetThermal, ...]

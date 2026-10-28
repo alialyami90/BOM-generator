@@ -24,6 +24,7 @@ from bomgen.engine.thermal import choose_ventilation, heat_result, ventilation_h
 from bomgen.engine.units import DeviceRow, expand_devices, lookup
 from bomgen.io.loader import LoadedSubstation
 from bomgen.models.bom import BuildResult, PanelBom
+from bomgen.models.calc import DcMains
 from bomgen.models.library import Category, Library
 from bomgen.models.panel import Panel, Ventilation
 from bomgen.models.project import DesignConstants, LooseExtra
@@ -38,6 +39,7 @@ class _PanelDraft:
     ventilation: Ventilation
     items: list[BomItem]
     strip_inputs: StripInputs
+    mains: DcMains
 
     @property
     def hwio(self) -> int:
@@ -59,7 +61,8 @@ def build(loaded: LoadedSubstation) -> BuildResult:
     heat = heat_result(
         [(d.panel, d.ventilation) for d in drafts], power, fan_pair_m3h, loaded.constants
     )
-    return BuildResult(panels=panels, loose=loose, power=power, heat=heat)
+    mains = tuple(d.mains for d in drafts)
+    return BuildResult(panels=panels, loose=loose, power=power, heat=heat, mains=mains)
 
 
 def _draft(
@@ -98,7 +101,13 @@ def _draft(
         annunciator_feeds=len(annunciators),
         xdin_default=0,
     )
-    return _PanelDraft(panel, rows, ventilation, items, strip_inputs)
+    mains = DcMains(
+        panel_id=panel.id,
+        design_current_a=dc.design_current_a,
+        rating_a=dc.main_a,
+        rule_rating_a=dc.rule_main_a,
+    )
+    return _PanelDraft(panel, rows, ventilation, items, strip_inputs, mains)
 
 
 def _finish(draft: _PanelDraft, library: Library, substation: str, hwio_total: int) -> PanelBom:
