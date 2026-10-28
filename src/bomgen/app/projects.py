@@ -83,7 +83,7 @@ def project_only(project_file: Path) -> Project | None:
         return None
 
 
-def _library_note(project: Project, store: LibraryStore) -> str | None:
+def library_note(project: Project, store: LibraryStore) -> str | None:
     """Why the recorded library differs from the active one; None when a local file is used."""
     selection = project.library
     if selection.file is not None:
@@ -153,7 +153,7 @@ def summarize(project_file: Path, store: LibraryStore, *, details: bool = False)
     """One project as Home lists it; with ``details`` also what the Project page shows."""
     loaded, issues = load_with_issues(project_file, store)
     project = loaded.project if loaded is not None else project_only(project_file)
-    note = _library_note(project, store) if project is not None else None
+    note = library_note(project, store) if project is not None else None
     summary: dict[str, Any] = {
         "id": project.project.id if project else project_file.parent.name,
         "name": project.project.name if project else project_file.parent.name,

@@ -284,6 +284,10 @@ table.table { width: 100%; border-collapse: separate; border-spacing: 0; font-si
 .kbd { font: 500 11.5px var(--font-mono); padding: 1px 5px; border: 1px solid var(--color-border-control); border-bottom-width: 2px; border-radius: 3px; background: var(--color-surface); }
 .progress { height: 6px; background: var(--color-surface-sunken); border: 1px solid var(--color-border); border-radius: 3px; overflow: hidden; }
 .progress > i { display: block; height: 100%; background: var(--color-action); transition: width var(--duration-slow) var(--ease-out); }
+.path-line { margin: var(--space-2) 0 0; color: var(--color-text-muted); }
+.progress--busy > i { width: 30%; animation: progress-slide 1.2s var(--ease-out) infinite; }
+@keyframes progress-slide { from { transform: translateX(-100%); } to { transform: translateX(340%); } }
+@media (prefers-reduced-motion: reduce) { .progress--busy > i { width: 100%; animation: none; opacity: .5; } }
 .fade-in { animation: fade var(--duration-slow) var(--ease-out); }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; } .spinner { animation: none; border-right-color: currentColor; } }
