@@ -678,7 +678,16 @@ Delivered in small PRs by A11, one screen group each (ADR 0015 for the bridge):
   design's "Keep both" has no engine support. The installed-versions table counts the
   projects built with each version. Substation screens opened from a real project keep
   the example data under a "not connected yet" banner, without the example's badges.
-- **M10c:** Substation settings, Network and Panels after M1b and M1c.
+- **M10c:** Substation settings, Network and Panels after M1b and M1c. First the
+  read side on the M1b models (`bomgen.app.substations`, `open_substation`): Settings
+  (general, the calculation sheets' register documents, output file name and its
+  result, the ten constants and the spares with the project default and a "Changed
+  from" mark for the keys the substation writes, loose material, the YAML with its
+  located problems) and Network's inputs (field network, equipment checked against the
+  library, spares). Read-only until substation writers exist. The L1 ranking, the
+  Result card and the Panels board follow with M1c's `NetworkPlan`,
+  `rank_l1_switches` and `layout_preview`; they are ported from the prototype as of
+  #32 (ranked L1 table with a pin, cable managers counted in panel blocks).
 - **M10d:** Checks, Preview and Build after M4, M5 and M7.
 - **M10e:** A4's impeccable polish pass.
 

@@ -28,6 +28,7 @@ from pydantic import BaseModel, ValidationError
 
 from bomgen import __version__
 from bomgen.app.projects import RecentProjects, project_files, summarize
+from bomgen.app.substations import SubstationNotFoundError, substation_page
 from bomgen.bundle.errors import LibraryPackageError, RefusalKind
 from bomgen.io.errors import InputError
 from bomgen.io.loader import PROJECT_FILE, load_library
@@ -386,6 +387,18 @@ class Api:
         if not target.exists():
             raise FileNotFoundError(errno.ENOENT, "This file is no longer there", path)
         self._reveal(target)
+
+    # -- Substation (docs/ui/screens.md: Substation settings, Network) --
+
+    @endpoint
+    def open_substation(self, project_file: str, substation_id: str) -> dict[str, Any]:
+        """Settings and Network inputs of one substation, with its located problems."""
+        try:
+            return substation_page(Path(project_file), substation_id, self._library_store())
+        except SubstationNotFoundError:
+            raise AppError(
+                "not_found", f"The project has no substation {substation_id!r}"
+            ) from None
 
     @endpoint
     def preview_project_import(self, path: str) -> dict[str, Any]:

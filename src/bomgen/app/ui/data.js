@@ -49,16 +49,23 @@
   };
   /* Equipment: what the substation has, before any panel exists (substation.yaml equipment). */
   const equipment = [
-    { id: 'fopp', part: 'FOPP-96SM', model: 'FOPP 96-core SM', label: 'FO patch panel', role: 'fopp', redundant: true, l2Ports: '', h: 4, count: 1, stem: 'FOPP-CCR', base: 1 },
-    { id: 'l2', part: 'RST2228-L2', model: 'Ruggedcom RST-2228', label: 'L2 switch', role: 'l2_switch', redundant: true, l2Ports: '', h: 1, count: 1, stem: 'L2-ESW', base: 1 },
-    { id: 'l1', part: 'RST2228-L1-24MM', model: 'Ruggedcom RST-2228 (24 MM)', label: 'L1 switch', role: 'l1_switch', redundant: true, l2Ports: '', h: 1, count: 2, stem: 'L1-ESW', base: 11 },
-    { id: 'ext', part: 'SEL-2730M-EXT', model: 'SEL-2730M', label: 'External switch', role: 'ext_switch', redundant: true, l2Ports: '2', h: 1, count: 1, stem: 'EXT-ESW', base: 1 },
+    { id: 'fopp', part: 'FOPP-96SM', model: 'FOPP 96-core SM', label: 'FO patch panel', role: 'fopp', redundant: true, l2Ports: '', cm: true, h: 4, count: 1, stem: 'FOPP-CCR', base: 1 },
+    { id: 'l2', part: 'RST2228-L2', model: 'Ruggedcom RST-2228', label: 'L2 switch', role: 'l2_switch', redundant: true, l2Ports: '', cm: true, h: 1, count: 1, stem: 'L2-ESW', base: 1 },
+    { id: 'l1', part: 'RST2228-L1-24MM', model: 'Ruggedcom RST-2228 (24 MM)', label: 'L1 switch', role: 'l1_switch', redundant: true, l2Ports: '', cm: true, h: 1, count: 2, stem: 'L1-ESW', base: 11 },
+    { id: 'ext', part: 'SEL-2730M-EXT', model: 'SEL-2730M', label: 'External switch', role: 'ext_switch', redundant: true, l2Ports: '2', cm: true, h: 1, count: 1, stem: 'EXT-ESW', base: 1 },
     { id: 'gw', part: 'SEL-3555-GW', model: 'SEL-3555', label: 'Gateway', role: 'other', redundant: true, l2Ports: '1', h: 1, count: 1, stem: 'DHPCC-GW', base: 1 },
-    { id: 'fw', part: 'FGR-60F', model: 'FortiGate Rugged 60F', label: 'Firewall', role: 'firewall', redundant: true, l2Ports: '1', h: 1, count: 1, stem: 'EXT-FW', base: 1 },
+    { id: 'fw', part: 'FGR-60F', model: 'FortiGate Rugged 60F', label: 'Firewall', role: 'firewall', redundant: true, l2Ports: '1', cm: true, h: 1, count: 1, stem: 'EXT-FW', base: 1 },
     { id: 'gps', part: 'SEL-2488', model: 'SEL-2488', label: 'GPS clock', role: 'other', redundant: false, l2Ports: '1', h: 1, count: 1, stem: 'GPS', base: 1 },
     { id: 'rtac', part: 'SEL-3555-RTAC', model: 'SEL-3555 RTAC', label: 'Data concentrator', role: 'other', redundant: false, l2Ports: '2', h: 2, count: 1, stem: 'RTAC', base: 1 },
     { id: 'io1', part: 'AXION-IO-RACK', model: 'SEL Axion I/O rack', label: 'Axion I/O rack 1', role: 'other', redundant: true, l2Ports: '0', h: 12, count: 1, stem: 'HWIO', base: 1 },
     { id: 'io2', part: 'AXION-IO-RACK', model: 'SEL Axion I/O rack', label: 'Axion I/O rack 2', role: 'other', redundant: true, l2Ports: '0', h: 12, count: 1, stem: 'HWIO', base: 2 }
+  ];
+  /* The engine's ranking of L1 switch models for the IED count (rank_l1_switches): best first. Literal values; the engine supplies them. */
+  const l1Ranking = [
+    { part: 'RST2228-L1-24MM', model: 'Ruggedcom RST-2228 (24 MM)', ports: 24, perSide: 2, spare: 4, note: 'Fewest switches with the spare ports asked for.' },
+    { part: 'SEL-2730M-24', model: 'SEL-2730M (24 ports)', ports: 24, perSide: 2, spare: 4, note: 'Same count; ranked second on price tier.' },
+    { part: 'RST2228-L1-16MM', model: 'Ruggedcom RST-2228 (16 MM)', ports: 16, perSide: 3, spare: 8, note: 'One more switch per side.' },
+    { part: 'SEL-2730M-8', model: 'SEL-2730M (8 ports)', ports: 8, perSide: 6, spare: 8, note: 'Six per side; more uplinks.' }
   ];
   const dinParts = { 1: 38, 2: 38, 3: 12, 4: 12 };
 
@@ -332,6 +339,6 @@
   const bom = { psa1: bomPsa(1, 'A'), psa2: bomPsa(2, 'B'), psa3: bomIo(3, 'A'), psa4: bomIo(4, 'B'), ws: bomWs() };
   const groupNames = { A: 'Enclosure', B: 'Main equipment', C: 'Network and IO accessories', D: 'Cabinet housekeeping', E: 'AC distribution', F: 'DC distribution', G: 'Terminal blocks', H: 'Grounding' };
 
-  window.DB = { sub, projects, equipment, networkPlan, dinParts, wsDevices, panels, library, devices, problems, engineChecks, bom, hwioTotal, power, heat, groupNames
+  window.DB = { sub, projects, equipment, l1Ranking, networkPlan, dinParts, wsDevices, panels, library, devices, problems, engineChecks, bom, hwioTotal, power, heat, groupNames
   };
 })();
