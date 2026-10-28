@@ -563,6 +563,8 @@ def _mcb(tables: Mapping[str, _Table], base: Mapping[str, Any], skip: bool, asm:
         fields = [n for n in McbCatalogue.model_fields if n != "codes"]
         if cid != DEFAULT_BRAND:
             fields.append("ac_rated")
+        elif cells.get("ac_rated", "").strip():
+            asm.problem("mcb.csv", row, "ac_rated", "applies to brands, not the default row", cid)
         data = _row_dict(table, cells, fields, old)
         if isinstance(data.get("ratings_a"), str):
             data["ratings_a"] = [

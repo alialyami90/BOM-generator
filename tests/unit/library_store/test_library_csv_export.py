@@ -173,6 +173,21 @@ def test_brand_sets_are_rows_of_their_catalogue_table(library: Library) -> None:
     assert {r["code"] for r in codes} == {f"X{a}" for a in mcb["ratings_a"]}
 
 
+def test_a_dc_only_brand_is_marked_in_the_last_mcb_column(library: Library) -> None:
+    mcb = library.catalogues.mcb.model_dump(mode="json", exclude_none=True)
+    brand = {**mcb, "id": "dc-only", "ac_rated": False}
+    edited = apply_edits(library, [Insert(path=["catalogue_brands", "mcb"], value=brand)]).library
+    assert edited is not None
+
+    rows = library_tables(edited)["mcb.csv"]
+
+    assert TABLES["mcb.csv"][-1] == "ac_rated"
+    by_id = {r["catalogue_id"]: r for r in rows}
+    assert by_id["default"]["ac_rated"] == ""  # the default catalogue has no such flag
+    assert by_id["dc-only"]["ac_rated"] == "false"
+    assert {by_id[b.id]["ac_rated"] for b in library.catalogue_brands.mcb} == {"true"}
+
+
 def test_the_zip_holds_every_table_as_utf8_with_a_byte_order_mark(
     tmp_path: Path, library: Library
 ) -> None:

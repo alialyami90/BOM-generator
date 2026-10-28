@@ -95,6 +95,20 @@ def _changed_keys(old: Mapping[str, Any], new: Mapping[str, Any]) -> list[str]:
     return sorted(key for key in old.keys() | new.keys() if old.get(key) != new.get(key))
 
 
+def _brand_changes(old: Mapping[str, Any], new: Mapping[str, Any]) -> list[str]:
+    """`kind:id` of each brand set that was added, removed or edited (ADR 0017 catalogue brands)."""
+    old_brands = (old or {}).get("catalogue_brands") or {}
+    new_brands = new.get("catalogue_brands") or {}
+    changed: list[str] = []
+    for kind in old_brands.keys() | new_brands.keys():
+        before = {b.get("id"): b for b in old_brands.get(kind) or [] if isinstance(b, dict)}
+        after = {b.get("id"): b for b in new_brands.get(kind) or [] if isinstance(b, dict)}
+        changed += [
+            f"{kind}:{i}" for i in before.keys() | after.keys() if before.get(i) != after.get(i)
+        ]
+    return changed
+
+
 def diff_libraries(
     old: Mapping[str, Any] | None,
     new: Mapping[str, Any],
@@ -116,7 +130,10 @@ def diff_libraries(
         added=sorted(new_devices.keys() - old_devices.keys()),
         removed=sorted(old_devices.keys() - new_devices.keys()),
         changed=changed,
-        catalogues_changed=_changed_keys(old_catalogues, new_catalogues),
+        catalogues_changed=[
+            *_changed_keys(old_catalogues, new_catalogues),
+            *sorted(_brand_changes(old or {}, new)),
+        ],
         files_added=sorted(extra_new.keys() - extra_old.keys()),
         files_changed=sorted(
             p for p in extra_old.keys() & extra_new.keys() if extra_old[p] != extra_new[p]
