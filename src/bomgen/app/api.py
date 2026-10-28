@@ -47,6 +47,7 @@ from bomgen.project_store import (
     export_project,
     import_project,
     list_backups,
+    preview_backup_restore,
     preview_project_import,
     restore_backup,
 )
@@ -435,12 +436,9 @@ class Api:
 
     @endpoint
     def preview_backup_restore(self, backup: str) -> dict[str, Any]:
-        """The review before a restore: the same dry-run, against the backup's own project."""
+        """The review before a restore: its refusals, then the import dry-run."""
         package = Path(backup)
-        preview = preview_project_import(
-            package, workspace=package.parent.parent.parent, store=self._library_store()
-        )
-        return self._preview(package, preview)
+        return self._preview(package, preview_backup_restore(package, store=self._library_store()))
 
     @endpoint
     def restore_backup(self, backup: str) -> dict[str, Any]:

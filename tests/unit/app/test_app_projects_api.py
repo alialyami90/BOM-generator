@@ -298,6 +298,20 @@ def test_restore_a_backup(app: api.Api, example: Path) -> None:
     assert not (example.parent / "notes.txt").exists()
 
 
+def test_restore_review_refuses_a_backup_outside_its_backups_folder(
+    app: api.Api, example: Path, tmp_path: Path
+) -> None:
+    saved = ok(app.backup_project(str(example)))
+    moved = tmp_path / "moved.bomproj"
+    shutil.copy(saved["path"], moved)
+
+    preview = ok(app.preview_backup_restore(str(moved)))
+
+    assert preview["can_import"] is False
+    assert preview["checks"][0]["id"] == "location"
+    assert preview["checks"][0]["status"] == "failed"
+
+
 def test_show_in_folder_selects_the_file_in_explorer_on_windows(tmp_path: Path) -> None:
     target = tmp_path / "a backup.bomproj"
     target.write_bytes(b"x")
