@@ -17,7 +17,9 @@ TIERS = ("low", "mid", "high")
 VERIFIED_LEVELS = {"confirmed", "partial", "unverified"}
 KINDS = {"device", "catalogue"}
 
-# Every distinct part in the example workbook. Device ids match examples/library.yaml.
+# Every distinct part in the example workbook. Device ids match examples/library.yaml;
+# catalogue ids are local to the database. Provisional: once M1 is complete, derive the
+# device set from examples/library.yaml so a rename there fails here.
 EXPECTED_DEVICE_IDS = {
     "FOPP-96SM", "FOPP-SPOOL", "FOPP-SPLICE-HOLDER", "FOPP-PIGTAIL-LC-SM",
     "RST2228-L2", "RST2228-L1-24MM", "SEL-2730M-EXT", "SEL-3555-GW", "FGR-60F",
@@ -74,9 +76,9 @@ def test_record_kind_and_verified_level_are_known(record: dict[str, Any]) -> Non
 
 
 @pytest.mark.parametrize("record", RECORDS, ids=_ids(RECORDS))
-def test_record_names_the_part_it_enriches(record: dict[str, Any]) -> None:
+def test_record_does_not_repeat_library_fields(record: dict[str, Any]) -> None:
     assert record["description"]
-    assert record.get("model") or record.get("ordering_code") or record["kind"] == "catalogue"
+    assert not {"model", "ordering_code", "unit_power_w", "category"} & record.keys()
 
 
 @pytest.mark.parametrize("record", RECORDS, ids=_ids(RECORDS))
@@ -97,6 +99,22 @@ def test_two_alternative_brands_each_with_low_mid_high_part(record: dict[str, An
             part = alt["tiers"][tier]
             assert part.get("model"), f"{alt['make']} {tier} has no model"
             assert isinstance(part["verified"], bool)
+
+
+@pytest.mark.parametrize("record", RECORDS, ids=_ids(RECORDS))
+def test_a_tier_repeats_a_lower_tier_part_only_when_marked_same_as(
+    record: dict[str, Any],
+) -> None:
+    for alt in record["alternatives"]:
+        seen: dict[tuple[str, str], str] = {}
+        for tier in TIERS:
+            part = alt["tiers"][tier]
+            key = (part["model"], part.get("ordering_code", ""))
+            if key in seen:
+                assert part.get("same_as") == seen[key], f"{alt['make']} {tier}"
+            else:
+                assert "same_as" not in part
+                seen[key] = tier
 
 
 @pytest.mark.parametrize("record", RECORDS, ids=_ids(RECORDS))

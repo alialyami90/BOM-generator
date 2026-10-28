@@ -1,6 +1,7 @@
 # Device database: Commodity catalogues: MCBs, auxiliary contacts, terminal blocks, grounding busbars.
 # Researched datasheet facts and alternative brands for the example project's parts.
-# Keys match examples/library.yaml part ids; library fields live there, not here.
+# Device part ids match examples/library.yaml, where the library fields live.
+# Catalogue ids (MCB-*, AUX-*, TB-*, BUSBAR-*, ENCL-*) are local to this database.
 # Format and field meanings: data/device-db/README.md
 schema_version: 1
 area: electrical
@@ -8,10 +9,8 @@ title: 'Commodity catalogues: MCBs, auxiliary contacts, terminal blocks, groundi
 records:
 - part_id: MCB-A9F74201
   kind: catalogue
-  description: 1A, 2P MCB
+  description: 1A, 2P MCB (Schneider A9F74201)
   make: Schneider
-  model: A9F74201
-  ordering_code: A9F74201
   verified: confirmed
   datasheet:
     full_name: Acti9 iC60N miniature circuit breaker, 2P, 1 A, C curve
@@ -137,10 +136,8 @@ records:
   - https://www.tme.eu/en/details/5sy6201-7/circuit-breakers/siemens/
 - part_id: MCB-A9F74202
   kind: catalogue
-  description: 2A, 2P MCB
+  description: 2A, 2P MCB (Schneider A9F74202)
   make: Schneider
-  model: A9F74202
-  ordering_code: A9F74202
   verified: confirmed
   datasheet:
     full_name: Acti9 iC60N miniature circuit breaker, 2P, 2 A, C curve
@@ -264,10 +261,8 @@ records:
   - https://uk.rs-online.com/web/p/mcbs/7721278
 - part_id: MCB-A9F74206
   kind: catalogue
-  description: 6A, 2P MCB
+  description: 6A, 2P MCB (Schneider A9F74206)
   make: Schneider
-  model: A9F74206
-  ordering_code: A9F74206
   verified: confirmed
   datasheet:
     full_name: Acti9 iC60N miniature circuit breaker, 2P, 6 A, C curve
@@ -391,10 +386,8 @@ records:
   - https://www.tme.eu/en/details/5sy6201-7/circuit-breakers/siemens/
 - part_id: MCB-A9F74210
   kind: catalogue
-  description: 10A, 2P MCB
+  description: 10A, 2P MCB (Schneider A9F74210)
   make: Schneider
-  model: A9F74210
-  ordering_code: A9F74210
   verified: confirmed
   datasheet:
     full_name: Acti9 iC60N miniature circuit breaker, 2P, 10 A, C curve
@@ -519,10 +512,8 @@ records:
   - https://www.electricautomationnetwork.com/en/abb/miniature-circuit-breaker-s200-2p-c-16-a-abb-s202-c16-2cds252001r0164
 - part_id: MCB-A9F74216
   kind: catalogue
-  description: 16A, 2P MCB
+  description: 16A, 2P MCB (Schneider A9F74216)
   make: Schneider
-  model: A9F74216
-  ordering_code: A9F74216
   verified: confirmed
   datasheet:
     full_name: Acti9 iC60N miniature circuit breaker, 2P, 16 A, C curve
@@ -647,10 +638,8 @@ records:
   - https://za.rs-online.com/web/p/mcbs/0132122
 - part_id: AUX-A9A26924
   kind: catalogue
-  description: AC/DC Auxiliary Contact for MCB
+  description: AC/DC Auxiliary Contact for MCB (Schneider A9A26924)
   make: Schneider
-  model: A9A26924
-  ordering_code: A9A26924
   verified: confirmed
   datasheet:
     full_name: Acti9 iOF auxiliary contact, 1 C/O, AC/DC
@@ -742,10 +731,8 @@ records:
   - https://eshop.se.com/id/auxiliary-contact-acti9-a9a-iof-1-c-o-100ma-to-6a-24vac-to-415vac-24-130-vdc-bottom-connection.html
 - part_id: TB-UT-16
   kind: catalogue
-  description: Terminal block for incoming AC / DC circuits
+  description: Terminal block for incoming AC / DC circuits (Phoenix Contact 3044199)
   make: Phoenix Contact
-  model: UT 16
-  ordering_code: '3044199'
   verified: confirmed
   datasheet:
     full_name: UT 16 feed-through terminal block, screw connection, gray
@@ -841,10 +828,8 @@ records:
   - https://pacificautomation.com.au/weidmuller-wdu-16-feed-through-terminal-block-16mm-1000v-76a-screw-connection-beige-ts-35-din-rail/
 - part_id: TB-UT-2.5-MTD
   kind: catalogue
-  description: Terminal block for AC / DC distribution and housekeeping circuits
+  description: Terminal block for AC / DC distribution and housekeeping circuits (Phoenix Contact 3064085)
   make: Phoenix Contact
-  model: UT 2,5-MTD
-  ordering_code: '3064085'
   verified: confirmed
   datasheet:
     full_name: UT 2,5-MTD feed-through terminal block, screw connection, gray
@@ -944,10 +929,9 @@ records:
   - https://www.controldesign.com/vendors/products/2009/273
 - part_id: TB-UT-2.5-MT
   kind: catalogue
-  description: Knife-disconnect terminal block for DI, RTAC COM and inter-panel circuits
+  description: Knife-disconnect terminal block for DI, RTAC COM and inter-panel circuits (Phoenix Contact
+    3046362)
   make: Phoenix Contact
-  model: UT 2,5-MT
-  ordering_code: '3046362'
   verified: confirmed
   datasheet:
     full_name: UT 2,5-MT knife-disconnect terminal block, screw connection, gray
@@ -1042,8 +1026,6 @@ records:
 - part_id: BUSBAR-AC-SAFETY-GND
   kind: catalogue
   description: POWER/AC SAFETY GROUNDING BUSBAR - TINNED COPPER
-  make: (generic)
-  model: Tinned copper AC safety grounding busbar
   verified: partial
   datasheet:
     summary: Generic tinned copper PE / safety earth busbar bonded to the cabinet frame
@@ -1117,8 +1099,6 @@ records:
 - part_id: BUSBAR-INSTRUMENT-GND
   kind: catalogue
   description: INSTRUMENT GROUNDING BUSBAR - TINNED COPPER
-  make: (generic)
-  model: Tinned copper instrument grounding busbar, insulated mounting
   verified: partial
   datasheet:
     summary: Generic tinned copper instrument / signal (clean) earth busbar on insulated supports, isolated

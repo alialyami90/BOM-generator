@@ -1,6 +1,7 @@
 # Device database: Network devices, transceivers and fibre management (cabinets 001/002).
 # Researched datasheet facts and alternative brands for the example project's parts.
-# Keys match examples/library.yaml part ids; library fields live there, not here.
+# Device part ids match examples/library.yaml, where the library fields live.
+# Catalogue ids (MCB-*, AUX-*, TB-*, BUSBAR-*, ENCL-*) are local to this database.
 # Format and field meanings: data/device-db/README.md
 schema_version: 1
 area: network
@@ -9,9 +10,7 @@ records:
 - part_id: RST2228-L2
   kind: device
   description: LAN-{lan} Industrial Ethernet switch (Level-2)
-  make: Ruggedcom (Siemens)
-  model: RST-2228
-  ordering_code: 6GK6222-6AB00-5CC0-Z A00+B06+C06+D06+E06+F06+G00
+  make: Ruggedcom
   verified: confirmed
   datasheet:
     full_name: SIMATIC NET RUGGEDCOM RST2228 managed Layer 2 19" rack switch with 10 Gbit/s uplinks
@@ -158,9 +157,7 @@ records:
 - part_id: RST2228-L1-24MM
   kind: device
   description: LAN-{lan} Industrial Ethernet switch (Level-1) (24 MM FO Ports)
-  make: Ruggedcom (Siemens)
-  model: RST-2228
-  ordering_code: 6GK6222-6AB00-5CC0-Z A05+B05+C05+D05+E05+F05+G05
+  make: Ruggedcom
   verified: confirmed
   datasheet:
     full_name: SIMATIC NET RUGGEDCOM RST2228 managed Layer 2 19" rack switch with 10 Gbit/s uplinks
@@ -299,8 +296,6 @@ records:
   kind: device
   description: LAN-{lan} Industrial Ethernet switch (EXT) (16 MM Ports, 4 RJ45)
   make: SEL
-  model: SEL-2730M
-  ordering_code: 2730M#2CF9
   verified: partial
   datasheet:
     full_name: SEL-2730M Managed 24-Port Ethernet Switch
@@ -408,8 +403,6 @@ records:
   kind: device
   description: Industrial Firewall for External Systems
   make: Fortigate
-  model: FortiGate Rugged 60F, FGR-60F
-  ordering_code: FGR-60F
   verified: partial
   datasheet:
     full_name: FortiGate Rugged 60F (FGR-60F)
@@ -503,9 +496,7 @@ records:
 - part_id: SFP-1G-LX-SM
   kind: device
   description: 1000BASE-LX SM SFP (1310nm, 10 Km)
-  make: Ruggedcom (Siemens)
-  model: 6GK6000-8FG52-0AA0
-  ordering_code: 6GK6000-8FG52-0AA0
+  make: Ruggedcom
   verified: partial
   datasheet:
     full_name: RUGGEDCOM SFP transceiver 1 x 1000BASE-LX, single-mode, 1310 nm, LC, 10 km (legacy code
@@ -581,9 +572,7 @@ records:
 - part_id: SFP-1G-SX-MM
   kind: device
   description: 1000BASE-SX MM SFP (850nm, <500m)
-  make: Ruggedcom (Siemens)
-  model: 6GK6000-8FG51-0AA0
-  ordering_code: 6GK6000-8FG51-0AA0
+  make: Ruggedcom
   verified: partial
   datasheet:
     full_name: RUGGEDCOM SFP transceiver 1 x 1000BASE-SX, multimode, 850 nm, LC, 500 m (legacy code 1FG51)
@@ -657,9 +646,7 @@ records:
 - part_id: SFP-100M-FX-MM
   kind: device
   description: 100BASE-FX MM SFP (1310nm, <2km)
-  make: Ruggedcom (Siemens)
-  model: 6GK6000-8FE51-0AA0
-  ordering_code: 6GK6000-8FE51-0AA0
+  make: Ruggedcom
   verified: partial
   datasheet:
     full_name: RUGGEDCOM SFP transceiver 1 x 100BASE-FX, multimode, 1310 nm, LC, 2 km
@@ -723,6 +710,7 @@ records:
           80 km) are single-mode and do not work on the multimode bay fibre. Part number seen on a manufacturer
           or distributor page this session.'
         verified: true
+        same_as: low
       high:
         model: SFP-1FESLC-T
         ordering_code: SFP-1FESLC-T
@@ -738,8 +726,6 @@ records:
   kind: device
   description: Industrial SFP (1Gig, MM)
   make: Fortinet
-  model: FR-TRAN-SX
-  ordering_code: FR-TRAN-SX
   verified: partial
   datasheet:
     full_name: Fortinet 1GE SFP SX transceiver module, -40 to 85 C operation, over MMF
@@ -816,9 +802,7 @@ records:
 - part_id: FOPP-96SM
   kind: device
   description: LC, 96 core SM FOPP for L2-L3 Interface
-  make: Hubbell (Hubbell Premise Wiring)
-  model: FEUR96LCSM
-  ordering_code: FEUR96LCSM
+  make: Hubbell
   verified: unverified
   datasheet:
     full_name: Hubbell Premise Wiring OptiChannel FEUR rack-mount fibre enclosure, 96-fibre LC single-mode
@@ -901,8 +885,6 @@ records:
   kind: device
   description: Fiber Management Spool
   make: Hubbell
-  model: OFSPOOLPK2
-  ordering_code: OFSPOOLPK2
   verified: partial
   datasheet:
     full_name: Hubbell Premise Wiring OptiChannel Fiber Management Spool Kit, yellow (OFSPOOLPK2)
@@ -934,6 +916,7 @@ records:
         notes: 'Kept identical on purpose: FMS2 is the only Panduit fibre spool SKU found (Gexpro, Rexel,
           Crescent, Stanion). Vary the quantity instead.'
         verified: true
+        same_as: low
       high:
         model: FMS2
         ordering_code: FMS2
@@ -942,6 +925,7 @@ records:
         notes: Same part (only Panduit spool SKU found). Spool kits are normally specific to each enclosure
           range, so pick the one that matches the chosen enclosure.
         verified: true
+        same_as: low
   - make: Corning
     manufacturer: Corning Optical Communications
     tiers:
@@ -974,8 +958,6 @@ records:
   kind: device
   description: Splice Holder
   make: Hubbell
-  model: OFSPLKT24F
-  ordering_code: OFSPLKT24F
   verified: partial
   datasheet:
     full_name: Hubbell OptiChannel 24-fibre fusion splice tray, yellow, with clear snap-on cover (OFSPLKT24F)
@@ -1054,8 +1036,6 @@ records:
   kind: device
   description: LC Single Mode pigtails
   make: Hubbell
-  model: FPLCS3SM
-  ordering_code: FPLCS3SM
   verified: partial
   datasheet:
     full_name: Hubbell Premise Wiring OptiChannel fibre optic pigtail, LC single-mode OS2, 6-fibre bundled,
@@ -1135,8 +1115,6 @@ records:
   kind: device
   description: Brush Type Cable Manager
   make: Marshcom
-  model: PL1U12NEBK
-  ordering_code: PL1U12NEBK
   verified: unverified
   datasheet:
     full_name: 1U 19" brush-type horizontal cable manager (as described in BOM)
@@ -1165,6 +1143,7 @@ records:
         notes: 'Kept identical on purpose: no StarTech 2U or high-density brush panel with a separate
           code was found (the ''high-density'' listings are CMBRUSH1U itself).'
         verified: true
+        same_as: low
       high:
         model: CMDUCT2U
         ordering_code: CMDUCT2U

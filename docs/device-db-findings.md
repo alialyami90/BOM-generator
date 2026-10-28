@@ -4,7 +4,7 @@ The datasheet research turned up places where the example workbook (and so the s
 example values) disagrees with the manufacturer's data, or where a part could not be
 found. None of these is changed anywhere: the library and golden values still follow
 the workbook. Each item is a question for Ali. Details and source links are in the
-matching record.
+matching record in `data/device-db/`.
 
 ## Could change the power, heat or airflow results
 
@@ -26,14 +26,17 @@ matching record.
 ## Ordering codes and quantities
 
 4. **RST2228 L1 option `A05` is not valid.** Option A only sets the service panel position
-   (A00 front, A01 rear). The L2 switch uses A00. (`RST2228-L1-24MM`)
+   (A00 front, A01 rear). The L2 switch uses A00. Verify on the cited Siemens page before
+   acting. (`RST2228-L1-24MM`)
 5. **FPLCS3SM pigtails come as 6-fibre bundles.** Hubbell lists FPLCS3SM as a 3 m bundle of
    6 OS2 LC pigtails, so a 96-fibre panel needs 16, not 96. (`FOPP-PIGTAIL-LC-SM`)
 6. **Phoenix 3064086 does not exist.** PSA2-XPS uses it. It is almost certainly a typo for
-   3064085 (UT 2,5-MTD). (`TB-UT-2.5-MTD`)
+   3064085 (UT 2,5-MTD). Already decided in `examples/README.md` (plan Q22).
+   (`TB-UT-2.5-MTD`)
 7. **UT 2,5-MTD is a feed-through block, not a knife-disconnect.** Phoenix lists 3064085 as a
    feed-through terminal block (24 A, 800 V). Only UT 2,5-MT (3046362) is a knife-disconnect
    block. The BOM uses each in the right place, but the wording in descriptions should match.
+   This reading may be the wrong way round; verify on the cited Phoenix pages before acting.
    (`TB-UT-2.5-MTD`, `TB-UT-2.5-MT`)
 8. **Vent filter SK 3238.200 fits the small 148.5 mm fan range.** It is right only if the
    console has an SK 3238.100 fan. As the outlet for an SK 3243.100 fan the part is
@@ -50,7 +53,8 @@ matching record.
     the cabinet, and its rating is 13 A where the BOM sizes a 10 A circuit. (`SOCKET-730076`)
 
 12. **Acti9 iC60N on 125 V DC.** Schneider rates the 2P iC60N at 10 kA up to 125 V DC
-    (IEC 60947-2). A 125 V station battery floats at about 135–140 V, which is above that.
+    (IEC 60947-2). A 125 V station battery's float and boost voltage is typically above
+    125 V (check the project's battery data; no source was found for a figure).
     The high tier of each MCB alternative is a DC-rated (UC) range for this reason.
     (`MCB-*`)
 13. **Interposing relay 2903685 is a 230 V AC relay with gold contacts.** It is

@@ -1,6 +1,7 @@
 # Device database: WS console peripherals, annunciator, software and loose cables.
 # Researched datasheet facts and alternative brands for the example project's parts.
-# Keys match examples/library.yaml part ids; library fields live there, not here.
+# Device part ids match examples/library.yaml, where the library fields live.
+# Catalogue ids (MCB-*, AUX-*, TB-*, BUSBAR-*, ENCL-*) are local to this database.
 # Format and field meanings: data/device-db/README.md
 schema_version: 1
 area: workstation-loose
@@ -10,8 +11,6 @@ records:
   kind: device
   description: 23" Desktop Monitor
   make: Ultraview
-  model: NAP-F23
-  ordering_code: NAP-F23-125VDC
   verified: partial
   datasheet:
     full_name: Austin Hughes UltraView NAP-F23 - Professional and Versatile 23in FHD LED Monitor, NEMA
@@ -141,8 +140,6 @@ records:
   kind: device
   description: 55" LCD Alarm Annunciator (Touch) - Wall Mounted
   make: Ultraview
-  model: NAP-K55
-  ordering_code: NAP-K55
   verified: partial
   datasheet:
     full_name: Austin Hughes UltraView NAP-K55 - Professional and Versatile 55in 4K LED Monitor, NEMA
@@ -270,9 +267,7 @@ records:
 - part_id: LPA37-696
   kind: device
   description: Wall Mount Kit
-  make: Lumi (Lumi Legend)
-  model: LPA37-696
-  ordering_code: LPA37-696
+  make: Lumi
   verified: confirmed
   datasheet:
     full_name: LUMI LPA37-696 X-Large Heavy-Duty Full Motion Curved & Flat Panel TV Wall Mount
@@ -364,9 +359,7 @@ records:
 - part_id: KEYTEK-KBM
   kind: device
   description: Industrial Keyboard & Mouse
-  make: Key-Tek (KEYTEK industrial)
-  model: K-TEK-A420TP-KP-FN-MDT
-  ordering_code: K-TEK-A420TP-KP-FN-MDT
+  make: Key-Tek
   verified: partial
   datasheet:
     full_name: K-TEK-A420TP-KP-FN-MDT stainless steel industrial keyboard with touchpad, metal desktop
@@ -478,8 +471,6 @@ records:
   kind: device
   description: Zenon Energy Edition Sever/Client with Editor Studio
   make: COPA-DATA
-  model: zenon Energy Edition V12
-  ordering_code: zenon Energy Edition V12
   verified: partial
   datasheet:
     full_name: COPA-DATA zenon Software Platform 12 - Energy Edition (Engineering Studio + Service Engine)
@@ -547,8 +538,6 @@ records:
   kind: device
   description: Microsoft Office 2021
   make: Microsoft
-  model: Office 2021
-  ordering_code: Office 2021
   verified: partial
   datasheet:
     full_name: Microsoft Office LTSC Professional Plus 2021 (commercial, perpetual) / Office Home & Business
@@ -634,8 +623,6 @@ records:
 - part_id: ANN-DISPLAY-CABLE-10M
   kind: device
   description: Display Cable for Annunciator
-  make: (no make)
-  model: 10 m display cable
   verified: partial
   datasheet:
     full_name: 'Reference part: StarTech.com HD2MM10MA 10 m active HDMI 2.0 cable, 4K60, CL2'
@@ -714,8 +701,6 @@ records:
 - part_id: ANN-USB-CABLE-10M
   kind: device
   description: USB cable for Annunciator
-  make: (no make)
-  model: 10 m USB cable
   verified: partial
   datasheet:
     full_name: 'Reference part: StarTech.com USB2AAEXT10M 10 m USB 2.0 active extension cable, M/F'
@@ -799,8 +784,6 @@ records:
 - part_id: MON-DVI-CABLE-3M
   kind: device
   description: DVI Cable for Monitor
-  make: (no make)
-  model: 3 m DVI cable
   verified: partial
   datasheet:
     summary: 3 m DVI-D cable, workstation to 23in monitor
@@ -866,8 +849,6 @@ records:
 - part_id: MON-USB-CABLE-3M
   kind: device
   description: USB Cable for Monitor
-  make: (no make)
-  model: 3 m USB cable
   verified: partial
   datasheet:
     full_name: 'Reference part: StarTech.com USB2HAB3M 3 m USB 2.0 A to B cable, M/M'
@@ -940,8 +921,6 @@ records:
 - part_id: FO-PATCH-CORDS
   kind: device
   description: Fiber Optic Patch Cords
-  make: (no make)
-  model: Fibre optic patch cords (1 Lot)
   verified: partial
   datasheet:
     summary: 'Lot of duplex LC-LC patch cords: multimode OM3/OM4 50/125 and singlemode OS2 9/125'

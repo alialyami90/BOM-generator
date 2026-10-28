@@ -1,6 +1,7 @@
 # Device database: Enclosures and cabinet housekeeping: lamp, fans, filters, thermostats, IPR kit, socket, change-over diodes.
 # Researched datasheet facts and alternative brands for the example project's parts.
-# Keys match examples/library.yaml part ids; library fields live there, not here.
+# Device part ids match examples/library.yaml, where the library fields live.
+# Catalogue ids (MCB-*, AUX-*, TB-*, BUSBAR-*, ENCL-*) are local to this database.
 # Format and field meanings: data/device-db/README.md
 schema_version: 1
 area: housekeeping
@@ -9,10 +10,9 @@ title: 'Enclosures and cabinet housekeeping: lamp, fans, filters, thermostats, I
 records:
 - part_id: ENCL-RAWABI-2100
   kind: catalogue
-  description: Cabinet H2100 x D1000 x W800 mm, base frame H100 x D950 x W750 mm, top cable entry
-  make: Rawabi (Saudi panel builder, verify)
-  model: Fixed Frame
-  ordering_code: Fixed Frame
+  description: Cabinet H2100 x D1000 x W800 mm, base frame H100 x D950 x W750 mm, top cable entry (Rawabi
+    (Saudi panel builder, verify) Fixed Frame)
+  make: Rawabi
   verified: unverified
   datasheet:
     manufacturer: Rawabi (unconfirmed; no public product page found)
@@ -91,10 +91,8 @@ records:
   - https://my.rs-online.com/web/p/floor-standing-enclosures/2289462
 - part_id: ENCL-RITTAL-PC5386
   kind: catalogue
-  description: Console H1600 x D636 x W800 mm, base frame H100, side cable entry
+  description: Console H1600 x D636 x W800 mm, base frame H100, side cable entry (Rittal PC 5386.050)
   make: Rittal
-  model: PC 5386.050
-  ordering_code: PC 5386.050
   verified: confirmed
   datasheet:
     full_name: PC enclosure system PC 5386.050 (Rittal PC cabinet with glazed monitor door, keyboard drawer
@@ -195,8 +193,6 @@ records:
   kind: device
   description: Illumination Lamp with Door switch, 11W
   make: Rittal
-  model: SZ 2500.210 + SZ 2500.470
-  ordering_code: SZ 2500.210 + SZ 2500.470
   verified: confirmed
   datasheet:
     full_name: LED system light with socket SZ 2500.210
@@ -299,8 +295,6 @@ records:
   kind: device
   description: '230V AC Inlet and Exhaust Fan, Throughput: 716 m3/h, 87W'
   make: Rittal
-  model: SK 3243.100
-  ordering_code: SK 3243.100
   verified: confirmed
   datasheet:
     full_name: TopTherm fan-and-filter unit SK 3243.100
@@ -401,8 +395,6 @@ records:
   kind: device
   description: Ventilation Filter
   make: Rittal
-  model: SK 3238.200
-  ordering_code: SK 3238.200
   verified: confirmed
   datasheet:
     full_name: Outlet filter (standard) SK 3238.200
@@ -498,8 +490,6 @@ records:
   kind: device
   description: Thermostat, 30W
   make: Rittal
-  model: SK 3110.000
-  ordering_code: SK 3110.000
   verified: confirmed
   datasheet:
     full_name: Thermostat SK 3110.000 (internal enclosure thermostat)
@@ -594,8 +584,6 @@ records:
   kind: device
   description: Interposing Relay for High Temp Alarm
   make: Phoenix Contact
-  model: '2903685'
-  ordering_code: '2903685'
   verified: confirmed
   datasheet:
     full_name: REL-IR4/L-230AC/4X21AU - Individual plug-in industrial relay
@@ -712,8 +700,6 @@ records:
   kind: device
   description: IPR Relay Base
   make: Phoenix Contact
-  model: '2900934'
-  ordering_code: '2900934'
   verified: confirmed
   datasheet:
     full_name: RIF-2-BPT/4X21 - Relay base
@@ -809,8 +795,6 @@ records:
   kind: device
   description: Suppression Module
   make: Phoenix Contact
-  model: '2900944'
-  ordering_code: '2900944'
   verified: confirmed
   datasheet:
     full_name: RIF-LV-120-230AC/110DC - Plug-in module
@@ -890,8 +874,6 @@ records:
   kind: device
   description: Retaining Bracket - RIF-RH-2
   make: Phoenix Contact
-  model: '2900954'
-  ordering_code: '2900954'
   verified: confirmed
   datasheet:
     full_name: RIF-RH-2 - Retaining bracket
@@ -968,8 +950,6 @@ records:
   kind: device
   description: Power Socket for Auxiliary Power Supply
   make: Legrand
-  model: '730076'
-  ordering_code: '730076'
   verified: partial
   datasheet:
     full_name: Synergy 2 gang 13 A single pole switched socket outlet, white (730076)
@@ -1056,8 +1036,6 @@ records:
   kind: device
   description: Change Over Diodes (Negative)
   make: Ruttonsha
-  model: IRND150F12
-  ordering_code: IRND150F12
   verified: unverified
   datasheet:
     full_name: IRND150F12 diode module (Ruttonsha International Rectifier / RIR Power Electronics)
@@ -1141,8 +1119,6 @@ records:
   kind: device
   description: Change Over Diodes (Positive)
   make: Ruttonsha
-  model: IRMD150F12
-  ordering_code: IRMD150F12
   verified: unverified
   datasheet:
     full_name: IRMD150F12 diode module (Ruttonsha International Rectifier / RIR Power Electronics)

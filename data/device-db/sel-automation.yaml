@@ -1,6 +1,7 @@
 # Device database: SEL automation: RTACs, Axion IO, GPS clock and accessories, workstation.
 # Researched datasheet facts and alternative brands for the example project's parts.
-# Keys match examples/library.yaml part ids; library fields live there, not here.
+# Device part ids match examples/library.yaml, where the library fields live.
+# Catalogue ids (MCB-*, AUX-*, TB-*, BUSBAR-*, ENCL-*) are local to this database.
 # Format and field meanings: data/device-db/README.md
 schema_version: 1
 area: sel-automation
@@ -10,8 +11,6 @@ records:
   kind: device
   description: Protocol Gateway for Dhahran PCC connection
   make: SEL
-  model: SEL-3555
-  ordering_code: 3555#0KVC
   verified: partial
   datasheet:
     full_name: SEL-3555 Real-Time Automation Controller (RTAC)
@@ -124,8 +123,6 @@ records:
   kind: device
   description: PSA RTAC and Data Concentrator for DCS
   make: SEL
-  model: SEL-3555
-  ordering_code: 3555#F2R2
   verified: partial
   datasheet:
     full_name: SEL-3555 Real-Time Automation Controller (RTAC)
@@ -225,8 +222,6 @@ records:
   description: GPS Clock with Antenna and accessories (SNTP/IRIG-B), 125VDC redundant, 100mbps SFP ports
     redundant
   make: SEL
-  model: SEL-2488
-  ordering_code: 2488#J544
   verified: confirmed
   datasheet:
     full_name: SEL-2488 Satellite-Synchronized Network Clock
@@ -362,8 +357,6 @@ records:
   kind: device
   description: Axion IO and Non-IEC Protocol Gateway
   make: SEL
-  model: SEL-2240 Axion
-  ordering_code: (system)
   verified: partial
   datasheet:
     full_name: SEL-2240 Axion Distributed Integrated Control Platform
@@ -446,8 +439,6 @@ records:
   kind: device
   description: Chassis/Backpane
   make: SEL
-  model: SEL-2242
-  ordering_code: 2242#5DPM
   verified: partial
   datasheet:
     full_name: SEL-2242 Axion Chassis (Backplane)
@@ -484,12 +475,14 @@ records:
         url: https://www.siemens.com/en-us/products/sicam/a8000/
         notes: No chassis needed.
         verified: false
+        same_as: low
       high:
         model: SICAM A8000 (no chassis; DIN rail)
         description: Same as low
         url: https://www.siemens.com/en-us/products/sicam/a8000/
         notes: No chassis needed.
         verified: false
+        same_as: low
   - make: Hitachi Energy
     manufacturer: Hitachi Energy
     tiers:
@@ -518,8 +511,6 @@ records:
   kind: device
   description: RTAC (Axion CPU module)
   make: SEL
-  model: SEL-2241
-  ordering_code: 2241#4D2J
   verified: partial
   datasheet:
     full_name: SEL-2241 Axion RTAC Module
@@ -606,8 +597,6 @@ records:
   kind: device
   description: Power Coupler (125V DC)
   make: SEL
-  model: SEL-2243
-  ordering_code: 224311X0
   verified: partial
   datasheet:
     full_name: SEL-2243 Axion Power Coupler
@@ -692,8 +681,6 @@ records:
   kind: device
   description: Digital Input Module-24DI (125V DC)
   make: SEL
-  model: SEL-2244-2
-  ordering_code: 22442424X0
   verified: partial
   datasheet:
     full_name: SEL-2244-2 Axion Digital Input Module
@@ -779,8 +766,6 @@ records:
   kind: device
   description: RJ-45 port serial cables for RTAC COM port connection
   make: SEL
-  model: SEL-C607
-  ordering_code: C607#DM6B
   verified: unverified
   datasheet:
     full_name: SEL-C607 serial communications cable
@@ -858,8 +843,6 @@ records:
   kind: device
   description: PSA DA Server/Operator/Engineering Automation Workstation
   make: SEL
-  model: SEL-3355
-  ordering_code: 3355#F5P8
   verified: partial
   datasheet:
     full_name: SEL-3355 Computing Platform (rugged computer)
@@ -973,8 +956,6 @@ records:
   kind: device
   description: GPS/GLONASS Antenna
   make: SEL
-  model: SEL-9524B
-  ordering_code: (included with SEL-2488)
   verified: confirmed
   datasheet:
     full_name: SEL-9524B GPS/GLONASS GNSS Antenna
@@ -1055,8 +1036,6 @@ records:
   kind: device
   description: 50 ft (15 Meters) LMR-400 cable
   make: SEL
-  model: SEL-C961-050
-  ordering_code: C961-050
   verified: confirmed
   datasheet:
     full_name: SEL-C961 Low-Loss LMR-400 TNC Male to TNC Male Coaxial Cable, 50 ft
@@ -1126,8 +1105,6 @@ records:
   kind: device
   description: 25 ft (7 Meters) LMR-400 cable
   make: SEL
-  model: SEL-C961-025
-  ordering_code: C961-025
   verified: confirmed
   datasheet:
     full_name: SEL-C961 Low-Loss LMR-400 TNC Male to TNC Male Coaxial Cable, 25 ft
@@ -1195,8 +1172,6 @@ records:
   kind: device
   description: Gas Tube Coaxial Surge Protector and Mounting Kit
   make: SEL
-  model: '915900139'
-  ordering_code: '915900139'
   verified: partial
   datasheet:
     full_name: Gas Tube Coaxial Surge Protector and Mounting Kit, Female TNC Connectors
@@ -1254,6 +1229,7 @@ records:
         description: Same; Meinberg offers one variant per antenna type
         notes: Not web-verified.
         verified: false
+        same_as: low
       high:
         model: Meinberg fiber-optic antenna link
         description: Removes the copper path entirely
@@ -1267,8 +1243,6 @@ records:
   kind: device
   description: Antenna Pipe-Mounting Kit
   make: SEL
-  model: '915900043'
-  ordering_code: '915900043'
   verified: partial
   datasheet:
     full_name: Antenna Pipe-Mounting Kit
@@ -1300,6 +1274,7 @@ records:
         description: Same
         notes: Not researched.
         verified: false
+        same_as: mid
   - make: Arbiter Systems
     manufacturer: Arbiter Systems, Inc.
     tiers:
@@ -1313,10 +1288,12 @@ records:
         description: Same
         notes: Not researched.
         verified: false
+        same_as: low
       high:
         model: Arbiter antenna mounting kit
         description: Same
         notes: Not researched.
         verified: false
+        same_as: low
   sources:
   - https://selinc.com/api/download/105184
