@@ -58,6 +58,7 @@ src/bomgen/       package source
 tests/unit/       one test module per rule area
 tests/golden/     example-project golden values and tests
 examples/         YAML inputs reproducing the spec's example project
+data/device-db/   researched datasheet details and alternative brands (reference only)
 schemas/          JSON Schemas exported from the models (bomgen schema)
 ```
 
