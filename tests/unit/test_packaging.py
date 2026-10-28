@@ -108,3 +108,12 @@ def test_release_workflow_builds_the_example_project_with_the_frozen_and_install
     assert (PACKAGING.parent / "examples" / "project.yaml").is_file()
     assert workflow.count("validate examples\\project.yaml") == 2
     assert workflow.count("build examples\\project.yaml --out") == 2
+
+
+def test_release_workflow_has_no_variable_followed_by_a_colon() -> None:
+    # PowerShell reads "$name:" as a scope prefix and the step fails to parse; write ${name}:.
+    workflow = (PACKAGING.parent / ".github" / "workflows" / "release.yml").read_text(
+        encoding="utf-8"
+    )
+    scoped = re.findall(r"\$(?!(?:env|global|script|local):)\w+:", workflow)
+    assert scoped == []
