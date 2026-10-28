@@ -31,7 +31,7 @@ from bomgen.io.round_trip import (
 )
 from bomgen.io.yaml_source import read_yaml
 from bomgen.project_store.backup import backup_project
-from bomgen.project_store.export import export_project
+from bomgen.project_store.export import export_project, project_files
 from bomgen.project_store.manifest import PROJECT_SUFFIX
 from bomgen.project_store.rename import suggest_project_id
 
@@ -249,8 +249,21 @@ def delete_substation(
 
 
 def delete_project(project_file: Path, deleted_folder: Path) -> Path:
-    """Save the project as ``<deleted_folder>/<id>.bomproj``, then remove its folder; the
-    returned file restores it (ADR 0012)."""
+    """Save the project as ``<deleted_folder>/<id>.bomproj``, then remove what it carries plus
+    ``out/`` and ``__pycache__``; the returned file restores it (ADR 0012).
+
+    Anything the ``.bomproj`` does not carry (``Backups/``, other ``.bomproj`` files) stays,
+    and so does the folder while it holds anything. A folder holding ``.git``, the home
+    folder and a drive root are refused before anything is saved or removed.
+    """
+    folder = project_file.parent.resolve()
+    if (folder / ".git").exists():
+        raise EditError(
+            f"refusing to delete {folder}: it holds a .git folder, which the .bomproj would not "
+            "keep; move the project to a folder of its own first"
+        )
+    if folder == Path.home().resolve() or _is_drive_root(folder):
+        raise EditError(f"refusing to delete {folder}: it is the home folder or a drive root")
     data = read_yaml(project_file).data
     project_id = str((data.get("project") or {}).get("id") or project_file.parent.name)
     deleted_folder.mkdir(parents=True, exist_ok=True)
@@ -260,8 +273,22 @@ def delete_project(project_file: Path, deleted_folder: Path) -> Path:
             break
         target = deleted_folder / f"{project_id}-{number}{PROJECT_SUFFIX}"
     saved = export_project(project_file, target).path
-    shutil.rmtree(project_file.parent)
+    for name in project_files(folder):
+        (folder / name).unlink()
+    for skipped in ("out", "__pycache__"):
+        for directory in sorted(folder.rglob(skipped), reverse=True):
+            if directory.is_dir() and not directory.is_symlink():
+                shutil.rmtree(directory)
+    for directory in sorted((p for p in folder.rglob("*") if p.is_dir()), reverse=True):
+        if not directory.is_symlink() and not any(directory.iterdir()):
+            directory.rmdir()
+    if not any(folder.iterdir()):
+        folder.rmdir()
     return saved
+
+
+def _is_drive_root(path: Path) -> bool:
+    return path == Path(path.anchor)
 
 
 def _map(data: Mapping[str, Any]) -> CommentedMap:

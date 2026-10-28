@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from bomgen.io import fields
+from bomgen.io import fields, lifecycle
 from bomgen.io.edit import EditError
 from bomgen.io.lifecycle import (
     create_project,
@@ -17,6 +17,7 @@ from bomgen.io.lifecycle import (
     project_id_for,
 )
 from bomgen.io.loader import load_project
+from bomgen.project_store.export import project_files
 
 EXAMPLES = Path(__file__).parents[2] / "examples"
 TODAY = date(2026, 10, 28)
@@ -115,3 +116,56 @@ def test_delete_project_saves_a_bomproj(project: Path, tmp_path: Path) -> None:
     assert saved == tmp_path / "Deleted" / "jfgp2-pkg3.bomproj"
     assert saved.is_file()
     assert not project.parent.exists()
+
+
+def bundle_files(saved: Path) -> dict[str, bytes]:
+    with zipfile.ZipFile(saved) as zf:
+        return {name: zf.read(name) for name in zf.namelist() if name != "manifest.json"}
+
+
+def test_a_deleted_project_is_all_in_its_bomproj(project: Path, tmp_path: Path) -> None:
+    before = project_files(project.parent)
+    saved = delete_project(project, tmp_path / "Deleted")
+    assert bundle_files(saved) == before
+
+
+def test_a_project_folder_holding_git_is_refused_and_left_untouched(
+    project: Path, tmp_path: Path
+) -> None:
+    (project.parent / ".git").mkdir()
+    (project.parent / ".git" / "HEAD").write_text("ref: refs/heads/main\n", encoding="utf-8")
+    before = sorted(p.relative_to(project.parent) for p in project.parent.rglob("*"))
+    with pytest.raises(EditError, match=r"holds a \.git folder"):
+        delete_project(project, tmp_path / "Deleted")
+    assert sorted(p.relative_to(project.parent) for p in project.parent.rglob("*")) == before
+    assert not (tmp_path / "Deleted").exists()
+
+
+@pytest.mark.parametrize("where", ["home", "root"])
+def test_a_project_in_the_home_folder_or_a_drive_root_is_refused(
+    where: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    folder = tmp_path / "top"
+    folder.mkdir()
+    (folder / "project.yaml").write_text("project: {id: p}\n", encoding="utf-8")
+    if where == "home":
+        monkeypatch.setattr(Path, "home", classmethod(lambda cls: folder))
+    else:
+        monkeypatch.setattr(lifecycle, "_is_drive_root", lambda path: path == folder)
+    with pytest.raises(EditError, match="refusing to delete"):
+        delete_project(folder / "project.yaml", tmp_path / "Deleted")
+    assert (folder / "project.yaml").is_file()
+
+
+def test_delete_project_keeps_what_the_bomproj_does_not_carry(
+    project: Path, tmp_path: Path
+) -> None:
+    folder = project.parent
+    (folder / "out").mkdir()
+    (folder / "out" / "built.xlsx").write_bytes(b"x")
+    (folder / "Backups").mkdir()
+    (folder / "Backups" / "old.bomproj").write_bytes(b"b")
+    (folder / "notes.bomproj").write_bytes(b"n")
+    delete_project(project, tmp_path / "Deleted")
+    left = sorted(p.relative_to(folder).as_posix() for p in folder.rglob("*"))
+    assert left == ["Backups", "Backups/old.bomproj", "notes.bomproj"]
