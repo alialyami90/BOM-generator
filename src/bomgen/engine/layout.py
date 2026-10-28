@@ -121,26 +121,48 @@ def _order(unit: Unit) -> tuple[int, str, int]:
 class PanelFill:
     number: int
     units: list[Unit] = field(default_factory=list)
+    pins: dict[Unit, int | None] = field(default_factory=dict)  # pinned units, position (R7)
+
+    def stack(self) -> list[Unit]:
+        """The units top to bottom: group order, with positioned pins at their place."""
+        placed = {x: p for x, p in self.pins.items() if p is not None and x.block_u > 0}
+        order = [x for x in sorted(self.units, key=_order) if x not in placed]
+        taken: dict[int, int] = {}
+        for unit in sorted(placed, key=lambda x: (placed[x], _order(x))):
+            position = placed[unit] + taken.get(placed[unit], 0)
+            taken[placed[unit]] = taken.get(placed[unit], 0) + 1
+            rack = [i for i, x in enumerate(order) if x.block_u > 0]
+            order.insert(rack[position - 1] if position <= len(rack) else len(order), unit)
+        return order
 
     def used_u(self, rules: LayoutRules) -> int:
-        return used_u(self.units, rules.blank_plate_u)
+        return used_u(self.stack(), rules.blank_plate_u)
 
     def free_u(self, rules: LayoutRules) -> int:
         return rules.capacity_u - self.used_u(rules)
 
     def blank_plates(self) -> int:
-        return blank_plates(self.units)
+        return blank_plates(self.stack())
 
     def din_rail_count(self) -> int:
         return sum(1 for x in self.units if x.block_u == 0)
 
     def fits(self, unit: Unit, rules: LayoutRules) -> bool:
-        stack = sorted([*self.units, unit], key=_order)
-        return used_u(stack, rules.blank_plate_u) <= rules.capacity_u
+        trial = PanelFill(self.number, [*self.units, unit], dict(self.pins))
+        return trial.used_u(rules) <= rules.capacity_u
 
     def add(self, unit: Unit) -> None:
         self.units.append(unit)
         self.units.sort(key=_order)
+
+    def is_pinned(self, unit: Unit) -> bool:
+        """A layout override placed this unit here, even where the fill would have."""
+        return unit in self.pins
+
+    def position(self, unit: Unit) -> int | None:
+        """The unit's place among the panel's rack devices, 1 = top; None on DIN rail."""
+        rack = [x for x in self.stack() if x.block_u > 0]
+        return rack.index(unit) + 1 if unit in rack else None
 
 
 @dataclass
@@ -206,7 +228,9 @@ class _Builder:
                 best = self.open_pair()[0]
             best.add(unit)
 
-    def move(self, units: Sequence[Unit], number: int, what: str) -> None:
+    def move(
+        self, units: Sequence[Unit], number: int, what: str, position: int | None = None
+    ) -> None:
         target = self.panel(number)
         if target is None:
             self.issues.append(
@@ -221,7 +245,9 @@ class _Builder:
             for panel in self.panels:
                 if unit in panel.units:
                     panel.units.remove(unit)
+                    panel.pins.pop(unit, None)
             target.add(unit)
+            target.pins[unit] = position
         if target.used_u(self.rules) > self.rules.capacity_u:
             self.issues.append(
                 LayoutIssue(
@@ -236,6 +262,7 @@ class _Builder:
         while self.panels and not self.panels[-1].units:
             self.panels.pop()
         for panel in self.panels:
+            panel.units = panel.stack()
             if not panel.units:
                 self.issues.append(
                     LayoutIssue(
@@ -278,6 +305,11 @@ def auto_layout(
     moves: Sequence[DeviceMove | PairMove] = (),
 ) -> Layout:
     """Drop ``removed``, fill, then apply ``moves`` in order (R7).
+
+    Every moved unit is pinned, also when the move names the panel the fill chose, so
+    the pin holds when later changes would place it elsewhere. A move's ``position``
+    puts the unit at that place among the panel's rack devices (1 = top, past the
+    bottom = last); a later move of the same unit replaces it.
 
     A move to the next one or two panel numbers opens a new pair, as when a device is
     dragged onto the board's empty column; the unit keeps its own LAN letter there.
@@ -324,7 +356,7 @@ def auto_layout(
             if not group:
                 continue
             what = _describe(ref) if side is None else f"{_describe(ref)} side {side.upper()}"
-            builder.move(group, number, what)
+            builder.move(group, number, what, move.position)
     return builder.finish()
 
 

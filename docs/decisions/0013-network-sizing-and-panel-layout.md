@@ -63,6 +63,17 @@ R1–R10 are in the design document named in ADR 0012.
   blank_plate_u ≤ panel_capacity_u`, where `p` counts the rack blocks, except
   the lowest, that carry no cable manager. The example's generated panels drop
   from 29U and 25U to 23U and 19U; the BOM is unchanged (Q25).
+
+  *Amended (2026-10-28, M17, the Panels board's pins):* every override pins the
+  units it names, also when it names the panel the fill chose, so "Pin here"
+  holds when later changes would place the unit elsewhere; `layout_preview`
+  reports whether each unit is pinned (`PanelFill.is_pinned`) and its place
+  (`PanelFill.position`). `DeviceMove` and `PairMove` take an optional
+  `position`, the unit's place among the panel's rack devices (1 = top, past the
+  bottom = last; DIN-rail parts do not count); without it the unit takes its
+  group-order place. The blank-plate rule applies to the pinned order. Overrides
+  still apply after the fill, in order, and a later override of a unit replaces
+  an earlier one.
 - **Pipeline**: a step 0 (`engine/sizing.py`, `engine/layout.py`,
   `bomgen layout`) runs before the existing steps 1–15; `bomgen build
   --no-layout` keeps hand-written panels working.
