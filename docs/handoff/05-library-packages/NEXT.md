@@ -1,6 +1,6 @@
 # Next
 
-**First action: rerun the README step 4 drift check and record any drift, then answer A11's questions on the Library editors (via A1 or A11's thread) from the code and ADR 0018.** Nothing else is requested; do not invent code work.
+**First action: rerun the README step 4 drift check and record any drift, then answer B11's questions on the Library editors (B11's thread) from the code and ADR 0018.** Nothing else is requested; do not invent code work.
 
 ## Tasks in priority order
 1. Answer A11 (M16 app side, [`docs/ui/editing.md`](../../ui/editing.md)). Facts to give:
@@ -10,7 +10,9 @@
    - `preview_csv_import` returns `checks`, `problems` (table, row, column, message, key),
      `changes`, `edits` (the same changes as edit ops for a pending set) and `library`;
      `skip_invalid=True` turns row failures into warnings;
-   - alternatives are only the `alt_group` key; `compare_alternatives` gives the rows.
+   - alternatives are only the `alt_group` key; `compare_alternatives` gives the rows;
+   - device records: `apply_record_edits` / `check_record_field`, `save_edits(record_edits=...)`
+     (#164, ADR 0018 "device-record edits").
    Done when A11 has what it needs; no code unless a real gap appears.
 2. If a gap appears, one small PR per gap, tests first, named after the rule; gate passes, PR open
    for A1. Files: `src/bomgen/library_store/` and its tests only.
