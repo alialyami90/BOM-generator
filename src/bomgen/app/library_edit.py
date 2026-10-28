@@ -121,6 +121,7 @@ class LibraryEditor:
 
     def __init__(self, store: LibraryStore, pending: PendingEdits, name: str) -> None:
         self.store, self.pending, self.name = store, pending, name
+        self._records_read: dict[str, dict[str, DeviceRecord]] = {}
 
     def _active(self) -> str | None:
         try:
@@ -149,12 +150,18 @@ class LibraryEditor:
             raise EditRefusedError(listed)
         return result.library
 
+    def _saved_records(self, version: str) -> dict[str, DeviceRecord]:
+        """The installed version's device records, read once per editor (one bridge call)."""
+        if version not in self._records_read:
+            self._records_read[version] = load_device_records(self.store, self.name, version)
+        return self._records_read[version]
+
     def _records(self, pending: Pending, more: Sequence[dict[str, Any]] | None = None) -> Any:
         """The base version's device records with the pending record edits (or `more`
         instead of them) applied."""
         assert pending.base is not None
         edits = pending.record_edits if more is None else more
-        records = load_device_records(self.store, self.name, pending.base)
+        records = self._saved_records(pending.base)
         if not edits:
             return records
         result = apply_record_edits(records, parse_edits(edits))
@@ -186,7 +193,7 @@ class LibraryEditor:
         if problem is None and pending.base is not None and pending.edits:
             entries = describe(self._library(pending.base), self._edited(pending))
         if problem is None and pending.base is not None and pending.record_edits:
-            saved = load_device_records(self.store, self.name, pending.base)
+            saved = self._saved_records(pending.base)
             entries += describe_records(saved, self._records(pending))
         base = pending.base or active
         return {
@@ -214,7 +221,7 @@ class LibraryEditor:
         now = edited.model_dump(mode="json")
         was = saved.model_dump(mode="json") if saved else None
         record = self._records(pending).get(part_id)
-        saved_record = load_device_records(self.store, self.name, pending.base).get(part_id)
+        saved_record = self._saved_records(pending.base).get(part_id)
         return {
             "device": now,
             "saved": was,
@@ -279,7 +286,7 @@ class LibraryEditor:
             key, record[key] = _with_field(record, path.split("."), value)
             if record[key] is None:
                 del record[key]
-        saved_records = load_device_records(self.store, self.name, pending.base)
+        saved_records = self._saved_records(pending.base)
         saved = saved_records[part_id].model_dump(mode="json", exclude_none=True)
         mine: list[dict[str, Any]] = []
         for key in sorted(saved.keys() | record.keys()):

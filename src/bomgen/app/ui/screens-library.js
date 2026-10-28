@@ -119,6 +119,22 @@
         ${sel ? detail(sel) : ''}
       </div>`;
   }
+  /* The library's own alternatives (same alt_group), compact: part, power and inrush against this device. */
+  const ALT = { id: '', reply: null };
+  window.addEventListener('hashchange', () => { ALT.id = ''; });  // pending edits may have changed them
+  function altCompact(id) {
+    if (ALT.id !== id) {
+      ALT.id = id; ALT.reply = null;
+      Bridge.call('library_alternatives', id).then((a) => { if (ALT.id === id) { ALT.reply = a; App.render(); } }).catch(() => { if (ALT.id === id) { ALT.reply = { group: null, rows: [] }; App.render(); } });
+    }
+    const a = ALT.reply, chip = App.altChip || (() => '');
+    if (!a) return '<p class="muted">Reading the alternatives…</p>';
+    if (!a.group || a.rows.length < 2) return '<p class="muted">No alternatives in the library for this device.</p>';
+    const num = (v, u) => (v == null ? '—' : `${v} ${u}`);
+    return `<div class="table-wrap"><table class="table"><thead><tr><th>Part</th><th class="num">Power</th><th class="num">Inrush</th></tr></thead><tbody>${a.rows.filter((r) => !r.is_self).map((r) => `<tr><td><span class="mono">${esc(r.part_id)}</span><span class="cell-sub">${esc([r.tier ? r.tier[0].toUpperCase() + r.tier.slice(1) : '', r.make, r.model].filter(Boolean).join(' · '))}</span></td><td class="num nowrap">${num(r.unit_power_w, 'W')}${chip(r.power_delta_w, 'W')}</td><td class="num nowrap">${num(r.inrush_a, 'A')}${chip(r.inrush_delta_a, 'A')}</td></tr>`).join('')}</tbody></table>
+      <div class="table-foot"><span>${a.rows.length - 1} in group <span class="mono">${esc(a.group)}</span></span><a href="#/library/device/${encodeURIComponent(id)}" data-action="compare-full">Compare in full</a></div></div>`;
+  }
+  ACTIONS['compare-full'] = () => { S.tab.devEdit = 'alternatives'; return true; };
   function detail(d, o) {  // o: a catalogue entry's heading and Overview, in place of a device's
     const t = S.tab.libdetail;
     const tabsList = [['overview', 'Overview'], ['datasheet', 'Datasheet'], ['alternatives', 'Alternatives']];
@@ -126,9 +142,8 @@
     if (t === 'overview') body = o ? o.kv : `<dl class="kv"><dt>Part ID</dt><dd class="mono">${esc(d.id)}</dd><dt>Make</dt><dd>${esc(d.make)}</dd><dt>Model</dt><dd>${esc(d.model)}</dd><dt>Ordering code</dt><dd class="mono">${esc(d.code || '—')}</dd><dt>Category</dt><dd>${esc(catName(d.cat))}</dd><dt>Tag</dt><dd class="mono">${d.tagType ? esc(d.tagType) + (d.level ? ' · ' + esc(d.level) : '') : '—'}</dd><dt>Supply</dt><dd>${esc(d.supply)}</dd><dt>Power</dt><dd>${esc(d.power || '—')}</dd><dt>Rated power</dt><dd class="num" style="text-align:left">${d.w != null ? d.w + ' W' : '—'}</dd><dt>Branch MCB</dt><dd>${esc(d.mcb || '—')}</dd></dl>`;
     else if (t === 'datasheet') body = d.ds ? `${d.ds.summary ? `<p style="margin-bottom:var(--space-3)">${esc(d.ds.summary)}</p>` : ''}<dl class="kv"><dt>Supply range</dt><dd>${esc(d.ds.supply)}</dd><dt>Typical power</dt><dd>${esc(d.ds.typical)}</dd><dt>Maximum power</dt><dd>${esc(d.ds.max)}</dd><dt>Ports</dt><dd>${esc(d.ds.ports)}</dd><dt>Dimensions</dt><dd>${esc(d.ds.dims)}</dd><dt>Weight</dt><dd>${esc(d.ds.weight)}</dd><dt>Operating temperature</dt><dd>${esc(d.ds.temp)}</dd><dt>Certifications</dt><dd>${esc(d.ds.certs)}</dd>${d.ds.url ? `<dt>Datasheet</dt><dd class="row" style="gap:4px;flex-wrap:nowrap"><span class="mono small" style="overflow-wrap:anywhere">${esc(d.ds.url)}</span><button class="btn btn--ghost btn--icon btn--sm" data-action="copy" data-v="${esc(d.ds.url)}" aria-label="Copy the datasheet link">${icon('copy')}</button></dd>` : ''}</dl>
       ${(d.src || []).length ? `<div class="section" style="margin-top:var(--space-4);padding-bottom:0"><h3>Sources</h3><ul style="margin:var(--space-2) 0 0;padding-left:18px">${d.src.map((x) => `<li style="overflow-wrap:anywhere">${esc(x)}</li>`).join('')}</ul></div>` : ''}` : `<p class="muted">No datasheet recorded for this device.</p>`;
-    else body = d.alt ? `${banner('info', 'Alternatives are for reference. Swapping a device inside a panel is not available yet.')}
-      ${d.alt.map((a) => `<h3 style="margin-top:var(--space-4)">${esc(a.brand)}</h3><div class="table-wrap" style="margin-top:6px"><table class="table"><thead><tr><th style="width:56px">Tier</th><th>Model</th><th>Data</th><th style="width:40px"><span class="sr-only">Copy</span></th></tr></thead><tbody>${a.rows.map((r) => `<tr><td>${esc(r.tier)}</td><td><span class="mono nowrap">${esc(r.model)}</span><span class="cell-sub">${r.same_as ? `Same as ${esc(r.same_as)}` : esc(r.sub || '')}</span></td><td>${verified(r.verified)}</td><td style="width:40px"><button class="btn btn--ghost btn--icon btn--sm" data-action="copy" data-v="${esc(r.model)}" aria-label="Copy ${esc(r.model)}">${icon('copy')}</button></td></tr>`).join('')}</tbody></table></div>`).join('')}`
-      : `<p class="muted">No alternatives recorded for this device.</p>`;
+    else body = `${o || LIB.offline ? '' : altCompact(d.id)}${d.alt ? `<details class="section" style="margin-top:var(--space-4)"><summary>Researched brands <span class="muted small">(device database)</span></summary>
+      ${d.alt.map((a) => `<h3 style="margin-top:var(--space-4)">${esc(a.brand)}</h3><div class="table-wrap" style="margin-top:6px"><table class="table"><thead><tr><th style="width:56px">Tier</th><th>Model</th><th>Data</th><th style="width:40px"><span class="sr-only">Copy</span></th></tr></thead><tbody>${a.rows.map((r) => `<tr><td>${esc(r.tier)}</td><td><span class="mono nowrap">${esc(r.model)}</span><span class="cell-sub">${r.same_as ? `Same as ${esc(r.same_as)}` : esc(r.sub || '')}</span></td><td>${verified(r.verified)}</td><td style="width:40px"><button class="btn btn--ghost btn--icon btn--sm" data-action="copy" data-v="${esc(r.model)}" aria-label="Copy ${esc(r.model)}">${icon('copy')}</button></td></tr>`).join('')}</tbody></table></div>`).join('')}</details>` : ''}`;
     const what = o ? 'Catalogue entry detail' : 'Device detail';
     return `<aside class="detail" aria-label="${what}"><h2 class="mono" style="font-size:18px;font-family:var(--font-mono)">${o ? o.title : esc(d.id)}</h2><p class="muted" style="margin-bottom:var(--space-3)">${o ? o.sub : makeModel(d)}</p>${o || LIB.offline ? '' : `<a class="btn btn--secondary btn--sm" style="margin-bottom:var(--space-3)" href="#/library/device/${encodeURIComponent(d.id)}">${icon('edit')}Edit device</a>`}
       ${tabs('libdetail', tabsList, t, what)}<div role="tabpanel" aria-labelledby="tab-libdetail-${t}">${body}</div></aside>`;
