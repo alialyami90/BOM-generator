@@ -1,17 +1,43 @@
 """Run the derivation steps over a loaded substation (spec: Data model and generation order).
 
-Steps 1, 2, 3 and 5 so far: groups A-D per panel and the loose-material table.
+Steps 1-3 and 5-11: groups A-H per panel and the loose-material table. Step 8 needs
+the substation's HWIO total (the XDIN default), so groups A-F of every panel are built
+before any panel's groups G and H.
 """
 
+from collections.abc import Sequence
+from dataclasses import dataclass, replace
+
+from bomgen.engine.ac_dist import ac_distribution
+from bomgen.engine.assemble import mark_revisions
+from bomgen.engine.dc_dist import dc_distribution, single_fed_loads
 from bomgen.engine.enclosure import enclosure_item
+from bomgen.engine.grounding import grounding
 from bomgen.engine.housekeeping import housekeeping, needs_change_over, resolve_ventilation
-from bomgen.engine.items import flatten
+from bomgen.engine.items import BomItem, flatten
 from bomgen.engine.kits import loose_table, main_equipment
 from bomgen.engine.network import accessories
-from bomgen.engine.units import DeviceRow, expand_devices
+from bomgen.engine.terminals import StripInputs, terminal_strips
+from bomgen.engine.units import DeviceRow, expand_devices, lookup
 from bomgen.io.loader import LoadedSubstation
 from bomgen.models.bom import BuildResult, PanelBom
+from bomgen.models.library import Category, Library
 from bomgen.models.panel import Panel
+from bomgen.models.project import DesignConstants, LooseExtra
+
+
+@dataclass(frozen=True)
+class _PanelDraft:
+    """A panel's groups A-F and what groups G-H need from them."""
+
+    panel: Panel
+    rows: tuple[DeviceRow, ...]
+    items: list[BomItem]
+    strip_inputs: StripInputs
+
+    @property
+    def hwio(self) -> int:
+        return sum(line.hwio for line in flatten(self.items))
 
 
 def build(loaded: LoadedSubstation) -> BuildResult:
@@ -20,25 +46,58 @@ def build(loaded: LoadedSubstation) -> BuildResult:
     material = loaded.substation.loose_material
     loose_items = material.items if material is not None else []
     substation = loaded.substation.substation.name
-    panel_rows: list[tuple[Panel, tuple[DeviceRow, ...]]] = []
-    panels = []
-    for panel in loaded.panels:
-        rows = expand_devices(panel, library)
-        panel_rows.append((panel, rows))
-        change_over = needs_change_over(panel, library, loose_items)
-        items = [
-            enclosure_item(panel),
-            *main_equipment(rows, library),
-            *accessories(panel, rows, library),
-            *housekeeping(panel, library, resolve_ventilation(panel), change_over),
-        ]
-        panels.append(
-            PanelBom(
-                panel_id=panel.id,
-                sheet_name=panel.sheet_name,
-                title=(panel.cabinet_number, f"{substation} - {panel.cabinet_name}"),
-                lines=flatten(items),
-            )
-        )
-    loose = loose_table(material, substation, panel_rows, library)
-    return BuildResult(panels=tuple(panels), loose=loose)
+    drafts = [_draft(p, library, loaded.constants, loose_items) for p in loaded.panels]
+    hwio_total = sum(draft.hwio for draft in drafts)
+    panels = tuple(_finish(draft, library, substation, hwio_total) for draft in drafts)
+    loose = loose_table(material, substation, [(d.panel, d.rows) for d in drafts], library)
+    return BuildResult(panels=panels, loose=loose)
+
+
+def _draft(
+    panel: Panel, library: Library, constants: DesignConstants, loose: Sequence[LooseExtra]
+) -> _PanelDraft:
+    rows = expand_devices(panel, library)
+    ventilation = resolve_ventilation(panel)
+    change_over = needs_change_over(panel, library, loose)
+    ac = ac_distribution(panel, library, ventilation)
+    fed = single_fed_loads(panel, rows, library, loose)
+    dc = dc_distribution(panel, library, constants, rows, fed, change_over)
+    annunciators = [
+        item
+        for item in loose
+        if item.fed_from == panel.id
+        and lookup(library, item.part_id).category is Category.ANNUNCIATOR
+    ]
+    items = [
+        enclosure_item(panel),
+        *main_equipment(rows, library),
+        *accessories(panel, rows, library),
+        *housekeeping(panel, library, ventilation, change_over),
+        *ac.items,
+        *dc.items,
+    ]
+    strip_inputs = StripInputs(
+        ventilation=ventilation,
+        ac_mcbs=ac.mcbs,
+        dc_branches_per_feed=dc.branches_per_feed,
+        change_over=change_over,
+        annunciator_feeds=len(annunciators),
+        xdin_default=0,
+    )
+    return _PanelDraft(panel, rows, items, strip_inputs)
+
+
+def _finish(draft: _PanelDraft, library: Library, substation: str, hwio_total: int) -> PanelBom:
+    panel = draft.panel
+    strip_inputs = replace(draft.strip_inputs, xdin_default=hwio_total)
+    items = [
+        *draft.items,
+        *terminal_strips(panel, library, draft.rows, strip_inputs),
+        *grounding(panel, library),
+    ]
+    return PanelBom(
+        panel_id=panel.id,
+        sheet_name=panel.sheet_name,
+        title=(panel.cabinet_number, f"{substation} - {panel.cabinet_name}"),
+        lines=mark_revisions(panel, flatten(items)),
+    )
