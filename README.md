@@ -8,23 +8,33 @@ setup, and page headers/footers.
 - **Spec (source of truth):** [`docs/spec/generator-spec-v2.md`](docs/spec/generator-spec-v2.md)
 - **Plan, milestones, open questions:** [`docs/plan.md`](docs/plan.md)
 - **Design decisions:** [`docs/decisions/`](docs/decisions/)
+- **Team:** the agents building the project and who owns what are in
+  [`docs/agents.md`](docs/agents.md)
+- **Changes:** [`CHANGELOG.md`](CHANGELOG.md)
 
 ## Status
 
-Milestone M0: repository, spec, plan and CI. No generator code yet; it lands
-milestone by milestone after the plan is approved. The CLI comes first; an
-installable Windows desktop app with shareable device-library update packages
-follows (see the plan, M8–M11).
+Milestones M0 (repository, spec, plan, CI) and M1 (input models, YAML loader,
+JSON Schemas, `examples/`, `bomgen validate`) are done. The rule engine, sheet
+models and Excel writer (M2–M7) come next; `bomgen build` arrives with them.
+An installable Windows desktop app with shareable device-library update
+packages follows (see the plan, M8–M11).
 
-## Planned usage
-
-```bash
-bomgen validate --project examples/project.yaml
-bomgen build --project examples/project.yaml --out out/PSA_BOM.xlsx
-```
+## Usage
 
 Inputs are three YAML sets (device library, panel definitions, project
-settings); see `docs/plan.md` → "Input file schemas" and `examples/`.
+settings); see `docs/plan.md` → "Input file schemas" and
+[`examples/`](examples/).
+
+```bash
+bomgen validate --project examples/project.yaml   # check the inputs, build nothing
+bomgen schema                                     # write JSON Schemas to schemas/
+```
+
+`validate` prints `OK:` with the panel and part counts, or each error with its
+file and path. The JSON Schemas in [`schemas/`](schemas/) let an editor check
+the YAML as you type (ADR 0010); a test fails if they drift from the models, so
+run `bomgen schema` after changing a model.
 
 ## Development
 
