@@ -28,6 +28,7 @@ from bomgen.models.calc import (
     LineUpCheck,
     NaturalConvCheck,
 )
+from bomgen.models.library import CatalogueChoice, resolve_catalogues
 from bomgen.models.panel import Ventilation
 from bomgen.models.project import DesignConstants
 from bomgen.models.report import CheckItem, CheckReport, CheckStatus
@@ -220,6 +221,25 @@ def test_mcbs_without_a_dc_rating_cannot_be_checked() -> None:
     (item,) = float_items(None)
     assert item.status is CheckStatus.WARN
     assert "no dc_rating_v" in item.message
+
+
+def test_float_check_names_the_mcb_dc_choice() -> None:
+    # ADR 0023: the DC set is checked against the float, not the AC set.
+    dc_set = {
+        "id": "c60h-dc",
+        "family": "C60H-DC 2P",
+        "make": "Schneider",
+        "ratings_a": [2, 4, 10, 16],
+        "code_pattern": "MGN61{rating:03d}",
+        "dc_rating_v": 250,
+    }
+    lib = resolve_catalogues(
+        library(mcb={"dc_rating_v": 125}, mcb_brands=[dc_set]), CatalogueChoice(mcb_dc="c60h-dc")
+    )
+    mains = [DcMains(panel_id="p1", design_current_a=1.0, rating_a=10, rule_rating_a=10)]
+    (item,) = dc_float_checks([bom()], mains, lib, DesignConstants())
+    assert (item.status, item.subject) == (CheckStatus.PASS, "C60H-DC 2P")
+    assert item.values == {"dc_rating_v": 250, "dc_float_v": 140}
 
 
 def test_no_dc_feeds_no_mcb_float_check() -> None:

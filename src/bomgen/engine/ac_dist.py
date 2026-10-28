@@ -36,10 +36,11 @@ def ac_distribution(panel: Panel, library: Library, ventilation: Ventilation) ->
     loads += [("SPARE", spare_a)] * panel.options.ac_spare_branches
 
     prefix = panel.tag_prefix
-    cinc_a = CINC_A if socket_a is None else rating_above(library, socket_a)
-    lines = [mcb_line(library, Group.E, f"{prefix}-CINC", cinc_a, "Main Auxiliary AC Supply")]
+    mcb = library.catalogues.mcb  # the AC choice; the DC branches take dc_mcb (ADR 0023)
+    cinc_a = CINC_A if socket_a is None else rating_above(mcb, socket_a)
+    lines = [mcb_line(mcb, Group.E, f"{prefix}-CINC", cinc_a, "Main Auxiliary AC Supply")]
     lines += [
-        mcb_line(library, Group.E, f"{prefix}-C{n}", rating, load)
+        mcb_line(mcb, Group.E, f"{prefix}-C{n}", rating, load)
         for n, (load, rating) in enumerate(loads, start=1)
     ]
     # One aux contact on CINC and one on each fan circuit (C2, C3 after the lamp's C1).

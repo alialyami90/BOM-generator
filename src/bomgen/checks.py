@@ -199,13 +199,13 @@ def dc_float_checks(
     library: Library,
     constants: DesignConstants,
 ) -> list[CheckItem]:
-    """The MCB catalogue's DC rating, once, when any panel has DC feeds, and each DC-fed
+    """The DC MCB set's rating (ADR 0023), once, when any panel has DC feeds, and each DC-fed
     device type's highest input voltage, where the library gives one, against the
     battery float voltage."""
     float_v = constants.dc_float_v
     items = []
     if any(main.rating_a for main in mains):
-        mcb = library.catalogues.mcb
+        mcb = library.catalogues.dc_mcb
         if mcb.dc_rating_v is None:
             status = CheckStatus.WARN
             message = (
