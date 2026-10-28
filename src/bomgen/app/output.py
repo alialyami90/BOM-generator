@@ -167,7 +167,7 @@ def build_file(
         outcome = build_substation(loaded, path, previous=previous)
     except EngineError as exc:
         raise OutputRefusedError("engine", f"The engine stopped: {exc}") from None
-    except WriterError as exc:
+    except (WriterError, PermissionError) as exc:
         if _locked(exc) and folder.is_dir() and not os.access(folder, os.W_OK):
             raise OutputRefusedError(
                 "io", f"{folder} is read-only. Choose another folder."
