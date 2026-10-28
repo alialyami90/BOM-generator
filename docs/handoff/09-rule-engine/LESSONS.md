@@ -19,6 +19,12 @@
   one inserted row would mark every row below it.
 - M7, ΣQ in the check report is the cabinet's own DC loads (ADR 0016), not the feed total.
 
+- 2026-10-28, the MCB helpers (`rating_at_least`, `rating_above`, `mcb_line`) take the
+  `McbCatalogue` to use (#154). Rejected: a `dc: bool` flag or keeping `library` and
+  reading `dc_mcb` inside, which let a caller size from the wrong set silently.
+- 2026-10-28, CINC stays on the AC set (#154): it is group E's "Main Auxiliary AC Supply"
+  breaker (ADR 0023 point 1). A1's task note had listed it with the DC items.
+
 ## Failed approaches and what they taught
 - M15 was written before A2's #97 (the M13 fields) merged. A local stand-in patch kept in
   the scratchpad let the tests run. It was never committed and was reverted before the
@@ -37,6 +43,11 @@
   Copy the attribution lines from the session's instructions, not from an older PR.
 
 ## Working notes
+- 2026-10-28, B9 resume drift: none in code. The stash was not in the new container (as
+  expected), and ruff formats more files (309) after other roles' merges.
+- 2026-10-28, `resolve_catalogues(library, CatalogueChoice(...))` lets engine tests cover the
+  brand choices without the loader; `engine_factories.library(mcb_brands=[...])` fills
+  `catalogue_brands.mcb`.
 - Run the tools as `python -m ruff|mypy|pytest`. The full suite takes about 2 minutes,
   golden about 7 s.
 - Drift at this checkpoint: none (first checkpoint for role 9; no earlier STATE/NEXT).
