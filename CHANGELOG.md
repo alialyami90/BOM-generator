@@ -10,6 +10,21 @@ tagged release.
 
 ### Added
 
+- BOM groups A–D as engine output: enclosure, devices and tags, kit
+  children, network accessories, housekeeping kit and the loose-material
+  table, with a golden test over every group A–D row; ADR 0014 (milestone M2,
+  #22).
+- Sheet models and the XlsxWriter workbook writer: cells, live formulas,
+  styles, merges, print setup, page header and footer (milestone M6, #21).
+- `bomgen project export|import|backup`: projects shared and backed up as
+  `.bomproj` files with a checksummed manifest, overwrite refusal with a
+  safety backup, and a library-version note naming the `.bomlib` to install;
+  the zip container is shared with `.bomlib` (milestone M8b, #20).
+- Device database: rack height and mounting kind per record, port roles for
+  the library switches (#18).
+- ADR 0012 (projects hold substations, `.bomproj` sharing) and ADR 0013
+  (switch sizing and automatic panel layout), milestones M1b, M1c and M8b,
+  Q24–Q28 resolved and the A8–A10 roles (#16).
 - Windows installer and releases, built early: PyInstaller spec, per-user
   Inno Setup installer with `.bomlib` file association, frozen-app launcher
   with placeholders for the M10 window and `.bomlib` import, tag-driven
@@ -23,7 +38,7 @@ tagged release.
   library store with import preview, downgrade refusal and rollback, and the
   `bomgen library pack|import|list|rollback` commands (milestone M8, #9).
 - Changelog entries for #6 and #4 (#10); README and test READMEs for M8 and
-  M9 (#11).
+  M9 (#11) and for M11 (#14).
 - Device database in `data/device-db/`: datasheet facts and two alternative
   brands (low, mid, high part numbers) for every part in the example library,
   as reference data the generator does not read; findings in
@@ -39,6 +54,9 @@ tagged release.
 
 ### Changed
 
+- M9 prototype reworked for projects and substations: project page with the
+  document register and backup and share, a Network screen and a Panels board
+  per substation (#23).
 - The installed app imports a double-clicked `.bomlib` through the library
   store and shows the change summary or the refusal; `.bomproj` files get a
   placeholder association; `BOMGEN_NO_DIALOGS=1` prints messages to stderr
