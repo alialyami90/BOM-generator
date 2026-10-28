@@ -40,6 +40,22 @@ def test_installer_registers_bomlib_association_for_current_user() -> None:
     assert '"{app}\\{#AppExeName}"" ""%1"""' in ISS
 
 
+def test_installer_registers_bomproj_association_for_current_user() -> None:
+    lines = [line for line in ISS.splitlines() if "Software\\Classes" in line]
+    project = [line for line in lines if ".bomproj" in line or "ProjectProgId" in line]
+    assert any('Subkey: "Software\\Classes\\.bomproj"' in line for line in project)
+    assert any(r"Software\Classes\{#ProjectProgId}\shell\open\command" in line for line in project)
+    assert all(line.startswith("Root: HKA;") for line in project)
+    assert all("uninsdelete" in line for line in project)
+    assert re.search(r"#define ProjectProgId \"bomgen\.project\"", ISS)
+
+
+def test_each_association_opens_its_file_with_the_app() -> None:
+    commands = [line for line in ISS.splitlines() if "shell\\open\\command" in line]
+    assert len(commands) == 2
+    assert all('"{app}\\{#AppExeName}"" ""%1"""' in line for line in commands)
+
+
 def test_installer_output_name_carries_the_version() -> None:
     assert setup_value("OutputBaseFilename") == "bomgen-setup-{#AppVersion}"
 

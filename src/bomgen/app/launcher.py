@@ -3,15 +3,16 @@
 The installer ships two executables built from this module:
 
 * ``BOM Generator.exe`` (windowed) runs :func:`app_main`. The Start-menu
-  shortcut opens it with no arguments, and double-clicking a ``.bomlib`` file
-  opens it with that file (ADR 0008).
+  shortcut opens it with no arguments, double-clicking a ``.bomlib`` file imports
+  that library (ADR 0008), and a ``.bomproj`` file is reserved for project export.
 * ``bomgen.exe`` (console) runs :func:`cli_main`, the typer CLI.
 
-The window (M10) and library import (M8) are placeholders until those
+The window (M10) and project files (M8b) are placeholders until those
 milestones land; only their hand-off points live here.
 """
 
 import importlib
+import os
 import pkgutil
 import sys
 from collections.abc import Callable, Sequence
@@ -20,13 +21,17 @@ from pathlib import Path, PureWindowsPath
 from typing import Literal
 
 from bomgen import __version__
+from bomgen.library_store import LibraryPackageError, import_library
 
 APP_TITLE = "BOM Generator"
 LIBRARY_SUFFIX = ".bomlib"
+PROJECT_SUFFIX = ".bomproj"
+MAX_SUMMARY_LINES = 20
+NO_DIALOGS_ENV = "BOMGEN_NO_DIALOGS"  # set by unattended CI: print instead of a message box
 SELF_TEST_FLAG = "--self-test"
 MODULE_MANIFEST = "bomgen_modules.txt"  # written by packaging/bomgen.spec
 
-Action = Literal["window", "import_library", "self_test"]
+Action = Literal["window", "import_library", "open_project", "self_test"]
 
 
 @dataclass(frozen=True)
@@ -38,13 +43,17 @@ class Launch:
 def parse_args(argv: Sequence[str]) -> Launch:
     if list(argv) == [SELF_TEST_FLAG]:
         return Launch("self_test")
-    if len(argv) == 1 and PureWindowsPath(argv[0]).suffix.lower() == LIBRARY_SUFFIX:
-        return Launch("import_library", Path(argv[0]))
+    if len(argv) == 1:
+        suffix = PureWindowsPath(argv[0]).suffix.lower()
+        if suffix == LIBRARY_SUFFIX:
+            return Launch("import_library", Path(argv[0]))
+        if suffix == PROJECT_SUFFIX:
+            return Launch("open_project", Path(argv[0]))
     return Launch("window")
 
 
 def show_message(text: str) -> None:
-    if sys.platform == "win32":
+    if sys.platform == "win32" and not os.environ.get(NO_DIALOGS_ENV):
         import ctypes
 
         mb_iconinformation = 0x40
@@ -89,6 +98,24 @@ def self_test(
     return sorted(set(failed))
 
 
+def import_library_message(package: Path) -> tuple[str, bool]:
+    """Import a double-clicked ``.bomlib``; return the message to show and whether it worked."""
+    try:
+        result = import_library(package)
+    except LibraryPackageError as error:
+        return f"Could not import {package.name}.\n\n{error}\n\n({error.kind.value})", False
+    except OSError as error:  # e.g. the library folder isn't writable
+        return f"Could not import {package.name}.\n\n{error}", False
+    manifest = result.manifest
+    heading = f"Imported library {manifest.name} {manifest.version}"
+    if result.previous:
+        heading += f" (was {result.previous})"
+    lines = result.diff.summary_lines()
+    if len(lines) > MAX_SUMMARY_LINES:
+        lines = [*lines[:MAX_SUMMARY_LINES], f"... and {len(lines) - MAX_SUMMARY_LINES} more lines"]
+    return "\n".join([f"{heading}.", "", *lines]), True
+
+
 def app_main(
     argv: Sequence[str] | None = None, notify: Callable[[str], None] = show_message
 ) -> int:
@@ -100,7 +127,15 @@ def app_main(
         return 1 if failed else 0
     if launch.action == "import_library":
         assert launch.path is not None
-        notify(f"Importing library packages is not available yet (plan M8).\n\n{launch.path.name}")
+        message, imported = import_library_message(launch.path)
+        notify(message)
+        return 0 if imported else 1
+    if launch.action == "open_project":
+        assert launch.path is not None
+        notify(
+            f"{launch.path.name}\n\nProject files open with the app after M8b; "
+            "this build can't open them yet."
+        )
         return 0
     notify(
         f"{APP_TITLE} {__version__}\n\n"
