@@ -201,13 +201,16 @@ class Resolved(NamedTuple):
     loaded: LoadedSubstation | None
     problems: list[Issue]
     warnings: Sequence[Issue] = ()
+    source: LoadedSubstation | None = None  # as loaded, before the layout
 
 
 def _laid_out(found: Resolved) -> Resolved:
     """Generated panels re-laid out, as ``bomgen build`` does; layout errors block."""
-    assert found.loaded is not None
+    source = found.loaded
+    assert source is not None
+    found = found._replace(source=source)
     try:
-        loaded, report = with_layout(found.loaded)
+        loaded, report = with_layout(source)
     except EngineError as exc:
         return found._replace(loaded=None, problems=[Issue(found.file, "layout", str(exc))])
     if report is None:

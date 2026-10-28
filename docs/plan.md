@@ -720,10 +720,15 @@ Delivered in small PRs by A11, one screen group each (ADR 0015 for the bridge):
   result, the ten constants and the spares with the project default and a "Changed
   from" mark for the keys the substation writes, loose material, the YAML with its
   located problems) and Network's inputs (field network, equipment checked against the
-  library, spares). Read-only until substation writers exist. The L1 ranking, the
-  Result card and the Panels board follow with M1c's `NetworkPlan`,
-  `rank_l1_switches` and `layout_preview`; they are ported from the prototype as of
-  #32 (ranked L1 table with a pin, cable managers counted in panel blocks).
+  library, spares). Read-only until substation writers exist. Then the L1 ranking, the
+  Result card and the Panels board (`bomgen.app.network`, `substation_layout`) on M1c's
+  `layout_preview` of the substation as written: the `NetworkPlan` per side, the L1
+  candidates in the engine's order (the pinned or picked one marked; usable ports
+  rather than spare ports, which the engine does not give), and per generated panel
+  its units with height, cable manager, U used and free, blank plates, DIN-rail count
+  and a mark on units an override placed away from the automatic fill, plus the layout
+  issues. For hand-written panels the board shows what the layout would write. Moves,
+  deletions, pins and the panel editor wait for the substation writers.
 - **M10d:** Checks, Preview and Build after M4, M5 and M7. First Checks and Build
   (`bomgen.app.output`): `run_checks` gives the substation's located problems (errors,
   plus the library-version note as a warning) and, when the files load, the M7 check
