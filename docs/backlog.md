@@ -10,16 +10,16 @@ material are as in the spec.
 
 | # | Point (Ali, 2026-10-28) | Milestone | Owner | Status |
 | --- | --- | --- | --- | --- |
-| 1 | The Library screen doesn't list the MCBs, terminal blocks, auxiliary contacts or other accessories. List them, so an engineer can change the MCB brand. | M13, M16 | A2, A5, A11 | In progress. The Library screen lists the catalogues read-only (#93); brand sets come with M13 (#97); editing with M16. |
-| 2 | A device's alternatives (e.g. for the SEL-2730M) are shown by tier, but they aren't library parts, so they can't be picked. Add them to the library. | M13, M14 | A2, A3 | Planned |
-| 3 | Size each MCB from the equipment's own data, worked out by the program, not from Ali's example. Fill in the data needed for every researched device. | M14, M15 | A3, A9 | In progress (A9). Q35: computed, with a 2 A floor |
-| 4 | Create projects and substations in the app, with no YAML or project file. Files are only for import, export and backup. | M17 | A2, A11, A4 | Planned |
+| 1 | The Library screen doesn't list the MCBs, terminal blocks, auxiliary contacts or other accessories. List them, so an engineer can change the MCB brand. | M13, M16 | A2, A5, A11 | In progress. Catalogue tabs read-only (#93); brand sets per project and substation (#97); editing comes with M16. |
+| 2 | A device's alternatives (e.g. for the SEL-2730M) are shown by tier, but they aren't library parts, so they can't be picked. Add them to the library. | M13, M14 | A2, A3 | In progress. Alternatives are library parts with `alt_group` and `tier` (#97); the data comes with M14 (A3); the comparison list is designed (#99). |
+| 3 | Size each MCB from the equipment's own data, worked out by the program, not from Ali's example. Fill in the data needed for every researched device. | M14, M15 | A3, A9 | Rule done: computed sizing with a 2 A floor, spikes under 10 ms ignored (#103), DC float-voltage warnings, iC60N kept (Q37, #109). Per-device data comes with M14 (A3). |
+| 4 | Create projects and substations in the app, with no YAML or project file. Files are only for import, export and backup. | M17 | A2, A11, A4 | In progress. Substation file writers (M17a, #106, ADR 0021); hand-written panels and settings next (A2), then the app (A11). |
 | 5 | Bundle the device library with the installer; it can still be updated separately. | M11 | A6 | Done in v0.1.1 (#86): the installer ships psa-devices 1.0.0 and a fresh install loads it on first start |
-| 6 | Loose material belongs in its own sheet, not the substation settings; Preview doesn't show it; it must be customizable per project. | M18 | A2, A9, A10, A11 | In progress. Q36: its own sheet. The sheet is done (#96); the Preview tab and the app editor are next (A11). |
-| 7 | Every setting, panel value and other field shown as a static example must be a real, editable value. | M17 | A2, A11, A4 | Planned |
-| 8 | Panels board: a cable manager is a passive plate, so it can sit directly against the next device. The one-blank-plate gap is only between two active devices. | M12 | A8 | Done (#90). The board's plate drawing follows (A11). |
-| 9 | Drag and drop on the Panels board doesn't work. | M17 | A11, A2 | Planned. Moves were waiting on the substation writers, so the board showed the drag affordance without acting on it. |
-| 10 | Add and edit devices in the app, with every field editable. Export the library as a backup, and import one. Use CSV for both so engineers can work in Excel. Link alternatives in the CSV with a unique key, and show a list of all the alternatives for a device so they can be compared. | M16 | A5, A11, A4, A2 | Planned |
+| 6 | Loose material belongs in its own sheet, not the substation settings; Preview doesn't show it; it must be customizable per project. | M18 | A2, A9, A10, A11 | In progress. Q36: its own sheet (#96) and its own Preview tab (#108); the editor page is designed (#102) and comes with the app (A11). |
+| 7 | Every setting, panel value and other field shown as a static example must be a real, editable value. | M17 | A2, A11, A4 | In progress. Writers for the generated-panel editor (#106); project and substation settings next (A2, M17c). |
+| 8 | Panels board: a cable manager is a passive plate, so it can sit directly against the next device. The one-blank-plate gap is only between two active devices. | M12 | A8 | Done (#90, #101). |
+| 9 | Drag and drop on the Panels board doesn't work. | M17 | A11, A2 | In progress. Pins with a position (#100), the board shows pins (#110), the layout writers are in (#106); A11 wires drag and drop to them next. |
+| 10 | Add and edit devices in the app, with every field editable. Export the library as a backup, and import one. Use CSV for both so engineers can work in Excel. Link alternatives in the CSV with a unique key, and show a list of all the alternatives for a device so they can be compared. | M16 | A5, A11, A4, A2 | In progress. Design (#99); local library versions (#105); CSV export and import next (A5). |
 
 ## Order
 
