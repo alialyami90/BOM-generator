@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Annotated, NoReturn
 
 import typer
+import yaml
 
 from bomgen import __version__
 from bomgen.checks import check_report, render_text
@@ -14,7 +15,7 @@ from bomgen.checks import render_json as render_checks_json
 from bomgen.engine.errors import EngineError
 from bomgen.engine.pipeline import build as build_bom
 from bomgen.io.errors import InputError
-from bomgen.io.loader import LoadedProject, LoadedSubstation, load_inputs
+from bomgen.io.loader import LoadedProject, LoadedSubstation, load_inputs, load_substation
 from bomgen.io.schema import write_json_schemas
 from bomgen.library_store.cli import library_app
 from bomgen.project_store.cli import project_app
@@ -145,12 +146,17 @@ def build(
         ),
     ] = None,
     no_checks: Annotated[bool, typer.Option("--no-checks", help="Skip the check report.")] = False,
+    no_layout: Annotated[
+        bool, typer.Option("--no-layout", help="Build the panel files as they are.")
+    ] = False,
 ) -> None:
     """Build one BOM workbook per substation, print each file's path and its check report.
 
     Exits 1 when a check fails; the report is also written next to the workbook as
     <name>.checks.json.
     """
+    from bomgen.engine.layout import with_layout
+
     loaded = _load_or_exit(file)
     targets = _selected(loaded, substation)
     previous = None
@@ -166,6 +172,16 @@ def build(
     failed = False
     for target in targets:
         try:
+            if not no_layout:
+                target, layout_report = with_layout(target)
+                if layout_report is not None:
+                    # Warnings show too; errors stop the build with the whole report.
+                    bad = layout_report.has_errors
+                    lines = layout_report.lines() if bad else layout_report.problem_lines()
+                    for line in lines:
+                        typer.echo(f"{target.substation.substation.id}: {line}", err=True)
+                    if bad:
+                        raise typer.Exit(1)
             result = build_bom(target)
             marked = result
             if previous is not None:
@@ -187,6 +203,86 @@ def build(
             failed = failed or report.failed
     if failed:
         raise typer.Exit(1)
+
+
+@app.command()
+def layout(
+    substation: Annotated[
+        Path, typer.Option("--substation", "-s", help="The substation.yaml to lay out.")
+    ],
+    out: Annotated[
+        Path | None,
+        typer.Option("--out", "-o", help="Write the panel files here, not to panels/."),
+    ] = None,
+    force: Annotated[
+        bool, typer.Option("--force", help="Overwrite hand-written panel files too.")
+    ] = False,
+) -> None:
+    """Size the switches and write the generated panel files (ADR 0013)."""
+    from bomgen.engine.errors import EngineError
+    from bomgen.engine.layout import layout_substation, render_panel_yaml
+
+    try:
+        loaded = load_substation(substation)
+        result = layout_substation(loaded)
+    except InputError as error:
+        for issue in error.issues:
+            typer.echo(str(issue), err=True)
+        typer.echo(f"{len(error.issues)} problem(s) found.", err=True)
+        raise typer.Exit(1) from None
+    except EngineError as error:
+        typer.echo(f"error: {error}", err=True)
+        raise typer.Exit(1) from None
+    folder = out if out is not None else substation.parent / "panels"
+    targets = {folder / f"{panel.id}.yaml": panel for panel in result.panels}
+    hand_written = [t for t in targets if t.exists() and not _is_generated(t)]
+    if hand_written and not force:
+        for target in hand_written:
+            typer.echo(f"{target}: hand-written panel file; not overwritten", err=True)
+        typer.echo("Use --out to write elsewhere, or --force to replace them.", err=True)
+        raise typer.Exit(1)
+    folder.mkdir(parents=True, exist_ok=True)
+    for target, panel in targets.items():
+        target.write_text(render_panel_yaml(panel), encoding="utf-8")
+        typer.echo(f"wrote {target}")
+    if out is None:
+        _relist_panels(substation, folder, list(targets))
+    for line in result.report.lines():
+        typer.echo(line)
+    if result.report.has_errors:
+        raise typer.Exit(1)
+
+
+def _relist_panels(substation: Path, folder: Path, written: list[Path]) -> None:
+    """Point substation.yaml's ``panels:`` at the written files; drop stale generated ones."""
+    from bomgen.engine.layout import reconcile_panels_list
+
+    text = substation.read_text(encoding="utf-8")
+    data = yaml.safe_load(text) or {}
+    base = substation.parent
+    files = [path.relative_to(base).as_posix() for path in written]
+    new_text = reconcile_panels_list(text, files)
+    if new_text != text:
+        substation.write_text(new_text, encoding="utf-8")
+        typer.echo(f"updated the panels list in {substation}")
+    kept = {path.resolve() for path in written}
+    listed = {(base / entry).resolve() for entry in data.get("panels") or []}
+    for path in sorted(listed | {p.resolve() for p in folder.glob("*.yaml")}):
+        if path in kept or not path.exists():
+            continue
+        if _is_generated(path):
+            path.unlink()
+            typer.echo(f"removed {path}: the layout no longer writes it")
+        elif path in listed:
+            typer.echo(f"{path}: hand-written, no longer listed in panels (manual_panels keeps it)")
+
+
+def _is_generated(path: Path) -> bool:
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError):
+        return False
+    return isinstance(data, dict) and data.get("generated") is True
 
 
 @app.command()

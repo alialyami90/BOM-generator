@@ -1,0 +1,62 @@
+# Golden layout of the example substation (examples/substations/gis01, 40 IEDs, star).
+# Rules from docs/superpowers/specs/2026-10-28-substations-and-auto-layout-design.md
+# (ADR 0013). Confirmed by Ali on 2026-10-28 in the A8 project thread (the spec
+# example shows 6 L1 switches; these values follow the rules).
+#
+# R1: RST2228-L1-24MM has 24 IED ports (its 4 SFP slots are uplink-only), so
+#     floor(24 x 0.8) = 19 usable and 40 IEDs need 3 L1 switches per side.
+# R2: per side, 3 L1 links + ext-fw 1 + gw 1 + gps 1 + rtac 2 = 8 ports on an L2 with
+#     floor(20 x 0.8) = 16 usable (its 4 SFP+ slots carry the 2 L3 uplinks): 1 L2.
+# R5: U used = blocks + 1U blank plate between rack neighbours; every rack switch and
+#     the FOPP carries a 1U cable manager (Q32); the firewall is DIN rail (0U).
+# R6: A units in panel 1, B units in panel 2; GPS to panel 1 (tie), RTAC to panel 2
+#     (most free U), Axion I/O to panel 1 (9 U free against 7).
+
+l1_per_side: 3
+l2_per_side: 1
+l2_demand_per_side: 8
+
+panels:
+  - id: psa1
+    used_u: 29
+    devices:  # [part_id, qty, lan, purpose], in the equipment's group B order
+      - [FOPP-96SM, 1, A, L2-L3 Interface]
+      - [RST2228-L2, 1, A, null]
+      - [RST2228-L1-24MM, 3, A, null]  # A11 to A13
+      - [SEL-2730M-EXT, 1, A, null]
+      - [SEL-3555-GW, 1, A, for Dhahran PCC connection]
+      - [FGR-60F, 1, A, null]
+      - [SEL-2488, 1, null, null]
+      - [SEL-2240, 1, null, null]
+    port_plans:
+      FGR-60F:  # the ext-fw entry's own port plan
+        downlinks: [{count: 2, speed: 1G, media: MM}]
+      RST2228-L1-24MM:  # R3: 3 switches x (uplink + A-B interlink), + 3 spare per row
+        uplinks: [{count: 6, speed: 1G, media: MM, spare: 3}]
+      RST2228-L2:  # R3: L3 uplinks SM; L1 links and equipment by speed and media
+        uplinks_l3: [{count: 2, speed: 1G, media: SM}]
+        downlinks:
+          - {count: 7, speed: 1G, media: MM}
+          - {count: 1, speed: 100M, media: MM}
+  - id: psa2
+    used_u: 25
+    devices:
+      - [FOPP-96SM, 1, B, L2-L3 Interface]
+      - [RST2228-L2, 1, B, null]
+      - [RST2228-L1-24MM, 3, B, null]  # B11 to B13
+      - [SEL-2730M-EXT, 1, B, null]
+      - [SEL-3555-GW, 1, B, for Dhahran PCC connection]
+      - [FGR-60F, 1, B, null]
+      - [SEL-3555-RTAC, 1, null, null]
+    port_plans:
+      FGR-60F:  # the ext-fw entry's own port plan
+        downlinks: [{count: 2, speed: 1G, media: MM}]
+      SEL-3555-RTAC:  # the rtac entry's own port plan
+        serial_ports: 6
+      RST2228-L1-24MM:
+        uplinks: [{count: 6, speed: 1G, media: MM, spare: 3}]
+      RST2228-L2:
+        uplinks_l3: [{count: 2, speed: 1G, media: SM}]
+        downlinks:
+          - {count: 7, speed: 1G, media: MM}
+          - {count: 1, speed: 100M, media: MM}

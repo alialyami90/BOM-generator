@@ -418,8 +418,30 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
 - `bomgen layout`; `bomgen build` runs it first unless `--no-layout`; generated
   `panels/*.yaml` with a `generated` header; check-report lines for port
   demand, panel fill, stale overrides and the IED count.
+- The layout takes over a substation's `panels` list only once one of its files
+  is `generated: true` (written by `bomgen layout`); until then `build` uses the
+  hand-written panels as they are, which keeps the spec example and its goldens.
+- The layout reports loose material whose `host_panel` or `fed_from` names a
+  panel the layout no longer writes, and warns (`replaced-panel`) for each
+  hand-written file still listed in `panels` that it replaces.
+- `bomgen layout` (default folder) rewrites the `panels:` list to the files it
+  wrote, keeping the file's comments, deletes generated files it no longer
+  writes, and names hand-written files that left the list.
+- Removed units are taken out before sizing the L2 switches: L1 links and
+  equipment `l2_ports` (per entry, as R2 counts them) come from the kept units of
+  each side, so their SFPs go too. A side whose kept L1 switches cannot carry
+  the IEDs, or whose kept L2 switches cannot carry the demand, is a
+  `port-capacity` error.
+- A move to the next one or two panel numbers opens a new pair; a farther one is
+  `unknown-panel`. A `pair` move on an entry without A/B units is a stale override.
+- `bomgen build` prints layout warnings to stderr and stops with the whole
+  report on errors; these lines join the M7 check report.
+- After a layout, the annunciator's change-over diodes are fed from panel 001
+  (side A), Ali's answer. `examples/` keeps psa3 for the hand-written goldens;
+  the layout golden feeds the annunciator from psa1 through its input fixture.
 - Golden R10: the example substation's generated panels in
-  `tests/golden/layout/`, confirmed by Ali.
+  `tests/golden/layout/`, confirmed by Ali on 2026-10-28 (3 L1 switches per
+  side from the rules, not the spec example's 6).
 - Starts when M1b is on main.
 
 ### M2 — BOM groups A–D

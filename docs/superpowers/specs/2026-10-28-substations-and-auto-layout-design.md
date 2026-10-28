@@ -161,8 +161,9 @@ before. The hand-written console panel is listed in `substation.yaml`
 ports are needed per side (Ali, 2026-10-28). Per side, `reserved = l1_uplinks_per_switch +
 (1 if l1_interlink)` in a star and `2` in a ring;
 `usable = floor((ports_total − reserved) × (1 − spares.port_fraction))`,
-`n_l1 = ceil(ied_count / usable)`. Example: RST2228 has 28 ports; 28 − 2 = 26;
-26 × 0.8 = 20.8 → 20; 40 IEDs → 2 L1 switches per side (matches Ali's example).
+`n_l1 = ceil(ied_count / usable)`. Example: RST2228-L1-24MM has 24 IED ports and 4
+uplink-only SFP slots, which carry the 2 reserved ports; 24 × 0.8 = 19.2 → 19;
+40 IEDs → 3 L1 switches per side (Ali confirmed the golden, 2026-10-28).
 Ali (Q28): in a star, L1 A has one uplink to L2 A, L1 B one uplink to L2 B,
 and the A and B switches of a pair are interconnected. The L1 model is chosen
 by the tool: rank every library switch with `ied` ports by switches per side,
@@ -174,8 +175,8 @@ exposes the ranking to the UI. The 20 % port spare default stays.
 side or common) + l1_links`, where `l1_links = n_l1 × l1_uplinks_per_switch` in a
 star, and `2 × ceil(n_l1 / ring_max_switches)` in a ring (two ports close each
 ring). `usable_l2 = floor((ports_total − l3_uplinks_per_l2) × (1 − port_fraction))`,
-`n_l2 = ceil(demand / usable_l2)`. Spec example: 6 L1 × 1 link + GPS 1 = 7 ≤ 20
-→ one L2 per side, as today.
+`n_l2 = ceil(demand / usable_l2)`. Example: 3 L1 links + ext-fw 1 + gw 1 + GPS 1 +
+RTAC 2 = 8 ≤ 16 → one L2 per side, as today.
 
 **R3 Port plans and SFPs follow the sizing.** The generated port plan for each
 L2 lists `uplinks_l3`, the L1 links as 1G MM downlinks and the equipment ports
@@ -223,8 +224,9 @@ the same meter.
 golden value. The layout engine gets a second golden: the example substation
 (`examples/substation.yaml`, 40 IEDs, star) must produce two panels, 001 with
 the A units and 002 with the B units, with the GPS, RTAC and I/O spread by R6,
-and the port plans and L1 count of the spec example. A8 records the expected
-panels in `tests/golden/layout/` and Ali confirms them once in review.
+and the port plans and L1 count R1–R3 give (3 L1 per side, not the spec
+example's 6). A8 records the expected panels in `tests/golden/layout/`; Ali
+confirmed them on 2026-10-28.
 
 ## 5. Engine and pipeline change
 
