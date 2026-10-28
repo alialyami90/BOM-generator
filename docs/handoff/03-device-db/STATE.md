@@ -91,7 +91,8 @@
 
 ## Waiting on
 
-- A1: merge #130 (since 2026-10-28 20:23 UTC).
+- A1: merge #130, held until Ali re-tags v0.1.1 (A1, 20:55 UTC).
+- B2: #145 adds `McbBrand.ac_rated`; then C60H-DC needs `ac_rated: false` (NEXT §2).
 - A1 and Ali: confirm the iC60N float warning (A2's note 2 on #130).
 - No questions from role 3 to Ali are open. Q33, Q37 and Q38 are resolved; see plan.md §6.
 

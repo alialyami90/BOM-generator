@@ -61,9 +61,10 @@
 If #130 is still open more than a day after 2026-10-28 20:40 UTC, ask A1 in A1's thread
 what blocks it. While you wait, §3 and §4 may go ahead.
 
-Answer review events on #130. A2 raised two notes that are not role 3's work. A2 owns
-the follow-up for DC-only MCB brands chosen for AC branches. A1 and Ali are to confirm the
-default iC60N's `dc_float` warning. After #130 merges, tell Ali in one short reply.
+Answer review events on #130; A1 merges it after Ali re-tags v0.1.1. A1 and Ali are to
+confirm the iC60N `dc_float` warning. When B2's #145 (`McbBrand.ac_rated`) is on main, add
+`ac_rated: false` to `schneider-c60h-dc` in `examples/library.yaml` (on #130, or else in
+the Q38 PR) and rebuild the shipped file. After #130 merges, tell Ali in one short reply.
 
 ## 3. Fill the gaps in findings 30–31 of `docs/device-db-findings.md` (reference data, no milestone)
 
