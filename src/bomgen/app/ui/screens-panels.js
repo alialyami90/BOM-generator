@@ -84,7 +84,7 @@
     const d = l.data;
     if (d.reason) return `<div class="page">${pageHead('Panels', 'Laid out from the equipment and network.')}${banner('bad', `<b>No layout.</b> ${esc(d.reason)}.`, '<a class="btn btn--secondary btn--sm" href="#/checks">Open checks</a>')}</div>`;
     const t = ['board', 'list'].includes(S.tab.panels) ? S.tab.panels : 'board';
-    return `<div class="page page--wide">${pageHead('Panels', 'Placed by the engine from the equipment and network. Read-only: moves are written in substation.yaml under layout.overrides.')}
+    return `<div class="page page--wide">${pageHead('Panels', 'Placed by the engine from the equipment and network.', '', '', 'Moving a device here is not available yet. To move one, add it to layout.overrides in substation.yaml.')}
       ${tabs('panels', [['board', 'Board'], ['list', 'List']], t, 'Panels view')}
       <div role="tabpanel" aria-labelledby="tab-panels-${t}" style="margin-top:var(--space-4)">${t === 'board' ? board(d) : list(d)}</div></div>`;
   };

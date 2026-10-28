@@ -28,6 +28,7 @@ from typing import Any, Protocol
 from pydantic import BaseModel, ValidationError
 
 from bomgen import __version__
+from bomgen.app.catalogues import catalogues_page
 from bomgen.app.network import layout_page
 from bomgen.app.output import OutputRefusedError, build_file, build_target, checks_page
 from bomgen.app.preview import preview_page
@@ -259,10 +260,17 @@ class Api:
 
     @endpoint
     def library_overview(self) -> dict[str, Any]:
-        """The active library's facts, its devices in file order, and their device records."""
+        """The active library's facts, its devices in file order, their device records and
+        the commodity catalogues."""
         installed = self._active_library()
         if installed is None or installed.active is None:
-            return {"library": None, "devices": [], "records": {}, "records_problem": None}
+            return {
+                "library": None,
+                "devices": [],
+                "records": {},
+                "records_problem": None,
+                "catalogues": None,
+            }
         store = self._library_store()
         manifest, problem = self._manifest(installed.name, installed.active)
         try:
@@ -289,6 +297,7 @@ class Api:
             "devices": [device.model_dump(mode="json") for device in library.devices],
             "records": records,
             "records_problem": records_problem,
+            "catalogues": catalogues_page(library.catalogues, set(library.part_ids()), records),
         }
 
     @endpoint

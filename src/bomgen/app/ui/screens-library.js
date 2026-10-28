@@ -80,9 +80,18 @@
       ${loadError('overview', 'The active library could not be read.')}
       ${LIB.overview && LIB.overview.library && LIB.overview.library.problem ? `<div style="margin-bottom:var(--space-4)">${banner('warn', `<b>Part of the active library is damaged.</b> ${esc(LIB.overview.library.problem)}`)}</div>` : ''}
       ${LIB.overview && LIB.overview.records_problem ? `<div style="margin-bottom:var(--space-4)">${banner('warn', `<b>Datasheets and alternatives could not be read.</b> ${esc(LIB.overview.records_problem)}`)}</div>` : ''}
-      ${L ? devicesView() : LIB.errors.overview && !LIB.offline ? '' : versions().length
+      ${L ? contents() : LIB.errors.overview && !LIB.offline ? '' : versions().length
         ? banner('warn', '<b>No library version is active.</b> Make an installed version active, or import a package.', '<button class="btn btn--primary btn--sm" data-action="show-versions">Installed versions…</button>')
         : banner('warn', '<b>No library is installed.</b> Import a <span class="mono">.bomlib</span> file to see devices here.', '<a class="btn btn--primary btn--sm" href="#/library/import">Import…</a>')}</div>`;
+  }
+
+  /* Devices, and the commodity catalogues the engine picks MCBs, terminal blocks and busbars from. */
+  function contents() {
+    const cat = !LIB.offline && LIB.overview && LIB.overview.catalogues;
+    if (!cat) return devicesView();
+    const t = S.tab.libview === 'catalogues' ? 'catalogues' : 'devices';
+    return `${tabs('libview', [['devices', 'Devices', badge('plain', devices().length)], ['catalogues', 'Catalogues']], t, 'Library contents')}
+      <div role="tabpanel" aria-labelledby="tab-libview-${t}">${t === 'catalogues' ? cataloguesView(cat) : devicesView()}</div>`;
   }
 
   function filtered() {
@@ -105,21 +114,63 @@
         ${sel ? detail(sel) : ''}
       </div>`;
   }
-  function detail(d) {
+  function detail(d, o) {  // o: a catalogue entry's heading and Overview, in place of a device's
     const t = S.tab.libdetail;
     const tabsList = [['overview', 'Overview'], ['datasheet', 'Datasheet'], ['alternatives', 'Alternatives']];
     let body = '';
-    if (t === 'overview') body = `<dl class="kv"><dt>Part ID</dt><dd class="mono">${esc(d.id)}</dd><dt>Make</dt><dd>${esc(d.make)}</dd><dt>Model</dt><dd>${esc(d.model)}</dd><dt>Ordering code</dt><dd class="mono">${esc(d.code || '—')}</dd><dt>Category</dt><dd>${esc(catName(d.cat))}</dd><dt>Tag</dt><dd class="mono">${d.tagType ? esc(d.tagType) + (d.level ? ' · ' + esc(d.level) : '') : '—'}</dd><dt>Supply</dt><dd>${esc(d.supply)}</dd><dt>Power</dt><dd>${esc(d.power || '—')}</dd><dt>Rated power</dt><dd class="num" style="text-align:left">${d.w != null ? d.w + ' W' : '—'}</dd><dt>Branch MCB</dt><dd>${esc(d.mcb || '—')}</dd></dl>`;
+    if (t === 'overview') body = o ? o.kv : `<dl class="kv"><dt>Part ID</dt><dd class="mono">${esc(d.id)}</dd><dt>Make</dt><dd>${esc(d.make)}</dd><dt>Model</dt><dd>${esc(d.model)}</dd><dt>Ordering code</dt><dd class="mono">${esc(d.code || '—')}</dd><dt>Category</dt><dd>${esc(catName(d.cat))}</dd><dt>Tag</dt><dd class="mono">${d.tagType ? esc(d.tagType) + (d.level ? ' · ' + esc(d.level) : '') : '—'}</dd><dt>Supply</dt><dd>${esc(d.supply)}</dd><dt>Power</dt><dd>${esc(d.power || '—')}</dd><dt>Rated power</dt><dd class="num" style="text-align:left">${d.w != null ? d.w + ' W' : '—'}</dd><dt>Branch MCB</dt><dd>${esc(d.mcb || '—')}</dd></dl>`;
     else if (t === 'datasheet') body = d.ds ? `${d.ds.summary ? `<p style="margin-bottom:var(--space-3)">${esc(d.ds.summary)}</p>` : ''}<dl class="kv"><dt>Supply range</dt><dd>${esc(d.ds.supply)}</dd><dt>Typical power</dt><dd>${esc(d.ds.typical)}</dd><dt>Maximum power</dt><dd>${esc(d.ds.max)}</dd><dt>Ports</dt><dd>${esc(d.ds.ports)}</dd><dt>Dimensions</dt><dd>${esc(d.ds.dims)}</dd><dt>Weight</dt><dd>${esc(d.ds.weight)}</dd><dt>Operating temperature</dt><dd>${esc(d.ds.temp)}</dd><dt>Certifications</dt><dd>${esc(d.ds.certs)}</dd>${d.ds.url ? `<dt>Datasheet</dt><dd class="row" style="gap:4px;flex-wrap:nowrap"><span class="mono small" style="overflow-wrap:anywhere">${esc(d.ds.url)}</span><button class="btn btn--ghost btn--icon btn--sm" data-action="copy" data-v="${esc(d.ds.url)}" aria-label="Copy the datasheet link">${icon('copy')}</button></dd>` : ''}</dl>
       ${(d.src || []).length ? `<div class="section" style="margin-top:var(--space-4);padding-bottom:0"><h3>Sources</h3><ul style="margin:var(--space-2) 0 0;padding-left:18px">${d.src.map((x) => `<li style="overflow-wrap:anywhere">${esc(x)}</li>`).join('')}</ul></div>` : ''}` : `<p class="muted">No datasheet recorded for this device.</p>`;
     else body = d.alt ? `${banner('info', 'Alternatives are for reference. Swapping a device inside a panel is not available yet.')}
       ${d.alt.map((a) => `<h3 style="margin-top:var(--space-4)">${esc(a.brand)}</h3><div class="table-wrap" style="margin-top:6px"><table class="table"><thead><tr><th style="width:56px">Tier</th><th>Model</th><th>Data</th><th style="width:40px"><span class="sr-only">Copy</span></th></tr></thead><tbody>${a.rows.map((r) => `<tr><td>${esc(r.tier)}</td><td><span class="mono nowrap">${esc(r.model)}</span><span class="cell-sub">${r.same_as ? `Same as ${esc(r.same_as)}` : esc(r.sub || '')}</span></td><td>${verified(r.verified)}</td><td style="width:40px"><button class="btn btn--ghost btn--icon btn--sm" data-action="copy" data-v="${esc(r.model)}" aria-label="Copy ${esc(r.model)}">${icon('copy')}</button></td></tr>`).join('')}</tbody></table></div>`).join('')}`
       : `<p class="muted">No alternatives recorded for this device.</p>`;
-    return `<aside class="detail" aria-label="Device detail"><h2 class="mono" style="font-size:18px;font-family:var(--font-mono)">${esc(d.id)}</h2><p class="muted" style="margin-bottom:var(--space-3)">${makeModel(d)}</p>
-      ${tabs('libdetail', tabsList, t, 'Device detail')}<div role="tabpanel" aria-labelledby="tab-libdetail-${t}">${body}</div></aside>`;
+    const what = o ? 'Catalogue entry detail' : 'Device detail';
+    return `<aside class="detail" aria-label="${what}"><h2 class="mono" style="font-size:18px;font-family:var(--font-mono)">${o ? o.title : esc(d.id)}</h2><p class="muted" style="margin-bottom:var(--space-3)">${o ? o.sub : makeModel(d)}</p>
+      ${tabs('libdetail', tabsList, t, what)}<div role="tabpanel" aria-labelledby="tab-libdetail-${t}">${body}</div></aside>`;
   }
+
+  /* ---------- Catalogues (read-only; editing them is M16) ---------- */
+  const firstLine = (text) => String(text || '').split('\n')[0];
+  const ROLES = {
+    lamp: 'Cabinet lamp', door_switch: 'Door switch', fan: 'Fan', vent_filter: 'Vent filter', thermostat: 'Thermostat', ipr_kit: 'IPR kit',
+    change_over_diode_negative: 'Change-over diode, negative', change_over_diode_positive: 'Change-over diode, positive', socket: 'Socket'
+  };
+  const withRecord = (e) => {
+    const r = (e.record && LIB.overview.records[e.record]) || null;
+    return { ...e, make: e.make || (r && r.make) || '', verified: r ? r.verified : null, ds: r ? datasheet(r) : null, alt: r && r.alternatives.length ? alternatives(r) : null, src: r ? r.sources : null };
+  };
+  const catalogueEntries = (c) => [
+    ...c.mcb.ratings.map((m) => ({ key: `mcb.${m.rating_a}`, section: 'MCB', title: m.code, name: `${m.rating_a} A`, make: c.mcb.make, model: `${c.mcb.family}, ${c.mcb.poles}-pole, ${m.rating_a} A`, code: m.code, record: m.record })),
+    { key: 'aux_contact', section: 'Auxiliary contact', title: c.aux_contact.ordering_code, name: c.aux_contact.model, make: c.aux_contact.make, model: c.aux_contact.model, code: c.aux_contact.ordering_code, record: c.aux_contact.record },
+    ...c.terminal_blocks.map((b) => ({ key: `terminal_blocks.${b.type}`, section: 'Terminal block', title: b.ordering_code, name: b.type, make: b.make, model: b.type, code: b.ordering_code, record: b.record })),
+    ...c.busbars.map((b) => ({ key: `busbars.${b.key}`, section: 'Busbar', title: b.tag || b.key, name: b.tag || b.key, make: '', model: firstLine(b.description), code: '', description: b.description, record: b.record }))
+  ].map(withRecord);
+  const catKv = (e) => `<dl class="kv"><dt>Catalogue</dt><dd>${esc(e.section)}</dd>${e.make ? `<dt>Make</dt><dd>${esc(e.make)}</dd>` : ''}<dt>${e.description ? 'Description' : 'Model'}</dt><dd style="white-space:pre-line">${esc(e.description || e.model)}</dd>${e.code ? `<dt>Ordering code</dt><dd class="mono">${esc(e.code)}</dd>` : ''}<dt>Datasheet record</dt><dd class="mono">${esc(e.record || '—')}</dd></dl>`;
+  function cataloguesView(c) {
+    const all = catalogueEntries(c), quality = hasDeviceDb() || all.some((e) => e.verified);
+    const sel = all.find((e) => e.key === S.selectedCatalogue) || all[0];
+    const data = (e) => (quality ? `<td style="white-space:nowrap">${e.verified ? verified(e.verified) : '<span class="muted">No record</span>'}</td>` : '');
+    const tr = (e, cells) => `<tr class="clickable" tabindex="0" data-action="lib-select-cat" data-id="${esc(e.key)}" aria-selected="${sel.key === e.key}">${cells}${data(e)}</tr>`;
+    const table = (title, lede, head, rows) => `<section style="margin-bottom:var(--space-5)"><h3>${title}</h3>${lede ? `<p class="muted small" style="margin:2px 0 0">${lede}</p>` : ''}
+      <div class="table-wrap" style="margin-top:var(--space-2)"><table class="table"><thead><tr>${head.map((h) => `<th>${h}</th>`).join('')}${quality ? '<th>Data</th>' : ''}</tr></thead><tbody>${rows}</tbody></table></div></section>`;
+    const of = (prefix) => all.filter((e) => e.key.startsWith(prefix));
+    const kit = c.housekeeping;
+    return `<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,400px);gap:var(--space-5);align-items:start;margin-top:var(--space-4)"><div>
+      ${table('Miniature circuit breakers', `${esc(c.mcb.make)} ${esc(c.mcb.family)}, ${c.mcb.poles}-pole. The engine sizes each MCB and takes the code for its rating from here.`, ['Rating', 'Ordering code'],
+        of('mcb.').map((e) => tr(e, `<td class="nowrap">${esc(e.name)}</td><td class="mono">${esc(e.code)}</td>`)).join(''))}
+      ${table('Auxiliary alarm contact', '', ['Make and model', 'Ordering code'], of('aux_contact').map((e) => tr(e, `<td>${esc(e.make)} <span class="muted">${esc(e.model)}</span></td><td class="mono">${esc(e.code)}</td>`)).join(''))}
+      ${table('Terminal blocks', '', ['Type', 'Make', 'Ordering code'], of('terminal_blocks.').map((e) => tr(e, `<td class="mono nowrap">${esc(e.name)}</td><td>${esc(e.make)}</td><td class="mono">${esc(e.code)}</td>`)).join(''))}
+      ${table('Busbars', '', ['Tag', 'Description'], of('busbars.').map((e) => tr(e, `<td class="mono nowrap">${esc(e.name)}</td><td>${esc(e.model)}</td>`)).join(''))}
+      ${table('Housekeeping kit', 'Each role is a part in the device list. Select one to open it there.', ['Role', 'Part ID', ''],
+        kit.map((h) => `<tr ${h.in_library ? `class="clickable" tabindex="0" data-action="lib-goto-device" data-id="${esc(h.part_id)}"` : ''}><td>${esc(ROLES[h.role] || h.role)}</td><td class="mono">${esc(h.part_id)}</td><td class="muted">${esc(h.detail || '')}</td>${quality ? `<td style="white-space:nowrap">${LIB.overview.records[h.part_id] ? verified(LIB.overview.records[h.part_id].verified) : '<span class="muted">No record</span>'}</td>` : ''}</tr>`).join(''))}
+      <p class="muted small">Standard enclosure: ${c.enclosure_u} U.</p></div>
+      ${detail(sel, { title: esc(sel.title), sub: `${esc(sel.section)}${sel.make ? ` · ${esc(sel.make)}` : ''}`, kv: catKv(sel) })}</div>`;
+  }
+  ACTIONS['lib-select-cat'] = (el) => { S.selectedCatalogue = el.dataset.id; S.tab.libdetail = 'overview'; App.render(); };
+  ACTIONS['lib-goto-device'] = (el) => { S.tab.libview = 'devices'; S.selectedDevice = el.dataset.id; S.tab.libdetail = 'overview'; App.render(); };
+
   ACTIONS['lib-select'] = (el) => { S.selectedDevice = el.dataset.id; S.tab.libdetail = 'overview'; App.render(); };
-  document.addEventListener('keydown', (e) => { const r = e.target.closest && e.target.closest('tr.clickable[data-action="lib-select"]'); if (r && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); r.click(); } });
+  document.addEventListener('keydown', (e) => { const r = e.target.closest && e.target.closest('tr.clickable[data-action^="lib-"]'); if (r && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); r.click(); } });
   document.addEventListener('change', (e) => { if (e.target.id === 'lib-cat') { F.cat = e.target.value; App.render(); } if (e.target.id === 'lib-ver') { F.ver = e.target.value; App.render(); } });
   ACTIONS['lib-cat'] = () => {}; ACTIONS['lib-ver'] = () => {};
   ACTIONS['lib-alt'] = () => { F.alt = !F.alt; App.render(); };
@@ -221,7 +272,8 @@
   };
   window.addEventListener('hashchange', () => { if (IMP.step === 'done') ACTIONS['import-cancel'](); });  // the next visit starts fresh
   /* A file dropped on the window must not replace the app page. */
-  ['dragover', 'drop'].forEach((t) => window.addEventListener(t, (e) => { e.preventDefault(); if (t === 'drop') toast('Use "Choose package…" to pick the file.', 'info'); }));
+  const isFile = (e) => e.dataTransfer && [...e.dataTransfer.types].includes('Files');
+  ['dragover', 'drop'].forEach((t) => window.addEventListener(t, (e) => { if (!isFile(e)) return; e.preventDefault(); if (t === 'drop') toast('Use "Choose package…" to pick the file.', 'info'); }));
 
   function versionsView() {
     const L = lib(), list = versions();
