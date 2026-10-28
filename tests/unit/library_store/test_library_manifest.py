@@ -6,7 +6,8 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from bomgen.library_store.manifest import Manifest, is_safe_member
+from bomgen.bundle.paths import is_safe_member
+from bomgen.library_store.manifest import Manifest
 from bomgen.library_store.versions import Version
 
 
