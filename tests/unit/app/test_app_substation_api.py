@@ -140,3 +140,58 @@ def test_an_unknown_substation_is_refused(app: api.Api, project: Path) -> None:
 
     assert envelope["ok"] is False
     assert envelope["error"]["kind"] == "not_found"  # type: ignore[index]
+
+
+def test_a_constant_the_project_defaults_reject_shows_as_written(
+    app: api.Api, project: Path
+) -> None:
+    edit(project.parent / SUBSTATION, "\nequipment:", "\nconstants: { t_max_c: 1 }\nequipment:")
+
+    page = ok(app.open_substation(str(project), "gis01"))
+
+    t_max = next(c for c in page["constants"] if c["key"] == "t_max_c")
+    assert t_max["value"] == 1
+    assert t_max["changed"] is True
+    assert any(p["location"].startswith("constants") for p in page["problems"])
+
+
+@pytest.mark.parametrize(
+    "damage",
+    [
+        pytest.param(lambda p: p.unlink(), id="missing"),
+        pytest.param(lambda p: edit(p, "\nlibrary:", "\nlibary:"), id="unknown-key"),
+        pytest.param(lambda p: shutil.copy(p.parent / SUBSTATION, p), id="a-substation-yaml"),
+    ],
+)
+def test_a_project_that_cannot_be_read_gives_its_own_problems(
+    app: api.Api, project: Path, damage: Any
+) -> None:
+    damage(project)
+
+    envelope = app.open_substation(str(project), "gis01")
+
+    assert envelope["ok"] is False
+    assert envelope["error"]["kind"] == "project_invalid"  # type: ignore[index]
+    assert "project.yaml" in envelope["error"]["message"]  # type: ignore[index]
+
+
+def test_a_library_that_is_not_installed_is_a_problem(app: api.Api, project: Path) -> None:
+    edit(project, "  file: library.yaml\n", "")
+
+    page = ok(app.open_substation(str(project), "gis01"))
+
+    assert [p["location"] for p in page["problems"]] == ["library"]
+    assert page["problems"][0]["file"].endswith("project.yaml")
+
+
+def test_an_equipment_part_missing_from_the_library_is_marked_unknown(
+    app: api.Api, project: Path
+) -> None:
+    edit(project.parent / SUBSTATION, "part_id: FOPP-96SM", "part_id: NO-SUCH-PART")
+
+    page = ok(app.open_substation(str(project), "gis01"))
+
+    rows = {e["id"]: e for e in page["equipment"]}
+    assert rows["fopp"]["device"] == {"known": False}
+    assert rows["l2"]["device"]["known"] is True
+    assert page["problems"]

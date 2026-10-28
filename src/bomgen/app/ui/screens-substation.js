@@ -17,9 +17,10 @@
     if (SUB.key !== key) Object.assign(SUB, { key, state: 'idle', page: null, error: null });
     if (SUB.state === 'idle') {
       SUB.state = 'loading';
+      const current = () => SUB.key === key;  // the user may have moved on while it loaded
       Bridge.call('open_substation', S.project.file, S.sub)
-        .then((p) => { SUB.page = p; }).catch((err) => { SUB.error = err; toast(err.message, 'error'); })
-        .then(() => { SUB.state = 'loaded'; App.render(); });
+        .then((p) => { if (current()) SUB.page = p; }).catch((err) => { if (current()) { SUB.error = err; toast(err.message, 'error'); } })
+        .then(() => { if (current()) { SUB.state = 'loaded'; App.render(); } });
     }
     return SUB.state === 'loaded' ? SUB.page : null;
   }

@@ -14,9 +14,11 @@ from pydantic import BaseModel, ValidationError
 
 from bomgen.app.projects import load_with_issues, project_only
 from bomgen.io.errors import InputError, Issue
-from bomgen.io.loader import LoadedSubstation
+from bomgen.io.loader import LoadedSubstation, load_library
 from bomgen.io.yaml_source import read_yaml
+from bomgen.library_store.errors import LibraryPackageError
 from bomgen.library_store.store import LibraryStore
+from bomgen.models._base import InputModel
 from bomgen.models.library import Library
 from bomgen.models.project import (
     DesignConstants,
@@ -32,6 +34,14 @@ CALCULATION_SHEETS = ("power_consumption", "heat_dissipation", "heat_calculation
 
 class SubstationNotFoundError(LookupError):
     """The project lists no substation with this id."""
+
+
+class ProjectInvalidError(Exception):
+    """project.yaml itself cannot be read, so no substation in it can be found."""
+
+    def __init__(self, issues: list[Issue]) -> None:
+        super().__init__("\n".join(str(i) for i in issues))
+        self.issues = issues
 
 
 def _rows(
@@ -68,13 +78,35 @@ def _file_name(substation: Substation, entries: dict[str, RegisterEntry]) -> str
     main = entries.get(substation.document)
     if main is None:
         return None
-    return substation.output.file_name.format(doc_no=main.doc_no, rev=main.rev)
+    return substation.output.resolve_file_name(main.doc_no, main.rev)
 
 
-def _substation_file(project_file: Path, project: Project | None, substation_id: str) -> Path:
-    """The listed ``substation.yaml`` whose folder, or validated id, is ``substation_id``."""
-    if project is None:
-        raise SubstationNotFoundError(substation_id)
+def _effective[M: InputModel](default: M, written: InputModel | None) -> M:
+    """The default with the written keys on top; unvalidated when the merge is refused,
+    so the page shows what the file says next to the loader's located issue."""
+    try:
+        return merge_defaults(default, written)
+    except ValidationError:
+        assert written is not None
+        return default.model_copy(update={k: getattr(written, k) for k in written.model_fields_set})
+
+
+def _library(project_file: Path, project: Project, store: LibraryStore) -> Library | None:
+    """The project's library on its own, to name each part when the project has errors."""
+    selection = project.library
+    try:
+        file = (
+            project_file.parent / selection.file
+            if selection.file is not None
+            else store.library_file(selection.name, selection.version)
+        )
+        return load_library(file)
+    except (InputError, LibraryPackageError, OSError):
+        return None
+
+
+def _substation_file(project_file: Path, project: Project, substation_id: str) -> Path:
+    """The listed ``substation.yaml`` whose folder is ``substation_id``."""
     for path in project.substations:
         file = project_file.parent / path
         if file.parent.name == substation_id:
@@ -89,8 +121,8 @@ def _page(
     substation: Substation | None,
     loaded: LoadedSubstation | None,
     problems: list[Issue],
+    library: Library | None,
 ) -> dict[str, Any]:
-    library = loaded.library if loaded is not None else None
     entries = (
         {
             e.key: e
@@ -125,8 +157,8 @@ def _page(
         return page
     defaults_c = project.defaults.constants if project else DesignConstants()
     defaults_s = project.defaults.spares if project else Spares()
-    constants = loaded.constants if loaded else merge_defaults(defaults_c, substation.constants)
-    spares = loaded.spares if loaded else merge_defaults(defaults_s, substation.spares)
+    constants = loaded.constants if loaded else _effective(defaults_c, substation.constants)
+    spares = loaded.spares if loaded else _effective(defaults_s, substation.spares)
     page |= {
         "documents": list(entries.values()),
         "calculations": [
@@ -165,15 +197,27 @@ def substation_page(project_file: Path, substation_id: str, store: LibraryStore)
         for loaded in loaded_project.substations:
             if loaded.substation.substation.id == substation_id:
                 return _page(
-                    project_file, loaded.project, loaded.file, loaded.substation, loaded, []
+                    project_file,
+                    loaded.project,
+                    loaded.file,
+                    loaded.substation,
+                    loaded,
+                    [],
+                    loaded.library,
                 )
         raise SubstationNotFoundError(substation_id)
     project = project_only(project_file)
+    if project is None:
+        raise ProjectInvalidError(issues)
     file = _substation_file(project_file, project, substation_id)
-    folder = file.parent.resolve()
-    problems = [i for i in issues if folder in i.file.resolve().parents]
+    others = {(project_file.parent / p).parent.resolve() for p in project.substations} - {
+        file.parent.resolve()
+    }
+    # this substation's issues and the project's own; not those of its other substations
+    problems = [i for i in issues if not others & set(i.file.resolve().parents)]
     try:
         substation: Substation | None = Substation.model_validate(read_yaml(file).data)
     except (InputError, ValidationError):
         substation = None
-    return _page(project_file, project, file, substation, None, problems)
+    library = _library(project_file, project, store)
+    return _page(project_file, project, file, substation, None, problems, library)
