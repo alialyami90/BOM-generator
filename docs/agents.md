@@ -16,14 +16,14 @@ agent; the milestones are in [`plan.md`](plan.md) → "Milestones".
 | A1 | Lead developer | Reviews, cross-thread consistency, this file | `docs/agents.md`, `CLAUDE.md`, `.github/workflows/ci.yml`, plan sections 1, 2, 4 (intro), 5 |
 | A2 | Input models and examples | M1, M1b | `src/bomgen/models/`, `src/bomgen/io/`, `src/bomgen/cli.py`, `src/bomgen/build.py`, `examples/`, plan section 3 and the M1 section |
 | A3 | Device database researcher | Reference data, outside the milestones | `data/device-db/`, its validation test |
-| A4 | UI designer | M9 | `docs/ui/`, the M9 section |
+| A4 | UI designer | M9, the M10e polish findings (done) | `docs/ui/`, the M9 section |
 | A5 | Library update packages | M8, M8b | `src/bomgen/library_store/`, ADR 0008, the M8 section |
 | A6 | Windows installer and release | M11 | `packaging/`, `.github/workflows/release.yml`, `docs/install.md`, `src/bomgen/app/launcher.py`, ADR 0009, the M11 section |
 | A7 | Lead developer assistant | Documentation and small tasks A1 hands out | `README.md`, `tests/unit/README.md`, `tests/golden/README.md`; other files only when A1 assigns them |
 | A8 | Sizing and layout engine | M1c | `src/bomgen/engine/sizing.py`, `src/bomgen/engine/layout.py`, `tests/golden/layout/`, the M1c section |
 | A9 | BOM rule engine | M2, M3, M4, M7 (engine) | the rest of `src/bomgen/engine/`, `src/bomgen/checks.py`, `src/bomgen/revision.py`, `src/bomgen/models/bom.py`, `src/bomgen/models/calc.py`, `src/bomgen/models/output.py`, `src/bomgen/models/report.py`, `tests/golden/` (except `layout/`), `tests/unit/test_revision.py`, the M2–M4 sections and the M7 engine note |
 | A10 | Excel workbook writer | M6, then M5 | `src/bomgen/sheets/`, `src/bomgen/writer/`, `src/bomgen/models/sheet.py`, the M5–M6 sections |
-| A11 | Desktop app | M10 | `src/bomgen/app/` except `launcher.py` (A6), `src/bomgen/app/ui/`, `tests/unit/app/`, the M10 section |
+| A11 | Desktop app | M10 (done) | `src/bomgen/app/` except `launcher.py` (A6), `src/bomgen/app/ui/`, `tests/unit/app/`, the M10 section |
 
 Each agent also owns its tests (`tests/unit/<area>/` or `tests/unit/test_<area>.py`)
 and its implementation plan under `docs/superpowers/plans/`.
@@ -38,7 +38,7 @@ and its implementation plan under `docs/superpowers/plans/`.
   thread rather than changing another agent's files.
 - Hands out ADR and open-question numbers, sets the merge order, and keeps this
   file current.
-- Recommends when to start the milestones nobody owns yet (see "Not started").
+- Recommends when to start the milestones nobody owns yet (see "Status").
 
 ### A2 — Input models and examples (M1)
 
@@ -63,7 +63,8 @@ Designs the desktop app with the `impeccable` skill: tokens, component specs,
 screen flows and the clickable prototype in `docs/ui/`. Asks Ali the design
 questions. Reads inputs from A2 (schema), A3 (alternatives) and A5 (import
 preview) but writes no Python. A design that needs a new input field or engine
-output goes to A2 or A1 first.
+output goes to A2 or A1 first. Done: the M9 design, the M10e polish findings, and
+the departures the built app made from the design, recorded in `docs/ui/` (#82).
 
 ### A5 — Library update packages (M8)
 
@@ -115,7 +116,8 @@ Project, Library, Backup/share screens against what is on main; Substation,
 Network and Panels once M1b and M1c land; Checks, Preview and Build once M5
 and M7 land. No business rule in the UI: anything missing from the engine goes
 to its owner. A4 owns the design and reviews the screens; the milestone ends
-with A4's impeccable polish pass.
+with A4's impeccable polish pass. Done: M10a–M10e (#28 to #81). Substation and
+project editing waits for the project and substation writers (plan M10 status).
 
 ### A7 — Lead developer assistant
 
@@ -166,14 +168,10 @@ Merge order while the current work is open: A2 M1b → A8 M1c → A5 M8b → A4 
 follow-up (ADR 0012/0013); A9's M2 → M3 → M4 and A10's M6 as they come, then
 M5 (A10) and M7; A3's data and A7's docs any time.
 
-## Not started
+## Status
 
-| Milestone | Recommendation |
-| --- | --- |
-| M5 sheet models | A10, after M4 and M6. |
-| M7 check report, revision highlighting | After M5; also wires A5's `library_mismatch()` into the report. |
-
-M1b (A2), M1c (A8), M2–M4 (A9), M6 (A10), M8b (A5) and M10 (A11) are assigned; see ADR 0012 and 0013 and the
-design in `docs/superpowers/specs/`.
+Every milestone in `plan.md` is on main: M0–M11, with M1b, M1c and M8b. Not
+planned yet: the project and substation writers the app needs before it can edit
+(plan M10 status).
 
 New agents get the next `A` number and a row in "Roles" when Ali starts them.

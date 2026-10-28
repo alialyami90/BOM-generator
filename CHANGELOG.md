@@ -132,6 +132,12 @@ tagged release.
 
 ### Changed
 
+- Desktop app polish from A4's findings: a compact Panels board header, one
+  "not available yet" line under each page's subtitle, a pulsing Build busy
+  bar, a neutral "Partial" badge and smaller fixes across the screens
+  (milestone M10e, #81).
+- `docs/ui/` records the departures the built app made from the design (#82).
+- Changelog, README status for M10c and test READMEs for #75–#79 (#80).
 - The app's Build runs the shared build sequence; `BuildOutcome.sheets`
   carries the workbook's sheet names (#79).
 - One build sequence, `bomgen.build.build_substation`, for `bomgen build` and

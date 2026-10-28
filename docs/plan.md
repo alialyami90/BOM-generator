@@ -712,8 +712,8 @@ Delivered in small PRs by A11, one screen group each (ADR 0015 for the bridge):
   under the preview's `suggested_id` through `import_project(rename_to=)`, #53) or
   Cancel. The restore review runs `preview_backup_restore` (#59), so a backup outside its
   project's Backups folder shows as a failed check. The installed-versions table counts the
-  projects built with each version. Substation screens opened from a real project keep
-  the example data under a "not connected yet" banner, without the example's badges.
+  projects built with each version. Until M10c the substation screens of a real project
+  kept the example data under a "not connected yet" banner.
 - **M10c:** Substation settings, Network and Panels after M1b and M1c. First the
   read side on the M1b models (`bomgen.app.substations`, `open_substation`): Settings
   (general, the calculation sheets' register documents, output file name and its
@@ -752,7 +752,14 @@ Delivered in small PRs by A11, one screen group each (ADR 0015 for the bridge):
   (`m10e-polish-findings.md` in the project files): a compact Panels board header, equal
   twin columns, one "not available yet" line under every page's subtitle, an opacity pulse
   for the busy Build bar (the detector's marquee), a neutral "Partial" badge, and smaller
-  fixes on the project, Library, Preview, Build, Network and Home screens.
+  fixes on the project, Library, Preview, Build, Network and Home screens. Done (#81);
+  A4 recorded the departures the built app made from the design in `docs/ui/` (#82).
+
+Status: done (M10a–M10e, #28 to #82). The app stays read-only on projects and
+substations until the project and substation writers exist: creating projects and
+substations, editing their settings, documents and defaults, and the Panels board's
+moves, deletions, pins and panel editor are not available yet, and the app says to
+edit the YAML files instead.
 
 ### M11 — Windows installer and releases
 - Freeze the app with PyInstaller (one folder) and wrap it in an Inno Setup
