@@ -115,6 +115,19 @@ def test_the_board_has_the_golden_panels(app: api.Api, project: Path) -> None:
     assert [(u["role"], u["n"], u["of"]) for u in l1] == [("l1_switch", n, 3) for n in (1, 2, 3)]
 
 
+def test_the_board_places_each_blank_plate_where_the_engine_counts_it(
+    app: api.Api, project: Path
+) -> None:
+    for panel in page(app, project)["panels"]:
+        rack = [u for u in panel["units"] if u["block_u"]]
+        # R5 as amended for backlog point 8: no plate under a cable manager or the last unit
+        assert [u["plate_below_u"] for u in rack] == [
+            0 if u["cable_manager_u"] or i == len(rack) - 1 else 1 for i, u in enumerate(rack)
+        ]
+        assert sum(u["plate_below_u"] for u in rack) == panel["blank_plates"]
+        assert all(u["plate_below_u"] == 0 for u in panel["units"] if not u["block_u"])
+
+
 def test_a_moved_device_is_marked(app: api.Api, project: Path, substation: Path) -> None:
     edit(substation, "  overrides: []", "  overrides: [{device: gps, panel: 2}]")
 

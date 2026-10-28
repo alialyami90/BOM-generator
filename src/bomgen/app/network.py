@@ -14,7 +14,7 @@ from typing import Any
 from bomgen.app.output import problems_of
 from bomgen.app.substations import layout_message, resolve
 from bomgen.engine.errors import EngineError
-from bomgen.engine.layout import LayoutResult, Unit, layout_preview
+from bomgen.engine.layout import LayoutResult, Unit, blank_plates, layout_preview
 from bomgen.io.loader import LoadedSubstation
 from bomgen.library_store.store import LibraryStore
 from bomgen.models.substation import EquipmentRole, Side
@@ -31,11 +31,20 @@ def _placed(result: LayoutResult) -> dict[tuple[str, Side], int]:
     return {(u.key, u.side): f.number for f in result.fills for u in f.units}
 
 
+def _plates_below(units: list[Unit], plate_u: int) -> dict[int, int]:
+    """Rack units of blank plate under each unit, by the engine's R5 rule on each neighbour pair."""
+    rack = [u for u in units if u.block_u > 0]
+    return {id(u): blank_plates(rack[i : i + 2]) * plate_u for i, u in enumerate(rack)}
+
+
 def _board(loaded: LoadedSubstation, result: LayoutResult, auto: LayoutResult) -> list[Any]:
     automatic = _placed(auto)
     rules = result.rules
     roles = {e.id: e.role for e in loaded.substation.equipment}
     counts = Counter((u.device, u.side) for f in result.fills for u in f.units)
+    plates = {
+        k: v for f in result.fills for k, v in _plates_below(f.units, rules.blank_plate_u).items()
+    }
     return [
         {
             "number": fill.number,
@@ -62,6 +71,7 @@ def _board(loaded: LoadedSubstation, result: LayoutResult, auto: LayoutResult) -
                     "height_u": unit.height_u,
                     "cable_manager_u": unit.cable_manager_u,
                     "block_u": unit.block_u,
+                    "plate_below_u": plates.get(id(unit), 0),
                     "moved": automatic.get((unit.key, unit.side)) != fill.number,
                 }
                 for unit in fill.units
