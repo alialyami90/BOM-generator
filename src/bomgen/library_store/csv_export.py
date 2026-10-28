@@ -86,6 +86,7 @@ TABLES: dict[str, tuple[str, ...]] = {
         "catalogue_id",
         "name",
         *(name for name in McbCatalogue.model_fields if name != "codes"),
+        "ac_rated",  # a brand's only (McbBrand); blank on the default row
     ),
     "mcb_codes.csv": ("catalogue_id", "rating_a", "code"),
     "aux_contacts.csv": ("catalogue_id", "name", "make", "model", "ordering_code"),
