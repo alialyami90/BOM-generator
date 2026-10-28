@@ -86,6 +86,87 @@ exists; its **name** can change at any time (Rename), so file paths in a `.bompr
 | Delete a project | Dialog; the project name must be typed | A `.bomproj` is saved first in the app's Deleted folder; Home keeps "Restore deleted project" for 30 days |
 | Board move, pin, delete | None | Undo (button, toast, Ctrl+Z) and "Reset to automatic" |
 
+## Panels board: drag, drop, pin, delete
+
+The board is a **direct-action** surface: every change writes `layout.overrides` or `layout.removed` at
+once, shows the new layout, and offers Undo. The status bar reads "Substation saved just now"; there is
+no save bar on the board. The engine places everything; the board only records what the person
+decided and shows what the engine returns (`layout_preview`).
+
+### Pins
+
+A **pin** holds a unit (or a pair) at a panel, and optionally at a position, so it stays there when the
+network or equipment changes. It is the user-facing word for a layout override.
+
+- Dragging or moving a device **pins** it. The block shows a pin icon and the selection bar offers **Unpin**.
+- **Pin here** pins a device where it already is, without moving it. A pin that equals the automatic place is
+  kept (engine need below).
+- **Unpin** hands the device back to the layout; it is placed again automatically.
+- Pinned units are placed first; the rest of the layout fills around them.
+- A pair is pinned and unpinned together; "Move this unit only…" pins one unit.
+- The header link reads "2 pinned · 1 deleted" (or "Nothing pinned or deleted") and opens the list:
+  each row says what is pinned ("L1 switch 2 (pair) to panels 3 and 4, position 2") with **Unpin**, and each
+  deleted device with **Restore**.
+- **Reset to automatic** releases every pin and deletion, after a confirmation that counts them. It can be undone.
+
+### Drag and drop contract
+
+The board never draws an affordance that does not act. The grip, the grab cursor and the drop targets exist
+only when the board can write; otherwise the page shows one line: "Moving a device here is not available
+yet. To move one, add it to layout.overrides in substation.yaml." and the blocks are plain.
+
+| State | What the person sees |
+| --- | --- |
+| Idle | Block with a grip; cursor `grab` on hover |
+| Dragging | The source block is dimmed (45%); cursor `grabbing`; the destination is evaluated live |
+| Over a panel that can take it | The panel (both panels of a pair, when moving a pair) gets a green border and tint, and a blue **insertion line** with a dot shows the position between two blocks |
+| Over a panel that cannot | Red border and tint, cursor `not-allowed`; no insertion line |
+| Drop that fits | The layout runs again, the block shows the pin, a toast says "Pinned L2 switch (pair) to panels 3 and 4, position 2" with Undo |
+| Drop that does not fit | Nothing changes; a red banner says why: "Panel 1 needs 34 U, only 32 U may be used. Nothing was changed." |
+| Drop where it already is | Nothing happens, no toast |
+| Esc while dragging | Cancels |
+
+- Dragging a redundant unit moves the **pair**; hold **Alt** to move that unit only. Side rules hold: an A unit only
+  goes to an odd panel, a B unit only to an even one.
+- The position is the gap the pointer is in. Dropping into the same panel only changes the position.
+- Moves never re-flow other devices silently. If a move does not fit, it is refused.
+
+### Keyboard
+
+Tab to a block; Enter or Space selects it; then:
+
+- **Alt + ↑ / ↓** move it one position up or down in its panel.
+- **Alt + ← / →** move it to the neighbouring panel (a pair moves to the neighbouring pair).
+- **Move…** in the selection bar opens the destination list with the panel and a position (where the layout
+  puts it, at the top, at the bottom), and greys out panels that do not fit with the reason.
+- **Delete** removes the selected device (the pair, if it has a partner); **Ctrl+Z** undoes.
+
+### Delete
+
+Delete removes a device from the BOM (`layout.removed`). It is not a pin. The toast says so ("Deleted Gateway
+(both units) from the BOM") with Undo, and the list offers Restore.
+
+## Panel editor (v0.2)
+
+- **Generated panels.** Devices stay read-only (they follow Network and the board; each row links to the board).
+  **Enclosure** is editable and shared by all generated panels, with a note that says so. **Options** are
+  editable with an **Apply to** switch: *All generated panels* or *This panel only*; a value set for one panel
+  is marked **Own value** with a link to go back to the shared one. **Port plans** are editable; they belong
+  to the equipment, so a change applies to the other panels with that device and to both sides, and the tab says so.
+  **Document** is editable. The YAML tab is read-only.
+- **Hand-written panels.** Everything is editable, as before, plus **Delete panel…** (confirmation, Undo).
+  Created from Panels › **Add hand-written panel…**.
+
+## Engine needs for the board (for A8 and A2)
+
+- An override may carry a **position** (index among the panel's rack devices): `DeviceMove.position`,
+  `PairMove.position`, optional.
+- An override that equals the automatic place must be **kept**, not dropped, so that "Pin here" holds.
+- Overrides are applied before the automatic fill: pinned units are placed first.
+- `layout_preview` keeps returning, per device, whether it is pinned and its position in the panel.
+- The writers (A2) write `layout.overrides` and `layout.removed` for each action and return the new
+  `layout_preview`.
+
 ## Field inventory
 
 What each form shows, so every field in the models is reachable. *Check* is who validates; *Default*

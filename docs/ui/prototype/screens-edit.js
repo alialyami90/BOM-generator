@@ -81,6 +81,11 @@
     toast(`Created ${name}`); go(first ? '#/network' : '#/project/info');
   };
 
+  /* ---------- Hand-written panel: delete ---------- */
+  ACTIONS['delete-panel'] = (el) => dialog({ title: 'Delete this panel?', body: `<div class="stack"><p>The hand-written panel, its devices and its sheet are removed from this substation. The layout is not affected.</p>${banner('info', 'Nothing else changes. Undo is available straight after.')}</div>`,
+    actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--danger" data-action="delete-panel-do">' + icon('trash') + 'Delete panel</button>' });
+  ACTIONS['delete-panel-do'] = () => { closeDialog(); toast('Deleted the panel', 'trash', () => toast('Restored', 'undo')); go('#/panels'); };
+
   /* ---------- Project: delete ---------- */
   ACTIONS['delete-project'] = () => {
     const p = curProject();
