@@ -1,6 +1,6 @@
 # 0015. Desktop app: how the UI calls the engine
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-10-28)
 - Date: 2026-10-28
 - Spec sections: — (the app is outside the spec; ADR 0007, `docs/ui/screens.md` "What the app needs from the engine")
 

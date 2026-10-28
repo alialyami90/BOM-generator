@@ -1,6 +1,6 @@
 # 0022. Free-text loose items
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-10-28)
 - Date: 2026-10-28
 - Spec sections: Inputs the tool needs (3. Project settings, loose material); How each
   panel BOM groups its materials ("Loose material"); Columns of a panel BOM

@@ -1,6 +1,6 @@
 # 0019. Branch MCBs sized from device data
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-10-28)
 - Date: 2026-10-28
 - Spec sections: Derivation rules → DC distribution (group F), Breaker part numbers;
   Data model and generation order (steps 7 and 15)

@@ -1,6 +1,6 @@
 # 0010. Input schema details and validation behaviour
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-10-28)
 - Date: 2026-10-28
 - Spec sections: Inputs the tool needs; How each panel BOM groups its materials
   (mirroring paragraph); Data model and generation order (entities)

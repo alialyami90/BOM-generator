@@ -1,6 +1,6 @@
 # 0004. One BOM sheet per cabinet with a hidden HWIO column
 
-- Status: Proposed (resolves a spec ambiguity; needs Ali's confirmation)
+- Status: Accepted (Ali, 2026-10-28)
 - Date: 2026-10-28
 - Spec sections: Workbook map; Output requirements (OUT-3, OUT-4); Formatting → Panel BOM sheets
 

@@ -1,6 +1,6 @@
 # 0009. Installer layout and releases
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-10-28)
 - Date: 2026-10-28
 - Spec sections: — (packaging is outside the spec; plan M11, Q19–Q20, ADR 0007, ADR 0008)
 

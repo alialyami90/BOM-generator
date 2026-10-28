@@ -1,6 +1,6 @@
 # 0011. UI design language and bundled fonts
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-10-28)
 - Date: 2026-10-28
 - Spec sections: — (the app is outside the spec; requested by Ali in the project thread)
 

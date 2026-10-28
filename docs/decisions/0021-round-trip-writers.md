@@ -1,6 +1,6 @@
 # 0021. Round-trip YAML writers, checked before they write
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-10-28)
 - Date: 2026-10-28
 - Spec sections: Inputs the tool needs (2. Panel definition, 3. Project settings)
 

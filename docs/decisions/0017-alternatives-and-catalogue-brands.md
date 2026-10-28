@@ -1,6 +1,6 @@
 # 0017. Alternatives as library parts; catalogue brand sets
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-10-28)
 - Date: 2026-10-28
 - Spec sections: Inputs the tool needs (1. Device library; commodity catalogues),
   Electrical rules (branch MCBs)

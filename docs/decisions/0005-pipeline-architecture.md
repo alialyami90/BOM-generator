@@ -1,6 +1,6 @@
 # 0005. Pipeline: rule engine → sheet models → thin writer
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-10-28)
 - Date: 2026-10-28
 - Spec sections: Data model and generation order; Relationships between sheets
 
