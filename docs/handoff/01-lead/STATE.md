@@ -56,9 +56,10 @@ B8 `cmsg_01CGuLumA5u5e7gSGbisWmMiWrgyedtbG3UzCXSmJ5mdJm`,
 B9 `cmsg_01CGuLumA5u5e7gSGbisWmMiEVdwRwy2F5RdK8ptK2QkGn`,
 B10 `cmsg_01CGuLumA5u5e7gSGbisWmMi5oJH7cuxNZWDrjADGPLnRU`,
 B11 `cmsg_01CGuLumA5u5e7gSGbisWmMiSRmFy8hwGpYU6cXpyyR56y`.
-Retired A threads (A2, A4–A11) must not act; if one does, tell the coordinator
-(`message_coordinator`). This role's own thread: `cmsg_01CGuLumA5u5e7gSGbisWmMi3nTuZbpZkUB1t4T5nt6GfE`
-(the coordinator starts a new B1 thread at handover).
+Retired A threads (A1, A2, A4–A11) must not act; if one does, tell the coordinator
+(`message_coordinator`). This role's own thread (B1, since 2026-10-28 22:32):
+`cmsg_01CGuLumA5u5e7gSGbisWmMiJaADCWuiNCb42qQHM1dpuv`. A1's old thread
+`cmsg_01CGuLumA5u5e7gSGbisWmMi3nTuZbpZkUB1t4T5nt6GfE` is retired; its open cards were reposted here.
 `list_threads` shows the latest; the coordinator starts new threads as checkpoints merge.
 
 ## Verification
