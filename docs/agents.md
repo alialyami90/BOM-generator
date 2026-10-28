@@ -149,7 +149,7 @@ the same one. Ask A1 before you add one.
 | Kind | Taken | Next free |
 | --- | --- | --- |
 | ADR | 0009 installer layout (A6), 0010 input models (A2), 0011 UI design language and bundled fonts (A4), 0012 projects/substations/.bomproj (A1, accepted), 0013 network sizing and panel layout (A1, accepted), 0014 engine data model (A9, proposed), 0015 desktop app bridge (A11, accepted) | 0016 |
-| Open question | Q22 workbook corrections, Q23 issued sheets vs masters (A2), Q24–Q28 substations/layout (resolved), Q29 thermostat and fan library defaults (A3), Q30 loose-table order (A9), Q31 M2 engine rules bundle (A9), Q32 cable managers vs 32U (resolved), Q33 FOPP-96SM height (resolved), Q34 M3 terminal rules (A9, reserved) | Q35 |
+| Open question | Q22 workbook corrections, Q23 issued sheets vs masters (A2), Q24–Q28 substations/layout (resolved), Q29 thermostat and fan library defaults (A3), Q30 loose-table order (A9), Q31 M2 engine rules bundle (A9), Q32 cable managers vs 32U (resolved), Q33 FOPP-96SM height (resolved), Q34 M3 group E–H rules (A9, with Ali) | Q35 |
 
 ## Review and merge
 
