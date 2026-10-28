@@ -345,3 +345,24 @@ def test_a_tier_may_carry_fan_airflow_ratings_and_sources() -> None:
 def test_a_tier_still_refuses_an_unknown_key() -> None:
     with pytest.raises(LibraryPackageError, match=r"low\.colour: unknown key"):
         parse_device_records(_tier("colour: red"))
+
+
+def test_a_tier_and_the_datasheet_may_give_the_dc_input_range() -> None:
+    parse_device_records(_tier("input_v_min: 88, input_v_max: 300.5"))
+    parse_device_records(_tier("input_v_min: 24"))
+    parse_device_records(_datasheet("input_v_min: 18\n      input_v_max: 60"))
+    parse_device_records(_tier("input_v_min: 48, input_v_max: 48"))
+
+
+@pytest.mark.parametrize("field", ["input_v_min", "input_v_max"])
+def test_a_dc_input_figure_is_a_number(field: str) -> None:
+    _refused(_tier(f"{field}: '24'"), f"low.{field}")
+    _refused(_tier(f"{field}: true"), f"low.{field}")
+    _refused(_datasheet(f"{field}: '24'"), f"datasheet.{field}")
+
+
+def test_the_dc_input_minimum_is_not_above_the_maximum() -> None:
+    with pytest.raises(LibraryPackageError, match="input_v_min must not be above input_v_max"):
+        parse_device_records(_tier("input_v_min: 60, input_v_max: 18"))
+    with pytest.raises(LibraryPackageError, match="input_v_min must not be above input_v_max"):
+        parse_device_records(_datasheet("input_v_min: 60\n      input_v_max: 18"))

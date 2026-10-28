@@ -82,16 +82,25 @@ class PortGroup(_Model):
     note: str | None = None
 
 
-class _Inrush(_Model):
-    """Switch-on current of a part, with where the figure comes from."""
+class _Electrical(_Model):
+    """Switch-on current and DC input range of a part (research figures, all optional)."""
 
     inrush_a: Number | None = None
     inrush_ms: Number | None = None
     inrush_basis: Literal["datasheet", "not_given", "assumed"] | None = None
     inrush_note: str | None = None
+    input_v_min: Number | None = None  # DC input range, V
+    input_v_max: Number | None = None
+
+    @model_validator(mode="after")
+    def _input_range_is_ordered(self) -> Self:
+        low, high = self.input_v_min, self.input_v_max
+        if low is not None and high is not None and low > high:
+            raise ValueError("input_v_min must not be above input_v_max")
+        return self
 
 
-class Datasheet(_Inrush):
+class Datasheet(_Electrical):
     """Whatever could be confirmed; keys are left out when unknown."""
 
     full_name: str | None = None
@@ -121,7 +130,7 @@ class Datasheet(_Inrush):
         return self
 
 
-class Tier(_Inrush):
+class Tier(_Electrical):
     """One part of an alternative; the keys after `same_as` are optional research findings."""
 
     model: str
