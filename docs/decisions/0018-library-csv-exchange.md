@@ -76,9 +76,14 @@ hold JSON.
 has the same `name` as the version the CSV was exported from, the base version's
 `schema_version` and `min_app_version`, a regenerated `library.yaml`, the base version's other
 files, `release_notes` starting `Local edit from <base version>:` with the change counts, and
-a fresh manifest with checksums. The version number is the next patch above the highest
-installed version of the library (installed 1.0.0 and 1.2.0 give 1.2.1). It is activated the
-way a `.bomlib` import is, and `rollback` goes back to the old version, which stays installed.
+a fresh manifest with checksums. The version is the base version plus a local segment,
+`<base>+local.<n>` (1.0.0+local.1, then 1.0.0+local.2), where `n` is one more than the
+highest local number installed on that base. These order after their base and before the next
+official release (1.0.0 < 1.0.0+local.1 < 1.0.1), unlike semver build metadata, which does
+not order. An official package therefore keeps plain semver, a local version is marked
+wherever it is shown, and it cannot collide with an official number. It is activated the way
+a `.bomlib` import is, and `rollback` goes back to the old version, which stays installed.
+The library `Version` type learns to parse and order the suffix in the code PR.
 
 **Dry-run.** `preview_csv_import` returns the same `Check` list as `preview_library_import`
 and follows its rules: a failed check skips the rest and leaves `files` empty.
@@ -94,7 +99,7 @@ and follows its rules: a failed check skips the rest and leaves `files` empty.
 | `library` | the assembled library fails the model and loader checks that a `.bomlib` import runs |
 | `base` | warns when `based_on_version` is not the active version, because edits made since will be replaced |
 | `changes` | never fails; lists devices and catalogue entries added, changed and removed against the active version, and warns when there are none (no version is created) |
-| `version` | the computed version already exists |
+| `version` | the computed local version already exists |
 
 The `changes` check is the main protection against Excel damage that cannot be detected
 cell by cell, such as dropped leading zeros: the engineer sees "42 ordering codes changed"
@@ -112,12 +117,13 @@ from a `Library` and a base version. The `.bomlib` backup of an edited library i
 - The CSV columns track the model: a new model field needs a column in the same PR that adds
   the field. A round-trip test that builds a library with every field set catches a missing
   column.
-- Local versions use the patch number, so an official package that reuses a locally used
-  number is refused by the existing "already installed" or "older than the active" check. The
-  convention to keep this from happening is that official releases bump the minor number.
-  Open question for A1: the convention, and whether a local version needs a marker beyond the
-  `release_notes` text.
+- Local versions carry `+local.<n>`, so the version parser (`versions.py`), the manifest check
+  and the `.bomlib` import accept the suffix. When a `.bomlib` import would replace an active
+  local version, its dry-run warns: your local edits in 1.0.0+local.2 stay installed but are
+  no longer active, and a rollback keeps them in use. A `.bomlib` backup of an edited
+  library carries the `+local.<n>` version and imports on another machine like any package.
 - The shape of the brand tables follows ADR 0017 as agreed with A2 on 2026-10-28 (including
-  `codes` as an alternative to `code_pattern`, which `mcb_codes.csv` covers). If M13 changes a
+  `codes` as an alternative to `code_pattern`, which `mcb_codes.csv` covers; `ratings_a` stays
+  required and the model rejects `codes` keys that differ from it). If M13 changes a
   field, this ADR is amended in the PR that builds the code.
 - The CSV code is not built until M13 is on main.
