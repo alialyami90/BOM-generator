@@ -5,16 +5,23 @@ from pathlib import Path
 from builders import default_p1, write_project
 from typer.testing import CliRunner
 
+from bomgen import __version__
 from bomgen.cli import app
 
 runner = CliRunner()
+
+
+def test_version_prints_package_version() -> None:
+    result = runner.invoke(app, ["--version"])
+    assert result.exit_code == 0
+    assert result.stdout.strip() == f"bomgen {__version__}"
 
 
 def test_validate_ok_prints_summary(tmp_path: Path) -> None:
     project_file = write_project(tmp_path)
     result = runner.invoke(app, ["validate", "--project", str(project_file)])
     assert result.exit_code == 0
-    assert result.stdout.strip() == "OK: GIS 01: 2 panels (p1, p2), 10 library parts"
+    assert result.stdout.strip() == "OK: GIS 01: 2 panels (p1, p2), 11 library parts"
 
 
 def test_validate_accepts_short_option(tmp_path: Path) -> None:

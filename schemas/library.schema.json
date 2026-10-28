@@ -112,6 +112,28 @@
       "title": "Category",
       "type": "string"
     },
+    "ChangeOverDiodes": {
+      "additionalProperties": false,
+      "description": "COD-1 and COD-2 device records (spec: Tags, other device type codes).",
+      "properties": {
+        "negative": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+          "title": "Negative",
+          "type": "string"
+        },
+        "positive": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+          "title": "Positive",
+          "type": "string"
+        }
+      },
+      "required": [
+        "negative",
+        "positive"
+      ],
+      "title": "ChangeOverDiodes",
+      "type": "object"
+    },
     "ChildRule": {
       "additionalProperties": false,
       "description": "A kit part added as a child row (spec: Inputs, ``children``).",
@@ -392,10 +414,18 @@
       "description": "Housekeeping kit roles (spec: Inputs, commodity catalogues).",
       "properties": {
         "change_over_diodes": {
-          "$ref": "#/$defs/HousekeepingRef"
+          "$ref": "#/$defs/ChangeOverDiodes"
         },
         "door_switch": {
-          "$ref": "#/$defs/HousekeepingRef"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HousekeepingRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "fan": {
           "$ref": "#/$defs/FanRef"
@@ -418,7 +448,6 @@
       },
       "required": [
         "lamp",
-        "door_switch",
         "fan",
         "vent_filter",
         "thermostat",

@@ -205,12 +205,12 @@ catalogues:
     instrument_ground: { description: "INSTRUMENT-GROUND ..." }
   housekeeping:                        # part_ids of device records (ADR 0010)
     lamp:        { part_id: ... }
-    door_switch: { part_id: ... }
+    door_switch: { part_id: ... }        # optional; omit when the lamp part includes it
     fan:         { part_id: ..., airflow_m3h: 358 }   # per fan (Q8)
     vent_filter: { part_id: ... }
     thermostat:  { part_id: ... }
     ipr_kit:     { part_id: ... }        # its device record lists relay, base, suppression, bracket
-    change_over_diodes: { part_id: ... }
+    change_over_diodes: { negative: ..., positive: ... }   # COD-1, COD-2
     socket:      { part_id: ..., rating_a: 10 }
 ```
 
@@ -429,6 +429,9 @@ Each has a proposed default that the plan assumes until Ali answers.
 **Q1 — Example data is not in the spec (blocks M1 and the golden tests).**
 *Resolved 2026-10-28:* Ali uploaded the example workbook; `examples/` is transcribed
 from it (ADR 0010). The workbook itself stays out of git.
+Still to add: `examples/assets/logo.png` (binary, not yet committed). `logo:` is
+commented out in `examples/project.yaml` until it lands; the header writer
+milestone needs it.
 
 The spec gives rules and totals but not the per-device data behind them: most
 unit wattages, full group B/C/D row lists, ordering codes, descriptions, port

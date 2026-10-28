@@ -45,7 +45,8 @@ def default_library() -> dict[str, Any]:
             _passive("VENT-FILTER", "vent_filter"),
             _passive("THERMOSTAT", "thermostat"),
             _passive("IPR-KIT", "accessory"),
-            _passive("COD-KIT", "change_over_diode"),
+            _passive("COD-NEG", "change_over_diode"),
+            _passive("COD-POS", "change_over_diode"),
             _passive("SOCKET-10", "socket"),
         ],
         "catalogues": {
@@ -68,7 +69,7 @@ def default_library() -> dict[str, Any]:
                 "vent_filter": {"part_id": "VENT-FILTER"},
                 "thermostat": {"part_id": "THERMOSTAT"},
                 "ipr_kit": {"part_id": "IPR-KIT"},
-                "change_over_diodes": {"part_id": "COD-KIT"},
+                "change_over_diodes": {"negative": "COD-NEG", "positive": "COD-POS"},
                 "socket": {"part_id": "SOCKET-10", "rating_a": 10},
             },
         },

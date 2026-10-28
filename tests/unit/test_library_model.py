@@ -72,7 +72,7 @@ def minimal_library_dict() -> dict[str, Any]:
                 "vent_filter": ref,
                 "thermostat": ref,
                 "ipr_kit": ref,
-                "change_over_diodes": ref,
+                "change_over_diodes": {"negative": "X", "positive": "X"},
                 "socket": {"part_id": "X", "rating_a": 10},
             },
         },
@@ -311,4 +311,23 @@ def test_housekeeping_fan_needs_airflow_and_socket_needs_rating() -> None:
     data = minimal_library_dict()
     data["catalogues"]["housekeeping"]["socket"]["rating_a"] = 0
     with pytest.raises(ValidationError, match="rating_a"):
+        Library.model_validate(data)
+
+
+def test_door_switch_is_optional_when_the_lamp_part_includes_it() -> None:
+    data = minimal_library_dict()
+    del data["catalogues"]["housekeeping"]["door_switch"]
+    assert Library.model_validate(data).catalogues.housekeeping.door_switch is None
+
+
+def test_change_over_diodes_name_negative_and_positive_parts() -> None:
+    data = minimal_library_dict()
+    data["catalogues"]["housekeeping"]["change_over_diodes"] = {
+        "negative": "COD-NEG",
+        "positive": "COD-POS",
+    }
+    diodes = Library.model_validate(data).catalogues.housekeeping.change_over_diodes
+    assert (diodes.negative, diodes.positive) == ("COD-NEG", "COD-POS")
+    data["catalogues"]["housekeeping"]["change_over_diodes"] = {"part_id": "COD-NEG"}
+    with pytest.raises(ValidationError, match="positive"):
         Library.model_validate(data)

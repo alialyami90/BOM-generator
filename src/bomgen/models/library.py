@@ -294,16 +294,23 @@ class SocketRef(HousekeepingRef):
     rating_a: PositiveInt
 
 
+class ChangeOverDiodes(InputModel):
+    """COD-1 and COD-2 device records (spec: Tags, other device type codes)."""
+
+    negative: PartId
+    positive: PartId
+
+
 class Housekeeping(InputModel):
     """Housekeeping kit roles (spec: Inputs, commodity catalogues)."""
 
     lamp: HousekeepingRef
-    door_switch: HousekeepingRef
+    door_switch: HousekeepingRef | None = None
     fan: FanRef
     vent_filter: HousekeepingRef
     thermostat: HousekeepingRef
     ipr_kit: HousekeepingRef
-    change_over_diodes: HousekeepingRef
+    change_over_diodes: ChangeOverDiodes
     socket: SocketRef
 
 

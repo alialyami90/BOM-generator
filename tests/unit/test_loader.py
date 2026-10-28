@@ -119,7 +119,7 @@ def test_duplicate_library_part_id(tmp_path: Path) -> None:
     library["devices"].append(dict(library["devices"][1]))
     issues = issues_for(write_project(tmp_path, library=library))
     assert [(i.location, i.message) for i in issues] == [
-        ("devices[10].part_id", "duplicate part_id 'SFP-1G-SM' (first at devices[1])")
+        ("devices[11].part_id", "duplicate part_id 'SFP-1G-SM' (first at devices[1])")
     ]
 
 
@@ -147,6 +147,18 @@ def test_unknown_child_and_terminal_block(tmp_path: Path) -> None:
         ),
     ]
     assert all(issue.line is not None for issue in issues)
+
+
+def test_unknown_change_over_diode_part_is_reported(tmp_path: Path) -> None:
+    library = default_library()
+    library["catalogues"]["housekeeping"]["change_over_diodes"]["positive"] = "NO-COD"
+    issues = issues_for(write_project(tmp_path, library=library))
+    assert [(i.location, i.message) for i in issues] == [
+        (
+            "catalogues.housekeeping.change_over_diodes.positive",
+            "unknown part_id 'NO-COD' (not in library.yaml)",
+        )
+    ]
 
 
 def test_port_plan_key_must_match_a_device(tmp_path: Path) -> None:
@@ -333,7 +345,7 @@ def library_file_for(tmp_path: Path, library: dict[str, Any]) -> Path:
 def test_load_library_returns_library(tmp_path: Path) -> None:
     library = load_library(library_file_for(tmp_path, default_library()))
     assert library.get("RST2228-L2") is not None
-    assert len(library.devices) == 10
+    assert len(library.devices) == 11
 
 
 def test_load_library_reports_duplicate_part_id(tmp_path: Path) -> None:
@@ -343,7 +355,7 @@ def test_load_library_reports_duplicate_part_id(tmp_path: Path) -> None:
     with pytest.raises(InputError) as caught:
         load_library(path)
     assert [(i.file, i.location, i.message) for i in caught.value.issues] == [
-        (path, "devices[10].part_id", "duplicate part_id 'SFP-1G-SM' (first at devices[1])")
+        (path, "devices[11].part_id", "duplicate part_id 'SFP-1G-SM' (first at devices[1])")
     ]
 
 

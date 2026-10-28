@@ -10,7 +10,7 @@ from collections.abc import Sequence
 
 from bomgen.io.errors import Issue, Loc, format_location
 from bomgen.io.yaml_source import YamlSource
-from bomgen.models.library import Housekeeping, Library
+from bomgen.models.library import ChangeOverDiodes, Housekeeping, Library
 from bomgen.models.panel import Panel, PanelMirror
 from bomgen.models.project import Project
 
@@ -55,13 +55,23 @@ def library_issues(library: Library, source: YamlSource) -> list[Issue]:
                     f"unknown terminal block '{rule.block}' (not in catalogues.terminal_blocks)"
                 )
                 issues.append(_issue(source, loc, message))
-    housekeeping = library.catalogues.housekeeping
-    for role in Housekeeping.model_fields:
-        part_id: str = getattr(housekeeping, role).part_id
+    for role_loc, part_id in _housekeeping_refs(library.catalogues.housekeeping):
         if part_id not in first_at:
-            role_loc = ("catalogues", "housekeeping", role, "part_id")
             issues.append(_unknown_part(source, role_loc, part_id, name))
     return issues
+
+
+def _housekeeping_refs(housekeeping: Housekeeping) -> list[tuple[Loc, str]]:
+    base = ("catalogues", "housekeeping")
+    refs: list[tuple[Loc, str]] = []
+    for role in Housekeeping.model_fields:
+        ref = getattr(housekeeping, role)
+        if isinstance(ref, ChangeOverDiodes):
+            refs.append(((*base, role, "negative"), ref.negative))
+            refs.append(((*base, role, "positive"), ref.positive))
+        elif ref is not None:
+            refs.append(((*base, role, "part_id"), ref.part_id))
+    return refs
 
 
 def panel_issues(

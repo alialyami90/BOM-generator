@@ -446,8 +446,6 @@ devices:
     tag_pattern: "{prefix}-COD-1"
 
   - part_id: COD-POS-IRMD150F12  # 'Panel 3' row 20: PSA3-COD-2
-    # NOTE: catalogues.housekeeping.change_over_diodes names one part (the negative
-    # diode); the engine adds this positive diode after it (M2).
     category: change_over_diode
     make: Ruttonsha
     model: IRMD150F12
@@ -599,10 +597,10 @@ catalogues:
 
   housekeeping:  # part ids of the group D records above (ADR 0010 item 1)
     lamp: { part_id: SZ2500-LAMP }
-    door_switch: { part_id: SZ2500-LAMP }  # the workbook sells lamp and switch as one part
+    # no door_switch: the lamp part includes it (SZ 2500.210, SZ 2500.470)
     fan: { part_id: SK3243-FAN, airflow_m3h: 358 }  # per fan; the pair gives 716 (plan Q8)
     vent_filter: { part_id: SK3238-FILTER }
     thermostat: { part_id: SK3110-TH }
     ipr_kit: { part_id: IPR-2903685 }
-    change_over_diodes: { part_id: COD-NEG-IRND150F12 }  # COD-POS-IRMD150F12 follows (M2)
+    change_over_diodes: { negative: COD-NEG-IRND150F12, positive: COD-POS-IRMD150F12 }
     socket: { part_id: SOCKET-730076, rating_a: 10 }
