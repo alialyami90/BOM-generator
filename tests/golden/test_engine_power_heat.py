@@ -89,8 +89,8 @@ def test_ventilation_choice(heat: HeatResult) -> None:
 
 def test_heat_dissipation_blocks(heat: HeatResult) -> None:
     # Heat Dissipation layout: one block per cabinet, then "PSA Auxiliary Equipment"
-    # outside the panels; no margin, unit heat = W x 3.41.
+    # outside the panels, no margin. The block totals are the Power Consumption block
+    # sums without the 25% margin (847.5 / 1.25 + 345.7 / 1.25 for 001, and so on).
     blocks = heat.dissipation
     assert [b.panel_id for b in blocks] == ["psa1", "psa2", "psa3", "ws", None]
-    for block in blocks:
-        assert block.total_btu_h == pytest.approx(block.total_w * 3.41)
+    assert [b.total_w for b in blocks] == pytest.approx([954.56, 954.56, 419.56, 185.56, 100])

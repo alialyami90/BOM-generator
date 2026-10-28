@@ -3,6 +3,7 @@ sheets, "Rule for the tool"; Data model and generation order, step 4)."""
 
 from collections.abc import Iterable, Sequence
 
+from bomgen.engine.power import count
 from bomgen.engine.units import lookup
 from bomgen.models.bom import BomLine
 from bomgen.models.calc import (
@@ -78,12 +79,12 @@ def ventilation_heat_w(lines: Iterable[BomLine], library: Library) -> float:
     ventilation parts themselves (plan Q4)."""
     total = 0.0
     for line in lines:
-        if line.part_id is None or not isinstance(line.qty, int):
+        if line.part_id is None:
             continue
         device = lookup(library, line.part_id)
         if device.excluded_from_power or device.category in VENTILATION_PARTS:
             continue
-        total += line.qty * (device.unit_power_w or 0)
+        total += count(line) * (device.unit_power_w or 0)
     return total
 
 

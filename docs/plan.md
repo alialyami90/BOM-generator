@@ -465,7 +465,9 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
   groups D, E and G are built. The forced check compares each cabinet with the fan
   pair (2 × `fan.airflow_m3h`, Q8); the line-up check covers the fan-ventilated
   cabinets. Cable managers keep the M2 rule until M1c's layout gives a count for
-  generated panels (Q32).
+  generated panels (Q32). The choice does not test the fans' throughput against
+  the required airflow; each cabinet's `forced.passes` carries that result for the
+  check report (step 15, M7).
 
 ### M5 — Sheet models with live formulas
 - Steps 12–13: BOM sheet (incl. loose-material table), Power Consumption,

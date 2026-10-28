@@ -5,7 +5,7 @@ from collections.abc import Sequence
 
 from bomgen.engine.errors import EngineError
 from bomgen.engine.units import lookup
-from bomgen.models.bom import BomTable, LooseTable, PanelBom
+from bomgen.models.bom import BomLine, BomTable, LooseTable, PanelBom
 from bomgen.models.calc import CabinetPower, LineRef, PowerBlock, PowerConsumption, PowerLine
 from bomgen.models.library import Library, SupplyType
 from bomgen.models.project import DesignConstants
@@ -25,10 +25,6 @@ def powered_lines(
         assert device.supply_type
         assert device.unit_power_w is not None
         assert device.load_type
-        if not isinstance(line.qty, int):
-            raise EngineError(
-                f"{line.tag or line.part_id}: a powered row needs a count, not {line.qty!r}"
-            )
         voltage = (
             constants.dc_voltage_v
             if device.supply_type is SupplyType.VDC
@@ -39,13 +35,22 @@ def powered_lines(
                 source=LineRef(panel_id=panel_id, line=index),
                 supply_type=device.supply_type,
                 voltage_v=voltage,
-                qty=line.qty,
+                qty=count(line),
                 unit_w=device.unit_power_w,
                 load_type=device.load_type,
                 current_factor=constants.current_factor,
             )
         )
     return result
+
+
+def count(line: BomLine) -> int:
+    """A powered row's quantity, which must be a plain count."""
+    if not isinstance(line.qty, int):
+        raise EngineError(
+            f"{line.tag or line.part_id}: a powered row needs a count, not {line.qty!r}"
+        )
+    return line.qty
 
 
 def _block(
