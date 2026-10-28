@@ -368,7 +368,8 @@ fieldset.readonly .btn, fieldset.readonly .grip { opacity: .5; cursor: default; 
 .rack { display: flex; flex-direction: column; background: var(--color-surface-sunken); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 2px; }
 .plate { flex: none; display: grid; place-items: center; }
 .plate::after { content: ""; width: 60%; height: 2px; background: var(--color-border); border-radius: 1px; }
-.dev { flex: none; display: flex; align-items: center; gap: 6px; padding: 0 6px; background: var(--color-surface); border: 1px solid var(--color-border-control); border-radius: var(--radius-sm); font-size: 12.5px; line-height: 1.2; cursor: grab; overflow: hidden; user-select: none; }
+.dev { flex: none; display: flex; align-items: center; gap: 6px; padding: 0 6px; background: var(--color-surface); border: 1px solid var(--color-border-control); border-radius: var(--radius-sm); font-size: 12.5px; line-height: 1.2; cursor: pointer; overflow: hidden; user-select: none; }
+.dev[draggable="true"] { cursor: grab; }  /* only the prototype board can move a device */
 .dev:hover { border-color: var(--color-action-text); }
 .dev-grip { color: var(--color-text-muted); display: inline-flex; }
 .dev-grip svg.i { width: 12px; height: 12px; }

@@ -65,6 +65,7 @@ def test_library_overview_with_nothing_installed(app: api.Api) -> None:
         "devices": [],
         "records": {},
         "records_problem": None,
+        "catalogues": None,
     }
 
 
@@ -103,6 +104,84 @@ def test_library_overview_joins_the_device_database_records(app: api.Api, packag
     assert switch["datasheet"]["summary"]
     assert len(switch["alternatives"]) == 2
     assert set(switch["alternatives"][0]["tiers"]) == {"low", "mid", "high"}
+
+
+def test_library_overview_lists_the_catalogues(app: api.Api, package: Any) -> None:
+    ok(app.import_library(str(package("1.0.0"))))
+
+    catalogues = ok(app.library_overview())["catalogues"]
+
+    assert catalogues["enclosure_u"] == 42
+    mcb = catalogues["mcb"]
+    assert (mcb["family"], mcb["make"], mcb["poles"]) == ("Acti9 2P", "Schneider", 2)
+    assert [(r["rating_a"], r["code"]) for r in mcb["ratings"]] == [
+        (1, "A9F74201"),
+        (2, "A9F74202"),
+        (6, "A9F74206"),
+        (10, "A9F74210"),
+        (16, "A9F74216"),
+    ]
+    assert catalogues["aux_contact"] == {
+        "make": "Schneider",
+        "model": "A9A26924",
+        "ordering_code": "A9A26924",
+        "record": None,
+    }
+    assert [(t["type"], t["make"], t["ordering_code"]) for t in catalogues["terminal_blocks"]] == [
+        ("UT-16", "Phoenix", "3044199"),
+        ("UT-2.5-MTD", "Phoenix", "3064085"),
+        ("UT-2.5-MT", "Phoenix", "3046362"),
+    ]
+    busbars = {b["key"]: b for b in catalogues["busbars"]}
+    assert list(busbars) == ["ac_safety_ground", "instrument_ground", "power_ground"]
+    assert busbars["instrument_ground"]["tag"] == "INSTRUMENT-GROUND"
+    assert busbars["instrument_ground"]["description"].startswith("INSTRUMENT GROUNDING BUSBAR")
+
+
+def test_housekeeping_roles_name_their_library_parts(app: api.Api, package: Any) -> None:
+    ok(app.import_library(str(package("1.0.0"))))
+
+    roles = ok(app.library_overview())["catalogues"]["housekeeping"]
+
+    assert [(r["role"], r["part_id"], r["detail"]) for r in roles] == [
+        ("lamp", "SZ2500-LAMP", None),
+        ("fan", "SK3243-FAN", "358 m³/h per fan"),
+        ("vent_filter", "SK3238-FILTER", None),
+        ("thermostat", "SK3110-TH", None),
+        ("ipr_kit", "IPR-2903685", None),
+        ("change_over_diode_negative", "COD-NEG-IRND150F12", None),
+        ("change_over_diode_positive", "COD-POS-IRMD150F12", None),
+        ("socket", "SOCKET-730076", "10 A"),
+    ]
+    assert all(r["in_library"] for r in roles)  # the loader refuses a dangling part id
+
+
+def test_catalogue_entries_link_their_device_database_records(app: api.Api, package: Any) -> None:
+    ok(app.import_library(str(package("1.0.0", device_db=True))))
+
+    overview = ok(app.library_overview())
+    catalogues = overview["catalogues"]
+
+    assert [r["record"] for r in catalogues["mcb"]["ratings"]] == [
+        "MCB-A9F74201",
+        "MCB-A9F74202",
+        "MCB-A9F74206",
+        "MCB-A9F74210",
+        "MCB-A9F74216",
+    ]
+    assert catalogues["aux_contact"]["record"] == "AUX-A9A26924"
+    assert [t["record"] for t in catalogues["terminal_blocks"]] == [
+        "TB-UT-16",
+        "TB-UT-2.5-MTD",
+        "TB-UT-2.5-MT",
+    ]
+    assert [b["record"] for b in catalogues["busbars"]] == [
+        "BUSBAR-AC-SAFETY-GND",
+        "BUSBAR-INSTRUMENT-GND",
+        "BUSBAR-AC-SAFETY-GND",  # one record serves both power grounding busbars
+    ]
+    for entry in catalogues["mcb"]["ratings"]:
+        assert overview["records"][entry["record"]]["kind"] == "catalogue"
 
 
 def test_a_damaged_device_database_does_not_hide_the_library(
