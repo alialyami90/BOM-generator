@@ -210,3 +210,66 @@ def test_cli_export_csv_names_a_bad_table_group(runner: CliRunner, tmp_path: Pat
 
     assert result.exit_code == 1
     assert "unknown table group nonsense" in result.output
+
+
+def _csv_tables(runner: CliRunner, tmp_path: Path) -> Path:
+    runner.invoke(library_app, ["import", str(_pack(runner, tmp_path, "1.0.0", V1))])
+    folder = tmp_path / "tables"
+    result = runner.invoke(library_app, ["export-csv", "psa-devices", "--out", str(folder)])
+    assert result.exit_code == 0, result.output
+    return folder
+
+
+def test_cli_import_csv_saves_the_edited_rows_as_a_local_version(
+    runner: CliRunner, tmp_path: Path
+) -> None:
+    folder = _csv_tables(runner, tmp_path)
+    devices = folder / "devices.csv"
+    devices.write_text(
+        devices.read_text("utf-8-sig").replace("Panduit", "Acme").replace("Hubbell", "Acme"),
+        "utf-8-sig",
+    )
+
+    dry = runner.invoke(library_app, ["import-csv", "psa-devices", str(folder), "--dry-run"])
+    done = runner.invoke(
+        library_app, ["import-csv", "psa-devices", str(folder), "--notes", "from Excel"]
+    )
+
+    assert dry.exit_code == 0, dry.output
+    assert "[ok] Files are readable tables" in dry.output
+    assert "Dry run: nothing was saved." in dry.output
+    assert done.exit_code == 0, done.output
+    assert "Saved and activated psa-devices 1.0.0+local.1 (from 1.0.0)." in done.output
+    listing = runner.invoke(library_app, ["list"])
+    assert "1.0.0+local.1 (active)" in listing.output
+
+
+def test_cli_import_csv_refuses_rows_with_problems_unless_told_to_skip_them(
+    runner: CliRunner, tmp_path: Path
+) -> None:
+    folder = _csv_tables(runner, tmp_path)
+    devices = folder / "devices.csv"
+    lines = devices.read_text("utf-8-sig").splitlines()
+    header = lines[0].split(",")
+    cells = lines[2].split(",")
+    cells[header.index("voltage_v")] = "abc"
+    lines[2] = ",".join(cells)
+    lines[3] = lines[3].replace("Hubbell", "Acme").replace("Panduit", "Acme")
+    devices.write_text("\r\n".join(lines) + "\r\n", "utf-8-sig")
+
+    refused = runner.invoke(library_app, ["import-csv", "psa-devices", str(folder)])
+    dry = runner.invoke(library_app, ["import-csv", "psa-devices", str(folder), "--dry-run"])
+
+    assert refused.exit_code == 1
+    assert "devices.csv row 3, voltage_v" in refused.output
+    assert dry.exit_code == 1
+    assert "[failed] Every row reads cleanly" in dry.output
+
+
+def test_cli_import_csv_with_nothing_to_change_says_so(runner: CliRunner, tmp_path: Path) -> None:
+    folder = _csv_tables(runner, tmp_path)
+
+    result = runner.invoke(library_app, ["import-csv", "psa-devices", str(folder)])
+
+    assert result.exit_code == 1
+    assert "nothing differs from 1.0.0" in result.output

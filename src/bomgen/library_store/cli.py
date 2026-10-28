@@ -8,6 +8,7 @@ from typing import Annotated
 import typer
 
 from bomgen.library_store.csv_export import GROUPS, export_installed_csv
+from bomgen.library_store.csv_import import import_csv, preview_csv_import
 from bomgen.library_store.errors import LibraryPackageError, RefusalKind
 from bomgen.library_store.package import PACKAGE_SUFFIX, pack
 from bomgen.library_store.service import import_library, validate_library
@@ -153,6 +154,40 @@ def export_csv_command(
     except (LibraryPackageError, OSError, ValueError) as exc:
         raise _fail(exc) from exc
     typer.echo(f"Wrote {out} ({len(files)} tables)")
+
+
+@library_app.command("import-csv")
+def import_csv_command(
+    name: Annotated[str, typer.Argument(help="Library name.")],
+    source: Annotated[Path, typer.Argument(help="The .zip or folder of CSV tables.")],
+    skip_invalid: Annotated[
+        bool,
+        typer.Option("--skip-invalid", help="Leave out rows with a problem and import the rest."),
+    ] = False,
+    dry_run: Annotated[
+        bool,
+        typer.Option("--dry-run", help="Show every check and what would change; save nothing."),
+    ] = False,
+    notes: Annotated[
+        str, typer.Option(help="A note added to the new version's release notes.")
+    ] = "",
+) -> None:
+    """Read CSV tables edited in Excel and save them as a new local version."""
+    store = _store()
+    try:
+        preview = preview_csv_import(source, store, name, skip_invalid=skip_invalid)
+        for check in preview.checks:
+            detail = f": {check.detail}" if check.detail else ""
+            typer.echo(f"[{check.status.value}] {check.label}{detail}")
+        if dry_run:
+            typer.echo("Dry run: nothing was saved.")
+            if not preview.can_import:
+                raise typer.Exit(1)
+            return
+        saved = import_csv(source, store, name, skip_invalid=skip_invalid, note=notes)
+    except (LibraryPackageError, OSError) as exc:
+        raise _fail(exc) from exc
+    typer.echo(f"Saved and activated {name} {saved.manifest.version} (from {saved.previous}).")
 
 
 @library_app.command("rollback")
