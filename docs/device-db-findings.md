@@ -100,3 +100,40 @@ matching record in `data/device-db/`.
   Electronics). Ratings are inferred from the matching Semikron SKND/SKMD 150F12 parts.
 - **SEL configured codes** (`#xxxx`, e.g. 3555#0KVC) are configuration hashes; SEL does not
   publish how to decode them. The options need the SEL quote or configurator.
+
+## M14: library data for the alternatives and MCB sizing
+
+From the 2026-10-28 research of the alternatives' electrical data (power, supply, inrush,
+height, ports) and the MCB brand sets. Ali chose to keep the iC60N as the default MCB.
+
+22. **The 125 V DC rating of the default MCB is at its limit.** Acti9 iC60N 2P (A9F742xx)
+    is rated up to 125 V DC; a 125 V battery floats at about 135–140 V. ABB S200/S200M and
+    Siemens 5SY4/5SY6 are 60 V DC per pole (125 V DC multi-pole for ABB; Siemens states no
+    2-pole series rating). The DC-rated ranges are Schneider C60H-DC (500 V DC 2P, DC only,
+    no 8 A), ABB S200M UC (440 V DC 2P) and Siemens 5SY5 (440 V DC 2P); all three are
+    polarity-sensitive. Decided: iC60N stays the default, the three DC ranges become brand
+    sets, and the check report warns against the float voltage (`MCB-*`).
+23. **On DC the magnetic trip is higher than on AC.** C curve: iC60N 9.05–13.6 In (Schneider's
+    √2 factor), ABB S200M 7.5–15 In (×1.5), Siemens 5SY 7–14 In (×1.4), C60H-DC 6.8–10.2 In.
+    The S200M UC DC band (7–15 In) is the IEC 60898-2 band ABB's curve cites; ABB prints no
+    number. (`MCB-*`)
+24. **The FGR-60F takes 12–125 V DC.** 125 V is the top of its range, so a floating battery
+    exceeds it. Fortinet should confirm before it is fed from station DC. (`FGR-60F`)
+25. **Few datasheets give inrush.** Found: SEL-3555 20 A per SEL-9331 supply, SEL-3355 20 A,
+    SEL-2240 17 A per power coupler, SEL-2488 8 A per supply, and Cisco's PWR-RGD-AC-DC(-H)
+    under 30 A at 125 V DC (the IE9320 and IR8340 alternatives). Nothing for the Ruggedcom,
+    SEL-2730M, Moxa, Fortinet, monitors, fans or lamps. The sizing rule skips the inrush
+    check when the figure is unknown (plan Q35).
+26. **Many alternatives take no 125 V DC.** All monitor and annunciator alternatives (12/24 V
+    DC or 100–240 V AC), Cisco ISA3000, Moxa EDR-G9010 LV, Meinberg microSyncHR and LANTIME
+    M600, and the Siemens SIMATIC IPCs. They carry `supply_ok: false` and need a 125/24 V DC
+    converter or an AC feed.
+27. **Alternatives found wrong or discontinued.** The SCALANCE code 6GK5324-4QG10-3HR2 is the
+    230 V AC PoE model; the 125 V DC EEC model is 6GK5324-4GG10-4JR2 (notes only, code kept).
+    Meinberg LANTIME M600 is replaced by the M1000. Hitachi RTU540 is discontinued and
+    560CMG10 was not found. The RSG2300 code was changed to its 125 V DC version. IR8340
+    and IPC647E are 2U, not 1U.
+28. **Phoenix UT 2,5-MTD alternatives.** As item 7, the alternatives are feed-through blocks.
+    WAGO 2002-1671 carries 16 A against the UT 2,5-MT's 20 A. WAGO has no screw-clamp blocks.
+29. **The C60H-DC needs its own auxiliary contact**, A9N26924, not the iOF A9A26924. The ABB
+    S2C-H6R's rating at 110–125 V DC was not found.

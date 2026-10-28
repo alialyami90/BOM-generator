@@ -213,3 +213,55 @@ def test_record_writes_no_null_values(record: dict[str, Any]) -> None:
         return []
 
     assert nulls(record, record["part_id"]) == []
+
+
+SUPPLY_TYPES = {"VDC", "VAC", "none"}
+POWER_BASES = {"datasheet_max", "datasheet_typical", "computed", "assumed"}
+
+
+def _tiers(record: dict[str, Any]) -> list[dict[str, Any]]:
+    return [tier for alt in record["alternatives"] for tier in alt["tiers"].values()]
+
+
+@pytest.mark.parametrize("record", RECORDS, ids=_ids(RECORDS))
+def test_every_alternative_states_its_mounting_and_supply(record: dict[str, Any]) -> None:
+    for tier in _tiers(record):
+        assert tier["mounting_kind"] in MOUNTING_KINDS, tier["model"]
+        assert tier["supply_type"] in SUPPLY_TYPES, tier["model"]
+        if tier["mounting_kind"] != "rack":
+            assert tier["height_u"] == 0, tier["model"]
+        elif "height_u" in tier:
+            assert tier["height_u"] >= 1, tier["model"]
+
+
+@pytest.mark.parametrize("record", RECORDS, ids=_ids(RECORDS))
+def test_a_powered_alternative_says_where_its_power_figure_comes_from(
+    record: dict[str, Any],
+) -> None:
+    for tier in _tiers(record):
+        if tier["supply_type"] == "none":
+            assert not {"voltage_v", "inrush_a", "input_v_min"} & tier.keys(), tier["model"]
+        elif "unit_power_w" in tier:
+            assert tier["power_basis"] in POWER_BASES, tier["model"]
+        if "inrush_a" in tier:
+            assert tier["inrush_basis"] in {"datasheet", "assumed"}, tier["model"]
+
+
+@pytest.mark.parametrize("record", RECORDS, ids=_ids(RECORDS))
+def test_a_dc_input_range_contains_the_nominal_voltage(record: dict[str, Any]) -> None:
+    for part in [record["datasheet"], *_tiers(record)]:
+        if "input_v_min" in part:
+            assert part["input_v_min"] < part["input_v_max"]
+            if part.get("supply_type") == "VDC":
+                assert part["input_v_min"] <= part["voltage_v"] <= part["input_v_max"]
+
+
+MCB_RECORDS = [r for r in RECORDS if r["part_id"].startswith("MCB-")]
+
+
+@pytest.mark.parametrize("record", MCB_RECORDS, ids=_ids(MCB_RECORDS))
+def test_every_mcb_states_its_trip_curve_and_dc_magnetic_multiple(record: dict[str, Any]) -> None:
+    for ratings in [record["datasheet"]["ratings"], *(t["ratings"] for t in _tiers(record))]:
+        assert ratings["trip_curve"] == "C"
+        assert ratings["magnetic_trip_multiple_dc"] >= ratings["magnetic_trip_multiple"]
+    assert "same_brand_dc_range" in record["datasheet"]["ratings"]
