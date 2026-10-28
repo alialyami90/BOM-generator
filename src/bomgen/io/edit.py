@@ -18,7 +18,15 @@ from ruamel.yaml.comments import CommentedMap
 from bomgen.engine.layout import LayoutResult, layout_preview
 from bomgen.io.errors import InputError, Issue
 from bomgen.io.loader import LoadedProject, LoadedSubstation, load_project
-from bomgen.io.round_trip import child_map, dump_text, load_text, merge_value, write_atomic
+from bomgen.io.round_trip import (
+    child_map,
+    dump_text,
+    edit_document,
+    load_text,
+    remove_entry,
+    set_entry,
+    write_atomic,
+)
 from bomgen.io.yaml_source import pending_texts, read_yaml
 from bomgen.models.panel import PanelOptions
 
@@ -62,20 +70,36 @@ def edit_substation(
     """Apply ``change`` to the substation file's parsed YAML and write it if it is sound."""
     file = substation_file(project_file, substation_id)
     data = load_text(file.read_text(encoding="utf-8-sig"))
-    change(data)
-    text = dump_text(data)
+    edit_document(data, change)
+    return commit(project_file, substation_id, {file: dump_text(data)}, store=store)
+
+
+def commit(
+    project_file: Path,
+    substation_id: str,
+    texts: Mapping[Path, str | None],
+    *,
+    store: LibraryStore | None = None,
+) -> EditResult:
+    """Write ``texts`` (``None`` deletes the file) if, loaded together, they cause no new
+    problem. Changed and new files are written before the deletions."""
     before, _ = _load(project_file, store, {})
-    after, loaded = _load(project_file, store, {file: text})
+    after, loaded = _load(project_file, store, texts)
     known = {_key(issue) for issue in before}
     caused = tuple(issue for issue in after if _key(issue) not in known)
     if caused:
         return EditResult(False, caused)
-    write_atomic(file, text)
+    for path, text in texts.items():
+        if text is not None:
+            write_atomic(path, text)
+    for path, text in texts.items():
+        if text is None:
+            path.unlink(missing_ok=True)
     return EditResult(True, tuple(after), _preview(loaded, substation_id))
 
 
 def _load(
-    project_file: Path, store: LibraryStore | None, texts: Mapping[Path, str]
+    project_file: Path, store: LibraryStore | None, texts: Mapping[Path, str | None]
 ) -> tuple[list[Issue], LoadedProject | None]:
     with pending_texts(texts):
         try:
@@ -108,7 +132,7 @@ def _generated(data: CommentedMap) -> CommentedMap:
 
 def _remove_key(parent: CommentedMap, key: Any) -> None:
     if key in parent:
-        del parent[key]
+        remove_entry(parent, key)
 
 
 # --- the generated-panel editor (docs/ui/editing.md, "Back-end needs") ---
@@ -124,8 +148,7 @@ def set_enclosure(
     """Set ``generated_panels.enclosure``, shared by every generated panel."""
 
     def change(data: CommentedMap) -> None:
-        generated = _generated(data)
-        generated["enclosure"] = merge_value(generated.get("enclosure"), enclosure)
+        set_entry(_generated(data), "enclosure", enclosure)
 
     return edit_substation(project_file, substation_id, change, store=store)
 
@@ -136,8 +159,7 @@ def set_generated_document(
     """Set ``generated_panels.document``; it must be one of the substation's register keys."""
 
     def change(data: CommentedMap) -> None:
-        generated = _generated(data)
-        generated["document"] = merge_value(generated.get("document"), document)
+        set_entry(_generated(data), "document", document)
 
     return edit_substation(project_file, substation_id, change, store=store)
 
@@ -157,7 +179,7 @@ def set_option(
     def change(data: CommentedMap) -> None:
         options = _options(_generated(data), panel, create=True)
         assert options is not None
-        options[key] = merge_value(options.get(key), value)
+        set_entry(options, key, value)
 
     return edit_substation(project_file, substation_id, change, store=store)
 
@@ -179,12 +201,12 @@ def remove_option(
         options = _options(generated, panel, create=False)
         if options is None or key not in options:
             return
-        del options[key]
+        remove_entry(options, key)
         if panel is not None and not options:
             by_panel = generated["options_by_panel"]
-            del by_panel[panel]
+            remove_entry(by_panel, panel)
             if not by_panel:
-                del generated["options_by_panel"]
+                remove_entry(generated, "options_by_panel")
 
     return edit_substation(project_file, substation_id, change, store=store)
 
@@ -243,7 +265,7 @@ def set_port_plan(
         if port_plan is None:
             _remove_key(row, "port_plan")
         else:
-            row["port_plan"] = merge_value(row.get("port_plan"), port_plan)
+            set_entry(row, "port_plan", port_plan)
 
     return edit_substation(project_file, substation_id, change, store=store)
 
@@ -294,7 +316,7 @@ def _set_layout(
         if not cleaned and not (isinstance(layout, CommentedMap) and key in layout):
             return
         layout = child_map(data, "layout")
-        layout[key] = merge_value(layout.get(key), cleaned)
+        set_entry(layout, key, cleaned)
         for item in layout[key]:
             item.fa.set_flow_style()  # one move per line, as the example writes them
 
