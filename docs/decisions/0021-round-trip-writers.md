@@ -28,6 +28,24 @@ lists the first writers, and each one returns the new layout preview and its pro
    changes, and a test keeps it that way. `merge_value` puts a new value onto the old
    node. Unchanged keys and items keep their comments, and a quoted string stays
    quoted.
+
+   Writers change entries through `set_entry` and `remove_entry`, and wrap each file's
+   change in `edit_document`. This keeps the layout of the file intact:
+   - The blank line and comments that end an entry stay at its end when items are
+     appended or removed.
+   - A list or mapping that becomes empty is written inline as `[]` or `{}`, with its
+     key's comment after it.
+   - An end-of-line comment keeps its distance from a value that grows or shrinks.
+   - A rewritten file keeps its permissions.
+
+   *M17b:* `io/panel_edit.py` writes, creates and deletes hand-written panel files:
+   - `write_panel` replaces a panel's contents.
+   - `create_panel` writes `panels/<id>.yaml` and lists it last in `manual_panels`.
+   - `delete_panel` removes the file and its list entry. The usual check refuses it
+     while something still names the panel.
+   - Generated panels are refused.
+
+   `pending_texts` takes `None` for a file the edit deletes.
 2. **Check before writing** (`io/edit.py`). The writer loads the whole project with the
    edited text in place of the file (`yaml_source.pending_texts`), so the edit passes
    through the same loader checks as a build would.

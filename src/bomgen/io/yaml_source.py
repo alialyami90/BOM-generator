@@ -61,13 +61,13 @@ class YamlSource:
         return None
 
 
-_PENDING: ContextVar[Mapping[Path, str] | None] = ContextVar("pending_texts", default=None)
+_PENDING: ContextVar[Mapping[Path, str | None] | None] = ContextVar("pending_texts", default=None)
 
 
 @contextmanager
-def pending_texts(texts: Mapping[Path, str]) -> Iterator[None]:
-    """Inside the block, :func:`read_yaml` reads ``texts`` in place of those files, so an
-    edit can be loaded and checked before it is written (ADR 0021)."""
+def pending_texts(texts: Mapping[Path, str | None]) -> Iterator[None]:
+    """Inside the block, :func:`read_yaml` reads ``texts`` in place of those files (``None``:
+    as if deleted), so an edit can be loaded and checked before it is written (ADR 0021)."""
     token = _PENDING.set({path.resolve(): text for path, text in texts.items()})
     try:
         yield
@@ -81,9 +81,15 @@ def read_yaml(path: Path) -> YamlSource:
     def fail(message: str, line: int | None = None) -> InputError:
         return InputError([Issue(path, "", message, line)])
 
-    pending = (_PENDING.get() or {}).get(path.resolve())
+    pending = _PENDING.get() or {}
+    key = path.resolve()
     try:
-        text = pending if pending is not None else path.read_text(encoding="utf-8-sig")
+        if key in pending:
+            text = pending[key]
+            if text is None:
+                raise FileNotFoundError(path)
+        else:
+            text = path.read_text(encoding="utf-8-sig")
     except FileNotFoundError:
         raise fail("file not found") from None
     except OSError as exc:
