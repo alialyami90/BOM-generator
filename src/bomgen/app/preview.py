@@ -121,11 +121,6 @@ def _sheets(result: BuildResult, names: dict[str, str]) -> dict[str, Any]:
                 "title": panel.title,
                 "rows": _rows(panel),
                 "hwio_total": sum(line.hwio for line in panel.lines),
-                "loose": (
-                    {"title": result.loose.title, "rows": _rows(result.loose)}
-                    if result.loose is not None and result.loose.host_panel == panel.panel_id
-                    else None
-                ),
             }
             for panel in result.panels
         ],
@@ -190,6 +185,14 @@ def preview_page(project_file: Path, substation_id: str, store: LibraryStore) ->
             "power": sheet_names.power_consumption,
             "heat_dissipation": sheet_names.heat_dissipation,
             "heat_calculations": sheet_names.heat_calculations,
+        },
+        "loose": None
+        if result.loose is None
+        else {
+            "sheet": sheet_names.loose_material,
+            "title": result.loose.title,
+            "rows": _rows(result.loose),
+            "hwio_total": sum(line.hwio for line in result.loose.lines),
         },
         **_sheets(result, names),
     }
