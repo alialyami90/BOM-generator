@@ -4,6 +4,7 @@ sheets, including "Rule for the tool"; Data model and generation order, step 4).
 import pytest
 from engine_factories import library, panel, powered
 
+from bomgen.engine.errors import EngineError
 from bomgen.engine.thermal import (
     choose_ventilation,
     forced_check,
@@ -76,6 +77,18 @@ def test_auto_ventilation_picks_filters_when_natural_rise_is_within_limit(
 def test_explicit_ventilation_option_wins() -> None:
     forced = panel([{"part_id": "LAMP"}], options={"ventilation": "forced"})
     assert choose_ventilation(forced, 1, C) is Ventilation.FORCED
+
+
+def test_explicit_natural_wins_over_a_hot_cabinet() -> None:
+    natural = panel([{"part_id": "LAMP"}], options={"ventilation": "natural"})
+    assert choose_ventilation(natural, 5000, C) is Ventilation.NATURAL
+
+
+def test_ventilation_heat_needs_counted_rows() -> None:
+    lib = library(powered("SW", "network_switch"))
+    lines = [BomLine(group=Group.B, description="SW", qty="1 Lot", part_id="SW")]
+    with pytest.raises(EngineError, match="needs a count"):
+        ventilation_heat_w(lines, lib)
 
 
 def power_line(panel_id: str | None, unit_w: float, supply: SupplyType, qty: int = 1) -> PowerLine:

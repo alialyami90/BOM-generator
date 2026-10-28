@@ -33,8 +33,14 @@ def expand_devices(
         device = lookup(library, instance.part_id)
         lan = instance.lan or panel.lan
         key = (device.tag_type, device.purdue_level)
-        start = next_free = first_number(device) + used[key]
+        first = first_number(device)
+        start = next_free = first + used[key]
         if instance.first_nn is not None:
+            if instance.first_nn < first:
+                raise EngineError(
+                    f"{panel.id}: {instance.part_id} first_nn {instance.first_nn} is below "
+                    f"{first}, the first number of its level"
+                )
             if instance.first_nn < next_free:
                 raise EngineError(
                     f"{panel.id}: {instance.part_id} first_nn {instance.first_nn} repeats "
@@ -49,7 +55,7 @@ def expand_devices(
             start=start,
             override=instance.tag,
         )
-        used[key] = start - first_number(device) + instance.qty
+        used[key] = start - first + instance.qty
         rows.append(DeviceRow(device, instance, lan, tags.row, tags.units))
     return tuple(rows)
 

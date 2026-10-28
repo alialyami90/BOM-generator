@@ -52,6 +52,11 @@ def test_first_nn_continues_a_range_from_another_panel() -> None:
     assert second.tag == "PSA1-L1-ESW-A15"
 
 
+def test_first_nn_below_the_levels_first_number_is_an_error() -> None:
+    with pytest.raises(EngineError, match="first_nn 5 is below 11"):
+        rows({"part_id": "L1", "first_nn": 5}, lib_devices=SWITCHES)
+
+
 def test_first_nn_below_the_running_count_is_an_error() -> None:
     with pytest.raises(EngineError, match="first_nn 12"):
         rows({"part_id": "L1", "qty": 2}, {"part_id": "L1", "first_nn": 12}, lib_devices=SWITCHES)
