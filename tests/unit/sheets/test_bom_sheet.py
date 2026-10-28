@@ -7,7 +7,6 @@ import pytest
 from bomgen.models.bom import BomLine, Group, LooseTable, PanelBom, QtySum
 from bomgen.models.calc import LineRef
 from bomgen.models.sheet import Borders, BorderStyle, CellStyle, Formula, SheetModel
-from bomgen.sheets import styles
 from bomgen.sheets.bom_sheet import bom_sheet
 
 
@@ -60,7 +59,9 @@ def style(model: SheetModel, row: int, col: int) -> CellStyle:
 def test_title_is_two_lines_merged_over_a_to_g(model: SheetModel) -> None:
     assert value(model, 1, 1) == "861-GIS01-PSA-0001\nGIS Substation - PSA Cabinet - 001"
     assert "A1:G1" in [m.name for m in model.merges]
-    assert style(model, 1, 1) == styles.BOM_TITLE
+    title = style(model, 1, 1)
+    assert (title.font.size, title.font.bold, title.fill) == (24, True, "#A6A6A6")
+    assert title.alignment.wrap
     assert model.rows[1].height == 90
 
 

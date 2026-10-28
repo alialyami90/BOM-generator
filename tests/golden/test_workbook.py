@@ -1,5 +1,5 @@
-"""The written example workbook (plan M5): every formula evaluates (Q15) to the value
-the writer cached, and the evaluated totals are the ones the spec states."""
+"""The written example workbook (plan M5): every formula, recalculated (Q15), gives the
+value the writer cached, and the recalculated totals are the ones the spec states."""
 
 from collections.abc import Callable
 from pathlib import Path
@@ -14,7 +14,12 @@ from bomgen.io.loader import load_substation
 from bomgen.sheets.workbook import build_workbook
 from bomgen.writer import write_workbook
 
-pytestmark = pytest.mark.golden
+pytestmark = [
+    pytest.mark.golden,
+    # pycel 1.0b30 compiles formulas with ast names Python 3.12 deprecates.
+    pytest.mark.filterwarnings("ignore:Attribute s is deprecated:DeprecationWarning"),
+    pytest.mark.filterwarnings("ignore:ast.Str is deprecated:DeprecationWarning"),
+]
 
 SUBSTATION_FILE = (
     Path(__file__).resolve().parents[2] / "examples" / "substations" / "gis01" / "substation.yaml"
@@ -35,9 +40,32 @@ def formulas(path: Path) -> openpyxl.Workbook:
     return openpyxl.load_workbook(path)
 
 
+# Formula cells in the example workbook; the count changes only if the layout does.
+FORMULA_COUNT = 923
+
+
+def formula_cells(book: openpyxl.Workbook) -> list[tuple[str, str]]:
+    """(sheet, cell) of every formula; text such as "=" is not one."""
+    return [
+        (sheet.title, cell.coordinate)
+        for sheet in book.worksheets
+        for row in sheet.iter_rows()
+        for cell in row
+        if cell.data_type == "f"
+    ]
+
+
 @pytest.fixture(scope="module")
-def evaluate(path: Path) -> Evaluate:
+def evaluate(path: Path, formulas: openpyxl.Workbook) -> Evaluate:
+    """Evaluate a cell from its formula, never from the result the writer cached.
+
+    pycel reads the file's cached results and only calculates a formula that has none,
+    so load every formula, then clear and recalculate them all.
+    """
     compiler = ExcelCompiler(filename=str(path))
+    for sheet, cell in formula_cells(formulas):
+        compiler.evaluate(f"{sheet}!{cell}")
+    compiler.recalculate()
 
     def run(sheet: str, cell: str) -> object:
         return compiler.evaluate(f"{sheet}!{cell}")
@@ -66,29 +94,23 @@ def test_bom_sheet_merges(formulas: openpyxl.Workbook) -> None:
     assert {"A1:G1", "B4:B7", "F4:F6", "G4:G6"} <= merges
 
 
-def test_every_formula_evaluates_to_its_cached_value(
+def test_every_formula_recalculates_to_its_cached_value(
     path: Path, formulas: openpyxl.Workbook, evaluate: Evaluate
 ) -> None:
     # Output requirements (OUT-5): live formulas; the cached results must agree, so the
     # file shows the right numbers before Excel recalculates.
     cached = openpyxl.load_workbook(path, data_only=True)
-    checked, wrong = 0, []
-    for sheet in formulas.worksheets:
-        for row in sheet.iter_rows():
-            for cell in row:
-                if not (isinstance(cell.value, str) and cell.value.startswith("=")):
-                    continue
-                checked += 1
-                got = evaluate(sheet.title, cell.coordinate)
-                want = cached[sheet.title][cell.coordinate].value
-                if isinstance(want, int | float) and not isinstance(want, bool):
-                    same = isinstance(got, int | float) and got == pytest.approx(want)
-                else:
-                    same = got == want
-                if not same:
-                    where = f"{sheet.title}!{cell.coordinate} {cell.value}"
-                    wrong.append(f"{where}: {got!r} != {want!r}")
-    assert checked > 900
+    cells = formula_cells(formulas)
+    wrong = []
+    for sheet, cell in cells:
+        got, want = evaluate(sheet, cell), cached[sheet][cell].value
+        if isinstance(want, int | float) and not isinstance(want, bool):
+            same = isinstance(got, int | float) and got == pytest.approx(want)
+        else:
+            same = got == want
+        if not same:
+            wrong.append(f"{sheet}!{cell} {formulas[sheet][cell].value}: {got!r} != {want!r}")
+    assert len(cells) == FORMULA_COUNT
     assert wrong == []
 
 

@@ -46,7 +46,8 @@ def heat_calculations_sheet(
     for col, width in WIDTHS.items():
         sheet.width(col, width)
     _constants_box(sheet, constants)
-    calc = _Calc(sheet, dissipation_sheet, totals, cabinet_names, constants)
+    btu_h = {block.panel_id: block.total_btu_h for block in heat.dissipation}
+    calc = _Calc(sheet, dissipation_sheet, totals, btu_h, cabinet_names, constants)
 
     row = 3
     forced = [c for c in heat.cabinets if c.ventilation is Ventilation.FORCED]
@@ -93,12 +94,14 @@ class _Calc:
         sheet: SheetBuilder,
         dissipation_sheet: str,
         totals: Mapping[str | None, int],
+        btu_h: Mapping[str | None, float],
         cabinet_names: Mapping[str, str],
         constants: DesignConstants,
     ) -> None:
         self.sheet = sheet
         self.dissipation_sheet = dissipation_sheet
         self.totals = totals
+        self.btu_h = btu_h
         self.names = cabinet_names
         self.constants = constants
         self.required: dict[str, str] = {}  # panel id -> cell holding its required airflow
@@ -108,11 +111,18 @@ class _Calc:
         self.sheet.set(row, col, value, style)
 
     def _heat_loss(self, row: int, panel_id: str, heat_w: float) -> str:
-        """'Total Heat Loss' from ``row``: BTU/h from Heat Dissipation and W; return W cell."""
+        """'Total Heat Loss' from ``row``: BTU/h from Heat Dissipation and W; return W cell.
+
+        A cabinet with no powered device has no Heat Dissipation block, so its loss is 0.
+        """
         btu = self.constants.btu_per_w
-        source = "=" + ref(self.dissipation_sheet, self.totals[panel_id], 11)
+        total = self.totals.get(panel_id)
+        loss: CellValue = 0
+        if total is not None:
+            source = "=" + ref(self.dissipation_sheet, total, 11)
+            loss = Formula(text=source, result=self.btu_h[panel_id])
         self._put(row, C, "=")
-        self._put(row, D, Formula(text=source, result=heat_w * btu), NUMBER)
+        self._put(row, D, loss, NUMBER)
         self._put(row, E, "BTU/HR")
         self._put(row, F, "or")
         self._put(row, G, Formula(text=f"=D{row}/{btu:g}", result=heat_w), NUMBER)

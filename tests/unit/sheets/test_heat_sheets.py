@@ -277,3 +277,38 @@ def test_heat_calculations_print_setup(calculations: SheetModel) -> None:
     assert setup.scale == 78
     assert setup.print_area is not None
     assert setup.print_area.name == "A1:N33"
+
+
+def test_cabinet_without_powered_devices_has_zero_heat_loss() -> None:
+    # The engine checks every cabinet, and gives an empty Heat Dissipation block to one
+    # with no powered device; that block has no TOTAL row to read.
+    empty = NaturalConvCheck(
+        panel_id="spare", heat_w=0, h_m=2.0, w_m=0.8, d_m=0.6, area_m2=5.712, delta_t_c=0,
+        limit_c=10,
+    )  # fmt: skip
+    spare = CabinetThermal(
+        panel_id="spare",
+        ventilation=Ventilation.NATURAL,
+        forced=ForcedVentCheck(panel_id="spare", heat_w=0, required_m3h=0, fan_m3h=0),
+        natural=empty,
+    )
+    heat = HEAT.model_copy(
+        update={
+            "dissipation": (*HEAT.dissipation, CabinetHeat(panel_id="spare", lines=())),
+            "cabinets": (spare,),
+            "line_up": None,
+        }
+    )
+    power = power_sheet("Power Consumption", POWER, SOURCES, NAMES, CONSTANTS)
+    names = {**NAMES, "spare": "Spare Cabinet"}
+    dissipation = heat_dissipation_sheet(
+        "Heat Dissipation", heat, "Power Consumption", power.rows, SOURCES, names, CONSTANTS
+    )
+    assert "spare" not in dissipation.totals
+    m = heat_calculations_sheet(
+        "Heat Calculations", heat, "Heat Dissipation", dissipation.totals, names, CONSTANTS
+    )
+    assert value(m, "B3") == "TOTAL HEAT DISSIPATION FOR SPARE CABINET"
+    assert value(m, "D5") == 0
+    assert formula(m, "G5").text == "=D5/3.41"
+    assert formula(m, "G5").result == 0

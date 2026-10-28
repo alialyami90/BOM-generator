@@ -777,7 +777,10 @@ that highlights cells whose value changed.
 **Q11 — Calculation sheet header details.** The `<scope>` in "Power Consumption
 for <scope>" and the calc-sheet header font size are not defined. *Default:*
 scope is a per-document field in `project.yaml` (e.g. "GIS Substation PSA
-System"); project name bold at 20 pt on calculation sheets.
+System"); project name bold at 20 pt on calculation sheets. *M5:* 20 pt is the
+cap; a calculation sheet uses the largest size whose three header lines, scaled
+with the sheet's print scale, fit between the header and top margins (17 pt on
+Power Consumption and Heat Dissipation, 11 pt on Heat Calculations).
 
 **Q12 — Tags that don't fit `<PANEL>-<LEVEL>-<TYPE>-<LAN><NN>`.** FOPP
 (`PSA1-FOPP-CCR-A01`) and gateways (`PSA1-DHPCC-GW-1`, numbered by LAN index).
