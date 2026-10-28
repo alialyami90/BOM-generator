@@ -10,6 +10,9 @@ tagged release.
 
 ### Added
 
+- Desktop app Preview: each panel sheet and the three calculation sheets as
+  the engine computes them, through `preview_substation` (milestone M10d,
+  #71).
 - Network sizing and automatic panel layout: `bomgen layout` sizes the L1 and
   L2 switches from the IED count and spares, fills the 32U panels and writes
   generated panel files; `bomgen build` lays out again a substation whose
@@ -125,6 +128,7 @@ tagged release.
 
 ### Changed
 
+- Changelog, README and test READMEs for #19 and #49–#70 (#72).
 - The frozen CLI writes UTF-8 to the console; the release smoke tests read the
   workbook path from the first line of `bomgen build` and check its report
   (#70).

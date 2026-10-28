@@ -60,6 +60,7 @@ A milestone with several modules may group them in a subfolder,
 | `engine/test_checks.py` | M7 | the step 15 check report: SFPs against slots, DC mains against ΣQ, ventilation, DI capacity (ADR 0016) |
 | `test_revision.py` | M7 | comparison with the previous issue (OUT-8, Q10): changed, added and removed rows and sheets |
 | `app/test_app_substation_api.py` | M10c | the Settings and Network API, read-only: register documents, output file name, constants against the project defaults, equipment, located problems |
+| `app/test_app_preview_api.py` | M10d | the Preview API: each panel sheet's rows and the calculation sheets from the engine's build result, or why there is nothing to show |
 | `app/test_app_output_api.py` | M10d | the Checks and Build API: checks, build target, the workbook and its report, the `file_exists`, `bad_name`, `has_errors`, `file_open` and `bad_folder` refusals |
 
 `builders.py`, `engine/engine_factories.py`, `project_store/project_builders.py`
