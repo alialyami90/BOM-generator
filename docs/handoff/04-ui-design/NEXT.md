@@ -22,7 +22,7 @@ Done when: A11 has notes in their Hearth thread (checked against editing.md: col
 - Gate venv: `uv venv /tmp/venv && uv pip install -p /tmp/venv -e ".[dev]"`, then `ruff check . && ruff format --check .`, `mypy`, `pytest` (docs-only PRs still run them before commit, CLAUDE.md).
 - Playwright smoke for `#/loose`: open `docs/ui/prototype/index.html#/loose` with `page.on('pageerror')` and `page.on('console')` collecting errors, click "Add from library" and "Add free text", expect zero errors. Rewrite it; the old scratch script is gone.
 - Hearth thread ids in LESSONS.md may be stale; if `message_thread` fails, use `list_threads` to find A1 and A11, or `message_coordinator`.
-- ROSTER row says B4 and lists this A4 checkpoint; B4's first checkpoint replaces that row.
+- ROSTER row 4 says B4 and links this A4 checkpoint; edit only that row at your next checkpoint.
 - Tasks 3 and 4 wait for A11's v0.2 screens to merge (loose, library editors, project/substation editors). Check `git log origin/main --oneline` for them.
 
 ## Don't do

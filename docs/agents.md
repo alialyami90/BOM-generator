@@ -13,7 +13,7 @@ agent; the milestones are in [`plan.md`](plan.md) → "Milestones".
 
 | Agent | Thread | Delivers | Owns (may change freely) |
 | --- | --- | --- | --- |
-| A1 | Lead developer | Reviews, cross-thread consistency, this file | `docs/agents.md`, `CLAUDE.md`, `.github/workflows/ci.yml`, plan sections 1, 2, 4 (intro), 5 |
+| A1 | Lead developer | Reviews, cross-thread consistency, this file | `docs/agents.md`, `CLAUDE.md`, `.github/workflows/ci.yml`, `docs/handoff/README.md`, `docs/handoff/01-lead/`, plan sections 1, 2, 4 (intro), 5 |
 | A2 | Input models and examples | M1, M1b | `src/bomgen/models/`, `src/bomgen/io/`, `src/bomgen/cli.py`, `src/bomgen/build.py`, `examples/`, plan section 3 and the M1 section |
 | A3 | Device database researcher | Reference data, outside the milestones | `data/device-db/`, its validation test |
 | A4 | UI designer | M9, the M10e polish findings (done) | `docs/ui/`, the M9 section |
@@ -25,7 +25,9 @@ agent; the milestones are in [`plan.md`](plan.md) → "Milestones".
 | A10 | Excel workbook writer | M6, then M5 | `src/bomgen/sheets/`, `src/bomgen/writer/`, `src/bomgen/models/sheet.py`, the M5–M6 sections |
 | A11 | Desktop app | M10 (done) | `src/bomgen/app/` except `launcher.py` (A6), `src/bomgen/app/ui/`, `tests/unit/app/`, the M10 section |
 
-Each agent also owns its tests (`tests/unit/<area>/` or `tests/unit/test_<area>.py`)
+Each agent also owns its `docs/handoff/<NN-role>/` folder and its row in
+`docs/handoff/ROSTER.md` (restart-safe checkpoints; names keep the role number, the letter
+counts resets, so B1 has A1's rights). Each agent also owns its tests (`tests/unit/<area>/` or `tests/unit/test_<area>.py`)
 and its implementation plan under `docs/superpowers/plans/`.
 
 ### A1 — Lead developer

@@ -47,4 +47,4 @@ Not run: golden tests separately (role does not touch engine, sheets or writer);
 - A1: accept ADR 0022 and merge this checkpoint PR. A11: Loose material PR, library editor PR.
 
 ## Scope check
-All 5 merged PRs changed files only under `docs/ui/`. This checkpoint adds `docs/handoff/04-ui-designer/` and a ROSTER row. `docs/handoff/ROSTER.md` did not exist on main; I created it with my row only, so other agents' checkpoints may conflict on it (A1 to resolve).
+All 5 merged PRs changed files only under `docs/ui/`. This checkpoint adds `docs/handoff/04-ui-design/` and changes only the role 4 row of `docs/handoff/ROSTER.md` (shared skeleton from #133, merged into this branch).
