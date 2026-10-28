@@ -7,11 +7,11 @@
   const docOptions = () => register().map((d) => [d.key, `${d.label} (${d.key})`]);
 
   /* ---------- Substation settings ---------- */
-  const tabsSettings = [['general', 'General'], ['documents', 'Documents'], ['output', 'Output'], ['constants', 'Design constants'], ['loose', 'Loose material'], ['yaml', 'YAML']];
+  const tabsSettings = [['general', 'General'], ['documents', 'Documents'], ['output', 'Output'], ['constants', 'Design constants'], ['yaml', 'YAML']];
   SCREENS.settings = () => {
     const rb = App.route().b; if (tabsSettings.some(([k]) => k === rb)) S.tab.settings = rb;
     const t = S.tab.settings;
-    const body = { general: settingsGeneral, documents: settingsDocuments, output: settingsOutput, constants: settingsConstants, loose: settingsLoose, yaml: settingsYaml }[t]();
+    const body = { general: settingsGeneral, documents: settingsDocuments, output: settingsOutput, constants: settingsConstants, yaml: settingsYaml }[t]();
     return `<div class="page">${pageHead('Settings', `Settings of ${esc(App.curSub().name)} only. Project-wide values are on the project page.`)}
       ${tabs('settings', tabsSettings, t, 'Substation settings')}
       <div role="tabpanel" aria-labelledby="tab-settings-${t}">${body}</div></div>`;
@@ -21,6 +21,11 @@
   const settingsGeneral = () => `<div class="form form--2">
     ${field('Substation name', input('p-name', P.name), 'Shown in the app and used for the folder.')}
     ${field('Title line', input('p-sub', P.titleLine), 'Second line of each BOM title, under the project name.')}
+    <div class="span-2 section" style="margin:0">
+      <h3>Catalogue brands</h3>
+      <p class="lede">Which make this substation takes ordering codes from. It uses the project's choice unless you set one here.</p>
+      <div class="form form--3" style="margin-top:var(--space-3)">${[['mcb', 'MCBs'], ['aux', 'Aux contacts'], ['tb', 'Terminal blocks']].map(([k, t]) => { const c = DB.catalogues[k]; const pb = (curProject().brands && curProject().brands[k]) || c.active; return field(t, select('sb-' + k, [['', `Same as the project (${c.brands.find((b) => b.id === pb).name})`], ...c.brands.map((b) => [b.id, b.name])], (P.brands && P.brands[k]) || '')); }).join('')}</div>
+    </div>
     <div class="span-2 section" style="margin:0">
       <h3>From the project</h3>
       <p class="lede">These come from the project and are the same for every substation in it.</p>
@@ -37,8 +42,8 @@
     ${field('Main document', select('o-main', docOptions(), P.mainDoc), 'The document whose number and revision go into the workbook file name.')}
     ${field('File name', input('o-pat', P.output.pattern, { mono: true }), 'Fields: <span class="mono">{doc_no}</span> and <span class="mono">{rev}</span>.')}
     <div class="banner banner--info">${icon('info')}<div class="grow"><b>Result:</b> <span class="mono">${esc(P.output.fileName)}</span></div></div>
-    <div class="section" style="margin:0"><h3>Calculation sheet names</h3><p class="lede">Cabinet sheets are named by each panel's sheet name (1 to 5).</p>
-    <div class="stack">${P.output.sheets.map((s, i) => field(['Power', 'Heat dissipation', 'Heat calculations'][i], input('o-sh' + i, s))).join('')}</div></div></div>`;
+    <div class="section" style="margin:0"><h3>Sheet names</h3><p class="lede">Cabinet sheets are named by each panel's sheet name (1 to 5). The Loose Material sheet is written only when the substation has loose material; its list is on the Loose material page.</p>
+    <div class="stack">${P.output.sheets.map((s, i) => field(['Loose material', 'Power', 'Heat dissipation', 'Heat calculations'][i], input('o-sh' + i, s))).join('')}</div></div></div>`;
 
   const settingsConstants = () => `<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">Defaults come from the spec and the project's shared defaults. Change one only when this substation's design basis says so; changed values are marked.</p>
     <div class="table-wrap" style="max-width:820px"><table class="table"><thead><tr><th>Constant</th><th class="num" style="width:130px">Value</th><th>Unit</th><th style="width:150px">Default</th></tr></thead>
@@ -46,11 +51,6 @@
     <div class="table-foot"><span>${P.constants.filter((c) => c.value !== c.def).length} changed from the default</span><button class="btn btn--ghost btn--sm" data-action="reset-const" data-i="all" ${P.constants.some((c) => c.value !== c.def) ? '' : 'disabled'}>Reset all to defaults</button></div></div>`;
   ACTIONS['reset-const'] = (el) => { P.constants.forEach((c, i) => { if (el.dataset.i === 'all' || +el.dataset.i === i) c.value = c.def; }); S.dirty = true; S.changed.add('constants'); App.render(); };
   document.addEventListener('change', (e) => { const m = /^c(\d+)$/.exec(e.target.id || ''); if (m && P.constants[+m[1]] && /^\d+(\.\d+)?$/.test(e.target.value.trim())) { P.constants[+m[1]].value = e.target.value; App.render(); } });
-
-  const settingsLoose = () => `<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">Items that are not mounted in any cabinet. They appear as a second table under the WS console BOM. Pick the cabinet that supplies power to an item that needs it.</p>
-    <div class="toolbar"><button class="btn btn--secondary btn--sm">${icon('plus')}Add item</button></div>
-    <div class="table-wrap" style="max-width:1100px"><table class="table"><thead><tr><th>Part</th><th>Designation</th><th class="num" style="width:70px">Qty</th><th style="width:130px">Fed from</th><th>Child parts</th><th style="width:40px"><span class="sr-only">Actions</span></th></tr></thead>
-    <tbody>${P.loose.map((l, i) => `<tr><td class="mono">${esc(l.part)}</td><td>${esc(l.tag)}</td><td class="num">${esc(l.qty)}</td><td>${l.fed ? esc(l.fed.toUpperCase()) : '<span class="muted">—</span>'}</td><td class="mono">${esc(l.children || '—')}</td><td><button class="btn btn--ghost btn--icon btn--sm" aria-label="Remove ${esc(l.part)}">${icon('trash')}</button></td></tr>`).join('')}</tbody></table></div>`;
 
   /* YAML view shared by project and panel */
   const hl = (line) => esc(line).replace(/^(\s*)(- )?([A-Za-z_][\w]*)(:)/, '$1$2<span class="k">$3</span>$4').replace(/(#.*)$/, '<span class="c">$1</span>').replace(/: ("[^"]*"|'[^']*')/, ': <span class="s">$1</span>').replace(/: (\d[\d.]*)\b/, ': <span class="n">$1</span>');
