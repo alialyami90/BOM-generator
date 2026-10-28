@@ -49,8 +49,8 @@
   const verified = (v) => ({ confirmed: badge('ok', 'Confirmed', 'check'), partial: badge('warn', 'Partial', 'info'), unverified: badge('plain', 'Unverified', 'info') }[v]);
   const banner = (kind, body, actions = '') => `<div class="banner banner--${kind}" role="${kind === 'bad' ? 'alert' : 'status'}">${icon({ bad: 'error', warn: 'warn', ok: 'check', info: 'info' }[kind])}<div class="grow">${body}</div>${actions}</div>`;
   const tabs = (group, items, active, label) =>
-    `<div class="tabs" role="tablist" aria-label="${esc(label)}">${items.map(([id, text, extra]) =>
-      `<button role="tab" id="tab-${group}-${id}" aria-selected="${id === active}" tabindex="${id === active ? 0 : -1}" data-action="tab" data-group="${group}" data-value="${id}">${esc(text)}${extra || ''}</button>`).join('')}</div>`;
+    `<div class="tabs" role="tablist" aria-label="${esc(label)}">${items.map(([id, text, extra, tip]) =>
+      `<button role="tab" id="tab-${group}-${id}"${tip ? ` title="${esc(tip)}"` : ''} aria-selected="${id === active}" tabindex="${id === active ? 0 : -1}" data-action="tab" data-group="${group}" data-value="${id}">${esc(text)}${extra || ''}</button>`).join('')}</div>`;
   const field = (label, control, help = '', err = '') => {
     const id = (control.match(/\sid="([^"]+)"/) || [])[1];
     const desc = [help && id ? `${id}-help` : '', err && id ? `${id}-err` : ''].filter(Boolean).join(' ');
@@ -164,6 +164,13 @@
       m.insertAdjacentHTML('afterbegin', `<div class="not-connected"><div class="page" style="padding-bottom:var(--space-3)">${banner('info', '<b>Not connected yet.</b> This screen still shows the example substation from the design, not your project.')}</div></div>`);
     }
     if (SCREENS[key + 'After']) SCREENS[key + 'After']();
+    // a strip wider than the page scrolls; keep the selected tab whole
+    // (sideways only, so a re-render never moves the page)
+    m.querySelectorAll('.tabs [role="tab"][aria-selected="true"]').forEach((t) => {
+      const strip = t.parentElement, s = strip.getBoundingClientRect(), r = t.getBoundingClientRect();
+      if (r.left < s.left) strip.scrollLeft -= s.left - r.left;
+      else if (r.right > s.right) strip.scrollLeft += r.right - s.right;
+    });
     document.title = 'BOM Generator';
   }
   function render() {

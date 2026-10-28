@@ -34,8 +34,10 @@
       return `<div class="page">${pageHead('Preview', 'What the workbook will contain.')}
         ${banner('bad', `<b>Nothing to preview.</b> ${esc(d.reason)}${errors ? ' must be fixed first' : ''}.`, '<a class="btn btn--secondary btn--sm" href="#/checks">Open checks</a>')}</div>`;
     }
-    const sheets = [...d.panels.map((x) => [x.panel_id, `Sheet ${x.sheet}: ${x.cabinet}`]),
-      ['power', d.calc_sheets.power], ['heatdiss', d.calc_sheets.heat_dissipation], ['heatcalc', d.calc_sheets.heat_calculations]];
+    // short labels keep all tabs in view; the cabinet is the tooltip and the sheet's title block
+    const sheets = [...d.panels.map((x) => [x.panel_id, `Sheet ${x.sheet}`, '', x.cabinet]),
+      ['power', 'Power', '', d.calc_sheets.power], ['heatdiss', 'Heat dissipation', '', d.calc_sheets.heat_dissipation],
+      ['heatcalc', 'Heat calculations', '', d.calc_sheets.heat_calculations]];
     const { b } = App.route();
     let t = b || S.tab.preview;
     if (!sheets.some(([k]) => k === t)) t = sheets[0][0];
