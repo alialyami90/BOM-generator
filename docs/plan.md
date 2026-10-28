@@ -24,6 +24,9 @@ Excel), and the sheet layer emits the same values as live formulas (OUT-5).
 The generator is delivered as a CLI first (M1–M7), then as an installable
 Windows desktop app with shareable device-library update packages (M8–M11).
 
+Milestones are built by agents working in parallel; who owns which milestone and
+files, and the review and merge order, are in [`agents.md`](agents.md).
+
 Stack: as briefed (ADR 0002), with one agreed deviation: write the file with
 **XlsxWriter** because openpyxl cannot put the logo picture in the page header
 (ADR 0003). openpyxl stays for reading files back in tests.
