@@ -22,7 +22,7 @@ from pydantic import (
 
 from bomgen.models._base import DocumentKey, ExcelSheetName, InputModel, PartId
 from bomgen.models.library import Media, PortSpeed
-from bomgen.models.panel import Enclosure, PanelId, PanelKind, TagPrefix
+from bomgen.models.panel import Enclosure, PanelId, PanelKind, PortPlan, TagPrefix
 from bomgen.models.project import ConstantOverrides, LooseMaterial, OutputSettings, Spares
 
 
@@ -71,11 +71,21 @@ class Equipment(InputModel):
     l2_ports: NonNegativeInt = 0
     l2_speed: PortSpeed = PortSpeed.G1
     l2_media: Media = Media.MM
+    # copied onto every panel row the layout writes for this entry (as on DeviceInstance)
+    purpose: str | None = None
+    hwio_points: NonNegativeInt | None = None  # a row's HWIO total, overriding the library's
+    port_plan: PortPlan | None = None  # per unit; the layout scales it by the row's qty
 
     @model_validator(mode="after")
     def _consistent(self) -> "Equipment":
         if self.part_id is None and self.role is not EquipmentRole.L1_SWITCH:
             raise ValueError(f"part_id is needed for a {self.role.value}")
+        sized = (EquipmentRole.L1_SWITCH, EquipmentRole.L2_SWITCH)
+        if self.role in sized and self.port_plan is not None:
+            raise ValueError(
+                f"the {self.role.value} port plan is computed by the switch sizing; "
+                "leave port_plan out"
+            )
         if self.redundant and self.side is not Side.NONE:
             raise ValueError("a redundant device has one unit per side; leave side out")
         if self.role is EquipmentRole.L1_SWITCH and "qty" in self.model_fields_set:
