@@ -2,7 +2,7 @@
 (function () {
   const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, field, input, select, pageHead, illus, dialog, closeDialog, toast, go, verified, $ } = App;
   const L = DB.library;
-  const catName = (c) => c.replace(/_/g, ' ').replace(/^./, (m) => m.toUpperCase());
+  const catName = (c) => c.replace(/_/g, ' ').replace(/^./, (m) => m.toUpperCase()).replace(/^Io\b/, 'IO');
   const F = { q: '', cat: '', ver: '', alt: false };
 
   SCREENS.library = () => {
@@ -31,9 +31,9 @@
         <label class="sr-only" for="lib-ver">Data quality</label>${select('lib-ver', [['', 'Any data quality'], ['confirmed', 'Confirmed'], ['partial', 'Partial'], ['unverified', 'Unverified']], F.ver, {}).replace('data-dirty="1"', 'data-action="lib-ver"').replace('class="select "', 'class="select" style="width:190px"')}
         <label class="check"><input type="checkbox" data-action="lib-alt" ${F.alt ? 'checked' : ''}> Has alternatives</label>
         <span class="sp"></span><span class="muted small">${list.length} of ${DB.devices.length} devices</span></div>
-      <div style="display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:var(--space-5);align-items:start">
-        <div><div class="table-wrap"><table class="table"><thead><tr><th>Part ID</th><th>Make and model</th><th>Category</th><th>Supply</th><th>Data</th></tr></thead><tbody>
-          ${list.map((d) => `<tr class="clickable" tabindex="0" data-action="lib-select" data-id="${d.id}" aria-selected="${sel && sel.id === d.id}"><td class="mono" style="white-space:nowrap">${esc(d.id)}</td><td>${esc(d.make)} <span class="muted">${esc(d.model)}</span></td><td>${esc(catName(d.cat))}</td><td style="white-space:nowrap">${esc(d.supply)}${d.w ? ` <span class="muted">· ${d.w} W</span>` : ''}</td><td>${verified(d.verified)}</td></tr>`).join('') || '<tr class="empty-row"><td colspan="5">No device matches these filters. Clear a filter or search for a different part.</td></tr>'}
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,400px);gap:var(--space-5);align-items:start">
+        <div><div class="table-wrap"><table class="table"><thead><tr><th>Part ID</th><th>Make and model</th><th>Supply</th><th>Data</th></tr></thead><tbody>
+          ${list.map((d) => `<tr class="clickable" tabindex="0" data-action="lib-select" data-id="${d.id}" aria-selected="${sel && sel.id === d.id}"><td><span class="mono">${esc(d.id)}</span><span class="cell-sub">${esc(catName(d.cat))}</span></td><td>${esc(d.make)} <span class="muted">${esc(d.model)}</span></td><td>${esc(d.supply)}${d.w ? `<span class="cell-sub">${d.w} W</span>` : ''}</td><td style="white-space:nowrap">${verified(d.verified)}</td></tr>`).join('') || '<tr class="empty-row"><td colspan="4">No device matches these filters. Clear a filter or search for a different part.</td></tr>'}
         </tbody></table><div class="table-foot"><span>Select a row to see its datasheet and alternatives</span><span>${illus()}</span></div></div></div>
         ${sel ? detail(sel) : ''}
       </div>`;

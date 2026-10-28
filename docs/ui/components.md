@@ -148,7 +148,7 @@ Enter or Space opens the picker.
 ### Tabs
 Horizontal text tabs with a 1 px rule under the list. Selected: semibold heading
 colour with a 2 px cobalt underline. `role="tablist"`, roving tabindex, ← →
-move and select, Home/End jump. A tab can carry a small error badge when its
+move and select, Home/End jump (Home/End are not in the prototype). A tab can carry a small error badge when its
 panel has a problem. Tab panels are labelled by their tab. Used for sections of
 a record (Panel: Enclosure, Devices, Port plans, Options, Document, YAML) and
 for workbook sheets in Preview.

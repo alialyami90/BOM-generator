@@ -37,7 +37,10 @@ node docs/ui/tools/build-tokens.mjs --check  # fail if out of date
 Ctrl+S, Ctrl+O and F6, the unsaved-changes dialog, overwrite confirmation, the empty
 recent-projects state, Home/End in tab lists, the "Open a project first" nav
 tooltip, sortable table headers, Undo after removing a device row, keyboard
-reorder. They are in `components.md` and `screens.md` and belong to M10.
+reorder.
+
+In the prototype: deep links (`#/panels/<id>/<tab>`, `#/project/<tab>`) and the
+device picker keys (↑ ↓ Enter Esc). They are in `components.md` and `screens.md` and belong to M10.
 
 ## Depends on other work
 
@@ -58,6 +61,8 @@ Fixed: Build/Preview primary action when blocked, icon on Blocked/Ready in the r
 Preview control overload (group select), Checks page (collapsed engine checks,
 panel-first Where column), device-table drag handle and removal feedback, wrapped
 dates in Versions, cabinet names in the heat table, "Saved" wording.
+
+Fixed after A1's review: Preview, Power and Heat render literal engine figures only; library table fits 1280 px; mirrored panels follow A2's model (read-only tabs, full Mirror dialog, sample error moved to the original); deep links and picker keys; form labels now linked to their fields; hard-coded colours moved to tokens.
 
 Not done, and why: read-only reviewer mode (needs Ali's call, see `screens.md`);
 inputs only on the focused device row (kept always-editable for speed, to review

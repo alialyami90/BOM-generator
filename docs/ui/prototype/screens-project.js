@@ -1,6 +1,6 @@
 /* Screens: Home, Project, Panels (list and editor). */
 (function () {
-  const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, field, input, select, pageHead, illus, dialog, closeDialog, toast, go, counts, $ } = App;
+  const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, field, input, select, pageHead, illus, dialog, closeDialog, toast, go, counts, $, $$ } = App;
   const P = DB.project;
 
   /* ---------- Home ---------- */
@@ -42,6 +42,7 @@
   /* ---------- Project ---------- */
   const tabsProject = [['general', 'General'], ['documents', 'Documents'], ['output', 'Output'], ['constants', 'Design constants'], ['loose', 'Loose material'], ['yaml', 'YAML']];
   SCREENS.project = () => {
+    const rb = App.route().b; if (tabsProject.some(([k]) => k === rb)) S.tab.project = rb;
     const t = S.tab.project;
     const body = { general: projectGeneral, documents: projectDocuments, output: projectOutput, constants: projectConstants, loose: projectLoose, yaml: projectYaml }[t]();
     return `<div class="page">${pageHead('Project', 'Settings that apply to every cabinet in this workbook.',
@@ -113,21 +114,27 @@
         <td class="mono">${esc(p.sheet)}</td><td class="mono">${esc(p.cabinet)}</td><td><b style="font-weight:500">${esc(p.name)}</b></td><td>${kindLabel[p.kind]}</td><td>${p.lan || '—'}</td><td class="num">${p.devices}</td><td>${p.mirrorOf ? esc(p.mirrorOf.toUpperCase()) : '—'}</td>
         <td>${p.status === 'bad' && S.checks === 'errors' ? badge('bad', '1 error', 'error') : badge('ok', 'Ready', 'check')}</td></tr>`).join('')}</tbody></table></div></div>`;
   };
-  ACTIONS['open-panel'] = (el) => { S.tab.panel = 'devices'; go('#/panels/' + el.dataset.id); };
-  ACTIONS.mirror = () => dialog({ title: 'Mirror a panel', body: `<p style="margin-bottom:var(--space-3)">Creates a new panel that copies the devices, port plans and options of the original and swaps the cabinet prefix and LAN letter in every tag.</p><div class="stack">${field('Original panel', select('m-src', [['psa1', 'PSA Cabinet - 001 (LAN A)']], 'psa1'))}${field('New cabinet number', input('m-cab', '861-GIS01-PSA-0002', { mono: true }))}${field('LAN', select('m-lan', ['B', 'A'], 'B'))}</div>`, actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="close">Create mirrored panel</button>' });
+  ACTIONS['open-panel'] = (el) => { S.tab.panel = 'devices'; go('#/panels/' + el.dataset.id + '/devices'); };
+  ACTIONS.mirror = () => dialog({ title: 'Mirror a panel', body: `<p style="margin-bottom:var(--space-3)">Creates a small file that points at the original. Devices, enclosure and port plans follow the original, and every tag swaps the cabinet prefix and LAN letter. Options and the document block are the new panel's own.</p><div class="form form--2">
+      <div class="span-2">${field('Original panel', select('m-src', [['psa1', 'PSA Cabinet - 001 (LAN A)']], 'psa1'))}</div>
+      ${field('Panel id', input('m-id', 'psa2', { mono: true }), 'File name: panels/psa2.yaml.')}${field('Cabinet number', input('m-cab', '861-GIS01-PSA-0002', { mono: true }))}
+      ${field('Cabinet name', input('m-name', 'PSA Cabinet - 002'), 'Printed in the sheet title.')}${field('Sheet name', input('m-sheet', '2', { mono: true }), 'Workbook tab.')}
+      ${field('Tag prefix', input('m-pre', 'PSA2', { mono: true }), 'Replaces PSA1 in every tag.')}${field('LAN', select('m-lan', ['B', 'A'], 'B'), 'Swaps A to B in tags. Shown because the original has a LAN.')}</div>`, actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="close">Create mirrored panel</button>' });
   ACTIONS['add-panel'] = () => dialog({ title: 'Add panel', body: `<div class="stack">${field('Kind', select('ap-k', [['network', 'Network cabinet'], ['control', 'Control cabinet'], ['console', 'Console']], 'network'), 'Sets the terminal strip defaults.')}${field('Cabinet number', input('ap-c', '', { mono: true }))}${field('Name', input('ap-n', ''))}</div>`, actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="close">Add panel</button>' });
 
   const panelTabs = [['enclosure', 'Enclosure'], ['devices', 'Devices'], ['ports', 'Port plans'], ['options', 'Options'], ['document', 'Document'], ['yaml', 'YAML']];
   function panelEditor(id) {
     const p = DB.panels.find((x) => x.id === id) || DB.panels[0];
+    const rc = App.route().c; if (panelTabs.some(([k]) => k === rc)) S.tab.panel = rc;
     const t = S.tab.panel;
-    const errs = S.checks === 'errors' && (p.id === 'psa2' || p.id === 'ws');
-    const body = { enclosure: () => panelEnclosure(p), devices: () => panelDevices(p), ports: () => panelPorts(p), options: () => panelOptions(p), document: () => panelDocument(p), yaml: () => panelYaml(p) }[t]();
-    const badgeTab = (tab) => (errs && ((p.id === 'psa2' && tab === 'devices') || (p.id === 'ws' && tab === 'options')) ? badge('bad', '1', 'error') : '');
+    const errs = S.checks === 'errors' && (p.id === 'psa1' || p.id === 'ws');
+    const ro = (fn) => (p.mirrorOf ? `<fieldset class="readonly" disabled><legend class="sr-only">Follows ${p.mirrorOf.toUpperCase()}, read-only</legend>${fn()}</fieldset>` : fn());
+    const body = { enclosure: () => ro(() => panelEnclosure(p)), devices: () => ro(() => panelDevices(p)), ports: () => ro(() => panelPorts(p)), options: () => panelOptions(p), document: () => panelDocument(p), yaml: () => panelYaml(p) }[t]();
+    const badgeTab = (tab) => (errs && ((p.id === 'psa1' && tab === 'devices') || (p.id === 'ws' && tab === 'options')) ? badge('bad', '1', 'error') : '');
     return `<div class="page">${pageHead(esc(p.name), `<span class="mono" style="font-size:13px">${esc(p.cabinet)}</span> · ${kindLabel[p.kind]}${p.lan ? ' · LAN ' + p.lan : ''}${p.mirrorOf ? ' · mirror of ' + p.mirrorOf.toUpperCase() : ''}`,
       `<button class="btn btn--secondary" data-action="goto" data-to="#/preview/${p.id}">${icon('preview')}Preview BOM</button><button class="btn btn--primary" data-action="save" ${S.dirty ? '' : 'disabled'}>${icon('save')}Save</button>`,
       `<a href="#/panels">Panels</a>${icon('chevr')}<span>${esc(p.name)}</span>`)}
-      ${p.mirrorOf ? `<div style="margin-bottom:var(--space-4)">${banner('info', `<b>Mirrored from ${p.mirrorOf.toUpperCase()}.</b> Devices, port plans and options follow the original. Changes you make here override it for this panel only.`, '<button class="btn btn--secondary btn--sm">Open original</button>')}</div>` : ''}
+      ${p.mirrorOf ? `<div style="margin-bottom:var(--space-4)">${banner('info', `<b>Mirrored from ${p.mirrorOf.toUpperCase()}.</b> Enclosure, Devices and Port plans follow the original and are read-only here. Options (only the fields you fill in), Document and YAML are this panel's own.`, `<a class="btn btn--secondary btn--sm" href="#/panels/${p.mirrorOf}">Open ${p.mirrorOf.toUpperCase()}</a>`)}</div>` : ''}
       ${tabs('panel', panelTabs.map(([i, l]) => [i, l, badgeTab(i)]), t, 'Panel sections')}
       <div role="tabpanel" aria-labelledby="tab-panel-${t}">${body}</div></div>`;
   }
@@ -139,7 +146,7 @@
 
   function panelDevices(p) {
     const rows = p.id === 'psa1' || p.id === 'psa2' ? DB.psa1Devices.map((d) => p.id === 'psa2' ? Object.assign({}, d, { tag: d.tag.replace('PSA1', 'PSA2').replace(/-A/g, '-B').replace('GW-1', 'GW-2') }) : d) : DB.psa1Devices.slice(0, p.devices);
-    const bad = S.checks === 'errors' && p.id === 'psa2';
+    const bad = S.checks === 'errors' && p.id === 'psa1';
     return `<div class="toolbar"><div class="popwrap" style="position:relative"><button class="btn btn--primary btn--sm" data-action="pick-open" aria-haspopup="listbox">${icon('plus')}Add device</button></div>
       <span class="muted small">Order here sets the order in the BOM and the DC breaker numbers.</span><span class="sp"></span><span class="muted small">Tags are generated by the engine</span></div>
       <div id="picker-slot"></div>
@@ -169,7 +176,17 @@
       const list = DB.devices.filter((d) => (d.id + d.make + d.model).toLowerCase().includes(q)).slice(0, 8);
       $('#pk-list').innerHTML = list.map((d, i) => `<div role="option" id="pk-${i}" aria-selected="${i === 0}" data-action="pick-add" data-id="${d.id}"><span><span class="mono">${esc(d.id)}</span></span><span class="sub">${esc(d.make)} ${esc(d.model)} · ${esc(d.supply)}${d.w ? ' · ' + d.w + ' W' : ''}</span><span class="right">${App.verified(d.verified)}</span></div>`).join('') || '<div class="muted" style="padding:12px">No device matches. Check the spelling, or install a library that has it.</div>';
     };
-    $('#pk-q').addEventListener('input', draw); draw(); $('#pk-q').focus();
+    let active = 0;
+    const mark = () => $$('#pk-list [role=option]').forEach((o, i) => { o.setAttribute('aria-selected', String(i === active)); if (i === active) { $('#pk-q').setAttribute('aria-activedescendant', o.id); o.scrollIntoView({ block: 'nearest' }); } });
+    $('#pk-q').addEventListener('input', () => { active = 0; draw(); });
+    $('#pk-q').addEventListener('keydown', (e) => {
+      const n = $$('#pk-list [role=option]').length;
+      if (e.key === 'ArrowDown') { e.preventDefault(); active = Math.min(active + 1, n - 1); mark(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); active = Math.max(active - 1, 0); mark(); }
+      else if (e.key === 'Enter' && n) { e.preventDefault(); $$('#pk-list [role=option]')[active].click(); }
+      else if (e.key === 'Escape') { e.stopPropagation(); $('#picker-slot').innerHTML = ''; const b = document.querySelector('[data-action="pick-open"]'); b && b.focus(); }
+    });
+    draw(); $('#pk-q').focus();
   };
   ACTIONS['pick-add'] = (el) => { $('#picker-slot').innerHTML = ''; S.dirty = true; toast(`Added ${el.dataset.id}`); App.render(); };
 
@@ -184,12 +201,12 @@
 
   const panelOptions = (p) => {
     const bad = S.checks === 'errors' && p.id === 'ws';
-    return `<div class="form form--2">
+    return `${p.mirrorOf ? `<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">Empty fields follow ${p.mirrorOf.toUpperCase()}. Only the fields you fill in are written to ${p.id}.yaml.</p>` : ''}<div class="form form--2">
     ${field('DC spare branches per feed', input('o1', bad ? 'two' : (p.id === 'ws' || p.id === 'psa3' ? '1' : '3'), { num: true, mono: true, invalid: bad }), 'Spare 2 A MCBs on each of feed 1 and feed 2.', bad ? 'Must be a whole number of 0 or more. Enter a number, for example 1.' : '')}
     ${field('AC spare branches', input('o2', '1', { num: true, mono: true }))}
     ${field('Ventilation', select('o3', [['auto', 'Automatic (from heat calculation)'], ['forced', 'Fans'], ['natural', 'Filters']], 'auto'), 'Automatic follows the heat calculation.')}
     ${field('Change-over diodes', select('o4', [['auto', 'Automatic'], ['true', 'Yes'], ['false', 'No']], 'auto'))}
-    ${field('Main MCB override', `<div class="input-affix">${input('o5', p.id === 'psa1' || p.id === 'psa2' ? '16' : '', { num: true, mono: true, placeholder: 'Calculated' })}<span class="affix">A</span></div>`, p.id === 'psa1' || p.id === 'psa2' ? `<span style="color:var(--color-warning)">Overrides the calculated 10 A. Remove to use the sizing rule.</span>` : 'Leave empty to use the sizing rule.')}
+    ${field('Main MCB override', `<div class="input-affix">${input('o5', p.id === 'psa1' ? '16' : '', { num: true, mono: true, placeholder: p.mirrorOf ? '16 from ' + p.mirrorOf.toUpperCase() : 'Calculated' })}<span class="affix">A</span></div>`, p.id === 'psa1' ? `<span style="color:var(--color-warning)">Overrides the calculated 10 A. Remove to use the sizing rule.</span>` : p.mirrorOf ? 'Left empty: follows ' + p.mirrorOf.toUpperCase() + '.' : 'Leave empty to use the sizing rule.')}
     ${field('Auxiliary socket', `<div class="input-affix">${input('o6', p.id === 'psa2' ? '10' : '', { num: true, mono: true, placeholder: 'None' })}<span class="affix">A</span></div>`)}
     ${field('Inter-panel terminals', input('o7', p.kind === 'console' ? '12' : '40', { num: true, mono: true }))}
     <div class="field"><span class="label">Other</span><label class="switch"><input type="checkbox" checked data-dirty="1">Smoke detector</label></div>
@@ -201,8 +218,10 @@
     <div class="section" style="margin-top:var(--space-5)"><h3>Revised cells</h3><p class="lede">Cells listed here are highlighted yellow in the workbook, as the spec's revision marking asks. You can also compare with the previous issue when you build.</p>
     <button class="btn btn--secondary btn--sm">${icon('plus')}Add revised cell</button></div>`;
 
-  const panelYaml = (p) => yamlView(`panels/${p.id}.yaml`, [
+  const panelYaml = (p) => (p.mirrorOf ? yamlView(`panels/${p.id}.yaml`, [
+    `id: ${p.id}`, `mirror_of: ${p.mirrorOf}`, `cabinet_number: ${p.cabinet}`, `cabinet_name: "${p.name}"`, `tag_prefix: ${p.prefix}`, `lan: ${p.lan}`, `sheet_name: "${p.sheet}"`, '', 'options:', '  aux_socket_a: 10', '', 'document:', '  doc_no: DOC-0001-GIS01-002', '  rev: "02"', '  issue_date: 2026-10-28  # ASSUMED'], {}) : yamlView(`panels/${p.id}.yaml`, [
     `id: ${p.id}`, `cabinet_number: ${p.cabinet}`, `cabinet_name: "${p.name}"`, `tag_prefix: ${p.prefix}`, `lan: ${p.lan || 'null'}`, `sheet_name: "${p.sheet}"`, `kind: ${p.kind}`, '', 'enclosure:', '  make: Rawabi', '  model: "Fixed Frame"', '  h_mm: 2100', '  d_mm: 1000', '  w_mm: 800', '', 'devices:',
-    p.id === 'psa2' ? '  - { part_id: SEL-2730M-EXT2 }   # SEL-2730M-EXT2 is not in psa-devices 1.4.0' : '  - { part_id: FOPP-96SM, purpose: "L2-L3 uplink to CCR" }', '  - { part_id: RST2228-L2 }', '  - { part_id: RST2228-L1-24MM, qty: 6, hwio_points: 10 }', '', 'options:', p.id === 'ws' ? '  dc_spare_branches_per_feed: two' : '  dc_spare_branches_per_feed: 3'].slice(0, 22),
-    S.checks === 'errors' && p.id === 'psa2' ? { 17: 'SEL-2730M-EXT2 is not in library psa-devices 1.4.0.' } : S.checks === 'errors' && p.id === 'ws' ? { 22: 'dc_spare_branches_per_feed must be a whole number, found "two".' } : {});
+    '  - { part_id: FOPP-96SM, purpose: "L2-L3 uplink to CCR" }', '  - { part_id: RST2228-L2 }', '  - { part_id: RST2228-L1-24MM, qty: 6, hwio_points: 10 }',
+    ...(p.id === 'psa1' ? [S.checks === 'errors' ? '  - { part_id: SEL-2730M-EXT2 }   # not in psa-devices 1.4.0' : '  - { part_id: SEL-2730M-EXT }'] : []), '', 'options:', p.id === 'ws' ? '  dc_spare_branches_per_feed: two' : '  dc_spare_branches_per_feed: 3'].slice(0, 22),
+    S.checks === 'errors' && p.id === 'psa1' ? { 20: 'SEL-2730M-EXT2 is not in library psa-devices 1.4.0.' } : S.checks === 'errors' && p.id === 'ws' ? { 22: 'dc_spare_branches_per_feed must be a whole number, found "two".' } : {}));
 })();

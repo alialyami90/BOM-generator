@@ -27,8 +27,8 @@
   ACTIONS.rerun = () => { running = true; App.render(); setTimeout(() => { running = false; App.render(); toast('Checks finished'); }, 900); };
   ACTIONS['goto-problem'] = (el) => {
     const p = DB.problems[+el.dataset.i];
-    if (p.project) { S.tab.project = p.path === 'library' ? 'general' : 'general'; go('#/project'); }
-    else { S.tab.panel = p.tab; go('#/panels/' + p.panel); }
+    if (p.project) go('#/project/general');
+    else go('#/panels/' + p.panel + '/' + p.tab);
   };
 
   /* ---------- Preview ---------- */
@@ -54,20 +54,19 @@
     const rows = DB.bom[p.id];
     const counts_ = {}; rows.forEach((r) => { counts_[r.g] = (counts_[r.g] || 0) + 1; });
     const filtering = grp !== 'all' || q;
-    let out = '', sr = 0, prevG = '', skip = 0;
+    let out = '', skip = 0;
     rows.forEach((r, i) => {
       const hay = (r.tag + r.desc + r.make + r.model + r.code).toLowerCase();
-      if (filtering && ((grp !== 'all' && r.g !== grp) || (q && !hay.includes(q.toLowerCase())))) { sr += 1; return; }
-      if (!filtering && 'EFGH'.includes(r.g) && r.g !== prevG && prevG) out += `<tr class="gap" aria-hidden="true"><td colspan="${showHwio ? 9 : 8}"></td></tr>`;
-      prevG = r.g; sr += 1;
+      if (filtering && ((grp !== 'all' && r.g !== grp) || (q && !hay.includes(q.toLowerCase())))) { return; }
+      if (!filtering && r.gapBefore) out += `<tr class="gap" aria-hidden="true"><td colspan="${showHwio ? 9 : 8}"></td></tr>`;
       let tagCell;
       if (!filtering && skip > 0) { skip -= 1; tagCell = ''; }
       else if (!filtering && r.span) { skip = r.span - 1; tagCell = `<td class="merged mono" rowspan="${r.span}">${esc(r.tag)}</td>`; }
       else tagCell = `<td class="mono">${esc(r.tag)}</td>`;
       const rev = showRev && r.tag === 'PSA1-Q1.3' && p.id === 'psa1';
-      out += `<tr><td class="muted" style="width:34px">${r.g}</td><td class="num" style="width:56px">${sr}</td>${tagCell}<td>${esc(r.desc)}</td><td class="num ${rev ? 'changed' : ''}" style="width:70px">${esc(r.qty)}</td><td>${esc(r.make)}</td><td class="mono">${esc(r.model)}</td><td class="mono">${esc(r.code)}</td>${showHwio ? `<td class="num">${r.hwio}</td>` : ''}</tr>`;
+      out += `<tr><td class="muted" style="width:34px">${r.g}</td><td class="num" style="width:56px">${r.sr}</td>${tagCell}<td>${esc(r.desc)}</td><td class="num ${rev ? 'changed' : ''}" style="width:70px">${esc(r.qty)}</td><td>${esc(r.make)}</td><td class="mono">${esc(r.model)}</td><td class="mono">${esc(r.code)}</td>${showHwio ? `<td class="num">${r.hwio}</td>` : ''}</tr>`;
     });
-    const hw = rows.reduce((a, r) => a + (+r.hwio || 0), 0);
+    const hw = DB.hwioTotal[p.id];
     return `<div class="toolbar">
       <label class="sr-only" for="bom-grp">Show group</label>
       <select class="select" id="bom-grp" data-action="grp" style="width:230px">${['all', ...Object.keys(DB.groupNames)].map((g) => `<option value="${g}" ${grp === g ? 'selected' : ''}>${g === 'all' ? 'All groups' : `${g}  ${DB.groupNames[g]} (${counts_[g] || 0})`}</option>`).join('')}</select>
@@ -84,23 +83,18 @@
   ACTIONS.rev = (el) => { showRev = el.checked; App.render(); };
   document.addEventListener('input', (e) => { if (e.target.id === 'bom-q') { q = e.target.value; const pos = e.target.selectionStart; App.render(); const n = $('#bom-q'); n.focus(); n.setSelectionRange(pos, pos); } });
 
-  const dcRows = [['L2 switch', 'Ruggedcom', 'RST-2228', 1, 77], ['L1 switch (24 MM)', 'Ruggedcom', 'RST-2228', 6, 77], ['External switch', 'SEL', 'SEL-2730M', 1, 23], ['Gateway', 'SEL', 'SEL-3555', 1, 45], ['Firewall', 'Fortinet', 'FGR-60F', 1, 24]];
-  const acRows = [['Cabinet lamp', 'Rittal', 'SZ 4100', 1, 9, 'INTERMITTENT'], ['Fan', 'Rittal', 'FAN-716', 2, 60, 'INTERMITTENT'], ['Thermostat', 'Rittal', 'TH-1', 3, 2, 'INTERMITTENT'], ['Interposing relay', 'Phoenix Contact', 'REL-IR', 1, 5, 'INTERMITTENT']];
-  const block = (title, rows, volt, type, load) => {
-    const sum = rows.reduce((a, r) => a + r[3] * r[4], 0);
-    return `<h3 style="margin:var(--space-4) 0 var(--space-2)">${title}</h3><div class="table-wrap"><table class="table"><thead><tr><th class="num">S.No</th><th>Supply</th><th>Input</th><th>Component</th><th class="num">Qty</th><th>Make</th><th>Model</th><th class="num">Unit W</th><th class="num">Total W</th><th>Load</th></tr></thead><tbody>
-      ${rows.map((r, i) => `<tr><td class="num">${i + 1}</td><td>${volt}V</td><td>${type}</td><td>${esc(r[0])}</td><td class="num">${r[3]}</td><td>${esc(r[1])}</td><td class="mono">${esc(r[2])}</td><td class="num">${r[4]}</td><td class="num">${fmt(r[3] * r[4], 0)}</td><td>${load || r[5]}</td></tr>`).join('')}
-      <tr class="band"><td colspan="8">TOTAL POWER (W), with 25% margin</td><td class="num">${fmt(sum * 1.25)}</td><td></td></tr></tbody></table></div>`;
-  };
-  const powerView = () => `<div class="metric-row" style="margin-bottom:var(--space-3)"><div><span class="muted small">125 V DC load</span><b>${fmt(2177.5)} W</b></div><div><span class="muted small">230 V AUX AC load</span><b>${fmt(1090.3)} W</b></div><div><span class="muted small">Total power</span><b>${fmt(3267.8)} W</b></div></div>
+  /* Power and heat figures are literal engine output in data.js; this code only renders them. */
+  const block = (t) => `<h3 style="margin:var(--space-4) 0 var(--space-2)">${t.title}</h3><div class="table-wrap"><table class="table"><thead><tr><th class="num">S.No</th><th>Supply</th><th>Input</th><th>Component</th><th class="num">Qty</th><th>Make</th><th>Model</th><th class="num">Unit W</th><th class="num">Total W</th><th>Load</th></tr></thead><tbody>
+      ${t.rows.map((r, i) => `<tr><td class="num">${i + 1}</td><td>${t.volt}V</td><td>${t.type}</td><td>${esc(r.name)}</td><td class="num">${r.qty}</td><td>${esc(r.make)}</td><td class="mono">${esc(r.model)}</td><td class="num">${r.unitW}</td><td class="num">${fmt(r.totalW, 0)}</td><td>${t.load}</td></tr>`).join('')}
+      <tr class="band"><td colspan="8">TOTAL POWER (W), with 25% margin</td><td class="num">${fmt(t.totalWithMargin)}</td><td></td></tr></tbody></table></div>`;
+  const powerView = () => `<div class="metric-row" style="margin-bottom:var(--space-3)"><div><span class="muted small">125 V DC load</span><b>${fmt(DB.power.summary.dcW)} W</b></div><div><span class="muted small">230 V AUX AC load</span><b>${fmt(DB.power.summary.acW)} W</b></div><div><span class="muted small">Total power</span><b>${fmt(DB.power.summary.totalW)} W</b></div></div>
     <p class="muted small">Summary: the example project's totals. Blocks below: sample rows for Cabinet 1 to show the layout. ${illus()}</p>
-    ${block('Power Consumption for Cabinet-1: DC load', dcRows, 125, 'VDC', 'CONTINUOUS')}${block('Cabinet-1: AUX AC load', acRows, 230, 'VAC')}`;
+    ${block(DB.power.dc)}${block(DB.power.ac)}`;
   const heatDissView = () => {
-    const rows = dcRows.map((r) => [...r, 'dc']).concat(acRows.map((r) => [r[0], r[1], r[2], r[3], r[4], 'ac']));
-    const w = rows.reduce((a, r) => a + r[3] * r[4], 0);
-    return `<p class="muted small" style="margin-bottom:var(--space-2)">Heat is the device power with no margin. Unit heat = W × 3.41 BTU/h. ${illus()}</p><h3 style="margin-bottom:var(--space-2)">Cabinet-1</h3><div class="table-wrap"><table class="table"><thead><tr><th class="num">S.No</th><th>Component</th><th class="num">Qty</th><th class="num">Unit W</th><th class="num">Unit BTU/h</th><th class="num">Total BTU/h</th><th class="num">Total W</th></tr></thead><tbody>
-      ${rows.map((r, i) => `<tr><td class="num">${i + 1}</td><td>${esc(r[0])}</td><td class="num">${r[3]}</td><td class="num">${r[4]}</td><td class="num">${fmt(r[4] * 3.41)}</td><td class="num">${fmt(r[3] * r[4] * 3.41)}</td><td class="num">${fmt(r[3] * r[4], 0)}</td></tr>`).join('')}
-      <tr class="band"><td colspan="5">TOTAL</td><td class="num">${fmt(w * 3.41)}</td><td class="num">${fmt(w, 0)}</td></tr></tbody></table></div>`;
+    const h = DB.heat;
+    return `<p class="muted small" style="margin-bottom:var(--space-2)">Heat is the device power with no margin. ${illus()}</p><h3 style="margin-bottom:var(--space-2)">${esc(h.cabinet)}</h3><div class="table-wrap"><table class="table"><thead><tr><th class="num">S.No</th><th>Component</th><th class="num">Qty</th><th class="num">Unit W</th><th class="num">Unit BTU/h</th><th class="num">Total BTU/h</th><th class="num">Total W</th></tr></thead><tbody>
+      ${h.rows.map((r, i) => `<tr><td class="num">${i + 1}</td><td>${esc(r.name)}</td><td class="num">${r.qty}</td><td class="num">${r.unitW}</td><td class="num">${fmt(r.unitBtu)}</td><td class="num">${fmt(r.totalBtu)}</td><td class="num">${fmt(r.totalW, 0)}</td></tr>`).join('')}
+      <tr class="band"><td colspan="5">TOTAL</td><td class="num">${fmt(h.totalBtu)}</td><td class="num">${fmt(h.totalW, 0)}</td></tr></tbody></table></div>`;
   };
   const heatCalcView = () => `<h3 style="margin-bottom:var(--space-2)">Forced ventilation: PSA cabinets</h3>
     <div class="table-wrap" style="max-width:860px"><table class="table table--comfort"><thead><tr><th>Cabinet</th><th class="num">Required airflow (m³/h)</th><th class="num">Fan airflow (m³/h)</th><th>Result</th></tr></thead><tbody>
@@ -112,7 +106,7 @@
     <p class="muted small" style="margin-top:var(--space-3)">Values are the spec's example results.</p>`;
 
   /* ---------- Build ---------- */
-  const fileName = () => `${P.docNo}_PSA_BOM_Rev${P.rev}.xlsx`;
+  const fileName = () => P.output.fileName; /* resolved from the pattern by the engine */
   SCREENS.build = () => {
     const c = counts();
     const blocked = S.build === 'ready' && c.errors > 0;

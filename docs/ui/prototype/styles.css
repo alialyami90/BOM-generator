@@ -49,7 +49,7 @@ svg.i--lg { width: 20px; height: 20px; }
 .bar-btn:hover { background: color-mix(in srgb, var(--color-on-bar) 12%, transparent); }
 .bar-btn--icon { width: 32px; padding: 0; justify-content: center; }
 .dot { width: 8px; height: 8px; border-radius: var(--radius-full); background: currentColor; display: inline-block; flex: none; }
-.dot--ok { color: #5FD08F; } .dot--warn { color: #F2B84B; } .dot--bad { color: #FF7A8A; } .dot--off { color: var(--color-text-muted); }
+.dot--ok { color: var(--color-bar-ok); } .dot--warn { color: var(--color-bar-warn); } .dot--bad { color: var(--color-bar-bad); } .dot--off { color: var(--color-text-muted); }
 
 .shell { grid-row: 2; display: grid; grid-template-columns: var(--size-nav-width) minmax(0, 1fr); min-height: 0; }
 .nav { background: var(--color-surface); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; padding: var(--space-3) var(--space-2); gap: 2px; overflow-y: auto; }
@@ -205,7 +205,7 @@ table.table { width: 100%; border-collapse: separate; border-spacing: 0; font-si
 .table tr.gap td { height: 10px; padding: 0; background: var(--color-ground); border-bottom: 1px solid var(--color-border); }
 .table tr.gap:hover td { background: var(--color-ground); }
 .table td.merged { vertical-align: top; padding-top: 5px; border-right: 1px solid var(--color-border); }
-.table td.changed { background: var(--color-highlight-yellow) !important; color: #14263A; }
+.table td.changed { background: var(--color-highlight-yellow) !important; color: var(--color-on-highlight); }
 .table td.wrap { white-space: normal; height: auto; padding-top: 5px; padding-bottom: 5px; }
 .table .ctl { height: var(--size-control-height-compact); font-size: 12.5px; padding: 0 8px; }
 .table .select.ctl { padding-right: 24px; }
@@ -296,3 +296,7 @@ table.table { width: 100%; border-collapse: separate; border-spacing: 0; font-si
 
 .grip { color: var(--color-text); opacity: .7; cursor: grab; width: 28px; }
 .table td.nowrap { white-space: nowrap; }
+
+fieldset.readonly { border: 0; margin: 0; padding: 0; min-width: 0; }
+fieldset.readonly :is(.input, .select, .textarea) { background: var(--color-surface-sunken); color: var(--color-text); -webkit-text-fill-color: var(--color-text); border-color: var(--color-border); }
+fieldset.readonly .btn, fieldset.readonly .grip { opacity: .5; cursor: default; }

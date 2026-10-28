@@ -14,7 +14,7 @@
       { key: 'heat_dissipation', label: 'Heat Dissipation', docNo: 'DOC-0001-GIS01-003', rev: '00', issue: '2026-10-28', scope: '861-GIS01-PSA-001/002' },
       { key: 'heat_calculations', label: 'Heat Calculations', docNo: 'DOC-0001-GIS01-003', rev: '00', issue: '2026-10-28', scope: '861-GIS01-PSA-001/002' }
     ],
-    output: { pattern: '{doc_no}_PSA_BOM_Rev{rev}.xlsx', sheets: ['Power Consumption', 'Heat Dissipation', 'Heat Calculations'] },
+    output: { pattern: '{doc_no}_PSA_BOM_Rev{rev}.xlsx', fileName: 'DOC-0001-GIS01_PSA_BOM_Rev02.xlsx', sheets: ['Power Consumption', 'Heat Dissipation', 'Heat Calculations'] },
     constants: [
       { key: 'dc_voltage_v', label: 'DC supply voltage', value: '125', def: '125', unit: 'V' },
       { key: 'ac_voltage_v', label: 'AC supply voltage', value: '230', def: '230', unit: 'V' },
@@ -37,8 +37,8 @@
   };
 
   const panels = [
-    { id: 'psa1', sheet: '1', cabinet: '861-GIS01-PSA-0001', name: 'PSA Cabinet - 001', prefix: 'PSA1', kind: 'network', lan: 'A', mirrorOf: '', devices: 6, status: 'ok' },
-    { id: 'psa2', sheet: '2', cabinet: '861-GIS01-PSA-0002', name: 'PSA Cabinet - 002', prefix: 'PSA2', kind: 'network', lan: 'B', mirrorOf: 'psa1', devices: 6, status: 'bad' },
+    { id: 'psa1', sheet: '1', cabinet: '861-GIS01-PSA-0001', name: 'PSA Cabinet - 001', prefix: 'PSA1', kind: 'network', lan: 'A', mirrorOf: '', devices: 6, status: 'bad' },
+    { id: 'psa2', sheet: '2', cabinet: '861-GIS01-PSA-0002', name: 'PSA Cabinet - 002', prefix: 'PSA2', kind: 'network', lan: 'B', mirrorOf: 'psa1', devices: 6, status: 'ok' },
     { id: 'psa3', sheet: '3', cabinet: '861-GIS01-PSA-0003', name: 'PSA Cabinet - 003', prefix: 'PSA3', kind: 'control', lan: '', mirrorOf: '', devices: 3, status: 'ok' },
     { id: 'ws', sheet: '4', cabinet: '861-GIS01-PSA-0010', name: 'WS Console', prefix: 'WS', kind: 'console', lan: '', mirrorOf: '', devices: 3, status: 'bad' }
   ];
@@ -146,10 +146,9 @@
   };
 
   const problems = [
-    { sev: 'error', file: 'panels/psa2.yaml', line: 17, where: 'PSA Cabinet - 002 › Devices › row 4', path: 'devices[3].part_id', msg: 'SEL-2730M-EXT2 is not in library psa-devices 1.4.0.', fix: 'Did you mean SEL-2730M-EXT? Pick the device from the list or import a library that includes it.', panel: 'psa2', tab: 'devices' },
+    { sev: 'error', file: 'panels/psa1.yaml', line: 20, where: 'PSA Cabinet - 001 › Devices › row 4', path: 'devices[3].part_id', msg: 'SEL-2730M-EXT2 is not in library psa-devices 1.4.0.', fix: 'Did you mean SEL-2730M-EXT? Pick the device from the list or import a library that includes it. PSA Cabinet - 002 mirrors this panel and follows the fix.', panel: 'psa1', tab: 'devices' },
     { sev: 'error', file: 'panels/ws.yaml', line: 22, where: 'Workstation Cabinet › Options', path: 'options.dc_spare_branches_per_feed', msg: 'Must be a whole number of 0 or more; found "two".', fix: 'Enter a number, for example 1.', panel: 'ws', tab: 'options' },
     { sev: 'warning', file: 'panels/psa1.yaml', line: 48, where: 'PSA Cabinet - 001 › Options', path: 'options.main_mcb_override_a', msg: 'Main MCB is fixed at 16 A. The sizing rule gives 10 A for this load.', fix: 'This is the documented exception for the example (plan Q3). Remove the override once the rule is confirmed.', panel: 'psa1', tab: 'options' },
-    { sev: 'warning', file: 'panels/psa2.yaml', line: 31, where: 'PSA Cabinet - 002 › Options', path: 'options.main_mcb_override_a', msg: 'Main MCB is fixed at 16 A. The sizing rule gives 10 A for this load.', fix: 'Mirrored from psa1. Change it on psa1 or override here.', panel: 'psa2', tab: 'options' },
     { sev: 'warning', file: 'project.yaml', line: 6, where: 'Project › General', path: 'library', msg: 'This project was built with psa-devices 1.3.2; 1.4.0 is active. 2 parts used here changed.', fix: 'Rebuild to use 1.4.0, or make 1.3.2 active under Library → Installed versions.', project: true },
     { sev: 'warning', file: 'project.yaml', line: 9, where: 'Project › General', path: 'project.logo', msg: 'No logo is set, so the workbook header will have no picture.', fix: 'Choose a PNG under Project → General.', project: true },
     { sev: 'warning', file: 'panels/psa3.yaml', line: 12, where: 'PSA Cabinet - 003 › Enclosure', path: 'enclosure.d_mm', msg: 'Depth is an assumed value (marked # ASSUMED).', fix: 'Confirm the depth from the enclosure datasheet.', panel: 'psa3', tab: 'enclosure' }
@@ -165,7 +164,7 @@
   const mcb = (a) => ({ make: 'Schneider', model: 'Acti9 2P', code: 'A9F742' + String(a).padStart(2, '0') });
   function bomPsa(n, lan) {
     const P = 'PSA' + n, L = lan, rows = [];
-    const add = (g, o) => rows.push(Object.assign({ g, tag: '', desc: '', qty: 1, make: '', model: '', code: '', hwio: '', span: 0 }, o));
+    const add = (g, o) => rows.push(Object.assign({ g, tag: '', desc: '', qty: 1, make: '', model: '', code: '', hwio: '', span: 0, sr: rows.length + 1, gapBefore: 'EFGH'.includes(g) && rows.length > 0 && rows[rows.length - 1].g !== g }, o));
     add('A', { tag: 'PANEL', desc: 'Fixed frame, H2100 x D1000 x W800, top cable entry', make: 'Rawabi', model: 'Fixed Frame', code: 'Fixed Frame' });
     add('B', { tag: `${P}-FOPP-CCR-${L}01`, desc: 'FO patch panel 96 core SM (L2-L3 uplink to CCR)', make: 'Corning', model: 'FOPP-96SM', code: 'FOPP-96SM', span: 4 });
     add('B', { desc: 'Cable spool', make: 'Corning', model: 'SPOOL-1', code: 'SPOOL-1' });
@@ -208,7 +207,7 @@
     return rows;
   }
   function bomWs() {
-    const rows = [], add = (g, o) => rows.push(Object.assign({ g, tag: '', desc: '', qty: 1, make: '', model: '', code: '', hwio: '', span: 0 }, o));
+    const rows = [], add = (g, o) => rows.push(Object.assign({ g, tag: '', desc: '', qty: 1, make: '', model: '', code: '', hwio: '', span: 0, sr: rows.length + 1, gapBefore: 'EFGH'.includes(g) && rows.length > 0 && rows[rows.length - 1].g !== g }, o));
     add('A', { tag: 'PANEL', desc: 'Console, H1600 x D636 x W800', make: 'Rittal', model: 'Console', code: 'Console' });
     add('B', { tag: 'WS-SRV/OAS-1', desc: 'Server / operator workstation', make: 'HP', model: 'Z2 Workstation', code: 'Z2-WS' });
     add('B', { tag: 'WS-MONITOR-1', desc: '24" monitor', make: 'Dell', model: 'P2422H', code: 'P2422H' });
@@ -227,7 +226,7 @@
     return rows;
   }
   function bomControl() {
-    const rows = [], add = (g, o) => rows.push(Object.assign({ g, tag: '', desc: '', qty: 1, make: '', model: '', code: '', hwio: '', span: 0 }, o));
+    const rows = [], add = (g, o) => rows.push(Object.assign({ g, tag: '', desc: '', qty: 1, make: '', model: '', code: '', hwio: '', span: 0, sr: rows.length + 1, gapBefore: 'EFGH'.includes(g) && rows.length > 0 && rows[rows.length - 1].g !== g }, o));
     add('A', { tag: 'PANEL', desc: 'Fixed frame, H2100 x D1000 x W800, top cable entry', make: 'Rawabi', model: 'Fixed Frame', code: 'Fixed Frame' });
     add('B', { tag: 'PSA3-GPS-1', desc: 'GPS satellite-synchronised clock', make: 'SEL', model: 'SEL-2488', code: '2488-A', hwio: 1 });
     add('B', { tag: 'PSA3-RTAC-1', desc: 'Data concentrator', make: 'SEL', model: 'SEL-3555', code: '3555-RTAC-A' });
@@ -242,10 +241,38 @@
     add('H', { tag: 'INSTRUMENT-GROUND', desc: 'Instrument-ground busbar' });
     return rows;
   }
+
+  /* Illustrative engine output for the Power and Heat sheets (Cabinet 1 sample).
+     Every figure is a literal value. In M10 the engine supplies them; the UI only renders. */
+  const power = {
+    dc: { title: 'Power Consumption for Cabinet-1: DC load', volt: 125, type: 'VDC', load: 'CONTINUOUS', totalWithMargin: 788.75, rows: [
+      { name: 'L2 switch', make: 'Ruggedcom', model: 'RST-2228', qty: 1, unitW: 77, totalW: 77, unitBtu: 262.57, totalBtu: 262.57 },
+      { name: 'L1 switch (24 MM)', make: 'Ruggedcom', model: 'RST-2228', qty: 6, unitW: 77, totalW: 462, unitBtu: 262.57, totalBtu: 1575.42 },
+      { name: 'External switch', make: 'SEL', model: 'SEL-2730M', qty: 1, unitW: 23, totalW: 23, unitBtu: 78.43, totalBtu: 78.43 },
+      { name: 'Gateway', make: 'SEL', model: 'SEL-3555', qty: 1, unitW: 45, totalW: 45, unitBtu: 153.45, totalBtu: 153.45 },
+      { name: 'Firewall', make: 'Fortinet', model: 'FGR-60F', qty: 1, unitW: 24, totalW: 24, unitBtu: 81.84, totalBtu: 81.84 }] },
+    ac: { title: 'Cabinet-1: AUX AC load', volt: 230, type: 'VAC', load: 'INTERMITTENT', totalWithMargin: 175.0, rows: [
+      { name: 'Cabinet lamp', make: 'Rittal', model: 'SZ 4100', qty: 1, unitW: 9, totalW: 9, unitBtu: 30.69, totalBtu: 30.69 },
+      { name: 'Fan', make: 'Rittal', model: 'FAN-716', qty: 2, unitW: 60, totalW: 120, unitBtu: 204.6, totalBtu: 409.2 },
+      { name: 'Thermostat', make: 'Rittal', model: 'TH-1', qty: 3, unitW: 2, totalW: 6, unitBtu: 6.82, totalBtu: 20.46 },
+      { name: 'Interposing relay', make: 'Phoenix Contact', model: 'REL-IR', qty: 1, unitW: 5, totalW: 5, unitBtu: 17.05, totalBtu: 17.05 }] },
+    summary: { dcW: 2177.5, acW: 1090.3, totalW: 3267.8 }
+  };
+  const heat = { cabinet: 'Cabinet-1', totalW: 771, totalBtu: 2629.11, rows: [
+      { name: 'L2 switch', make: 'Ruggedcom', model: 'RST-2228', qty: 1, unitW: 77, totalW: 77, unitBtu: 262.57, totalBtu: 262.57 },
+      { name: 'L1 switch (24 MM)', make: 'Ruggedcom', model: 'RST-2228', qty: 6, unitW: 77, totalW: 462, unitBtu: 262.57, totalBtu: 1575.42 },
+      { name: 'External switch', make: 'SEL', model: 'SEL-2730M', qty: 1, unitW: 23, totalW: 23, unitBtu: 78.43, totalBtu: 78.43 },
+      { name: 'Gateway', make: 'SEL', model: 'SEL-3555', qty: 1, unitW: 45, totalW: 45, unitBtu: 153.45, totalBtu: 153.45 },
+      { name: 'Firewall', make: 'Fortinet', model: 'FGR-60F', qty: 1, unitW: 24, totalW: 24, unitBtu: 81.84, totalBtu: 81.84 },
+      { name: 'Cabinet lamp', make: 'Rittal', model: 'SZ 4100', qty: 1, unitW: 9, totalW: 9, unitBtu: 30.69, totalBtu: 30.69 },
+      { name: 'Fan', make: 'Rittal', model: 'FAN-716', qty: 2, unitW: 60, totalW: 120, unitBtu: 204.6, totalBtu: 409.2 },
+      { name: 'Thermostat', make: 'Rittal', model: 'TH-1', qty: 3, unitW: 2, totalW: 6, unitBtu: 6.82, totalBtu: 20.46 },
+      { name: 'Interposing relay', make: 'Phoenix Contact', model: 'REL-IR', qty: 1, unitW: 5, totalW: 5, unitBtu: 17.05, totalBtu: 17.05 }] };
+  const hwioTotal = { psa1: 25, psa2: 25, psa3: 1, ws: 1 };
   const bom = { psa1: bomPsa(1, 'A'), psa2: bomPsa(2, 'B'), psa3: bomControl(), ws: bomWs() };
   const groupNames = { A: 'Enclosure', B: 'Main equipment', C: 'Network and IO accessories', D: 'Cabinet housekeeping', E: 'AC distribution', F: 'DC distribution', G: 'Terminal blocks', H: 'Grounding' };
 
-  window.DB = { project, panels, psa1Devices, library, devices, importScenarios, problems, engineChecks, bom, groupNames,
+  window.DB = { project, panels, psa1Devices, library, devices, importScenarios, problems, engineChecks, bom, hwioTotal, power, heat, groupNames,
     recent: [
       { name: 'GIS Substation SCADA Project (example)', path: 'D:\\Projects\\gis-substation', doc: 'DOC-0001-GIS01', panels: 4, lib: 'psa-devices 1.3.2', opened: 'Today 10:02', state: 'bad', stateText: '2 errors' },
       { name: 'Substation B PSA upgrade', path: 'D:\\Projects\\substation-b', doc: 'DOC-0007-PSA-BOM', panels: 3, lib: 'psa-devices 1.4.0', opened: 'Yesterday', state: 'ok', stateText: 'Ready' },

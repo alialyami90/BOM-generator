@@ -43,8 +43,12 @@ previous version stays installed. Projects built with the previous version
 show a warning in Checks until rebuilt.
 
 **4. Mirror a panel.** Panels → Mirror a panel… → pick the original, enter the
-new cabinet number and LAN → the new panel opens with a banner that says it
-follows the original.
+panel id, cabinet number, cabinet name, sheet name, tag prefix and LAN → the new
+panel opens with a banner that says it follows the original. A mirror is a small
+file (`mirror_of`, identity fields, its own `options` and `document`). Its
+Enclosure, Devices and Port plans tabs show the original's content read-only with
+an "Open PSA1" button. Options (only the filled fields are written), Document and
+YAML are editable. An error in the original's devices is reported on the original.
 
 **5. Edit as YAML.** Any record with a YAML tab (Project, Panel) offers the
 file's source. Errors show on the line. "Apply to form" is available only when
@@ -86,7 +90,7 @@ the YAML is valid.
 
 ### Panel editor
 - **Header:** breadcrumb, cabinet name, cabinet number · kind · LAN · mirror,
-  "Preview BOM" and Save. A mirrored panel shows an info banner above the tabs.
+  "Preview BOM" and Save. A mirrored panel shows an info banner above the tabs and read-only Enclosure, Devices and Port plans.
 - **Enclosure:** make, model, ordering code, H × D × W with unit suffixes, base
   frame height, cable entry.
 - **Devices:** the main table. Columns: reorder handle, device (id and model),
@@ -208,6 +212,21 @@ If any of these is missing, or shaped differently, the owning agent decides
 whether the engine or the design changes. The UI does not work around it by
 calculating rules itself.
 
+### Open items found against the other work (to resolve, not resolved here)
+
+Recorded from A1's review of this PR, checked against the code on `main` and the
+open PRs at the time.
+
+| Area | Mismatch | Design assumption to revisit |
+| --- | --- | --- |
+| Library packages (A5) | `preview_import` raises `LibraryPackageError(str)` for downgrade, same version, schema, minimum app version and checksum. There is no signature concept. | The Import screen assumes structured refusals and a per-check verification list. Needs typed refusals or a result object that lists each check. |
+| Library packages (A5) | "Projects built with it" has no data source. `InstalledLibrary.problem` has no UI state. | The Versions table shows a project count; a library with a problem needs a state and wording. |
+| Device records (A3) | Data-quality level is `confirmed`, not `verified`. A tier's `verified` is a boolean. Alternatives are `make` plus `tiers{low,mid,high}` with `ordering_code`, `url`, `notes`. Datasheet `ratings`, `ordering_code_decoded` and `product_url` exist. `make` may be absent. | The prototype uses `confirmed`/`partial`/`unverified` per tier row and shows no URL, notes or ratings. Decide whether to show them. |
+| Device records and library | Nobody owns the loader that joins device-database records to the library `part_id`s inside a `.bomlib`. | M10 dependency. The Library and the picker need it. |
+| Project model (A2) | `Project.library` is a path with no recorded name or version yet. | The "Built with" line and the Older-than-active badge need a recorded name and version. |
+| Panel model (A2) | Enclosure `base_frame` is `{h,d,w}`. `DeviceInstance.tag` and `lan` overrides, and `PortPlan.serial_ports`, are not in the Devices table. Constants are named `air_constant_m3k_per_wh` and `steel_coefficient_w_per_m2c`. | The prototype's field names are illustrative. The forms are generated from the JSON Schema, so labels come from the schema. |
+| Labels and help | The shape of the label and help override file needs a short section in the A2 schema ADR. | Forms need labels and help text beyond what the schema carries. |
+
 
 ## Decisions from the critique pass
 
@@ -223,5 +242,9 @@ calculating rules itself.
 - Devices table: the drag handle is full-contrast. Keyboard reorder is
   Alt+Up/Alt+Down on the focused row. Removing a row marks the project unsaved
   and offers Undo (Ctrl+Z) until the next save. The prototype only hides the row.
+- Mirrored panels: Enclosure, Devices and Port plans are read-only and follow the
+  original, matching A2's `PanelMirror`. The sample error moved to the original.
+- Preview, Power and Heat show figures the engine supplies. The prototype holds
+  them as literal values in `data.js`; no rule is computed in the UI.
 - Still open for Ali: a read-only reviewer mode (hides Save, Add device and
   Remove for non-engineers). Not designed yet; it is a likely M10 follow-up.

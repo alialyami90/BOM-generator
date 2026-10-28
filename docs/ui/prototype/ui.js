@@ -21,7 +21,7 @@
   };
   const ACTIONS = {};
   const SCREENS = {};
-  const counts = () => ({ errors: S.checks === 'errors' ? 2 : 0, warnings: 5 });
+  const counts = () => ({ errors: S.checks === 'errors' ? DB.problems.filter((p) => p.sev === 'error').length : 0, warnings: DB.problems.filter((p) => p.sev === 'warning').length });
 
   /* ---------- components ---------- */
   const badge = (kind, text, ic) => `<span class="badge badge--${kind}">${ic ? icon(ic) : ''}${esc(text)}</span>`;
@@ -30,8 +30,12 @@
   const tabs = (group, items, active, label) =>
     `<div class="tabs" role="tablist" aria-label="${esc(label)}">${items.map(([id, text, extra]) =>
       `<button role="tab" id="tab-${group}-${id}" aria-selected="${id === active}" tabindex="${id === active ? 0 : -1}" data-action="tab" data-group="${group}" data-value="${id}">${esc(text)}${extra || ''}</button>`).join('')}</div>`;
-  const field = (label, control, help = '', err = '') =>
-    `<div class="field"><label>${label}</label>${control}${help ? `<span class="help">${help}</span>` : ''}${err ? `<span class="err">${icon('error')}<span>${err}</span></span>` : ''}</div>`;
+  const field = (label, control, help = '', err = '') => {
+    const id = (control.match(/\sid="([^"]+)"/) || [])[1];
+    const desc = [help && id ? `${id}-help` : '', err && id ? `${id}-err` : ''].filter(Boolean).join(' ');
+    const ctl = desc && !/aria-describedby=/.test(control) ? control.replace(/<(input|select|textarea)\b/, `<$1 aria-describedby="${desc}"`) : control;
+    return `<div class="field"><label${id ? ` for="${id}"` : ''}>${label}</label>${ctl}${help ? `<span class="help"${id ? ` id="${id}-help"` : ''}>${help}</span>` : ''}${err ? `<span class="err"${id ? ` id="${id}-err"` : ''}>${icon('error')}<span>${err}</span></span>` : ''}</div>`;
+  };
   const input = (id, value, o = {}) => `<input class="input ${o.mono ? 'input--mono' : ''} ${o.num ? 'input--num' : ''}" id="${id}" value="${esc(value)}" ${o.readonly ? 'readonly' : ''} ${o.invalid ? 'aria-invalid="true"' : ''} ${o.placeholder ? `placeholder="${esc(o.placeholder)}"` : ''} data-dirty="1">`;
   const select = (id, opts, value, o = {}) => `<select class="select ${o.cls || ''}" id="${id}" ${o.invalid ? 'aria-invalid="true"' : ''} data-dirty="1">${opts.map((x) => { const [v, t] = Array.isArray(x) ? x : [x, x]; return `<option value="${esc(v)}" ${v === value ? 'selected' : ''}>${esc(t)}</option>`; }).join('')}</select>`;
   const pageHead = (title, lede = '', actions = '', crumbs = '') => `<div class="page-head"><div>${crumbs ? `<div class="crumbs">${crumbs}</div>` : ''}<h1>${title}</h1>${lede ? `<p class="lede">${lede}</p>` : ''}</div>${actions ? `<div class="actions">${actions}</div>` : ''}</div>`;
@@ -118,7 +122,7 @@
     return `<div class="proto-panel" id="proto-panel">
       <h4>Prototype controls (not part of the app)</h4>
       ${sel('project', 'Project', [['loaded', 'Project open'], ['empty', 'First run: nothing installed']], S.project)}
-      ${sel('checks', 'Validation', [['errors', '2 errors, 5 warnings'], ['clean', 'No errors, 5 warnings']], S.checks)}
+      ${sel('checks', 'Validation', [['errors', '2 errors, 4 warnings'], ['clean', 'No errors, 4 warnings']], S.checks)}
       ${sel('importScenario', 'Library package', Object.entries(DB.importScenarios).map(([k, v]) => [k, v.label]), S.importScenario)}
       ${sel('build', 'Build result', [['ready', 'Ready'], ['building', 'Building'], ['success', 'Success'], ['locked', 'Failed: file open in Excel']], S.build)}
       ${sel('density', 'Table density', [['default', 'Default (28 px rows)'], ['comfort', 'Comfortable (36 px rows)']], S.density)}
@@ -155,7 +159,7 @@
     }
   });
 
-  ACTIONS.tab = (el) => { S.tab[el.dataset.group] = el.dataset.value; const keep = $('#main').scrollTop; renderMain(); $('#main').scrollTop = keep; const nt = document.getElementById(el.id); nt && nt.focus(); };
+  ACTIONS.tab = (el) => { S.tab[el.dataset.group] = el.dataset.value; if (el.dataset.group === 'project') history.replaceState(null, '', '#/project/' + el.dataset.value); if (el.dataset.group === 'panel') history.replaceState(null, '', '#/panels/' + route().b + '/' + el.dataset.value); const keep = $('#main').scrollTop; renderMain(); $('#main').scrollTop = keep; const nt = document.getElementById(el.id); nt && nt.focus(); };
   ACTIONS.goto = (el) => go(el.dataset.to);
   ACTIONS.theme = () => { S.theme = { light: 'dark', dark: 'system', system: 'light' }[S.theme]; render(); toast(`Theme: ${S.theme}`, 'info'); };
   ACTIONS.help = () => dialog({ title: 'Help', body: '<p>Prototype only. In the app this opens the user guide.</p>', actions: '<button class="btn btn--primary" data-action="close">Close</button>' });
