@@ -13,18 +13,29 @@ Builds the per-user Windows installer (plan M11, ADR 0007, ADR 0009).
 
 ## Release
 
-Bump `__version__` in `src/bomgen/__init__.py` and `version` in
-`pyproject.toml`, merge, then push a matching tag:
+A release is one ordinary PR; nobody pushes a tag.
 
-```bash
-git tag v0.1.1 && git push origin v0.1.1
-```
+1. When A1 or Ali say a release is due, the agent opens a PR that sets the new
+   version in `__version__` (`src/bomgen/__init__.py`), `version` in
+   `pyproject.toml` and `tests/test_package.py`, and moves the `[Unreleased]`
+   entries in `CHANGELOG.md` under `## [<version>] - <date>`.
+2. A1 reviews and merges it.
+3. On that push to main, `.github/workflows/release.yml` sees that
+   `v<version>` doesn't exist yet. It builds and smoke-tests the installer
+   (install, window start, first-start library, build of the example,
+   uninstall), then creates the tag on the tested commit and the GitHub Release
+   with `bomgen-setup-<version>.exe` and `default.bomlib`.
 
-Don't cut a release tag until M10 is finished and A1 or Ali say so: the window
-works but the screens are still being wired to the engine. `.github/workflows/release.yml`
-builds, smoke-tests the install, uninstall and window start,
-and publishes the GitHub Release. Run it by hand (Actions → Release → Run
-workflow) to get the installer as an artifact without releasing.
+The run refuses to release, and creates nothing, when `CHANGELOG.md` has no
+section for the version or `pyproject.toml` and `__version__` disagree; a
+failed build creates nothing either. Pushes to main that keep the version end
+after the first job. A version with a letter (`0.2.0rc1`) is published as a
+pre-release.
+
+Pushing a `v<version>` tag by hand, or publishing a release in the GitHub UI,
+still works: the same run builds that commit and attaches the installer. Run
+the workflow by hand (Actions → Release → Run workflow) to get the installer as
+an artifact without releasing.
 
 ## Local build (Windows, Python 3.12, Inno Setup 6.4+)
 

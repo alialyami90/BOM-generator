@@ -789,9 +789,10 @@ edit the YAML files instead.
   installer: per-user install (no admin rights), Start-menu shortcut,
   uninstaller, `.bomlib` file association so double-clicking an update
   package imports it, and a bundled default library.
-- GitHub Actions job on `windows-latest` builds the installer on version tags
-  and attaches `bomgen-setup-<version>.exe` and the default `.bomlib` to a
-  GitHub Release, so sharing is one download link.
+- GitHub Actions job on `windows-latest` builds the installer when a version
+  bump reaches main (or a version tag is pushed), tags the tested commit and
+  attaches `bomgen-setup-<version>.exe` and the default `.bomlib` to a GitHub
+  Release, so sharing is one download link.
 - Code-sign the installer if a certificate is available (Q19), otherwise
   document the SmartScreen "More info → Run anyway" step.
 - Tests: smoke test that the frozen app starts and builds the example
@@ -808,6 +809,9 @@ from the frozen and the installed CLI, asserting the printed workbook exists. Th
 default library is bundled: the workflow packs `out/default.bomlib`, the installer
 ships it, and the first start imports it into an empty library store (smoke-tested,
 including that a reinstall leaves the store unchanged).
+Releases start from main (ADR 0009, amended): merging a PR that bumps the version
+and adds its `CHANGELOG.md` section builds, tags and publishes in one run, so no
+one pushes a tag; the steps are in `packaging/README.md`.
 The app icon comes with the M9 design (`packaging/icons/bomgen.ico`).
 
 ### M12–M18 — Next version (v0.2)
