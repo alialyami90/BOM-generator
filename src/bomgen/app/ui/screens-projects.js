@@ -201,10 +201,9 @@
   }
   function reviewDialog() {
     const { preview: v, restore } = PENDING, m = v.manifest;
-    const failed = v.checks.find((c) => c.status === 'failed');
     const facts = `<dl class="kv" style="grid-template-columns:130px 1fr"><dt>File</dt><dd class="mono">${esc(v.file_name)}</dd><dt>Size</dt><dd>${kb(v.package_size)}</dd>${m ? `<dt>Project</dt><dd class="mono">${esc(m.project_id)}</dd><dt>Contains</dt><dd>${count(Object.keys(m.files).length, 'file')}</dd><dt>Built with</dt><dd>${esc([m.library_name, m.library_version].filter(Boolean).join(' ') || '—')}</dd><dt>Saved</dt><dd>${esc(day(m.created))}</dd>` : ''}</dl>`;
-    const clash = !failed && v.exists ? banner('warn', restore ? '<b>Restoring replaces the project as it is now.</b> A backup of the current state is made first.' : `<b>This PC already has the project <span class="mono">${esc(v.project_id)}</span>.</b> Importing replaces it; a backup of it is made first.`) : '';
-    const primary = failed ? '' : `<button class="btn btn--primary" data-action="import-confirm">${restore ? 'Restore' : v.exists ? 'Replace my project' : 'Import'}</button>`;
+    const clash = v.can_import && v.exists ? banner('warn', restore ? '<b>Restoring replaces the project as it is now.</b> A backup of the current state is made first.' : `<b>This PC already has the project <span class="mono">${esc(v.project_id)}</span>.</b> Importing replaces it; a backup of it is made first.`) : '';
+    const primary = !v.can_import ? '' : `<button class="btn btn--primary" data-action="import-confirm">${restore ? 'Restore' : v.exists ? 'Replace my project' : 'Import'}</button>`;
     dialog({ title: restore ? 'Restore a backup' : 'Import a project file', body: `<div class="stack">${facts}
       <ul class="checklist">${App.checkList(v.checks)}</ul>
       ${v.library_note ? banner('warn', esc(v.library_note)) : ''}${clash}</div>`,

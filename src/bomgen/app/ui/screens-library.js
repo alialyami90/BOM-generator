@@ -10,10 +10,10 @@
   function loadLibrary() {
     LIB.state = 'loading';
     // Loaded independently: a damaged active version must not hide the versions that can repair it.
-    const load = (name, key) => Bridge.call(name).then((data) => { LIB[key] = data; LIB.errors[key] = null; })
+    const load = (call, key) => call.then((data) => { LIB[key] = data; LIB.errors[key] = null; })
       .catch((err) => { LIB[key] = null; LIB.errors[key] = err; });
     const projects = Bridge.call('list_projects').then((list) => { LIB.projects = list; }).catch(() => { LIB.projects = []; });  // only for the Projects column
-    return Promise.all([load('library_overview', 'overview'), load('library_versions', 'versions'), projects]).then(() => {
+    return Promise.all([load(Bridge.call('library_overview'), 'overview'), load(Bridge.call('library_versions'), 'versions'), projects]).then(() => {
       LIB.state = 'loaded';
       LIB.offline = Object.values(LIB.errors).some((e) => e && e.kind === 'no_backend');
       App.render();

@@ -6,6 +6,7 @@ words match the Checks screen (``docs/ui/screens.md``, Home).
 
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 from datetime import UTC, datetime
@@ -39,11 +40,16 @@ class RecentProjects:
         return [Path(p) for p in paths if isinstance(p, str)] if isinstance(paths, list) else []
 
     def add(self, project_file: Path) -> None:
+        """Remember a project; best effort, since opening it must not depend on this list."""
         paths = [project_file, *(p for p in self.load() if p != project_file)][:MAX_RECENT]
-        self.file.parent.mkdir(parents=True, exist_ok=True)
         partial = self.file.with_name(f".{self.file.name}.partial")
-        partial.write_text(json.dumps([str(p) for p in paths], indent=2), encoding="utf-8")
-        os.replace(partial, self.file)
+        try:
+            self.file.parent.mkdir(parents=True, exist_ok=True)
+            partial.write_text(json.dumps([str(p) for p in paths], indent=2), encoding="utf-8")
+            os.replace(partial, self.file)
+        except OSError:
+            with contextlib.suppress(OSError):
+                partial.unlink(missing_ok=True)
 
 
 def project_files(workspace: Path, recent: RecentProjects) -> list[Path]:

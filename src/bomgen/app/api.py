@@ -16,6 +16,7 @@ import functools
 import os
 import subprocess
 import sys
+import threading
 import traceback
 from collections.abc import Callable, Mapping, Sequence
 from datetime import UTC, date, datetime
@@ -81,8 +82,30 @@ def _first(chosen: object) -> str | None:
     return None
 
 
+APP_HOME_ENV = "BOMGEN_APP_HOME"
+
+
+def default_app_home(env: Mapping[str, str] = os.environ, platform: str = sys.platform) -> Path:
+    """Where the app keeps its own files: ``%LOCALAPPDATA%\\bomgen\\app`` on Windows."""
+    if override := env.get(APP_HOME_ENV, "").strip():
+        return Path(override)
+    if platform == "win32":
+        local = env.get("LOCALAPPDATA")
+        base = Path(local) if local else Path.home() / "AppData" / "Local"
+    else:
+        data = env.get("XDG_DATA_HOME")
+        base = Path(data) if data else Path.home() / ".local" / "share"
+    return base / "bomgen" / "app"
+
+
+def _spawn(args: list[str]) -> None:
+    """Start a program and reap it in the background, so no zombie is left behind."""
+    child = subprocess.Popen(args)
+    threading.Thread(target=child.wait, daemon=True).start()
+
+
 def reveal(
-    path: Path, platform: str = sys.platform, run: Callable[[list[str]], object] = subprocess.Popen
+    path: Path, platform: str = sys.platform, run: Callable[[list[str]], object] = _spawn
 ) -> None:
     """Show ``path`` in the file manager: selected in Explorer, its folder elsewhere."""
     if platform == "win32":
@@ -145,6 +168,7 @@ class Api:
         self._env = env
         self._window: FileDialogWindow | None = None
         self._reveal: Callable[[Path], object] = reveal
+        self._listed: set[Path] = set()  # files the page was given; show_in_folder opens only these
 
     def _set_window(self, window: FileDialogWindow) -> None:
         """Called by ``run_window`` once the window exists (it owns the file dialogs)."""
@@ -157,7 +181,10 @@ class Api:
         return default_workspace(self._env)
 
     def _recent(self) -> RecentProjects:
-        return RecentProjects(default_library_home(self._env).parent / "app")
+        return RecentProjects(default_app_home(self._env))
+
+    def _list(self, *paths: Path) -> None:
+        self._listed.update(Path(os.path.abspath(p)) for p in paths)
 
     def _dialog(self, dialog_type: int, kind: str, save_filename: str = "") -> str | None:
         if kind not in FILE_TYPES:
@@ -288,6 +315,7 @@ class Api:
         """The workspace's projects and the ones opened from elsewhere, newest change first."""
         store = self._library_store()
         rows = [summarize(f, store) for f in project_files(self._workspace(), self._recent())]
+        self._list(*(r["file"] for r in rows))
         return sorted(
             rows, key=lambda r: r["changed"] or datetime.min.replace(tzinfo=UTC), reverse=True
         )
@@ -299,6 +327,7 @@ class Api:
         if not file.is_file():
             raise FileNotFoundError(errno.ENOENT, "No project file here", str(file))
         page = summarize(file, self._library_store(), details=True)
+        self._list(file)
         workspace = self._workspace().resolve()
         if workspace not in file.resolve().parents:
             self._recent().add(file)
@@ -331,23 +360,29 @@ class Api:
         exported = export_project(
             file, out if out.suffix == PROJECT_SUFFIX else out.with_suffix(PROJECT_SUFFIX)
         )
+        self._list(exported.path)
         return {"path": exported.path, "size": exported.path.stat().st_size}
 
     @endpoint
     def backup_project(self, project_file: str) -> dict[str, Any]:
         """Save a backup in the project's ``Backups`` folder."""
         path = backup_project(Path(project_file))
+        self._list(path)
         return {"path": path, "size": path.stat().st_size}
 
     @endpoint
     def list_backups(self, project_file: str) -> list[Any]:
         """The project's backups, newest first."""
-        return list_backups(Path(project_file))
+        backups = list_backups(Path(project_file))
+        self._list(*(b.path for b in backups))
+        return backups
 
     @endpoint
     def show_in_folder(self, path: str) -> None:
-        """Open the file manager on a backup or a project file."""
+        """Open the file manager on a backup, an export or a project file the page was given."""
         target = Path(path)
+        if Path(os.path.abspath(target)) not in self._listed:
+            raise AppError("not_listed", "Only files the app has listed can be shown")
         if not target.exists():
             raise FileNotFoundError(errno.ENOENT, "This file is no longer there", path)
         self._reveal(target)

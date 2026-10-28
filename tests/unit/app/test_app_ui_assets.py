@@ -81,12 +81,25 @@ def test_content_security_policy_allows_nothing_from_outside_the_ui_folder() -> 
         assert all(s.startswith("'") or s == "data:" for s in sources), directive
 
 
+def bridge_calls() -> list[str]:
+    """The first argument of every ``Bridge.call(`` in the screens, as written."""
+    calls = []
+    for script in sorted(UI_DIR.glob("*.js")):
+        if script.name == "bridge.js":
+            continue
+        for match in re.finditer(r"Bridge\.call\(([^,)]*)", script.read_text(encoding="utf-8")):
+            calls.append(match.group(1))
+    return calls
+
+
 def test_every_endpoint_the_screens_call_exists() -> None:
-    called = {
-        name
-        for script in UI_DIR.glob("*.js")
-        for name in re.findall(r"Bridge\.call\('(\w+)'", script.read_text(encoding="utf-8"))
-    }
-    assert called
-    missing = sorted(n for n in called if n.startswith("_") or not callable(getattr(Api, n, None)))
+    calls = bridge_calls()
+    names = {name for call in calls for name in re.findall(r"'([^']*)'", call)}
+
+    assert calls
+    # a name held in a variable could not be checked here
+    assert [
+        c for c in calls if not re.fullmatch(r"\s*(?:\w+\s*\?\s*)?'\w+'(?:\s*:\s*'\w+')?\s*", c)
+    ] == []
+    missing = sorted(n for n in names if n.startswith("_") or not callable(getattr(Api, n, None)))
     assert missing == []
