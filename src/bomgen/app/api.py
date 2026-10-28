@@ -400,6 +400,18 @@ class Api:
             raise AppError("invalid_edit", f"The library cannot take this change: {exc}") from exc
 
     @endpoint
+    def add_library_device(
+        self, part_id: str, category: str, make: str, model: str, copy_of: str | None = None
+    ) -> dict[str, Any]:
+        """Add a new device to the pending set, blank or as a copy of another part."""
+        try:
+            return self._editor().add_device(part_id, category, make, model, copy_of)
+        except KeyError as exc:
+            raise AppError("not_found", f"There is no part {copy_of} in the library.") from exc
+        except (EditRefusedError, ValidationError) as exc:
+            raise AppError("invalid_edit", f"The library cannot take this change: {exc}") from exc
+
+    @endpoint
     def discard_library_edits(self) -> dict[str, Any]:
         """Drop every pending change; returns them so the page can undo."""
         return self._editor().discard()
