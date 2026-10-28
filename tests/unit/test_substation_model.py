@@ -193,11 +193,11 @@ def test_panel_file_cannot_be_both_generated_and_manual() -> None:
         Substation.model_validate(data)
 
 
-def test_substation_needs_a_panel_file() -> None:
+def test_a_new_substation_may_have_no_panel_files_yet() -> None:
+    # ADR 0021 (M17d): the app creates a blank substation; the build says it has no panels
     data = substation_dict()
     data["panels"], data["manual_panels"] = [], []
-    with pytest.raises(ValidationError, match="at least one file"):
-        Substation.model_validate(data)
+    assert Substation.model_validate(data).panels == []
 
 
 def test_network_defaults_are_design_values() -> None:

@@ -98,9 +98,11 @@ def test_constant_overrides_are_checked_after_the_merge() -> None:
         merge_defaults(DesignConstants(), ConstantOverrides(t_int_c=40))
 
 
-def test_project_requires_at_least_one_substation() -> None:
+def test_project_lists_substations_but_a_new_one_may_have_none() -> None:
     data = project_dict()
     data["substations"] = []
+    assert Project.model_validate(data).substations == []  # ADR 0021 (M17d)
+    del data["substations"]
     with pytest.raises(ValidationError, match="substations"):
         Project.model_validate(data)
 
