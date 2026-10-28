@@ -62,10 +62,10 @@ def test_register_keys_must_be_unique() -> None:
         Project.model_validate(data)
 
 
-@pytest.mark.parametrize("good", ["1.0.0", "12.3.40"])
+@pytest.mark.parametrize("good", ["1.0.0", "12.3.40", "1.4.0+local.1", "1.4.0+local.12"])
 def test_library_version_must_be_semver(good: str) -> None:
     assert LibrarySelection(name="lib", version=good).version == good
-    for bad in ["one", "1.0", "01.0.0"]:
+    for bad in ["one", "1.0", "01.0.0", "1.0.0+local.0", "1.0.0+local", "1.0.0+x.1"]:
         with pytest.raises(ValidationError, match="version"):
             LibrarySelection(name="lib", version=bad)
 

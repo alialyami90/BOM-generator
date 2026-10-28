@@ -33,7 +33,31 @@ def test_versions_compare_numerically() -> None:
     assert str(Version.parse("1.10.0")) == "1.10.0"
 
 
-@pytest.mark.parametrize("text", ["1.2", "v1.2.3", "1.2.3-beta", "", "1.2.x", "01.2.3"])
+def test_a_local_version_orders_after_its_base_and_before_the_next_release() -> None:
+    order = ["1.0.0", "1.0.0+local.1", "1.0.0+local.2", "1.0.0+local.10", "1.0.1"]
+
+    parsed = [Version.parse(text) for text in order]
+
+    assert parsed == sorted(parsed)
+    assert len(set(parsed)) == len(order)
+    assert [str(v) for v in parsed] == order
+
+
+def test_a_local_version_knows_its_base() -> None:
+    local = Version.parse("1.2.3+local.4")
+
+    assert local.is_local
+    assert local.local == 4
+    assert local.base == Version.parse("1.2.3")
+    assert not local.base.is_local
+    assert local.base.with_local(5) == Version.parse("1.2.3+local.5")
+
+
+BAD_VERSIONS = ["1.2", "v1.2.3", "1.2.3-beta", "", "1.2.x", "01.2.3"]
+BAD_LOCAL_VERSIONS = ["1.0.0+local.0", "1.0.0+local.01", "1.0.0+local", "1.0.0+build.1"]
+
+
+@pytest.mark.parametrize("text", [*BAD_VERSIONS, *BAD_LOCAL_VERSIONS, "1.0.0+local.1+local.2"])
 def test_version_rejects_non_semver(text: str) -> None:
     with pytest.raises(ValueError, match="version"):
         Version.parse(text)
@@ -63,6 +87,11 @@ def test_manifest_rejects_unknown_fields() -> None:
 def test_manifest_rejects_unsafe_library_name(name: str) -> None:
     with pytest.raises(ValidationError):
         Manifest.model_validate(_manifest(name=name))
+
+
+def test_manifest_accepts_a_local_version() -> None:
+    manifest = Manifest.model_validate(_manifest(version="1.0.0+local.2"))
+    assert manifest.parsed_version == Version.parse("1.0.0+local.2")
 
 
 def test_manifest_rejects_bad_version() -> None:
