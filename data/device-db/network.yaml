@@ -890,9 +890,8 @@ records:
       Confirm the exact 96F LC SM part number with Hubbell. It may be a configured or legacy code, or
       a typo for an FER/FCR enclosure plus adapter panels.
     mounting_kind: rack
-    height_u: 2
-    height_note: 'Not confirmed: FEUR96LCSM was not found; Hubbell''s FEUR48 is 1U for 48 fibres, so 96
-      fibres is taken as 2U. Check before relying on it.'
+    height_u: 1
+    height_note: 1U, confirmed by Ali on 2026-10-28 (plan Q33)
   alternatives:
   - make: Corning
     manufacturer: Corning Optical Communications
