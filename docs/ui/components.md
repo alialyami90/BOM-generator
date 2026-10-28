@@ -234,7 +234,7 @@ inside a card.
 Bottom right, navy, 3.6 s, for confirmations of a completed action ("Saved
 project.yaml", "Deleted GIS Substation 02. Backup saved."). Not used for errors or anything the user must act on. Announced
 politely in a live region. A toast for an undoable action carries an **Undo** link
-button and stays 8 s ("Moved Gateway (pair) to panels 3 and 4").
+button and stays 8 s ("Pinned Gateway (pair) to panels 3 and 4").
 
 ### Dialog
 Modal, 520 px wide, 4 px radius, scrim over the window. Used only when the task
@@ -324,8 +324,10 @@ selects. Draggable.
 | Default | `surface` fill, control border. |
 | Selected | `actionSoft` fill, cobalt border and a 2 px ring. |
 | Partner of the selection | Dashed cobalt border, `actionFaint` fill. |
-| Moved by you | Small move icon before the height; named in the accessible name. |
-| Dragging | 45% opacity. |
+| Pinned | Cobalt border and a small pin icon before the height; "pinned" in the accessible name. |
+| Dragging | 45% opacity; cursor `grabbing` (`grab` when idle). |
+| Drop target that fits | Panel border `success` and `successSoft` tint, plus a 3 px cobalt **insertion line** with a dot at the position the pointer is in. |
+| Drop target that does not fit | Panel border `danger` and `dangerSoft` tint, cursor `not-allowed`, no insertion line. |
 
 A device with a cable manager (switch, firewall, patch panel) is one block: the
 device row on top and a 17 px "Cable manager 1 U" strip under a dashed rule, inside

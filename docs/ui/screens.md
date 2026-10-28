@@ -163,13 +163,14 @@ here.
   are counted under the column and take no rack space. Common devices (GPS,
   RTAC, I/O) sit in the same panels as the A and B units; there is no common
   column.
-- **Select, move, delete:** selecting a device shows its tag and an action bar:
-  "Move pair…", "Move this unit only…", "Delete pair". A device that has no
+- **Select, move, pin, delete:** selecting a device shows its tag and an action bar:
+  "Move pair…", "Move this unit only…", **Pin here** or **Unpin**, "Delete pair". A device that has no
   partner shows "Move…" and "Delete". The partner of the selection is outlined.
-  Dragging does the same as "Move pair…"; Alt+drag moves only the unit. A pair
+  Dragging does the same as "Move pair…" and also sets the position; Alt+drag moves only the unit. A pair
   moves to panels (2n−1, 2n); a single A unit moves only to odd panels and a
-  single B unit only to even ones. Moved devices carry a small marker, and
-  "N manual changes" opens the list of overrides with Revert and Restore.
+  single B unit only to even ones. Pinned devices carry a pin icon, and
+  "N pinned · M deleted" opens the list with Unpin and Restore. Full rules, the drag states and the
+  keyboard are in [`editing.md`](editing.md) ("Panels board").
 - **Not allowed:** while dragging, a column that cannot take the move shows a
   red border; on drop, a banner says why ("Panel 1 needs 34 U, only 32 U may be
   used. Nothing was changed."). A move never silently re-flows other devices.
@@ -191,11 +192,10 @@ here.
 ### Panel editor
 - **Header:** breadcrumb, cabinet name, cabinet number · kind · side, "Preview
   BOM" and Save.
-- **Generated panel:** a banner says the layout writes it. Enclosure, Devices
-  (with an Origin column that marks moved devices), Port plans and Options show
-  the result read-only, and the YAML tab is labelled Generated. Only *Document*
-  (which register entry the sheet prints) is editable. Changes are made on
-  Network or by moving devices on the board; the banner links to both.
+- **Generated panel:** a banner says the layout writes the devices. Devices (with an Origin
+  column that marks pinned devices) is read-only; Enclosure, Port plans, Options and Document are
+  editable, with their scope stated (shared by all generated panels, or this panel only).
+  The YAML tab is labelled Generated and read-only. The banner links to Network and the board.
 - **Hand-written panel** (`manual_panels`, for example the WS console): the full
   editor, as in the first design. Devices: reorder handle, device, quantity,
   purpose, HWIO override, generated tag, remove; "Add device" opens the picker.
