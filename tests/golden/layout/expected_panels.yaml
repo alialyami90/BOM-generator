@@ -7,10 +7,13 @@
 #     floor(24 x 0.8) = 19 usable and 40 IEDs need 3 L1 switches per side.
 # R2: per side, 3 L1 links + ext-fw 1 + gw 1 + gps 1 + rtac 2 = 8 ports on an L2 with
 #     floor(20 x 0.8) = 16 usable (its 4 SFP+ slots carry the 2 L3 uplinks): 1 L2.
-# R5: U used = blocks + 1U blank plate between rack neighbours; every rack switch and
-#     the FOPP carries a 1U cable manager (Q32); the firewall is DIN rail (0U).
+# R5: U used = blocks + a 1U blank plate under each rack block that ends in an active
+#     device; every rack switch and the FOPP carries a 1U cable manager (Q32), which
+#     needs no plate below it (Ali, 2026-10-28, backlog point 8); the firewall is DIN
+#     rail (0U). Panel 1: plates under the gateway and the GPS (2); panel 2: under the
+#     gateway (1).
 # R6: A units in panel 1, B units in panel 2; GPS to panel 1 (tie), RTAC to panel 2
-#     (most free U), Axion I/O to panel 1 (9 U free against 7).
+#     (most free U), Axion I/O to panel 1 (15 U free against 13).
 
 l1_per_side: 3
 l2_per_side: 1
@@ -18,7 +21,7 @@ l2_demand_per_side: 8
 
 panels:
   - id: psa1
-    used_u: 29
+    used_u: 23  # 21 U of blocks + 2 plates
     devices:  # [part_id, qty, lan, purpose], in the equipment's group B order
       - [FOPP-96SM, 1, A, L2-L3 Interface]
       - [RST2228-L2, 1, A, null]
@@ -39,7 +42,7 @@ panels:
           - {count: 7, speed: 1G, media: MM}
           - {count: 1, speed: 100M, media: MM}
   - id: psa2
-    used_u: 25
+    used_u: 19  # 18 U of blocks + 1 plate
     devices:
       - [FOPP-96SM, 1, B, L2-L3 Interface]
       - [RST2228-L2, 1, B, null]

@@ -181,6 +181,14 @@ def test_default_calc_sheet_names() -> None:
     assert names.heat_calculations == "Heat Calculations"
 
 
+def test_loose_material_sheet_name_defaults_and_is_configurable() -> None:
+    # ADR 0020 (Q36): loose material has its own sheet, named like the calculation sheets.
+    assert SheetNames().loose_material == "Loose Material"
+    assert SheetNames(loose_material="Loose").loose_material == "Loose"
+    with pytest.raises(ValidationError):
+        SheetNames(loose_material="a/b")
+
+
 def test_sheet_names_follow_excel_rules() -> None:
     with pytest.raises(ValidationError):
         SheetNames(power_consumption="a/b")

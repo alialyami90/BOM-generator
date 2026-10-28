@@ -98,12 +98,12 @@ def test_the_board_has_the_golden_panels(app: api.Api, project: Path) -> None:
         ("psa2", 2, "B", 1),
     ]
     first = panels[0]
-    assert (first["used_u"], first["capacity_u"], first["free_u"]) == (29, 32, 3)
+    assert (first["used_u"], first["capacity_u"], first["free_u"]) == (23, 32, 9)
     assert first["cabinet_name"] == "PSA Cabinet - 001"
     devices = [u["device"] for u in first["units"]]
     assert devices[:3] == ["fopp", "l2", "l1"]
     assert devices.count("l1") == 3
-    assert first["blank_plates"] == sum(1 for u in first["units"] if u["block_u"]) - 1
+    assert first["blank_plates"] == 2  # under the gateway and the GPS (R5, backlog point 8)
     firewall = next(u for u in first["units"] if u["device"] == "ext-fw")
     assert firewall["block_u"] == 0  # DIN rail
     assert first["din_rail"] >= 1

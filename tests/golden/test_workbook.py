@@ -40,8 +40,9 @@ def formulas(path: Path) -> openpyxl.Workbook:
     return openpyxl.load_workbook(path)
 
 
-# Formula cells in the example workbook; the count changes only if the layout does.
-FORMULA_COUNT = 923
+# Formula cells in the example workbook; the count changes only if the layout does. The
+# Loose Material sheet (ADR 0020) added its own HWIO total.
+FORMULA_COUNT = 924
 
 
 def formula_cells(book: openpyxl.Workbook) -> list[tuple[str, str]]:
@@ -81,9 +82,11 @@ def row_of(sheet: Worksheet, column: str, label: str) -> int:
 
 
 def test_sheet_order(formulas: openpyxl.Workbook) -> None:
-    # Output requirements: a BOM sheet per cabinet, then the three calculation sheets.
+    # Output requirements (OUT-3) as amended by ADR 0020 (Q36): a BOM sheet per cabinet,
+    # the Loose Material sheet, then the three calculation sheets.
     assert formulas.sheetnames == [
-        "1", "2", "3", "4", "Power Consumption", "Heat Dissipation", "Heat Calculations",
+        "1", "2", "3", "4", "Loose Material",
+        "Power Consumption", "Heat Dissipation", "Heat Calculations",
     ]  # fmt: skip
 
 
@@ -92,6 +95,60 @@ def test_bom_sheet_merges(formulas: openpyxl.Workbook) -> None:
     # and model spanning the kit children that leave them empty.
     merges = {str(m) for m in formulas["1"].merged_cells.ranges}
     assert {"A1:G1", "B4:B7", "F4:F6", "G4:G6"} <= merges
+
+
+def test_loose_material_sheet(formulas: openpyxl.Workbook) -> None:
+    # ADR 0020 (Q36): the loose table leaves the WS console sheet (now A1:G45, was
+    # A1:G62) for its own sheet, which is laid out and printed like a panel BOM.
+    console, loose = formulas["4"], formulas["Loose Material"]
+    assert console.print_area == "'4'!$A$1:$G$45"
+    assert console.max_row == 45
+    assert loose.print_area == "'Loose Material'!$A$1:$G$16"
+    assert loose["A1"].value == "GIS Substation\nPSA Panels Loose Material and Auxiliary Equipment"
+    assert loose["B2"].value == "ITEM DESIGNATION"
+    assert loose["C3"].value == '55" LCD Alarm Annunciator (Touch)  - Wall Mounted'
+    assert loose.print_title_rows == "$1:$2"
+    assert loose.column_dimensions["H"].hidden
+    setup = loose.page_setup
+    assert (setup.orientation, setup.paperSize, setup.fitToHeight) == ("portrait", 9, 0)
+    fit = loose.sheet_properties.pageSetUpPr
+    assert fit is not None
+    assert fit.fitToPage
+    assert loose.print_options.horizontalCentered
+
+
+def zone(sheet: Worksheet, part: str, side: str) -> str:
+    """The text of one header/footer zone, e.g. ``zone(sheet, "oddHeader", "center")``."""
+    header_footer = getattr(sheet, part)
+    assert header_footer is not None
+    text = getattr(header_footer, side).text
+    return "" if text is None else str(text)
+
+
+def test_loose_material_header_and_footer(formulas: openpyxl.Workbook) -> None:
+    # ADR 0020: the BOM header with the sheet as its subject, under the host panel's
+    # document (the WS console's).
+    loose, console = formulas["Loose Material"], formulas["4"]
+    assert zone(loose, "oddHeader", "center").splitlines()[1:] == [
+        "Bill of Materials for Loose Material",
+        "Supplier Doc # VD-EL0009-861GISPSA-001",
+    ]
+    assert zone(loose, "oddHeader", "right") == zone(console, "oddHeader", "right") == "Rev : 02"
+    assert zone(loose, "oddFooter", "left") == "VD-EL0009-861GISPSA-001"
+    assert zone(loose, "oddFooter", "center") == "Page &P of &N"
+
+
+def test_external_equipment_reads_the_loose_material_sheet(
+    formulas: openpyxl.Workbook,
+) -> None:
+    # Power Consumption sheet, item 4: the annunciator row reads its loose-material row,
+    # now on the Loose Material sheet (was ='4'!C49).
+    sheet = formulas["Power Consumption"]
+    row = row_of(sheet, "A", "Power Consumption for External Equipment") + 5
+    assert [sheet.cell(row, col).value for col in (5, 6, 7, 8)] == [
+        "='Loose Material'!C3", "='Loose Material'!D3",
+        "='Loose Material'!E3", "='Loose Material'!F3",
+    ]  # fmt: skip
 
 
 def test_every_formula_recalculates_to_its_cached_value(

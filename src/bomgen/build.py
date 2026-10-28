@@ -55,7 +55,8 @@ def build_substation(
     marked: BuildResult = result
     revisions: RevisionReport | None = None
     if previous is not None:
-        marked, revisions = compare_with_previous(result, previous)
+        loose_sheet = target.substation.output.sheet_names.loose_material
+        marked, revisions = compare_with_previous(result, previous, loose_sheet=loose_sheet)
     workbook = build_workbook(target, marked, logo=target.logo)
     path = write_workbook(workbook, out_path)
     report = None

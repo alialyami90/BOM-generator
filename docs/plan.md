@@ -198,14 +198,14 @@ panels:                                # sheet order (OUT-3); the layout (M1c) r
 manual_panels: [panels/ws.yaml]        # never touched by the layout; after `panels`
 output:
   file_name: "{doc_no}_PSA_BOM_Rev{rev}.xlsx"   # OUT-2
-  sheet_names: { power_consumption: "Power Consumption", heat_dissipation: "Heat Dissipation",
-                 heat_calculations: "Heat Calculations" }
+  sheet_names: { loose_material: "Loose Material", power_consumption: "Power Consumption",
+                 heat_dissipation: "Heat Dissipation", heat_calculations: "Heat Calculations" }
 constants: { t_max_c: 40 }             # optional overrides of the project defaults
 spares: { port_fraction: 0.25 }        # optional overrides of the project defaults
 catalogue_choice: { mcb: abb-s200m }   # optional; overrides the project's key by key
 loose_material:                        # extras not tied to a device
   title: "PSA Panels Loose Material and Auxiliary Equipment"   # the table's title row
-  host_panel: ws                       # table sits under this panel's BOM
+  host_panel: ws                       # its document heads the Loose Material sheet (ADR 0020)
   items:
     - { part_id: NAP-K55, children: [LPA37-696], fed_from: psa3 }   # Q13
     - { part_id: FO-PATCH-CORDS, qty: "1 Lot" }
@@ -840,7 +840,13 @@ writes its section's details when the work starts.
   design).** Backlog points 1 and 10. Add and edit devices and catalogue entries, saved as
   a new local library version. Export and import the library as CSV, with alternatives
   linked by their group key. The Library screen gets catalogue tabs and an alternatives
-  list for comparing devices.
+  list for comparing devices. Store side (`library_store`, after M13 is on main): the
+  `export_csv`, `preview_csv_import` and `import_csv` functions with the dry-run checks of
+  ADR 0018; an edit service (add, edit or delete a device or catalogue entry, validated
+  against the model) that saves a new local version and keeps the old one for rollback; and
+  the `.bomlib` export of an edited library as the backup. Import and edit share one
+  save-a-new-local-version function. The tests include the round trip
+  (library, CSV, library is equal).
 - **M17 — Project and substation editing (A2 writers; A11 app; A4 design).** Backlog points
   4, 7 and 9. Writers round-trip projects, substations and panels. The app creates projects
   and substations from scratch, every settings field is editable, and the Panels board gets
@@ -849,6 +855,12 @@ writes its section's details when the work starts.
 - **M18 — Loose material (A2 model; A9 engine; A10 sheet; A11 editor).** Backlog point 6.
   Each substation has its own editable loose-material list, on its own "Loose Material"
   sheet (Q36, ADR 0020) and in Preview.
+  - Sheet side (A10, ADR 0020): the table moves off the WS console sheet onto its own
+    "Loose Material" sheet (`output.sheet_names.loose_material`), placed after the cabinet
+    BOMs and before Power Consumption. It uses the panel BOM layout, print setup and
+    header, and its header and footer come from `host_panel`'s document. External Equipment
+    references follow it. Revision comparison reads the new sheet and falls back to the
+    host sheet's second table for older issues.
 
 ## 5. Testing strategy
 

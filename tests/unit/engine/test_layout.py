@@ -13,6 +13,7 @@ from bomgen.engine.layout import (
     LayoutRules,
     Unit,
     auto_layout,
+    blank_plates,
     fill,
     fill_lines,
     layout_preview,
@@ -48,20 +49,46 @@ def kinds(layout: Layout) -> list[str]:
     return [issue.kind for issue in layout.issues]
 
 
+def _stack(*blocks: tuple[int, int]) -> list[Unit]:
+    """Units top to bottom from ``(height_u, cable_manager_u)`` pairs."""
+    return [u(f"d{i}", 1, A, h, rank=i, cm=cm) for i, (h, cm) in enumerate(blocks)]
+
+
 def test_r5_blank_plate_between_neighbours() -> None:
-    assert used_u([1, 2, 1], 1) == 6
-    assert used_u([1], 1) == 1
+    assert used_u(_stack((1, 0), (2, 0), (1, 0)), 1) == 6
+    assert used_u(_stack((1, 0)), 1) == 1
     assert used_u([], 1) == 0
 
 
 def test_r5_din_rail_parts_cost_nothing() -> None:
-    assert used_u([1, 0, 1], 1) == 3
+    assert used_u(_stack((1, 0), (0, 0), (1, 0)), 1) == 3
 
 
-def test_r5_cable_manager_sits_under_its_switch() -> None:
+def test_r5_cable_manager_needs_no_blank_plate_below_it() -> None:
+    # switch + manager, then a device: the passive manager may touch it (Ali, M12)
     layout = fill([u("sw", 1, A, cm=1), u("gw", 1, A, rank=1)], RULES)
-    assert layout.panels[0].used_u(RULES) == 4  # switch 1 + manager 1, gap 1, device 1
-    assert layout.panels[0].blank_plates() == 1
+    assert layout.panels[0].used_u(RULES) == 3
+    assert layout.panels[0].blank_plates() == 0
+
+
+def test_r5_active_device_above_a_managed_switch_still_needs_a_plate() -> None:
+    # gw over switch + manager: the switch's top touches the active gateway
+    stack = _stack((1, 0), (1, 1))
+    assert used_u(stack, 1) == 4
+    assert blank_plates(stack) == 1
+
+
+def test_r5_managed_blocks_stack_without_plates() -> None:
+    # FOPP + manager, L2 + manager, L1 + manager, then a firewall: no plates at all
+    stack = _stack((1, 1), (1, 1), (1, 1), (1, 0))
+    assert used_u(stack, 1) == 7
+    assert blank_plates(stack) == 0
+
+
+def test_r5_din_rail_part_does_not_break_the_rule() -> None:
+    # a DIN-rail part between two rack devices is not a rack neighbour
+    assert blank_plates(_stack((1, 1), (0, 0), (1, 0))) == 0
+    assert blank_plates(_stack((1, 0), (0, 0), (1, 0))) == 1
 
 
 def test_r5_fill_stops_at_32u_and_opens_a_new_panel() -> None:

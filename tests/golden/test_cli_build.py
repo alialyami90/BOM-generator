@@ -20,7 +20,10 @@ EXAMPLES = Path(__file__).resolve().parents[2] / "examples"
 # Output requirements (OUT-2): '<project doc no.>_PSA_BOM_Rev<rev>.xlsx'; the register's
 # gis01-bom entry is VD-EL0009-861GISPSA-001 rev 02.
 FILE_NAME = "VD-EL0009-861GISPSA-001_PSA_BOM_Rev02.xlsx"
-SHEETS = ["1", "2", "3", "4", "Power Consumption", "Heat Dissipation", "Heat Calculations"]
+SHEETS = [
+    "1", "2", "3", "4", "Loose Material",  # ADR 0020
+    "Power Consumption", "Heat Dissipation", "Heat Calculations",
+]  # fmt: skip
 
 runner = CliRunner()
 

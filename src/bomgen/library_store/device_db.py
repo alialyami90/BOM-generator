@@ -19,6 +19,7 @@ from pydantic import (
     ConfigDict,
     Field,
     PositiveInt,
+    StrictBool,
     StrictFloat,
     StrictInt,
     ValidationError,
@@ -37,6 +38,16 @@ DEVICE_DB_SCHEMA_VERSION = 1
 # Figures are numbers (a bool is not one); anything uncertain goes in `notes`.
 Number = StrictInt | StrictFloat
 WholeNumber = Annotated[int, Field(strict=True, ge=0)]
+MountingKind = Literal["rack", "din_rail", "plug_in", "enclosure", "external"]
+
+
+def _height_belongs_to_rack_parts(height_u: int | None, mounting_kind: str | None) -> None:
+    if (
+        height_u is not None
+        and mounting_kind is not None
+        and (height_u > 0) != (mounting_kind == "rack")
+    ):
+        raise ValueError("height_u is above 0 exactly when mounting_kind is rack")
 
 
 class _Model(BaseModel):
@@ -71,7 +82,25 @@ class PortGroup(_Model):
     note: str | None = None
 
 
-class Datasheet(_Model):
+class _Electrical(_Model):
+    """Switch-on current and DC input range of a part (research figures, all optional)."""
+
+    inrush_a: Number | None = None
+    inrush_ms: Number | None = None
+    inrush_basis: Literal["datasheet", "not_given", "assumed"] | None = None
+    inrush_note: str | None = None
+    input_v_min: Number | None = None  # DC input range, V
+    input_v_max: Number | None = None
+
+    @model_validator(mode="after")
+    def _input_range_is_ordered(self) -> Self:
+        low, high = self.input_v_min, self.input_v_max
+        if low is not None and high is not None and low > high:
+            raise ValueError("input_v_min must not be above input_v_max")
+        return self
+
+
+class Datasheet(_Electrical):
     """Whatever could be confirmed; keys are left out when unknown."""
 
     full_name: str | None = None
@@ -90,19 +119,20 @@ class Datasheet(_Model):
     ordering_code_decoded: dict[Any, Any] | None = None
     datasheet_url: str | None = None
     product_url: str | None = None
-    mounting_kind: Literal["rack", "din_rail", "plug_in", "enclosure", "external"]
+    mounting_kind: MountingKind
     height_u: WholeNumber
     height_note: str | None = None
     port_groups: list[PortGroup] | None = None
 
     @model_validator(mode="after")
     def _height_belongs_to_rack_parts(self) -> Self:
-        if (self.height_u > 0) != (self.mounting_kind == "rack"):
-            raise ValueError("height_u is above 0 exactly when mounting_kind is rack")
+        _height_belongs_to_rack_parts(self.height_u, self.mounting_kind)
         return self
 
 
-class Tier(_Model):
+class Tier(_Electrical):
+    """One part of an alternative; the keys after `same_as` are optional research findings."""
+
     model: str
     description: str
     ordering_code: str | None = None
@@ -111,6 +141,24 @@ class Tier(_Model):
     notes: str | None = None
     verified: bool
     same_as: Literal["low", "mid"] | None = None
+    height_u: WholeNumber | None = None
+    mounting_kind: MountingKind | None = None
+    supply_type: Literal["VDC", "VAC", "none"] | None = None
+    voltage_v: Number | None = None
+    supply_option: str | None = None  # the PSU option that covers the supply
+    supply_ok: StrictBool | None = None  # false: no variant takes 125 VDC / 230 VAC
+    power_supplies: Annotated[int, Field(strict=True, ge=1, le=2)] | None = None
+    power_basis: Literal["datasheet_max", "datasheet_typical", "computed", "assumed"] | None = None
+    power_note: str | None = None
+    port_groups: list[PortGroup] | None = None
+    airflow_m3h: Number | None = None  # fans
+    ratings: dict[str, Any] | None = None  # free-form, like `datasheet.ratings`
+    sources: list[str] | None = None
+
+    @model_validator(mode="after")
+    def _height_belongs_to_rack_parts(self) -> Self:
+        _height_belongs_to_rack_parts(self.height_u, self.mounting_kind)
+        return self
 
 
 class Tiers(_Model):
