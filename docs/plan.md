@@ -542,8 +542,10 @@ update package (ADR 0008).
   Windows device names such as `con`.
 - A `.bomlib` given to `project import` (and the reverse) gets a one-line
   explanation.
-- Open item for M1b: once the `project.yaml` model is on main, read the id and
-  library through it instead of plain YAML.
+- The id and library are still read as plain YAML on purpose, not through the
+  M1b `Project` model: a backup or export must work on a project the model would
+  reject (a half-edited file). A test checks that the plain read agrees with the
+  model on the example project.
 - Dry-runs and backups for the UI (follow-up to M8b):
   Follow-up for the "What the app needs from the engine" rows. Nothing here changes
   how a package is built or installed.
