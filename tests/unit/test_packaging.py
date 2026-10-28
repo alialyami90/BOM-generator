@@ -1,0 +1,57 @@
+"""Installer configuration invariants (plan M11, Q20; ADR 0007, 0008, 0009).
+
+The installer itself is built and smoke-tested on the Windows runner
+(``.github/workflows/release.yml``); these tests pin the settings that must
+not drift.
+"""
+
+import re
+from pathlib import Path
+
+PACKAGING = Path(__file__).resolve().parents[2] / "packaging"
+ISS = (PACKAGING / "bomgen.iss").read_text(encoding="utf-8")
+SPEC = (PACKAGING / "bomgen.spec").read_text(encoding="utf-8")
+
+
+def setup_value(key: str) -> str:
+    match = re.search(rf"^{key}=(.*)$", ISS, flags=re.MULTILINE)
+    assert match, f"[Setup] has no {key}"
+    return match.group(1).strip()
+
+
+def test_installer_is_per_user_without_admin_rights() -> None:
+    assert setup_value("PrivilegesRequired") == "lowest"
+    assert "PrivilegesRequiredOverridesAllowed" not in ISS
+    assert setup_value("DefaultDirName").startswith("{autopf}")
+
+
+def test_installer_targets_64_bit_windows_10_21h2_and_later() -> None:
+    assert setup_value("ArchitecturesAllowed") == "x64compatible"
+    assert setup_value("ArchitecturesInstallIn64BitMode") == "x64compatible"
+    assert setup_value("MinVersion") == "10.0.19044"
+
+
+def test_installer_registers_bomlib_association_for_current_user() -> None:
+    assert setup_value("ChangesAssociations") == "yes"
+    association = [line for line in ISS.splitlines() if "Software\\Classes" in line]
+    assert any(".bomlib" in line for line in association)
+    assert all(line.startswith("Root: HKA;") for line in association)
+    assert all("uninsdelete" in line for line in association)
+    assert '"{app}\\{#AppExeName}"" ""%1"""' in ISS
+
+
+def test_installer_output_name_carries_the_version() -> None:
+    assert setup_value("OutputBaseFilename") == "bomgen-setup-{#AppVersion}"
+
+
+def test_installer_keeps_user_libraries_on_uninstall() -> None:
+    assert "[UninstallDelete]" not in ISS
+    assert "{localappdata}\\bomgen" not in ISS
+
+
+def test_spec_builds_windowed_app_and_console_cli_from_existing_entry_scripts() -> None:
+    for script in ("entry_app.py", "entry_cli.py"):
+        assert script in SPEC
+        assert (PACKAGING / script).is_file()
+    assert re.search(r"name=APP_EXE_NAME,.*?console=False", SPEC, flags=re.DOTALL)
+    assert re.search(r'name="bomgen",.*?console=True', SPEC, flags=re.DOTALL)

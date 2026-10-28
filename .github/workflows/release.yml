@@ -1,0 +1,181 @@
+name: Release
+
+# Builds the Windows installer and publishes it (plan M11, ADR 0009).
+#
+#   - Version tags (v0.1.0) build, smoke-test, and attach
+#     bomgen-setup-<version>.exe (and the default .bomlib, once M8 makes one)
+#     to a GitHub Release. The tag must match bomgen.__version__.
+#   - Pull requests that touch packaging, and manual runs, build and smoke-test
+#     only; the installer is kept as a workflow artifact.
+#
+# Not part of ci-status (ADR 0006): it runs only for packaging changes and tags.
+
+on:
+  push:
+    tags: ["v*"]
+  pull_request:
+    paths:
+      - "packaging/**"
+      - "src/bomgen/app/**"
+      - "pyproject.toml"
+      - ".github/workflows/release.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_type != 'tag' }}
+
+permissions:
+  contents: read
+
+jobs:
+  installer:
+    name: Build Windows installer
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install . -r packaging/requirements.txt
+
+      - name: Resolve version
+        id: version
+        run: |
+          $version = python -c "import bomgen; print(bomgen.__version__)"
+          if ($env:GITHUB_REF_TYPE -eq "tag") {
+            $tag = $env:GITHUB_REF_NAME.TrimStart("v")
+            if ($tag -ne $version) {
+              Write-Error "Tag v$tag does not match bomgen.__version__ $version"
+              exit 1
+            }
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Freeze with PyInstaller
+        run: |
+          pyinstaller packaging/bomgen.spec --noconfirm --clean
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+      - name: Smoke-test the frozen app
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          $out = & "dist\bomgen\bomgen.exe" --version
+          if ($LASTEXITCODE -or $out -ne "bomgen $env:VERSION") {
+            Write-Error "bomgen.exe --version gave '$out' (exit $LASTEXITCODE)"
+            exit 1
+          }
+          # Exit 2 means "bomgen.cli not in this build yet" (M1); once it exists --help must work.
+          $ErrorActionPreference = "Continue"  # a native command's stderr must not abort here
+          $help = & "dist\bomgen\bomgen.exe" --help 2>&1
+          $expected = if (Test-Path src\bomgen\cli.py) { 0 } else { 2 }
+          $helpExit = $LASTEXITCODE
+          Write-Output "bomgen.exe --help exited $helpExit (expected $expected): $help"
+          if ($helpExit -ne $expected) { Write-Error "bomgen.exe --help exited $helpExit"; exit 1 }
+          $global:LASTEXITCODE = 0  # an expected non-zero exit must not leak out as the step's result
+          # Imports every bomgen module from the frozen bundle (bomgen.app.launcher.self_test).
+          $app = Start-Process "dist\bomgen\BOM Generator.exe" -ArgumentList "--self-test" -Wait -PassThru
+          Write-Output "BOM Generator.exe --self-test exited $($app.ExitCode)"
+          if ($app.ExitCode) { Write-Error "BOM Generator.exe --self-test exited $($app.ExitCode)"; exit 1 }
+          exit 0
+
+      - name: Compile the installer
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          $iscc = Join-Path ${env:ProgramFiles(x86)} "Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) {
+            # No unpinned download here: a release must not change with upstream.
+            Write-Error "Inno Setup 6 not found at $iscc; the runner image no longer ships it. Pin an installer version here."
+            exit 1
+          }
+          & $iscc "/DAppVersion=$env:VERSION" packaging\bomgen.iss
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+      - name: Smoke-test install and uninstall (per user)
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          function Fail($message) { Write-Error $message; exit 1 }
+          $silent = "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART"
+
+          $setup = Start-Process "out\installer\bomgen-setup-$env:VERSION.exe" -Wait -PassThru `
+            -ArgumentList ($silent + "/LOG=$PWD\out\installer\install.log")
+          if ($setup.ExitCode) { Fail "Setup exited $($setup.ExitCode)" }
+
+          $dir = Join-Path $env:LOCALAPPDATA "Programs\BOM Generator"
+          $exe = Join-Path $dir "BOM Generator.exe"
+          foreach ($file in $exe, "$dir\bomgen.exe", "$dir\unins000.exe") {
+            if (-not (Test-Path $file)) { Fail "Missing $file" }
+          }
+          $out = & "$dir\bomgen.exe" --version
+          if ($out -ne "bomgen $env:VERSION") { Fail "Installed bomgen.exe --version gave '$out'" }
+          $app = Start-Process $exe -ArgumentList "--self-test" -Wait -PassThru
+          if ($app.ExitCode) { Fail "Installed BOM Generator.exe --self-test exited $($app.ExitCode)" }
+          $shortcut = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\BOM Generator.lnk"
+          if (-not (Test-Path $shortcut)) { Fail "Missing Start-menu shortcut $shortcut" }
+
+          $classes = "HKCU:\Software\Classes"
+          $progId = (Get-ItemProperty "$classes\.bomlib").'(default)'
+          if ($progId -ne "bomgen.library") { Fail ".bomlib maps to '$progId'" }
+          $command = (Get-ItemProperty "$classes\bomgen.library\shell\open\command").'(default)'
+          if ($command -ne "`"$exe`" `"%1`"") { Fail "Open command is '$command'" }
+
+          Start-Process "$dir\unins000.exe" -ArgumentList $silent -Wait
+          # The uninstaller re-launches itself from %TEMP%; wait for it to finish.
+          $deadline = (Get-Date).AddMinutes(2)
+          while ((Test-Path "$dir\unins000.exe") -and (Get-Date) -lt $deadline) { Start-Sleep 1 }
+          Start-Sleep 2
+          if (Test-Path $exe) { Fail "Uninstall left $exe" }
+          if (Test-Path "$classes\bomgen.library") { Fail "Uninstall left the bomgen.library ProgID" }
+          if (Test-Path "$classes\.bomlib") { Fail "Uninstall left the .bomlib key" }
+          if (Test-Path $shortcut) { Fail "Uninstall left the Start-menu shortcut" }
+          Write-Output "Installed, verified and uninstalled bomgen-setup-$env:VERSION.exe"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bomgen-setup-${{ steps.version.outputs.version }}
+          path: |
+            out/installer/bomgen-setup-*.exe
+            out/*.bomlib
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: install-log
+          path: out/installer/install.log
+          if-no-files-found: ignore
+
+  release:
+    name: Publish GitHub Release
+    needs: installer
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: bomgen-setup-${{ needs.installer.outputs.version }}
+          path: release
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.installer.outputs.version }}
+        run: |
+          mapfile -t assets < <(find release -type f \( -name '*.exe' -o -name '*.bomlib' \))
+          prerelease=()
+          # PEP 440 pre-releases (0.2.0rc1, 0.2.0b1, 0.2.0.dev1) carry a letter.
+          [[ "$VERSION" =~ [a-z] ]] && prerelease=(--prerelease)
+          gh release create "$GITHUB_REF_NAME" "${assets[@]}" \
+            --verify-tag --title "BOM Generator $VERSION" \
+            --notes-file packaging/release-notes.md --generate-notes "${prerelease[@]}"

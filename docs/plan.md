@@ -79,6 +79,9 @@ src/bomgen/
   revision.py       OUT-8 revised-cell highlighting
   library_store/    M8  .bomlib pack/import/verify, installed-library store, diff, rollback
   app/              M10 Windows desktop app: pywebview window + Python API for the UI
+    __init__.py     import-free (ADR 0009), so launcher.py never pulls in the window
+    launcher.py     M11 frozen-app entry points (app_main, cli_main, --self-test);
+                    M10 plugs the window in here, M8 the .bomlib import
     ui/             M9 HTML/CSS/JS from the impeccable design
   cli.py            typer app: build, validate, library pack/import/list/rollback
 packaging/          M11 PyInstaller spec, Inno Setup script, icons
@@ -415,6 +418,14 @@ impeccable polish/audit pass against the M9 design.
   document the SmartScreen "More info → Run anyway" step.
 - Tests: smoke test that the frozen app starts and builds the example
   workbook on the Windows runner.
+
+*Built early (ADR 0009):* the installer pipeline landed before M1, M8 and M10,
+with placeholders in `bomgen.app.launcher` for the CLI, library import and the
+window. The release workflow already installs, checks and uninstalls the
+installer on the runner; the "builds the example workbook" smoke step is added
+once `bomgen build` exists (M7), and the bundled default library once M8 writes
+`out/default.bomlib`. The app icon comes with the M9 design
+(`packaging/icons/bomgen.ico`).
 
 ## 5. Testing strategy
 

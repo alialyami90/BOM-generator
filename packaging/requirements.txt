@@ -1,0 +1,2 @@
+# Build-only dependencies for the Windows installer (packaging/README.md).
+pyinstaller==6.22.3
