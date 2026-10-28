@@ -6,18 +6,16 @@
    "Print it": merge, then add a plan note that the print area now covers the footnote (a
    correction to the reference). "Keep it off the printout": B10 stops the print area at the
    NOTES first. Done when it is merged and the plan says which.
-2. **A3's Q38 PR** (`data/library/build.py` → `psa-devices.yaml`, release.yml packs it,
-   `test_shipped_library.py`, `ac_rated: false` on C60H-DC). B6 reviews the release.yml part.
-   Expected: SEL branches go from 2 A to 6 A in the shipped library only; goldens unchanged.
-   After the merge, add `data/library/` to role 3's row in agents.md and tell B9 its task 1
-   (sizing against the shipped library) is unblocked.
-3. **#155 and the rest of B11's queue** (Library editors b–d, then project and substation
-   creation on `io/lifecycle`). Each needs a green "Build Windows installer" and B4's review.
-   B11 raised two gaps directly with B5 (device-record edits) and B2 (a "rows that use a part" query).
-4. **B7's docs pass** (README and CHANGELOG "Unreleased" entries for #130–#154, README:62
-   "tag-driven").
-5. **Checkpoint refreshes** from A3, B6 and B9: docs only, own folder and own ROSTER row.
-   Tell the coordinator as each merges.
+2. **FGR-60F `dc_float` warning** (B9, #171): its datasheet input stops at 125 V DC, below the
+   140 V float. Ask Ali on a card whether it stays (warning accepted, as for the iC60N under
+   Q37) or the firewall needs a DC-rated alternative; recommend keeping it with the warning.
+3. **#171 (B9, shipped-library sizing tests)** and **#166 (B11, Library list editing)**: merge
+   when CI is green; #166 also needs "Build Windows installer". Then B11's Datasheet tab (on
+   #164), CSV (b), alternatives (c), then project and substation creation on `io/lifecycle`.
+4. **B7's next docs pass:** CHANGELOG "Unreleased" lines for #155, #161, #163, #164, #165 and
+   the installer now shipping `data/library/` psa-devices 1.1.0.
+5. **Checkpoints:** review each docs-only checkpoint PR (own folder and own ROSTER row only;
+   ADR changes go in their own PR). Tell the coordinator as each merges.
 6. **Ali, when he has time:** one batch-accept card for the Proposed ADRs (list in STATE), and
    B10's header-fit Print Preview check.
 7. **v0.2.0 release** once points 1, 4, 6, 7 and 10 of docs/backlog.md are done in the app. The
