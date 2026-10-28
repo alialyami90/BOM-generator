@@ -277,3 +277,89 @@ def test_no_library_note_for_a_project_without_a_library(
     package = export_project(project_file, tmp_path / "bare.bomproj").path
 
     assert import_project(package, workspace=workspace, store=store).library_note is None
+
+
+def test_forced_import_keeps_git_and_cache_folders(
+    workspace: Path, package: Path, store: LibraryStore
+) -> None:
+    import_project(package, workspace=workspace, store=store)
+    project_dir = workspace / "jfgp2"
+    (project_dir / ".git").mkdir()
+    (project_dir / ".git" / "HEAD").write_text("ref: refs/heads/main\n")
+    (project_dir / "substations/psa/__pycache__").mkdir()
+    (project_dir / "substations/psa/__pycache__/x.pyc").write_text("cache")
+
+    import_project(package, workspace=workspace, force=True, store=store, now=NOW)
+
+    assert (project_dir / ".git" / "HEAD").read_text() == "ref: refs/heads/main\n"
+    assert (project_dir / "substations/psa/__pycache__/x.pyc").read_text() == "cache"
+
+
+def test_the_safety_backup_records_the_library_of_the_old_project(
+    workspace: Path, package: Path, store: LibraryStore
+) -> None:
+    import_project(package, workspace=workspace, store=store)
+
+    result = import_project(package, workspace=workspace, force=True, store=store, now=NOW)
+
+    assert result.backup is not None
+    with zipfile.ZipFile(result.backup) as zf:
+        manifest = json.loads(zf.read("manifest.json"))
+    assert manifest["library_name"] == "psa-devices"
+    assert manifest["library_version"] == "1.2.0"
+
+
+def test_the_safety_backup_still_works_when_the_old_project_file_is_broken(
+    workspace: Path, package: Path, store: LibraryStore
+) -> None:
+    import_project(package, workspace=workspace, store=store)
+    (workspace / "jfgp2" / "project.yaml").write_text("not: [valid\n")
+
+    result = import_project(package, workspace=workspace, force=True, store=store, now=NOW)
+
+    assert result.backup is not None
+    assert result.backup.is_file()
+
+
+@pytest.mark.parametrize("library_name", ["../../x", "A B", "con", ""])
+def test_import_rejects_a_hostile_library_name(
+    tmp_path: Path, workspace: Path, package: Path, store: LibraryStore, library_name: str
+) -> None:
+    hostile = _rewrite(package, tmp_path / "hostile.bomproj", library_name=library_name)
+
+    with pytest.raises(LibraryPackageError):
+        import_project(hostile, workspace=workspace, store=store)
+
+    assert not workspace.exists()
+
+
+def test_a_failing_library_check_does_not_fail_the_import(
+    workspace: Path, package: Path, store: LibraryStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def denied(name: str) -> list[str]:
+        raise PermissionError("library home is locked")
+
+    monkeypatch.setattr(store, "versions", denied)
+
+    result = import_project(package, workspace=workspace, store=store)
+
+    assert result.library_note is None
+    assert (workspace / "jfgp2" / "project.yaml").is_file()
+
+
+def test_import_rejects_a_package_that_holds_build_output_folders(
+    tmp_path: Path, workspace: Path, package: Path, store: LibraryStore
+) -> None:
+    sneaky = tmp_path / "sneaky.bomproj"
+    with zipfile.ZipFile(package) as old, zipfile.ZipFile(sneaky, "w") as new:
+        manifest = json.loads(old.read("manifest.json"))
+        manifest["files"]["out"] = manifest["files"]["project.yaml"]
+        for name in old.namelist():
+            data = json.dumps(manifest).encode() if name == "manifest.json" else old.read(name)
+            new.writestr(name, data)
+        new.writestr("out", old.read("project.yaml"))
+
+    with pytest.raises(LibraryPackageError, match="build output"):
+        import_project(sneaky, workspace=workspace, store=store)
+
+    assert not workspace.exists()

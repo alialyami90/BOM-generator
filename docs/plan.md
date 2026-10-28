@@ -428,6 +428,13 @@ update package (ADR 0008).
   `library_note` naming the `.bomlib` to install, or the `bomgen library
   rollback --to` command when that version is already installed (resolves Q21).
   The CLI prints it as `note: ...`.
+- Import also keeps `.git/` and `__pycache__/` folders (never packed), and
+  refuses a package that holds `out/`, `.git/` or a top-level `Backups/`.
+  A leftover `.replaced-<id>` folder in the workspace (Windows file locks) holds
+  the previous project and is safe to delete once the new one looks right.
+- Sharing the container made `pack --add` and `.bomproj` skip symlinks, where
+  the first `.bomlib` code followed them; library names now also refuse
+  Windows device names such as `con`.
 - A `.bomlib` given to `project import` (and the reverse) gets a one-line
   explanation.
 - Open item for M1b: once the `project.yaml` model is on main, read the id and

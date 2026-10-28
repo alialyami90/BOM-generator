@@ -169,3 +169,18 @@ def test_read_project_identity_returns_id_and_library(tmp_path: Path) -> None:
         "psa-devices",
         "1.2.0",
     )
+
+
+@pytest.mark.parametrize("library_name", ["../../x", "Has Space", "con"])
+def test_export_refuses_an_unsafe_library_name(tmp_path: Path, library_name: str) -> None:
+    project_file = make_project(
+        tmp_path / "p",
+        project_yaml=(
+            f"project:\n  id: ok\nlibrary:\n  name: {library_name!r}\n  version: 1.0.0\n"
+        ),
+    )
+
+    with pytest.raises(LibraryPackageError) as caught:
+        export_project(project_file, tmp_path / "out.bomproj")
+
+    assert caught.value.kind is RefusalKind.INVALID_PROJECT

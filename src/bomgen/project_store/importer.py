@@ -20,7 +20,13 @@ from bomgen.library_store.store import (
     library_mismatch,
 )
 from bomgen.project_store.backup import backup_directory
-from bomgen.project_store.export import BACKUPS_DIR, ProjectIdentity, parse_project_identity
+from bomgen.project_store.export import (
+    BACKUPS_DIR,
+    SKIPPED_DIRS,
+    ProjectIdentity,
+    parse_project_identity,
+    read_project_identity,
+)
 from bomgen.project_store.manifest import PROJECT_FILE, PROJECT_FORMAT_VERSION, ProjectManifest
 from bomgen.project_store.workspace import default_workspace
 
@@ -95,6 +101,8 @@ def import_project(
             f"the manifest names project {manifest.project_id!r} "
             f"but {PROJECT_FILE} names {identity.id!r}"
         )
+    _refuse_build_output(files)
+    note = _library_note_or_none(manifest, store or LibraryStore(default_library_home()))
     workspace = workspace or default_workspace()
     target = workspace / manifest.project_id
     exists = target.exists()
@@ -137,13 +145,39 @@ def import_project(
         target,
         replaced=exists,
         backup=target / BACKUPS_DIR / backup.name if backup else None,
-        library_note=library_note(manifest, store or LibraryStore(default_library_home())),
+        library_note=note,
     )
+
+
+def _refuse_build_output(files: dict[str, bytes]) -> None:
+    """A `.bomproj` never holds `out/`, `.git/`, caches or the top-level `Backups/`."""
+    for name in files:
+        parts = name.split("/")
+        if SKIPPED_DIRS.intersection(parts[:-1]) or parts[0] == BACKUPS_DIR or name in SKIPPED_DIRS:
+            raise LibraryPackageError(
+                f"package contains {name!r}, build output a .bomproj never holds"
+            )
+
+
+def _library_note_or_none(manifest: ProjectManifest, store: LibraryStore) -> str | None:
+    """The note is advice; a locked library folder must not turn a good import into an error."""
+    try:
+        return library_note(manifest, store)
+    except (LibraryPackageError, OSError):
+        return None
 
 
 def _backup_existing(project_dir: Path, project_id: str, now: datetime | None) -> Path:
     try:
-        return backup_directory(project_dir, ProjectIdentity(project_id, None, None), now=now)
+        try:
+            identity = read_project_identity(project_dir / PROJECT_FILE)
+            if identity.id != project_id:
+                identity = ProjectIdentity(
+                    project_id, identity.library_name, identity.library_version
+                )
+        except LibraryPackageError:
+            identity = ProjectIdentity(project_id, None, None)
+        return backup_directory(project_dir, identity, now=now)
     except (LibraryPackageError, OSError) as exc:
         raise LibraryPackageError(
             f"cannot back up the existing project, so it was not replaced: {exc}",
@@ -157,7 +191,7 @@ def _carry_over(old: Path, new: Path) -> None:
         here = Path(root)
         relative = here.relative_to(old)
         for name in list(dirs):
-            keep = name == "out" or (relative == Path() and name == BACKUPS_DIR)
+            keep = name in SKIPPED_DIRS or (relative == Path() and name == BACKUPS_DIR)
             if keep:
                 dirs.remove(name)
                 shutil.copytree(

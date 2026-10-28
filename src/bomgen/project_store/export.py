@@ -12,6 +12,7 @@ from pydantic import ValidationError
 import bomgen
 from bomgen.bundle.container import collect_tree, sha256, write_bundle
 from bomgen.bundle.errors import LibraryPackageError, RefusalKind
+from bomgen.library_store.manifest import is_valid_library_name
 from bomgen.library_store.versions import Version
 from bomgen.project_store.manifest import (
     PROJECT_FORMAT_VERSION,
@@ -20,7 +21,7 @@ from bomgen.project_store.manifest import (
     is_valid_project_id,
 )
 
-_SKIPPED_DIRS = frozenset({"out", ".git", "__pycache__"})
+SKIPPED_DIRS = frozenset({"out", ".git", "__pycache__"})
 BACKUPS_DIR = "Backups"
 
 
@@ -70,8 +71,11 @@ def parse_project_identity(text: str, name: str = "project.yaml") -> ProjectIden
     lib_name = library.get("name") if isinstance(library, dict) else None
     version = library.get("version") if isinstance(library, dict) else None
     try:
-        if not isinstance(lib_name, str) or not lib_name or not isinstance(version, str):
-            raise ValueError("library needs a name and a version")
+        if not is_valid_library_name(lib_name) or not isinstance(version, str):
+            raise ValueError(
+                f"library needs a lowercase name (letters, digits, '.', '_', '-') "
+                f"and a version, got name {lib_name!r}"
+            )
         Version.parse(version)
     except ValueError as exc:
         raise _invalid(f"{name}: library: {exc}") from exc
@@ -83,7 +87,7 @@ def project_files(project_dir: Path) -> dict[str, bytes]:
 
     def include(relative: PurePosixPath, is_dir: bool) -> bool:
         if is_dir:
-            return relative.name not in _SKIPPED_DIRS and relative != PurePosixPath(BACKUPS_DIR)
+            return relative.name not in SKIPPED_DIRS and relative != PurePosixPath(BACKUPS_DIR)
         return relative.suffix != PROJECT_SUFFIX and not relative.name.endswith(".partial")
 
     return collect_tree(project_dir, include=include)

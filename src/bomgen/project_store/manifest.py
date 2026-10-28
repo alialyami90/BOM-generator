@@ -10,6 +10,7 @@ from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from bomgen.bundle.container import check_file_table
 from bomgen.bundle.paths import is_safe_name
+from bomgen.library_store.manifest import is_valid_library_name
 from bomgen.library_store.versions import Version
 
 PROJECT_FORMAT_VERSION = 1
@@ -45,6 +46,13 @@ class ProjectManifest(BaseModel):
     def _check_project_id(cls, value: str) -> str:
         if not is_valid_project_id(value):
             raise ValueError(f"unsafe project id {value!r}")
+        return value
+
+    @field_validator("library_name")
+    @classmethod
+    def _check_library_name(cls, value: str | None) -> str | None:
+        if value is not None and not is_valid_library_name(value):
+            raise ValueError(f"unsafe library name {value!r}")
         return value
 
     @field_validator("library_version", "app_version")
