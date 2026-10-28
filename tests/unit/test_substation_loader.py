@@ -248,6 +248,44 @@ def test_unpinned_l1_switch_needs_a_library_candidate(tmp_path: Path) -> None:
     assert where(issues) == [("substation.yaml", "equipment[1]", message)]
 
 
+def test_layout_refs_are_located_and_reported_together(tmp_path: Path) -> None:
+    substation = with_equipment(default_substation())
+    gateway = {"id": "gw", "part_id": "RST2228-L2", "role": "other"}
+    substation["equipment"] += [{**gateway, "qty": 2}, gateway]
+    substation["layout"] = {
+        "overrides": [
+            {"device": "nope", "panel": 2},
+            {"device": "l1", "panel": 2},
+            {"pair": "gw", "panel": [1, 2]},
+            {"device": "gw", "side": "a", "panel": 1},
+            {"device": "gw", "unit": 3, "panel": 1},
+            {"pair": "l2", "unit": 2, "panel": [1, 2]},
+            {"device": "l1", "unit": 9, "side": "a", "panel": 1},  # L1 count is computed
+        ],
+        "removed": [
+            {"device": "ghost"},
+            {"device": "gw", "side": "b"},
+            {"device": "l2", "unit": 2},
+        ],
+    }
+    issues = issues_for(
+        write_project(tmp_path, library=library_with_heights(), substation=substation)
+    )
+    assert [(i.location, i.message) for i in issues] == [
+        ("equipment[3].id", "duplicate equipment id 'gw' (first at equipment[2])"),
+        ("layout.overrides[0].device", "no equipment id 'nope'"),
+        ("layout.overrides[1].side", "'l1' is redundant; name the side (a or b) to move"),
+        ("layout.overrides[2].pair", "'gw' is not redundant, so it has no pair"),
+        ("layout.overrides[3].side", "'gw' is not redundant; leave side out"),
+        ("layout.overrides[4].unit", "'gw' has qty 2; there is no unit 3"),
+        ("layout.overrides[5].unit", "'l2' has qty 1; there is no unit 2"),
+        ("layout.removed[0].device", "no equipment id 'ghost'"),
+        ("layout.removed[1].side", "'gw' is not redundant; leave side out"),
+        ("layout.removed[2].unit", "'l2' has qty 1; there is no unit 2"),
+    ]
+    assert all(i.line is not None for i in issues)
+
+
 def test_equipment_unknown_part_and_non_switch_role(tmp_path: Path) -> None:
     substation = with_equipment(default_substation())
     substation["equipment"][1]["part_id"] = "LAMP"

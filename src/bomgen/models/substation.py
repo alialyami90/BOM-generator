@@ -188,22 +188,6 @@ _RENDERED: dict[str, TypeAdapter[str]] = {
 }
 
 
-def _equipment(by_id: dict[str, Equipment], name: str, where: str) -> Equipment:
-    if name not in by_id:
-        raise ValueError(f"{where} names no equipment id '{name}'")
-    return by_id[name]
-
-
-def _check_unit_ref(
-    by_id: dict[str, Equipment], ref: UnitRef, where: str, *, side_required: bool
-) -> None:
-    entry = _equipment(by_id, ref.device, where)
-    if entry.redundant and ref.side is None and side_required:
-        raise ValueError(f"{where}: '{ref.device}' is redundant; name the side (a or b) to move")
-    if not entry.redundant and ref.side is not None:
-        raise ValueError(f"{where}: '{ref.device}' is not redundant; leave side out")
-
-
 class Substation(InputModel):
     """The substation file (``substation.yaml``)."""
 
@@ -230,22 +214,6 @@ class Substation(InputModel):
         )
         if both:
             raise ValueError(f"listed in both panels and manual_panels: {', '.join(both)}")
-        by_id: dict[str, Equipment] = {}
-        for item in self.equipment:
-            if item.id in by_id:
-                raise ValueError(f"duplicate equipment id '{item.id}'")
-            by_id[item.id] = item
-        for move in self.layout.overrides:
-            if isinstance(move, PairMove):
-                entry = _equipment(by_id, move.pair, "layout override")
-                if not entry.redundant:
-                    raise ValueError(
-                        f"layout override: '{move.pair}' is not redundant, so it has no pair"
-                    )
-            else:
-                _check_unit_ref(by_id, move, "layout override", side_required=True)
-        for ref in self.layout.removed:
-            _check_unit_ref(by_id, ref, "layout.removed", side_required=False)
         if self.equipment:
             for role in (EquipmentRole.L1_SWITCH, EquipmentRole.L2_SWITCH):
                 entries = [e for e in self.equipment if e.role is role]

@@ -20,7 +20,7 @@ from bomgen.models.library import (
 )
 from bomgen.models.panel import Panel, PanelMirror
 from bomgen.models.project import Project, RegisterEntry
-from bomgen.models.substation import EquipmentRole, Substation
+from bomgen.models.substation import Equipment, EquipmentRole, PairMove, Substation, UnitRef
 
 
 def _issue(source: YamlSource, loc: Loc, message: str) -> Issue:
@@ -263,6 +263,66 @@ def equipment_issues(
             )
             issues.append(_issue(source, loc, message))
     return issues
+
+
+def layout_issues(substation: Substation, source: YamlSource) -> list[Issue]:
+    """Equipment ids are unique, and layout overrides and removals name them correctly."""
+    issues: list[Issue] = []
+    by_id: dict[str, tuple[int, Equipment]] = {}
+    for index, item in enumerate(substation.equipment):
+        if item.id in by_id:
+            message = (
+                f"duplicate equipment id '{item.id}' (first at equipment[{by_id[item.id][0]}])"
+            )
+            issues.append(_issue(source, ("equipment", index, "id"), message))
+        else:
+            by_id[item.id] = (index, item)
+    entries = {name: item for name, (_index, item) in by_id.items()}
+    for index, move in enumerate(substation.layout.overrides):
+        base: Loc = ("layout", "overrides", index)
+        if isinstance(move, PairMove):
+            entry = entries.get(move.pair)
+            if entry is None:
+                issues.append(_issue(source, (*base, "pair"), f"no equipment id '{move.pair}'"))
+            elif not entry.redundant:
+                message = f"'{move.pair}' is not redundant, so it has no pair"
+                issues.append(_issue(source, (*base, "pair"), message))
+            else:
+                issues.extend(_unit_issues(source, base, entry, move.unit))
+        else:
+            issues.extend(_unit_ref_issues(source, base, entries, move, side_required=True))
+    for index, ref in enumerate(substation.layout.removed):
+        base = ("layout", "removed", index)
+        issues.extend(_unit_ref_issues(source, base, entries, ref, side_required=False))
+    return issues
+
+
+def _unit_ref_issues(
+    source: YamlSource,
+    base: Loc,
+    entries: Mapping[str, Equipment],
+    ref: UnitRef,
+    *,
+    side_required: bool,
+) -> list[Issue]:
+    entry = entries.get(ref.device)
+    if entry is None:
+        return [_issue(source, (*base, "device"), f"no equipment id '{ref.device}'")]
+    if entry.redundant and ref.side is None and side_required:
+        message = f"'{ref.device}' is redundant; name the side (a or b) to move"
+        return [_issue(source, (*base, "side"), message)]
+    if not entry.redundant and ref.side is not None:
+        message = f"'{ref.device}' is not redundant; leave side out"
+        return [_issue(source, (*base, "side"), message)]
+    return _unit_issues(source, base, entry, ref.unit)
+
+
+def _unit_issues(source: YamlSource, base: Loc, entry: Equipment, unit: int | None) -> list[Issue]:
+    # The L1 switch count is computed from the IED count, so its units are not known here.
+    if unit is None or entry.role is EquipmentRole.L1_SWITCH or unit <= entry.qty:
+        return []
+    message = f"'{entry.id}' has qty {entry.qty}; there is no unit {unit}"
+    return [_issue(source, (*base, "unit"), message)]
 
 
 def _is_l1_switch(device: DeviceType) -> bool:

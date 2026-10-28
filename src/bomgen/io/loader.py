@@ -19,6 +19,7 @@ from bomgen.io.mirror import mirror_panel
 from bomgen.io.references import (
     document_issues,
     equipment_issues,
+    layout_issues,
     library_issues,
     mirror_issues,
     panel_issues,
@@ -222,6 +223,7 @@ def _load_substation(
     found.extend(substation_issues(substation, source, resolved, library, library_name))
     found.extend(document_issues(substation, source, panel_sources, register))
     found.extend(equipment_issues(substation, source, library, library_name))
+    found.extend(layout_issues(substation, source))
     found.extend(_generated_panel_issues(substation, source, library))
     for panel_source, entry in panel_sources:
         if entry.generated and panel_source.path.resolve() in manual_files:

@@ -93,7 +93,10 @@ hand-written YAML.
     layout or a renumbering cannot break them. A unit is picked by a 1-based
     `unit` and, on a redundant entry, a `side` (`a` or `b`); leaving either
     out means every unit or both sides. A single-device move of a redundant
-    entry must name its side; a `pair` move takes both sides.
+    entry must name its side; a `pair` move takes both sides. A `unit` past the
+    entry's `qty` is rejected (not on the computed `l1_switch`). The loader
+    checks ids, sides and units, so each problem is located and all are
+    reported at once.
 19. **L1 switch model.** The `l1_switch` entry may leave `part_id` out; the
     tool then picks the model among library `network_switch` parts at
     `purdue_level: L1` (the UI may ask the engineer to choose). A given
