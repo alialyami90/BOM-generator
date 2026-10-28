@@ -88,7 +88,8 @@ def test_cells_are_written_the_way_excel_shows_them(library: Library) -> None:
     assert row["alarm_on_branch_mcb"] in ("true", "false")
     assert row["excluded_from_power"] == "false"
     assert row["voltage_v"] == str(device.voltage_v)
-    assert row["alt_group"] == ""  # not given is a blank cell
+    assert row["alt_group"] == device.alt_group
+    assert row["tier"] == ""  # not given is a blank cell
     assert row["make"] == device.make
 
 
@@ -129,17 +130,22 @@ def test_the_default_catalogue_is_the_brand_default(library: Library) -> None:
     tables = library_tables(library)
 
     mcb = tables["mcb.csv"]
-    assert [r["catalogue_id"] for r in mcb] == ["default"]
+    brands = [b.id for b in library.catalogue_brands.mcb]
+    assert [r["catalogue_id"] for r in mcb] == ["default", *brands]
     assert mcb[0]["ratings_a"] == "|".join(str(a) for a in library.catalogues.mcb.ratings_a)
     assert mcb[0]["family"] == library.catalogues.mcb.family
-    assert {r["catalogue_id"] for r in tables["terminal_blocks.csv"]} == {"default"}
-    assert len(tables["terminal_blocks.csv"]) == len(library.catalogues.terminal_blocks)
+    blocks = [r for r in tables["terminal_blocks.csv"] if r["catalogue_id"] == "default"]
+    assert len(blocks) == len(library.catalogues.terminal_blocks)
     assert {r["role"] for r in tables["busbars.csv"]} == set(library.catalogues.busbars)
     assert tables["library.csv"][-1] == {"key": "enclosure_u", "value": "42"}
 
 
 def test_housekeeping_is_a_row_per_role_with_the_fan_and_socket_figures(library: Library) -> None:
-    rows = {r["role"]: r for r in library_tables(library)["housekeeping.csv"]}
+    rows = {
+        r["role"]: r
+        for r in library_tables(library)["housekeeping.csv"]
+        if r["catalogue_id"] == "default"
+    }
 
     assert set(rows) >= {"lamp", "fan", "vent_filter", "thermostat", "ipr_kit", "socket"}
     assert {"change_over_diode_negative", "change_over_diode_positive"} <= set(rows)
@@ -159,11 +165,12 @@ def test_brand_sets_are_rows_of_their_catalogue_table(library: Library) -> None:
 
     tables = library_tables(edited)
 
-    assert [r["catalogue_id"] for r in tables["mcb.csv"]] == ["default", "abb-s200"]
-    assert tables["mcb.csv"][1]["name"] == "ABB S200"
-    assert tables["mcb.csv"][1]["code_pattern"] == ""
-    assert {r["catalogue_id"] for r in tables["mcb_codes.csv"]} == {"abb-s200"}
-    assert {r["code"] for r in tables["mcb_codes.csv"]} == {f"X{a}" for a in mcb["ratings_a"]}
+    shipped = [b.id for b in library.catalogue_brands.mcb]
+    assert [r["catalogue_id"] for r in tables["mcb.csv"]] == ["default", *shipped, "abb-s200"]
+    assert tables["mcb.csv"][-1]["name"] == "ABB S200"
+    assert tables["mcb.csv"][-1]["code_pattern"] == ""
+    codes = [r for r in tables["mcb_codes.csv"] if r["catalogue_id"] == "abb-s200"]
+    assert {r["code"] for r in codes} == {f"X{a}" for a in mcb["ratings_a"]}
 
 
 def test_the_zip_holds_every_table_as_utf8_with_a_byte_order_mark(

@@ -124,7 +124,7 @@ def test_the_round_trip_keeps_every_field_and_the_order(
             ),
             Insert(
                 path=["catalogue_brands", "terminal_blocks"],
-                value={"id": "wago", "name": "Wago", "types": types},
+                value={"id": "alt-blocks", "name": "Alt", "types": types},
             ),
             Insert(
                 path=["catalogue_brands", "busbars"],
