@@ -110,7 +110,7 @@ def test_the_board_has_the_golden_panels(app: api.Api, project: Path) -> None:
     l2 = next(u for u in first["units"] if u["device"] == "l2")
     assert l2["cable_manager_u"] == 1
     assert l2["block_u"] == l2["height_u"] + 1
-    assert {"key", "n", "part_id", "label", "moved"} <= set(l2)
+    assert {"key", "n", "part_id", "label", "pinned", "position"} <= set(l2)
     l1 = [u for u in first["units"] if u["device"] == "l1"]
     assert [(u["role"], u["n"], u["of"]) for u in l1] == [("l1_switch", n, 3) for n in (1, 2, 3)]
 
@@ -128,18 +128,41 @@ def test_the_board_places_each_blank_plate_where_the_engine_counts_it(
         assert all(u["plate_below_u"] == 0 for u in panel["units"] if not u["block_u"])
 
 
-def test_a_moved_device_is_marked(app: api.Api, project: Path, substation: Path) -> None:
+def test_a_device_moved_by_an_override_is_pinned(
+    app: api.Api, project: Path, substation: Path
+) -> None:
     edit(substation, "  overrides: []", "  overrides: [{device: gps, panel: 2}]")
 
     panels = page(app, project)["panels"]
 
     gps = next(u for p in panels for u in p["units"] if u["device"] == "gps")
-    assert gps["moved"] is True
+    assert gps["pinned"] is True
     assert next(p for p in panels if any(u is gps for u in p["units"]))["number"] == 2
-    assert not any(u["moved"] for p in panels for u in p["units"] if u["device"] != "gps")
+    assert not any(u["pinned"] for p in panels for u in p["units"] if u["device"] != "gps")
     assert page(app, project)["overrides"] == [
         {"device": "gps", "unit": None, "side": None, "panel": 2, "position": None}
     ]
+
+
+def test_a_pin_where_the_layout_would_place_it_is_still_a_pin(
+    app: api.Api, project: Path, substation: Path
+) -> None:
+    edit(substation, "  overrides: []", "  overrides: [{device: gps, panel: 1}]")
+
+    [gps] = [u for p in page(app, project)["panels"] for u in p["units"] if u["device"] == "gps"]
+
+    assert gps["pinned"] is True
+
+
+def test_a_pinned_position_orders_the_board(app: api.Api, project: Path, substation: Path) -> None:
+    edit(substation, "  overrides: []", "  overrides: [{device: gps, panel: 1, position: 1}]")
+
+    first = page(app, project)["panels"][0]
+
+    rack = [u for u in first["units"] if u["block_u"]]
+    assert rack[0]["device"] == "gps"
+    assert [u["position"] for u in rack] == list(range(1, len(rack) + 1))
+    assert all(u["position"] is None for u in first["units"] if not u["block_u"])
 
 
 def test_hand_written_panels_are_listed_and_the_board_is_what_the_layout_would_write(
