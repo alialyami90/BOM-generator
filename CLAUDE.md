@@ -54,6 +54,7 @@ examples/         YAML inputs reproducing the spec's example project
 
 ## UI work
 
-Any user interface (see the UI milestone in `docs/plan.md`) is designed with the
-`impeccable` skill before it is built: shape the screens first, then critique and
-polish them as part of the same milestone.
+Any user interface (milestone M8 in `docs/plan.md`) is designed with the
+`impeccable` skill first, as platform-neutral tokens, component specs and a
+reference prototype in `docs/ui/` (M8a). Implementation on the chosen platform
+(M8b) follows the approved design and ends with an impeccable polish pass.

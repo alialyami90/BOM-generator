@@ -336,15 +336,27 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
 - `bomgen build` final options (`--out`, `--sheet-name`, `--compare`),
   README usage, example walkthrough.
 
-### M8 — Web UI (designed with the impeccable skill)
-Requested in the thread; not part of the spec, so its scope is Q16.
-- Proposed: a small local web app on top of `bomgen` (FastAPI + server-rendered
-  pages): open or upload a project, edit library/panel/project data in forms
-  backed by the JSON Schemas, run validate, preview the BOM groups and the
-  check report, download the .xlsx.
-- Process: shape the screens with the `impeccable` skill first, review with
-  Ali, then build; finish with an impeccable critique/polish pass.
-- Could split into M8a (read-only preview + build/download) and M8b (editing).
+### M8 — UI: designed with impeccable, platform chosen afterwards
+Requested in the thread; not part of the spec. Design and implementation are
+separate steps so the platform can be picked once the design exists (Q16).
+
+**M8a — UI design (platform-neutral).** Use the `impeccable` skill to design
+the screens and elements: open project, edit library / panels / project
+settings, validate with readable errors, preview BOM groups and the check
+report, build and download the .xlsx. Deliverables in `docs/ui/`:
+- design tokens (colour, type, spacing, radius, elevation) in a neutral
+  format (`tokens.json`, W3C design-tokens style) that maps to CSS variables,
+  Qt stylesheets or any other toolkit;
+- component specs (states, sizes, behaviour, accessibility notes) and
+  screen layouts with the user flows;
+- a static clickable reference prototype (HTML/CSS) to review the look and
+  flow; it is a reference, not the product.
+Finish with an impeccable critique pass and Ali's review.
+
+**M8b — UI implementation on the chosen platform.** Build the approved design
+on whichever platform Ali picks (local web app, desktop app, or other) as a thin
+layer over `bomgen`; the business rules stay in the engine. Ends with an
+impeccable polish/audit pass against the M8a design.
 
 ## 5. Testing strategy
 
@@ -460,11 +472,10 @@ ranges become golden assertions per sheet once Q1's data fixes row positions.
 dev dependency) to evaluate the workbook in pytest; optionally a LibreOffice
 headless recalc job later to prove "opens without repair" (OUT-1).
 
-**Q16 — What the UI is.** You asked for the UI to be designed with the
-impeccable skill; the spec defines only the CLI and the workbook. *Default:* M8
-as described above, a local web app for editing inputs, validating, previewing
-and downloading. Tell me if you meant something else (e.g. only the Excel
-output's visual design, or a hosted multi-user tool).
+**Q16 — UI platform.** *Resolved in part, 2026-10-28:* Ali wants the UI
+designed with the impeccable skill independently of where it is implemented
+(M8a), with the platform picked afterwards (M8b). *Still open:* the platform
+(local web app, desktop app or other); decide before M8b.
 
 **Q17 — Writer library (ADR 0003).** *Resolved 2026-10-28:* Ali chose
 XlsxWriter for writing and openpyxl for reading back in tests.
