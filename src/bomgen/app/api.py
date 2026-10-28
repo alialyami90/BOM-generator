@@ -53,7 +53,7 @@ from bomgen.bundle.errors import LibraryPackageError, RefusalKind
 from bomgen.io import edit, lifecycle, loose_edit
 from bomgen.io.edit import EditError, EditResult
 from bomgen.io.errors import InputError
-from bomgen.io.fields import PartUse, part_users, set_field
+from bomgen.io.fields import PartUse, part_users, remove_field, set_field, validate_field
 from bomgen.io.loader import PROJECT_FILE, load_library
 from bomgen.library_store.csv_export import GROUPS as CSV_GROUPS
 from bomgen.library_store.device_db import DeviceRecord, load_device_records
@@ -82,6 +82,7 @@ FILE_TYPES = {
     "bomproj": "Project files (*.bomproj)",
     "xlsx": "Excel workbooks (*.xlsx)",
     "csv": "Spreadsheet tables (*.csv;*.zip)",
+    "png": "PNG pictures (*.png)",
 }
 
 
@@ -212,6 +213,7 @@ def _edit_refusals() -> Iterator[None]:
 
 
 DELETED_DIR = "deleted-projects"
+PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 
 
 def _written(result: EditResult) -> None:
@@ -685,6 +687,58 @@ class Api:
         self._recent().remove(file)
         self._list(saved)
         return {"saved": saved}
+
+    # -- The Project page's own fields (docs/ui/editing.md, Project > Overview; M17c) --
+
+    @endpoint
+    def set_project_field(
+        self, project_file: str, path: Sequence[str | int], value: Any
+    ) -> dict[str, Any]:
+        """Write one field of project.yaml (None or "" removes it, so the default applies);
+        refused with the model's message when the project would not load. Returns the page."""
+        return self._set_project_field(Path(project_file), path, value)
+
+    def _set_project_field(
+        self, file: Path, path: Sequence[str | int], value: Any
+    ) -> dict[str, Any]:
+        store = self._library_store()
+        with _edit_refusals():
+            if value is None or value == "":
+                result = remove_field(file, tuple(path), store=store)
+            else:
+                result = set_field(file, tuple(path), value, store=store)
+        _written(result)
+        return summarize(file, store, details=True)
+
+    @endpoint
+    def check_project_field(
+        self, project_file: str, path: Sequence[str | int], value: Any
+    ) -> str | None:
+        """The model's message for setting a project field to ``value``, or None."""
+        with _edit_refusals():
+            return validate_field(
+                Path(project_file), tuple(path), value, store=self._library_store()
+            )
+
+    @endpoint
+    def set_project_logo(
+        self, project_file: str, source: str | None = None
+    ) -> dict[str, Any] | None:
+        """Copy a PNG (asked for when not given) into the project's ``assets`` folder and
+        point ``project.logo`` at it; None when the person cancels."""
+        chosen = source or self._dialog(OPEN_DIALOG, "png")
+        if chosen is None:
+            return None
+        picture = Path(chosen)
+        data = picture.read_bytes()
+        if not data.startswith(PNG_SIGNATURE):
+            raise AppError("invalid_edit", f"{picture.name} is not a PNG picture.")
+        file = Path(project_file)
+        target = file.parent / "assets" / f"{lifecycle.project_id_for(picture.stem)}.png"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(data)
+        logo = target.relative_to(file.parent).as_posix()
+        return self._set_project_field(file, ["project", "logo"], logo)
 
     @endpoint
     def choose_project_folder(self) -> str | None:
