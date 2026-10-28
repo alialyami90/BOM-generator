@@ -14,13 +14,15 @@ from pydantic import (
     Field,
     NonNegativeInt,
     PositiveInt,
+    TypeAdapter,
+    ValidationError,
     field_validator,
     model_validator,
 )
 
-from bomgen.models._base import DocumentKey, InputModel, PartId
+from bomgen.models._base import DocumentKey, ExcelSheetName, InputModel, PartId
 from bomgen.models.library import Media, PortSpeed
-from bomgen.models.panel import Enclosure, PanelId, PanelKind
+from bomgen.models.panel import Enclosure, PanelId, PanelKind, TagPrefix
 from bomgen.models.project import ConstantOverrides, LooseMaterial, OutputSettings, Spares
 
 
@@ -148,6 +150,24 @@ class GeneratedPanels(InputModel):
     @classmethod
     def _number_templates(cls, value: str) -> str:
         return _check_number_template(value)
+
+    @model_validator(mode="after")
+    def _rendered_values_are_valid(self) -> "GeneratedPanels":
+        for name, kind in _RENDERED.items():
+            rendered = getattr(self, name).format(n=1)
+            try:
+                kind.validate_python(rendered)
+            except ValidationError as error:
+                problem = error.errors()[0]["msg"]
+                raise ValueError(f"{name} gives {rendered!r} for panel 1: {problem}") from None
+        return self
+
+
+_RENDERED: dict[str, TypeAdapter[str]] = {
+    "id": TypeAdapter(PanelId),
+    "tag_prefix": TypeAdapter(TagPrefix),
+    "sheet_name": TypeAdapter(ExcelSheetName),
+}
 
 
 class Substation(InputModel):

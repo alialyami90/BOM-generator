@@ -173,3 +173,13 @@ def test_loose_material_belongs_to_the_substation() -> None:
     s = Substation.model_validate(data)
     assert s.loose_material is not None
     assert s.loose_material.items[0].children == ["LUG-1"]
+
+
+@pytest.mark.parametrize(
+    ("field", "bad"), [("id", "PSA {n}"), ("tag_prefix", "psa{n}"), ("sheet_name", "a:{n}")]
+)
+def test_generated_panel_templates_render_valid_values(field: str, bad: str) -> None:
+    data = copy.deepcopy(substation_dict()["generated_panels"])
+    data[field] = bad
+    with pytest.raises(ValidationError, match=field):
+        GeneratedPanels.model_validate(data)

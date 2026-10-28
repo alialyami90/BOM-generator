@@ -206,7 +206,7 @@ def _document_issue(
 def document_issues(
     substation: Substation,
     source: YamlSource,
-    panels: Sequence[tuple[Panel, YamlSource]],
+    panels: Sequence[tuple[YamlSource, Panel | PanelMirror]],
     register: Mapping[str, RegisterEntry],
 ) -> list[Issue]:
     """Every document key a substation and its panels name must be one of its own."""
@@ -218,7 +218,7 @@ def document_issues(
         refs.append(
             (source, ("generated_panels", "document"), substation.generated_panels.document)
         )
-    refs.extend((panel_source, ("document",), panel.document) for panel, panel_source in panels)
+    refs.extend((panel_source, ("document",), panel.document) for panel_source, panel in panels)
     found = (_document_issue(src, loc, key, sub_id, register) for src, loc, key in refs)
     return [issue for issue in found if issue is not None]
 

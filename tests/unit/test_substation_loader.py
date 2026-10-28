@@ -8,6 +8,7 @@ from builders import (
     SUBSTATION_DIR,
     default_library,
     default_p1,
+    default_p2,
     default_project,
     default_substation,
     write_project,
@@ -310,4 +311,85 @@ def test_library_not_installed_is_reported(tmp_path: Path) -> None:
         load_project(project_file, store=store)
     assert where(list(caught.value.issues)) == [
         ("project.yaml", "library", "library test-lib 2.0.0 is not installed")
+    ]
+
+
+def test_misspelt_root_keys_reach_the_right_model(tmp_path: Path) -> None:
+    project = default_project()
+    project["substation"] = project.pop("substations")
+    project_file = write_project(tmp_path, project=project)
+    with pytest.raises(InputError) as caught:
+        load_inputs(project_file)
+    assert {i.location for i in caught.value.issues} == {"substations", "substation"}
+    substation = default_substation()
+    substation["substations"] = substation.pop("substation")
+    write_project(tmp_path, substation=substation)
+    with pytest.raises(InputError) as caught:
+        load_inputs(tmp_path / SUBSTATION_DIR / "substation.yaml")
+    assert {i.location for i in caught.value.issues} == {"substation", "substations"}
+
+
+def test_broken_project_file_above_a_substation_is_reported(tmp_path: Path) -> None:
+    project_file = write_project(tmp_path)
+    project_file.write_text(project_file.read_text() + "bad: [\n", encoding="utf-8")
+    with pytest.raises(InputError) as caught:
+        load_substation(tmp_path / SUBSTATION_DIR / "substation.yaml")
+    assert [i.file for i in caught.value.issues] == [project_file]
+
+
+def test_inherited_rack_reserve_is_reported_once(tmp_path: Path) -> None:
+    project = default_project()
+    project["defaults"] = {"spares": {"rack_u_reserved": 42}}
+    project["substations"].append("substations/s2/substation.yaml")
+    project["documents"].append(project["documents"][0] | {"key": "s2-bom", "substation": "s2"})
+    project["documents"].append(project["documents"][3] | {"key": "s2-calc", "substation": "s2"})
+    project_file = write_project(tmp_path, project=project)
+    s2 = default_substation()
+    s2["substation"]["id"] = "s2"
+    s2["document"] = "s2-bom"
+    for sheet in s2["calculations"].values():
+        sheet["document"] = "s2-calc"
+    s2["panels"] = []
+    s2["manual_panels"] = ["panels/q1.yaml"]
+    s2_dir = tmp_path / "substations" / "s2"
+    write_yaml(s2_dir / "substation.yaml", s2)
+    write_yaml(s2_dir / "panels" / "q1.yaml", default_p1() | {"document": "s2-bom"})
+    issues = issues_for(project_file)
+    assert [(i.file.name, i.location) for i in issues] == [
+        ("project.yaml", "defaults.spares.rack_u_reserved")
+    ]
+
+
+def test_generated_panel_busbars_are_checked(tmp_path: Path) -> None:
+    substation = with_equipment(default_substation())
+    substation["generated_panels"]["options"] = {"grounding_busbars": ["nope"]}
+    issues = issues_for(
+        write_project(tmp_path, library=library_with_heights(), substation=substation)
+    )
+    assert [(i.location, i.message) for i in issues] == [
+        (
+            "generated_panels.options.grounding_busbars[0]",
+            "unknown busbar 'nope' (not in catalogues.busbars)",
+        )
+    ]
+
+
+def test_bad_document_key_of_an_unresolved_mirror_is_still_reported(tmp_path: Path) -> None:
+    p2 = default_p2() | {"mirror_of": "zz", "document": "nokey"}
+    issues = issues_for(write_project(tmp_path, panels={"p2.yaml": p2}))
+    assert sorted(i.location for i in issues) == ["document", "mirror_of"]
+
+
+def test_manual_panel_cannot_be_generated(tmp_path: Path) -> None:
+    substation = default_substation()
+    substation["panels"] = ["panels/p1.yaml", "panels/p2.yaml"]
+    substation["manual_panels"] = ["panels/p3.yaml"]
+    p3 = default_p1() | {"id": "p3", "tag_prefix": "P3", "sheet_name": "3", "generated": True}
+    issues = issues_for(write_project(tmp_path, substation=substation, panels={"p3.yaml": p3}))
+    assert where(issues) == [
+        (
+            "p3.yaml",
+            "generated",
+            "a manual panel is never written by the layout; remove generated: true",
+        )
     ]

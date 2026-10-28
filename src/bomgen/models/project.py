@@ -142,7 +142,7 @@ LibraryVersion = Annotated[
 class LibrarySelection(InputModel):
     """The installed library every substation uses; ``file`` loads one from disk instead."""
 
-    name: str
+    name: Annotated[str, StringConstraints(pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]*$")]
     version: LibraryVersion
     file: Path | None = None
 

@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ValidationError
 
-from bomgen.io.errors import InputError, Issue, Loc, issues_from_validation_error
+from bomgen.io.errors import InputError, Issue, Loc, format_location, issues_from_validation_error
 from bomgen.io.mirror import mirror_panel
 from bomgen.io.references import (
     document_issues,
@@ -78,9 +78,9 @@ class LoadedProject:
 def load_inputs(
     path: Path, *, store: LibraryStore | None = None
 ) -> LoadedProject | LoadedSubstation:
-    """Load a project file or a substation file, told apart by the project's ``substations``."""
+    """Load a project file or a substation file; only a project has ``project`` or ``library``."""
     source = read_yaml(path)
-    if isinstance(source.data, dict) and "substations" in source.data:
+    if isinstance(source.data, dict) and source.data.keys() & {"project", "library"}:
         return load_project(path, store=store)
     return load_substation(path, store=store)
 
@@ -105,10 +105,8 @@ def load_substation(
 
 
 def _listed_substations(project_file: Path) -> set[Path]:
-    try:
-        data = read_yaml(project_file).data
-    except InputError:
-        return set()
+    """Files ``project_file`` lists; a project file that cannot be read raises."""
+    data = read_yaml(project_file).data
     listed = data.get("substations") if isinstance(data, dict) else None
     if not isinstance(listed, list):
         return set()
@@ -157,6 +155,13 @@ def load_project(project_file: Path, *, store: LibraryStore | None = None) -> Lo
     assert library_source is not None
     issues.extend(library_issues(library, library_source))
     issues.extend(project_issues(project, project_source, substation_sources))
+    reserved = project.defaults.spares.rack_u_reserved
+    if reserved >= library.catalogues.enclosure_u:
+        loc: Loc = ("defaults", "spares", "rack_u_reserved")
+        message = _no_rack_space(reserved, library)
+        issues.append(
+            Issue(project_file, format_location(loc), message, project_source.line_for(loc))
+        )
 
     loaded: list[LoadedSubstation] = []
     for substation, source in substation_sources:
@@ -215,41 +220,29 @@ def _load_substation(
     sub_id = substation.substation.id
     register = {entry.key: entry for entry in project.documents}
     found.extend(substation_issues(substation, source, resolved, library, library_name))
-    found.extend(document_issues(substation, source, resolved, register))
+    found.extend(document_issues(substation, source, panel_sources, register))
     found.extend(equipment_issues(substation, source, library, library_name))
-    found.extend(_generated_panel_issues(substation, source))
+    found.extend(_generated_panel_issues(substation, source, library))
+    for panel_source, entry in panel_sources:
+        if entry.generated and panel_source.path.resolve() in manual_files:
+            message = "a manual panel is never written by the layout; remove generated: true"
+            line = panel_source.line_for(("generated",))
+            found.append(Issue(panel_source.path, "generated", message, line))
 
     constants = _merged(
         project.defaults.constants, substation.constants, source, ("constants",), found
     )
     spares = _merged(project.defaults.spares, substation.spares, source, ("spares",), found)
-    if spares is not None and spares.rack_u_reserved >= library.catalogues.enclosure_u:
-        message = (
-            f"rack_u_reserved {spares.rack_u_reserved} leaves no usable rack space "
-            f"(catalogues.enclosure_u is {library.catalogues.enclosure_u})"
-        )
-        if (
-            substation.spares is not None
-            and "rack_u_reserved" in substation.spares.model_fields_set
-        ):
-            found.append(
-                Issue(
-                    source.path,
-                    "spares.rack_u_reserved",
-                    message,
-                    source.line_for(("spares", "rack_u_reserved")),
-                )
-            )
-        else:
-            loc: Loc = ("defaults", "spares", "rack_u_reserved")
-            found.append(
-                Issue(
-                    project_source.path,
-                    "defaults.spares.rack_u_reserved",
-                    message,
-                    project_source.line_for(loc),
-                )
-            )
+    written = substation.spares.model_fields_set if substation.spares is not None else set()
+    if (
+        spares is not None
+        and "rack_u_reserved" in written
+        and spares.rack_u_reserved >= library.catalogues.enclosure_u
+    ):
+        rack_loc: Loc = ("spares", "rack_u_reserved")
+        message = _no_rack_space(spares.rack_u_reserved, library)
+        line = source.line_for(rack_loc)
+        found.append(Issue(source.path, format_location(rack_loc), message, line))
 
     issues.extend(found)
     if found or constants is None or spares is None:
@@ -265,6 +258,13 @@ def _load_substation(
         panels=tuple(panel for panel, _ in resolved),
         panel_files={panel.id: panel_source.path for panel, panel_source in resolved},
         manual_panel_ids=manual_ids,
+    )
+
+
+def _no_rack_space(reserved: int, library: Library) -> str:
+    return (
+        f"rack_u_reserved {reserved} leaves no usable rack space "
+        f"(catalogues.enclosure_u is {library.catalogues.enclosure_u})"
     )
 
 
@@ -335,24 +335,34 @@ def _resolve_panels(
     return resolved
 
 
-def _generated_panel_issues(substation: Substation, source: YamlSource) -> list[Issue]:
-    """Each generated panel's options, merged, must be valid panel options."""
+def _generated_panel_issues(
+    substation: Substation, source: YamlSource, library: Library
+) -> list[Issue]:
+    """Each generated panel's options, merged, must be valid and name known busbars."""
     generated = substation.generated_panels
     if generated is None:
         return []
     issues: list[Issue] = []
-    combos: list[tuple[Loc, dict[str, object]]] = [
-        (("generated_panels", "options"), generated.options)
+    combos: list[tuple[Loc, dict[str, object], dict[str, object]]] = [
+        (("generated_panels", "options"), generated.options, generated.options)
     ]
-    for number, options in generated.options_by_panel.items():
-        combos.append(
-            (("generated_panels", "options_by_panel", number), generated.options | options)
-        )
-    for loc, options in combos:
+    for number, own in generated.options_by_panel.items():
+        loc: Loc = ("generated_panels", "options_by_panel", number)
+        combos.append((loc, own, generated.options | own))
+    for loc, own, merged in combos:
         try:
-            PanelOptions.model_validate(options)
+            PanelOptions.model_validate(merged)
         except ValidationError as error:
             issues.extend(issues_from_validation_error(error, source, prefix=loc))
+            continue
+        busbars = own.get("grounding_busbars")
+        for index, busbar in enumerate(busbars if isinstance(busbars, list) else []):
+            if busbar not in library.catalogues.busbars:
+                bar_loc = (*loc, "grounding_busbars", index)
+                message = f"unknown busbar '{busbar}' (not in catalogues.busbars)"
+                issues.append(
+                    Issue(source.path, format_location(bar_loc), message, source.line_for(bar_loc))
+                )
     return issues
 
 

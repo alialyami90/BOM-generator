@@ -203,3 +203,9 @@ def test_loose_item_and_extra_accept_tag() -> None:
 def test_loose_extra_rejects_zero_quantity() -> None:
     with pytest.raises(ValidationError):
         LooseExtra(part_id="CABLE-1", qty=0)
+
+
+@pytest.mark.parametrize("bad", ["../x", "a/b", "", ".hidden"])
+def test_library_name_is_a_plain_folder_name(bad: str) -> None:
+    with pytest.raises(ValidationError, match="name"):
+        LibrarySelection(name=bad, version="1.0.0")
