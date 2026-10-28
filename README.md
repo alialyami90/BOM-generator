@@ -59,7 +59,9 @@ Done:
 
   Apart from the Panels board (M17, below), projects and substations are
   still read-only in the app: edit the YAML files, then open the project again.
-- M11, built early (ADR 0009): the Windows installer and tag-driven releases.
+- M11, built early (ADR 0009): the Windows installer and releases from
+  `main` when a merged PR bumps the version
+  ([`packaging/README.md`](packaging/README.md)).
   The installed app opens the desktop window, double-clicking a `.bomlib`
   imports it, and a `.bomproj` opens the app on that project.
 
@@ -71,9 +73,11 @@ In progress, for v0.2 (Ali's feedback on v0.1.0, tracked in
   blank-plate gap is only between two active devices.
 - M13 (done): alternatives are library parts (`alt_group`, `tier`), and
   further MCB brand sets are chosen per project or substation with
-  `catalogue_choice` (ADR 0017). The Library screen shows the catalogues.
-- M14 (in review): researched datasheet data for every device and
-  alternative, for the next shipped library (psa-devices 1.1.0, plan Q38).
+  `catalogue_choice` (ADR 0017); the DC branches can use their own DC-rated
+  set with `catalogue_choice.mcb_dc` (ADR 0023). The Library screen shows the
+  catalogues.
+- M14 (done): the example library is psa-devices 1.1.0, with the researched
+  alternatives as parts and DC-rated MCB brand sets (plan Q37, Q38).
 - M15 (done): branch MCBs sized from each device's running and inrush current
   (ADR 0019), with DC float-voltage checks.
 - M16: library editing as local versions (`+local.N`) with `.bomlib` backups,
@@ -82,9 +86,8 @@ In progress, for v0.2 (Ali's feedback on v0.1.0, tracked in
 - M17: create and edit projects, substations and panels in the app. The
   writers (ADR 0021) and the Panels board's drag and drop, pins, deletes,
   undo and keyboard moves are done; the app's other editors come next.
-- M18: loose material on its own sheet and Preview tab (ADR 0020), with
-  free-text items and writers (ADR 0022). The app's Loose material page is in
-  review.
+- M18 (done): loose material on its own sheet and Preview tab (ADR 0020),
+  with free-text items, writers and the app's Loose material page (ADR 0022).
 
 Who builds what is in [`docs/agents.md`](docs/agents.md); the terms project,
 substation, side and stream are defined in `docs/plan.md` → "Glossary".

@@ -7,6 +7,36 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- DC MCBs can come from their own brand set: `catalogue_choice.mcb_dc` picks a
+  DC-rated set for the DC mains, branches, spares and QCOD circuits and their
+  sizing; unset, the DC set follows `mcb`, so existing projects do not change.
+  ADR 0023, plan Q39 (#151, #154).
+- Library data (M14): the example library is psa-devices 1.1.0, with the
+  researched alternatives as parts in each device's `alt_group` and DC-rated
+  MCB brand sets (Schneider C60H-DC, ABB S200M UC, Siemens 5SY5) with their
+  aux contacts, plus further terminal block, busbar and housekeeping sets;
+  iC60N stays the default (#130).
+- `output.power_footnotes` on a substation: free-text footnotes the Power
+  Consumption sheet prints after its NOTES; the example carries the reference
+  workbook's printer footnote (#152).
+- The app's Loose material page (M18): add library or free-text items, edit,
+  move and remove them, with per-field messages and a save bar; ADR 0022
+  (#146).
+
+### Changed
+
+- Releases: a merged PR that bumps the version releases from `main`, after
+  checking that `CHANGELOG.md` has the version's section and
+  `pyproject.toml` agrees; a hand-pushed tag still works. ADR 0009 amended
+  (#153).
+- Each input file is parsed once per text and cached, roughly halving the
+  test suite's time (#149).
+- A DC-only MCB brand (`ac_rated: false`) is refused as the
+  `catalogue_choice.mcb`, which also sizes the AC branches, and the error
+  names the AC-rated brands (#145).
+
 ## [0.1.1] - 2026-10-28
 
 ### Added
