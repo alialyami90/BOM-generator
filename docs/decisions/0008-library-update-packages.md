@@ -62,4 +62,9 @@ Code: `src/bomgen/library_store/`.
   package, incompatible, validation failed, downgrade, already installed, not
   installed, store damaged) so the desktop app (M10) can word them and offer
   remedies without parsing messages. Mapping kinds to screen copy is an M10 item.
+- `bomgen.library_store.validate_library(path)` and
+  `import_library(path, *, force=False, dry_run=False) -> ImportResult` are the
+  public entry points for the CLI, the double-click launcher and the desktop
+  app. `bomgen library pack` validates the source library before writing, so a
+  schema-invalid library is caught on the publisher's PC, not the recipient's.
 

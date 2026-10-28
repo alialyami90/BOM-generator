@@ -7,6 +7,7 @@ import pytest
 from typer.testing import CliRunner
 
 from bomgen.cli import app
+from bomgen.library_store.package import pack
 
 EXAMPLE_LIBRARY = Path(__file__).parents[3] / "examples" / "library.yaml"
 SCHEMA_INVALID = "devices:\n  - part_id: X\n    bogus: 1\n"
@@ -16,6 +17,13 @@ SCHEMA_INVALID = "devices:\n  - part_id: X\n    bogus: 1\n"
 def runner(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> CliRunner:
     monkeypatch.setenv("BOMGEN_LIBRARY_HOME", str(tmp_path / "home"))
     return CliRunner()
+
+
+def _pack_unchecked(tmp_path: Path, library: Path) -> Path:
+    """A package around a library `pack` would refuse, as an old or foreign tool might make."""
+    out = tmp_path / "unchecked.bomlib"
+    pack(library, out, name="psa", version="1.0.0")
+    return out
 
 
 def _pack(runner: CliRunner, tmp_path: Path, library: Path, version: str = "1.0.0") -> Path:
@@ -51,7 +59,7 @@ def test_import_refuses_a_library_that_fails_schema_validation(
 ) -> None:
     bad = tmp_path / "bad.yaml"
     bad.write_text(SCHEMA_INVALID)
-    package = _pack(runner, tmp_path, bad)
+    package = _pack_unchecked(tmp_path, bad)
 
     result = runner.invoke(app, ["library", "import", str(package)])
 
@@ -65,7 +73,7 @@ def test_import_refuses_a_library_that_fails_schema_validation(
 def test_dry_run_also_reports_schema_problems(runner: CliRunner, tmp_path: Path) -> None:
     bad = tmp_path / "bad.yaml"
     bad.write_text(SCHEMA_INVALID)
-    package = _pack(runner, tmp_path, bad)
+    package = _pack_unchecked(tmp_path, bad)
 
     result = runner.invoke(app, ["library", "import", str(package), "--dry-run"])
 

@@ -24,3 +24,6 @@ htmlcov/
 .idea/
 .vscode/
 .DS_Store
+
+# Library update packages are build outputs
+*.bomlib

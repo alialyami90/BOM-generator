@@ -2,36 +2,20 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
 from pathlib import Path
 from typing import Annotated
 
 import typer
 
-from bomgen.io.errors import InputError
-from bomgen.io.loader import load_library
-from bomgen.library_store.errors import LibraryPackageError, RefusalKind
-from bomgen.library_store.manifest import LIBRARY_FILE
+from bomgen.library_store.errors import LibraryPackageError
 from bomgen.library_store.package import PACKAGE_SUFFIX, pack
+from bomgen.library_store.service import import_library, validate_library
 from bomgen.library_store.store import ImportResult, LibraryStore, default_library_home
 
 library_app = typer.Typer(
     no_args_is_help=True,
     help="Build, install and roll back device-library update packages (.bomlib).",
 )
-
-
-def _validate_library(library_file: Path) -> None:
-    """Check a package's library with the same loader the build uses."""
-    try:
-        load_library(library_file)
-    except InputError as error:
-        problems = "\n".join(
-            f"  {replace(issue, file=Path(LIBRARY_FILE))}" for issue in error.issues
-        )
-        raise LibraryPackageError(
-            f"{LIBRARY_FILE} fails validation:\n{problems}", RefusalKind.VALIDATION_FAILED
-        ) from None
 
 
 def _store() -> LibraryStore:
@@ -70,6 +54,7 @@ def pack_command(
     """Build a .bomlib package from a library file."""
     out = out or Path(f"{name}-{version}{PACKAGE_SUFFIX}")
     try:
+        validate_library(library)
         manifest = pack(
             library, out, name=name, version=version, release_notes=notes, extra_dirs=add or []
         )
@@ -89,17 +74,15 @@ def import_command(
     ] = False,
 ) -> None:
     """Verify a package, show what changes, then install and activate it."""
-    store = _store()
     try:
-        if dry_run:
-            _report(store.preview_import(package, force=force, validate=_validate_library))
-            typer.echo("Dry run: nothing was installed.")
-            return
-        result = store.import_package(package, force=force, validate=_validate_library)
+        result = import_library(package, force=force, dry_run=dry_run)
     except (LibraryPackageError, OSError) as exc:
         raise _fail(exc) from exc
     _report(result)
-    typer.echo(f"Installed and activated {result.manifest.name} {result.manifest.version}.")
+    if dry_run:
+        typer.echo("Dry run: nothing was installed.")
+    else:
+        typer.echo(f"Installed and activated {result.manifest.name} {result.manifest.version}.")
 
 
 @library_app.command("list")
