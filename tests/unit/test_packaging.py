@@ -97,3 +97,13 @@ def test_release_workflow_installs_the_app_extra() -> None:
         encoding="utf-8"
     )
     assert 'pip install ".[app]"' in workflow
+
+
+def test_release_workflow_validates_the_example_project_with_the_frozen_and_installed_cli() -> None:
+    # `bomgen build` arrives with M7; until then validate loads the whole example
+    # (models, YAML, library) from the bundle, so a missing data file fails the job.
+    workflow = (PACKAGING.parent / ".github" / "workflows" / "release.yml").read_text(
+        encoding="utf-8"
+    )
+    assert (PACKAGING.parent / "examples" / "project.yaml").is_file()
+    assert workflow.count("validate examples\\project.yaml") == 2

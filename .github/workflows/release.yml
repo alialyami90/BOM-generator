@@ -80,6 +80,13 @@ jobs:
           Write-Output "bomgen.exe --help exited $helpExit (expected $expected): $help"
           if ($helpExit -ne $expected) { Write-Error "bomgen.exe --help exited $helpExit"; exit 1 }
           $global:LASTEXITCODE = 0  # an expected non-zero exit must not leak out as the step's result
+          # Loads the whole example (models, YAML, library) from the frozen bundle; this
+          # becomes `bomgen build` once M7 adds it.
+          $validated = & "dist\bomgen\bomgen.exe" validate examples\project.yaml 2>&1
+          $validateExit = $LASTEXITCODE
+          Write-Output "bomgen.exe validate exited ${validateExit}: $validated"
+          if ($validateExit -ne 0 -or "$validated" -notmatch "^OK:") { Write-Error "validate failed"; exit 1 }
+          $global:LASTEXITCODE = 0
           # Imports every bomgen module from the frozen bundle (bomgen.app.launcher.self_test).
           $app = Start-Process "dist\bomgen\BOM Generator.exe" -ArgumentList "--self-test" -Wait -PassThru
           Write-Output "BOM Generator.exe --self-test exited $($app.ExitCode)"
@@ -146,6 +153,8 @@ jobs:
           if ($LASTEXITCODE) { Fail "bomgen.exe library pack exited $LASTEXITCODE" }
           $import = Start-Process $exe -ArgumentList "`"$package`"" -Wait -PassThru
           if ($import.ExitCode) { Fail "Opening a .bomlib with the app exited $($import.ExitCode)" }
+          $validated = & "$dir\bomgen.exe" validate examples\project.yaml 2>&1
+          if ($LASTEXITCODE -ne 0 -or "$validated" -notmatch "^OK:") { Fail "Installed bomgen.exe validate gave: $validated" }
           $listing = (& "$dir\bomgen.exe" library list) -join "`n"
           if ($listing -notmatch "ci-library") { Fail "Imported library missing from: $listing" }
           Remove-Item Env:BOMGEN_LIBRARY_HOME, Env:BOMGEN_NO_DIALOGS
