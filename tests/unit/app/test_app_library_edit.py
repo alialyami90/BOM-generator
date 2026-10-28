@@ -306,7 +306,16 @@ def test_part_users_lists_the_open_substations_rows(app: api.Api, tmp_path: Path
     assert reply["substation"]
     wheres = {u["where"] for u in reply["uses"]}
     assert "equipment" in wheres
-    assert all(set(u) == {"where", "name"} for u in reply["uses"])
+    assert all(set(u) == {"where", "name", "panel"} for u in reply["uses"])
+
+
+def test_a_panel_row_names_its_panel_apart(app: api.Api, tmp_path: Path) -> None:
+    project = Path(shutil.copytree(EXAMPLES, tmp_path / "workspace" / "jfgp2-pkg3"))
+    uses = ok(app.library_part_users(PART, str(project / "project.yaml"), "gis01"))["uses"]
+    panel = next(u for u in uses if u["where"] == "panel")
+    assert panel["panel"] == "psa3"
+    assert ":" not in panel["name"]
+    assert all(u["panel"] is None for u in uses if u["where"] != "panel")
 
 
 def test_an_unused_part_has_no_users(app: api.Api, tmp_path: Path) -> None:

@@ -146,3 +146,10 @@ def test_the_device_editor_edits_every_list_the_model_has() -> None:
     for key in ("ports:", "children:", "terminals:", "loose_items:"):
         assert key in edit
     assert "can't be edited here yet" not in edit
+
+
+def test_in_use_rows_are_named_as_the_screens_show_them() -> None:
+    edit = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
+    assert "the equipment row ${m(x.name)} (Network)" in edit
+    assert "on panel ${m(p)} (Panels)" in edit
+    assert "Fixed once created: projects refer to it." in edit

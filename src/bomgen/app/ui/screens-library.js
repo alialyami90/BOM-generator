@@ -26,8 +26,8 @@
     return err ? `<div style="margin-bottom:var(--space-4)">${banner('bad', `<b>${what}</b> ${esc(err.message)}`, key === 'overview' && LIB.versions && LIB.versions.versions.length ? '<button class="btn btn--primary btn--sm" data-action="show-versions">Installed versions…</button>' : '')}</div>` : '';
   };
   const reloadLibrary = () => { LIB.state = 'idle'; return Bridge.call('app_info').then(App.setAppInfo).catch(() => {}).then(loadLibrary); };
-  App.reloadLibrary = reloadLibrary;
-  App.libraryDevices = () => devices();  // the Add device dialog's Start from list  // after a library edit is applied (screens-libedit.js)
+  App.reloadLibrary = reloadLibrary;  // after a library edit is applied (screens-libedit.js)
+  App.libraryDevices = () => devices();  // the Add device dialog's Start from list
   const day = (iso) => (iso ? String(iso).slice(0, 10) : '—');
   /* A +local.N version was made here from the version before the "+" (ADR 0018), so it was applied, not released. */
   const localOf = (v) => (/\+local\.\d+$/.test(v || '') ? v.split('+')[0] : null);

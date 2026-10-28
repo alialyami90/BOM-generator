@@ -52,7 +52,7 @@ from bomgen.bundle.errors import LibraryPackageError, RefusalKind
 from bomgen.io import edit, loose_edit
 from bomgen.io.edit import EditError, EditResult
 from bomgen.io.errors import InputError
-from bomgen.io.fields import part_users
+from bomgen.io.fields import PartUse, part_users
 from bomgen.io.loader import PROJECT_FILE, load_library
 from bomgen.library_store.device_db import DeviceRecord, load_device_records
 from bomgen.library_store.manifest import Manifest
@@ -424,9 +424,18 @@ class Api:
         if found.loaded is None:
             return {"substation": substation_id, "uses": None}
         uses = part_users(found.loaded, part_id)
+        panels = {file: panel for panel, file in found.loaded.panel_files.items()}
+
+        def use(u: PartUse) -> dict[str, Any]:
+            if u.where != "panel":
+                return {"where": u.where, "name": u.name, "panel": None}
+            panel = panels[u.file] if u.file is not None else None
+            # part_users names a panel row "<panel>: <tag>"
+            return {"where": u.where, "name": u.name.split(": ", 1)[-1], "panel": panel}
+
         return {
             "substation": found.loaded.substation.substation.name or substation_id,
-            "uses": [{"where": u.where, "name": u.name} for u in uses],
+            "uses": [use(u) for u in uses],
         }
 
     @endpoint

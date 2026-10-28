@@ -150,14 +150,22 @@
       ${tabs('devEdit', Object.entries(TABS).map(([k, [label]]) => [k, label]), t, 'Device sections')}
       <div role="tabpanel" aria-labelledby="tab-devEdit-${t}" style="margin-top:var(--space-4)">${t === 'parts' ? `<datalist id="dl-parts">${(ED.reply.part_ids || []).map((p) => `<option value="${esc(p)}">`).join('')}</datalist>` : ''}${lede}${fields.length ? `<div class="form ${t === 'identity' ? 'form--2' : 'form--3'}">${fields.map(spans).join('')}</div>` : ''}${lists}</div>${saveBar()}</div>`;
   }
-  /* "GIS Substation uses it in 2 rows: equipment PSA3-RTAC; panel psa3: PSA3-RTAC." Library rows that bring it are named apart. */
+  /* "GIS Substation uses it in 2 rows: the equipment row rtac (Network) and a row on panel psa3 (Panels)." Library rows that bring it are named apart. */
   function usesText() {
     const u = ED.users;
     if (!u || !u.uses || !u.uses.length) return '';
     const rows = u.uses.filter((x) => x.where !== 'library'), lib = u.uses.filter((x) => x.where === 'library');
-    const list = (xs) => xs.map((x) => `${esc(x.where)} <span class="mono">${esc(x.name)}</span>`).join('; ');
-    return [rows.length ? `${esc(u.substation)} uses it in ${plural(rows.length, 'row')}: ${list(rows)}.` : '',
-      lib.length ? `In the library it comes with ${lib.map((x) => `<span class="mono">${esc(x.name)}</span>`).join(', ')}.` : ''].filter(Boolean).join(' ');
+    const m = (s) => `<span class="mono">${esc(s)}</span>`;
+    const panels = {};
+    rows.filter((x) => x.where === 'panel').forEach((x) => { panels[x.panel] = (panels[x.panel] || 0) + 1; });
+    const parts = [
+      ...rows.filter((x) => x.where === 'equipment').map((x) => `the equipment row ${m(x.name)} (Network)`),
+      ...Object.entries(panels).map(([p, n]) => `${n === 1 ? 'a row' : `${n} rows`} on panel ${m(p)} (Panels)`),
+      ...rows.filter((x) => x.where === 'loose material').map((x) => `the loose material row ${m(x.name)} (Loose material)`),
+    ];
+    const and = (xs) => xs.length > 1 ? `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}` : xs.join('');
+    return [rows.length ? `${esc(u.substation)} uses it in ${plural(rows.length, 'row')}: ${and(parts)}.` : '',
+      lib.length ? `In the library it comes with ${and(lib.map((x) => m(x.name)))}.` : ''].filter(Boolean).join(' ');
   }
   function listTable(key) {
     const [title, , cols] = LISTS[key], rows = value(key) || [], err = ED.errors[key], changed = key in ED.draft;
@@ -253,7 +261,7 @@
     const devs = App.libraryDevices(), cats = (PEND.page && PEND.page.choices.category) || [...new Set(devs.map((d) => d.cat))];
     dialog({ title: 'Add a device', body: `<div class="stack">
       ${field('Start from', select('ad-from', [['', 'A blank device'], ...devs.map((d) => [d.id, `A copy of ${d.id}${d.model ? ` (${[d.make, d.model].filter(Boolean).join(' ')})` : ''}`])], ''), 'A copy keeps the electrical data, ports and parts, so you only change what differs.')}
-      <div class="form form--2">${field('Part ID', input('ad-id', '', { mono: true, placeholder: 'e.g. SEL-2730M-EXT-B' }), 'Unique in the library. It cannot change once projects use it.')}${field('Category', select('ad-cat', cats.map((c) => [c, catName(c)]), cats[0]))}
+      <div class="form form--2">${field('Part ID', input('ad-id', '', { mono: true, placeholder: 'e.g. SEL-2730M-EXT-B' }), 'Unique in the library. Fixed once created: projects refer to it.')}${field('Category', select('ad-cat', cats.map((c) => [c, catName(c)]), cats[0]))}
       ${field('Make', input('ad-make', ''))}${field('Model', input('ad-model', ''))}</div><div id="ad-err"></div></div>`,
       actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="add-device-do">Create and edit</button>' });
   };
