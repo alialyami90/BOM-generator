@@ -104,7 +104,7 @@ the same one. Ask A1 before you add one.
 
 | Kind | Taken | Next free |
 | --- | --- | --- |
-| ADR | 0009 installer layout (A6), 0010 input models (A2) | 0011 |
+| ADR | 0009 installer layout (A6), 0010 input models (A2), 0011 UI design language and bundled fonts (A4) | 0012 |
 | Open question | Q22 workbook corrections, Q23 issued sheets vs masters (A2) | Q24 |
 
 ## Review and merge
