@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -59,14 +61,29 @@ class YamlSource:
         return None
 
 
+_PENDING: ContextVar[Mapping[Path, str] | None] = ContextVar("pending_texts", default=None)
+
+
+@contextmanager
+def pending_texts(texts: Mapping[Path, str]) -> Iterator[None]:
+    """Inside the block, :func:`read_yaml` reads ``texts`` in place of those files, so an
+    edit can be loaded and checked before it is written (ADR 0021)."""
+    token = _PENDING.set({path.resolve(): text for path, text in texts.items()})
+    try:
+        yield
+    finally:
+        _PENDING.reset(token)
+
+
 def read_yaml(path: Path) -> YamlSource:
     """Read ``path`` into a :class:`YamlSource`, or raise :class:`InputError`."""
 
     def fail(message: str, line: int | None = None) -> InputError:
         return InputError([Issue(path, "", message, line)])
 
+    pending = (_PENDING.get() or {}).get(path.resolve())
     try:
-        text = path.read_text(encoding="utf-8-sig")
+        text = pending if pending is not None else path.read_text(encoding="utf-8-sig")
     except FileNotFoundError:
         raise fail("file not found") from None
     except OSError as exc:
