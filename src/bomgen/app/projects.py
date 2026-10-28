@@ -75,7 +75,7 @@ def _status(errors: int, library_note: str | None) -> dict[str, Any]:
     return {"level": "ok", "text": "Ready", "errors": 0}
 
 
-def _project_only(project_file: Path) -> Project | None:
+def project_only(project_file: Path) -> Project | None:
     """project.yaml validated on its own, for the header when the whole project has errors."""
     try:
         return Project.model_validate(read_yaml(project_file).data)
@@ -103,7 +103,9 @@ def _changed(path: Path) -> datetime | None:
         return None
 
 
-def _load(project_file: Path, store: LibraryStore) -> tuple[LoadedProject | None, list[Issue]]:
+def load_with_issues(
+    project_file: Path, store: LibraryStore
+) -> tuple[LoadedProject | None, list[Issue]]:
     try:
         return load_project(project_file, store=store), []
     except InputError as exc:
@@ -149,8 +151,8 @@ def _substations(
 
 def summarize(project_file: Path, store: LibraryStore, *, details: bool = False) -> dict[str, Any]:
     """One project as Home lists it; with ``details`` also what the Project page shows."""
-    loaded, issues = _load(project_file, store)
-    project = loaded.project if loaded is not None else _project_only(project_file)
+    loaded, issues = load_with_issues(project_file, store)
+    project = loaded.project if loaded is not None else project_only(project_file)
     note = _library_note(project, store) if project is not None else None
     summary: dict[str, Any] = {
         "id": project.project.id if project else project_file.parent.name,
