@@ -39,6 +39,7 @@ class DcCircuits:
     qcods: int
     design_current_a: float  # ΣQ per feed
     main_a: int
+    rule_main_a: int  # the rating without main_mcb_override_a
 
 
 @dataclass(frozen=True)
@@ -88,21 +89,23 @@ def dc_distribution(
     branches: list[_Branch] = []
     current = 0.0
     for row in rows:
+        # ΣQ is the cabinet's own DC loads, its Power Consumption block; loose loads fed
+        # from it are "External Equipment" (spec: Power Consumption sheet).
+        if row.device.power_supplies:
+            current += unit_current(row.device, constants) * row.instance.qty
         if row.device.power_supplies != 2:
             continue
         rating = branch_rating(row.device, library, constants)
         for unit_tag in row.unit_tags:
             name = _unit_name(unit_tag, row.device, panel.tag_prefix)
             branches.append(_Branch(name, rating, row.device.alarm_on_branch_mcb))
-            current += unit_current(row.device, constants)
-    current += sum(unit_current(load.device, constants) for load in fed)
     if not branches and not fed:
-        return DcCircuits([], 0, 0, 0.0, 0)
+        return DcCircuits([], 0, 0, 0.0, 0, 0)
 
     spare_a = max((b.rating for b in branches), default=rating_at_least(library, 2))
     branches += [_Branch("SPARE", spare_a, False)] * panel.options.dc_spare_branches_per_feed
-    override = panel.options.main_mcb_override_a
-    main_a = override or rating_at_least(library, max(current, constants.min_main_mcb_a))
+    rule_main_a = rating_at_least(library, max(current, constants.min_main_mcb_a))
+    main_a = panel.options.main_mcb_override_a or rule_main_a
 
     prefix = panel.tag_prefix
     lines: list[BomLine] = []
@@ -131,6 +134,7 @@ def dc_distribution(
         qcods=len(qcod),
         design_current_a=current,
         main_a=main_a,
+        rule_main_a=rule_main_a,
     )
 
 

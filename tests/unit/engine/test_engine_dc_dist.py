@@ -80,6 +80,7 @@ def test_main_mcb_is_next_size_above_design_current_minimum_6a() -> None:
 def test_main_mcb_override_wins() -> None:
     circuits = build([{"part_id": "L2"}], options={"main_mcb_override_a": 16})
     assert table(circuits)[0][1] == "16A, 2P MCB For Main DC supply-1"
+    assert (circuits.main_a, circuits.rule_main_a) == (16, 6)  # the check report flags it
 
 
 def test_alarmed_branches_add_aux_contacts() -> None:
@@ -105,6 +106,17 @@ def test_loose_load_fed_from_the_panel_gets_a_qcod() -> None:
     assert [f.name for f in fed] == ["Annunciator"]
     circuits = dc_distribution(p, lib, DesignConstants(), rows, fed, True)
     assert circuits.qcods == 2
+
+
+def test_design_current_is_the_cabinets_own_dc_loads() -> None:
+    # Power Consumption sheet: the loose annunciator is "External Equipment", so
+    # cabinet 003's sum Q is ~1.5 A (DC distribution). Single-fed rows count.
+    lib = library(*PARTS)
+    p = panel([{"part_id": "L2"}, {"part_id": "MON"}], id="psa3")
+    rows = expand_devices(p, lib)
+    fed = single_fed_loads(p, rows, lib, [loose("ANN", fed_from="psa3")])
+    circuits = dc_distribution(p, lib, DesignConstants(), rows, fed, True)
+    assert circuits.design_current_a == pytest.approx((77 + 10) * 1.3 / 125)
 
 
 def test_single_fed_load_without_change_over_is_an_error() -> None:

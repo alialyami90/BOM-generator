@@ -10,7 +10,7 @@ from typing import Annotated, Literal
 
 from pydantic import Field, NonNegativeInt, PositiveInt
 
-from bomgen.models.calc import HeatResult, PowerConsumption
+from bomgen.models.calc import DcMains, HeatResult, PowerConsumption
 from bomgen.models.output import OutputModel
 
 Column = Literal["A", "B", "C", "D", "E", "F", "G", "H"]
@@ -105,3 +105,4 @@ class BuildResult(OutputModel):
     loose: LooseTable | None = None
     power: PowerConsumption | None = None
     heat: HeatResult | None = None
+    mains: tuple[DcMains, ...] = ()
