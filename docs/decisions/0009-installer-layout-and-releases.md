@@ -73,9 +73,9 @@ end to end now and let those milestones plug in without touching packaging.
   `packaging/requirements.txt`, so packaging doesn't widen the dev install.
 
 - **The example project is the smoke test.** The frozen and the installed
-  `bomgen.exe` run `validate examples/project.yaml`, which loads every model, the
-  YAML and the library from the bundle, so a missing data file fails the job.
-  This becomes `bomgen build` on the example once M7 adds it.
+  `bomgen.exe` run `validate` and then `build` on `examples/project.yaml`, which
+  loads every model, the YAML and the library from the bundle and writes the
+  workbook, so a missing data file or module fails the job.
 
 ## Consequences
 
