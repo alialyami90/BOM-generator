@@ -21,6 +21,8 @@ agent; the milestones are in [`plan.md`](plan.md) → "Milestones".
 | A6 | Windows installer and release | M11 | `packaging/`, `.github/workflows/release.yml`, `docs/install.md`, `src/bomgen/app/launcher.py`, ADR 0009, the M11 section |
 | A7 | Lead developer assistant | Documentation and small tasks A1 hands out | `README.md`, `tests/unit/README.md`, `tests/golden/README.md`; other files only when A1 assigns them |
 | A8 | Sizing and layout engine | M1c | `src/bomgen/engine/sizing.py`, `src/bomgen/engine/layout.py`, `tests/golden/layout/`, the M1c section |
+| A9 | BOM rule engine | M2, M3, M4 | the rest of `src/bomgen/engine/`, `src/bomgen/models/bom.py`, `src/bomgen/models/calc.py`, `src/bomgen/checks.py`, `tests/golden/` (except `layout/`), the M2–M4 sections |
+| A10 | Excel workbook writer | M6, then M5 | `src/bomgen/sheets/`, `src/bomgen/writer/`, `src/bomgen/models/sheet.py`, the M5–M6 sections |
 
 Each agent also owns its tests (`tests/unit/<area>/` or `tests/unit/test_<area>.py`)
 and its implementation plan under `docs/superpowers/plans/`.
@@ -83,6 +85,24 @@ common devices spread, overrides and removals, `bomgen layout`, and the layout
 golden. Pure functions in `engine/`; asks A2 for any input field it is missing
 and never edits `models/` or `io/` itself. Starts when M1b is on main.
 
+### A9 — BOM rule engine (M2–M4)
+
+Steps 1–11 of "Data model and generation order" as pure functions over the
+loaded models: groups A–H, tags, kits, network accessories, power and heat,
+HWIO, assembly, and `engine/pipeline.py` returning a `BuildResult`. One PR per
+milestone, each extending the golden test on `examples/`. Builds on the
+hand-written example panels; A8's generated panels feed in later through the
+same `Panel` models. A new input field goes through A2; the sheets consume
+`BuildResult`, so changes to it are announced to A10 first.
+
+### A10 — Excel workbook writer (M6, then M5)
+
+`models/sheet.py` (`SheetModel`, cells, styles, print setup, header/footer),
+`writer/xlsx.py` (the only module importing XlsxWriter, ADR 0003) and, in M5,
+`sheets/*.py` turning A9's `BuildResult` into sheet models with live formulas.
+Writer tests reopen the file with openpyxl. Starts M6 now against a hand-built
+`SheetModel`; M5 waits for A9's M4.
+
 ### A7 — Lead developer assistant
 
 Supports A1 with documentation and small tasks: keeps `README.md` and the
@@ -102,7 +122,7 @@ change small, and rebase on `main` before asking for review.
 | `docs/plan.md` | Edit only your milestone's section and the open questions you resolve. Structure and other sections: A1. |
 | `docs/decisions/README.md` | Add one row for your own ADR. |
 | `pyproject.toml` | Add only the dependencies, extras and entry points your milestone needs. The `bomgen` console script is A2's. |
-| `src/bomgen/cli.py` | A2's. Other command groups live in their own module and attach with one `app.add_typer(...)` line. |
+| `src/bomgen/cli.py` | A2's. Other command groups live in their own module and attach with one `app.add_typer(...)` line. `build` calls A8's layout, A9's pipeline and A10's writer; each owner adds its own call after telling A2. |
 | `.github/workflows/` | `ci.yml` is A1's; a new job must join `ci-status`'s `needs` (ADR 0006). Other workflows belong to the agent that adds them. |
 | `CLAUDE.md` | A1. Ask A1 for changes. |
 | `README.md` | A7, under A1's direction. |
@@ -128,20 +148,18 @@ the same one. Ask A1 before you add one.
 4. A dependent PR rebases on `main` after the PR it depends on merges.
 
 Merge order while the current work is open: A2 M1b → A8 M1c → A5 M8b → A4 UI
-follow-up (ADR 0012/0013); A3's data and A7's docs as they come; M2–M7 as they
-open.
+follow-up (ADR 0012/0013); A9's M2 → M3 → M4 and A10's M6 as they come, then
+M5 (A10) and M7; A3's data and A7's docs any time.
 
 ## Not started
 
 | Milestone | Recommendation |
 | --- | --- |
-| M2–M4 rule engine | Ready now (M1 is on main). One agent working M2, M3, M4 in order: they share `engine/` and build up the same golden test. Hand-written `examples/panels/` are enough to start; M1c's generated panels feed it later. |
-| M6 Excel writer | Ready now, in parallel with M2: it only needs `models/sheet.py`, which it defines. |
-| M5 sheet models | After M4 and M6, by the M6 agent. |
+| M5 sheet models | A10, after M4 and M6. |
 | M7 check report, revision highlighting | After M5; also wires A5's `library_mismatch()` into the report. |
 | M10 desktop app | After the UI follow-up design (projects, substations, panels board) is approved and M1c is on main. |
 
-M1b (A2), M1c (A8) and M8b (A5) are assigned; see ADR 0012 and 0013 and the
+M1b (A2), M1c (A8), M2–M4 (A9), M6 (A10) and M8b (A5) are assigned; see ADR 0012 and 0013 and the
 design in `docs/superpowers/specs/`.
 
 New agents get the next `A` number and a row in "Roles" when Ali starts them.
