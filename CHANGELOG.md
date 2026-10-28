@@ -10,6 +10,18 @@ tagged release.
 
 ### Added
 
+- Sheet models filled from the engine: one BOM sheet per cabinet with the
+  loose-material table under its host, and the Power Consumption, Heat
+  Dissipation and Heat Calculations sheets, every computed cell a live formula
+  with its cached result; a golden test recalculates the written workbook with
+  pycel (milestone M5, #48).
+- Desktop app Library screens on the installed library store: browse with the
+  device-database records, import review and import, versions (milestone
+  M10b, #45).
+- Power and heat engine: Power Consumption lines, blocks and summary, heat
+  dissipation, forced-ventilation airflow, natural convection and the line-up
+  check; ventilation `auto` is decided from the heat check; ADR 0014
+  (milestone M4, #44, #46).
 - BOM groups E–H as engine output: AC and DC distribution, terminal strips
   (including the devices' own strips), grounding busbars and revision marks;
   `pipeline.build` builds groups A–H in two passes; golden test over every
@@ -77,6 +89,11 @@ tagged release.
 
 ### Changed
 
+- The release workflow validates the example project with the frozen and the
+  installed CLI (#47).
+- `data/device-db/README.md` explains how to ship the records in a `.bomlib`
+  (#42).
+- Changelog, README and test READMEs for #36–#41 (#43).
 - `data/device-db/README.md` states the field rules readers can rely on, with
   tests for them (#40).
 - The installed app opens the desktop window and a double-clicked
