@@ -10,6 +10,7 @@ results for JSON; they hold no business rule.
 
 from __future__ import annotations
 
+import contextlib
 import dataclasses
 import errno
 import functools
@@ -18,7 +19,7 @@ import subprocess
 import sys
 import threading
 import traceback
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from datetime import UTC, date, datetime
 from enum import Enum
 from pathlib import Path, PurePath
@@ -27,6 +28,7 @@ from typing import Any, Protocol
 from pydantic import BaseModel, ValidationError
 
 from bomgen import __version__
+from bomgen.app.output import OutputRefusedError, build_file, build_target, checks_page
 from bomgen.app.projects import RecentProjects, project_files, summarize
 from bomgen.app.substations import (
     ProjectInvalidError,
@@ -60,6 +62,7 @@ OPEN_DIALOG, FOLDER_DIALOG, SAVE_DIALOG = 10, 20, 30
 FILE_TYPES = {
     "bomlib": "Library packages (*.bomlib)",
     "bomproj": "Project files (*.bomproj)",
+    "xlsx": "Excel workbooks (*.xlsx)",
 }
 
 
@@ -120,6 +123,14 @@ def reveal(
         run(["open" if platform == "darwin" else "xdg-open", str(path.parent)])
 
 
+def open_with_default_app(
+    path: Path, platform: str = sys.platform, run: Callable[[list[str]], object] = _spawn
+) -> None:
+    """Open ``path`` in the program the system uses for it, such as Excel for a workbook."""
+    opener = {"win32": "explorer", "darwin": "open"}.get(platform, "xdg-open")
+    run([opener, str(path)])
+
+
 Envelope = dict[str, object]
 
 
@@ -174,6 +185,7 @@ class Api:
         self._env = env
         self._window: FileDialogWindow | None = None
         self._reveal: Callable[[Path], object] = reveal
+        self._open: Callable[[Path], object] = open_with_default_app
         self._listed: set[Path] = set()  # files the page was given; show_in_folder opens only these
 
     def _set_window(self, window: FileDialogWindow) -> None:
@@ -383,29 +395,92 @@ class Api:
         self._list(*(b.path for b in backups))
         return backups
 
-    @endpoint
-    def show_in_folder(self, path: str) -> None:
-        """Open the file manager on a backup, an export or a project file the page was given."""
+    def _given(self, path: str) -> Path:
+        """A file the page was given by the app, and that is still there."""
         target = Path(path)
         if Path(os.path.abspath(target)) not in self._listed:
-            raise AppError("not_listed", "Only files the app has listed can be shown")
+            raise AppError("not_listed", "Only files the app has listed can be opened or shown")
         if not target.exists():
             raise FileNotFoundError(errno.ENOENT, "This file is no longer there", path)
-        self._reveal(target)
+        return target
+
+    @endpoint
+    def show_in_folder(self, path: str) -> None:
+        """Open the file manager on a file the page was given: a backup, an export, a workbook."""
+        self._reveal(self._given(path))
+
+    @endpoint
+    def open_file(self, path: str) -> None:
+        """Open a workbook the app wrote in the program the system uses for it."""
+        self._open(self._given(path))
 
     # -- Substation (docs/ui/screens.md: Substation settings, Network) --
 
     @endpoint
     def open_substation(self, project_file: str, substation_id: str) -> dict[str, Any]:
         """Settings and Network inputs of one substation, with its located problems."""
-        try:
+        with self._substation(substation_id):
             return substation_page(Path(project_file), substation_id, self._library_store())
+
+    # -- Checks and Build (docs/ui/screens.md: Checks, Build) --
+
+    @endpoint
+    def run_checks(self, project_file: str, substation_id: str) -> dict[str, Any]:
+        """The substation's located problems, then the engine checks when the files load."""
+        with self._substation(substation_id):
+            return checks_page(Path(project_file), substation_id, self._library_store())
+
+    @endpoint
+    def build_target(self, project_file: str, substation_id: str) -> dict[str, Any]:
+        """The workbook's file name and default folder, and the problems that block a build."""
+        with self._substation(substation_id):
+            return build_target(Path(project_file), substation_id, self._library_store())
+
+    @endpoint
+    def choose_folder(self) -> str | None:
+        """Ask for a folder; None when cancelled."""
+        if self._window is None:
+            return None
+        return _first(self._window.create_file_dialog(FOLDER_DIALOG))
+
+    @endpoint
+    def build_workbook(
+        self,
+        project_file: str,
+        substation_id: str,
+        folder: str,
+        file_name: str | None = None,
+        compare: str | None = None,
+        replace: bool = False,
+    ) -> dict[str, Any]:
+        """Write the substation's workbook; ``compare`` marks changes since that issue."""
+        with self._substation(substation_id):
+            result = build_file(
+                Path(project_file),
+                substation_id,
+                self._library_store(),
+                Path(folder),
+                file_name or None,
+                Path(compare) if compare else None,
+                replace,
+            )
+        self._list(result["path"])
+        return result
+
+    @staticmethod
+    @contextlib.contextmanager
+    def _substation(substation_id: str) -> Iterator[None]:
+        """The page's refusals for one substation's endpoints."""
+        try:
+            yield
         except ProjectInvalidError as exc:
             raise AppError("project_invalid", f"The project cannot be read: {exc}") from None
         except SubstationNotFoundError:
             raise AppError(
                 "not_found", f"The project has no substation {substation_id!r}"
             ) from None
+        except OutputRefusedError as exc:
+            raise AppError(exc.kind, str(exc)) from None
 
     @endpoint
     def preview_project_import(self, path: str) -> dict[str, Any]:

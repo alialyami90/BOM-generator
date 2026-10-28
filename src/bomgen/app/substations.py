@@ -8,7 +8,7 @@ the substation writes itself (``docs/ui/screens.md``, Substation settings).
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 from pydantic import BaseModel, ValidationError
 
@@ -190,21 +190,26 @@ def _page(
     return page
 
 
-def substation_page(project_file: Path, substation_id: str, store: LibraryStore) -> dict[str, Any]:
-    """The Settings and Network view of one substation, or its located problems."""
+class Resolved(NamedTuple):
+    """One substation of a project: loaded, or its file and located problems."""
+
+    project: Project
+    file: Path
+    loaded: LoadedSubstation | None
+    problems: list[Issue]
+
+
+def resolve(project_file: Path, substation_id: str, store: LibraryStore) -> Resolved:
+    """Load the project and find ``substation_id`` in it.
+
+    When the project has errors, ``problems`` holds this substation's issues and the
+    project's own, not those of its other substations.
+    """
     loaded_project, issues = load_with_issues(project_file, store)
     if loaded_project is not None:
         for loaded in loaded_project.substations:
             if loaded.substation.substation.id == substation_id:
-                return _page(
-                    project_file,
-                    loaded.project,
-                    loaded.file,
-                    loaded.substation,
-                    loaded,
-                    [],
-                    loaded.library,
-                )
+                return Resolved(loaded.project, loaded.file, loaded, [])
         raise SubstationNotFoundError(substation_id)
     project = project_only(project_file)
     if project is None:
@@ -213,11 +218,21 @@ def substation_page(project_file: Path, substation_id: str, store: LibraryStore)
     others = {(project_file.parent / p).parent.resolve() for p in project.substations} - {
         file.parent.resolve()
     }
-    # this substation's issues and the project's own; not those of its other substations
     problems = [i for i in issues if not others & set(i.file.resolve().parents)]
+    return Resolved(project, file, None, problems)
+
+
+def substation_page(project_file: Path, substation_id: str, store: LibraryStore) -> dict[str, Any]:
+    """The Settings and Network view of one substation, or its located problems."""
+    found = resolve(project_file, substation_id, store)
+    if found.loaded is not None:
+        loaded = found.loaded
+        return _page(
+            project_file, loaded.project, loaded.file, loaded.substation, loaded, [], loaded.library
+        )
     try:
-        substation: Substation | None = Substation.model_validate(read_yaml(file).data)
+        substation: Substation | None = Substation.model_validate(read_yaml(found.file).data)
     except (InputError, ValidationError):
         substation = None
-    library = _library(project_file, project, store)
-    return _page(project_file, project, file, substation, None, problems, library)
+    library = _library(project_file, found.project, store)
+    return _page(project_file, found.project, found.file, substation, None, found.problems, library)

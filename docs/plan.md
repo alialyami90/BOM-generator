@@ -701,7 +701,16 @@ Delivered in small PRs by A11, one screen group each (ADR 0015 for the bridge):
   Result card and the Panels board follow with M1c's `NetworkPlan`,
   `rank_l1_switches` and `layout_preview`; they are ported from the prototype as of
   #32 (ranked L1 table with a pin, cable managers counted in panel blocks).
-- **M10d:** Checks, Preview and Build after M4, M5 and M7.
+- **M10d:** Checks, Preview and Build after M4, M5 and M7. First Checks and Build
+  (`bomgen.app.output`): `run_checks` gives the substation's located problems (errors,
+  plus the library-version note as a warning) and, when the files load, the M7 check
+  report; `build_target` the file name from the pattern, the default folder
+  (`<substation>/out`), the sheet names, library and revision; `build_workbook` runs the
+  steps of `bomgen build` (engine, sheets, the optional comparison with a previous issue,
+  the workbook and its `.checks.json`) and refuses `has_errors`, `file_exists` (the page
+  asks before replacing), `file_open` (another program holds the file) and `bad_name`.
+  `open_file` opens a workbook the app wrote. The build is one call, so the page shows
+  one busy state rather than four named stages. Preview follows.
 - **M10e:** A4's impeccable polish pass.
 
 ### M11 — Windows installer and releases

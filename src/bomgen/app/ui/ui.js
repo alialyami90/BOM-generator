@@ -120,7 +120,10 @@
   function renderNav() {
     const r = route().a, c = counts(), np = hasProject(), p = curProject();
     const ns = hasSub(), ex = ns && S.backend !== 'yes';  // ex: the example substation's figures (M10c and M10d connect the real ones)
-    const buildTail = !ex ? '' : c.errors ? `${icon('error')}Blocked` : `${icon('check')}Ready`;
+    const v = ns && S.backend === 'yes' && S.verify && S.verify.key === `${S.project.file}#${S.sub}` ? S.verify : null;  // the last checks of a real substation
+    const buildTail = v ? (v.errors ? `${icon('error')}Blocked` : `${icon('check')}Ready`) : !ex ? '' : c.errors ? `${icon('error')}Blocked` : `${icon('check')}Ready`;
+    const checksTail = v ? (v.errors ? `${icon('error')}${v.errors} ${v.errors === 1 ? 'error' : 'errors'}` : v.failed ? `${icon('error')}Failed` : `${icon('check')}Clear`) : ex ? (c.errors ? `${icon('error')}${c.errors} errors` : `${icon('check')}Clear`) : '';
+    const bad = v ? v.errors > 0 || v.failed : c.errors > 0;
     const projTail = !np ? '' : p.status === 'bad' ? `${icon('error')}${p.statusText}` : p.status === 'warn' ? `${icon('warn')}1` : `${icon('check')}`;
     const switcher = np ? `<div class="nav-switch"><label class="sr-only" for="sub-switch">Substation</label><select class="select" id="sub-switch" data-action="sub-switch">${S.sub ? '' : '<option value="">Choose a substation…</option>'}${p.substations.map((x) => `<option value="${x.id}" ${x.id === S.sub ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>` : '';
     $('#nav').innerHTML = `
@@ -133,9 +136,9 @@
       ${navItem('#/network', 'network', 'Network', ex ? (S.sub === 'cb03' ? `${icon('warn')}Not set up` : icon('check')) : '', S.sub === 'cb03' ? 'warn' : 'ok', !ns, r === 'network')}
       ${navItem('#/panels', 'panels', 'Panels', ex ? String(S.sub === 'cb03' ? 0 : DB.panels.length) : ns ? esc(curSub().panels) : '', '', !ns, r === 'panels')}
       <div class="nav-group">Verify and issue</div>
-      ${navItem('#/checks', 'checks', 'Checks', ex ? (c.errors ? `${icon('error')}${c.errors} errors` : `${icon('check')}Clear`) : '', c.errors ? 'bad' : 'ok', !ns, r === 'checks')}
+      ${navItem('#/checks', 'checks', 'Checks', checksTail, bad ? 'bad' : 'ok', !ns, r === 'checks')}
       ${navItem('#/preview', 'preview', 'Preview', '', '', !ns, r === 'preview')}
-      ${navItem('#/build', 'build', 'Build', buildTail, c.errors ? 'bad' : 'ok', !ns, r === 'build')}` : ''}
+      ${navItem('#/build', 'build', 'Build', buildTail, (v ? v.errors : c.errors) ? 'bad' : 'ok', !ns, r === 'build')}` : ''}
       <div class="nav-foot">App ${S.app ? esc(S.app.version) : ''}<br>Works offline. Nothing leaves this PC.</div>`;
   }
   function renderStatus() {
@@ -157,7 +160,7 @@
     const needsProject = key === 'project', needsSub = ['settings', 'network', 'panels', 'checks', 'preview', 'build'].includes(key);
     const m = $('#main');
     m.innerHTML = (needsProject && !hasProject()) || (needsSub && !hasSub()) ? SCREENS.home() : SCREENS[key]();
-    if (needsSub && hasSub() && S.backend === 'yes' && !['settings', 'network'].includes(key)) {  // M10c and M10d connect the rest
+    if (needsSub && hasSub() && S.backend === 'yes' && !['settings', 'network', 'checks', 'build'].includes(key)) {  // M10c and M10d connect the rest
       m.insertAdjacentHTML('afterbegin', `<div class="not-connected"><div class="page" style="padding-bottom:var(--space-3)">${banner('info', '<b>Not connected yet.</b> This screen still shows the example substation from the design, not your project.')}</div></div>`);
     }
     if (SCREENS[key + 'After']) SCREENS[key + 'After']();
