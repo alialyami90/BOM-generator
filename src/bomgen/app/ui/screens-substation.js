@@ -2,7 +2,7 @@
    Read-only until the substation writers exist. The L1 ranking and the Result card wait for the layout engine (M1c).
    Opened in a plain browser, the prototype's screens in screens-project.js and screens-layout.js are used instead. */
 (function () {
-  const { esc, S, SCREENS, badge, banner, tabs, field, input, pageHead, toast } = App;
+  const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, field, input, pageHead, toast } = App;
   const example = { settings: SCREENS.settings, network: SCREENS.network };
   const LATER = 'Editing substations in the app is not available yet. Edit substation.yaml, then open the project again.';
   const ro = (html) => html.replace('data-dirty="1"', 'readonly').replace('class="input', 'class="ctl input');
@@ -24,7 +24,18 @@
     return SUB.state === 'loaded' ? SUB.page : null;
   }
   const waiting = (title) => `<div class="page">${pageHead(title, SUB.error ? esc(SUB.error.message) : 'Reading substation.yaml…')}</div>`;
-  const problems = (p) => (p.problems.length ? `<div style="margin-bottom:var(--space-4)">${banner('bad', `<b>${plural(p.problems.length, 'problem')} in this substation's files.</b> <ul style="margin:6px 0 0;padding-left:18px">${p.problems.slice(0, 8).map((x) => `<li><span class="mono small">${esc(x.file.split(/[\\/]/).slice(-2).join('/'))}${x.line ? ':' + x.line : ''}</span>${x.location ? ` <span class="mono small">${esc(x.location)}</span>` : ''}: ${esc(x.message)}</li>`).join('')}</ul>`, '<button class="btn btn--secondary btn--sm" data-action="goto" data-to="#/settings/yaml">Show the YAML</button>')}</div>` : '');
+  const problems = (p) => (p.problems.length ? `<div style="margin-bottom:var(--space-4)">${banner('bad', `<b>${plural(p.problems.length, 'problem')} in this substation's files.</b> <ul style="margin:6px 0 0;padding-left:18px">${p.problems.slice(0, 8).map((x) => `<li><span class="mono small">${esc(x.file.split(/[\\/]/).slice(-2).join('/'))}${x.line ? ':' + x.line : ''}</span>${x.location ? ` <span class="mono small">${esc(x.location)}</span>` : ''}: ${esc(x.message)}</li>`).join('')}</ul>`, jump(p))}</div>` : '');
+  /* On the YAML tab the button scrolls to the first marked line; elsewhere it opens the tab. */
+  const jump = (p) => {
+    const first = p.problems.find((x) => x.line && x.file === p.file);
+    return App.route().a === 'settings' && S.tab.settings === 'yaml' && first
+      ? `<button class="btn btn--secondary btn--sm" data-action="yaml-goto" data-line="${first.line}">Go to line ${first.line}</button>`
+      : '<button class="btn btn--secondary btn--sm" data-action="goto" data-to="#/settings/yaml">Show the YAML</button>';
+  };
+  ACTIONS['yaml-goto'] = (el) => {
+    const row = document.querySelector(`.code .src > div:nth-child(${Number(el.dataset.line)})`);
+    if (row) { row.scrollIntoView({ block: 'center' }); document.querySelector('.code').focus({ preventScroll: true }); }
+  };
   const note = `<p class="muted small" style="margin-bottom:var(--space-4);max-width:68ch">${esc(LATER)}</p>`;
   const changed = (row, fmt = (v) => v) => (row.changed ? badge('info', `Changed from ${fmt(row.default)}`) : '<span class="muted small">Default</span>');
 
@@ -105,7 +116,7 @@
               ${n.topology === 'ring' ? field('Switches per ring', ro(input('n-ring', n.ring_max_switches, { num: true, mono: true })), 'Most L1 switches in one ring.') : ''}
             </div></section>
           <section><h3>L1 switch model</h3>
-            <div class="empty" style="margin-top:var(--space-3)"><b>No ranking yet.</b><div class="muted small">${unset ? 'It appears once the IED count is set.' : 'The engine ranks the library’s L1 switches once the layout engine is connected.'}</div></div></section>
+            <div class="empty" style="margin-top:var(--space-3)"><b>No ranking yet.</b><div class="muted small">${unset ? 'It appears once the IED count is set.' : 'The engine ranks the library’s L1 switches. It is not connected in this version.'}</div></div></section>
           <section><h3>Equipment</h3>
             <p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">What the substation has, before any panel exists. Redundant devices come as an A and a B unit.</p>
             ${eq.length ? `<div class="table-wrap"><table class="table"><thead><tr><th>Device</th><th style="width:150px">Role</th><th style="width:90px">A and B</th><th class="num" style="width:90px">L2 ports</th><th class="num" style="width:64px">Height</th></tr></thead><tbody>
@@ -117,7 +128,7 @@
             <p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">Every spare starts from the project's shared defaults; the ones this substation changes are marked.</p>
             <div class="form form--3">${p.spares.map((s) => { const [label, unit] = SPARES[s.key] || [s.key, '']; const v = s.key === 'port_fraction' ? pct(s.value) : s.value; return field(label, fixed(v, unit), s.changed ? `Changed from ${s.key === 'port_fraction' ? pct(s.default) : s.default}${unit && unit !== '%' ? ' ' + unit : unit}.` : 'Project default.'); }).join('')}</div></section>
         </div>
-        <aside class="net-result" aria-live="polite"><div class="card"><h3>Result</h3><p class="muted small" style="margin-top:var(--space-2)">The engine's sizing (L1 and L2 switches per side, ports and links) appears here once the layout engine is connected.</p></div></aside>
+        <aside class="net-result" aria-live="polite"><div class="card"><h3>Result</h3><p class="muted small" style="margin-top:var(--space-2)">The L1 and L2 switches per side, ports and links are calculated by the engine, which is not connected in this version.</p></div></aside>
       </div></div>`;
   };
 })();
