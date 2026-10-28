@@ -1,14 +1,19 @@
 # Changelog
 
 All notable changes to this project are listed here, one entry per merged pull
-request. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and the project will use [Semantic Versioning](https://semver.org/) from its
-first tagged release.
+request; a milestone split across several PRs gets one entry. The format
+follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
+project will use [Semantic Versioning](https://semver.org/) from its first
+tagged release.
 
 ## [Unreleased]
 
 ### Added
 
+- Input models for the device library, panels and project; YAML loader with
+  relative file references, panel mirroring and readable errors; JSON Schemas
+  in `schemas/`; `bomgen validate` and `bomgen schema`; `examples/`
+  transcribed from the example workbook; ADR 0010 (milestone M1, #5, #7).
 - Repository scaffold: `bomgen` package, tooling, working rules, generator spec
   v2, implementation plan, ADRs 0001–0008 and CI with docs-only gating
   (milestone M0, #1).
