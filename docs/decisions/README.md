@@ -17,3 +17,5 @@ An ADR stays "Proposed" until Ali accepts it in review.
 | 0009 | [Installer layout and tag-driven releases](0009-installer-layout-and-releases.md) | Proposed |
 | 0010 | [Input schema details and validation behaviour](0010-input-schema.md) | Proposed |
 | 0011 | [UI design language and bundled fonts](0011-ui-design-language.md) | Proposed |
+| 0012 | [Projects hold substations; sharing by `.bomproj` export](0012-projects-substations-bomproj.md) | Accepted |
+| 0013 | [Switches sized from the IED count; panels laid out automatically](0013-network-sizing-and-panel-layout.md) | Accepted |
