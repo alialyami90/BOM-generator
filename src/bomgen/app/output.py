@@ -86,7 +86,8 @@ def build_target(project_file: Path, substation_id: str, store: LibraryStore) ->
         except EngineError:
             pass  # Checks names the engine's problem; Build refuses with it
         else:
-            sheets = [sheet.name for sheet in workbook.sheets]
+            cabinets = {panel.sheet_name: panel.cabinet_name for panel in loaded.panels}
+            sheets = [{"name": s.name, "cabinet": cabinets.get(s.name)} for s in workbook.sheets]
     library = found.project.library
     return {
         "file_name": name,

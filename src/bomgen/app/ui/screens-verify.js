@@ -8,6 +8,8 @@
   const plural = (n, one) => `${n} ${one}${n === 1 ? '' : 's'}`;
   const editable = (html) => html.replace('data-dirty="1"', 'data-dirty="0"');
   const tail = (file) => String(file).split(/[\\/]/).slice(-2).join('/');
+  /* A path wraps only after its separators. */
+  const breakable = (path) => esc(path).replace(/([\\/])/g, '$1<wbr>');
   const kb = (n) => `${Math.max(1, Math.round(n / 1024))} KB`;
   const CHECKS = {
     sfp_slots: 'SFPs fit the port plans', dc_main: 'Main MCB covers the feed current', airflow: 'Fans cover the heat load',
@@ -61,13 +63,13 @@
       `<button class="btn btn--secondary" data-action="checks-rerun" ${running ? 'aria-busy="true" disabled' : ''}>${running ? '<span class="spinner"></span>Checking…' : icon('refresh') + 'Run checks again'}</button>`)}
       ${head}
       <div class="toolbar" style="margin-top:var(--space-5)"><h2 style="margin-right:var(--space-3)">Problems</h2>
-        ${[['all', `All ${problems.length}`], ['errors', `Errors ${errors}`], ['warnings', `Warnings ${warnings}`]].map(([k, t]) => `<button class="chip" aria-pressed="${level === k}" data-action="checks-level" data-v="${k}">${t}</button>`).join('')}</div>
-      <div class="table-wrap"><table class="table"><thead><tr><th style="width:100px">Level</th><th>Where</th><th>What is wrong</th><th style="width:110px"><span class="sr-only">Action</span></th></tr></thead><tbody>
+        ${problems.length < 2 ? '' : [['all', `All ${problems.length}`], ['errors', `Errors ${errors}`], ['warnings', `Warnings ${warnings}`]].map(([k, t]) => `<button class="chip" aria-pressed="${level === k}" data-action="checks-level" data-v="${k}">${t}</button>`).join('')}</div>
+      ${!problems.length ? '<p class="muted">The input files load without problems.</p>' : `<div class="table-wrap"><table class="table"><thead><tr><th style="width:100px">Level</th><th>Where</th><th>What is wrong</th><th style="width:110px"><span class="sr-only">Action</span></th></tr></thead><tbody>
         ${shown.map((p) => `<tr><td style="vertical-align:top;padding-top:8px">${p.level === 'error' ? badge('bad', 'Error', 'error') : badge('warn', 'Warning', 'warn')}</td>
           <td class="wrap" style="vertical-align:top"><span class="mono small">${esc(tail(p.file))}${p.line ? ':' + p.line : ''}</span>${p.location ? `<span class="cell-sub mono">${esc(p.location)}</span>` : ''}</td>
           <td class="wrap" style="vertical-align:top">${esc(p.message)}</td>
           <td style="vertical-align:top;padding-top:5px"><button class="btn btn--secondary btn--sm" data-action="checks-goto" data-i="${problems.indexOf(p)}">${/substation\.yaml$/.test(p.file) ? 'Show the line' : 'Open'}</button></td></tr>`).join('')
-          || `<tr class="empty-row"><td colspan="4">${problems.length ? 'Nothing to show with this filter.' : 'The input files load without problems.'}</td></tr>`}</tbody></table></div>
+          || '<tr class="empty-row"><td colspan="4">Nothing to show with this filter.</td></tr>'}</tbody></table></div>`}
       <div class="toolbar" style="margin-top:var(--space-6)"><h2>Engine checks</h2></div>
       ${engine.run ? engineTable(engine.items) : `<p class="muted">${esc(engine.reason)} Then run the checks again.</p>`}</div>`;
   };
@@ -76,8 +78,9 @@
     const groups = [...new Set(items.map((i) => i.check))];
     const worst = (list) => (list.some((i) => i.status === 'fail') ? 'fail' : list.some((i) => i.status === 'warn') ? 'warn' : 'pass');
     return `<div class="table-wrap" style="margin-top:var(--space-3)"><table class="table"><thead><tr><th>Check</th><th style="width:110px">Panel</th><th style="width:110px">Result</th><th>Detail</th></tr></thead><tbody>
-      ${groups.map((g) => { const list = items.filter((i) => i.check === g); return `<tr class="band"><td colspan="2">${esc(CHECKS[g] || g)}</td><td>${status(worst(list))}</td><td class="muted small">${plural(list.length, 'item')}${list.some((i) => i.status !== 'pass') ? ` · ${list.filter((i) => i.status !== 'pass').length} to read` : ''}</td></tr>
-        ${list.map((i) => `<tr><td class="wrap">${esc(i.subject || '')}</td><td class="mono small">${esc(i.panel_id || '—')}</td><td>${status(i.status)}</td><td class="wrap">${esc(i.message)}</td></tr>`).join('')}`; }).join('')}</tbody></table></div>`;
+      ${groups.map((g) => { const list = items.filter((i) => i.check === g), all = worst(list) === 'pass';  // groups that all pass stay folded into their header
+        return `<tr class="band"><td colspan="2">${esc(CHECKS[g] || g)}</td><td>${status(worst(list))}</td><td class="muted small">${plural(list.length, 'item')}${all ? '' : ` · ${list.filter((i) => i.status !== 'pass').length} to read`}</td></tr>
+        ${all ? '' : list.map((i) => `<tr><td class="wrap">${esc(i.subject || '')}</td><td class="mono small">${esc(i.panel_id || '—')}</td><td>${status(i.status)}</td><td class="wrap">${esc(i.message)}</td></tr>`).join('')}`; }).join('')}</tbody></table></div>`;
   }
   ACTIONS['checks-level'] = (el) => { level = el.dataset.v; App.render(); };
   ACTIONS['checks-rerun'] = () => { running = true; reload('checks'); reload('target'); App.render(); };
@@ -98,7 +101,7 @@
     const blocked = errors > 0, busy = B.state === 'building';
     let result = '';
     if (busy) result = `<div class="stack" style="max-width:520px"><h3>Building…</h3><div class="progress progress--busy" role="progressbar" aria-label="Build progress"><i></i></div>
-      <p class="muted small">Loading the inputs, running the engine, building the sheets, then writing the workbook.</p></div>`;
+      <p class="muted small">Loading the inputs, running the engine, building the sheets, then writing the workbook. This takes a few seconds.</p></div>`;
     if (B.state === 'open') result = banner('bad', `<b>The file could not be written.</b> <span class="mono">${esc(B.name)}</span> is open in another program, such as Excel. Close it there and try again, or save under a different name.`,
       '<div class="row" style="flex-wrap:nowrap"><button class="btn btn--primary btn--sm" data-action="build-run">Try again</button><button class="btn btn--secondary btn--sm" data-action="build-rename">Save as new name</button></div>');
     if (B.state === 'failed') result = banner('bad', `<b>The workbook was not written.</b> ${esc(B.error.message)}`);
@@ -111,20 +114,21 @@
           ${field('File name', editable(input('b-name', B.name, { mono: true })), t.file_name ? `From the pattern in Settings → Output: <span class="mono">${esc(t.file_name)}</span>.` : 'The pattern in Settings → Output gives the name once the files load.')}
           ${field('Save in', `<div class="row" style="flex-wrap:nowrap">${editable(input('b-dir', B.folder, { mono: true }))}<button class="btn btn--secondary" data-action="build-folder">Browse…</button></div>`)}
           <div class="field"><span class="label">Options</span><div class="stack"><label class="switch"><input type="checkbox" id="b-compare" data-action="build-compare" data-dirty="0" ${B.compare ? 'checked' : ''}>Highlight cells changed since the previous issue</label>
-            <div class="row" style="margin-left:44px"><input class="input input--mono" id="b-previous" style="width:320px" placeholder="Choose the previous issue (.xlsx)" value="${esc(B.previous)}" readonly ${B.compare ? '' : 'disabled'}><button class="btn btn--secondary btn--sm" data-action="build-previous" ${B.compare ? '' : 'disabled'}>Browse…</button></div>
+            <div class="row" style="margin-left:44px"><input class="input input--mono" id="b-previous" style="width:320px" placeholder="Choose the previous issue (.xlsx)" value="${esc(B.previous.split(/[\\/]/).pop())}" title="${esc(B.previous)}" readonly ${B.compare ? '' : 'disabled'}><button class="btn btn--secondary btn--sm" data-action="build-previous" ${B.compare ? '' : 'disabled'}>Browse…</button></div>
             <label class="switch"><input type="checkbox" id="b-open" data-action="build-open-toggle" data-dirty="0" ${B.open ? 'checked' : ''}>Open the workbook when it is written</label></div></div>
         </div>
         <div style="margin-top:var(--space-5)" class="row"><button class="btn btn--primary" data-action="build-run" ${blocked || busy ? 'disabled' : ''} ${busy ? 'aria-busy="true"' : ''}>${busy ? '<span class="spinner"></span>Building…' : icon('build') + 'Build workbook'}</button>${blocked ? `<span class="muted small">Unavailable until the ${plural(errors, 'error')} ${errors === 1 ? 'is' : 'are'} fixed.</span>` : ''}</div>
         <div style="margin-top:var(--space-5)" aria-live="polite">${result}</div>
       </div>
-      <aside><h3>This workbook contains</h3>${t.sheets ? `<ul class="checklist" style="margin-top:var(--space-3)">${t.sheets.map((s) => `<li>${icon('preview')}<span>${/^\d+$/.test(s) ? 'Sheet ' + esc(s) : esc(s)}</span></li>`).join('')}</ul>` : '<p class="muted small" style="margin-top:var(--space-2)">The sheets are listed once the files load without errors.</p>'}
+      <aside><h3>This workbook contains</h3>${t.sheets ? `<ul class="checklist" style="margin-top:var(--space-3)">${t.sheets.map((s) => `<li>${icon('preview')}<span>${s.cabinet ? `Sheet ${esc(s.name)}: ${esc(s.cabinet)}` : esc(s.name)}</span></li>`).join('')}</ul>` : '<p class="muted small" style="margin-top:var(--space-2)">The sheets are listed once the files load without errors.</p>'}
         <dl class="kv" style="margin-top:var(--space-4);grid-template-columns:120px 1fr"><dt>Library</dt><dd>${esc(t.library.name)} ${esc(t.library.version)}</dd><dt>Revision</dt><dd>${esc(t.revision || '—')}</dd><dt>Warnings</dt><dd>${warnings ? `${warnings} (do not block)` : 'None'}</dd></dl></aside></div></div>`;
   };
   function done(r) {
     const notPass = r.checks.items.filter((i) => i.status !== 'pass');
     const changes = r.revisions ? r.revisions.changes.length : null;
-    return `${banner(r.checks.failed ? 'warn' : 'ok', `<b>Workbook written.</b><div class="mono" style="margin-top:2px;word-break:break-all">${esc(r.path)}</div><div class="small muted">${kb(r.size)} · ${plural(r.sheets.length, 'sheet')}${changes !== null ? ` · ${plural(changes, 'change')} marked since the previous issue` : ''}</div>`,
+    return `${banner(r.checks.failed ? 'warn' : 'ok', `<b>Workbook written.</b><div class="small muted">${kb(r.size)} · ${plural(r.sheets.length, 'sheet')}${changes !== null ? ` · ${plural(changes, 'change')} marked since the previous issue` : ''}</div>`,
       '<div class="row" style="flex-wrap:nowrap"><button class="btn btn--primary btn--sm" data-action="build-open">Open workbook</button><button class="btn btn--secondary btn--sm" data-action="build-show">Show in folder</button></div>')}
+      <p class="mono small path-line">${breakable(r.path)}</p>
       <div class="stack" style="margin-top:var(--space-4)"><h3>Check report</h3>
         <p class="muted small">${plural(r.checks.items.length, 'check')}: ${r.checks.items.length - notPass.length} pass${notPass.length ? `, ${notPass.length} to read` : ''}. Saved next to the workbook as <span class="mono">.checks.json</span>.</p>
         ${notPass.length ? `<ul class="checklist">${notPass.slice(0, 6).map((i) => `<li class="${i.status === 'fail' ? 'bad' : ''}">${icon(i.status === 'fail' ? 'error' : 'warn')}<span>${esc(CHECKS[i.check] || i.check)}${i.panel_id ? ` · <span class="mono">${esc(i.panel_id)}</span>` : ''}: ${esc(i.message)}</span></li>`).join('')}</ul>${notPass.length > 6 ? '<a href="#/checks">All of them under Checks</a>' : ''}` : ''}</div>`;
