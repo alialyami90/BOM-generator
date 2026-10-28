@@ -43,7 +43,7 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-      - run: pip install . -r packaging/requirements.txt
+      - run: pip install ".[app]" -r packaging/requirements.txt
 
       - name: Resolve version
         id: version
@@ -84,6 +84,24 @@ jobs:
           $app = Start-Process "dist\bomgen\BOM Generator.exe" -ArgumentList "--self-test" -Wait -PassThru
           Write-Output "BOM Generator.exe --self-test exited $($app.ExitCode)"
           if ($app.ExitCode) { Write-Error "BOM Generator.exe --self-test exited $($app.ExitCode)"; exit 1 }
+
+          # Open the real window (WebView2 on the runner) and wait for it to show.
+          # run_window exits 1 at once when the UI, WebView2 or pywebview is missing.
+          $env:BOMGEN_NO_DIALOGS = "1"
+          $window = Start-Process "dist\bomgen\BOM Generator.exe" -PassThru
+          $deadline = (Get-Date).AddSeconds(60)
+          $title = ""
+          while ((Get-Date) -lt $deadline) {
+            if ($window.HasExited) { Write-Error "The window exited with $($window.ExitCode) before showing"; exit 1 }
+            $window.Refresh()
+            $title = $window.MainWindowTitle
+            if ($window.MainWindowHandle -ne 0 -and $title) { break }
+            Start-Sleep -Milliseconds 500
+          }
+          taskkill /PID $window.Id /T /F | Out-Null
+          Remove-Item Env:BOMGEN_NO_DIALOGS
+          Write-Output "Window title: '$title'"
+          if ($title -ne "BOM Generator") { Write-Error "The window never showed (title '$title')"; exit 1 }
           exit 0
 
       - name: Compile the installer
