@@ -41,10 +41,22 @@ output:  # the defaults, written out
 # constants and spares: the project defaults apply (project.yaml); write a key here to
 # override it for this substation only.
 
-equipment:  # what the substation needs before panels exist (design 3.2)
+equipment:  # needed before panels exist (design 3.2); in psa1 group B row order, which
+            # the layout follows when it lists rows
+  - id: fopp
+    part_id: FOPP-96SM
+    role: fopp
+    redundant: true
+    purpose: "L2-L3 Interface"  # 'Panel 1' row 4
   - { id: l2, part_id: RST2228-L2, role: l2_switch, redundant: true }
   - { id: l1, part_id: RST2228-L1-24MM, role: l1_switch, redundant: true }  # count from ied_count
   - { id: ext-esw, part_id: SEL-2730M-EXT, role: ext_switch, redundant: true }
+  - id: gw
+    part_id: SEL-3555-GW
+    role: other
+    redundant: true
+    l2_ports: 1  # ASSUMED
+    purpose: "for Dhahran PCC connection"  # 'Panel 1' row 8
   - id: ext-fw
     part_id: FGR-60F
     role: firewall
@@ -52,17 +64,6 @@ equipment:  # what the substation needs before panels exist (design 3.2)
     l2_ports: 1
     port_plan:  # per unit: 'Panel 1' row 17, EXT-FW-A SFP (MM), qty 2
       downlinks: [{ count: 2, speed: 1G, media: MM }]
-  - id: fopp
-    part_id: FOPP-96SM
-    role: fopp
-    redundant: true
-    purpose: "L2-L3 Interface"  # 'Panel 1' row 4
-  - id: gw
-    part_id: SEL-3555-GW
-    role: other
-    redundant: true
-    l2_ports: 1  # ASSUMED
-    purpose: "for Dhahran PCC connection"  # 'Panel 1' row 8
   - { id: gps, part_id: SEL-2488, role: other, l2_ports: 1, l2_speed: 100M }  # GPS clock
   - id: rtac
     part_id: SEL-3555-RTAC

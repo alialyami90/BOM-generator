@@ -243,6 +243,21 @@ def test_equipment_port_plans_match_the_hand_written_panels(loaded: LoadedSubsta
     assert plans["rtac"].serial_ports == 6
 
 
+def test_equipment_follows_psa1_group_b_row_order(loaded: LoadedSubstation) -> None:
+    # 'Panel 1' rows 4-12: FOPP, L2, L1, EXT switch, gateway, firewall; then the others.
+    assert [e.id for e in loaded.substation.equipment] == [
+        "fopp",
+        "l2",
+        "l1",
+        "ext-esw",
+        "gw",
+        "ext-fw",
+        "gps",
+        "rtac",
+        "hwio",
+    ]
+
+
 def test_rack_heights_answered_by_ali(loaded: LoadedSubstation) -> None:
     # Q33: the FOPP is 1U; the workstation's monitor and keyboard sit on the desk.
     assert part(loaded, "FOPP-96SM").height_u == 1
