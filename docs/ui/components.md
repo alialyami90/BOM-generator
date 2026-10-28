@@ -178,7 +178,7 @@ rules, 13 px text, tabular numerals, 10 px cell padding.
 | Two-line cell | Primary text, then a 12 px muted sub-line (mono for ids). |
 | Group separator | An empty bordered row (spec: groups E–H) or a `surfaceBand` row. |
 | Merged cell | `rowspan` for a parent tag over its child rows; the issued sheet merges them too. |
-| Revised cell | `#FFFF00` fill with dark text, only when "Show revised cells" is on. |
+| Revised cell | `#FFFF00` fill with dark text, in the Preview, on cells the engine marks as revised (there is no switch for it). |
 | Empty | One row with a sentence that says what to do ("Clear the filter to see all 71 rows."). |
 | Footer | 12 px strip with row counts or notes. |
 
