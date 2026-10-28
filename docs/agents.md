@@ -15,7 +15,7 @@ agent; the milestones are in [`plan.md`](plan.md) → "Milestones".
 | --- | --- | --- | --- |
 | A1 | Lead developer | Reviews, cross-thread consistency, this file | `docs/agents.md`, `CLAUDE.md`, `.github/workflows/ci.yml`, `docs/handoff/README.md`, `docs/handoff/01-lead/`, plan sections 1, 2, 4 (intro), 5 |
 | A2 | Input models and examples | M1, M1b | `src/bomgen/models/`, `src/bomgen/io/`, `src/bomgen/cli.py`, `src/bomgen/build.py`, `examples/`, plan section 3 and the M1 section |
-| A3 | Device database researcher | Reference data, outside the milestones | `data/device-db/`, its validation test |
+| A3 | Device database researcher | Reference data, outside the milestones | `data/device-db/`, its validation test; the shipped library `data/library/` (build script, generated file, `test_shipped_library.py`; plan Q38) |
 | A4 | UI designer | M9, the M10e polish findings (done) | `docs/ui/`, the M9 section |
 | A5 | Library update packages | M8, M8b | `src/bomgen/library_store/`, ADR 0008, the M8 section |
 | A6 | Windows installer and release | M11 | `packaging/`, `.github/workflows/release.yml`, `docs/install.md`, `src/bomgen/app/launcher.py`, ADR 0009, the M11 section |
