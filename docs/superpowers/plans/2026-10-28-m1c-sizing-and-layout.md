@@ -55,7 +55,8 @@ Settled by A1:
 - **Golden R10:** with 40 IEDs R1 gives 2 L1 switches per side, not the spec example's 6, and the port plans differ from the hand-written ones (L1 SFPs 2 × 2 + 3 = 7, not 24 + 3). The golden records the rule results; the hand-written example panels keep every BOM golden value.
 - **UI contract** (`docs/ui/screens.md` → "What the app needs from the engine"): `layout_preview(substation, overrides) -> LayoutResult` with panels, U used, blank plates, DIN-rail counts and move errors; `NetworkPlan` read-only; stable equipment ids.
 - **Cable managers** (Q32, Ali 2026-10-28: count them): every rack-mounted switch or patch panel unit (`network_switch`, `firewall`, `patch_panel` with `height_u > 0`) takes a 1U cable manager directly under it. The pair is one block of `height_u + 1` with no blank plate inside it; blank plates go between blocks. `Unit` gets `cable_manager_u: int = 0` (1 for those categories) and `used_u` counts it. The panel's cable-manager count goes to A9's step 3 instead of today's fixed 9.
-- **Port spare default and switch model choice**: asked on cards; the plan keeps `port_fraction` 0.20 and the engineer's switch choice until Ali answers.
+- **Port spare** (Ali 2026-10-28): default stays 20 %, editable per substation. Each IED has one port on side A and one on side B, so `ied_count` IEDs need `ied_count` ports per side (R1 as written).
+- **L1 switch model** (Ali 2026-10-28: the tool picks one, or the engineer selects the model): the sizer tries every library device with `category: network_switch` and `purdue_level: L1` and keeps the one with the fewest switches per side; ties go to the fewest total ports, then the lowest `part_id`. The engineer's selection is an `l1_switch` equipment entry with a `part_id`, which pins the model (asked of A2: make `part_id` optional on that role). L2 stays the engineer's choice.
 
 ---
 
@@ -71,7 +72,9 @@ Settled by A1:
 - `@dataclass(frozen=True) L2Link(owner: str, ports: int, speed: PortSpeed, media: Media)` — one per equipment entry on that side or common.
 - `l1_reserved_ports(net: NetworkInputs) -> int`; `l1_usable_ports(ports: SwitchPorts, net: NetworkInputs) -> int`; `l2_usable_ports(ports: SwitchPorts, net: NetworkInputs) -> int`; `l1_links(n_l1: int, net: NetworkInputs) -> int`.
 - `@dataclass(frozen=True) NetworkPlan(ied_count, l1_per_side, l1_usable_ports, l1_links_per_side, rings_per_side, l2_per_side, l2_usable_ports, l2_demand_per_side)`.
-- `size_network(net: NetworkInputs, l1: SwitchPorts, l2: SwitchPorts, links: Sequence[L2Link]) -> NetworkPlan`. `rings_per_side` is 0 in a star; `l2_per_side` is at least 1.
+- `size_network(net: NetworkInputs, l1: SwitchPorts, l2: SwitchPorts, links: Sequence[L2Link]) -> NetworkPlan`.
+- `rank_l1_switches(candidates: Sequence[SwitchPorts], net: NetworkInputs) -> list[tuple[SwitchPorts, int]]`: every candidate with a usable port and its L1 count per side, best first (the order above); the Network tab shows it so the engineer can pick another model.
+- `pick_l1_switch(candidates, net) -> SwitchPorts`: the first of `rank_l1_switches`; empty → `SizingError`. `rings_per_side` is 0 in a star; `l2_per_side` is at least 1.
 
 - [ ] **Write the failing tests** (RST2228 L1 = `SwitchPorts("RST2228-L1-24MM", ied=24, uplink=0, any=4)`, L2 = `SwitchPorts("RST2228-L2", 0, 0, 28)`):
   - `test_r1_star_reserves_uplink_and_interlink` → 2; `test_r1_star_without_interlink_reserves_one` → 1; `test_r1_ring_reserves_two_ring_ports` → 2.
@@ -80,6 +83,9 @@ Settled by A1:
   - `test_r1_boundary_counts`: 20 → 1, 21 → 2, 120 → 6.
   - `test_r1_zero_ieds_needs_no_l1_switch`: l1_per_side 0, l1_links 0, l2_per_side 1.
   - `test_r1_no_usable_port_is_an_error`: `port_fraction=1.0` and `SwitchPorts(.., ied=1, uplink=0, any=1)` each raise `SizingError` whose message contains the part id.
+  - `test_r1_tool_picks_l1_switch_with_fewest_switches`: 40 IEDs, candidates 16-port (`ied=14, any=2`, 11 usable → 4), 28-port (`24, 0, 4`, 20 → 2), 48-port (`44, 0, 4`, 36 → 2) → the 28-port (tie with the 48-port on 2 switches, fewer ports).
+  - `test_r1_ranking_lists_every_candidate_with_its_count`: `rank_l1_switches` returns `[(28-port, 2), (48-port, 2), (16-port, 4)]`.
+  - `test_r1_pick_tie_breaks_on_part_id`; `test_r1_pick_without_a_usable_candidate_is_an_error`.
   - `test_r2_star_links_one_port_per_l1_switch`: 6 L1 → 6; with `l1_uplinks_per_switch=2` → 12.
   - `test_r2_ring_takes_two_ports_per_ring`: 6 L1 → 2; 7 → 4; 13 with `ring_max_switches=6` → 6.
   - `test_r2_l2_usable_ports_reserve_l3_uplinks`: RST2228 L2 → 20.
