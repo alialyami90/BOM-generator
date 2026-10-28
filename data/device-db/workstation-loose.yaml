@@ -67,6 +67,9 @@ records:
       operating. Per-model power values in the datasheet table could not be mapped with certainty (55
       W likely F23). Manual: https://www.austin-hughes.com/wp-content/uploads/2021/03/UM-UV-F23.pdf ;
       drawing: https://www.austin-hughes.com/wp-content/uploads/2023/03/PD-UV-F23.pdf'
+    mounting_kind: external
+    height_u: 0
+    height_note: Desk or VESA mount on the WS console
   alternatives:
   - make: Advantech
     manufacturer: Advantech Co., Ltd.
@@ -201,6 +204,9 @@ records:
       is 48.6 kg in the 4K-L datasheet but 45 kg in the 42U K55 brochure. The BOM's "touch" requires the
       touch option to be specified (PCAP or IR). Package includes 6 ft DP cable. Not IEC 61850-3 rated.
       Manual https://www.austin-hughes.com/wp-content/uploads/2020/07/UM-UV-K55.pdf ; drawing https://www.austin-hughes.com/wp-content/uploads/2023/03/PD-UV-K55.pdf
+    mounting_kind: external
+    height_u: 0
+    height_note: Wall mounted
   alternatives:
   - make: Advantech
     manufacturer: Advantech Co., Ltd.
@@ -297,6 +303,9 @@ records:
       though its VESA 600x400 and 45-48.6 kg weight are within the mount's limits - check arm span fits
       the 1292 mm-wide chassis. Dimensions above are as published (625 x 1050 x 630 mm), axis order assumed.
       Mount weight not published.
+    mounting_kind: external
+    height_u: 0
+    height_note: Wall mount
   alternatives:
   - make: Chief (Legrand AV)
     manufacturer: Legrand AV
@@ -405,6 +414,9 @@ records:
     product_url: https://innova.se/product/k-tek-a420tp-kp-fn-mdt/
     notes: Data from distributor Innova (SE) and DirectIndustry page for the panel-mount sibling K-TEK-A420TP-KP-FN-DWP;
       no manufacturer datasheet seen. Weight 2.3 kg is gross weight.
+    mounting_kind: external
+    height_u: 0
+    height_note: Desktop
   alternatives:
   - make: iKey
     manufacturer: iKey Ltd (USA)
@@ -489,6 +501,9 @@ records:
       so confirm with the client whether V12 is still mandated. Protocol list, redundancy and OS support
       could not be read in this session (fetch budget exhausted). Licence BOM normally lists separate
       Editor and Runtime/Client licences with tag-count size - confirm sizing with the COPA-DATA partner.
+    mounting_kind: external
+    height_u: 0
+    height_note: Software
   alternatives:
   - make: Siemens
     manufacturer: Siemens AG (Smart Infrastructure)
@@ -557,6 +572,9 @@ records:
       unless the client mandates 2021. Home & Business is a retail/consumer-channel licence; LTSC Pro
       Plus is the commercial perpetual offer (offline-capable). SKU descriptions above come from reseller
       listings, not Microsoft.
+    mounting_kind: external
+    height_u: 0
+    height_note: Software
   alternatives:
   - make: SoftMaker
     manufacturer: SoftMaker Software GmbH
@@ -639,6 +657,9 @@ records:
     notes: NAP-K55 inputs are DP 1.2 and HDMI 2.0 - use an active HDMI 2.0 (or DP 1.2) cable for 4K60
       at 10 m. Active cables are directional (source end marked). StarTech DISPL10MA (10 m active DP)
       is listed by RS as 4K @ 30 Hz only, so it is not recommended for 4K60.
+    mounting_kind: external
+    height_u: 0
+    height_note: Cable
   alternatives:
   - make: Lindy
     manufacturer: LINDY-Elektronik GmbH
@@ -716,6 +737,9 @@ records:
     notes: Use with the display's own short touch cable, or use an active A-to-B cable direct (Lindy 42761).
       The K55 brochure lists the touch connector as USB Type-A on the IR touch option - confirm the connector
       on the ordered touch option.
+    mounting_kind: external
+    height_u: 0
+    height_note: Cable
   alternatives:
   - make: Lindy
     manufacturer: LINDY-Elektronik GmbH
@@ -790,6 +814,9 @@ records:
     notes: Not verified - search budget ran out before a 3 m DVI-D part could be confirmed. The NAP-F23
       has HDMI 1.4 + VGA as standard; DVI-D is an input option, so either order the DVI-D option or replace
       this line with a 3 m HDMI (or DVI-to-HDMI) cable. Single-link DVI-D is enough for 1920x1080.
+    mounting_kind: external
+    height_u: 0
+    height_note: Cable
   alternatives:
   - make: StarTech.com
     tiers:
@@ -863,6 +890,9 @@ records:
     product_url: https://uk.rs-online.com/web/p/usb-cables/1862797
     notes: Check connector on the monitor's touch option (TPC10/TRB = USB); passive 3 m is within USB
       2.0 limits.
+    mounting_kind: external
+    height_u: 0
+    height_note: Cable
   alternatives:
   - make: Lindy
     tiers:
@@ -929,6 +959,9 @@ records:
       ClearCurve / Pretium patch cords, CommScope SYSTIMAX LazrSPEED (OM4) and TeraSPEED (OS2). Specify
       per cord: fibre type, connector LC/UPC duplex, length, jacket (LSZH), colour (aqua/erika violet
       for OM3/OM4, yellow for OS2), and match the switch SFP type (MM 850 nm vs SM 1310 nm).'
+    mounting_kind: external
+    height_u: 0
+    height_note: Cables
   alternatives:
   - make: Panduit
     manufacturer: Panduit Corp.

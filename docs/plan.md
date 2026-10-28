@@ -305,6 +305,27 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
 - Tests: schema accept/reject cases, mirroring swaps LAN and prefix, every
   example file loads, unknown `part_id` is reported with file and path.
 
+### M1b — Projects, substations and the sizing inputs (A2, ADR 0012/0013)
+- `project.yaml` (project info, library name/version, document register,
+  defaults, substations) and `substation.yaml` (today's project settings plus
+  `equipment`, `network`, `spares`, `layout`); loader resolves project →
+  substations with key-by-key defaults; library `height_u`, port roles,
+  `enclosure_u`; JSON Schemas; `bomgen validate` on a project or a substation.
+- `examples/` becomes one project with one substation; the hand-written panels
+  and every golden value stay as they are.
+- Section 3 of this plan is rewritten by A2 with the new schemas.
+
+### M1c — Network sizing and automatic panel layout (A8, ADR 0013)
+- `engine/sizing.py` (rules R1–R4 of the design) and `engine/layout.py`
+  (R5–R9): L1/L2 counts from the IED count and spares, port plans, 32U fill
+  with blank space, A/B streams, common devices spread, overrides and removals.
+- `bomgen layout`; `bomgen build` runs it first unless `--no-layout`; generated
+  `panels/*.yaml` with a `generated` header; check-report lines for port
+  demand, panel fill, stale overrides and the IED count.
+- Golden R10: the example substation's generated panels in
+  `tests/golden/layout/`, confirmed by Ali.
+- Starts when M1b is on main.
+
 ### M2 — BOM groups A–D
 - Steps 1, 2, 3, 5: enclosure row, group B units and tags (range tags, LAN/level
   tokens, gateway numbering, FOPP tag), kit children and loose items, SFPs per
@@ -381,6 +402,13 @@ update package (ADR 0008).
   installed. Recording the library name and version in projects needs the
   project model and the check report, so M7 wires `library_mismatch()` into the
   check report. Refusals carry a `RefusalKind` for the M10 import screen.
+
+### M8b — `.bomproj` export, import and backup (A5, ADR 0012)
+- `bomgen project export|import|backup`: zip of the project folder without
+  `out/` plus a manifest with checksums and the library version, reusing the
+  `.bomlib` package code; overwrite warning on import; library-version
+  mismatch message naming the `.bomlib` to install (resolves Q21).
+- Starts when M1b is on main.
 
 ### M9 — UI design with impeccable
 Use the `impeccable` skill to design the screens and elements: open or create a
@@ -592,6 +620,22 @@ branch MCBs are 2 A, A9F74202 (the workbook text says 2A but uses the 1 A code).
 switch as a Ruggedcom RST-2228 and the L2 1G/100M MM SFPs as 18/6; the masters list a
 SEL-2730M and 15/2. *Default:* the masters, because Power Consumption reads them and
 they reproduce the spec's totals. Waiting for Ali.
+
+**Q24 — Document register per project or per substation.** *Resolved 2026-10-28:*
+per project, listing the documents per substation (ADR 0012).
+
+**Q25 — Blank plates in the BOM.** *Resolved 2026-10-28:* Ali: not in the BOM; the
+blank space only counts toward the panel's usable 32U (ADR 0013).
+
+**Q26 — Where common devices go.** *Resolved 2026-10-28:* Ali: in the same panels as
+the A/B pairs, not in their own panel (ADR 0013, rule R6).
+
+**Q27 — Ring topology rule.** *Resolved 2026-10-28 by default:* two ports per ring,
+`ring_max_switches` 6, both user-editable (ADR 0013).
+
+**Q28 — L1 uplinks in a star.** *Resolved 2026-10-28:* Ali: one uplink from each L1
+switch to its own L2 side, and the A and B switches of a pair interconnected
+(ADR 0013, rule R1).
 
 **Q29 — Thermostat load and fan airflow in the library defaults.** The device
 research (`docs/device-db-findings.md`, items 1 and 2) found that the SK 3110.000

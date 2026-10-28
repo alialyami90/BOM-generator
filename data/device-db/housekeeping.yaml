@@ -32,6 +32,9 @@ records:
       fabricated cabinet and ask the vendor for a GA drawing and IP rating. Standard catalogue cabinets
       are 2000 mm high + 100 mm plinth = 2100 mm overall. Saudi-local alternative worth asking about:
       alfanar (modular panel enclosures/frames).'
+    mounting_kind: external
+    height_u: 0
+    height_note: The cabinet itself
   alternatives:
   - make: Schneider Electric
     manufacturer: Schneider Electric
@@ -123,6 +126,9 @@ records:
     notes: 'Verified: PC 5386.050 is the 800 mm wide x 636 mm deep PC cabinet. Do not confuse with PC
       5368.050 (600 W x 1600 H x 836 D, 108.5 kg). BOM dimensions match 5386.050. Net weight 114 kg (gross
       115.8 kg). Side cable entry is not stated on the Rittal page; base plates are supplied.'
+    mounting_kind: external
+    height_u: 0
+    height_note: The console itself
   alternatives:
   - make: nVent Hoffman
     manufacturer: nVent
@@ -233,6 +239,9 @@ records:
       appears to be such an adapter/connection cable but its spec could not be read. Other confirmed connection
       accessory: SZ 2500.500 = 3 m adapter connection cable, 100-240 V AC. The Schuko socket on the light
       is not suitable for BS 1363 plugs used in Saudi Arabia; check.'
+    mounting_kind: enclosure
+    height_u: 0
+    height_note: On the enclosure's 25 mm pitch profile
   alternatives:
   - make: STEGO
     manufacturer: STEGO Elektrotechnik GmbH
@@ -336,6 +345,9 @@ records:
     notes: 716 m3/h is the 60 Hz unimpeded figure; at 50 Hz it is 625 m3/h, and with one matching outlet
       filter (SK 3243.200) only 405/460 m3/h. 87 W is the 60 Hz power; 70 W at 50 Hz. Use the outlet-filter
       figure for airflow sizing. Matching outlet filter is SK 3243.200, not SK 3238.200.
+    mounting_kind: enclosure
+    height_u: 0
+    height_note: Wall or door cut-out
   alternatives:
   - make: Pfannenberg
     manufacturer: Pfannenberg GmbH
@@ -422,6 +434,9 @@ records:
     notes: SK 3238.200 fits the small SK 3238.1xx fans (148.5 mm), NOT the SK 3243.100 (323 mm) fan. If
       this filter is meant as the exhaust for the main SCADA cabinet fan, the correct part is SK 3243.200.
       If it is for the PC console with its own SK 3238.100 fan, it is correct. Confirm with Ali.
+    mounting_kind: enclosure
+    height_u: 0
+    height_note: Wall or door cut-out
   alternatives:
   - make: Pfannenberg
     manufacturer: Pfannenberg GmbH
@@ -523,6 +538,8 @@ records:
       thermostat is a passive bi-metal device and draws no power; it should be 0 W in power and heat budgets.
       At 125 V DC the 30 W limit means max 0.24 A switched - use the AC side or an interposing relay for
       DC loads.
+    mounting_kind: din_rail
+    height_u: 0
   alternatives:
   - make: Pfannenberg
     manufacturer: Pfannenberg GmbH
@@ -634,6 +651,9 @@ records:
       24 V AC variant's 1.58 W). Gold contacts suit low-level dry-contact signals to RTU/IED inputs; if
       they switch >50 mA the gold burns off. RIF-1 kit counterpart 2903306 etc. not needed - this BOM
       orders base, module and bracket separately.
+    mounting_kind: plug_in
+    height_u: 0
+    height_note: Plugs into the RIF-2 base
   alternatives:
   - make: Finder
     manufacturer: Finder S.p.A.
@@ -730,6 +750,8 @@ records:
     datasheet_url: https://www.phoenixcontact.com/it/prodotti/2900934/pdf
     product_url: https://www.phoenixcontact.com/en-sa/products/relay-base-rif-2-bpt-4x21-2900934
     notes: 31 mm wide per relay position. Base current rating 12 A but the REL-IR4 relay limits to 6 A.
+    mounting_kind: din_rail
+    height_u: 0
   alternatives:
   - make: Finder
     manufacturer: Finder S.p.A.
@@ -809,6 +831,9 @@ records:
     product_url: https://www.phoenixcontact.com/us/products/2900944/pdf
     notes: 'Correct for the 230 V AC coil of 2903685. Sister modules: RIF-RC-120-230UC (2900951) RC, RIF-V-120-230UC
       (2900948) varistor only, RIF-LDP-110DC (2900941) LED+freewheel diode for 110 V DC coils.'
+    mounting_kind: plug_in
+    height_u: 0
+    height_note: Plugs into the relay base
   alternatives:
   - make: Finder
     manufacturer: Finder S.p.A.
@@ -887,6 +912,9 @@ records:
     datasheet_url: https://www.mouser.com/datasheet/2/324/4/2900954-1468416.pdf
     product_url: https://rspsupply.com/p-836952-phoenix-contact-2900954-retaining-bracket-rif-rh-2.aspx
     notes: Metal-free variant RIF-RHM-2 also exists. Sold in packs of 10 (MOQ 10).
+    mounting_kind: plug_in
+    height_u: 0
+    height_note: Clips onto the relay base
   alternatives:
   - make: Finder
     manufacturer: Finder S.p.A.
@@ -972,6 +1000,9 @@ records:
       a 2-gang back box (flush or surface) or a cabinet-mount plate, and 13 A (not 10 A) is the rating.
       Type G suits Saudi Arabia (SASO 2203 is BS 1363-based). Sister codes: 730060 = 1-gang 13 A DP switched,
       730078 = 1-gang SP switched with USB.'
+    mounting_kind: enclosure
+    height_u: 0
+    height_note: BS 1363 wall-box socket fixed inside the cabinet
   alternatives:
   - make: Schneider Electric
     manufacturer: Schneider Electric
@@ -1058,6 +1089,9 @@ records:
       anode = negative-pole change-over (two feeds' negatives joined), which matches the BOM "negative"
       role. 1200 V is far above the 125 V DC need; forward drop (~1 V) at load current is the real heat
       term - add to heat budget. Requires heatsink depending on load.
+    mounting_kind: enclosure
+    height_u: 0
+    height_note: Screwed to a heatsink or mounting plate
   alternatives:
   - make: Semikron Danfoss
     manufacturer: Semikron Danfoss
@@ -1138,6 +1172,9 @@ records:
     notes: No Ruttonsha datasheet found. Mirrors Semikron SKMD 150F12 (common cathode, 1200 V, 150 A,
       IFSM 1800 A, SEMIPACK 2, 0.16 kg). Common cathode = positive-pole diode-OR of the two 125 V DC feeds,
       matching the BOM "positive" role. Confirm ratings with Ruttonsha.
+    mounting_kind: enclosure
+    height_u: 0
+    height_note: Screwed to a heatsink or mounting plate
   alternatives:
   - make: Semikron Danfoss
     manufacturer: Semikron Danfoss
