@@ -134,3 +134,16 @@ def test_cli_list_of_empty_store(runner: CliRunner) -> None:
 
     assert result.exit_code == 0
     assert "No libraries installed." in result.output
+
+
+def test_cli_prints_the_remedy_for_an_inactive_reinstall(runner: CliRunner, tmp_path: Path) -> None:
+    v1 = _pack(runner, tmp_path, "1.0.0", V1)
+    v2 = _pack(runner, tmp_path, "1.1.0", V2)
+    runner.invoke(library_app, ["import", str(v1)])
+    runner.invoke(library_app, ["import", str(v2)])
+
+    result = runner.invoke(library_app, ["import", str(v1)])
+
+    assert result.exit_code == 1
+    assert "error: library psa-devices 1.0.0 is installed but not active" in result.output
+    assert "hint: run: bomgen library rollback psa-devices --to 1.0.0" in result.output

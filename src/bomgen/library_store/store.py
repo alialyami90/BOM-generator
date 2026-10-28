@@ -56,6 +56,9 @@ def default_library_home(env: Mapping[str, str] = os.environ, platform: str = sy
     return base / "bomgen" / "libraries"
 
 
+_REPAIR_HINT = "import a package or run: bomgen library rollback <name> --to <version>"
+
+
 @dataclass(frozen=True)
 class LibraryRef:
     name: str
@@ -132,15 +135,15 @@ class LibraryStore:
             version = pointer.read_text(encoding="utf-8").strip()
         except (UnicodeDecodeError, OSError) as exc:
             raise LibraryPackageError(
-                f"library {name}: the active version file cannot be read ({exc}); "
-                "import a package or run rollback --to <version>",
+                f"library {name}: the active version file cannot be read ({exc})",
                 RefusalKind.STORE_DAMAGED,
+                hint=_REPAIR_HINT,
             ) from exc
         if version not in self.versions(name):
             raise LibraryPackageError(
-                f"library {name}: the active version {version!r} is not installed; "
-                "import a package or run rollback --to <version>",
+                f"library {name}: the active version {version!r} is not installed",
                 RefusalKind.STORE_DAMAGED,
+                hint=_REPAIR_HINT,
             )
         return version
 
@@ -267,20 +270,22 @@ class LibraryStore:
         except LibraryPackageError:
             active = None  # a broken pointer is repaired by the import
         if manifest.version in self.versions(manifest.name) and not force:
-            hint = (
-                ""
-                if manifest.version == active
-                else f"; run rollback --to {manifest.version} to activate it"
-            )
+            inactive = manifest.version != active
             raise LibraryPackageError(
-                f"library {manifest.name} {manifest.version} is already installed{hint}",
+                f"library {manifest.name} {manifest.version} is "
+                + ("installed but not active" if inactive else "already installed"),
                 RefusalKind.ALREADY_INSTALLED,
+                hint=(
+                    f"run: bomgen library rollback {manifest.name} --to {manifest.version}"
+                    if inactive
+                    else None
+                ),
             )
         if active is not None and manifest.parsed_version < Version.parse(active) and not force:
             raise LibraryPackageError(
-                f"library {manifest.name} {manifest.version} is older than the active "
-                f"{active}; use force to downgrade",
+                f"library {manifest.name} {manifest.version} is older than the active {active}",
                 RefusalKind.DOWNGRADE,
+                hint="use --force to downgrade",
             )
         old_library: dict[str, Any] | None = None
         old_files: dict[str, str] = {}

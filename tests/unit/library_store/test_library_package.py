@@ -242,5 +242,8 @@ def test_a_bomproj_given_to_library_import_is_explained(tmp_path: Path) -> None:
     with zipfile.ZipFile(project, "w") as zf:
         zf.writestr("manifest.json", json.dumps(manifest))
 
-    with pytest.raises(LibraryPackageError, match=r"\.bomproj project.*bomgen project import"):
+    with pytest.raises(LibraryPackageError, match=r"\.bomproj project, not a \.bomlib") as caught:
         read_package(project)
+
+    assert "bomgen" not in str(caught.value)
+    assert caught.value.hint == "use 'bomgen project import' to open it"

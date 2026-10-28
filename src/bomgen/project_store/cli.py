@@ -20,6 +20,8 @@ project_app = typer.Typer(
 
 def _fail(exc: Exception) -> typer.Exit:
     typer.echo(f"error: {exc}", err=True)
+    if isinstance(exc, LibraryPackageError) and exc.hint:
+        typer.echo(f"hint: {exc.hint}", err=True)
     return typer.Exit(1)
 
 
@@ -63,6 +65,8 @@ def import_command(
         typer.echo(f"Replaced the existing project; its backup is {result.backup}")
     if result.library_note:
         typer.echo(f"note: {result.library_note}")
+        if result.library_hint:
+            typer.echo(f"hint: {result.library_hint}")
 
 
 @project_app.command("backup")
