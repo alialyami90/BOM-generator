@@ -7,6 +7,7 @@ version. The edits come from the edit operations or a CSV import; this module on
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
@@ -16,6 +17,7 @@ from bomgen.bundle.container import sha256
 from bomgen.io.errors import InputError
 from bomgen.io.loader import load_library
 from bomgen.library_store.diff import LibraryDiff, diff_libraries, parse_library
+from bomgen.library_store.edit import Insert, Remove, SetValue, apply_edits
 from bomgen.library_store.errors import LibraryPackageError, RefusalKind
 from bomgen.library_store.manifest import FORMAT_VERSION, LIBRARY_FILE, Manifest
 from bomgen.library_store.package import PackageContents
@@ -90,6 +92,37 @@ def save_local_version(
     )
     store.install(PackageContents(manifest, files, new_library), validate=validate_library)
     return LocalSave(manifest, base, diff)
+
+
+def save_edits(
+    store: LibraryStore,
+    name: str,
+    edits: Sequence[SetValue | Insert | Remove],
+    *,
+    base: str | None = None,
+    note: str = "",
+) -> LocalSave:
+    """Apply `edits` to the installed version `base` (default: the active one) and save the result.
+
+    Problems with the edits come back as one `VALIDATION_FAILED` refusal listing each; the
+    store is untouched.
+    """
+    base = base or store.active_version(name)
+    if base is None:
+        raise LibraryPackageError(f"library {name} is not installed", RefusalKind.NOT_INSTALLED)
+    try:
+        current = load_library(store.library_file(name, base))
+    except InputError as exc:
+        raise LibraryPackageError(
+            f"library {name} {base}: the installed library is damaged", RefusalKind.STORE_DAMAGED
+        ) from exc
+    result = apply_edits(current, edits)
+    if result.library is None:
+        listed = "\n".join(f"  {p.location}: {p.message}" for p in result.problems)
+        raise LibraryPackageError(
+            f"the edits leave {LIBRARY_FILE} invalid:\n{listed}", RefusalKind.VALIDATION_FAILED
+        )
+    return save_local_version(store, name, result.library, base=base, note=note)
 
 
 def _next_local(store: LibraryStore, name: str, base: Version) -> Version:

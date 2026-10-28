@@ -127,3 +127,24 @@ from a `Library` and a base version. The `.bomlib` backup of an edited library i
   required and the model rejects `codes` keys that differ from it). If M13 changes a
   field, this ADR is amended in the PR that builds the code.
 - The CSV code is not built until M13 is on main.
+
+## Amendment: edit operations (2026-10-28)
+
+The app edits the library through a pending set (`docs/ui/editing.md`, Library editing), so
+the engine takes edits, not whole libraries. An edit is plain JSON: `{"op": "set" | "insert" |
+"remove", "path": [...], "value": ..., "index": ...}`. A path is a list of segments: a string
+is a mapping key or, in a list, the item's `part_id` (devices) or `id` (catalogue brands); an
+integer is a position. `["devices", "SW-1", "ports", 0, "count"]` is the count of the first
+port group of SW-1. Every model field is therefore editable without one function per field.
+
+- `apply_edits` applies the edits in order to a copy and checks the result with the model and
+  the loader's cross-record rules. The answer is the new library or every problem, located as
+  `devices[SW-1].voltage_v`. Deleting a part another part uses is a problem.
+- `check_field(library, path, value)` is the per-field validation: the message the change
+  would cause, or nothing. Problems the library already had are not blamed on the field.
+- `save_edits` applies the edits to an installed version and saves the result as the next
+  `+local.<n>` version, with the same refusals as a CSV import. `bomgen library export` and
+  `LibraryStore.export_package` write any installed version as the `.bomlib` backup.
+- A CSV import yields the same kind of change set (rows added, changed and removed, and rows
+  with problems), so the app can add the valid rows to its pending set instead of saving at
+  once. The all-or-nothing import in this ADR remains the command-line behaviour.
