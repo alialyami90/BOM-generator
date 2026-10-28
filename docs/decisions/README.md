@@ -14,3 +14,4 @@ An ADR stays "Proposed" until Ali accepts it in review.
 | 0006 | [CI gated by paths-filter with an always-on ci-status job](0006-ci-docs-only-gating.md) | Accepted |
 | 0007 | [Windows desktop app: pywebview + PyInstaller + Inno Setup](0007-windows-desktop-app-stack.md) | Proposed |
 | 0008 | [Device library updates as `.bomlib` packages](0008-library-update-packages.md) | Proposed |
+| 0010 | [Input schema details and validation behaviour](0010-input-schema.md) | Proposed |
