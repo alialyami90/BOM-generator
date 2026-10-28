@@ -5,7 +5,7 @@
 Work is split across agents, one per project thread (`Ax - Role`). Roles, file
 ownership, shared-file rules, ADR/question numbering and the review flow are in
 [`docs/agents.md`](docs/agents.md). Change only files your role owns; A1 (lead)
-reviews and approves every PR, Ali merges.
+reviews, approves and merges every PR.
 
 ## Source of truth
 

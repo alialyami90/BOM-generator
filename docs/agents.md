@@ -2,7 +2,8 @@
 
 The project is built by several Claude agents working in parallel, one per
 project thread, named `Ax - Role`. Ali owns the project: he answers spec and
-design questions, accepts ADRs and merges PRs. A1 leads the other agents.
+design questions and accepts ADRs. A1 leads the other agents, approves PRs and
+merges them.
 
 This file says who owns what, so two agents never change the same thing in
 different ways. The working rules in [`CLAUDE.md`](../CLAUDE.md) apply to every
@@ -26,8 +27,8 @@ and its implementation plan under `docs/superpowers/plans/`.
 ### A1 — Lead developer
 
 - Reviews every PR against its milestone's scope in `plan.md`, the spec and
-  `CLAUDE.md`, and submits an approving review on GitHub when it fits. Ali
-  merges unless he says otherwise.
+  `CLAUDE.md`, posts an "A1: approved" review when it fits, checks CI and
+  conflicts, and squash-merges it. Ali merges nothing himself unless he wants to.
 - Checks for conflicts between threads: shared files, schema changes, CLI
   wiring, ADR and question numbers, CI jobs. Sends fix requests to the owning
   thread rather than changing another agent's files.
@@ -113,7 +114,8 @@ the same one. Ask A1 before you add one.
    `pytest`, opens a PR from its own branch and tells A1 the number.
 2. A1 reviews scope, spec, tests and cross-thread effects. Problems go back to
    the owning thread as a list; the owner fixes them on the same PR.
-3. When it fits, A1 submits an approving review. Ali merges.
+3. When it fits, A1 posts the approval and squash-merges once CI is green and
+   the branch has no conflict with `main`.
 4. A dependent PR rebases on `main` after the PR it depends on merges.
 
 Merge order while the current work is open: M1 (A2) first, since M8, M11 and the
