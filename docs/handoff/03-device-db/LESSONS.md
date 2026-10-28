@@ -42,5 +42,18 @@
 - **Tests outside role 3's files.** Change them only with A1's approval. Assert the new
   composition and never loosen a test. List them in the PR body under "Tests outside A3's
   files", and ask the owner (A5, A8...) to review.
-- **Full pytest takes about 10 minutes** since #130, because the example library is ~4,600
+- **Full pytest took ~10 min** after #130 (superseded: ~4 min since #149, see below), because the example library is ~4,600
   lines. Run it in the background (foreground calls time out at 120 s or 600 s).
+
+## 2026-10-28, after #161
+
+- **Roles move to new threads after a reset.** Message the current thread: ROSTER.md
+  names the role, and the coordinator gives the thread id. Ignore the retired thread, even
+  if it answers. A retired A5 and the new B5 gave conflicting answers on #161, and the
+  coordinator ruled for B5.
+- **When another role lands the same fix first, merge main and take its version.** B5's
+  #165 did this. Then check its new tests against your data: one assumed every shipped
+  brand is AC-rated.
+- **Never send placeholder text with `message_thread`.** Every call is delivered. Two
+  stray messages ("unused", "placeholder-do-not-send") had to be retracted.
+- **Since #149 the full pytest takes about 3–4 minutes**, down from about 11 minutes.
