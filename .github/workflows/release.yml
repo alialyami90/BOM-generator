@@ -167,7 +167,7 @@ jobs:
           if ($LASTEXITCODE -ne 0 -or "$validated" -notmatch "^OK:") { Fail "Installed bomgen.exe validate gave: $validated" }
           $buildDir = Join-Path $env:RUNNER_TEMP "installed-build"
           $built = & "$dir\bomgen.exe" build examples\project.yaml --out $buildDir
-          if ($LASTEXITCODE -ne 0 -or -not $built) { Fail "Installed bomgen.exe build exited $LASTEXITCODE: $built" }
+          if ($LASTEXITCODE -ne 0 -or -not $built) { Fail "Installed bomgen.exe build exited ${LASTEXITCODE}: $built" }
           foreach ($workbook in $built) {
             if ($workbook -notlike "*.xlsx" -or -not (Test-Path $workbook)) { Fail "Installed build printed '$workbook', which is not a workbook" }
           }
