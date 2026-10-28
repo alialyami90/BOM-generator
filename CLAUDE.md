@@ -1,5 +1,12 @@
 # Working rules for Claude
 
+## Team
+
+Work is split across agents, one per project thread (`Ax - Role`). Roles, file
+ownership, shared-file rules, ADR/question numbering and the review flow are in
+[`docs/agents.md`](docs/agents.md). Change only files your role owns; A1 (lead)
+reviews and approves every PR, Ali merges.
+
 ## Source of truth
 
 - The spec in `docs/spec/` is authoritative. Reference it by section name; do not
@@ -46,6 +53,7 @@ pytest
 docs/spec/        generator spec (authoritative) + how to update it
 docs/decisions/   ADRs
 docs/plan.md      plan, milestones, open questions
+docs/agents.md    agent roles and file ownership
 src/bomgen/       package source
 tests/unit/       one test module per rule area
 tests/golden/     example-project golden values and tests
