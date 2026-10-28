@@ -123,11 +123,12 @@ here.
   (`NetworkPlan`): L1 and L2 switches, L2 ports used of usable, links, and the
   note for the chosen topology.
 - **L1 switch model:** under Field network, a ranked table of the engine's
-  `rank_l1_switches` result (rank, model, ports, switches per side, spare ports).
-  The top row is used and marked "Tool's pick"; "Use this one" on another row
-  pins it ("Pinned by you", with Unpin, and the Result card says "(pinned)").
-  The UI never ranks; it shows the engine's order. No ranking is shown until the
-  IED count is set.
+  `rank_l1_switches` result (rank, model, ports, switches per side, **usable
+  ports**). The row in use is marked "Tool's pick" or, when `substation.yaml` pins
+  a model, "Pinned" (the Result card says "(pinned)"); a top row that is not in
+  use shows "Tool's pick" in muted text. The UI never ranks; it shows the
+  engine's order. No ranking is shown until the IED count is set. In the built
+  app the pin is made in `substation.yaml` (see *Departures in the built app*).
 - **Behaviour:** the Result card shows a busy state and updates after each
   change. Equipment rows are checked against the library; an unknown part id
   shows an inline error with a suggestion. In a star, each L1 has one uplink to
@@ -241,8 +242,9 @@ too and their "Go to field" opens the project page.
 - **Layout:** title, a banner when the last load had errors, sheet tabs (one
   Sheet per panel, then Power Consumption, Heat Dissipation, Heat Calculations),
   then the sheet.
-- **BOM sheet:** group chips A to H with counts, a row filter, switches for the
-  hidden HWIO column and revised cells; the sheet title block (cabinet number,
+- **BOM sheet:** group chips A to H with counts, a row filter, a switch for the
+  hidden HWIO column (the revised-cells switch was dropped, see *Departures in
+  the built app*); the sheet title block (cabinet number,
   substation and cabinet name); the table with a preview-only Grp column, SR.NO,
   designation, description, quantity, make, model, ordering code. Parent tags
   span their child rows and the empty separator rows between groups E to H are
@@ -265,6 +267,47 @@ too and their "Go to field" opens the project page.
   a short check report); failed because the file is open in Excel (red banner,
   "Try again", "Save as new name"). An existing file with the same name asks
   for confirmation in a dialog before it is replaced.
+
+## Departures in the built app
+
+The app (M10) follows this design except where listed here. Each departure was
+reviewed by the design owner and is the intended behaviour; the prototype in
+`prototype/` is not changed to match.
+
+- **Projects, substations and settings are read-only.** Creating and editing
+  projects, substations and settings is not in the first release: the pages show
+  the values in disabled fields, "New project…", "New substation…" and similar
+  actions are disabled, and one line under the page subtitle says "Creating and
+  editing … in the app is not available yet. Edit the YAML files, then open the
+  project again." It is a single component (`note` in `pageHead`): one line, an
+  info icon, ellipsis and a tooltip on overflow. Empty read-only fields read
+  "Not set".
+- **Network pin.** "Use this one" and "Unpin" are not offered; the pin is written
+  in `substation.yaml`. The ranking table's last column is "Use".
+- **Panels board.** The banner for hand-written panels is one line ("Hand-written
+  panels. The board shows what `bomgen layout` would write; Build uses your panel
+  files.") with a "Show N problem(s)" button; the expanded list starts with
+  "Running it would report N problems:". The line under it is one sentence
+  ("Select a device to see its part and size.") with a ? help icon whose tooltip
+  explains blank plates and the cable manager. Both columns of a pair have the
+  same width.
+- **Import project.** When the project already exists the dialog offers
+  "Replace my project" and "Keep both"; Keep both imports it under the suggested
+  id. The decision banner sits at the top and says that Replace backs up the
+  existing project first. Restoring a backup uses the same dialog with a
+  "Restore" action.
+- **Preview.** Sheet tabs use short labels (Sheet 1 to Sheet 4, Power, Heat
+  dissipation, Heat calculations) so they fit one row; the cabinet name is the
+  tooltip and the title block. The "Show revised cells" switch is removed. An
+  ordering code equal to the model reads "Same as model" (muted).
+- **Build.** The running state is an indeterminate bar (a pulsing full-width
+  fill, no sliding stripe) with "This takes a few seconds." instead of four
+  named steps. The file-name hint says only "From the pattern in Settings →
+  Output."
+- **Library.** "Partial" data quality uses the plain badge with an info icon;
+  amber is kept for a problem.
+- **Home.** With no projects the table is replaced by "No projects yet" with the
+  workspace folder, and the library-update banner stays.
 
 ## Cross-cutting behaviour
 
