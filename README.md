@@ -8,6 +8,9 @@ setup, and page headers/footers.
 - **Spec (source of truth):** [`docs/spec/generator-spec-v2.md`](docs/spec/generator-spec-v2.md)
 - **Plan, milestones, open questions:** [`docs/plan.md`](docs/plan.md)
 - **Design decisions:** [`docs/decisions/`](docs/decisions/)
+- **Team:** the agents building the project and who owns what are in
+  [`docs/agents.md`](docs/agents.md)
+- **Changes:** [`CHANGELOG.md`](CHANGELOG.md)
 
 ## Status
 
