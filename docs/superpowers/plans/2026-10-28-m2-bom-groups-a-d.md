@@ -79,7 +79,7 @@
 
 **Files:** Modify `src/bomgen/engine/kits.py` (+ `loose_table`); Create `src/bomgen/engine/pipeline.py`; Create `tests/golden/expected_groups_a_d.py`, `tests/golden/test_engine_groups_a_d.py`; Test `tests/unit/engine/test_engine_pipeline.py`.
 
-**Produces:** `kits.loose_table(project, rows_by_panel, library) -> LooseTable | None` (project items in order, then each device's `loose_items` as one parent block, plan Q30); `pipeline.build(loaded: LoadedProject) -> BuildResult` (groups A–D per panel; title `(cabinet_number, f"{substation} - {cabinet_name}")`).
+**Produces:** `kits.loose_table(material: LooseMaterial | None, substation: str, panel_rows, library) -> LooseTable | None` (project items in order, then each device's `loose_items` as one parent block, plan Q30); `pipeline.build(loaded: LoadedProject) -> BuildResult` (groups A–D per panel; title `(cabinet_number, f"{substation} - {cabinet_name}")`).
 
 - [ ] Golden: every A–D row of 001, 002, 003 and WS (tag, description, qty, make, model, code, hwio) and the loose table, each list citing the workbook rows; spec tags from plan section 5.
 - [ ] Fail → implement → pass; ruff, mypy, pytest; commit `test(golden): groups A–D of the example cabinets`.
