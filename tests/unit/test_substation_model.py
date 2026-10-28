@@ -7,7 +7,14 @@ import pytest
 from pydantic import ValidationError
 
 from bomgen.models.project import ConstantOverrides, DesignConstants, merge_defaults
-from bomgen.models.substation import Equipment, GeneratedPanels, Network, PairMove, Substation
+from bomgen.models.substation import (
+    DeviceMove,
+    Equipment,
+    GeneratedPanels,
+    Network,
+    PairMove,
+    Substation,
+)
 
 ENCLOSURE = {
     "make": "Rawabi",
@@ -246,3 +253,11 @@ def test_loose_material_title_defaults_to_the_workbook_text() -> None:
     s = Substation.model_validate(data)
     assert s.loose_material is not None
     assert s.loose_material.title == "PSA Panels Loose Material and Auxiliary Equipment"
+
+
+def test_override_position_is_optional_and_one_based() -> None:
+    assert DeviceMove.model_validate({"device": "gps", "panel": 1}).position is None
+    move = PairMove.model_validate({"pair": "ext-fw", "panel": [3, 4], "position": 2})
+    assert move.position == 2
+    with pytest.raises(ValidationError):
+        DeviceMove.model_validate({"device": "gps", "panel": 1, "position": 0})
