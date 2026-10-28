@@ -1,15 +1,17 @@
 # NEXT: role 7
 
-**Next action:** rerun the handoff README's step-4 checks, then message A1 that the docs lag
-#88–#129 and #133 and, on its go-ahead, open one docs-only PR from `origin/main` for them.
+**Next action:** check PR #143 (0.1.1 changelog for #90–#129, blocks the v0.1.1 re-tag):
+if it is still open, fix any review or CI finding and remind A1 it waits for the merge. Then
+rerun the handoff README's step-4 checks and, on A1's go-ahead, open one docs-only PR from
+`origin/main` for the rest of task 1.
 
 ## 1. Docs pass for #88–#129 (v0.2 work, M12–M18)
 - Files (all mine): `CHANGELOG.md`, `README.md`, `tests/unit/README.md`.
 - Depends on: A1's go-ahead; ask whether #130 and #131 should be waited for (A1 has
   preferred one PR over a range, LESSONS L2).
 - Do:
-  - CHANGELOG `[Unreleased]`: every merged PR number from #88 on appears, newest first, Added
-    vs Changed; PRs of one milestone step may share an entry citing all numbers (LESSONS L1). Read each with `git show --stat --format=%B <sha>`.
+  - CHANGELOG: done in #143 for #88–#129 (code PRs only, grouped by feature). Code PRs merged
+    after #129 go under `[Unreleased]` (LESSONS L1). Read each with `git show --stat --format=%B <sha>`.
   - README Status: add the v0.2 milestones that are done or in progress per
     `docs/backlog.md` (A1's file) and `docs/plan.md` → "M12–M18 (v0.2)"; fix "Next:".
   - README Usage: `bomgen library export`, `export-csv`, `import-csv` (from `--help`),

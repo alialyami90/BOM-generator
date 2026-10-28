@@ -23,8 +23,9 @@ In progress: none. Uncommitted changes: none.
 ## What's stale (the next task, see NEXT.md)
 - Merged since #87 (`39fddc4`, #87's squash commit) with no A7 docs pass: every PR #88–#129
   (42, all merged, checked with `git log --format=%s 39fddc4..origin/main`) and #133:
-  - CHANGELOG `[Unreleased]` is empty (`git log --oneline 39fddc4..origin/main`). #133 (the
-    handoff skeleton) also needs an entry.
+  - CHANGELOG: PR #143 (open, A1 merges, then Ali re-tags v0.1.1) adds the code PRs
+    #90–#129 to the `[0.1.1]` section, grouped by feature. Per A1, docs-only and handoff
+    PRs (#133 among them) get no entry.
   - README: the "Next:" paragraph still says the writers are "not yet planned";
     the library section lacks `export`, `export-csv`, `import-csv` (`bomgen library --help`).
   - tests/unit/README.md lacks 14 modules: app/test_app_edit_api, library_store/
