@@ -1,7 +1,8 @@
 """Device library and commodity catalogues.
 
-Models the spec section "Inputs the tool needs" (1. Device library) and ADR 0010.
-Cross-record checks (duplicate part ids, dangling references) live in the loader.
+Models the spec section "Inputs the tool needs" (1. Device library), ADR 0010 and, for
+alternatives and catalogue brands, ADR 0017. Cross-record checks (duplicate part ids,
+dangling references) live in the loader.
 """
 
 from enum import StrEnum
@@ -14,6 +15,7 @@ from pydantic import (
     NonNegativeInt,
     PositiveFloat,
     PositiveInt,
+    StringConstraints,
     field_validator,
     model_validator,
 )
@@ -161,6 +163,10 @@ class LooseItem(InputModel):
     tag: str | None = None
 
 
+AltGroup = Annotated[str, StringConstraints(pattern=r"^[A-Z0-9][A-Z0-9-]*$")]
+Tier = Literal["low", "mid", "high"]
+
+
 class DeviceType(InputModel):
     """One orderable part (spec: Inputs, 1. Device library)."""
 
@@ -192,6 +198,10 @@ class DeviceType(InputModel):
         bool,
         Field(description="Defaults to true when the part has no supply_type, else false."),
     ] = False
+    alt_group: AltGroup | None = None  # interchangeable parts share a key (ADR 0017)
+    tier: Tier | None = None
+    inrush_a: PositiveFloat | None = None  # peak inrush current
+    inrush_ms: PositiveFloat | None = None  # inrush duration
 
     @model_validator(mode="before")
     @classmethod
@@ -236,14 +246,32 @@ class DeviceType(InputModel):
         return self.ordering_code if self.ordering_code is not None else self.model
 
 
+TripCurve = Literal["B", "C", "D", "K", "Z"]
+
+# Instantaneous (magnetic) trip band per curve, in multiples of In, on AC (IEC 60898-1;
+# IEC 60947-2 for K and Z).
+TRIP_BANDS: dict[str, tuple[float, float]] = {
+    "B": (3, 5),
+    "C": (5, 10),
+    "D": (10, 20),
+    "K": (8, 14),
+    "Z": (2, 3),
+}
+
+
 class McbCatalogue(InputModel):
-    """MCB family by rating (spec: Inputs, commodity catalogues)."""
+    """MCB family by rating (spec: Inputs, commodity catalogues; sizing fields ADR 0017)."""
 
     family: str
     make: str
     poles: PositiveInt = 2
     ratings_a: Annotated[list[PositiveInt], Field(min_length=1)]
-    code_pattern: str
+    code_pattern: str | None = None
+    codes: dict[PositiveInt, str] | None = None  # per rating, when no pattern fits
+    trip_curve: TripCurve | None = None
+    magnetic_trip_multiple: PositiveFloat | None = None  # on AC
+    magnetic_trip_multiple_dc: PositiveFloat | None = None
+    dc_rating_v: PositiveFloat | None = None  # the whole MCB, poles in series
 
     @field_validator("ratings_a")
     @classmethod
@@ -254,7 +282,9 @@ class McbCatalogue(InputModel):
 
     @field_validator("code_pattern")
     @classmethod
-    def _pattern_uses_rating(cls, value: str) -> str:
+    def _pattern_uses_rating(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
         check_template(value, {"rating"})
         if "rating" not in template_fields(value):
             raise ValueError("code_pattern must contain {rating}")
@@ -264,10 +294,39 @@ class McbCatalogue(InputModel):
             raise ValueError(f"code_pattern cannot be formatted with a rating: {exc}") from exc
         return value
 
+    @model_validator(mode="after")
+    def _codes_and_trip(self) -> "McbCatalogue":
+        if (self.code_pattern is None) == (self.codes is None):
+            raise ValueError("give exactly one of code_pattern and codes")
+        if self.codes is not None and set(self.codes) != set(self.ratings_a):
+            raise ValueError("codes must list exactly the ratings in ratings_a")
+        ac = self.magnetic_trip_multiple
+        if self.trip_curve is not None and ac is not None:
+            low, high = TRIP_BANDS[self.trip_curve]
+            if not low <= ac <= high:
+                raise ValueError(
+                    f"a {self.trip_curve} curve trips magnetically at {low:g} to {high:g} "
+                    f"x In on AC, not {ac:g}"
+                )
+        dc = self.magnetic_trip_multiple_dc
+        if ac is not None and dc is not None and dc < ac:
+            raise ValueError("magnetic_trip_multiple_dc must not be below magnetic_trip_multiple")
+        return self
+
+    @property
+    def magnetic_multiple(self) -> float | None:
+        """The AC magnetic trip multiple: as written, else the curve's lower bound."""
+        if self.magnetic_trip_multiple is not None:
+            return self.magnetic_trip_multiple
+        return None if self.trip_curve is None else TRIP_BANDS[self.trip_curve][0]
+
     def code_for(self, rating_a: int) -> str:
         """Return the order code for ``rating_a``; raise ``ValueError`` if not catalogued."""
         if rating_a not in self.ratings_a:
             raise ValueError(f"no {self.family} MCB of {rating_a} A in the catalogue")
+        if self.codes is not None:
+            return self.codes[rating_a]
+        assert self.code_pattern is not None
         return self.code_pattern.format(rating=rating_a)
 
 
@@ -338,11 +397,108 @@ class Catalogues(InputModel):
     housekeeping: Housekeeping
 
 
+DEFAULT_BRAND = "default"  # the brand id of the ``catalogues`` entries
+BrandId = Annotated[str, StringConstraints(pattern=r"^[a-z0-9][a-z0-9-]*$")]
+
+
+class McbBrand(McbCatalogue):
+    id: BrandId
+    name: str | None = None
+
+
+class AuxContactBrand(AuxContact):
+    id: BrandId
+    name: str | None = None
+
+
+class TerminalBlockBrand(InputModel):
+    id: BrandId
+    name: str | None = None
+    types: Annotated[dict[str, TerminalBlockType], Field(min_length=1)]
+
+
+class BusbarBrand(InputModel):
+    id: BrandId
+    name: str | None = None
+    entries: Annotated[dict[str, Busbar], Field(min_length=1)]
+
+
+class HousekeepingBrand(Housekeeping):
+    id: BrandId
+    name: str | None = None
+
+
+BrandSet = McbBrand | AuxContactBrand | TerminalBlockBrand | BusbarBrand | HousekeepingBrand
+
+
+class CatalogueBrands(InputModel):
+    """Further brand sets per catalogue; ``catalogues`` is the brand ``default`` (ADR 0017)."""
+
+    mcb: list[McbBrand] = Field(default_factory=list)
+    aux_contact: list[AuxContactBrand] = Field(default_factory=list)
+    terminal_blocks: list[TerminalBlockBrand] = Field(default_factory=list)
+    busbars: list[BusbarBrand] = Field(default_factory=list)
+    housekeeping: list[HousekeepingBrand] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def _unique_ids(self) -> "CatalogueBrands":
+        for kind in CatalogueBrands.model_fields:
+            seen: set[str] = set()
+            for brand in getattr(self, kind):
+                if brand.id == DEFAULT_BRAND:
+                    raise ValueError(
+                        f"{kind} brand id '{DEFAULT_BRAND}' names the catalogues entry; "
+                        "choose another id"
+                    )
+                if brand.id in seen:
+                    raise ValueError(f"duplicate {kind} brand id '{brand.id}'")
+                seen.add(brand.id)
+        return self
+
+
+class CatalogueChoice(InputModel):
+    """The brand set picked per catalogue; unset means ``default``."""
+
+    mcb: BrandId | None = None
+    aux_contact: BrandId | None = None
+    terminal_blocks: BrandId | None = None
+    busbars: BrandId | None = None
+    housekeeping: BrandId | None = None
+
+
 class Library(InputModel):
     """The device library file (spec: Inputs, 1. Device library)."""
 
     devices: Annotated[list[DeviceType], Field(min_length=1)]
     catalogues: Catalogues
+    catalogue_brands: CatalogueBrands = Field(default_factory=CatalogueBrands)
+
+    @model_validator(mode="after")
+    def _groups_and_brands(self) -> "Library":
+        categories: dict[str, Category] = {}
+        for device in self.devices:
+            if device.alt_group is None:
+                continue
+            first = categories.setdefault(device.alt_group, device.category)
+            if first is not device.category:
+                raise ValueError(
+                    f"alt group '{device.alt_group}' mixes categories "
+                    f"{first.value} and {device.category.value}"
+                )
+        keyed = (
+            ("terminal_blocks", "types", self.catalogue_brands.terminal_blocks),
+            ("busbars", "entries", self.catalogue_brands.busbars),
+        )
+        for kind, _field, brands in keyed:
+            needed = getattr(self.catalogues, kind).keys()
+            for brand in brands:
+                missing = sorted(needed - getattr(brand, _field).keys())
+                if missing:
+                    raise ValueError(
+                        f"{kind} brand '{brand.id}' lacks {', '.join(missing)} "
+                        f"(every key of catalogues.{kind} is needed)"
+                    )
+        return self
 
     def get(self, part_id: str) -> DeviceType | None:
         """Return the device with ``part_id``, or ``None``."""
@@ -354,3 +510,53 @@ class Library(InputModel):
     def part_ids(self) -> list[str]:
         """Return all part ids in file order."""
         return [device.part_id for device in self.devices]
+
+    def alt_group(self, key: str) -> list[DeviceType]:
+        """Return the devices in alternative group ``key``, in file order."""
+        return [device for device in self.devices if device.alt_group == key]
+
+    def alternatives(self, part_id: str) -> list[DeviceType]:
+        """Return the other members of ``part_id``'s alternative group, in file order."""
+        device = self.get(part_id)
+        if device is None or device.alt_group is None:
+            return []
+        return [d for d in self.alt_group(device.alt_group) if d.part_id != part_id]
+
+    def brand_ids(self, kind: str) -> list[str]:
+        """Return the brand ids of catalogue ``kind``: ``default`` first, then file order."""
+        brands: list[BrandSet] = getattr(self.catalogue_brands, kind)
+        return [DEFAULT_BRAND, *(brand.id for brand in brands)]
+
+
+def resolve_catalogues(library: Library, choice: CatalogueChoice) -> Library:
+    """``library`` with the chosen brand sets in ``catalogues``; ``library`` itself when every
+    choice is ``default``. Raise ``ValueError`` for an id the library does not have."""
+    update: dict[str, object] = {}
+    for kind in CatalogueChoice.model_fields:
+        brand_id = getattr(choice, kind)
+        if brand_id is None or brand_id == DEFAULT_BRAND:
+            continue
+        brands = getattr(library.catalogue_brands, kind)
+        brand = next((b for b in brands if b.id == brand_id), None)
+        if brand is None:
+            known = ", ".join(library.brand_ids(kind))
+            raise ValueError(f"no {kind} brand '{brand_id}' (the library has: {known})")
+        update[kind] = _plain(kind, brand)
+    if not update:
+        return library
+    catalogues = library.catalogues.model_copy(update=update)
+    return library.model_copy(update={"catalogues": catalogues})
+
+
+def _plain(kind: str, brand: BrandSet) -> object:
+    """The catalogue value a brand set stands for, without its id and name."""
+    if isinstance(brand, TerminalBlockBrand):
+        return brand.types
+    if isinstance(brand, BusbarBrand):
+        return brand.entries
+    plain_type: dict[str, type[InputModel]] = {
+        "mcb": McbCatalogue,
+        "aux_contact": AuxContact,
+        "housekeeping": Housekeeping,
+    }
+    return plain_type[kind].model_validate(brand.model_dump(exclude={"id", "name"}))

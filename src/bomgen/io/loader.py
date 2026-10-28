@@ -8,6 +8,7 @@ found in every file is collected into one :class:`InputError` (ADR 0010 item 7).
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from contextlib import suppress
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -17,6 +18,7 @@ from pydantic import BaseModel, ValidationError
 from bomgen.io.errors import InputError, Issue, Loc, format_location, issues_from_validation_error
 from bomgen.io.mirror import mirror_panel
 from bomgen.io.references import (
+    catalogue_choice_issues,
     document_issues,
     equipment_issues,
     layout_issues,
@@ -28,7 +30,7 @@ from bomgen.io.references import (
 )
 from bomgen.io.yaml_source import YamlSource, read_yaml
 from bomgen.models._base import InputModel
-from bomgen.models.library import Library
+from bomgen.models.library import Library, resolve_catalogues
 from bomgen.models.panel import Panel, PanelMirror, PanelOptions
 from bomgen.models.project import (
     DesignConstants,
@@ -164,6 +166,16 @@ def load_project(project_file: Path, *, store: LibraryStore | None = None) -> Lo
     assert library_source is not None
     issues.extend(library_issues(library, library_source))
     issues.extend(project_issues(project, project_source, substation_sources))
+    choice_loc: Loc = ("defaults", "catalogue_choice")
+    issues.extend(
+        catalogue_choice_issues(
+            project.defaults.catalogue_choice,
+            project_source,
+            choice_loc,
+            library,
+            library_file.name,
+        )
+    )
     reserved = project.defaults.spares.rack_u_reserved
     if reserved >= library.catalogues.enclosure_u:
         loc: Loc = ("defaults", "spares", "rack_u_reserved")
@@ -222,6 +234,14 @@ def _load_substation(
 ) -> LoadedSubstation | None:
     """Resolve one substation's panels and defaults, adding every problem to ``issues``."""
     found: list[Issue] = []
+    found.extend(
+        catalogue_choice_issues(
+            substation.catalogue_choice, source, ("catalogue_choice",), library, library_name
+        )
+    )
+    choice = merge_defaults(project.defaults.catalogue_choice, substation.catalogue_choice)
+    with suppress(ValueError):  # reported against the file that names the brand
+        library = resolve_catalogues(library, choice)
     base = source.path.parent
     manual_files = {(base / p).resolve() for p in substation.manual_panels}
     resolved = _resolve_panels(panel_sources, library, library_name, found)

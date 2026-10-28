@@ -28,6 +28,7 @@ from bomgen.models._base import (
     Quantity,
     check_template,
 )
+from bomgen.models.library import CatalogueChoice
 from bomgen.models.panel import DocumentInfo, PanelId
 
 FILE_NAME_PLACEHOLDERS = {"doc_no", "rev"}
@@ -82,6 +83,8 @@ class ConstantOverrides(InputModel):
     air_constant_m3k_per_wh: PositiveFloat = 4.1
     steel_coefficient_w_per_m2c: PositiveFloat = 5.5
     min_main_mcb_a: PositiveInt = 6
+    min_branch_mcb_a: PositiveInt = 2  # the smallest branch MCB (ADR 0017)
+    inrush_min_ms: PositiveFloat = 10  # shorter inrush does not size the branch MCB
 
 
 class DesignConstants(ConstantOverrides):
@@ -161,6 +164,7 @@ class Defaults(InputModel):
 
     constants: DesignConstants = Field(default_factory=DesignConstants)
     spares: Spares = Field(default_factory=Spares)
+    catalogue_choice: CatalogueChoice = Field(default_factory=CatalogueChoice)
 
 
 class Project(InputModel):

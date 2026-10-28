@@ -11,6 +11,8 @@ from collections.abc import Mapping, Sequence
 from bomgen.io.errors import Issue, Loc, format_location
 from bomgen.io.yaml_source import YamlSource
 from bomgen.models.library import (
+    DEFAULT_BRAND,
+    CatalogueChoice,
     Category,
     ChangeOverDiodes,
     DeviceType,
@@ -63,14 +65,39 @@ def library_issues(library: Library, source: YamlSource) -> list[Issue]:
                     f"unknown terminal block '{rule.block}' (not in catalogues.terminal_blocks)"
                 )
                 issues.append(_issue(source, loc, message))
-    for role_loc, part_id in _housekeeping_refs(library.catalogues.housekeeping):
-        if part_id not in first_at:
-            issues.append(_unknown_part(source, role_loc, part_id, name))
+    housekeeping_sets: list[tuple[Loc, Housekeeping]] = [
+        (("catalogues", "housekeeping"), library.catalogues.housekeeping)
+    ]
+    for index, brand in enumerate(library.catalogue_brands.housekeeping):
+        housekeeping_sets.append((("catalogue_brands", "housekeeping", index), brand))
+    for base, housekeeping in housekeeping_sets:
+        for role_loc, part_id in _housekeeping_refs(base, housekeeping):
+            if part_id not in first_at:
+                issues.append(_unknown_part(source, role_loc, part_id, name))
     return issues
 
 
-def _housekeeping_refs(housekeeping: Housekeeping) -> list[tuple[Loc, str]]:
-    base = ("catalogues", "housekeeping")
+def catalogue_choice_issues(
+    choice: CatalogueChoice | None,
+    source: YamlSource,
+    prefix: Loc,
+    library: Library,
+    library_name: str,
+) -> list[Issue]:
+    """Brand ids in ``choice`` that the library does not have (ADR 0017)."""
+    if choice is None:
+        return []
+    issues: list[Issue] = []
+    for kind in sorted(choice.model_fields_set):
+        brand_id = getattr(choice, kind)
+        known = library.brand_ids(kind)
+        if brand_id is not None and brand_id != DEFAULT_BRAND and brand_id not in known:
+            message = f"no {kind} brand '{brand_id}' in {library_name} (it has: {', '.join(known)})"
+            issues.append(_issue(source, (*prefix, kind), message))
+    return issues
+
+
+def _housekeeping_refs(base: Loc, housekeeping: Housekeeping) -> list[tuple[Loc, str]]:
     refs: list[tuple[Loc, str]] = []
     for role in Housekeeping.model_fields:
         ref = getattr(housekeeping, role)
