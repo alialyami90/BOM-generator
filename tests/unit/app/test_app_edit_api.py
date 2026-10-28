@@ -162,3 +162,20 @@ def test_check_layout_says_whether_a_move_fits_without_writing(
     assert refused_move["fits"] is False
     assert refused_move["issues"][0]["message"]
     assert substation.read_text("utf-8") == before
+
+
+def test_check_layout_gives_the_rack_space_each_panel_would_use(
+    app: api.Api, project: Path, substation: Path
+) -> None:
+    now = {
+        p["number"]: p["used_u"] for p in ok(app.substation_layout(str(project), "gis01"))["panels"]
+    }
+    gps = {"device": "gps", "panel": 2}
+
+    reply = ok(app.check_layout(str(project), "gis01", [gps], []))
+
+    after = {p["number"]: p["used_u"] for p in reply["panels"]}
+    assert after[1] < now[1]
+    assert after[2] > now[2]
+    assert all(p["capacity_u"] for p in reply["panels"])
+    assert ok(app.check_layout(str(project), "gis01", [BAD_MOVE], []))["panels"] == []
