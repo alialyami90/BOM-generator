@@ -6,6 +6,8 @@ most free U. ``auto_layout`` drops removed units first and applies the engineer'
 after. Units are named by equipment id and unit number, never by tag.
 """
 
+import math
+import re
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field, replace
 from typing import Literal
@@ -17,6 +19,7 @@ from bomgen.engine.sizing import (
     L2Link,
     NetworkInputs,
     NetworkPlan,
+    l1_links,
     l1_reserved_ports,
     l2_port_plan,
     pick_l1_switch,
@@ -47,8 +50,12 @@ IssueKind = Literal[
     "panel-empty",
     "missing-height",
     "missing-panel",
+    "port-capacity",
+    "replaced-panel",
 ]
-WARNING_KINDS: frozenset[IssueKind] = frozenset({"stale-override", "stale-removal"})
+WARNING_KINDS: frozenset[IssueKind] = frozenset(
+    {"stale-override", "stale-removal", "replaced-panel"}
+)
 
 
 @dataclass(frozen=True)
@@ -259,7 +266,11 @@ def auto_layout(
     removed: Sequence[UnitRef] = (),
     moves: Sequence[DeviceMove | PairMove] = (),
 ) -> Layout:
-    """Drop ``removed``, fill, then apply ``moves`` in order (R7)."""
+    """Drop ``removed``, fill, then apply ``moves`` in order (R7).
+
+    A move to the next one or two panel numbers opens a new pair, as when a device is
+    dragged onto the board's empty column; the unit keeps its own LAN letter there.
+    """
     issues: list[LayoutIssue] = []
     kept = list(units)
     for ref in removed:
@@ -285,12 +296,15 @@ def auto_layout(
             ref = move
             targets = [(None, move.panel)]
         matched = [x for x in kept if _matches(x, ref)]
+        if isinstance(move, PairMove) and all(x.side is Side.NONE for x in matched):
+            matched = []  # not a redundant entry: it has no A/B pair to move
         if not matched:
             builder.issues.append(
                 LayoutIssue(
                     "stale-override",
                     _describe(ref),
-                    f"a layout override names {_describe(ref)}, which the substation no longer has",
+                    f"a layout override names {_describe(ref)}, which the substation has no "
+                    f"{'pair of' if isinstance(move, PairMove) else 'unit'} for",
                 )
             )
             continue
@@ -331,11 +345,18 @@ class LayoutReport:
     def has_errors(self) -> bool:
         return any(issue.is_error for issue in self.issues)
 
-    def lines(self) -> list[str]:
-        problems = [
+    def problem_lines(self) -> list[str]:
+        return [
             f"{'error' if i.is_error else 'warning'}: {i.subject}: {i.message}" for i in self.issues
         ]
-        return [f"IED count: {self.ied_count}", *self.port_lines, *self.fill_lines, *problems]
+
+    def lines(self) -> list[str]:
+        return [
+            f"IED count: {self.ied_count}",
+            *self.port_lines,
+            *self.fill_lines,
+            *self.problem_lines(),
+        ]
 
 
 @dataclass
@@ -422,6 +443,78 @@ def _part_id(entry: Equipment, plan: NetworkPlan) -> str:
     return str(entry.part_id)
 
 
+@dataclass(frozen=True)
+class _SidePorts:
+    """One side's L2 demand from the units the layout keeps (R2, R7)."""
+
+    links: list[L2Link]
+    l1_switches: int
+    l1_links: int
+
+    @property
+    def demand(self) -> int:
+        return self.l1_links + sum(link.ports for link in self.links)
+
+
+def _side_ports(
+    loaded: LoadedSubstation, kept: Sequence[Unit], side: Side, net: NetworkInputs
+) -> _SidePorts:
+    counts: dict[str, int] = {}
+    for unit in kept:
+        if unit.side in (side, Side.NONE):
+            counts[unit.device] = counts.get(unit.device, 0) + 1
+    links = [
+        L2Link(e.id, e.l2_ports, e.l2_speed, e.l2_media)  # per entry, as R2 counts them
+        for e in loaded.substation.equipment
+        if e.l2_ports and counts.get(e.id)
+    ]
+    l1 = sum(
+        n for device, n in counts.items() if _entry(loaded, device).role is EquipmentRole.L1_SWITCH
+    )
+    return _SidePorts(links, l1, l1_links(l1, net))
+
+
+def _entry(loaded: LoadedSubstation, device: str) -> Equipment:
+    return next(e for e in loaded.substation.equipment if e.id == device)
+
+
+def _removed(unit: Unit, removed: Sequence[UnitRef]) -> bool:
+    return any(_matches(unit, ref) for ref in removed)
+
+
+def _capacity_issues(
+    plan: NetworkPlan, sides: dict[Side, _SidePorts], kept: Sequence[Unit], loaded: LoadedSubstation
+) -> list[LayoutIssue]:
+    issues = []
+    for side, ports in sides.items():
+        letter = side.value.upper()
+        if ports.l1_switches * plan.l1_usable_ports < plan.ied_count:
+            issues.append(
+                LayoutIssue(
+                    "port-capacity",
+                    f"side {letter} L1",
+                    f"{ports.l1_switches} L1 switches leave "
+                    f"{ports.l1_switches * plan.l1_usable_ports} IED ports on side {letter}; "
+                    "the IEDs need more (a removed L1 switch?)",
+                )
+            )
+        l2 = sum(
+            1
+            for x in kept
+            if x.side is side and _entry(loaded, x.device).role is EquipmentRole.L2_SWITCH
+        )
+        if l2 * plan.l2_usable_ports < ports.demand:
+            issues.append(
+                LayoutIssue(
+                    "port-capacity",
+                    f"side {letter} L2",
+                    f"{ports.demand} L2 ports needed on side {letter}, "
+                    f"{l2 * plan.l2_usable_ports} usable (a removed L2 switch?)",
+                )
+            )
+    return issues
+
+
 def _size(loaded: LoadedSubstation) -> tuple[NetworkPlan, NetworkInputs, list[L1Candidate]]:
     net = network_inputs(loaded)
     devices = {d.part_id: d for d in loaded.library.devices}
@@ -483,6 +576,7 @@ def _port_plans(
     loaded: LoadedSubstation,
     plan: NetworkPlan,
     net: NetworkInputs,
+    sides: dict[Side, _SidePorts],
 ) -> dict[str, PortPlan]:
     entries = {e.id: e for e in loaded.substation.equipment}
     plans: dict[str, list[PortPlan]] = {}
@@ -500,7 +594,9 @@ def _port_plans(
         ]
         if not l2_units:
             continue
-        side_plan = l2_port_plan(plan, net, _links(loaded, side))
+        side_plan = l2_port_plan(
+            replace(plan, l1_links_per_side=sides[side].l1_links), net, sides[side].links
+        )
         first_home = next(
             p for p in fills if any(x in p.units for x in _all_l2(fills, entries, side))
         )
@@ -542,6 +638,7 @@ def _panel(
     loaded: LoadedSubstation,
     plan: NetworkPlan,
     net: NetworkInputs,
+    sides: dict[Side, _SidePorts],
 ) -> Panel:
     spec = loaded.substation.generated_panels
     assert spec is not None  # the model requires it whenever equipment is listed
@@ -557,7 +654,7 @@ def _panel(
         kind=spec.kind,
         enclosure=spec.enclosure,
         devices=_rows(fill, loaded),
-        port_plans=_port_plans(fill, fills, loaded, plan, net),
+        port_plans=_port_plans(fill, fills, loaded, plan, net, sides),
         options=PanelOptions.model_validate(options),
         document=spec.document,
         generated=True,
@@ -574,8 +671,23 @@ def layout_preview(loaded: LoadedSubstation, overrides: LayoutInputs | None = No
     plan, net, candidates = _size(loaded)
     issues: list[LayoutIssue] = []
     units = _units(loaded, plan, issues)
+    # Size the L2 switches and their port plans from the units the layout keeps (R7).
+    kept = [x for x in units if not _removed(x, inputs.removed)]
+    sides = {side: _side_ports(loaded, kept, side, net) for side in (Side.A, Side.B)}
+    demand = max(s.demand for s in sides.values())
+    kept_plan = replace(
+        plan,
+        l2_per_side=max(1, math.ceil(demand / plan.l2_usable_ports)),
+        l2_demand_per_side=demand,
+        l1_links_per_side=max(s.l1_links for s in sides.values()),
+    )
+    if kept_plan.l2_per_side != plan.l2_per_side:
+        units = _units(loaded, kept_plan, [])
+        kept = [x for x in units if not _removed(x, inputs.removed)]
+    plan = kept_plan
     layout = auto_layout(units, rules, removed=inputs.removed, moves=inputs.overrides)
-    panels = [_panel(f, layout.panels, loaded, plan, net) for f in layout.panels if f.units]
+    panels = [_panel(f, layout.panels, loaded, plan, net, sides) for f in layout.panels if f.units]
+    issues += _capacity_issues(plan, sides, kept, loaded)
     issues += _loose_material_issues(loaded, panels)
     report = LayoutReport(
         ied_count=plan.ied_count,
@@ -647,5 +759,38 @@ def with_layout(loaded: LoadedSubstation) -> tuple[LoadedSubstation, LayoutRepor
     if not loaded.substation.equipment or not any(p.generated for p in listed):
         return loaded, None
     result = layout_substation(loaded)
+    result.report.issues += [
+        LayoutIssue(
+            "replaced-panel",
+            p.id,
+            f"{loaded.panel_files[p.id]} is hand-written but listed in panels, which the "
+            "layout writes; move it to manual_panels to keep it, or remove it from panels",
+        )
+        for p in listed
+        if not p.generated
+    ]
     manual = [p for p in loaded.panels if p.id in loaded.manual_panel_ids]
     return replace(loaded, panels=(*result.panels, *manual)), result.report
+
+
+def reconcile_panels_list(text: str, files: Sequence[str]) -> str:
+    """``substation.yaml`` text with its ``panels:`` list set to ``files``, comments kept.
+
+    ``bomgen layout`` calls this so a layout that grows or shrinks stays listed.
+    """
+    lines = text.splitlines(keepends=True)
+    start = next((i for i, line in enumerate(lines) if re.match(r"panels:(\s|$)", line)), None)
+    indent = "  "
+    if start is None:
+        head = text if not text or text.endswith("\n") else text + "\n"
+        return head + "panels:\n" + "".join(f"{indent}- {f}\n" for f in files)
+    end = start + 1
+    while end < len(lines) and re.match(r"[ \t]+\S|-(\s|$)", lines[end]):
+        item = re.match(r"([ \t]*)-", lines[end])
+        if item and end == start + 1:
+            indent = item.group(1)
+        end += 1
+    block = re.match(r"panels:\s*(#.*)?$", lines[start])
+    head = lines[start] if block else "panels:\n"  # a flow list becomes a block list
+    items = [f"{indent}- {f}\n" for f in files]
+    return "".join([*lines[:start], head, *items, *lines[end:]])

@@ -70,10 +70,78 @@ def test_cli_build_after_layout_uses_the_generated_panels(substation: Path, tmp_
     assert book.sheetnames[:3] == ["1", "2", "4"]  # psa3's devices now sit in psa1 and psa2
 
 
+def _own_psa1(substation: Path) -> None:
+    psa1 = substation.parent / "panels" / "psa1.yaml"
+    psa1.write_text(psa1.read_text() + "generated: true\n")
+
+
 def test_cli_build_no_layout_builds_the_files_as_they_are(substation: Path, tmp_path: Path) -> None:
-    assert runner.invoke(app, ["layout", "--substation", str(substation), "--force"]).exit_code == 0
+    _own_psa1(substation)
     out = tmp_path / "out"
     result = runner.invoke(app, ["build", str(substation), "--no-layout", "--out", str(out)])
     assert result.exit_code == 0, result.output
     book = openpyxl.load_workbook(next(out.glob("*.xlsx")))
     assert book.sheetnames[:4] == ["1", "2", "3", "4"]
+
+
+def test_cli_build_prints_layout_warnings(substation: Path, tmp_path: Path) -> None:
+    _own_psa1(substation)  # psa2 and psa3 stay hand-written but listed in panels
+    result = runner.invoke(app, ["build", str(substation), "--out", str(tmp_path / "out")])
+    assert result.exit_code == 0, result.output
+    assert "gis01: warning: psa2:" in result.stderr
+    assert "gis01: warning: psa3:" in result.stderr
+    assert "IED count" not in result.stderr  # the full report only comes with errors
+
+
+def _panels_list(substation: Path) -> list[str]:
+    return list(yaml.safe_load(substation.read_text())["panels"])
+
+
+def test_r9_layout_relists_the_panels_it_writes(substation: Path) -> None:
+    result = runner.invoke(app, ["layout", "--substation", str(substation), "--force"])
+    assert result.exit_code == 0, result.output
+    assert _panels_list(substation) == ["panels/psa1.yaml", "panels/psa2.yaml"]
+    text = substation.read_text()
+    assert "# panel order = sheet order (OUT-3)" in text  # comments survive
+    assert "manual_panels:  # never touched by the layout" in text
+    # psa3 is hand-written: kept on disk, and the user is told it left the list
+    assert (substation.parent / "panels" / "psa3.yaml").exists()
+    assert "psa3.yaml: hand-written, no longer listed in panels" in result.stdout
+
+
+def test_r9_layout_grows_and_shrinks_the_panels_list(substation: Path) -> None:
+    args = ["layout", "--substation", str(substation)]
+    assert runner.invoke(app, [*args, "--force"]).exit_code == 0
+    (substation.parent / "panels" / "psa3.yaml").unlink()  # the old hand-written psa3
+    ws = substation.parent / "panels" / "ws.yaml"  # free sheet name '4' for psa4
+    ws.write_text(ws.read_text().replace('sheet_name: "4"', 'sheet_name: "WS"'))
+    # Push the gateway pair to a new panel pair: the list grows to four files.
+    text = substation.read_text()
+    substation.write_text(
+        text.replace("  overrides: []", "  overrides: [{pair: gw, panel: [3, 4]}]")
+    )
+    assert runner.invoke(app, args).exit_code == 0
+    assert _panels_list(substation)[2:] == ["panels/psa3.yaml", "panels/psa4.yaml"]
+    # Drop the override again: the list shrinks and the stale generated files go.
+    substation.write_text(substation.read_text().replace("[{pair: gw, panel: [3, 4]}]", "[]"))
+    result = runner.invoke(app, args)
+    assert result.exit_code == 0, result.output
+    assert _panels_list(substation) == ["panels/psa1.yaml", "panels/psa2.yaml"]
+    assert not (substation.parent / "panels" / "psa4.yaml").exists()
+    assert "removed" in result.stdout
+
+
+def test_r7_overrides_survive_a_rerun(substation: Path) -> None:
+    args = ["layout", "--substation", str(substation)]
+    assert runner.invoke(app, [*args, "--force"]).exit_code == 0
+    text = substation.read_text().replace(
+        "  overrides: []", "  overrides: [{device: gps, panel: 2}]"
+    )
+    substation.write_text(text)
+    assert runner.invoke(app, args).exit_code == 0
+    psa2 = substation.parent / "panels" / "psa2.yaml"
+    first = psa2.read_text()
+    assert "SEL-2488" in first  # the GPS clock moved from psa1
+    assert runner.invoke(app, args).exit_code == 0
+    assert substation.read_text().count("{device: gps, panel: 2}") == 1
+    assert psa2.read_text() == first

@@ -17,6 +17,7 @@ from bomgen.engine.layout import (
     fill_lines,
     layout_preview,
     layout_substation,
+    reconcile_panels_list,
     render_panel_yaml,
     used_u,
     with_layout,
@@ -200,6 +201,13 @@ def test_r7_stale_override_is_reported_and_ignored() -> None:
     assert where(layout) == where(fill(units, RULES))
 
 
+def test_r7_pair_move_of_a_single_entry_is_stale() -> None:
+    units = [*pair("fw", 1), u("gps", 1, NONE, rank=1)]
+    layout = auto_layout(units, RULES, moves=[PairMove(pair="gps", panel=(1, 2))])
+    assert kinds(layout) == ["stale-override"]
+    assert where(layout) == where(fill(units, RULES))
+
+
 def test_r7_move_to_unknown_panel_is_reported() -> None:
     layout = auto_layout(pair("fw", 1), RULES, moves=[DeviceMove(device="fw", side="a", panel=9)])
     assert kinds(layout) == ["unknown-panel"]
@@ -327,6 +335,36 @@ def test_r7_preview_overrides_replace_the_files_overrides(example: LoadedSubstat
     assert example.substation.layout.overrides == []
 
 
+def _l2_downlinks(result: LayoutResult, number: int) -> list[PortAllocation]:
+    return _panel_of(result, number).port_plans["RST2228-L2"].downlinks
+
+
+def test_r7_removed_units_free_their_l2_ports(example: LoadedSubstation) -> None:
+    result = layout_preview(example, LayoutInputs(removed=[UnitRef(device="gw")]))
+    assert result.plan.l2_demand_per_side == 7
+    for number in (1, 2):  # 3 L1 links + ext-fw 1 + rtac 2; no gateway SFP
+        assert _l2_downlinks(result, number)[0] == PortAllocation(count=6, speed="1G", media="MM")
+    assert "7 of 16 usable ports" in result.report.port_lines[1]
+
+
+def test_r7_removed_l1_switch_is_a_port_capacity_error(example: LoadedSubstation) -> None:
+    removed = [UnitRef(device="l1", unit=3, side="a")]
+    result = layout_preview(example, LayoutInputs(removed=removed))
+    assert [(i.kind, i.subject) for i in result.report.issues if i.is_error][:1] == [
+        ("port-capacity", "side A L1")
+    ]
+    assert _l2_downlinks(result, 1)[0].count == 6  # side A: 2 L1 links + 4
+    assert _l2_downlinks(result, 2)[0].count == 7  # side B keeps its 3 L1 switches
+
+
+def test_r7_removed_l2_switch_is_a_port_capacity_error(example: LoadedSubstation) -> None:
+    removed = [UnitRef(device="l2", side="b")]
+    result = layout_preview(example, LayoutInputs(removed=removed))
+    issue = next(i for i in result.report.issues if i.kind == "port-capacity")
+    assert issue.subject == "side B L2"
+    assert issue.is_error
+
+
 def test_r1_tool_picks_the_l1_model_unless_pinned(example: LoadedSubstation) -> None:
     equipment = [
         e.model_copy(update={"part_id": None}) if e.role is EquipmentRole.L1_SWITCH else e
@@ -365,6 +403,41 @@ def test_r9_build_lays_out_generated_panels_again(example: LoadedSubstation) -> 
     assert [p.id for p in rebuilt.panels] == ["psa1", "psa2", "ws"]
     assert report is not None
     assert report.lines()[0] == "IED count: 40"
+    # psa2 and psa3 are hand-written but listed in panels: the layout says it replaced them
+    replaced = [(i.subject, i.is_error) for i in report.issues if i.kind == "replaced-panel"]
+    assert replaced == [("psa2", False), ("psa3", False)]
+
+
+SUBSTATION_YAML = """\
+substation:
+  id: s1
+panels:  # the layout rewrites these
+  - panels/psa1.yaml  # first
+  - panels/old.yaml
+
+manual_panels:
+  - panels/ws.yaml
+"""
+
+
+def test_r9_panels_list_is_rewritten_with_its_comments() -> None:
+    text = reconcile_panels_list(SUBSTATION_YAML, ["panels/psa1.yaml", "panels/psa2.yaml"])
+    assert text == SUBSTATION_YAML.replace(
+        "  - panels/psa1.yaml  # first\n  - panels/old.yaml\n",
+        "  - panels/psa1.yaml\n  - panels/psa2.yaml\n",
+    )
+
+
+def test_r9_panels_flow_list_and_missing_list_become_block_lists() -> None:
+    flow = "substation: {id: s1}\npanels: [a.yaml]\nlayout: {}\n"
+    assert reconcile_panels_list(flow, ["b.yaml"]) == (
+        "substation: {id: s1}\npanels:\n  - b.yaml\nlayout: {}\n"
+    )
+    flush = "panels:\n- a.yaml\n- c.yaml\nlayout: {}\n"
+    assert reconcile_panels_list(flush, ["b.yaml"]) == "panels:\n- b.yaml\nlayout: {}\n"
+    assert reconcile_panels_list("substation: {id: s1}", ["b.yaml"]) == (
+        "substation: {id: s1}\npanels:\n  - b.yaml\n"
+    )
 
 
 def test_r9_loose_material_on_a_panel_the_layout_drops_is_reported(

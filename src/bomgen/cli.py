@@ -173,10 +173,14 @@ def build(
         try:
             if not no_layout:
                 target, layout_report = with_layout(target)
-                if layout_report is not None and layout_report.has_errors:
-                    for line in layout_report.lines():
+                if layout_report is not None:
+                    # Warnings show too; errors stop the build with the whole report.
+                    bad = layout_report.has_errors
+                    lines = layout_report.lines() if bad else layout_report.problem_lines()
+                    for line in lines:
                         typer.echo(f"{target.substation.substation.id}: {line}", err=True)
-                    raise typer.Exit(1)
+                    if bad:
+                        raise typer.Exit(1)
             result = build_bom(target)
             marked = result
             if previous is not None:
@@ -218,7 +222,8 @@ def layout(
     from bomgen.engine.layout import layout_substation, render_panel_yaml
 
     try:
-        result = layout_substation(load_substation(substation))
+        loaded = load_substation(substation)
+        result = layout_substation(loaded)
     except InputError as error:
         for issue in error.issues:
             typer.echo(str(issue), err=True)
@@ -239,10 +244,36 @@ def layout(
     for target, panel in targets.items():
         target.write_text(render_panel_yaml(panel), encoding="utf-8")
         typer.echo(f"wrote {target}")
+    if out is None:
+        _relist_panels(substation, folder, list(targets))
     for line in result.report.lines():
         typer.echo(line)
     if result.report.has_errors:
         raise typer.Exit(1)
+
+
+def _relist_panels(substation: Path, folder: Path, written: list[Path]) -> None:
+    """Point substation.yaml's ``panels:`` at the written files; drop stale generated ones."""
+    from bomgen.engine.layout import reconcile_panels_list
+
+    text = substation.read_text(encoding="utf-8")
+    data = yaml.safe_load(text) or {}
+    base = substation.parent
+    files = [path.relative_to(base).as_posix() for path in written]
+    new_text = reconcile_panels_list(text, files)
+    if new_text != text:
+        substation.write_text(new_text, encoding="utf-8")
+        typer.echo(f"updated the panels list in {substation}")
+    kept = {path.resolve() for path in written}
+    listed = {(base / entry).resolve() for entry in data.get("panels") or []}
+    for path in sorted(listed | {p.resolve() for p in folder.glob("*.yaml")}):
+        if path in kept or not path.exists():
+            continue
+        if _is_generated(path):
+            path.unlink()
+            typer.echo(f"removed {path}: the layout no longer writes it")
+        elif path in listed:
+            typer.echo(f"{path}: hand-written, no longer listed in panels (manual_panels keeps it)")
 
 
 def _is_generated(path: Path) -> bool:
