@@ -54,7 +54,8 @@ examples/         YAML inputs reproducing the spec's example project
 
 ## UI work
 
-Any user interface (milestone M8 in `docs/plan.md`) is designed with the
-`impeccable` skill first, as platform-neutral tokens, component specs and a
-reference prototype in `docs/ui/` (M8a). Implementation on the chosen platform
-(M8b) follows the approved design and ends with an impeccable polish pass.
+The Windows desktop app's UI (milestones M9–M10 in `docs/plan.md`) is designed
+with the `impeccable` skill first: tokens, component specs and an HTML/CSS
+prototype in `docs/ui/` (M9). The app (M10) implements the approved design and
+ends with an impeccable polish pass. Business rules stay in the engine, never
+in the UI.

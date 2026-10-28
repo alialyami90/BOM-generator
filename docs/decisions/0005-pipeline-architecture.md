@@ -30,5 +30,7 @@ Three layers, each testable on its own:
 ## Consequences
 
 Engine tests stay fast and readable; writer tests only check translation. The
+CLI and the Windows desktop app (ADR 0007) are both thin callers of the same
+pipeline, so they always produce the same workbook. The
 heat check's ventilation choice feeds back into groups D, E and G, so the
 engine resolves ventilation before building those groups (see plan, step 4).

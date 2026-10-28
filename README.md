@@ -12,7 +12,9 @@ setup, and page headers/footers.
 ## Status
 
 Milestone M0: repository, spec, plan and CI. No generator code yet; it lands
-milestone by milestone after the plan is approved.
+milestone by milestone after the plan is approved. The CLI comes first; an
+installable Windows desktop app with shareable device-library update packages
+follows (see the plan, M8–M11).
 
 ## Planned usage
 

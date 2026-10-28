@@ -17,6 +17,8 @@ The brief fixes the stack and asks for proposals before deviating.
   `bomgen validate`.
 - `pytest` for tests, `ruff` for lint and formatting, `mypy --strict`.
 - The .xlsx writer library is decided separately in ADR 0003.
+- The Windows desktop app and its packaging are decided in ADR 0007, and
+  library update packages in ADR 0008. Both sit on top of this stack.
 
 ## Consequences
 

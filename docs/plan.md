@@ -21,6 +21,9 @@ YAML ──load/validate──▶ input models ──engine (steps 1–11, 15)�
 Python computes every value (so rules and golden numbers are tested without
 Excel), and the sheet layer emits the same values as live formulas (OUT-5).
 
+The generator is delivered as a CLI first (M1–M7), then as an installable
+Windows desktop app with shareable device-library update packages (M8–M11).
+
 Stack: as briefed (ADR 0002), with one agreed deviation: write the file with
 **XlsxWriter** because openpyxl cannot put the logo picture in the page header
 (ADR 0003). openpyxl stays for reading files back in tests.
@@ -71,7 +74,11 @@ src/bomgen/
     xlsx.py         step 14 SheetModel → .xlsx (only module importing XlsxWriter)
   checks.py         step 15 check report
   revision.py       OUT-8 revised-cell highlighting
-  cli.py            typer app: build, validate
+  library_store/    M8  .bomlib pack/import/verify, installed-library store, diff, rollback
+  app/              M10 Windows desktop app: pywebview window + Python API for the UI
+    ui/             M9 HTML/CSS/JS from the impeccable design
+  cli.py            typer app: build, validate, library pack/import/list/rollback
+packaging/          M11 PyInstaller spec, Inno Setup script, icons
 ```
 
 ### 2.2 Mapping to "Data model and generation order"
@@ -336,27 +343,56 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
 - `bomgen build` final options (`--out`, `--sheet-name`, `--compare`),
   README usage, example walkthrough.
 
-### M8 — UI: designed with impeccable, platform chosen afterwards
-Requested in the thread; not part of the spec. Design and implementation are
-separate steps so the platform can be picked once the design exists (Q16).
+### M8 — Library update packages
+Ali wants the device library updated on every installed copy by sharing an
+update package (ADR 0008).
+- `.bomlib` package format: a zip holding `manifest.json` (library name,
+  version, schema version, minimum app version, release notes, SHA-256 of
+  each file) plus `library.yaml` and any assets.
+- Installed library store per Windows user under
+  `%LOCALAPPDATA%\bomgen\libraries\<name>\<version>\`, with an
+  `active` pointer and the previous versions kept for rollback.
+- CLI: `bomgen library pack`, `bomgen library import <file.bomlib>`,
+  `bomgen library list`, `bomgen library rollback`. Import validates the
+  manifest, checksums and schema, shows added / changed / removed parts, and
+  refuses downgrades unless forced.
+- Projects record the library name and version they were built with; the
+  check report warns when a project is rebuilt against a different version.
+- Tests: pack/import round-trip, corrupted or tampered package rejected,
+  schema-version mismatch rejected, diff summary, rollback.
 
-**M8a — UI design (platform-neutral).** Use the `impeccable` skill to design
-the screens and elements: open project, edit library / panels / project
-settings, validate with readable errors, preview BOM groups and the check
-report, build and download the .xlsx. Deliverables in `docs/ui/`:
-- design tokens (colour, type, spacing, radius, elevation) in a neutral
-  format (`tokens.json`, W3C design-tokens style) that maps to CSS variables,
-  Qt stylesheets or any other toolkit;
-- component specs (states, sizes, behaviour, accessibility notes) and
-  screen layouts with the user flows;
-- a static clickable reference prototype (HTML/CSS) to review the look and
-  flow; it is a reference, not the product.
+### M9 — UI design with impeccable
+Use the `impeccable` skill to design the screens and elements: open or create a
+project, edit panels and project settings, browse the installed device library
+and import an update package, validate with readable errors, preview BOM groups
+and the check report, build and save the .xlsx. Deliverables in `docs/ui/`:
+- design tokens (colour, type, spacing, radius, elevation) in `tokens.json`
+  (W3C design-tokens style);
+- component specs (states, sizes, behaviour, accessibility notes) and screen
+  layouts with the user flows;
+- a clickable HTML/CSS prototype. With the desktop stack in ADR 0007 this
+  prototype is the starting point of the real UI, not a throwaway.
 Finish with an impeccable critique pass and Ali's review.
 
-**M8b — UI implementation on the chosen platform.** Build the approved design
-on whichever platform Ali picks (local web app, desktop app, or other) as a thin
-layer over `bomgen`; the business rules stay in the engine. Ends with an
-impeccable polish/audit pass against the M8a design.
+### M10 — Windows desktop app
+Build the approved design as a Windows desktop app (ADR 0007): the M9 HTML/CSS
+UI rendered in a native window with `pywebview` (Microsoft Edge WebView2),
+calling `bomgen` in-process through a small Python API. No browser, no local
+server port, works offline. The business rules stay in the engine. Ends with an
+impeccable polish/audit pass against the M9 design.
+
+### M11 — Windows installer and releases
+- Freeze the app with PyInstaller (one folder) and wrap it in an Inno Setup
+  installer: per-user install (no admin rights), Start-menu shortcut,
+  uninstaller, `.bomlib` file association so double-clicking an update
+  package imports it, and a bundled default library.
+- GitHub Actions job on `windows-latest` builds the installer on version tags
+  and attaches `bomgen-setup-<version>.exe` and the default `.bomlib` to a
+  GitHub Release, so sharing is one download link.
+- Code-sign the installer if a certificate is available (Q19), otherwise
+  document the SmartScreen "More info → Run anyway" step.
+- Tests: smoke test that the frozen app starts and builds the example
+  workbook on the Windows runner.
 
 ## 5. Testing strategy
 
@@ -472,10 +508,29 @@ ranges become golden assertions per sheet once Q1's data fixes row positions.
 dev dependency) to evaluate the workbook in pytest; optionally a LibreOffice
 headless recalc job later to prove "opens without repair" (OUT-1).
 
-**Q16 — UI platform.** *Resolved in part, 2026-10-28:* Ali wants the UI
-designed with the impeccable skill independently of where it is implemented
-(M8a), with the platform picked afterwards (M8b). *Still open:* the platform
-(local web app, desktop app or other); decide before M8b.
+**Q16 — UI platform.** *Resolved 2026-10-28:* Ali wants an installable,
+shareable Windows app whose UI is designed with the impeccable skill, with
+device-library updates shipped as packages (M8–M11). *Proposed stack:* ADR 0007
+(pywebview + PyInstaller + Inno Setup) and ADR 0008 (`.bomlib` packages).
 
 **Q17 — Writer library (ADR 0003).** *Resolved 2026-10-28:* Ali chose
 XlsxWriter for writing and openpyxl for reading back in tests.
+
+**Q18 — Who publishes library updates, and must they be signed?** *Default:*
+you (or a named owner) build `.bomlib` packages with `bomgen library pack`;
+packages carry checksums but no signature. If packages will travel by email or
+shared drives, I suggest signing them with an Ed25519 key you hold, so the app
+rejects tampered or unofficial libraries.
+
+**Q19 — Installer code signing.** Unsigned installers trigger a Windows
+SmartScreen warning. *Default:* ship unsigned with instructions; add signing if
+you have (or buy) a code-signing certificate or use Azure Trusted Signing.
+
+**Q20 — Install scope and Windows versions.** *Default:* per-user install, no
+admin rights, Windows 10 (21H2+) and 11, 64-bit; WebView2 runtime is part of
+both and the installer bootstraps it if it's missing.
+
+**Q21 — Should projects travel with the library?** *Default:* a project file
+records the library name and version; when sharing a project with someone on
+an older library, the app tells them which `.bomlib` to import. Alternatively
+a project can be exported as a bundle that includes its library snapshot.
