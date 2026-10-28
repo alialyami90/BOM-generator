@@ -16,6 +16,7 @@ from typing import Any
 from pydantic import ValidationError
 
 from bomgen.io.errors import InputError, Issue
+from bomgen.io.lifecycle import project_id_for
 from bomgen.io.loader import PROJECT_FILE, LoadedProject, load_project
 from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.errors import LibraryPackageError
@@ -50,6 +51,23 @@ class RecentProjects:
         except OSError:
             with contextlib.suppress(OSError):
                 partial.unlink(missing_ok=True)
+
+    def remove(self, project_file: Path) -> None:
+        """Forget a project (it was deleted); best effort, like ``add``."""
+        paths = [p for p in self.load() if p != project_file]
+        with contextlib.suppress(OSError):
+            self.file.parent.mkdir(parents=True, exist_ok=True)
+            self.file.write_text(json.dumps([str(p) for p in paths], indent=2), encoding="utf-8")
+
+
+def free_id(name: str, taken: Path) -> str:
+    """A folder id from ``name`` (lower case, words joined by ``-``) that ``taken`` does not
+    hold yet: ``-2``, ``-3``, ... are added when it does."""
+    base = project_id_for(name)
+    candidate, number = base, 2
+    while (taken / candidate).exists():
+        candidate, number = f"{base}-{number}", number + 1
+    return candidate
 
 
 def project_files(workspace: Path, recent: RecentProjects) -> list[Path]:

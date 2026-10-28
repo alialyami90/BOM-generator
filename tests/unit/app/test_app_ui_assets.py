@@ -177,3 +177,11 @@ def test_alternatives_compare_with_a_signed_delta_chip_not_colour_alone() -> Non
     assert "Bridge.call('library_alternatives'" in edit
     assert "`${v > 0 ? '+' : '\u2212'}" in edit
     assert 'data-action="add-alternative"' in edit
+
+
+def test_project_creation_is_live_and_deleting_a_project_asks_for_its_name() -> None:
+    js = (UI_DIR / "screens-projects.js").read_text(encoding="utf-8")
+    assert "later()" not in js
+    for name in ("create_project", "create_substation", "rename_project", "rename_substation"):
+        assert f"Bridge.call('{name}'" in js
+    assert "Type the project name to confirm" in js
