@@ -1,19 +1,26 @@
 # Example project
 
 YAML inputs that reproduce the example project in the spec (PSA Cabinets 001–003,
-WS Console 0010 and the loose-material list). They arrive with milestone M1:
+WS Console 0010 and the loose-material list). They were added in milestone M1:
 
 ```
 examples/
-  project.yaml          project settings, documents, design constants, loose extras
+  project.yaml          the project: info, library, document register, defaults (ADR 0012)
   library.yaml          device library + commodity catalogues
-  panels/
-    psa1.yaml           PSA Cabinet 001 (LAN-A)
-    psa2.yaml           PSA Cabinet 002 (LAN-B, mirrors psa1)
-    psa3.yaml           PSA Cabinet 003 (GPS, RTAC, Axion IO)
-    ws.yaml             WS Console 0010
+  substations/gis01/
+    substation.yaml     GIS Substation: documents, panels, loose material, and the
+                        equipment, network, spares and layout inputs (ADR 0013)
+    panels/
+      psa1.yaml         PSA Cabinet 001 (LAN-A)
+      psa2.yaml         PSA Cabinet 002 (LAN-B, mirrors psa1)
+      psa3.yaml         PSA Cabinet 003 (GPS, RTAC, Axion IO)
+      ws.yaml           WS Console 0010 (manual panel: the layout never touches it)
   assets/logo.png       company logo for the page header (not committed yet; add the PNG)
 ```
+
+The hand-written panels keep every golden value. The `equipment`, `network` and
+`generated_panels` sections are the inputs the automatic layout (M1c) reads; rack
+heights and port roles come from the device research (A3, PR #18).
 
 Schemas: `docs/plan.md` → "Input file schemas".
 

@@ -1,4 +1,4 @@
-"""Project model: project info, documents, output settings, constants, loose material."""
+"""Project model: project info, library, document register, defaults; shared settings models."""
 
 import re
 from typing import Any
@@ -8,40 +8,108 @@ from pydantic import ValidationError
 
 from bomgen.models.library import LooseItem
 from bomgen.models.project import (
+    ConstantOverrides,
     DesignConstants,
+    LibrarySelection,
     LooseExtra,
     OutputSettings,
     Project,
     SheetNames,
+    Spares,
+    merge_defaults,
 )
 
 
 def project_dict() -> dict[str, Any]:
-    calc = {
-        "doc_no": "DOC-9",
-        "rev": 0,
-        "issue_date": "2026-10-28",
-        "scope": "Whole substation",
-    }
+    """The design's project file (section 2), with one substation."""
     return {
-        "project": {"name": "GIS 01", "substation": "Dhahran", "doc_no": "DOC-1"},
-        "library": "library.yaml",
-        "panels": ["panels/psa1.yaml"],
-        "documents": {
-            "power_consumption": calc,
-            "heat_dissipation": calc,
-            "heat_calculations": calc,
-        },
+        "project": {"id": "jfgp2", "name": "JAFURAH JFGP2", "client": "Aramco"},
+        "library": {"name": "psa-devices", "version": "1.0.0"},
+        "documents": [
+            {
+                "key": "s1-bom",
+                "substation": "s1",
+                "doc_no": "DOC-1",
+                "rev": "02",
+                "issue_date": "2026-10-28",
+            },
+            {
+                "key": "s1-power",
+                "substation": "s1",
+                "doc_no": "DOC-2",
+                "rev": 0,
+                "issue_date": "2026-10-28",
+            },
+        ],
+        "substations": ["substations/s1/substation.yaml"],
     }
 
 
-def test_project_from_minimal_dict_validates() -> None:
+def test_project_from_design_example_validates() -> None:
     project = Project.model_validate(project_dict())
-    assert project.project.rev == "0"
-    assert project.output == OutputSettings()
-    assert project.constants == DesignConstants()
-    assert project.loose_material is None
-    assert project.documents.heat_calculations.scope == "Whole substation"
+    assert project.project.id == "jfgp2"
+    assert project.library.file is None
+    assert [entry.key for entry in project.documents] == ["s1-bom", "s1-power"]
+    assert project.documents[1].rev == "0"
+    assert project.defaults.constants == DesignConstants()
+    assert project.defaults.spares == Spares()
+
+
+def test_register_keys_must_be_unique() -> None:
+    data = project_dict()
+    data["documents"][1]["key"] = "s1-bom"
+    with pytest.raises(ValidationError, match="duplicate document key 's1-bom'"):
+        Project.model_validate(data)
+
+
+@pytest.mark.parametrize("good", ["1.0.0", "12.3.40"])
+def test_library_version_must_be_semver(good: str) -> None:
+    assert LibrarySelection(name="lib", version=good).version == good
+    for bad in ["one", "1.0", "01.0.0"]:
+        with pytest.raises(ValidationError, match="version"):
+            LibrarySelection(name="lib", version=bad)
+
+
+def test_spares_defaults_are_design_values() -> None:
+    spares = Spares()
+    assert spares.port_fraction == 0.20
+    assert spares.sfp_per_l1 == 3
+    assert spares.dc_branches_per_feed == 3
+    assert spares.ac_branches == 1
+    assert spares.rack_u_reserved == 10
+
+
+@pytest.mark.parametrize("bad", [1, 1.5, -0.1])
+def test_port_fraction_must_be_below_one(bad: float) -> None:
+    with pytest.raises(ValidationError, match="port_fraction"):
+        Spares(port_fraction=bad)
+
+
+def test_merge_defaults_overrides_only_written_keys() -> None:
+    base = DesignConstants(t_max_c=40)
+    merged = merge_defaults(base, ConstantOverrides(dc_voltage_v=110))
+    assert (merged.dc_voltage_v, merged.t_max_c) == (110, 40)
+    assert merge_defaults(base, None) == base
+
+
+def test_constant_overrides_are_checked_after_the_merge() -> None:
+    assert merge_defaults(DesignConstants(t_max_c=45), ConstantOverrides(t_int_c=40)).t_int_c == 40
+    with pytest.raises(ValidationError, match="t_max_c must be greater than t_int_c"):
+        merge_defaults(DesignConstants(), ConstantOverrides(t_int_c=40))
+
+
+def test_project_requires_at_least_one_substation() -> None:
+    data = project_dict()
+    data["substations"] = []
+    with pytest.raises(ValidationError, match="substations"):
+        Project.model_validate(data)
+
+
+def test_project_rejects_unknown_key() -> None:
+    data = project_dict()
+    data["panels"] = ["panels/p1.yaml"]
+    with pytest.raises(ValidationError, match="panels"):
+        Project.model_validate(data)
 
 
 def test_design_constants_default_to_spec_values() -> None:
@@ -118,20 +186,6 @@ def test_sheet_names_follow_excel_rules() -> None:
         SheetNames(power_consumption="a/b")
 
 
-def test_project_requires_at_least_one_panel() -> None:
-    data = project_dict()
-    data["panels"] = []
-    with pytest.raises(ValidationError):
-        Project.model_validate(data)
-
-
-def test_project_rejects_unknown_key() -> None:
-    data = project_dict()
-    data["extras"] = 1
-    with pytest.raises(ValidationError, match="extras"):
-        Project.model_validate(data)
-
-
 def test_loose_extra_accepts_one_lot() -> None:
     assert LooseExtra(part_id="CABLE-1", qty="1 Lot").qty == "1 Lot"
     assert LooseExtra(part_id="CABLE-1").qty == 1
@@ -151,12 +205,7 @@ def test_loose_extra_rejects_zero_quantity() -> None:
         LooseExtra(part_id="CABLE-1", qty=0)
 
 
-def test_loose_material_from_project_dict() -> None:
-    data = project_dict()
-    data["loose_material"] = {
-        "host_panel": "psa1",
-        "items": [{"part_id": "CABLE-1", "qty": 2, "children": ["LUG-1"], "fed_from": "psa1"}],
-    }
-    project = Project.model_validate(data)
-    assert project.loose_material is not None
-    assert project.loose_material.items[0].children == ["LUG-1"]
+@pytest.mark.parametrize("bad", ["../x", "a/b", "", ".hidden"])
+def test_library_name_is_a_plain_folder_name(bad: str) -> None:
+    with pytest.raises(ValidationError, match="name"):
+        LibrarySelection(name=bad, version="1.0.0")

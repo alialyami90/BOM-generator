@@ -6,13 +6,14 @@ Each function returns located issues; none raises.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 
 from bomgen.io.errors import Issue, Loc, format_location
 from bomgen.io.yaml_source import YamlSource
-from bomgen.models.library import ChangeOverDiodes, Housekeeping, Library
+from bomgen.models.library import Category, ChangeOverDiodes, Housekeeping, Library
 from bomgen.models.panel import Panel, PanelMirror
-from bomgen.models.project import Project
+from bomgen.models.project import Project, RegisterEntry
+from bomgen.models.substation import EquipmentRole, Substation
 
 
 def _issue(source: YamlSource, loc: Loc, message: str) -> Issue:
@@ -112,8 +113,8 @@ def mirror_issues(mirror: PanelMirror, source: YamlSource, library: Library) -> 
     ]
 
 
-def project_issues(
-    project: Project,
+def substation_issues(
+    substation: Substation,
     source: YamlSource,
     panels: Sequence[tuple[Panel, YamlSource]],
     library: Library,
@@ -122,7 +123,7 @@ def project_issues(
     """Duplicate panel ids, tag prefixes and sheet names, and loose-material references."""
     issues: list[Issue] = []
     sheets: dict[str, str] = {}
-    for key, name in project.output.sheet_names.model_dump().items():
+    for key, name in substation.output.sheet_names.model_dump().items():
         if name.casefold() in sheets:
             message = f"duplicate sheet name '{name}' (also used by {sheets[name.casefold()]})"
             issues.append(_issue(source, ("output", "sheet_names", key), message))
@@ -149,11 +150,11 @@ def project_issues(
         else:
             sheets[sheet] = f"panel '{panel.id}'"
 
-    loose = project.loose_material
+    loose = substation.loose_material
     if loose is not None:
         known_parts = set(library.part_ids())
         if loose.host_panel not in ids:
-            message = f"host_panel '{loose.host_panel}' is not a panel id in this project"
+            message = f"host_panel '{loose.host_panel}' is not a panel id in this substation"
             issues.append(_issue(source, ("loose_material", "host_panel"), message))
         for index, item in enumerate(loose.items):
             base: Loc = ("loose_material", "items", index)
@@ -165,6 +166,79 @@ def project_issues(
                         _unknown_part(source, (*base, "children", k), child, library_name)
                     )
             if item.fed_from is not None and item.fed_from not in ids:
-                message = f"fed_from '{item.fed_from}' is not a panel id in this project"
+                message = f"fed_from '{item.fed_from}' is not a panel id in this substation"
                 issues.append(_issue(source, (*base, "fed_from"), message))
+    return issues
+
+
+def project_issues(
+    project: Project, source: YamlSource, substations: Sequence[tuple[Substation, YamlSource]]
+) -> list[Issue]:
+    """Duplicate substation ids, and register entries naming a substation not listed."""
+    issues: list[Issue] = []
+    first: dict[str, str] = {}
+    for substation, sub_source in substations:
+        sub_id = substation.substation.id
+        if sub_id in first:
+            message = f"duplicate substation id '{sub_id}' (first in {first[sub_id]})"
+            issues.append(_issue(sub_source, ("substation", "id"), message))
+        else:
+            first[sub_id] = sub_source.path.as_posix()
+    for index, entry in enumerate(project.documents):
+        if entry.substation not in first:
+            message = f"substation '{entry.substation}' is not listed in substations"
+            issues.append(_issue(source, ("documents", index, "substation"), message))
+    return issues
+
+
+def _document_issue(
+    source: YamlSource, loc: Loc, key: str, sub_id: str, register: Mapping[str, RegisterEntry]
+) -> Issue | None:
+    entry = register.get(key)
+    if entry is None:
+        return _issue(source, loc, f"unknown document key '{key}' (not in the project's documents)")
+    if entry.substation != sub_id:
+        message = f"document '{key}' belongs to substation '{entry.substation}', not '{sub_id}'"
+        return _issue(source, loc, message)
+    return None
+
+
+def document_issues(
+    substation: Substation,
+    source: YamlSource,
+    panels: Sequence[tuple[YamlSource, Panel | PanelMirror]],
+    register: Mapping[str, RegisterEntry],
+) -> list[Issue]:
+    """Every document key a substation and its panels name must be one of its own."""
+    sub_id = substation.substation.id
+    refs: list[tuple[YamlSource, Loc, str]] = [(source, ("document",), substation.document)]
+    for sheet, calc in substation.calculations:
+        refs.append((source, ("calculations", sheet, "document"), calc.document))
+    if substation.generated_panels is not None:
+        refs.append(
+            (source, ("generated_panels", "document"), substation.generated_panels.document)
+        )
+    refs.extend((panel_source, ("document",), panel.document) for panel_source, panel in panels)
+    found = (_document_issue(src, loc, key, sub_id, register) for src, loc, key in refs)
+    return [issue for issue in found if issue is not None]
+
+
+def equipment_issues(
+    substation: Substation, source: YamlSource, library: Library, library_name: str
+) -> list[Issue]:
+    """Equipment parts exist, have a rack height, and the switch roles are switches."""
+    issues: list[Issue] = []
+    for index, item in enumerate(substation.equipment):
+        loc: Loc = ("equipment", index, "part_id")
+        device = library.get(item.part_id)
+        if device is None:
+            issues.append(_unknown_part(source, loc, item.part_id, library_name))
+            continue
+        if device.height_u is None:
+            message = f"height_u is needed for the panel layout ('{item.part_id}' has none)"
+            issues.append(_issue(source, loc, message))
+        switch_roles = (EquipmentRole.L1_SWITCH, EquipmentRole.L2_SWITCH)
+        if item.role in switch_roles and device.category is not Category.NETWORK_SWITCH:
+            message = f"an {item.role.value} must be a network_switch part, not {device.category}"
+            issues.append(_issue(source, loc, message))
     return issues

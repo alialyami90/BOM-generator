@@ -1,0 +1,905 @@
+{
+  "$defs": {
+    "BaseFrame": {
+      "additionalProperties": false,
+      "description": "The plinth under the enclosure (spec: Inputs, 2. Panel definition).",
+      "properties": {
+        "d_mm": {
+          "exclusiveMinimum": 0,
+          "title": "D Mm",
+          "type": "integer"
+        },
+        "h_mm": {
+          "exclusiveMinimum": 0,
+          "title": "H Mm",
+          "type": "integer"
+        },
+        "w_mm": {
+          "exclusiveMinimum": 0,
+          "title": "W Mm",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "h_mm",
+        "d_mm",
+        "w_mm"
+      ],
+      "title": "BaseFrame",
+      "type": "object"
+    },
+    "CableEntry": {
+      "enum": [
+        "top",
+        "side"
+      ],
+      "title": "CableEntry",
+      "type": "string"
+    },
+    "CalcSheet": {
+      "additionalProperties": false,
+      "description": "A calculation sheet's register document and its scope line.",
+      "properties": {
+        "document": {
+          "pattern": "^[a-z0-9][a-z0-9_-]*$",
+          "title": "Document",
+          "type": "string"
+        },
+        "scope": {
+          "title": "Scope",
+          "type": "string"
+        }
+      },
+      "required": [
+        "document",
+        "scope"
+      ],
+      "title": "CalcSheet",
+      "type": "object"
+    },
+    "Calculations": {
+      "additionalProperties": false,
+      "properties": {
+        "heat_calculations": {
+          "$ref": "#/$defs/CalcSheet"
+        },
+        "heat_dissipation": {
+          "$ref": "#/$defs/CalcSheet"
+        },
+        "power_consumption": {
+          "$ref": "#/$defs/CalcSheet"
+        }
+      },
+      "required": [
+        "power_consumption",
+        "heat_dissipation",
+        "heat_calculations"
+      ],
+      "title": "Calculations",
+      "type": "object"
+    },
+    "ConstantOverrides": {
+      "additionalProperties": false,
+      "description": "Design constants as written in a file; unwritten keys keep the inherited value.",
+      "properties": {
+        "ac_voltage_v": {
+          "default": 230,
+          "exclusiveMinimum": 0,
+          "title": "Ac Voltage V",
+          "type": "number"
+        },
+        "air_constant_m3k_per_wh": {
+          "default": 4.1,
+          "exclusiveMinimum": 0,
+          "title": "Air Constant M3K Per Wh",
+          "type": "number"
+        },
+        "btu_per_w": {
+          "default": 3.41,
+          "exclusiveMinimum": 0,
+          "title": "Btu Per W",
+          "type": "number"
+        },
+        "current_factor": {
+          "default": 1.3,
+          "exclusiveMinimum": 0,
+          "title": "Current Factor",
+          "type": "number"
+        },
+        "dc_voltage_v": {
+          "default": 125,
+          "exclusiveMinimum": 0,
+          "title": "Dc Voltage V",
+          "type": "number"
+        },
+        "min_main_mcb_a": {
+          "default": 6,
+          "exclusiveMinimum": 0,
+          "title": "Min Main Mcb A",
+          "type": "integer"
+        },
+        "power_margin": {
+          "default": 0.25,
+          "minimum": 0,
+          "title": "Power Margin",
+          "type": "number"
+        },
+        "steel_coefficient_w_per_m2c": {
+          "default": 5.5,
+          "exclusiveMinimum": 0,
+          "title": "Steel Coefficient W Per M2C",
+          "type": "number"
+        },
+        "t_int_c": {
+          "default": 25,
+          "title": "T Int C",
+          "type": "number"
+        },
+        "t_max_c": {
+          "default": 35,
+          "title": "T Max C",
+          "type": "number"
+        }
+      },
+      "title": "ConstantOverrides",
+      "type": "object"
+    },
+    "DeviceMove": {
+      "additionalProperties": false,
+      "description": "Move single units into a panel; a redundant entry's move names its side.",
+      "properties": {
+        "device": {
+          "pattern": "^[a-z0-9][a-z0-9_-]*$",
+          "title": "Device",
+          "type": "string"
+        },
+        "panel": {
+          "exclusiveMinimum": 0,
+          "title": "Panel",
+          "type": "integer"
+        },
+        "side": {
+          "anyOf": [
+            {
+              "enum": [
+                "a",
+                "b"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Side"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        }
+      },
+      "required": [
+        "device",
+        "panel"
+      ],
+      "title": "DeviceMove",
+      "type": "object"
+    },
+    "Enclosure": {
+      "additionalProperties": false,
+      "description": "The cabinet enclosure (spec: Inputs, 2. Panel definition).",
+      "properties": {
+        "base_frame": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BaseFrame"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "cable_entry": {
+          "$ref": "#/$defs/CableEntry"
+        },
+        "d_mm": {
+          "exclusiveMinimum": 0,
+          "title": "D Mm",
+          "type": "integer"
+        },
+        "h_mm": {
+          "exclusiveMinimum": 0,
+          "title": "H Mm",
+          "type": "integer"
+        },
+        "make": {
+          "title": "Make",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "ordering_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ordering Code"
+        },
+        "w_mm": {
+          "exclusiveMinimum": 0,
+          "title": "W Mm",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "make",
+        "model",
+        "h_mm",
+        "d_mm",
+        "w_mm",
+        "cable_entry"
+      ],
+      "title": "Enclosure",
+      "type": "object"
+    },
+    "Equipment": {
+      "additionalProperties": false,
+      "description": "A device the substation needs, before any panel exists (ADR 0013).",
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "l2_media": {
+          "$ref": "#/$defs/Media",
+          "default": "MM"
+        },
+        "l2_ports": {
+          "default": 0,
+          "minimum": 0,
+          "title": "L2 Ports",
+          "type": "integer"
+        },
+        "l2_speed": {
+          "$ref": "#/$defs/PortSpeed",
+          "default": "1G"
+        },
+        "part_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+          "title": "Part Id",
+          "type": "string"
+        },
+        "qty": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Qty",
+          "type": "integer"
+        },
+        "redundant": {
+          "default": false,
+          "title": "Redundant",
+          "type": "boolean"
+        },
+        "role": {
+          "$ref": "#/$defs/EquipmentRole"
+        },
+        "side": {
+          "$ref": "#/$defs/Side",
+          "default": "none"
+        }
+      },
+      "required": [
+        "id",
+        "part_id",
+        "role"
+      ],
+      "title": "Equipment",
+      "type": "object"
+    },
+    "EquipmentRole": {
+      "enum": [
+        "l1_switch",
+        "l2_switch",
+        "ext_switch",
+        "firewall",
+        "fopp",
+        "other"
+      ],
+      "title": "EquipmentRole",
+      "type": "string"
+    },
+    "GeneratedPanels": {
+      "additionalProperties": false,
+      "description": "Identity of the panels the layout writes; ``{n}`` is the panel number (ADR 0013).",
+      "properties": {
+        "cabinet_name": {
+          "title": "Cabinet Name",
+          "type": "string"
+        },
+        "cabinet_number": {
+          "title": "Cabinet Number",
+          "type": "string"
+        },
+        "document": {
+          "pattern": "^[a-z0-9][a-z0-9_-]*$",
+          "title": "Document",
+          "type": "string"
+        },
+        "enclosure": {
+          "$ref": "#/$defs/Enclosure"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/PanelKind",
+          "default": "network"
+        },
+        "options": {
+          "additionalProperties": true,
+          "title": "Options",
+          "type": "object"
+        },
+        "options_by_panel": {
+          "additionalProperties": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Options By Panel",
+          "type": "object"
+        },
+        "sheet_name": {
+          "title": "Sheet Name",
+          "type": "string"
+        },
+        "tag_prefix": {
+          "title": "Tag Prefix",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "cabinet_number",
+        "cabinet_name",
+        "tag_prefix",
+        "sheet_name",
+        "enclosure",
+        "document"
+      ],
+      "title": "GeneratedPanels",
+      "type": "object"
+    },
+    "Layout": {
+      "additionalProperties": false,
+      "description": "Layout inputs; the usable U per panel is computed, not written (ADR 0013).",
+      "properties": {
+        "blank_plate_u": {
+          "default": 1,
+          "minimum": 0,
+          "title": "Blank Plate U",
+          "type": "integer"
+        },
+        "overrides": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/DeviceMove"
+              },
+              {
+                "$ref": "#/$defs/PairMove"
+              }
+            ]
+          },
+          "title": "Overrides",
+          "type": "array"
+        },
+        "removed": {
+          "items": {
+            "$ref": "#/$defs/UnitRef"
+          },
+          "title": "Removed",
+          "type": "array"
+        }
+      },
+      "title": "Layout",
+      "type": "object"
+    },
+    "LooseExtra": {
+      "additionalProperties": false,
+      "description": "A loose-material row, optionally with kit children and a feeding panel.",
+      "properties": {
+        "children": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+            "type": "string"
+          },
+          "title": "Children",
+          "type": "array"
+        },
+        "fed_from": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fed From"
+        },
+        "part_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+          "title": "Part Id",
+          "type": "string"
+        },
+        "qty": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "const": "1 Lot"
+            }
+          ],
+          "default": 1,
+          "title": "Qty"
+        },
+        "tag": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tag"
+        }
+      },
+      "required": [
+        "part_id"
+      ],
+      "title": "LooseExtra",
+      "type": "object"
+    },
+    "LooseMaterial": {
+      "additionalProperties": false,
+      "properties": {
+        "host_panel": {
+          "title": "Host Panel",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/LooseExtra"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "title": {
+          "default": "PSA Panels Loose Material and Auxiliary Equipment",
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "host_panel"
+      ],
+      "title": "LooseMaterial",
+      "type": "object"
+    },
+    "Media": {
+      "enum": [
+        "MM",
+        "SM",
+        "RJ45"
+      ],
+      "title": "Media",
+      "type": "string"
+    },
+    "Network": {
+      "additionalProperties": false,
+      "properties": {
+        "ied_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Ied Count",
+          "type": "integer"
+        },
+        "l1_interlink": {
+          "default": true,
+          "title": "L1 Interlink",
+          "type": "boolean"
+        },
+        "l1_uplinks_per_switch": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "L1 Uplinks Per Switch",
+          "type": "integer"
+        },
+        "l3_uplinks_per_l2": {
+          "default": 2,
+          "minimum": 0,
+          "title": "L3 Uplinks Per L2",
+          "type": "integer"
+        },
+        "ring_max_switches": {
+          "default": 6,
+          "exclusiveMinimum": 0,
+          "title": "Ring Max Switches",
+          "type": "integer"
+        },
+        "topology": {
+          "$ref": "#/$defs/Topology",
+          "default": "star"
+        }
+      },
+      "title": "Network",
+      "type": "object"
+    },
+    "OutputSettings": {
+      "additionalProperties": false,
+      "description": "Workbook file name template and calculation sheet names.",
+      "properties": {
+        "file_name": {
+          "default": "{doc_no}_PSA_BOM_Rev{rev}.xlsx",
+          "title": "File Name",
+          "type": "string"
+        },
+        "sheet_names": {
+          "$ref": "#/$defs/SheetNames"
+        }
+      },
+      "title": "OutputSettings",
+      "type": "object"
+    },
+    "PairMove": {
+      "additionalProperties": false,
+      "description": "Move both sides of a redundant entry (its ``unit``-th pair, or all) into two panels.",
+      "properties": {
+        "pair": {
+          "pattern": "^[a-z0-9][a-z0-9_-]*$",
+          "title": "Pair",
+          "type": "string"
+        },
+        "panel": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          ],
+          "title": "Panel",
+          "type": "array"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        }
+      },
+      "required": [
+        "pair",
+        "panel"
+      ],
+      "title": "PairMove",
+      "type": "object"
+    },
+    "PanelKind": {
+      "enum": [
+        "network",
+        "control",
+        "console"
+      ],
+      "title": "PanelKind",
+      "type": "string"
+    },
+    "PortSpeed": {
+      "enum": [
+        "10M",
+        "100M",
+        "1G",
+        "10G"
+      ],
+      "title": "PortSpeed",
+      "type": "string"
+    },
+    "SheetNames": {
+      "additionalProperties": false,
+      "properties": {
+        "heat_calculations": {
+          "default": "Heat Calculations",
+          "maxLength": 31,
+          "minLength": 1,
+          "pattern": "^(?!')(?:[^\\[\\]:*?/\\\\']|'(?!$))*$",
+          "title": "Heat Calculations",
+          "type": [
+            "string",
+            "integer"
+          ]
+        },
+        "heat_dissipation": {
+          "default": "Heat Dissipation",
+          "maxLength": 31,
+          "minLength": 1,
+          "pattern": "^(?!')(?:[^\\[\\]:*?/\\\\']|'(?!$))*$",
+          "title": "Heat Dissipation",
+          "type": [
+            "string",
+            "integer"
+          ]
+        },
+        "power_consumption": {
+          "default": "Power Consumption",
+          "maxLength": 31,
+          "minLength": 1,
+          "pattern": "^(?!')(?:[^\\[\\]:*?/\\\\']|'(?!$))*$",
+          "title": "Power Consumption",
+          "type": [
+            "string",
+            "integer"
+          ]
+        }
+      },
+      "title": "SheetNames",
+      "type": "object"
+    },
+    "Side": {
+      "enum": [
+        "none",
+        "a",
+        "b"
+      ],
+      "title": "Side",
+      "type": "string"
+    },
+    "Spares": {
+      "additionalProperties": false,
+      "description": "Every spare as a user input, defaults as today (ADR 0013).",
+      "properties": {
+        "ac_branches": {
+          "default": 1,
+          "minimum": 0,
+          "title": "Ac Branches",
+          "type": "integer"
+        },
+        "dc_branches_per_feed": {
+          "default": 3,
+          "minimum": 0,
+          "title": "Dc Branches Per Feed",
+          "type": "integer"
+        },
+        "port_fraction": {
+          "default": 0.2,
+          "exclusiveMaximum": 1,
+          "minimum": 0,
+          "title": "Port Fraction",
+          "type": "number"
+        },
+        "rack_u_reserved": {
+          "default": 10,
+          "minimum": 0,
+          "title": "Rack U Reserved",
+          "type": "integer"
+        },
+        "sfp_per_l1": {
+          "default": 3,
+          "minimum": 0,
+          "title": "Sfp Per L1",
+          "type": "integer"
+        }
+      },
+      "title": "Spares",
+      "type": "object"
+    },
+    "SubstationInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "SubstationInfo",
+      "type": "object"
+    },
+    "Topology": {
+      "enum": [
+        "star",
+        "ring"
+      ],
+      "title": "Topology",
+      "type": "string"
+    },
+    "UnitRef": {
+      "additionalProperties": false,
+      "description": "Units of one equipment entry: ``unit`` (1-based) and ``side``; None means all.",
+      "properties": {
+        "device": {
+          "pattern": "^[a-z0-9][a-z0-9_-]*$",
+          "title": "Device",
+          "type": "string"
+        },
+        "side": {
+          "anyOf": [
+            {
+              "enum": [
+                "a",
+                "b"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Side"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        }
+      },
+      "required": [
+        "device"
+      ],
+      "title": "UnitRef",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The substation file (``substation.yaml``).",
+  "properties": {
+    "calculations": {
+      "$ref": "#/$defs/Calculations"
+    },
+    "constants": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ConstantOverrides"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "document": {
+      "pattern": "^[a-z0-9][a-z0-9_-]*$",
+      "title": "Document",
+      "type": "string"
+    },
+    "equipment": {
+      "items": {
+        "$ref": "#/$defs/Equipment"
+      },
+      "title": "Equipment",
+      "type": "array"
+    },
+    "generated_panels": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/GeneratedPanels"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "layout": {
+      "$ref": "#/$defs/Layout"
+    },
+    "loose_material": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LooseMaterial"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "manual_panels": {
+      "items": {
+        "format": "path",
+        "type": "string"
+      },
+      "title": "Manual Panels",
+      "type": "array"
+    },
+    "network": {
+      "$ref": "#/$defs/Network"
+    },
+    "output": {
+      "$ref": "#/$defs/OutputSettings"
+    },
+    "panels": {
+      "items": {
+        "format": "path",
+        "type": "string"
+      },
+      "title": "Panels",
+      "type": "array"
+    },
+    "spares": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Spares"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "substation": {
+      "$ref": "#/$defs/SubstationInfo"
+    }
+  },
+  "required": [
+    "substation",
+    "document",
+    "calculations"
+  ],
+  "title": "Substation",
+  "type": "object"
+}

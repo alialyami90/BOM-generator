@@ -9,7 +9,7 @@ import typer
 
 from bomgen import __version__
 from bomgen.io.errors import InputError
-from bomgen.io.loader import load_project
+from bomgen.io.loader import LoadedProject, LoadedSubstation, load_inputs
 from bomgen.io.schema import write_json_schemas
 from bomgen.library_store.cli import library_app
 from bomgen.project_store.cli import project_app
@@ -40,25 +40,48 @@ def _root(
     """Substation SCADA BOM generator."""
 
 
+def _panel_summary(substation: LoadedSubstation) -> str:
+    panel_ids = ", ".join(panel.id for panel in substation.panels)
+    return f"{len(substation.panels)} panels ({panel_ids})"
+
+
 @app.command()
 def validate(
+    file: Annotated[
+        Path | None,
+        typer.Argument(help="A project.yaml or a substation.yaml.", show_default=False),
+    ] = None,
     project: Annotated[
-        Path, typer.Option("--project", "-p", help="Path to the project YAML file.")
-    ],
+        Path | None,
+        typer.Option("--project", "-p", help="Same as FILE, kept for older scripts."),
+    ] = None,
 ) -> None:
-    """Check the project, library and panel files without building anything."""
+    """Check a project or substation, its library and panel files, building nothing."""
+    if (file is None) == (project is None):
+        raise typer.BadParameter("give one project or substation file, as FILE or --project")
+    path = file if file is not None else project
+    assert path is not None
     try:
-        loaded = load_project(project)
+        loaded = load_inputs(path)
     except InputError as error:
         for issue in error.issues:
             typer.echo(str(issue), err=True)
         typer.echo(f"{len(error.issues)} problem(s) found.", err=True)
         raise typer.Exit(1) from None
-    panel_ids = ", ".join(panel.id for panel in loaded.panels)
-    typer.echo(
-        f"OK: {loaded.project.project.name}: {len(loaded.panels)} panels ({panel_ids}), "
-        f"{len(loaded.library.devices)} library parts"
-    )
+    parts = f"{len(loaded.library.devices)} library parts"
+    if isinstance(loaded, LoadedProject):
+        substations = "; ".join(
+            f"{s.substation.substation.id}: {_panel_summary(s)}" for s in loaded.substations
+        )
+        count = len(loaded.substations)
+        typer.echo(
+            f"OK: {loaded.project.project.name}: {count} substation(s); {substations}; {parts}"
+        )
+    else:
+        typer.echo(
+            f"OK: {loaded.project.project.name} / {loaded.substation.substation.id}: "
+            f"{_panel_summary(loaded)}, {parts}"
+        )
 
 
 @app.command()

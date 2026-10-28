@@ -139,3 +139,5 @@ ExcelSheetName = Annotated[
 ]
 
 PartId = Annotated[str, StringConstraints(pattern=r"^[A-Za-z0-9][A-Za-z0-9._+-]*$")]
+DocumentKey = Annotated[str, StringConstraints(pattern=r"^[a-z0-9][a-z0-9_-]*$")]
+"""A key of the project's document register (ADR 0012)."""

@@ -36,7 +36,7 @@ def base_dict() -> dict[str, Any]:
             "SFP-1G-SM": {"serial_ports": 1},
         },
         "options": {"dc_spare_branches_per_feed": 3},
-        "document": {"doc_no": "DOC-1", "rev": "0", "issue_date": "2026-10-28"},
+        "document": "psa1-bom",
         "revision": {"highlight": [{"tag": "PSA1-L2-ESW-A01", "columns": ["D"]}]},
     }
 
@@ -51,7 +51,7 @@ def mirror_dict() -> dict[str, Any]:
         "lan": "B",
         "sheet_name": "2",
         "options": {"aux_socket_a": 10},
-        "document": {"doc_no": "DOC-2", "rev": "1", "issue_date": "2026-11-01"},
+        "document": "psa2-bom",
     }
 
 

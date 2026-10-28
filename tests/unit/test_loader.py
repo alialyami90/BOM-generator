@@ -5,22 +5,30 @@ from typing import Any
 
 import pytest
 from builders import (
+    SUBSTATION_DIR,
     default_library,
     default_p1,
     default_p2,
     default_project,
+    default_substation,
     write_project,
     write_yaml,
 )
 
 from bomgen.io.errors import InputError, Issue
-from bomgen.io.loader import load_library, load_project
+from bomgen.io.loader import LoadedSubstation, load_library, load_project
 
 
 def issues_for(project_file: Path) -> list[Issue]:
     with pytest.raises(InputError) as caught:
         load_project(project_file)
     return list(caught.value.issues)
+
+
+def load_s1(project_file: Path) -> LoadedSubstation:
+    """Load the project and return its only substation."""
+    (substation,) = load_project(project_file).substations
+    return substation
 
 
 def texts(project_file: Path) -> list[str]:
@@ -36,26 +44,26 @@ def line_of(path: Path, needle: str) -> int:
 
 
 def with_third_panel(tmp_path: Path, panel: dict[str, Any]) -> Path:
-    project = default_project()
-    project["panels"] = [*project["panels"], "panels/p3.yaml"]
-    return write_project(tmp_path, project=project, panels={"p3.yaml": panel})
+    substation = default_substation()
+    substation["panels"] = [*substation["panels"], "panels/p3.yaml"]
+    return write_project(tmp_path, substation=substation, panels={"p3.yaml": panel})
 
 
 def test_loads_minimal_project_in_panel_order(tmp_path: Path) -> None:
     project_file = write_project(tmp_path)
-    loaded = load_project(project_file)
-    assert loaded.project_file == project_file
+    loaded = load_s1(project_file)
+    assert loaded.file == tmp_path / SUBSTATION_DIR / "substation.yaml"
     assert [panel.id for panel in loaded.panels] == ["p1", "p2"]
     assert loaded.project.project.name == "GIS 01"
     assert loaded.library.get("RST2228-L2") is not None
     assert loaded.panel_files == {
-        "p1": tmp_path / "panels" / "p1.yaml",
-        "p2": tmp_path / "panels" / "p2.yaml",
+        "p1": tmp_path / SUBSTATION_DIR / "panels" / "p1.yaml",
+        "p2": tmp_path / SUBSTATION_DIR / "panels" / "p2.yaml",
     }
 
 
 def test_mirror_panel_is_resolved(tmp_path: Path) -> None:
-    loaded = load_project(write_project(tmp_path))
+    loaded = load_s1(write_project(tmp_path))
     p1, p2 = loaded.panels
     assert (p2.tag_prefix, p2.lan, p2.sheet_name) == ("P2", "B", "2")
     assert p2.devices[0].tag == "P2-L2-ESW-B01"
@@ -68,7 +76,7 @@ def test_unknown_part_id_reports_file_path_and_line(tmp_path: Path) -> None:
     p1 = default_p1()
     p1["devices"][1]["part_id"] = "NOPE"
     project_file = write_project(tmp_path, panels={"p1.yaml": p1})
-    panel_file = tmp_path / "panels" / "p1.yaml"
+    panel_file = tmp_path / SUBSTATION_DIR / "panels" / "p1.yaml"
     line = line_of(panel_file, "NOPE")
     assert texts(project_file) == [
         f"{panel_file.as_posix()}:{line}: devices[1].part_id: "
@@ -96,8 +104,8 @@ def test_reports_issues_from_several_files_at_once(tmp_path: Path) -> None:
     files = {issue.file for issue in issues_for(project_file)}
     assert files == {
         tmp_path / "library.yaml",
-        tmp_path / "panels" / "p1.yaml",
-        tmp_path / "panels" / "p2.yaml",
+        tmp_path / SUBSTATION_DIR / "panels" / "p1.yaml",
+        tmp_path / SUBSTATION_DIR / "panels" / "p2.yaml",
     }
 
 
@@ -188,7 +196,7 @@ def test_mirror_unknown_grounding_busbar_is_reported_in_mirror_file(tmp_path: Pa
     p2 = default_p2()
     p2["options"] = {"grounding_busbars": ["ac_safety_ground", "nope"]}
     project_file = write_project(tmp_path, panels={"p2.yaml": p2})
-    panel_file = tmp_path / "panels" / "p2.yaml"
+    panel_file = tmp_path / SUBSTATION_DIR / "panels" / "p2.yaml"
     assert texts(project_file) == [
         f"{panel_file.as_posix()}:{line_of(panel_file, 'nope')}: options.grounding_busbars[1]: "
         "unknown busbar 'nope' (not in catalogues.busbars)"
@@ -214,15 +222,15 @@ def test_duplicate_sheet_name_between_panels_is_reported_in_the_later_panel(
     assert [(i.file.name, i.location) for i in issues] == [("p2.yaml", "sheet_name")]
 
 
-def test_duplicate_calculation_sheet_names_are_reported_in_the_project_file(
+def test_duplicate_calculation_sheet_names_are_reported_in_the_substation_file(
     tmp_path: Path,
 ) -> None:
-    project = default_project()
-    project["output"] = {"sheet_names": {"heat_calculations": "HEAT DISSIPATION"}}
-    project_file = write_project(tmp_path, project=project)
+    substation = default_substation()
+    substation["output"] = {"sheet_names": {"heat_calculations": "HEAT DISSIPATION"}}
+    project_file = write_project(tmp_path, substation=substation)
     issues = issues_for(project_file)
     assert [(i.file, i.location) for i in issues] == [
-        (project_file, "output.sheet_names.heat_calculations")
+        (tmp_path / SUBSTATION_DIR / "substation.yaml", "output.sheet_names.heat_calculations")
     ]
 
 
@@ -242,21 +250,28 @@ def test_duplicate_panel_id(tmp_path: Path) -> None:
 
 
 def test_same_panel_file_listed_twice(tmp_path: Path) -> None:
-    project = default_project()
-    project["panels"] = ["panels/p1.yaml", "panels/p2.yaml", "panels/../panels/p1.yaml"]
-    project_file = write_project(tmp_path, project=project)
+    substation = default_substation()
+    substation["panels"] = ["panels/p1.yaml", "panels/p2.yaml"]
+    substation["manual_panels"] = ["panels/../panels/p1.yaml"]
+    project_file = write_project(tmp_path, substation=substation)
     issues = issues_for(project_file)
-    assert [(i.file, i.location) for i in issues] == [(project_file, "panels[2]")]
+    assert [(i.file, i.location, i.message) for i in issues] == [
+        (
+            tmp_path / SUBSTATION_DIR / "substation.yaml",
+            "manual_panels[0]",
+            "panel file listed twice (first at panels[0])",
+        )
+    ]
 
 
 def test_mirror_of_unknown_panel(tmp_path: Path) -> None:
     p2 = default_p2()
     p2["mirror_of"] = "zz"
     project_file = write_project(tmp_path, panels={"p2.yaml": p2})
-    panel_file = tmp_path / "panels" / "p2.yaml"
+    panel_file = tmp_path / SUBSTATION_DIR / "panels" / "p2.yaml"
     assert texts(project_file) == [
         f"{panel_file.as_posix()}:{line_of(panel_file, 'mirror_of')}: mirror_of: "
-        "mirror_of 'zz' is not a panel in this project"
+        "mirror_of 'zz' is not a panel in this substation"
     ]
 
 
@@ -276,7 +291,7 @@ def test_mirror_bad_option_is_reported_in_mirror_file(tmp_path: Path) -> None:
     p2 = default_p2()
     p2["options"] = {"ac_spare_branches": -1, "bogus": True}
     project_file = write_project(tmp_path, panels={"p2.yaml": p2})
-    panel_file = tmp_path / "panels" / "p2.yaml"
+    panel_file = tmp_path / SUBSTATION_DIR / "panels" / "p2.yaml"
     issues = issues_for(project_file)
     assert {(i.file, i.location) for i in issues} == {
         (panel_file, "options.ac_spare_branches"),
@@ -289,11 +304,11 @@ def test_mirror_bad_option_is_reported_in_mirror_file(tmp_path: Path) -> None:
 
 
 def test_missing_panel_file_is_reported(tmp_path: Path) -> None:
-    project = default_project()
-    project["panels"] = ["panels/p1.yaml", "panels/missing.yaml"]
-    issues = issues_for(write_project(tmp_path, project=project))
+    substation = default_substation()
+    substation["panels"] = ["panels/p1.yaml", "panels/missing.yaml"]
+    issues = issues_for(write_project(tmp_path, substation=substation))
     assert [(i.file, i.message) for i in issues] == [
-        (tmp_path / "panels" / "missing.yaml", "file not found")
+        (tmp_path / SUBSTATION_DIR / "panels" / "missing.yaml", "file not found")
     ]
 
 
@@ -311,28 +326,28 @@ def test_missing_logo_is_reported(tmp_path: Path) -> None:
 
 
 def test_loose_material_references_are_checked(tmp_path: Path) -> None:
-    project = default_project()
-    project["loose_material"] = {
+    substation = default_substation()
+    substation["loose_material"] = {
         "host_panel": "p1",
         "items": [{"part_id": "SFP-1G-SM", "children": ["SFP-1G-SM"], "fed_from": "p2"}],
     }
-    load_project(write_project(tmp_path, project=project))
+    load_project(write_project(tmp_path, substation=substation))
 
-    project["loose_material"] = {
+    substation["loose_material"] = {
         "host_panel": "zz",
         "items": [{"part_id": "GHOST", "children": ["SFP-1G-SM", "GHOST-KID"], "fed_from": "yy"}],
     }
-    project_file = write_project(tmp_path, project=project)
+    project_file = write_project(tmp_path, substation=substation)
     issues = issues_for(project_file)
-    assert all(issue.file == project_file for issue in issues)
+    assert all(issue.file == tmp_path / SUBSTATION_DIR / "substation.yaml" for issue in issues)
     assert [(i.location, i.message) for i in issues] == [
-        ("loose_material.host_panel", "host_panel 'zz' is not a panel id in this project"),
+        ("loose_material.host_panel", "host_panel 'zz' is not a panel id in this substation"),
         ("loose_material.items[0].part_id", "unknown part_id 'GHOST' (not in library.yaml)"),
         (
             "loose_material.items[0].children[1]",
             "unknown part_id 'GHOST-KID' (not in library.yaml)",
         ),
-        ("loose_material.items[0].fed_from", "fed_from 'yy' is not a panel id in this project"),
+        ("loose_material.items[0].fed_from", "fed_from 'yy' is not a panel id in this substation"),
     ]
 
 

@@ -9,11 +9,12 @@ from engine_factories import device, library, loose, panel, powered, switch
 from bomgen.engine.kits import loose_table
 from bomgen.engine.pipeline import build
 from bomgen.engine.units import expand_devices
-from bomgen.io.loader import LoadedProject
+from bomgen.io.loader import LoadedSubstation
 from bomgen.io.mirror import mirror_panel
 from bomgen.models.bom import Group
 from bomgen.models.panel import PanelMirror
-from bomgen.models.project import LooseMaterial, Project
+from bomgen.models.project import DesignConstants, LooseMaterial, Project, Spares
+from bomgen.models.substation import Substation
 
 GPS = powered(
     "GPS",
@@ -34,16 +35,23 @@ LOOSE_PARTS = (
 )
 
 
-def loaded(loose_material: dict[str, Any] | None = None) -> LoadedProject:
-    calc = {"doc_no": "DOC-9", "rev": "0", "issue_date": "2026-10-28", "scope": "All"}
+def loaded(loose_material: dict[str, Any] | None = None) -> LoadedSubstation:
     project = Project.model_validate(
         {
-            "project": {"name": "GIS 01", "substation": "Dhahran", "doc_no": "DOC-1"},
-            "library": "library.yaml",
-            "panels": ["p1.yaml", "p2.yaml"],
-            "documents": {
+            "project": {"id": "gis", "name": "GIS 01"},
+            "library": {"name": "lib", "version": "1.0.0"},
+            "substations": ["substations/s1/substation.yaml"],
+        }
+    )
+    calc = {"document": "calc", "scope": "All"}
+    substation = Substation.model_validate(
+        {
+            "substation": {"id": "s1", "name": "Dhahran"},
+            "document": "bom",
+            "calculations": {
                 k: calc for k in ("power_consumption", "heat_dissipation", "heat_calculations")
             },
+            "panels": ["p1.yaml", "p2.yaml"],
             "loose_material": loose_material,
         }
     )
@@ -60,11 +68,22 @@ def loaded(loose_material: dict[str, Any] | None = None) -> LoadedProject:
                 "tag_prefix": "PSA2",
                 "lan": "B",
                 "sheet_name": "2",
-                "document": {"doc_no": "DOC-2", "rev": "0", "issue_date": "2026-10-28"},
+                "document": "p2-bom",
             }
         ),
     )
-    return LoadedProject(Path("project.yaml"), project, lib, (p1, p2), {})
+    return LoadedSubstation(
+        file=Path("substation.yaml"),
+        substation=substation,
+        project=project,
+        library=lib,
+        documents={},
+        constants=DesignConstants(),
+        spares=Spares(),
+        panels=(p1, p2),
+        panel_files={},
+        manual_panel_ids=frozenset(),
+    )
 
 
 def test_groups_a_to_d_in_order_with_cabinet_title() -> None:

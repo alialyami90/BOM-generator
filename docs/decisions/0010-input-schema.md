@@ -48,7 +48,7 @@ hand-written YAML.
 8. **Project revision.** `project.rev` feeds the default file name
    `{doc_no}_PSA_BOM_Rev{rev}.xlsx` (OUT-2), which names a project-level rev the
    sketch did not have.
-9. **JSON Schemas** for the three files are generated from the models
+9. **JSON Schemas** for the input files are generated from the models
    (`bomgen schema`) and committed under `schemas/`; a test fails when they
    are stale. Example files point editors at them.
 10. **Example provenance.** `examples/` is transcribed from the example
@@ -59,6 +59,41 @@ hand-written YAML.
     frame has its own H × D × W. A panel device can override its row's HWIO
     total (`hwio_points`; the six L1 switches carry 10). Loose items and loose
     extras can carry their column-B designation (`tag`).
+
+## M1b additions (projects and substations, ADR 0012/0013)
+
+12. **Folders.** `project.yaml` lists `substations/<id>/substation.yaml`; each
+    substation lists its panel files. A substation file is loaded through the
+    nearest `project.yaml` above it that lists it; without one it is an error.
+13. **Library by name and version.** `library: {name, version}` resolves
+    through the installed store (ADR 0008). An optional `file` loads that file
+    instead (examples, tests).
+14. **Document register.** `documents` on the project is a list of
+    `{key, substation, doc_no, rev, issue_date}`. Each entry names a listed
+    substation. Panels, mirrors, the substation (its workbook) and its
+    calculation sheets name a key of their own substation. The calculation
+    sheet's scope line moved to `calculations.<sheet>.scope`.
+15. **Defaults key by key.** A substation's `constants` and `spares` replace
+    only the keys written there; the merged constants are validated again.
+    Panel `options` stay as they are; `spares` feed generated panels.
+16. **Generated and manual panels.** `panels` lists the files the layout
+    writes (or hand-written ones, which is the `--no-layout` path), and
+    `manual_panels` lists files the layout never touches. Sheet order is
+    `panels`, then `manual_panels`. `generated_panels` gives the identity
+    templates of generated panels (`{n}` = panel number) and is needed when
+    `equipment` is given. A generated panel file carries `generated: true`;
+    a device row's `first_nn` continues a tag range across panels.
+17. **Sizing inputs.** `equipment` needs exactly one redundant `l1_switch`
+    and one redundant `l2_switch` (both `network_switch` parts); the L1 count
+    is computed, so it takes no `qty`. Every equipment part needs `height_u`.
+    The panel's usable U is computed (`enclosure_u − rack_u_reserved`), never
+    written.
+18. **Equipment ids.** Every equipment entry has a unique `id`. Layout
+    `overrides` and `removed` name these ids, never tags, so a re-run of the
+    layout or a renumbering cannot break them. A unit is picked by a 1-based
+    `unit` and, on a redundant entry, a `side` (`a` or `b`); leaving either
+    out means every unit or both sides. A single-device move of a redundant
+    entry must name its side; a `pair` move takes both sides.
 
 ## Consequences
 

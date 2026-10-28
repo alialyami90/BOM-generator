@@ -77,16 +77,42 @@ def default_library() -> dict[str, Any]:
 
 
 def default_project() -> dict[str, Any]:
-    calc = {"doc_no": "DOC-9", "rev": 0, "issue_date": "2026-10-28", "scope": "Whole substation"}
+    """Project ``gis`` with one substation ``s1`` and its register entries."""
+
+    def entry(key: str, doc_no: str) -> dict[str, Any]:
+        return {
+            "key": key,
+            "substation": "s1",
+            "doc_no": doc_no,
+            "rev": 0,
+            "issue_date": "2026-10-28",
+        }
+
     return {
-        "project": {"name": "GIS 01", "substation": "Dhahran", "doc_no": "DOC-1"},
-        "library": "library.yaml",
-        "panels": ["panels/p1.yaml", "panels/p2.yaml"],
-        "documents": {
+        "project": {"id": "gis", "name": "GIS 01"},
+        "library": {"name": "test-lib", "version": "1.0.0", "file": "library.yaml"},
+        "documents": [
+            entry("s1-bom", "DOC-1"),
+            entry("p1-bom", "DOC-1"),
+            entry("p2-bom", "DOC-2"),
+            entry("s1-calc", "DOC-9"),
+        ],
+        "substations": ["substations/s1/substation.yaml"],
+    }
+
+
+def default_substation() -> dict[str, Any]:
+    """Substation ``s1`` (Dhahran) with the panels p1 and p2."""
+    calc = {"document": "s1-calc", "scope": "Whole substation"}
+    return {
+        "substation": {"id": "s1", "name": "Dhahran"},
+        "document": "s1-bom",
+        "calculations": {
             "power_consumption": calc,
             "heat_dissipation": calc,
             "heat_calculations": calc,
         },
+        "panels": ["panels/p1.yaml", "panels/p2.yaml"],
     }
 
 
@@ -115,7 +141,7 @@ def default_p1() -> dict[str, Any]:
         "port_plans": {
             "P1-L2-ESW-A01": {"downlinks": [{"count": 2, "speed": "1G", "media": "RJ45"}]},
         },
-        "document": {"doc_no": "DOC-1", "rev": "0", "issue_date": "2026-10-28"},
+        "document": "p1-bom",
     }
 
 
@@ -129,7 +155,7 @@ def default_p2() -> dict[str, Any]:
         "tag_prefix": "P2",
         "lan": "B",
         "sheet_name": "2",
-        "document": {"doc_no": "DOC-2", "rev": "0", "issue_date": "2026-10-28"},
+        "document": "p2-bom",
     }
 
 
@@ -138,23 +164,33 @@ def write_yaml(path: Path, data: Mapping[str, Any]) -> None:
     path.write_text(yaml.safe_dump(dict(data), sort_keys=False), encoding="utf-8")
 
 
+SUBSTATION_DIR = Path("substations") / "s1"
+
+
 def write_project(
     tmp_path: Path,
     *,
     library: Mapping[str, Any] | None = None,
     project: Mapping[str, Any] | None = None,
+    substation: Mapping[str, Any] | None = None,
     panels: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> Path:
     """Write a minimal valid project under ``tmp_path`` and return its project file.
 
-    Each keyword replaces the whole contents of that file. ``panels`` maps a file name
-    under ``panels/`` to its contents; it is merged over the defaults ``p1.yaml`` and
+    The substation file is ``substations/s1/substation.yaml``. Each keyword replaces
+    the whole contents of that file. ``panels`` maps a file name under the substation's
+    ``panels/`` to its contents; it is merged over the defaults ``p1.yaml`` and
     ``p2.yaml``, so a name not among them adds a file.
     """
     project_file = tmp_path / "project.yaml"
     write_yaml(project_file, default_project() if project is None else project)
     write_yaml(tmp_path / "library.yaml", default_library() if library is None else library)
+    substation_dir = tmp_path / SUBSTATION_DIR
+    write_yaml(
+        substation_dir / "substation.yaml",
+        default_substation() if substation is None else substation,
+    )
     files = {"p1.yaml": default_p1(), "p2.yaml": default_p2()} | dict(panels or {})
     for name, data in files.items():
-        write_yaml(tmp_path / "panels" / name, data)
+        write_yaml(substation_dir / "panels" / name, data)
     return project_file

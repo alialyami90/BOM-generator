@@ -1,81 +1,56 @@
 # yaml-language-server: $schema=../schemas/project.schema.json
 #
-# Project settings for the example project, transcribed from the example workbook
-# (page headers and footers; loose-material table on the hidden master sheet 'Aux',
-# rows 47-62). Values the workbook does not give carry a trailing "# ASSUMED".
+# The example project (ADR 0012): project info, the library it is built with, the
+# document register and the defaults its substations inherit. Transcribed from the
+# example workbook's page headers and footers. Values the workbook does not give carry
+# a trailing "# ASSUMED".
 
 project:
+  id: jfgp2-pkg3
   name: "JAFURAH JFGP2 PKG.3 UTILITIES, SULFUR and INTERCONNECTING SYSTEMS"
-  substation: "GIS Substation"
-  doc_no: VD-EL0009-861GISPSA-001
-  rev: "02"
   # logo: assets/logo.png  # ASSUMED: add the company logo PNG here (binary, added separately)
 
-library: library.yaml
+library:  # the installed library; `file` loads this folder's copy instead
+  name: psa-devices
+  version: 1.0.0
+  file: library.yaml
 
-panels:  # panel order = sheet order (OUT-3)
-  - panels/psa1.yaml
-  - panels/psa2.yaml
-  - panels/psa3.yaml
-  - panels/ws.yaml
-
-documents:
-  power_consumption:
+documents:  # the register: every key names its substation (Q24)
+  - key: gis01-bom  # the BOM sheets of every gis01 panel
+    substation: gis01
+    doc_no: VD-EL0009-861GISPSA-001
+    rev: "02"
+    issue_date: 2026-10-28  # ASSUMED
+  - key: gis01-power  # Power Consumption
+    substation: gis01
     doc_no: VD-EL0009-861GISPSA-002
     rev: "00"
     issue_date: 2026-10-28  # ASSUMED
-    scope: "861-GIS01-PSA-001/002"
-  heat_dissipation:
+  - key: gis01-heat  # Heat Dissipation and Heat Calculations
+    substation: gis01
     doc_no: VD-EL0009-861GISPSA-003
     rev: "00"
     issue_date: 2026-10-28  # ASSUMED
-    scope: "861-GIS01-PSA-001/002"
-  heat_calculations:
-    doc_no: VD-EL0009-861GISPSA-003
-    rev: "00"
-    issue_date: 2026-10-28  # ASSUMED
-    scope: "861-GIS01-PSA-001/002"
 
-output:  # the defaults, written out
-  file_name: "{doc_no}_PSA_BOM_Rev{rev}.xlsx"
-  sheet_names:
-    power_consumption: "Power Consumption"
-    heat_dissipation: "Heat Dissipation"
-    heat_calculations: "Heat Calculations"
+defaults:  # inherited key by key by every substation
+  constants:  # spec: Inputs the tool needs -> 3. Project settings
+    dc_voltage_v: 125
+    ac_voltage_v: 230
+    power_margin: 0.25
+    current_factor: 1.3
+    btu_per_w: 3.41
+    t_max_c: 35
+    t_int_c: 25
+    air_constant_m3k_per_wh: 4.1
+    steel_coefficient_w_per_m2c: 5.5
+    min_main_mcb_a: 6
 
-constants:  # spec: Inputs the tool needs -> 3. Project settings
-  dc_voltage_v: 125
-  ac_voltage_v: 230
-  power_margin: 0.25
-  current_factor: 1.3
-  btu_per_w: 3.41
-  t_max_c: 35
-  t_int_c: 25
-  air_constant_m3k_per_wh: 4.1
-  steel_coefficient_w_per_m2c: 5.5
-  min_main_mcb_a: 6
+  spares:  # ADR 0013; every spare is an input
+    port_fraction: 0.20
+    sfp_per_l1: 3
+    dc_branches_per_feed: 3
+    ac_branches: 1
+    rack_u_reserved: 10
 
-loose_material:  # 'Aux' rows 49-62, under the WS console BOM
-  host_panel: ws
-  items:
-    - part_id: NAP-K55  # row 49
-      tag: '55" LCD Alarm Annunciator'
-      children: [LPA37-696]  # row 50: Wall Mount Kit
-      fed_from: psa3  # PSA3-QCOD-1 "2A, 2P MCB For Annunciator" (plan Q13)
-    - part_id: ZENON-V12  # row 51
-      tag: "SRV/OAS -HMI Software"
-    - part_id: MS-OFFICE-2021  # row 52
-      tag: "SRV/OAS -MS Office"
-    # Rows 53-57 (Time Server Accessories) are the GPS clock's loose_items (library.yaml,
-    # SEL-2488), not entries of this list.
-    - part_id: ANN-DISPLAY-CABLE-10M  # row 58
-      tag: "ANN-Display Cable"
-    - part_id: ANN-USB-CABLE-10M  # row 59
-      tag: "ANN-USB Cable"
-    - part_id: MON-DVI-CABLE-3M  # row 60
-      tag: "MON-DVI Cable"
-    - part_id: MON-USB-CABLE-3M  # row 61
-      tag: "MON-USB Cable"
-    - part_id: FO-PATCH-CORDS  # row 62
-      tag: FO
-      qty: "1 Lot"
+substations:
+  - substations/gis01/substation.yaml

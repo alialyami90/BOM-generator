@@ -17,7 +17,7 @@ from pydantic import (
     model_validator,
 )
 
-from bomgen.models._base import AutoBool, ExcelSheetName, InputModel, PartId, Rev
+from bomgen.models._base import AutoBool, DocumentKey, ExcelSheetName, InputModel, PartId, Rev
 from bomgen.models.library import Media, PortSpeed
 
 Lan = Literal["A", "B"]
@@ -72,6 +72,7 @@ class DeviceInstance(InputModel):
     purpose: str | None = None
     lan: Lan | None = None
     hwio_points: NonNegativeInt | None = None  # the row's HWIO total, overriding the library's
+    first_nn: PositiveInt | None = None  # first {nn} of the row, continuing a range (ADR 0013)
 
 
 class PortAllocation(InputModel):
@@ -142,7 +143,8 @@ class Panel(InputModel):
     devices: Annotated[list[DeviceInstance], Field(min_length=1)]
     port_plans: dict[str, PortPlan] = Field(default_factory=dict)
     options: PanelOptions = Field(default_factory=PanelOptions)
-    document: DocumentInfo
+    document: DocumentKey
+    generated: bool = False  # written by the layout engine (ADR 0013)
     revision: Revision = Field(default_factory=Revision)
 
 
@@ -161,7 +163,8 @@ class PanelMirror(InputModel):
     lan: Lan | None = None
     sheet_name: ExcelSheetName
     options: dict[str, Any] = Field(default_factory=dict)
-    document: DocumentInfo
+    document: DocumentKey
+    generated: bool = False  # written by the layout engine (ADR 0013)
     revision: Revision = Field(default_factory=Revision)
 
     @model_validator(mode="after")

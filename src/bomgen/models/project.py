@@ -1,46 +1,37 @@
-"""Project file model: project info, documents, output settings and design constants.
+"""Project file model: project info, library, document register and defaults (ADR 0012).
 
-Models the spec section "Inputs the tool needs" (3. Project settings) and ADR 0010.
-Paths stay as written (relative to the project file); the loader resolves them.
+Also holds the settings models a substation file shares with it (spec: Inputs the tool
+needs, 3. Project settings; ADR 0010). Paths stay as written (relative to the file that
+holds them); the loader resolves them.
 """
 
 from pathlib import Path
 from string import Formatter
+from typing import Annotated
 
 from pydantic import (
     Field,
     NonNegativeFloat,
+    NonNegativeInt,
     PositiveFloat,
     PositiveInt,
+    StringConstraints,
     field_validator,
     model_validator,
 )
 
-from bomgen.models._base import ExcelSheetName, InputModel, PartId, Quantity, Rev, check_template
-from bomgen.models.panel import DocumentInfo
+from bomgen.models._base import (
+    DocumentKey,
+    ExcelSheetName,
+    InputModel,
+    PartId,
+    Quantity,
+    check_template,
+)
+from bomgen.models.panel import DocumentInfo, PanelId
 
 FILE_NAME_PLACEHOLDERS = {"doc_no", "rev"}
 _FILE_NAME_FORBIDDEN = set('<>:"/\\|?*')
-
-
-class ProjectInfo(InputModel):
-    name: str
-    substation: str
-    doc_no: str
-    rev: Rev = "0"
-    logo: Path | None = None
-
-
-class CalcDocument(DocumentInfo):
-    """Header values of a calculation sheet; ``scope`` is its scope line."""
-
-    scope: str
-
-
-class Documents(InputModel):
-    power_consumption: CalcDocument
-    heat_dissipation: CalcDocument
-    heat_calculations: CalcDocument
 
 
 class SheetNames(InputModel):
@@ -78,8 +69,8 @@ class OutputSettings(InputModel):
         return self.file_name.format(doc_no=doc_no, rev=rev)
 
 
-class DesignConstants(InputModel):
-    """Calculation constants with the spec's defaults (Inputs, 3. Project settings)."""
+class ConstantOverrides(InputModel):
+    """Design constants as written in a file; unwritten keys keep the inherited value."""
 
     dc_voltage_v: PositiveFloat = 125
     ac_voltage_v: PositiveFloat = 230
@@ -91,6 +82,10 @@ class DesignConstants(InputModel):
     air_constant_m3k_per_wh: PositiveFloat = 4.1
     steel_coefficient_w_per_m2c: PositiveFloat = 5.5
     min_main_mcb_a: PositiveInt = 6
+
+
+class DesignConstants(ConstantOverrides):
+    """Calculation constants with the spec's defaults (Inputs, 3. Project settings)."""
 
     @model_validator(mode="after")
     def _t_max_above_t_int(self) -> "DesignConstants":
@@ -110,17 +105,79 @@ class LooseExtra(InputModel):
 
 
 class LooseMaterial(InputModel):
+    title: str = "PSA Panels Loose Material and Auxiliary Equipment"  # the table's title row
     host_panel: str
     items: list[LooseExtra] = Field(default_factory=list)
+
+
+class Spares(InputModel):
+    """Every spare as a user input, defaults as today (ADR 0013)."""
+
+    port_fraction: Annotated[float, Field(ge=0, lt=1)] = 0.20
+    sfp_per_l1: NonNegativeInt = 3
+    dc_branches_per_feed: NonNegativeInt = 3
+    ac_branches: NonNegativeInt = 1
+    rack_u_reserved: NonNegativeInt = 10
+
+
+def merge_defaults[M: InputModel](base: M, override: InputModel | None) -> M:
+    """``base`` with the keys written in ``override`` replaced, validated again as a whole."""
+    if override is None:
+        return base
+    written = {name: getattr(override, name) for name in override.model_fields_set}
+    return type(base).model_validate(base.model_dump() | written)
+
+
+class ProjectInfo(InputModel):
+    id: PanelId
+    name: str
+    client: str | None = None
+    logo: Path | None = None
+
+
+LibraryVersion = Annotated[
+    str, StringConstraints(pattern=r"^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$")
+]
+
+
+class LibrarySelection(InputModel):
+    """The installed library every substation uses; ``file`` loads one from disk instead."""
+
+    name: Annotated[str, StringConstraints(pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]*$")]
+    version: LibraryVersion
+    file: Path | None = None
+
+
+class RegisterEntry(DocumentInfo):
+    """One document of the project's register; ``key`` is what panels and sheets name."""
+
+    key: DocumentKey
+    substation: PanelId
+    title: str | None = None
+
+
+class Defaults(InputModel):
+    """Values every substation inherits key by key."""
+
+    constants: DesignConstants = Field(default_factory=DesignConstants)
+    spares: Spares = Field(default_factory=Spares)
 
 
 class Project(InputModel):
     """The project file (``project.yaml``)."""
 
     project: ProjectInfo
-    library: Path
-    panels: list[Path] = Field(min_length=1)
-    documents: Documents
-    output: OutputSettings = Field(default_factory=OutputSettings)
-    constants: DesignConstants = Field(default_factory=DesignConstants)
-    loose_material: LooseMaterial | None = None
+    library: LibrarySelection
+    documents: list[RegisterEntry] = Field(default_factory=list)
+    defaults: Defaults = Field(default_factory=Defaults)
+    substations: list[Path] = Field(min_length=1)
+
+    @field_validator("documents")
+    @classmethod
+    def _unique_keys(cls, entries: list[RegisterEntry]) -> list[RegisterEntry]:
+        seen: set[str] = set()
+        for entry in entries:
+            if entry.key in seen:
+                raise ValueError(f"duplicate document key '{entry.key}'")
+            seen.add(entry.key)
+        return entries

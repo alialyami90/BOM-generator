@@ -1,7 +1,8 @@
-"""Load a project: the project file, its library and panel files, mirrors resolved.
+"""Load a project: the project file, its library, its substations and their panels.
 
-Every problem found in every file is collected into one :class:`InputError`
-(ADR 0010 item 7).
+A project lists substations (ADR 0012); each substation lists its panel files, whose
+mirrors are resolved here, and inherits the project defaults key by key. Every problem
+found in every file is collected into one :class:`InputError` (ADR 0010 item 7).
 """
 
 from __future__ import annotations
@@ -9,36 +10,114 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ValidationError
 
-from bomgen.io.errors import InputError, Issue, issues_from_validation_error
+from bomgen.io.errors import InputError, Issue, Loc, format_location, issues_from_validation_error
 from bomgen.io.mirror import mirror_panel
-from bomgen.io.references import library_issues, mirror_issues, panel_issues, project_issues
+from bomgen.io.references import (
+    document_issues,
+    equipment_issues,
+    library_issues,
+    mirror_issues,
+    panel_issues,
+    project_issues,
+    substation_issues,
+)
 from bomgen.io.yaml_source import YamlSource, read_yaml
+from bomgen.models._base import InputModel
 from bomgen.models.library import Library
-from bomgen.models.panel import Panel, PanelMirror
-from bomgen.models.project import Project
+from bomgen.models.panel import Panel, PanelMirror, PanelOptions
+from bomgen.models.project import (
+    DesignConstants,
+    Project,
+    RegisterEntry,
+    Spares,
+    merge_defaults,
+)
+from bomgen.models.substation import Substation
+
+if TYPE_CHECKING:
+    from bomgen.library_store.store import LibraryStore
+
+PROJECT_FILE = "project.yaml"
+
+
+@dataclass(frozen=True)
+class LoadedSubstation:
+    """A validated substation: its settings merged with the project's, panels resolved."""
+
+    file: Path
+    substation: Substation
+    project: Project
+    library: Library
+    documents: Mapping[str, RegisterEntry]  # this substation's register entries by key
+    constants: DesignConstants
+    spares: Spares
+    panels: tuple[Panel, ...]  # ``panels`` then ``manual_panels``, in sheet order
+    panel_files: Mapping[str, Path]  # panel id -> its own file (a mirror's is the mirror file)
+    manual_panel_ids: frozenset[str]
+
+    @property
+    def panel_capacity_u(self) -> int:
+        """Rack units the layout may fill in one panel (ADR 0013)."""
+        return self.library.catalogues.enclosure_u - self.spares.rack_u_reserved
 
 
 @dataclass(frozen=True)
 class LoadedProject:
-    """A validated project with its library and every panel fully resolved."""
+    """A validated project with its library and every substation resolved."""
 
-    project_file: Path
+    file: Path
     project: Project
     library: Library
-    panels: tuple[Panel, ...]
-    panel_files: Mapping[str, Path]  # panel id -> its own file (a mirror's is the mirror file)
+    substations: tuple[LoadedSubstation, ...]
 
 
-def load_project(project_file: Path) -> LoadedProject:
+def load_inputs(
+    path: Path, *, store: LibraryStore | None = None
+) -> LoadedProject | LoadedSubstation:
+    """Load a project file or a substation file; only a project has ``project`` or ``library``."""
+    source = read_yaml(path)
+    if isinstance(source.data, dict) and source.data.keys() & {"project", "library"}:
+        return load_project(path, store=store)
+    return load_substation(path, store=store)
+
+
+def load_substation(
+    substation_file: Path, *, store: LibraryStore | None = None
+) -> LoadedSubstation:
+    """Load the project that lists ``substation_file`` and return that substation."""
+    target = substation_file.resolve()
+    for folder in target.parents:
+        candidate = folder / PROJECT_FILE
+        if candidate.is_file() and target in _listed_substations(candidate):
+            loaded = load_project(candidate, store=store)
+            return next(s for s in loaded.substations if s.file.resolve() == target)
+    if not substation_file.is_file():
+        read_yaml(substation_file)  # raises "file not found"
+    message = (
+        f"no {PROJECT_FILE} in a folder above lists this substation; "
+        "add it to the project's substations"
+    )
+    raise InputError([Issue(substation_file, "", message)])
+
+
+def _listed_substations(project_file: Path) -> set[Path]:
+    """Files ``project_file`` lists; a project file that cannot be read raises."""
+    data = read_yaml(project_file).data
+    listed = data.get("substations") if isinstance(data, dict) else None
+    if not isinstance(listed, list):
+        return set()
+    return {(project_file.parent / str(p)).resolve() for p in listed if isinstance(p, str)}
+
+
+def load_project(project_file: Path, *, store: LibraryStore | None = None) -> LoadedProject:
     """Load ``project_file`` and everything it names, or raise :class:`InputError`."""
     project_source = read_yaml(project_file)
     project = _validate(Project, project_source)
     base = project_file.parent
-    library_file = base / project.library
-    panel_files = [base / path for path in project.panels]
 
     issues: list[Issue] = []
     if project.project.logo is not None:
@@ -48,42 +127,196 @@ def load_project(project_file: Path) -> LoadedProject:
             line = project_source.line_for(("project", "logo"))
             issues.append(Issue(project_file, "project.logo", message, line))
 
-    library_source = _read(library_file, issues)
+    library_file = _library_file(project, project_source, store, issues)
+    library_source = _read(library_file, issues) if library_file is not None else None
     library = _validate_into(Library, library_source, issues)
 
-    panel_sources: list[tuple[YamlSource, Panel | PanelMirror]] = []
+    substation_sources: list[tuple[Substation, YamlSource]] = []
+    panel_sources: dict[Path, list[tuple[YamlSource, Panel | PanelMirror]]] = {}
     seen: dict[Path, int] = {}
-    for index, panel_file in enumerate(panel_files):
-        key = panel_file.resolve()
+    for index, path in enumerate(project.substations):
+        file = base / path
+        key = file.resolve()
         if key in seen:
-            message = f"panel file listed twice (first at panels[{seen[key]}])"
-            line = project_source.line_for(("panels", index))
-            issues.append(Issue(project_file, f"panels[{index}]", message, line))
+            message = f"substation file listed twice (first at substations[{seen[key]}])"
+            line = project_source.line_for(("substations", index))
+            issues.append(Issue(project_file, f"substations[{index}]", message, line))
             continue
         seen[key] = index
+        source = _read(file, issues)
+        substation = _validate_into(Substation, source, issues)
+        if source is not None and substation is not None:
+            substation_sources.append((substation, source))
+            panel_sources[source.path] = _read_panels(substation, source, issues)
+
+    if issues or library is None:
+        raise InputError(_sorted(issues))
+    assert library_file is not None
+    assert library_source is not None
+    issues.extend(library_issues(library, library_source))
+    issues.extend(project_issues(project, project_source, substation_sources))
+    reserved = project.defaults.spares.rack_u_reserved
+    if reserved >= library.catalogues.enclosure_u:
+        loc: Loc = ("defaults", "spares", "rack_u_reserved")
+        message = _no_rack_space(reserved, library)
+        issues.append(
+            Issue(project_file, format_location(loc), message, project_source.line_for(loc))
+        )
+
+    loaded: list[LoadedSubstation] = []
+    for substation, source in substation_sources:
+        result = _load_substation(
+            project,
+            project_source,
+            substation,
+            source,
+            panel_sources[source.path],
+            library,
+            library_file.name,
+            issues,
+        )
+        if result is not None:
+            loaded.append(result)
+    if issues:
+        raise InputError(_sorted(issues))
+    return LoadedProject(project_file, project, library, tuple(loaded))
+
+
+def _library_file(
+    project: Project, source: YamlSource, store: LibraryStore | None, issues: list[Issue]
+) -> Path | None:
+    """The library named by the project: its ``file``, or the installed version."""
+    selection = project.library
+    if selection.file is not None:
+        return source.path.parent / selection.file
+    from bomgen.library_store.errors import LibraryPackageError
+    from bomgen.library_store.store import LibraryStore, default_library_home
+
+    try:
+        store = store or LibraryStore(default_library_home())
+        return store.library_file(selection.name, selection.version)
+    except LibraryPackageError as error:
+        issues.append(Issue(source.path, "library", str(error), source.line_for(("library",))))
+        return None
+
+
+def _load_substation(
+    project: Project,
+    project_source: YamlSource,
+    substation: Substation,
+    source: YamlSource,
+    panel_sources: Sequence[tuple[YamlSource, Panel | PanelMirror]],
+    library: Library,
+    library_name: str,
+    issues: list[Issue],
+) -> LoadedSubstation | None:
+    """Resolve one substation's panels and defaults, adding every problem to ``issues``."""
+    found: list[Issue] = []
+    base = source.path.parent
+    manual_files = {(base / p).resolve() for p in substation.manual_panels}
+    resolved = _resolve_panels(panel_sources, library, library_name, found)
+    manual_ids = frozenset(p.id for p, s in resolved if s.path.resolve() in manual_files)
+
+    sub_id = substation.substation.id
+    register = {entry.key: entry for entry in project.documents}
+    found.extend(substation_issues(substation, source, resolved, library, library_name))
+    found.extend(document_issues(substation, source, panel_sources, register))
+    found.extend(equipment_issues(substation, source, library, library_name))
+    found.extend(_generated_panel_issues(substation, source, library))
+    for panel_source, entry in panel_sources:
+        if entry.generated and panel_source.path.resolve() in manual_files:
+            message = "a manual panel is never written by the layout; remove generated: true"
+            line = panel_source.line_for(("generated",))
+            found.append(Issue(panel_source.path, "generated", message, line))
+
+    constants = _merged(
+        project.defaults.constants, substation.constants, source, ("constants",), found
+    )
+    spares = _merged(project.defaults.spares, substation.spares, source, ("spares",), found)
+    written = substation.spares.model_fields_set if substation.spares is not None else set()
+    if (
+        spares is not None
+        and "rack_u_reserved" in written
+        and spares.rack_u_reserved >= library.catalogues.enclosure_u
+    ):
+        rack_loc: Loc = ("spares", "rack_u_reserved")
+        message = _no_rack_space(spares.rack_u_reserved, library)
+        line = source.line_for(rack_loc)
+        found.append(Issue(source.path, format_location(rack_loc), message, line))
+
+    issues.extend(found)
+    if found or constants is None or spares is None:
+        return None
+    return LoadedSubstation(
+        file=source.path,
+        substation=substation,
+        project=project,
+        library=library,
+        documents={k: e for k, e in register.items() if e.substation == sub_id},
+        constants=constants,
+        spares=spares,
+        panels=tuple(panel for panel, _ in resolved),
+        panel_files={panel.id: panel_source.path for panel, panel_source in resolved},
+        manual_panel_ids=manual_ids,
+    )
+
+
+def _no_rack_space(reserved: int, library: Library) -> str:
+    return (
+        f"rack_u_reserved {reserved} leaves no usable rack space "
+        f"(catalogues.enclosure_u is {library.catalogues.enclosure_u})"
+    )
+
+
+def _read_panels(
+    substation: Substation, substation_source: YamlSource, issues: list[Issue]
+) -> list[tuple[YamlSource, Panel | PanelMirror]]:
+    """Read and validate every panel file the substation lists, in sheet order."""
+    base = substation_source.path.parent
+    listed = [("panels", i, p) for i, p in enumerate(substation.panels)]
+    listed += [("manual_panels", i, p) for i, p in enumerate(substation.manual_panels)]
+    panel_sources: list[tuple[YamlSource, Panel | PanelMirror]] = []
+    seen: dict[Path, str] = {}
+    for key_name, index, path in listed:
+        panel_file = base / path
+        key = panel_file.resolve()
+        listed_as = f"{key_name}[{index}]"
+        if key in seen:
+            message = f"panel file listed twice (first at {seen[key]})"
+            line = substation_source.line_for((key_name, index))
+            issues.append(Issue(substation_source.path, listed_as, message, line))
+            continue
+        seen[key] = listed_as
         panel_source = _read(panel_file, issues)
         if panel_source is None:
             continue
         panel: Panel | PanelMirror | None
-        if "mirror_of" in panel_source.data:
+        if isinstance(panel_source.data, dict) and "mirror_of" in panel_source.data:
             panel = _validate_into(PanelMirror, panel_source, issues)
         else:
             panel = _validate_into(Panel, panel_source, issues)
         if panel is not None:
             panel_sources.append((panel_source, panel))
+    return panel_sources
 
-    if issues or library is None:
-        raise InputError(_sorted(issues))
 
+def _resolve_panels(
+    panel_sources: Sequence[tuple[YamlSource, Panel | PanelMirror]],
+    library: Library,
+    library_name: str,
+    issues: list[Issue],
+) -> list[tuple[Panel, YamlSource]]:
+    """Resolve mirrors and check each panel against the library; problems go to ``issues``."""
     originals = {p.id: p for _, p in panel_sources if isinstance(p, Panel)}
     mirror_ids = {p.id for _, p in panel_sources if isinstance(p, PanelMirror)}
     resolved: list[tuple[Panel, YamlSource]] = []
-    own: list[tuple[Panel, YamlSource]] = []  # panels defined in full, not mirrors
     for source, entry in panel_sources:
         if isinstance(entry, Panel):
             resolved.append((entry, source))
-            own.append((entry, source))
+            # a mirror inherits these, so reporting them there would repeat them
+            issues.extend(panel_issues(entry, source, library, library_name))
             continue
+        issues.extend(mirror_issues(entry, source, library))
         original = originals.get(entry.mirror_of)
         if original is None:
             if entry.mirror_of in mirror_ids:
@@ -92,34 +325,55 @@ def load_project(project_file: Path) -> LoadedProject:
                     "mirror the original panel instead"
                 )
             else:
-                message = f"mirror_of '{entry.mirror_of}' is not a panel in this project"
-            line = source.line_for(("mirror_of",))
-            issues.append(Issue(source.path, "mirror_of", message, line))
+                message = f"mirror_of '{entry.mirror_of}' is not a panel in this substation"
+            issues.append(Issue(source.path, "mirror_of", message, source.line_for(("mirror_of",))))
             continue
         try:
             resolved.append((mirror_panel(original, entry), source))
         except ValidationError as error:
             issues.extend(issues_from_validation_error(error, source, prefix=("options",)))
+    return resolved
 
-    assert library_source is not None  # library is set only when its file was read
-    library_name = library_file.name
-    issues.extend(library_issues(library, library_source))
-    for panel, source in own:  # a mirror inherits these, so reporting them there would repeat them
-        issues.extend(panel_issues(panel, source, library, library_name))
-    for source, entry in panel_sources:
-        if isinstance(entry, PanelMirror):
-            issues.extend(mirror_issues(entry, source, library))
-    issues.extend(project_issues(project, project_source, resolved, library, library_name))
-    if issues:
-        raise InputError(_sorted(issues))
 
-    return LoadedProject(
-        project_file=project_file,
-        project=project,
-        library=library,
-        panels=tuple(panel for panel, _ in resolved),
-        panel_files={panel.id: source.path for panel, source in resolved},
-    )
+def _generated_panel_issues(
+    substation: Substation, source: YamlSource, library: Library
+) -> list[Issue]:
+    """Each generated panel's options, merged, must be valid and name known busbars."""
+    generated = substation.generated_panels
+    if generated is None:
+        return []
+    issues: list[Issue] = []
+    combos: list[tuple[Loc, dict[str, object], dict[str, object]]] = [
+        (("generated_panels", "options"), generated.options, generated.options)
+    ]
+    for number, own in generated.options_by_panel.items():
+        loc: Loc = ("generated_panels", "options_by_panel", number)
+        combos.append((loc, own, generated.options | own))
+    for loc, own, merged in combos:
+        try:
+            PanelOptions.model_validate(merged)
+        except ValidationError as error:
+            issues.extend(issues_from_validation_error(error, source, prefix=loc))
+            continue
+        busbars = own.get("grounding_busbars")
+        for index, busbar in enumerate(busbars if isinstance(busbars, list) else []):
+            if busbar not in library.catalogues.busbars:
+                bar_loc = (*loc, "grounding_busbars", index)
+                message = f"unknown busbar '{busbar}' (not in catalogues.busbars)"
+                issues.append(
+                    Issue(source.path, format_location(bar_loc), message, source.line_for(bar_loc))
+                )
+    return issues
+
+
+def _merged[M: InputModel](
+    base: M, override: InputModel | None, source: YamlSource, prefix: Loc, issues: list[Issue]
+) -> M | None:
+    try:
+        return merge_defaults(base, override)
+    except ValidationError as error:
+        issues.extend(issues_from_validation_error(error, source, prefix=prefix))
+        return None
 
 
 def load_library(library_file: Path) -> Library:
