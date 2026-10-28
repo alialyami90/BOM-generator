@@ -52,7 +52,7 @@ A2 agreed these names for M1b (`models/substation.py` unless noted); Task 5 uses
 
 Settled by A1:
 
-- **Golden R10:** with 40 IEDs R1 gives 2 L1 switches per side, not the spec example's 6, and the port plans differ from the hand-written ones (L1 SFPs 2 × 2 + 3 = 7, not 24 + 3). The golden records the rule results; the hand-written example panels keep every BOM golden value.
+- **Golden R10:** with 40 IEDs R1 gives 3 L1 switches per side (RST2228-L1-24MM: 19 usable ports), not the spec example's 6, and the port plans differ from the hand-written ones (L1 SFPs 3 × 2 + 3 = 9, not 24 + 3). Ali confirmed the golden on 2026-10-28. The golden records the rule results; the hand-written example panels keep every BOM golden value.
 - **UI contract** (`docs/ui/screens.md` → "What the app needs from the engine"): `layout_preview(substation, overrides) -> LayoutResult` with panels, U used, blank plates, DIN-rail counts and move errors; `NetworkPlan` read-only; stable equipment ids.
 - **Cable managers** (Q32, Ali 2026-10-28: count them): every rack-mounted switch or patch panel unit (`network_switch`, `firewall`, `patch_panel` with `height_u > 0`) takes a 1U cable manager directly under it. The pair is one block of `height_u + 1` with no blank plate inside it; blank plates go between blocks. `Unit` gets `cable_manager_u: int = 0` (1 for those categories) and `used_u` counts it. The panel's cable-manager count goes to A9's step 3 instead of today's fixed 9.
 - **Port spare** (Ali 2026-10-28): default stays 20 %, editable per substation. Each IED has one port on side A and one on side B, so `ied_count` IEDs need `ied_count` ports per side (R1 as written).
@@ -192,7 +192,7 @@ Settled by A1:
 
 **Consumes:** Task 5, A2's `examples/substations/gis01/substation.yaml` (40 IEDs, star) and A3's `height_u` values.
 
-- [ ] Write `expected_panels.yaml`: for each generated panel, its number, used U, and rows (`part_id`, `qty`, `lan`, `first_nn`) and port plans; each value commented with the rule it comes from (R1 → 2 L1 per side, R2 → demand and 1 L2 per side, R3 → plans, R6 → where GPS, RTAC and I/O land). With 1U for every rack device except a 2U RTAC, the design reads panel 1 = A units + GPS + I/O and panel 2 = B units + RTAC; the file records whatever the confirmed heights give.
+- [ ] Write `expected_panels.yaml`: for each generated panel, its number, used U, and rows (`part_id`, `qty`, `lan`, `first_nn`) and port plans; each value commented with the rule it comes from (R1 → 3 L1 per side, R2 → demand and 1 L2 per side, R3 → plans, R6 → where GPS, RTAC and I/O land). With 1U for every rack device except a 2U RTAC, the design reads panel 1 = A units + GPS + I/O and panel 2 = B units + RTAC; the file records whatever the confirmed heights give.
 - [ ] `test_r10_example_substation_layout_matches_golden` loads the example substation, runs `layout_substation` and compares with the YAML; `test_r10_example_substation_has_no_layout_errors`.
 - [ ] Run; pass. Checks. Commit `test(layout): golden layout of the example substation (R10)`.
 - [ ] Open the PR (draft until Ali confirms the golden through A1), subscribe to it, and send A1 the number.

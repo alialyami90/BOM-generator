@@ -440,8 +440,8 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
   (side A), Ali's answer. `examples/` keeps psa3 for the hand-written goldens;
   the layout golden feeds the annunciator from psa1 through its input fixture.
 - Golden R10: the example substation's generated panels in
-  `tests/golden/layout/`, pending Ali's confirmation (3 L1 switches per side
-  from the rules, not the spec example's 6).
+  `tests/golden/layout/`, confirmed by Ali on 2026-10-28 (3 L1 switches per
+  side from the rules, not the spec example's 6).
 - Starts when M1b is on main.
 
 ### M2 — BOM groups A–D

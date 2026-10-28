@@ -1,7 +1,7 @@
 # Golden layout of the example substation (examples/substations/gis01, 40 IEDs, star).
 # Rules from docs/superpowers/specs/2026-10-28-substations-and-auto-layout-design.md
-# (ADR 0013). Pending Ali's confirmation in the A8 project thread (the spec example
-# shows 6 L1 switches; these values follow the rules).
+# (ADR 0013). Confirmed by Ali on 2026-10-28 in the A8 project thread (the spec
+# example shows 6 L1 switches; these values follow the rules).
 #
 # R1: RST2228-L1-24MM has 24 IED ports (its 4 SFP slots are uplink-only), so
 #     floor(24 x 0.8) = 19 usable and 40 IEDs need 3 L1 switches per side.
