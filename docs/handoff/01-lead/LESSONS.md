@@ -1,0 +1,49 @@
+# Role 1 (lead): lessons and small decisions
+
+Append-only. Mark replaced entries "superseded by …"; move old ones to `archive/` past 120 lines.
+
+## How role 1 works (Ali's standing instructions, 2026-10-28)
+
+- Ali: "Moving forward all PR approvals send to A1" and "stop asking me for merges. Check the merge
+  for conflicts and merge it". Role 1 reviews, approves and squash-merges every PR itself.
+- The GitHub account can't approve its own PRs, so approval is a COMMENT review whose body starts
+  "A1: approved" and ends with the Claude Code footer. Merge with `merge_method: squash` and the
+  full `expectedHeadSha`; a 409 means the head moved, so re-review the new head.
+- Ali: "If u have questions to me prompt it in a cards always." Every question to Ali goes on a
+  `request_decision` card with one option recommended. Record his answer as a plan §6 question
+  (next free number in agents.md) in a docs PR.
+- Brief agents specifically: the files, the rule, the tests, and what not to touch.
+- Ali pushes release tags himself; this session's tag pushes get a 403.
+
+## Review procedure (what works)
+
+1. `git fetch origin main refs/pull/N/head:refs/remotes/pr/N`, wrapped in `timeout 90` with
+   retries, because fetches sometimes hang.
+2. `git merge-tree --write-tree origin/main pr/N` to check for conflicts.
+3. Run the gate in a scratch `git worktree` with `git merge --no-commit origin/main`:
+   ruff, `ruff format --check`, `PYTHONPATH=src python3 -m mypy`,
+   `PYTHONPATH=src python3 -m pytest -q -p no:cacheprovider`. Then remove the worktree.
+   pytest takes 2 to 10 minutes; run it in the background if needed.
+4. Check the PR's check runs with `pull_request_read get_check_runs`. Any PR touching
+   `src/bomgen/app/`, `packaging/`, `pyproject.toml` or `release.yml` needs a green
+   "Build Windows installer" check too.
+5. Read the diff for scope: only the role's files (agents.md "Owns"). For JS, run `node --check`
+   and read the template strings. #126 had `aria-label=""${…}` that no test catches.
+
+## Small decisions
+
+- Commits and PRs: conventional commit titles. Each piece of work gets a fresh branch from
+  origin/main named `claude/project-thread-2fnqi0-<topic>`. Never force-push.
+- Handoff checkpoint PRs (docs only) are merged as they arrive. Neighbouring ROSTER rows conflict
+  when both are unmerged, so ask the owner to merge main and keep only their row.
+- Q38 (2026-10-28): `examples/library.yaml` stays the spec example (golden values fixed); the
+  shipped library is generated separately by A3 (`data/library/`).
+- Cross-role engine edits are fine when they're minimal guards (for example #122's
+  `part_id is not None`), but tell the owner.
+
+## Failed approaches
+
+- Editing the wrong thread message, earlier in this role's life: check the message id before
+  using `edit_message`.
+- Merging while the head was still changing gave a 409. Always merge with the head sha just
+  reviewed.
