@@ -1,12 +1,10 @@
 # State: role 5, Library update packages
 
-- Name: A5 - Library update packages (outgoing); successor B5. Date: 2026-10-28.
+- Name: B5 - Library update packages. Date: 2026-10-28 (refreshed after #164).
 - Role and files: [`docs/agents.md`](../../agents.md) "Roles" row A5 and its section. Owns
   `src/bomgen/library_store/`, ADR 0008, ADR 0018 (number assigned by A1), the M8 section.
-- Branch: `claude/project-thread-gq1gxg` (HEAD `23b3ca4`; the branch name is fixed by the thread, so each PR
-  is cherry-picked onto fresh `origin/main` and `merge -s ours` joins the old history; a successor
-  may also just reset the branch to main when it has no unmerged work). Checkpoint branch:
-  `claude/a5-handoff-checkpoint`. origin/main at write time: `aad6094`.
+- Branch: `claude/project-thread-31eptw` (B5's thread branch; reset to `origin/main` before each PR
+  when there is no unmerged work). origin/main at write time: `1fe50d4`.
 - Nothing uncommitted, no stash, no open PR of mine.
 
 ## Merged (all reviewed and merged by A1)
@@ -20,30 +18,33 @@
   `library import-csv` (incl. "probably an Excel formula" hint); #120 `compare_alternatives`;
   #127 `write_bundle` creates missing folders and refuses cleanly; a failed `active` write
   restores the previous version (no `.replaced-<uuid>`).
+- B5: #164 device-record edits (`records.py`: `apply_record_edits`, `check_record_field`,
+  `write_records`; `save_edits(record_edits=...)`), for B11's Datasheet tab. ADR 0018 amendment
+  "device-record edits" in the checkpoint PR.
+- Not mine but in my files: #165 (`ac_rated` CSV column, brand sets in `diff_libraries`).
 
 ## In review
-- None of mine. A3's #130 (M14 library entries) changed five of my test files; I reviewed them
-  and told A3 they are fine (1093 library_store + device_db tests pass on its head `87eee46`).
+- None of mine except this checkpoint PR. Reviewed B3's #161 library_store parts (now only one
+  test expectation in `test_library_csv_export.py`, commit `7184f99`): fine, told B3.
 
 ## What works (evidence)
-- `pytest tests/unit/library_store tests/unit/test_bundle_container.py`: 344 passed on main
-  `9313db1` (2026-10-28). `pytest tests/golden`: 94 passed.
+- Full gate on #164's head (`f319f64` base): 2479 passed. #164 merged with main (`0f4b3eb`):
+  `tests/unit/library_store tests/unit/app` 585 passed.
 - Public API is in `src/bomgen/library_store/__init__.py` (docstring lists it).
 
 ## Environment note (not a main failure)
-- My first full `pytest` run (in a git worktree) showed 3 failures in
-  `tests/unit/app/test_app_edit_api.py` (`'Api' object has no attribute 'check_layout'`). The cause was
-  a stale editable install: `bomgen` imported from another checkout (`/home/user/BOM-generator/src`,
-  an older tree), not from the worktree. A1 reports main passes 2414 in CI. In a worktree or any other
-  checkout, run `PYTHONPATH=src python -m pytest` and check `python -c "import bomgen;print(bomgen.__file__)"`.
+- A fresh container has no `bomgen` installed: run `pip install -e ".[dev]"` first.
+- `mypy` on PATH (`/root/.local/bin/mypy`) runs under another Python without pydantic and fails
+  with "Error importing plugin pydantic.mypy"; use `python -m mypy`.
+- In a git worktree run `PYTHONPATH=src python -m pytest` and check `bomgen.__file__`.
 
 ## Verification table
 | Command | Result | Date |
 | --- | --- | --- |
-| `ruff check . && ruff format --check .` (main `9313db1`) | pass | 2026-10-28 |
-| `mypy` (main `9313db1`) | pass, 210 files | 2026-10-28 |
-| `pytest` (main `9313db1`, worktree, stale editable install) | 2411 passed, 3 failed: environment, see note | 2026-10-28 |
-| `pytest tests/golden` | 94 passed | 2026-10-28 |
+| `ruff check . && ruff format --check .` (#164 head) | pass | 2026-10-28 |
+| `python -m mypy` (#164 head) | pass, 214 files | 2026-10-28 |
+| `pytest` (#164 head, fresh install) | 2479 passed | 2026-10-28 |
+| `pytest tests/unit/library_store tests/unit/app` (#164 merged with `0f4b3eb`) | 585 passed | 2026-10-28 |
 | Not run: Windows installer, GUI | n/a (not my role's files) | |
 
 ## Scope risks (files outside `library_store/` that my PRs changed, all approved by A1)
@@ -56,7 +57,8 @@
 
 ## Blockers, risks, assumptions
 - ADR 0008 and ADR 0018 stay "Proposed" until Ali accepts them (A1's ruling); leave them as they are.
-- Waiting on: nobody. A11 is wiring the Library editors and will ask questions.
+- Waiting on: nobody. B11 builds the Datasheet tab on #164; it may ask more.
 - Spec vs code disagreements: none known.
-- Unverified: that A11's app code uses `check_field`, `save_edits` and `preview_csv_import`
-  as documented (I have not read `src/bomgen/app/`).
+- Unverified: how B11's app (#155, merged) calls `save_edits` / `check_field`; I have not read
+  `src/bomgen/app/`. `catalogues.mcb_dc` has no CSV table; an import keeps it from the base
+  (checked by hand on #161's head), so it cannot be edited in Excel. Not requested.
