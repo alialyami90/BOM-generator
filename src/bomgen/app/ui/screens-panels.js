@@ -61,7 +61,7 @@
   const name = (u) => (ROLES[u.role] ? `${ROLES[u.role]}${u.of > 1 ? ' ' + u.n : ''}` : u.label);
   const uid = (p, u) => `${p.number}:${u.key}:${u.side || ''}`;
   let showIssues = false;
-  const HELP = 'Blank plates are the gaps between devices and are not in the BOM. A switch, firewall or patch panel counts with its 1 U cable manager.';
+  const HELP = 'Blank plates are the gaps under a device that has no cable manager below it. They are not in the BOM. A switch, firewall or patch panel counts with its 1 U cable manager.';
   const issueList = (xs) => `<ul style="margin:6px 0 0;padding-left:18px">${xs.slice(0, 8).map((i) => `<li><span class="mono small">${esc(i.subject)}</span> ${esc(i.message)}</li>`).join('')}</ul>`;
   const issuesBanner = (d) => {
     if (!d.generated) {  // one banner: what the board is, and what the layout would report
@@ -110,12 +110,12 @@
     const rack = p.units.filter((u) => u.block_u > 0);
     const partner = sel && sel.u.side ? `${sel.u.key}:${sel.u.side === 'A' ? 'B' : 'A'}` : '';
     const cards = [];
-    rack.forEach((u, i) => {
-      if (i) cards.push(`<div class="plate" style="height:${U}px" title="Blank plate (not in the BOM)"></div>`);
+    rack.forEach((u) => {
       const id = uid(p, u), isSel = id === selected, isPartner = partner && `${u.key}:${u.side}` === partner;
       cards.push(`<div class="dev ${u.cable_manager_u ? 'has-cm' : ''} ${isSel ? 'is-sel' : ''} ${isPartner ? 'is-partner' : ''} ${u.moved ? 'is-moved' : ''}" tabindex="0" role="button" aria-pressed="${isSel}" data-action="pv-select-dev" data-uid="${esc(id)}" style="height:${u.block_u * U}px"
         aria-label="${esc(name(u))}${u.side ? ', side ' + u.side : ', common'}, ${u.block_u} U${u.cable_manager_u ? ' including a 1 U cable manager' : ''}${u.moved ? ', moved by an override' : ''}" title="${esc(u.part_id)} · ${esc(u.label)}">
         <span class="dev-row" style="height:${u.height_u * U - 2}px"><span class="dev-main"><b>${esc(name(u))}</b>${u.height_u >= 2 ? `<span class="mono">${esc(u.part_id)}</span>` : ''}</span>${u.moved ? `<span class="dev-flag" title="Moved by an override">${icon('move')}</span>` : ''}<span class="dev-u">${u.height_u} U</span></span>${u.cable_manager_u ? `<span class="dev-cm">Cable manager<span class="dev-u">${u.cable_manager_u} U</span></span>` : ''}</div>`);
+      if (u.plate_below_u) cards.push(`<div class="plate" style="height:${u.plate_below_u * U}px" title="Blank plate (not in the BOM)"></div>`);
     });
     const din = p.units.filter((u) => u.block_u === 0);
     return `<section class="bcol" aria-label="${esc(p.cabinet_name)}, side ${esc(p.side || '')}, ${p.used_u} of ${p.capacity_u} U used">

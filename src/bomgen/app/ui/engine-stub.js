@@ -2,7 +2,7 @@
    In the app the Python engine supplies `layout_preview(substation, overrides) -> LayoutResult` (A8, ADR 0013).
    A switch, firewall or patch panel is placed together with its 1 U cable manager as one block (Q32).
    This stub exists only so the Panels board can be tried in the prototype. It places devices the way the
-   design describes (32 U usable, one blank plate between neighbours, A units in odd panels, B units in even
+   design describes (32 U usable, a blank plate under each device whose block does not end in a cable manager, A units in odd panels, B units in even
    panels, common devices in the first panel with room). The UI renders its result and never re-derives it. */
 (function () {
   const CAPACITY = 32, RESERVED = 10;
@@ -20,7 +20,9 @@
     return out;
   }
 
-  const cost = (list, extra) => { const all = extra ? list.concat([extra]) : list; return all.reduce((a, u) => a + u.h, 0) + Math.max(0, all.length - 1); };
+  /* R5: a plate under each rack block except the lowest, unless the block ends in its cable manager. */
+  const plateBelow = (list, i) => (i < list.length - 1 && !list[i].cm ? 1 : 0);
+  const cost = (list, extra) => { const all = (extra ? list.concat([extra]) : list).slice().sort((a, b) => a.order - b.order); return all.reduce((a, u, i) => a + u.h + plateBelow(all, i), 0); };
 
   /* overrides: [{ pair: 'l1.2', pairIndex: 2 } | { unit: 'l1.2.A', panel: 3 }], removed: [unit or pair ids] */
   function layoutPreview(overrides = [], removed = []) {
@@ -56,8 +58,8 @@
       const meta = DB.panels.find((p) => p.n === n);
       panels.push({
         n, id: meta ? meta.id : 'psa' + n, name: meta ? meta.name : `PSA Cabinet - ${String(n).padStart(3, '0')}`, prefix: meta ? meta.prefix : 'PSA' + n,
-        side: n % 2 ? 'A' : 'B', pair: Math.ceil(n / 2), capacity: CAPACITY, reserved: RESERVED, used, free: CAPACITY - used, plates: Math.max(0, list.length - 1), din: DB.dinParts[n] || 0,
-        devices: list.map((u) => ({ id: u.id, pair: u.pair, name: u.name, model: u.model, part: u.part, h: u.h, dev: u.dev, cm: u.cm, side: u.side, redundant: u.redundant, moved: moved.has(u.id),
+        side: n % 2 ? 'A' : 'B', pair: Math.ceil(n / 2), capacity: CAPACITY, reserved: RESERVED, used, free: CAPACITY - used, plates: list.reduce((a, u, i) => a + plateBelow(list, i), 0), din: DB.dinParts[n] || 0,
+        devices: list.map((u, i) => ({ plateBelow: plateBelow(list, i), id: u.id, pair: u.pair, name: u.name, model: u.model, part: u.part, h: u.h, dev: u.dev, cm: u.cm, side: u.side, redundant: u.redundant, moved: moved.has(u.id),
           tag: `${(meta ? meta.prefix : 'PSA' + n)}-${u.stem}${u.redundant ? '-' + u.side : '-'}${String(u.num).padStart(2, '0')}` }))
       });
     }

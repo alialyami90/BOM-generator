@@ -141,12 +141,12 @@
     const pct = Math.round((p.used / p.capacity) * 100);
     const full = p.free < 3;
     const cards = [];
-    p.devices.forEach((d, i) => {
-      if (i) cards.push(`<div class="plate" style="height:${U}px" title="Blank plate (not in the BOM)"></div>`);
+    p.devices.forEach((d) => {
       const isSel = d.id === sel, isPartner = partner && partner.id === d.id;
       cards.push(`<div class="dev ${d.cm ? 'has-cm' : ''} ${isSel ? 'is-sel' : ''} ${isPartner ? 'is-partner' : ''} ${d.moved ? 'is-moved' : ''}" draggable="true" tabindex="0" role="button" aria-pressed="${isSel}" data-action="select-dev" data-dev="${d.id}" data-pair="${d.pair}" style="height:${d.h * U}px"
         aria-label="${esc(d.name)}${d.side ? ', side ' + d.side : ', common'}, ${d.h} U${d.cm ? ` including a 1 U cable manager` : ''}, tag ${esc(d.tag)}${d.moved ? ', moved by you' : ''}" title="${esc(d.tag)}">
         <span class="dev-row" style="height:${d.dev * U - 2}px"><span class="dev-grip">${icon('grip')}</span><span class="dev-main"><b>${esc(d.name)}</b>${d.dev >= 2 ? `<span class="mono">${esc(d.tag)}</span>` : ''}</span>${d.moved ? `<span class="dev-flag" title="Moved by you">${icon('move')}</span>` : ''}<span class="dev-u">${d.dev} U</span></span>${d.cm ? '<span class="dev-cm">Cable manager<span class="dev-u">1 U</span></span>' : ''}</div>`);
+      if (d.plateBelow) cards.push(`<div class="plate" style="height:${d.plateBelow * U}px" title="Blank plate (not in the BOM)"></div>`);
     });
     return `<section class="bcol" data-panel="${p.n}" aria-label="${esc(p.name)}, side ${p.side}, ${p.used} of ${p.capacity} U used">
       <header><a href="#/panels/${p.id}"><b>${esc(p.name)}</b></a><span class="badge badge--plain">Side ${p.side}</span></header>
