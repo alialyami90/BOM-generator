@@ -10,6 +10,19 @@ The generator never reads this folder. The device library it builds from is
 library fields (category, model, ordering code, wattage, ports, children…) live there
 only. Changing a part in a project means editing the library, not this folder.
 
+A library package can carry these files, so the app's Library screen can show a
+part's datasheet details and alternatives next to the library's parts. To ship
+them with a library, add the folder when packing:
+
+```bash
+bomgen library pack examples/library.yaml --name psa-devices --version 1.0.0 \
+  --add data/device-db
+```
+
+The package keeps the YAML files under `device-db/`. `pack` checks every record
+against the field rules below and refuses to build a package that breaks them; import
+does not re-check them.
+
 Records of `kind: device` key on the library's `part_id`s, so a tool or a person can
 join the two. Records of `kind: catalogue` (`MCB-*`, `AUX-*`, `TB-*`, `BUSBAR-*`,
 `ENCL-*`) use ids local to this database, because the library keys MCBs by rating,
