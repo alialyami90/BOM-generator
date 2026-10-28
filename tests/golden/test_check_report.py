@@ -77,3 +77,13 @@ def test_sfps_fit_the_switch_slots(report: CheckReport) -> None:
     assert [s for s in sfp if s[2] is CheckStatus.FAIL] == []
     # The firewall's two SFP slots take its two downlink SFPs ('Panel 1' row 17).
     assert {s[2] for s in sfp if "FW" in (s[1] or "")} == {CheckStatus.PASS}
+
+
+def test_every_branch_mcb_is_2a_from_the_floor(report: CheckReport) -> None:
+    # DC distribution: every Q1.n/Q2.n and QCOD-n of the example is 2 A; under Q35 the
+    # 2 A floor gives it, as no example device lists an inrush. The annunciator's
+    # 1.3 x 100 W / 125 V = 1.04 A is over the 1 A size, so it needs 2 A too.
+    branches = [i for i in report.items if i.check == "branch_mcb"]
+    assert {(i.status, i.values["rating_a"]) for i in branches} == {(CheckStatus.PASS, 2)}
+    assert {i.values["set_by"] for i in branches} == {"floor", "running,floor"}
+    assert len(branches) == 50

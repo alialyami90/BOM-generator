@@ -6,6 +6,7 @@ BOM row by table and index, so the sheet layer can write ``='1'!C8``-style refer
 """
 
 import math
+from typing import Literal
 
 from pydantic import NonNegativeFloat, NonNegativeInt, PositiveFloat, PositiveInt
 
@@ -209,3 +210,29 @@ class HeatResult(OutputModel):
     dissipation: tuple[CabinetHeat, ...]
     cabinets: tuple[CabinetThermal, ...]
     line_up: LineUpCheck | None
+
+
+BranchCondition = Literal["running", "inrush", "floor"]
+
+
+class BranchSizing(OutputModel):
+    """A branch MCB's rating and the numbers behind it (plan Q35, ADR 0019)."""
+
+    rating_a: PositiveInt
+    running_a: NonNegativeFloat  # current factor x W / V of one unit
+    inrush_a: PositiveFloat | None = None
+    inrush_ms: PositiveFloat | None = None
+    inrush_counted: bool = True  # False: shorter than inrush_min_ms, too short to trip
+    trip_multiple: PositiveFloat | None = None  # None: the catalogue has no trip curve
+    inrush_need_a: NonNegativeFloat | None = None  # inrush / trip multiple, when counted
+    floor_a: PositiveInt
+    set_by: tuple[BranchCondition, ...]  # every condition that alone gives the rating
+    library_min_a: PositiveInt | None = None  # the deprecated min_branch_mcb_a
+
+
+class BranchMcb(BranchSizing):
+    """One Q1.n, Q2.n or QCOD-n with its sizing; spares are not listed."""
+
+    panel_id: str
+    tag: str
+    load: str
