@@ -67,7 +67,7 @@
   };
 
   /* ---------- Device editor ---------- */
-  const ED = { key: '', state: 'idle', reply: null, error: null, draft: {}, errors: {}, refusal: '', saving: false };
+  const ED = { key: '', state: 'idle', reply: null, error: null, draft: {}, errors: {}, refusal: '', saving: false, users: null };
   const CAT = { io: 'IO', gps: 'GPS', rtac: 'RTAC', sfp: 'SFP' };
   const catName = (c) => c.split('_').map((w) => CAT[w] || w).join(' ').replace(/^./, (m) => m.toUpperCase());
   /* [key, label, kind, help]; kinds: text, mono, area, int, num, choice, feeds, bool. The model checks every value. */
@@ -80,15 +80,26 @@
       ['unit_power_w', 'Rated power', 'num', 'What the power sheet uses.', 0, 'W'], ['inrush_a', 'Inrush current', 'num', 'The branch MCB is sized to clear it.', 0, 'A'], ['load_type', 'Load type', 'choice'],
       ['min_branch_mcb_a', 'Minimum branch MCB', 'int', '', 0, 'A'], ['hwio_points', 'HWIO points', 'int', 'Hardwired points one unit gives.'], ['di_inputs', 'Digital inputs', 'int'],
       ['alarm_on_branch_mcb', 'Alarm on the branch MCB', 'bool'], ['excluded_from_power', 'Leave out of the power total', 'bool']]],
-    ports: ['Ports and mounting', [['height_u', 'Height', 'int', '0 for a DIN-rail part; empty if not known yet.', 0, 'U'], ['cores', 'Fibre cores', 'int', 'For patch panels.']]]
+    ports: ['Ports and mounting', [['height_u', 'Height', 'int', '0 for a DIN-rail part; empty if not known yet.', 0, 'U'], ['cores', 'Fibre cores', 'int', 'For patch panels.']]],
+    parts: ['Parts it brings', []]
+  };
+  /* List fields are edited as a whole list: [title, tab, columns [key, label, kind], a new row]. Kinds: int, choice, part, qty, mono, text. */
+  const LISTS = {
+    ports: ['Port groups', 'ports', [['count', 'Count', 'int'], ['speed', 'Speed', 'choice'], ['media', 'Media', 'choice'], ['kind', 'Kind', 'choice'], ['usable_for', 'Used for', 'choice']], { count: 1, speed: '100M', media: 'RJ45', kind: 'fixed', usable_for: 'any' }],
+    children: ['Child parts', 'parts', [['part_id', 'Part', 'part'], ['qty', 'Qty', 'qty']], { part_id: '', qty: 1 }],
+    terminals: ['Terminals', 'parts', [['strip', 'Strip', 'mono'], ['block', 'Block', 'mono'], ['count', 'Count', 'int'], ['per', 'Per', 'choice']], { strip: 'X1', block: '', count: 1, per: 'unit' }],
+    loose_items: ['Loose items', 'parts', [['part_id', 'Part', 'part'], ['qty', 'Qty', 'qty'], ['tag', 'Tag', 'text']], { part_id: '', qty: 1 }]
   };
   const FIELDS = Object.values(TABS).flatMap(([, f]) => f);
   const kindOf = (key) => (FIELDS.find((f) => f[0] === key) || [])[2];
-  const labelOf = (key) => (FIELDS.find((f) => f[0] === key) || [key, key])[1];
+  const labelOf = (key) => (LISTS[key] ? LISTS[key][0] : (FIELDS.find((f) => f[0] === key) || [key, key])[1]);
   const withUnit = (key, v) => { const u = (FIELDS.find((f) => f[0] === key) || [])[5]; return v ? (u ? `${v} ${u}` : v) : 'empty'; };
 
   function loadDevice(id) {
-    Object.assign(ED, { key: id, state: 'loading', reply: null, error: null, draft: {}, errors: {}, refusal: '' });
+    Object.assign(ED, { key: id, state: 'loading', reply: null, error: null, draft: {}, errors: {}, refusal: '', users: null });
+    if (S.project && S.project.real && S.sub) {  /* who uses it in the open substation: the In use banner and the delete warning */
+      Bridge.call('library_part_users', id, S.project.file, S.sub).then((u) => { if (ED.key === id) { ED.users = u; App.render(); } }).catch(() => {});
+    }
     Bridge.call('library_device', id).then((r) => { if (ED.key === id) ED.reply = r; }).catch((e) => { if (ED.key === id) ED.error = e; })
       .then(() => { if (ED.key === id) { ED.state = 'loaded'; App.render(); } });
   }
@@ -128,15 +139,66 @@
     if (!ED.reply) return `<div class="page">${pageHead('Device not found', esc(ED.error ? ED.error.message : ''), '<a class="btn btn--secondary" href="#/library">Back to the library</a>', crumbs)}</div>`;
     const d = ED.reply.device, t = TABS[S.tab.devEdit] ? S.tab.devEdit : 'identity';
     const fields = TABS[t][1], spans = (f) => (f[4] === 2 ? `<div class="span-2">${control(f)}</div>` : control(f));
-    const ports = t === 'ports' ? `<h3 style="margin-top:var(--space-5)">Port groups</h3>${d.ports.length ? `<div class="table-wrap" style="max-width:760px;margin-top:var(--space-2)"><table class="table"><thead><tr><th class="num">Count</th><th>Speed</th><th>Media</th><th>Kind</th><th>Used for</th></tr></thead><tbody>
-      ${d.ports.map((g) => `<tr><td class="num">${esc(g.count)}</td><td>${esc(g.speed || '—')}</td><td>${esc(g.media || '—')}</td><td>${esc(g.kind || '—')}</td><td>${esc(g.usable_for || '—')}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted small" style="margin-top:var(--space-2)">No port groups.</p>'}
-      <p class="muted small" style="margin-top:var(--space-2)">Port groups can't be edited here yet.</p>` : '';
+    const lists = Object.entries(LISTS).filter(([, l]) => l[1] === t).map(([key]) => listTable(key)).join('');
+    const lede = t === 'parts' ? '<p class="muted small" style="max-width:68ch;margin-bottom:var(--space-3)">Parts that come with each unit of this device. They appear as extra rows in the BOM.</p>' : '';
     const pend = ED.reply.pending_fields.length && ED.reply.saved ? `<div style="margin-bottom:var(--space-4)">${banner('info', `<b>This device has pending changes</b> (${ED.reply.pending_fields.map(esc).join(', ')}). The fields show them; the library keeps the saved values until you apply.`)}</div>` : '';
+    const inUse = usesText();
+    const used = inUse ? `<div style="margin-bottom:var(--space-4)">${banner('info', `<b>This device is in use.</b> ${inUse} Projects keep the library version they record, so an edit reaches a project only when it records the version you apply.`)}</div>` : '';
     const notice = ED.refusal ? `<div style="margin-bottom:var(--space-4)">${banner('bad', `<b>Not saved.</b> ${esc(ED.refusal)}`)}</div>` : '';
-    return `<div class="page">${pageHead(esc(d.part_id), esc([d.make, d.model].filter(Boolean).join(' ')), '', crumbs)}${notice}${pend}
+    const isNew = !ED.reply.saved;
+    return `<div class="page">${pageHead(esc(d.part_id), esc([d.make, d.model, isNew ? 'new device, not applied yet' : ''].filter(Boolean).join(' · ')), `<button class="btn btn--danger" data-action="delete-device" data-id="${esc(d.part_id)}">${icon('trash')}Delete…</button>`, crumbs)}${notice}${used}${pend}
       ${tabs('devEdit', Object.entries(TABS).map(([k, [label]]) => [k, label]), t, 'Device sections')}
-      <div role="tabpanel" aria-labelledby="tab-devEdit-${t}" style="margin-top:var(--space-4)"><div class="form ${t === 'identity' ? 'form--2' : 'form--3'}">${fields.map(spans).join('')}</div>${ports}</div>${saveBar()}</div>`;
+      <div role="tabpanel" aria-labelledby="tab-devEdit-${t}" style="margin-top:var(--space-4)">${t === 'parts' ? `<datalist id="dl-parts">${(ED.reply.part_ids || []).map((p) => `<option value="${esc(p)}">`).join('')}</datalist>` : ''}${lede}${fields.length ? `<div class="form ${t === 'identity' ? 'form--2' : 'form--3'}">${fields.map(spans).join('')}</div>` : ''}${lists}</div>${saveBar()}</div>`;
   }
+  /* "GIS Substation uses it in 2 rows: the equipment row rtac (Network) and a row on panel psa3 (Panels)." Library rows that bring it are named apart. */
+  function usesText() {
+    const u = ED.users;
+    if (!u || !u.uses || !u.uses.length) return '';
+    const rows = u.uses.filter((x) => x.where !== 'library'), lib = u.uses.filter((x) => x.where === 'library');
+    const m = (s) => `<span class="mono">${esc(s)}</span>`;
+    const panels = {};
+    rows.filter((x) => x.where === 'panel').forEach((x) => { panels[x.panel] = (panels[x.panel] || 0) + 1; });
+    const parts = [
+      ...rows.filter((x) => x.where === 'equipment').map((x) => `the equipment row ${m(x.name)} (Network)`),
+      ...Object.entries(panels).map(([p, n]) => `${n === 1 ? 'a row' : `${n} rows`} on panel ${m(p)} (Panels)`),
+      ...rows.filter((x) => x.where === 'loose material').map((x) => `the loose material row ${m(x.name)} (Loose material)`),
+    ];
+    const and = (xs) => xs.length > 1 ? `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}` : xs.join('');
+    return [rows.length ? `${esc(u.substation)} uses it in ${plural(rows.length, 'row')}: ${and(parts)}.` : '',
+      lib.length ? `In the library it comes with ${and(lib.map((x) => m(x.name)))}.` : ''].filter(Boolean).join(' ');
+  }
+  function listTable(key) {
+    const [title, , cols] = LISTS[key], rows = value(key) || [], err = ED.errors[key], changed = key in ED.draft;
+    const choices = ED.reply.choices || {};
+    const cell = (i, [col, label, kind]) => {
+      const id = `dl-${key}-${i}-${col}`, v = rows[i][col];
+      const ctl = kind === 'choice' ? select(id, [...(col === 'media' ? [['', '—']] : []), ...(choices[col] || []).map((c) => [c, c])], v == null ? '' : String(v), { cls: 'ctl' })
+        : input(id, v == null ? '' : String(v), { mono: kind !== 'text', num: kind === 'int' || kind === 'qty' }).replace('class="input', 'class="ctl input').replace('<input', `<input aria-label="${esc(label)}, row ${i + 1}"${kind === 'part' ? ' list="dl-parts"' : ''}`);
+      return `<td>${ctl}</td>`;
+    };
+    const body = rows.length ? rows.map((r, i) => `<tr>${cols.map((c) => cell(i, c)).join('')}<td><button class="btn btn--ghost btn--icon btn--sm" data-action="dl-remove" data-key="${key}" data-i="${i}" aria-label="Remove ${esc(title.toLowerCase())} row ${i + 1}">${icon('trash')}</button></td></tr>`).join('')
+      : `<tr class="empty-row"><td colspan="${cols.length + 1}" class="muted">None. Add one if each unit brings it.</td></tr>`;
+    return `<section class="section${changed ? ' changed' : ''}" style="padding-top:var(--space-3)"><div class="row" style="justify-content:space-between;max-width:760px"><h3>${esc(title)}${changed ? ` ${badge('warn', 'Changed')}` : ''}</h3><button class="btn btn--ghost btn--sm" data-action="dl-add" data-key="${key}">${icon('plus')}Add</button></div>
+      <div class="table-wrap" style="max-width:760px;margin-top:6px"><table class="table"><thead><tr>${cols.map(([, label]) => `<th>${esc(label)}</th>`).join('')}<th style="width:40px"><span class="sr-only">Actions</span></th></tr></thead><tbody>${body}</tbody></table></div>
+      ${err ? `<span class="err" style="margin-top:6px" id="dl-${key}-err">${icon('error')}<span>${esc(err)}</span></span>` : ''}</section>`;
+  }
+  /* A list edit replaces the whole list; the model checks it, and setting it back to the saved list drops the change. */
+  function setList(key, rows) {
+    const saved = ED.reply.device[key] || [];
+    if (JSON.stringify(rows) === JSON.stringify(saved)) { delete ED.draft[key]; delete ED.errors[key]; queueMicrotask(App.render); return; }
+    ED.draft[key] = rows; delete ED.errors[key]; queueMicrotask(App.render);
+    const id = ED.key;
+    Bridge.call('check_library_field', id, key, rows).then((msg) => {
+      if (ED.key !== id || ED.draft[key] !== rows) return;
+      if (msg) ED.errors[key] = msg; else delete ED.errors[key];
+      App.render();
+    }).catch(() => {});
+  }
+  const listCopy = (key) => (value(key) || []).map((r) => ({ ...r }));
+  ACTIONS['dl-add'] = (el) => { const key = el.dataset.key, rows = listCopy(key); rows.push({ ...LISTS[key][3] }); setList(key, rows); };
+  ACTIONS['dl-remove'] = (el) => { const key = el.dataset.key, rows = listCopy(key); rows.splice(+el.dataset.i, 1); setList(key, rows); };
+  const cellValue = (kind, raw) => { const t = String(raw).trim(); if (kind === 'int' || kind === 'qty') return /^\d+$/.test(t) ? Number(t) : t || null; return t || null; };
+
   function saveBar() {
     if (!dirty() && !ED.saving) return '';
     const bad = invalid();
@@ -149,6 +211,13 @@
 
   /* A field is checked by the model as it is left; the draft holds only what differs from the saved device. */
   document.addEventListener('change', (e) => {
+    const c = /^dl-(\w+?)-(\d+)-(\w+)$/.exec(e.target.id || '');
+    if (c && ED.reply && LISTS[c[1]]) {
+      const [, key, i, col] = c, rows = listCopy(key), kind = LISTS[key][2].find((x) => x[0] === col)[2];
+      const v = cellValue(kind, e.target.value);
+      rows[+i][col] = v;
+      setList(key, rows); return;
+    }
     const m = /^de-(\w+)$/.exec(e.target.id || '');
     if (!m || !ED.reply || App.route().b !== 'device') return;
     const key = m[1], kind = kindOf(key);
@@ -186,6 +255,38 @@
       ACTIONS['de-save']();
     }
   });
+
+  /* ---------- Add device and Delete: records, so they go to the pending set at once ---------- */
+  ACTIONS['add-device'] = () => {
+    const devs = App.libraryDevices(), cats = (PEND.page && PEND.page.choices.category) || [...new Set(devs.map((d) => d.cat))];
+    dialog({ title: 'Add a device', body: `<div class="stack">
+      ${field('Start from', select('ad-from', [['', 'A blank device'], ...devs.map((d) => [d.id, `A copy of ${d.id}${d.model ? ` (${[d.make, d.model].filter(Boolean).join(' ')})` : ''}`])], ''), 'A copy keeps the electrical data, ports and parts, so you only change what differs.')}
+      <div class="form form--2">${field('Part ID', input('ad-id', '', { mono: true, placeholder: 'e.g. SEL-2730M-EXT-B' }), 'Unique in the library. Fixed once created: projects refer to it.')}${field('Category', select('ad-cat', cats.map((c) => [c, catName(c)]), cats[0]))}
+      ${field('Make', input('ad-make', ''))}${field('Model', input('ad-model', ''))}</div><div id="ad-err"></div></div>`,
+      actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="add-device-do">Create and edit</button>' });
+  };
+  document.addEventListener('change', (e) => {  /* a copy starts with the source's category */
+    if (e.target.id !== 'ad-from' || !e.target.value) return;
+    const d = App.libraryDevices().find((x) => x.id === e.target.value);
+    if (d && $('#ad-cat')) $('#ad-cat').value = d.cat;
+  });
+  ACTIONS['add-device-do'] = () => {
+    const id = $('#ad-id').value.trim();
+    if (!id) { $('#ad-id').setAttribute('aria-invalid', 'true'); $('#ad-id').focus(); return; }
+    Bridge.call('add_library_device', id, $('#ad-cat').value, $('#ad-make').value.trim(), $('#ad-model').value.trim(), $('#ad-from').value || null).then((p) => {
+      PEND.page = p; PEND.state = 'loaded'; closeDialog(); S.tab.devEdit = 'identity'; ED.key = '';
+      toast(`${id} added to pending changes. It joins the library when you apply them.`, 'plus'); go('#/library/device/' + encodeURIComponent(id));
+    }).catch((e) => { $('#ad-err').innerHTML = banner('bad', esc(e.message)); });
+  };
+  ACTIONS['delete-device'] = (el) => dialog({ title: `Delete ${esc(el.dataset.id)}?`, body: `<div class="stack"><p>The device is removed from the library when you apply the pending changes. You can still discard it before then.</p>${usesText() ? banner('bad', `<b>It is still used.</b> ${usesText()} After you apply this change, a project that records the new version reports an error until another part is picked.`) : '<p class="muted small">A project that uses it reports an error once it records the new version, until another part is picked.</p>'}<div id="dd-err"></div></div>`,
+    actions: `<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--danger" data-action="delete-device-do" data-id="${esc(el.dataset.id)}">${icon('trash')}Delete device</button>` });
+  ACTIONS['delete-device-do'] = (el) => {
+    const id = el.dataset.id;
+    Bridge.call('add_library_edits', [{ op: 'remove', path: ['devices', id] }]).then((p) => {
+      PEND.page = p; PEND.state = 'loaded'; closeDialog(); ED.draft = {}; ED.errors = {}; ED.key = ''; go('#/library');
+      toast(`${id} will be removed when you apply the changes`, 'trash');
+    }).catch((e) => { $('#dd-err').innerHTML = banner('bad', esc(e.message)); });
+  };
 
   /* Leaving the editor with unsaved changes asks first. */
   let here = location.hash;

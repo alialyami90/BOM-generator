@@ -22,7 +22,17 @@ from bomgen.library_store.errors import LibraryPackageError, RefusalKind
 from bomgen.library_store.local import next_local_version, save_edits
 from bomgen.library_store.store import LibraryStore
 from bomgen.library_store.versions import Version
-from bomgen.models.library import Category, Library, LoadType, PurdueLevel, SupplyType
+from bomgen.models.library import (
+    Category,
+    Library,
+    LoadType,
+    Media,
+    PortKind,
+    PortSpeed,
+    PortUse,
+    PurdueLevel,
+    SupplyType,
+)
 
 PENDING_DIR = "library-pending"
 # The values the model takes for the editor's choice fields, so the page never lists its own.
@@ -31,7 +41,14 @@ CHOICES = {
     "supply_type": [c.value for c in SupplyType],
     "load_type": [c.value for c in LoadType],
     "purdue_level": [c.value for c in PurdueLevel],
+    "speed": [c.value for c in PortSpeed],
+    "media": [c.value for c in Media],
+    "kind": [c.value for c in PortKind],
+    "usable_for": [c.value for c in PortUse],
+    "per": ["unit", "serial_port"],
 }
+# What a copy leaves behind: it is a new part, not a member of the source's alternative group.
+_NOT_COPIED = ("alt_group", "tier")
 _MISSING = object()
 
 
@@ -138,6 +155,7 @@ class LibraryEditor:
             if base
             else None,
             "problem": problem,
+            "choices": CHOICES,
         }
 
     def device(self, part_id: str) -> dict[str, Any]:
@@ -148,7 +166,8 @@ class LibraryEditor:
                 pending.problem or "no library is active", RefusalKind.NOT_INSTALLED
             )
         saved = next((d for d in self._library(pending.base).devices if d.part_id == part_id), None)
-        edited = next((d for d in self._edited(pending).devices if d.part_id == part_id), None)
+        library = self._edited(pending)
+        edited = next((d for d in library.devices if d.part_id == part_id), None)
         if edited is None:
             raise KeyError(part_id)
         now = edited.model_dump(mode="json")
@@ -159,6 +178,7 @@ class LibraryEditor:
             "pending_fields": [k for k, v in now.items() if was is None or was.get(k) != v],
             "used_by": [],
             "choices": CHOICES,
+            "part_ids": sorted(d.part_id for d in library.devices),
         }
 
     def check(self, part_id: str, key: str, value: object) -> str | None:
@@ -188,6 +208,30 @@ class LibraryEditor:
         else:
             self.pending.clear(self.name)
         return self.page()
+
+    def add_device(
+        self, part_id: str, category: str, make: str, model: str, copy_of: str | None
+    ) -> dict[str, Any]:
+        """Add a device to the pending set: blank, or a copy of `copy_of` under a new identity."""
+        pending = self._current()
+        if pending.base is None or pending.problem:
+            raise LibraryPackageError(
+                pending.problem or "no library is active", RefusalKind.NOT_INSTALLED
+            )
+        body: dict[str, Any] = {}
+        edited = self._edited(pending)
+        if copy_of:
+            source = next((d for d in edited.devices if d.part_id == copy_of), None)
+            if source is None:
+                raise KeyError(copy_of)
+            body = source.model_dump(mode="json", exclude_none=True, exclude=set(_NOT_COPIED))
+        name = " ".join(filter(None, (make.strip(), model.strip()))) or part_id
+        body.update(part_id=part_id, category=category, make=make or None, model=model or None)
+        body.setdefault("description_template", name)
+        body = {k: v for k, v in body.items() if v is not None}
+        if any(d.part_id == part_id for d in edited.devices):
+            raise EditRefusedError(f"devices: {part_id} is already in the library")
+        return self.add([{"op": "insert", "path": ["devices"], "value": body}])
 
     def discard(self) -> dict[str, Any]:
         """Drop the set; the edits come back so the page can offer Undo."""
@@ -223,6 +267,18 @@ def merge(
     merged = list(edits)
     for edit in new:
         path = tuple(edit["path"])
+        if edit["op"] == "remove" and len(path) == 2 and path[0] == "devices":
+            added = [
+                e
+                for e in merged
+                if e["op"] == "insert"
+                and tuple(e["path"]) == ("devices",)
+                and isinstance(e.get("value"), dict)
+                and e["value"].get("part_id") == path[1]
+            ]
+            if added:
+                merged = [e for e in merged if e not in added and tuple(e["path"][:2]) != path]
+                continue
         if edit["op"] == "insert":
             merged.append(edit)
             continue
@@ -269,4 +325,15 @@ def _text(value: object) -> str:
         return str(int(value))
     if isinstance(value, str | int | float):
         return str(value)
+    if isinstance(value, list) and all(isinstance(item, dict) for item in value):
+        return "; ".join(_item_text(item) for item in value)
     return json.dumps(value, ensure_ascii=False)
+
+
+def _item_text(item: dict[str, Any]) -> str:
+    """A list item as words: a count or quantity leads ("4 x 1G sfp_slot any")."""
+    lead = item.get("count", item.get("qty"))
+    rest = " ".join(
+        _text(v) for k, v in item.items() if k not in ("count", "qty") and v not in (None, "")
+    )
+    return f"{_text(lead)} x {rest}" if lead is not None else rest

@@ -45,12 +45,14 @@ from bomgen.app.projects import RecentProjects, project_files, summarize
 from bomgen.app.substations import (
     ProjectInvalidError,
     SubstationNotFoundError,
+    resolve,
     substation_page,
 )
 from bomgen.bundle.errors import LibraryPackageError, RefusalKind
 from bomgen.io import edit, loose_edit
 from bomgen.io.edit import EditError, EditResult
 from bomgen.io.errors import InputError
+from bomgen.io.fields import PartUse, part_users
 from bomgen.io.loader import PROJECT_FILE, load_library
 from bomgen.library_store.device_db import DeviceRecord, load_device_records
 from bomgen.library_store.manifest import Manifest
@@ -398,6 +400,43 @@ class Api:
             return self._editor().add(edits)
         except (EditRefusedError, ValidationError) as exc:
             raise AppError("invalid_edit", f"The library cannot take this change: {exc}") from exc
+
+    @endpoint
+    def add_library_device(
+        self, part_id: str, category: str, make: str, model: str, copy_of: str | None = None
+    ) -> dict[str, Any]:
+        """Add a new device to the pending set, blank or as a copy of another part."""
+        try:
+            return self._editor().add_device(part_id, category, make, model, copy_of)
+        except KeyError as exc:
+            raise AppError("not_found", f"There is no part {copy_of} in the library.") from exc
+        except (EditRefusedError, ValidationError) as exc:
+            raise AppError("invalid_edit", f"The library cannot take this change: {exc}") from exc
+
+    @endpoint
+    def library_part_users(
+        self, part_id: str, project_file: str, substation_id: str
+    ) -> dict[str, Any]:
+        """The rows of the open substation, and of its library, that use ``part_id``; ``uses`` is
+        None when the substation cannot be read (its problems are on Checks)."""
+        with self._substation(substation_id):
+            found = resolve(Path(project_file), substation_id, self._library_store())
+        if found.loaded is None:
+            return {"substation": substation_id, "uses": None}
+        uses = part_users(found.loaded, part_id)
+        panels = {file: panel for panel, file in found.loaded.panel_files.items()}
+
+        def use(u: PartUse) -> dict[str, Any]:
+            if u.where != "panel":
+                return {"where": u.where, "name": u.name, "panel": None}
+            panel = panels[u.file] if u.file is not None else None
+            # part_users names a panel row "<panel>: <tag>"
+            return {"where": u.where, "name": u.name.split(": ", 1)[-1], "panel": panel}
+
+        return {
+            "substation": found.loaded.substation.substation.name or substation_id,
+            "uses": [use(u) for u in uses],
+        }
 
     @endpoint
     def discard_library_edits(self) -> dict[str, Any]:

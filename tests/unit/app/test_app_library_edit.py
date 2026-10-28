@@ -6,6 +6,7 @@ the bridge replies.
 """
 
 import json
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -223,3 +224,102 @@ def test_library_device_lists_the_models_choices(app: api.Api) -> None:
     assert choices["supply_type"] == ["VDC", "VAC"]
     assert "CONTINUOUS" in choices["load_type"]
     assert "L2" in choices["purdue_level"]
+
+
+# -- lists, new devices and deletes (PR a2) ---------------------------------------------------
+
+
+def test_removing_a_device_added_in_the_set_drops_its_insert_and_its_edits() -> None:
+    insert = {"op": "insert", "path": ["devices"], "value": {"part_id": "NEW-1"}}
+    edit = power("NEW-1", 5)
+    remove = {"op": "remove", "path": ["devices", "NEW-1"]}
+    assert merge([insert, edit, power(PART, 80)], [remove], base={}) == [power(PART, 80)]
+
+
+def test_describe_shows_a_changed_list_as_readable_text() -> None:
+    library = load_library(EXAMPLES / "library.yaml")
+    data = library.model_dump(mode="json")
+    device = next(d for d in data["devices"] if d["part_id"] == "RST2228-L2")
+    device["ports"] = [{"count": 4, "speed": "1G", "media": None, "kind": "sfp_slot"}]
+    entry = next(
+        e for e in describe(library, type(library).model_validate(data)) if e["field"] == "ports"
+    )
+    assert entry["to"] == "4 x 1G sfp_slot any"
+    assert "{" not in entry["from"]
+
+
+def test_library_device_lists_the_part_ids_and_the_list_choices(app: api.Api) -> None:
+    reply = ok(app.library_device(PART))
+    assert PART in reply["part_ids"]
+    assert reply["choices"]["speed"] == ["10M", "100M", "1G", "10G"]
+    assert reply["choices"]["per"] == ["unit", "serial_port"]
+    assert "sfp_slot" in reply["choices"]["kind"]
+
+
+def test_a_whole_port_list_is_set_and_checked(app: api.Api) -> None:
+    ports = [{"count": 8, "speed": "1G", "kind": "sfp_slot", "usable_for": "uplink"}]
+    edit = {"op": "set", "path": ["devices", "RST2228-L2", "ports"], "value": ports}
+    assert ok(app.check_library_field("RST2228-L2", "ports", ports)) is None
+    ok(app.add_library_edits([edit]))
+    assert ok(app.library_device("RST2228-L2"))["device"]["ports"][0]["count"] == 8
+    bad = [{"count": 0, "speed": "1G", "kind": "sfp_slot"}]
+    assert ok(app.check_library_field("RST2228-L2", "ports", bad))
+
+
+def test_a_new_device_copies_the_electrical_data_ports_and_parts(app: api.Api) -> None:
+    page = ok(app.add_library_device("SEL-3555-RTAC-B", "rtac", "SEL", "SEL-3555 B", PART))
+    assert [(e["label"], e["kind"]) for e in page["entries"]] == [("SEL-3555-RTAC-B", "added")]
+    new = ok(app.library_device("SEL-3555-RTAC-B"))
+    source = ok(app.library_device(PART))["device"]
+    assert new["saved"] is None
+    assert new["device"]["unit_power_w"] == source["unit_power_w"]
+    assert new["device"]["ports"] == source["ports"]
+    assert new["device"]["model"] == "SEL-3555 B"
+    assert new["device"]["alt_group"] is None
+
+
+def test_a_blank_device_needs_only_its_identity(app: api.Api) -> None:
+    ok(app.add_library_device("SITE-CABLE", "component", "Local", "Cable", None))
+    device = ok(app.library_device("SITE-CABLE"))["device"]
+    assert device["description_template"] == "Local Cable"
+    assert device["excluded_from_power"] is True
+
+
+def test_a_new_device_with_a_part_id_in_use_is_refused(app: api.Api) -> None:
+    error = refused(app.add_library_device(PART, "rtac", "SEL", "x", None))
+    assert error["kind"] == "invalid_edit"
+    assert ok(app.library_pending())["count"] == 0
+
+
+def test_a_deleted_device_is_listed_as_removed(app: api.Api) -> None:
+    ok(app.add_library_edits([{"op": "remove", "path": ["devices", "SEL-2488"]}]))
+    entries = ok(app.library_pending())["entries"]
+    assert ("SEL-2488", "removed") in {(e["label"], e["kind"]) for e in entries}
+
+
+# -- who uses a part (the In use banner and the delete warning) --------------------------------
+
+
+def test_part_users_lists_the_open_substations_rows(app: api.Api, tmp_path: Path) -> None:
+    project = Path(shutil.copytree(EXAMPLES, tmp_path / "workspace" / "jfgp2-pkg3"))
+    reply = ok(app.library_part_users(PART, str(project / "project.yaml"), "gis01"))
+    assert reply["substation"]
+    wheres = {u["where"] for u in reply["uses"]}
+    assert "equipment" in wheres
+    assert all(set(u) == {"where", "name", "panel"} for u in reply["uses"])
+
+
+def test_a_panel_row_names_its_panel_apart(app: api.Api, tmp_path: Path) -> None:
+    project = Path(shutil.copytree(EXAMPLES, tmp_path / "workspace" / "jfgp2-pkg3"))
+    uses = ok(app.library_part_users(PART, str(project / "project.yaml"), "gis01"))["uses"]
+    panel = next(u for u in uses if u["where"] == "panel")
+    assert panel["panel"] == "psa3"
+    assert ":" not in panel["name"]
+    assert all(u["panel"] is None for u in uses if u["where"] != "panel")
+
+
+def test_an_unused_part_has_no_users(app: api.Api, tmp_path: Path) -> None:
+    project = Path(shutil.copytree(EXAMPLES, tmp_path / "workspace" / "jfgp2-pkg3"))
+    assert (
+        ok(app.library_part_users("NOPE-1", str(project / "project.yaml"), "gis01"))["uses"] == []
+    )
