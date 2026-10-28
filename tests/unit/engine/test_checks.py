@@ -6,6 +6,7 @@ import pytest
 from engine_factories import device, library, panel, powered, switch
 
 from bomgen.checks import (
+    branch_mcb_checks,
     dc_main_checks,
     di_capacity_check,
     library_check,
@@ -18,6 +19,7 @@ from bomgen.engine.units import expand_devices
 from bomgen.library_store.store import LibraryRef
 from bomgen.models.bom import BomLine, Group, PanelBom
 from bomgen.models.calc import (
+    BranchMcb,
     CabinetThermal,
     DcMains,
     ForcedVentCheck,
@@ -122,6 +124,51 @@ def test_main_by_the_rule_passes_and_panels_without_dc_are_skipped() -> None:
         DcMains(panel_id="q", design_current_a=0, rating_a=0, rule_rating_a=0),
     ]
     assert [item.status for item in dc_main_checks(mains)] == [CheckStatus.PASS]
+
+
+def branch(rating: int, set_by: tuple[str, ...], **fields: object) -> BranchMcb:
+    values: dict[str, object] = {
+        "panel_id": "p",
+        "tag": "PSA1-Q1.1",
+        "load": "L2_ESW_A01 PS1",
+        "rating_a": rating,
+        "running_a": 0.8,
+        "floor_a": 2,
+        "set_by": set_by,
+    }
+    return BranchMcb.model_validate(values | fields)
+
+
+def test_each_branch_mcb_reports_the_numbers_behind_it() -> None:
+    (item,) = branch_mcb_checks(
+        [branch(6, ("inrush",), inrush_a=12, trip_multiple=5, inrush_need_a=2.4)]
+    )
+    assert (item.check, item.status, item.subject) == ("branch_mcb", CheckStatus.PASS, "PSA1-Q1.1")
+    assert item.message == (
+        "6 A for L2_ESW_A01 PS1: running 0.80 A, inrush 12 A / 5 = 2.40 A, floor 2 A; set by inrush"
+    )
+    assert item.values == {
+        "rating_a": 6,
+        "running_a": 0.8,
+        "inrush_a": 12,
+        "trip_multiple": 5,
+        "inrush_need_a": 2.4,
+        "floor_a": 2,
+        "set_by": "inrush",
+    }
+
+
+def test_a_higher_library_min_branch_mcb_a_is_a_warning() -> None:
+    (item,) = branch_mcb_checks([branch(2, ("floor",), library_min_a=6)])
+    assert item.status is CheckStatus.WARN
+    assert "min_branch_mcb_a 6 A is no longer used (plan Q35)" in item.message
+    assert "inrush" not in item.message  # no inrush figure: condition (b) does not apply
+
+
+def test_inrush_the_catalogue_cannot_check_is_a_warning() -> None:
+    (item,) = branch_mcb_checks([branch(2, ("floor",), inrush_a=12)])
+    assert item.status is CheckStatus.WARN
+    assert "inrush 12 A, but the MCB catalogue has no trip curve" in item.message
 
 
 def thermal(

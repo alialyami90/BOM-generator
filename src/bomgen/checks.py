@@ -1,7 +1,8 @@
 """Step 15: the check report on a built substation (spec: Data model and generation
 order, step 15; plan M7, Q3).
 
-Checks SFPs against the hosts' slots, DC mains against ΣQ, fans and natural
+Checks SFPs against the hosts' slots, DC mains against ΣQ, each branch MCB's sizing
+(plan Q35), fans and natural
 convection against the heat, DI capacity against the HWIO total, and the library
 version a project recorded. The CLI
 renders the report as text or JSON and exits non-zero when a check fails.
@@ -16,7 +17,7 @@ from bomgen.engine.units import DeviceRow, expand_devices
 from bomgen.io.loader import LoadedSubstation
 from bomgen.library_store.store import LibraryRef, library_mismatch
 from bomgen.models.bom import BuildResult, PanelBom, QtySum
-from bomgen.models.calc import DcMains, HeatResult
+from bomgen.models.calc import BranchMcb, DcMains, HeatResult
 from bomgen.models.library import Library, Media, PortKind, PortSpeed
 from bomgen.models.panel import Panel, Ventilation
 from bomgen.models.report import CheckItem, CheckReport, CheckStatus
@@ -30,6 +31,7 @@ def check_report(loaded: LoadedSubstation, result: BuildResult) -> CheckReport:
     for panel in loaded.panels:
         items += sfp_slot_checks(panel, expand_devices(panel, loaded.library))
     items += dc_main_checks(result.mains)
+    items += branch_mcb_checks(result.branch_mcbs)
     if result.heat is not None:
         items += ventilation_checks(result.heat)
     di = di_capacity_check(result.panels, loaded.library)
@@ -127,6 +129,57 @@ def dc_main_checks(mains: Iterable[DcMains]) -> list[CheckItem]:
                     "rating_a": main.rating_a,
                     "rule_rating_a": main.rule_rating_a,
                 },
+            )
+        )
+    return items
+
+
+def branch_mcb_checks(branches: Iterable[BranchMcb]) -> list[CheckItem]:
+    """Each branch MCB with the needs behind its rating (plan Q35, ADR 0019); a warning
+    when the inrush could not be checked or the library's old floor asks for more."""
+    items = []
+    for branch in branches:
+        status = CheckStatus.PASS
+        needs = [f"running {branch.running_a:.2f} A"]
+        if branch.inrush_a is not None:
+            if branch.trip_multiple is None or branch.inrush_need_a is None:
+                status = CheckStatus.WARN
+                needs.append(
+                    f"inrush {branch.inrush_a:g} A, but the MCB catalogue has no trip curve"
+                )
+            else:
+                needs.append(
+                    f"inrush {branch.inrush_a:g} A / {branch.trip_multiple:g} = "
+                    f"{branch.inrush_need_a:.2f} A"
+                )
+        needs.append(f"floor {branch.floor_a} A")
+        message = (
+            f"{branch.rating_a} A for {branch.load}: {', '.join(needs)}; "
+            f"set by {', '.join(branch.set_by)}"
+        )
+        if branch.library_min_a is not None and branch.library_min_a > branch.rating_a:
+            status = CheckStatus.WARN
+            message += (
+                f"; the library's min_branch_mcb_a {branch.library_min_a} A is no longer "
+                "used (plan Q35)"
+            )
+        values: dict[str, int | float | str] = {
+            "rating_a": branch.rating_a,
+            "running_a": round(branch.running_a, 3),
+        }
+        for key in ("inrush_a", "trip_multiple", "inrush_need_a"):
+            value = getattr(branch, key)
+            if value is not None:
+                values[key] = round(value, 3)
+        values |= {"floor_a": branch.floor_a, "set_by": ",".join(branch.set_by)}
+        items.append(
+            CheckItem(
+                check="branch_mcb",
+                status=status,
+                panel_id=branch.panel_id,
+                subject=branch.tag,
+                message=message,
+                values=values,
             )
         )
     return items
