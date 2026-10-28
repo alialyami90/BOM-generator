@@ -27,23 +27,32 @@ Done:
 - M3: BOM groups E–H (AC and DC distribution, terminal strips, grounding),
   HWIO, assembly with separators and revision marks; the engine now builds
   every BOM group of the example cabinets.
-- M6: sheet models and the XlsxWriter workbook writer.
+- M4: power and heat. Power Consumption lines and blocks per cabinet plus the
+  external equipment, heat dissipation, forced-ventilation airflow, the
+  natural-convection rise and the line-up check; a panel with ventilation
+  `auto` gets filters or fans from the heat check (plan Q4).
+- M5: sheet models filled from the engine. One BOM sheet per cabinet and the
+  Power Consumption, Heat Dissipation and Heat Calculations sheets, with live
+  formulas that a golden test recalculates to the spec's totals.
+- M6: the XlsxWriter workbook writer.
 - M8 and M8b: device-library update packages (`bomgen library …`) and project
   sharing and backup as `.bomproj` files (`bomgen project …`).
 - M9: UI design and clickable prototype in [`docs/ui/`](docs/ui/README.md),
   reworked for projects, substations and the panels board.
-- M10a: the desktop app shell, a pywebview window showing the approved UI
-  through a Python bridge (ADR 0015); its screens still show the prototype's
-  example data.
+- M10a and the Library part of M10b: the desktop app shell, a pywebview window
+  showing the approved UI through a Python bridge (ADR 0015). The Library
+  screens browse the installed library with its device-database records,
+  review and run a `.bomlib` import, and switch versions; the other screens
+  still show the prototype's example data.
 - M11, built early (ADR 0009): the Windows installer and tag-driven releases.
   The installed app opens the desktop window, double-clicking a `.bomlib`
   imports it, and a `.bomproj` opens the app on that project.
 
-Next: M1c (switch sizing and automatic panel layout, `bomgen layout`), M4
-(power and heat), M5 (sheet models filled from the engine)
-and the remaining M10 screens. `bomgen build` arrives with them. Who builds
-what is in [`docs/agents.md`](docs/agents.md); the terms project, substation,
-side and stream are defined in `docs/plan.md` → "Glossary".
+Next: M1c (switch sizing and automatic panel layout, `bomgen layout`), M7
+(check report, revision highlighting and `bomgen build`, which writes the
+workbook) and the remaining M10 screens. Who builds what is in
+[`docs/agents.md`](docs/agents.md); the terms project, substation, side and
+stream are defined in `docs/plan.md` → "Glossary".
 
 To install the Windows app, see [`docs/install.md`](docs/install.md).
 

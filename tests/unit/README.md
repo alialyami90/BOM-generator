@@ -24,7 +24,7 @@ A milestone with several modules may group them in a subfolder,
 | `engine/test_engine_bom_model.py` | M2 | BOM line, quantity, separator and table models (ADR 0014) |
 | `engine/test_engine_tags.py` | M2 | tag naming: range tags, LAN and level tokens, gateway numbering, FOPP tag |
 | `engine/test_engine_kits.py`, `test_engine_network.py`, `test_engine_housekeeping.py` | M2 | groups A–D: enclosure and devices with kit children, network accessories (SFPs, FOPP, cable managers, serial cables), housekeeping kit |
-| `engine/test_engine_pipeline.py` | M2, M3 | `pipeline.build`: groups A–H in two passes and the loose-material table |
+| `engine/test_engine_pipeline.py` | M2–M4 | `pipeline.build`: groups A–H in two passes, the loose-material table, power and heat |
 | `writer/test_sheet_model.py` | M6 | sheet model defaults and the inputs it rejects before writing |
 | `writer/test_xlsx_cells.py`, `test_xlsx_layout.py` | M6 | values, live formulas, styles, merges, column widths, row heights, hidden columns, read back with openpyxl |
 | `writer/test_xlsx_print.py`, `test_xlsx_header_footer.py` | M6 | print setup, sheet view, page header and footer |
@@ -41,6 +41,15 @@ A milestone with several modules may group them in a subfolder,
 | `engine/test_engine_grounding.py` | M3 | group H grounding busbars |
 | `engine/test_engine_assemble.py` | M3 | revision marks per cell (OUT-8) |
 | `library_store/test_library_device_db.py` | M8 | device-database records packed in a `.bomlib`, checked on pack and loaded after import |
+| `engine/test_engine_calc_model.py` | M4 | power and heat formulas: total power, sizing columns N–R, supply label, block margin, BTU |
+| `engine/test_engine_power.py` | M4 | Power Consumption rows: powered rows DC then AC in BOM order, voltages, external block at 125 V, summary |
+| `engine/test_engine_thermal.py` | M4 | required airflow, surface area, natural-convection rise, line-up check, the automatic ventilation choice |
+| `sheets/test_grid.py` | M5 | sheet builder helpers: quoted sheet references, frames, merges |
+| `sheets/test_bom_sheet.py` | M5 | panel BOM sheet: title, header row, SR.NO formula, separators, quantities |
+| `sheets/test_power_sheet.py` | M5 | Power Consumption sheet: layout, references to the BOM sheets, power, sizing and block-total formulas |
+| `sheets/test_heat_sheets.py` | M5 | Heat Dissipation and Heat Calculations sheets: blocks, formulas, notes, frames, print setup |
+| `sheets/test_header_footer.py` | M5 | page header and footer per sheet, logo, calculation-sheet header size |
+| `app/test_app_library_api.py` | M10b | the Library screens' API: browse with device-database records, import review, import, versions |
 
 `builders.py`, `engine/engine_factories.py`, `project_store/project_builders.py`
 and `writer/writer_helpers.py` hold the small builders those tests share.
