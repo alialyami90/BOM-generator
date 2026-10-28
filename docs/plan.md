@@ -207,6 +207,8 @@ loose_material:                        # extras not tied to a device
 equipment:                             # what the layout places (design 3.2)
   - { id: l2, part_id: RST2228-L2, role: l2_switch, redundant: true }       # exactly one
   - { id: l1, part_id: RST2228-L1-24MM, role: l1_switch, redundant: true }  # exactly one; no qty
+  # l1_switch part_id is optional: left out, the tool picks an L1 network_switch
+  # from the library; given, the engineer pinned it (must be L1 network_switch)
   - { id: ext-fw, part_id: FGR-60F, role: firewall, redundant: true, l2_ports: 1 }
   - { id: gps, part_id: SEL-2488, role: other, l2_ports: 1, l2_speed: 100M } # side: none
   # id: unique; overrides and the UI name ids, never tags
@@ -248,7 +250,8 @@ panels name must be one of that substation's register entries. Equipment parts
 must exist and carry `height_u`, and the two switch roles must be
 `network_switch` parts. `rack_u_reserved` must be below `enclosure_u`. A
 library given by name and version comes from the installed store; a missing
-version is a located error.
+version is a located error. Validating one substation loads the whole project
+that lists it, so a sibling substation's errors are reported too.
 
 ### 3.3 `library.yaml` (spec: Inputs → 1. Device library)
 
@@ -782,7 +785,7 @@ cable-manager count from the layout.
 **Q33 — FOPP-96SM rack height.** The datasheet was not found; the device database
 assumed 2U from Hubbell's 48-fibre 1U unit (`data/device-db/`, PR #18).
 *Resolved 2026-10-28:* Ali: 1U. A3 and A2 update the device database and the example
-library.
+library (done in #33: FOPP-96SM `height_u: 1`).
 
 **Q29 — Thermostat load and fan airflow in the library defaults.** The device
 research (`docs/device-db-findings.md`, items 1 and 2) found that the SK 3110.000

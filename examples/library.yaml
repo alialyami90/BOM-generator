@@ -36,7 +36,7 @@ devices:
 
   - part_id: FOPP-96SM  # 'Panel 1' row 4: PSA1-FOPP-CCR-A01
     category: patch_panel
-    height_u: 2  # A3 (PR #18): not confirmed, inferred from Hubbell FEUR48 = 1U per 48 fibres
+    height_u: 1  # Ali (Q33)
     make: Hubbell
     model: FEUR96LCSM
     ordering_code: FEUR96LCSM
@@ -85,6 +85,8 @@ devices:
     ports:  # A3 (PR #18); the workbook gives no port inventory. Slot 6 is blank (G00).
       - { count: 20, speed: 1G, kind: sfp_slot, usable_for: any }  # slots 1-5, 100M/1G
       - { count: 4, speed: 1G, kind: sfp_slot, usable_for: uplink }  # slot 0, SFP+
+      # Slot 0 takes 1/10G SFP+ (A3 records 10G); written 1G because 1G SFPs are fitted
+      # in the example, and M1c matches port groups by speed.
 
   - part_id: RST2228-L1-24MM  # 'Panel 1' row 9: PSA1-L1-ESW-A11 to A16
     # The spec's library example (Inputs the tool needs -> 1. Device library).
@@ -107,6 +109,7 @@ devices:
     ports:
       - { count: 24, speed: 100M, media: MM, kind: fixed, usable_for: ied }
       - { count: 4, speed: 1G, kind: sfp_slot, usable_for: uplink }  # SFP+ (1/10G), 1G fitted
+      # Written 1G, not A3's 10G: 1G SFPs are fitted, and M1c matches groups by speed.
     excluded_from_power: false
 
   - part_id: SEL-2730M-EXT  # 'Panel 1' row 10: PSA1-EXT-ESW-A
@@ -293,6 +296,7 @@ devices:
 
   - part_id: NAP-F23  # 'Aux' row 5: WS-MONITOR
     category: monitor
+    height_u: 0  # on the workstation desk, not in a rack
     make: Ultraview
     model: NAP-F23
     ordering_code: NAP-F23-125VDC
@@ -308,6 +312,7 @@ devices:
 
   - part_id: KEYTEK-KBM  # 'Aux' row 6: Keyboard & Mouse
     category: peripheral
+    height_u: 0  # on the workstation desk, not in a rack
     make: Key-Tek
     model: K-TEK-A420TP-KP-FN-MDT
     ordering_code: K-TEK-A420TP-KP-FN-MDT

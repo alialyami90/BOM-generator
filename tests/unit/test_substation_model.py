@@ -103,6 +103,13 @@ def test_redundant_equipment_cannot_name_a_side() -> None:
     assert Equipment.model_validate(other).side == "b"
 
 
+def test_l1_switch_model_is_picked_by_the_tool_unless_pinned() -> None:
+    picked = Equipment.model_validate({"id": "l1", "role": "l1_switch", "redundant": True})
+    assert picked.part_id is None
+    with pytest.raises(ValidationError, match="part_id is needed for a firewall"):
+        Equipment.model_validate({"id": "fw", "role": "firewall"})
+
+
 def test_l1_switch_count_is_not_an_input() -> None:
     with pytest.raises(ValidationError, match="leave qty out"):
         Equipment.model_validate({"id": "l1", "part_id": "X", "role": "l1_switch", "qty": 2})
@@ -205,31 +212,6 @@ def test_generated_panel_templates_render_valid_values(field: str, bad: str) -> 
     data[field] = bad
     with pytest.raises(ValidationError, match=field):
         GeneratedPanels.model_validate(data)
-
-
-def test_equipment_ids_are_unique() -> None:
-    data = substation_dict()
-    data["equipment"][3]["id"] = "l1"
-    with pytest.raises(ValidationError, match="duplicate equipment id 'l1'"):
-        Substation.model_validate(data)
-
-
-@pytest.mark.parametrize(
-    ("layout", "message"),
-    [
-        ({"overrides": [{"device": "nope", "panel": 2}]}, "equipment id 'nope'"),
-        ({"overrides": [{"pair": "gps", "panel": [1, 2]}]}, "'gps' is not redundant"),
-        ({"removed": [{"device": "ghost"}]}, "equipment id 'ghost'"),
-        ({"overrides": [{"device": "l1", "panel": 2}]}, "name the side"),
-        ({"overrides": [{"device": "gps", "side": "a", "panel": 2}]}, "leave side out"),
-        ({"removed": [{"device": "gps", "side": "b"}]}, "leave side out"),
-    ],
-)
-def test_layout_overrides_name_equipment_ids(layout: dict[str, Any], message: str) -> None:
-    data = substation_dict()
-    data["layout"] = layout
-    with pytest.raises(ValidationError, match=message):
-        Substation.model_validate(data)
 
 
 def test_loose_material_title_defaults_to_the_workbook_text() -> None:

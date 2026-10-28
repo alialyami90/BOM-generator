@@ -19,6 +19,7 @@ from bomgen.io.mirror import mirror_panel
 from bomgen.io.references import (
     document_issues,
     equipment_issues,
+    layout_issues,
     library_issues,
     mirror_issues,
     panel_issues,
@@ -78,10 +79,17 @@ class LoadedProject:
 def load_inputs(
     path: Path, *, store: LibraryStore | None = None
 ) -> LoadedProject | LoadedSubstation:
-    """Load a project file or a substation file; only a project has ``project`` or ``library``."""
+    """Load a project file or a substation file, told apart by their top-level keys."""
     source = read_yaml(path)
-    if isinstance(source.data, dict) and source.data.keys() & {"project", "library"}:
+    keys = set(source.data) if isinstance(source.data, dict) else set()
+    if keys & {"project", "library"}:
         return load_project(path, store=store)
+    if "cabinet_number" in keys:
+        message = "this is a panel file; validate the substation.yaml or project.yaml that lists it"
+        raise InputError([Issue(path, "", message)])
+    if "catalogues" in keys:
+        message = f"this is a library file; validate the {PROJECT_FILE} that uses it"
+        raise InputError([Issue(path, "", message)])
     return load_substation(path, store=store)
 
 
@@ -222,6 +230,7 @@ def _load_substation(
     found.extend(substation_issues(substation, source, resolved, library, library_name))
     found.extend(document_issues(substation, source, panel_sources, register))
     found.extend(equipment_issues(substation, source, library, library_name))
+    found.extend(layout_issues(substation, source))
     found.extend(_generated_panel_issues(substation, source, library))
     for panel_source, entry in panel_sources:
         if entry.generated and panel_source.path.resolve() in manual_files:

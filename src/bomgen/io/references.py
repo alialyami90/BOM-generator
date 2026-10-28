@@ -10,10 +10,17 @@ from collections.abc import Mapping, Sequence
 
 from bomgen.io.errors import Issue, Loc, format_location
 from bomgen.io.yaml_source import YamlSource
-from bomgen.models.library import Category, ChangeOverDiodes, Housekeeping, Library
+from bomgen.models.library import (
+    Category,
+    ChangeOverDiodes,
+    DeviceType,
+    Housekeeping,
+    Library,
+    PurdueLevel,
+)
 from bomgen.models.panel import Panel, PanelMirror
 from bomgen.models.project import Project, RegisterEntry
-from bomgen.models.substation import EquipmentRole, Substation
+from bomgen.models.substation import Equipment, EquipmentRole, PairMove, Substation, UnitRef
 
 
 def _issue(source: YamlSource, loc: Loc, message: str) -> Issue:
@@ -229,6 +236,14 @@ def equipment_issues(
     """Equipment parts exist, have a rack height, and the switch roles are switches."""
     issues: list[Issue] = []
     for index, item in enumerate(substation.equipment):
+        if item.part_id is None:
+            if not any(_is_l1_switch(d) and d.height_u is not None for d in library.devices):
+                message = (
+                    f"no L1 network_switch with height_u in {library_name} for the tool "
+                    "to pick; add one or set part_id"
+                )
+                issues.append(_issue(source, ("equipment", index), message))
+            continue
         loc: Loc = ("equipment", index, "part_id")
         device = library.get(item.part_id)
         if device is None:
@@ -241,4 +256,74 @@ def equipment_issues(
         if item.role in switch_roles and device.category is not Category.NETWORK_SWITCH:
             message = f"an {item.role.value} must be a network_switch part, not {device.category}"
             issues.append(_issue(source, loc, message))
+        elif item.role is EquipmentRole.L1_SWITCH and not _is_l1_switch(device):
+            level = device.purdue_level or "no purdue_level"
+            message = (
+                f"a pinned l1_switch must be an L1 network_switch part ({item.part_id} is {level})"
+            )
+            issues.append(_issue(source, loc, message))
     return issues
+
+
+def layout_issues(substation: Substation, source: YamlSource) -> list[Issue]:
+    """Equipment ids are unique, and layout overrides and removals name them correctly."""
+    issues: list[Issue] = []
+    by_id: dict[str, tuple[int, Equipment]] = {}
+    for index, item in enumerate(substation.equipment):
+        if item.id in by_id:
+            message = (
+                f"duplicate equipment id '{item.id}' (first at equipment[{by_id[item.id][0]}])"
+            )
+            issues.append(_issue(source, ("equipment", index, "id"), message))
+        else:
+            by_id[item.id] = (index, item)
+    entries = {name: item for name, (_index, item) in by_id.items()}
+    for index, move in enumerate(substation.layout.overrides):
+        base: Loc = ("layout", "overrides", index)
+        if isinstance(move, PairMove):
+            entry = entries.get(move.pair)
+            if entry is None:
+                issues.append(_issue(source, (*base, "pair"), f"no equipment id '{move.pair}'"))
+            elif not entry.redundant:
+                message = f"'{move.pair}' is not redundant, so it has no pair"
+                issues.append(_issue(source, (*base, "pair"), message))
+            else:
+                issues.extend(_unit_issues(source, base, entry, move.unit))
+        else:
+            issues.extend(_unit_ref_issues(source, base, entries, move, side_required=True))
+    for index, ref in enumerate(substation.layout.removed):
+        base = ("layout", "removed", index)
+        issues.extend(_unit_ref_issues(source, base, entries, ref, side_required=False))
+    return issues
+
+
+def _unit_ref_issues(
+    source: YamlSource,
+    base: Loc,
+    entries: Mapping[str, Equipment],
+    ref: UnitRef,
+    *,
+    side_required: bool,
+) -> list[Issue]:
+    entry = entries.get(ref.device)
+    if entry is None:
+        return [_issue(source, (*base, "device"), f"no equipment id '{ref.device}'")]
+    if entry.redundant and ref.side is None and side_required:
+        message = f"'{ref.device}' is redundant; name the side (a or b) to move"
+        return [_issue(source, (*base, "side"), message)]
+    if not entry.redundant and ref.side is not None:
+        message = f"'{ref.device}' is not redundant; leave side out"
+        return [_issue(source, (*base, "side"), message)]
+    return _unit_issues(source, base, entry, ref.unit)
+
+
+def _unit_issues(source: YamlSource, base: Loc, entry: Equipment, unit: int | None) -> list[Issue]:
+    # The L1 switch count is computed from the IED count, so its units are not known here.
+    if unit is None or entry.role is EquipmentRole.L1_SWITCH or unit <= entry.qty:
+        return []
+    message = f"'{entry.id}' has qty {entry.qty}; there is no unit {unit}"
+    return [_issue(source, (*base, "unit"), message)]
+
+
+def _is_l1_switch(device: DeviceType) -> bool:
+    return device.category is Category.NETWORK_SWITCH and device.purdue_level is PurdueLevel.L1
