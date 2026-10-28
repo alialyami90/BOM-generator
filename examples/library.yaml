@@ -1,0 +1,606 @@
+# yaml-language-server: $schema=../schemas/library.schema.json
+#
+# Device library and commodity catalogues for the example project, transcribed from
+# the example workbook (hidden master sheets 'Panel 1', 'Panel 2', 'Panel 3', 'Aux';
+# unit watts from 'Power Consumption' column I). Values the workbook does not give
+# carry a trailing "# ASSUMED".
+#
+# Conventions:
+# - ordering_code is set whenever the workbook's ORDERING CODE cell (column G) has a
+#   value, even when it equals MODEL; it is left out where column G is blank.
+# - Descriptions are the workbook's column C text with trailing spaces trimmed;
+#   {lan} replaces the LAN letter and {purpose} the panel-specific phrase.
+# - Numeric codes (2903685, 730076, ...) are quoted so they stay strings.
+#
+# Part ids by BOM group (spec: "How each panel BOM groups its materials"):
+#   B  main equipment   FOPP-96SM (children FOPP-SPOOL, FOPP-SPLICE-HOLDER,
+#                       FOPP-PIGTAIL-LC-SM), RST2228-L2, RST2228-L1-24MM, SEL-2730M-EXT,
+#                       SEL-3555-GW, FGR-60F, SEL-2488, SEL-3555-RTAC,
+#                       SEL-2240 (children SEL-2242, SEL-2241, SEL-2243, SEL-2244-2),
+#                       SEL-3355, NAP-F23, KEYTEK-KBM
+#   C  accessories      SFP-1G-LX-SM, SFP-1G-SX-MM, SFP-100M-FX-MM, FR-TRAN-SX,
+#                       PL1U12NEBK, SEL-C607
+#   D  housekeeping     SZ2500-LAMP, SK3243-FAN, SK3238-FILTER, SK3110-TH,
+#                       IPR-2903685 (children IPR-BASE-2900934, IPR-SUPP-2900944,
+#                       IPR-BRACKET-2900954), COD-NEG-IRND150F12, COD-POS-IRMD150F12,
+#                       SOCKET-730076
+#   loose material      NAP-K55, LPA37-696, ZENON-V12, MS-OFFICE-2021,
+#                       ANN-DISPLAY-CABLE-10M, ANN-USB-CABLE-10M, MON-DVI-CABLE-3M,
+#                       MON-USB-CABLE-3M, FO-PATCH-CORDS; GPS clock loose items
+#                       SEL-9524B, SEL-C961-050, SEL-915900139, SEL-C961-025,
+#                       SEL-915900043
+#   E-H                 catalogues below (MCBs, aux contact, terminal blocks, busbars)
+
+devices:
+  # --- Group B: network cabinets (example workbook, 'Panel 1'!B4:H12) -----------------
+
+  - part_id: FOPP-96SM  # 'Panel 1' row 4: PSA1-FOPP-CCR-A01
+    category: patch_panel
+    make: Hubbell
+    model: FEUR96LCSM
+    ordering_code: FEUR96LCSM
+    description_template: "LC, 96 core SM FOPP for {purpose}"
+    tag_type: FOPP
+    tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
+    cores: 96
+    children:
+      - { part_id: FOPP-SPOOL, qty: 1 }
+      - { part_id: FOPP-SPLICE-HOLDER, qty: 1 }
+      - { part_id: FOPP-PIGTAIL-LC-SM, qty: cores }
+
+  - part_id: FOPP-SPOOL  # 'Panel 1' row 5
+    category: component
+    make: Hubbell
+    description_template: "Fiber Management Spool"
+
+  - part_id: FOPP-SPLICE-HOLDER  # 'Panel 1' row 6
+    category: component
+    make: Hubbell
+    description_template: "Splice Holder"
+
+  - part_id: FOPP-PIGTAIL-LC-SM  # 'Panel 1' row 7 (qty 96 = cores)
+    category: component
+    make: Hubbell
+    model: FPLCS3SM
+    ordering_code: FPLCS3SM
+    description_template: "LC Single Mode pigtails"
+
+  - part_id: RST2228-L2  # 'Panel 1' row 8: PSA1-L2-ESW-A01
+    category: network_switch
+    make: Ruggedcom
+    model: RST-2228
+    ordering_code: "6GK6222-6AB00-5CC0-Z A00+B06+C06+D06+E06+F06+G00"
+    description_template: "LAN-{lan} Industrial Ethernet switch (Level-2)"
+    tag_type: ESW
+    purdue_level: L2
+    supply_type: VDC
+    voltage_v: 125
+    unit_power_w: 77  # 'Power Consumption'!I7
+    load_type: CONTINUOUS
+    power_supplies: 2
+    min_branch_mcb_a: 2
+    hwio_points: 1  # 'Panel 1'!H8
+    # NOTE: the workbook gives no port inventory for this switch; ports are left empty.
+
+  - part_id: RST2228-L1-24MM  # 'Panel 1' row 9: PSA1-L1-ESW-A11 to A16
+    # The spec's library example (Inputs the tool needs -> 1. Device library).
+    category: network_switch
+    make: Ruggedcom
+    model: RST-2228
+    ordering_code: "6GK6222-6AB00-5CC0-Z A05+B05+C05+D05+E05+F05+G05"
+    description_template: "LAN-{lan} Industrial Ethernet switch (Level-1) (24 MM FO Ports)"
+    tag_type: ESW
+    purdue_level: L1
+    supply_type: VDC
+    voltage_v: 125
+    unit_power_w: 77  # 'Power Consumption'!I8
+    load_type: CONTINUOUS
+    power_supplies: 2
+    min_branch_mcb_a: 2
+    alarm_on_branch_mcb: false
+    hwio_points: 1  # the panel row overrides this with 10 ('Panel 1'!H9, plan Q5)
+    ports:
+      - { count: 24, speed: 100M, media: MM, kind: fixed }
+      - { count: 4, speed: 1G, kind: sfp_slot }
+    excluded_from_power: false
+
+  - part_id: SEL-2730M-EXT  # 'Panel 1' row 10: PSA1-EXT-ESW-A
+    category: network_switch
+    make: SEL
+    model: SEL-2730M
+    ordering_code: "2730M#2CF9"
+    description_template: "LAN-{lan} Industrial Ethernet switch (EXT) (16 MM Ports, 4 RJ45)"
+    tag_type: ESW
+    purdue_level: EXT
+    supply_type: VDC
+    voltage_v: 125
+    unit_power_w: 45  # 'Power Consumption'!I9
+    load_type: CONTINUOUS
+    power_supplies: 2
+    min_branch_mcb_a: 2
+    hwio_points: 1  # 'Panel 1'!H10
+    # NOTE: the issued sheets '1'!F10:G10 and '2'!F10:G10 list a Ruggedcom RST-2228
+    # (...E01+F00+G00) here; this follows the master 'Panel 1', which Power Consumption reads.
+
+  - part_id: SEL-3555-GW  # 'Panel 1' row 11: PSA1-DHPCC-GW-1
+    category: gateway
+    make: SEL
+    model: SEL-3555
+    ordering_code: "3555#0KVC"
+    description_template: "Protocol Gateway {purpose}"
+    tag_type: GW
+    tag_pattern: "{prefix}-DHPCC-GW-{lan_index}"
+    supply_type: VDC
+    voltage_v: 125
+    unit_power_w: 73  # 'Power Consumption'!I10
+    load_type: CONTINUOUS
+    power_supplies: 2
+    min_branch_mcb_a: 2
+
+  - part_id: FGR-60F  # 'Panel 1' row 12: PSA1-EXT-FW-A
+    category: firewall
+    make: Fortigate
+    model: FGR-60F
+    ordering_code: FGR-60F
+    description_template: "Industrial Firewall for External Systems"
+    tag_type: FW
+    purdue_level: EXT
+    supply_type: VDC
+    voltage_v: 125
+    unit_power_w: 21  # 'Power Consumption'!I11
+    load_type: CONTINUOUS
+    power_supplies: 2
+    min_branch_mcb_a: 2
+    alarm_on_branch_mcb: true  # Q1.10/Q2.10 aux contacts ('Panel 1'!C63)
+
+  # --- Group B: control cabinet (example workbook, 'Panel 3'!B4:G10) ------------------
+
+  - part_id: SEL-2488  # 'Panel 3' row 4: PSA3-GPS
+    category: gps_clock
+    make: SEL
+    model: SEL-2488
+    ordering_code: "2488#J544"
+    description_template: >-
+      GPS Clock with Antenna and accessories (SNTP/IRIG-B), 125VDC redundant,
+      100mbps SFP ports redundant
+    tag_type: GPS
+    tag_pattern: "{prefix}-GPS"
+    supply_type: VDC
+    voltage_v: 125
+    unit_power_w: 50  # 'Power Consumption'!I49
+    load_type: CONTINUOUS
+    power_supplies: 2
+    min_branch_mcb_a: 2
+    hwio_points: 1  # 'Panel 3'!H4
+    loose_items:  # loose table, 'Aux' rows 53-57
+      - { part_id: SEL-9524B, qty: 1, tag: "Time Server Accessories" }
+      - { part_id: SEL-C961-050, qty: 1 }
+      - { part_id: SEL-915900139, qty: 1 }
+      - { part_id: SEL-C961-025, qty: 1 }
+      - { part_id: SEL-915900043, qty: 1 }
+
+  - part_id: SEL-3555-RTAC  # 'Panel 3' row 5: PSA3-RTAC
+    category: rtac
+    make: SEL
+    model: SEL-3555
+    ordering_code: "3555#F2R2"
+    description_template: "PSA RTAC and Data Concentrator for DCS"
+    tag_type: RTAC
+    tag_pattern: "{prefix}-RTAC"
+    supply_type: VDC
+    voltage_v: 125
+    unit_power_w: 62  # 'Power Consumption'!I50
+    load_type: CONTINUOUS
+    power_supplies: 2
+    min_branch_mcb_a: 2
+    terminals:  # PSA3-XRTAC-C1 ... C6, 5 each ('Panel 3' rows 60-61, 65-68)
+      - { strip: "XRTAC-C{n}", block: UT-2.5-MT, count: 5, per: serial_port }
+
+  - part_id: SEL-2240  # 'Panel 3' row 6: PSA3-HWIO
+    category: io_chassis
+    make: SEL
+    model: SEL-2240
+    description_template: "Axion IO and Non-IEC Protocol Gateway"
+    tag_type: HWIO
+    tag_pattern: "{prefix}-HWIO"
+    supply_type: VDC
+    voltage_v: 125
+    unit_power_w: 31  # 'Power Consumption'!I51
+    load_type: CONTINUOUS
+    power_supplies: 2
+    min_branch_mcb_a: 2
+    children:  # 'Panel 3' rows 7-10
+      - { part_id: SEL-2242, qty: 1 }
+      - { part_id: SEL-2241, qty: 1 }
+      - { part_id: SEL-2243, qty: 2 }
+      - { part_id: SEL-2244-2, qty: 4 }
+
+  - part_id: SEL-2242  # 'Panel 3' row 7
+    category: component
+    make: SEL
+    model: SEL-2242
+    ordering_code: "2242#5DPM"
+    description_template: "Chassis/Backpane"
+
+  - part_id: SEL-2241  # 'Panel 3' row 8
+    category: component
+    make: SEL
+    model: SEL-2241
+    ordering_code: "2241#4D2J"
+    description_template: "RTAC"
+
+  - part_id: SEL-2243  # 'Panel 3' row 9
+    category: component
+    make: SEL
+    model: SEL-2243
+    ordering_code: "224311X0"
+    description_template: "Power Coupler (125V DC)"
+
+  - part_id: SEL-2244-2  # 'Panel 3' row 10
+    category: component
+    make: SEL
+    model: SEL-2244-2
+    ordering_code: "22442424X0"
+    description_template: "Digital Input Module-24DI (125V DC)"
+    terminals:  # PSA3-XDIPD ... XDIPG, 58 each ('Panel 3' rows 55-58)
+      - { strip: "XDIP{slot}", block: UT-2.5-MT, count: 58, first_slot: D }
+
+  # --- Group B: WS console (example workbook, 'Aux'!B4:G6) -----------------------------
+
+  - part_id: SEL-3355  # 'Aux' row 4: WS-SRV/OAS/EAS
+    category: workstation
+    make: SEL
+    model: SEL-3355
+    ordering_code: "3355#F5P8"
+    description_template: "PSA DA Server/Operator/Engineering Automation Workstation"
+    tag_type: SRV/OAS/EAS
+    tag_pattern: "{prefix}-SRV/OAS/EAS"
+    supply_type: VDC
+    voltage_v: 125
+    unit_power_w: 91  # 'Power Consumption'!I68
+    load_type: CONTINUOUS
+    power_supplies: 2
+    min_branch_mcb_a: 2
+
+  - part_id: NAP-F23  # 'Aux' row 5: WS-MONITOR
+    category: monitor
+    make: Ultraview
+    model: NAP-F23
+    ordering_code: NAP-F23-125VDC
+    description_template: '23" Desktop Monitor'
+    tag_type: MONITOR
+    tag_pattern: "{prefix}-MONITOR"
+    supply_type: VDC
+    voltage_v: 125
+    unit_power_w: 52  # 'Power Consumption'!I69
+    load_type: CONTINUOUS
+    power_supplies: 1  # single-fed through the change-over diodes (WS-QCOD-1)
+    min_branch_mcb_a: 2
+
+  - part_id: KEYTEK-KBM  # 'Aux' row 6: Keyboard & Mouse
+    category: peripheral
+    make: Key-Tek
+    model: K-TEK-A420TP-KP-FN-MDT
+    ordering_code: K-TEK-A420TP-KP-FN-MDT
+    description_template: "Industrial Keyboard & Mouse"
+    tag_pattern: "Keyboard & Mouse"
+
+  # --- Group C: network and IO accessories (derived from port plans and rules) ---------
+  # Each SFP declares the one port it provides, so port-plan allocations can be matched
+  # to it by speed and media.
+  # NOTE: nothing in the models ties an SFP to its host; the workbook uses Ruggedcom SFPs
+  # in the Ruggedcom switches and FR-TRAN-SX in the Fortigate firewall (same make).
+
+  - part_id: SFP-1G-LX-SM  # 'Panel 1' row 13: L2-ESW-A01 SFP (SM)
+    category: sfp
+    make: Ruggedcom
+    model: 6GK6000-8FG52-0AA0
+    ordering_code: 6GK6000-8FG52-0AA0
+    description_template: "1000BASE-LX SM SFP (1310nm, 10 Km)"
+    ports:
+      - { count: 1, speed: 1G, media: SM, kind: fixed }
+
+  - part_id: SFP-1G-SX-MM  # 'Panel 1' rows 14 and 16: L2-ESW-A01 / L1-ESW-A11 to A16 SFP (MM)
+    category: sfp
+    make: Ruggedcom
+    model: 6GK6000-8FG51-0AA0
+    ordering_code: 6GK6000-8FG51-0AA0
+    description_template: "1000BASE-SX MM SFP (850nm, <500m)"
+    # NOTE: 'Panel 1'!C14 (the L2 switch row) describes this same part as
+    # "1000BASE-X MM SFP (850nm, 500m)"; one record has one description, the L1 row's.
+    ports:
+      - { count: 1, speed: 1G, media: MM, kind: fixed }
+
+  - part_id: SFP-100M-FX-MM  # 'Panel 1' row 15: L2-ESW-A01 SFP (MM)
+    category: sfp
+    make: Ruggedcom
+    model: 6GK6000-8FE51-0AA0
+    ordering_code: 6GK6000-8FE51-0AA0
+    description_template: "100BASE-FX MM SFP (1310nm, <2km)"
+    ports:
+      - { count: 1, speed: 100M, media: MM, kind: fixed }
+
+  - part_id: FR-TRAN-SX  # 'Panel 1' row 17: EXT-FW-A SFP (MM)
+    category: sfp
+    make: Fortigate
+    model: FR-TRAN-SX
+    ordering_code: FR-TRAN-SX
+    description_template: "Industrial SFP (1Gig, MM)"
+    ports:
+      - { count: 1, speed: 1G, media: MM, kind: fixed }
+
+  - part_id: PL1U12NEBK  # 'Panel 1' row 18: Cable Manager (9 per network cabinet)
+    category: cable_manager
+    make: Marshcom
+    model: PL1U12NEBK
+    ordering_code: PL1U12NEBK
+    description_template: "Brush Type Cable Manager"
+    tag_pattern: "Cable Manager"
+
+  - part_id: SEL-C607  # 'Panel 3' row 11: COM-CABLE (one per RTAC serial port used)
+    category: serial_cable
+    make: SEL
+    model: SEL-C607
+    ordering_code: "C607#DM6B"
+    description_template: "RJ-45 port serial cables for RTAC COM port connection"
+    tag_pattern: "COM-CABLE"
+
+  # --- Group D: cabinet housekeeping (catalogues.housekeeping points here) -------------
+  # Workbook tags: PSA1-IL, PSA1-FAN-1,2, PSA1-TH-1,2,3 (WS-TH-1), PSA1-IPR, WS-FILTER,
+  # PSA3-COD-1, PSA3-COD-2, PSA2-AUX PS. FAN and TH number their units in one tag
+  # (spec: Tag naming conventions), so they carry tag_type only.
+
+  - part_id: SZ2500-LAMP  # 'Panel 1' row 19: PSA1-IL (lamp and door switch, one part)
+    category: lamp
+    make: Rittal
+    model: "SZ 2500.210, SZ 2500.470"
+    ordering_code: "SZ 2500.210, SZ 2500.470"
+    description_template: "Illumination Lamp with Door switch, 11W"
+    # NOTE: 'Aux'!C7 (WS console) describes this same part as
+    # "230V AC, 11W LED Illumination Lamp with Door switch".
+    tag_type: IL
+    tag_pattern: "{prefix}-IL"
+    supply_type: VAC
+    voltage_v: 230
+    unit_power_w: 11  # 'Power Consumption'!I17
+    load_type: INTERMITTENT
+
+  - part_id: SK3243-FAN  # 'Panel 1' row 20: PSA1-FAN-1,2
+    category: fan
+    make: Rittal
+    model: SK 3243.100
+    ordering_code: SK 3243.100
+    description_template: "230V AC Inlet and Exhaust Fan, Throughput: 716 m3/h, 87W"
+    tag_type: FAN
+    supply_type: VAC
+    voltage_v: 230
+    unit_power_w: 87  # 'Power Consumption'!I18, per fan
+    load_type: INTERMITTENT
+
+  - part_id: SK3238-FILTER  # 'Aux' row 8: WS-FILTER
+    category: vent_filter
+    make: Rittal
+    model: SK 3238.200
+    ordering_code: SK 3238.200
+    description_template: "Ventilation Filter"
+    tag_type: FILTER
+    tag_pattern: "{prefix}-FILTER"
+
+  - part_id: SK3110-TH  # 'Panel 1' row 21: PSA1-TH-1,2,3
+    category: thermostat
+    make: Rittal
+    model: SK 3110.000
+    ordering_code: SK 3110.000
+    description_template: "Thermostat, 30W"
+    tag_type: TH
+    supply_type: VAC
+    voltage_v: 230
+    unit_power_w: 30  # 'Power Consumption'!I19
+    load_type: INTERMITTENT
+
+  - part_id: IPR-2903685  # 'Panel 1' row 22: PSA1-IPR
+    category: relay
+    make: Phoenix
+    model: "2903685"
+    ordering_code: "2903685"
+    description_template: "Interposing Relay for High Temp Alarm"
+    tag_type: IPR
+    tag_pattern: "{prefix}-IPR"
+    supply_type: VAC
+    voltage_v: 230
+    unit_power_w: 1.56  # 'Power Consumption'!I20
+    load_type: INTERMITTENT
+    children:  # 'Panel 1' rows 23-25
+      - { part_id: IPR-BASE-2900934, qty: 1 }
+      - { part_id: IPR-SUPP-2900944, qty: 1 }
+      - { part_id: IPR-BRACKET-2900954, qty: 1 }
+
+  - part_id: IPR-BASE-2900934  # 'Panel 1' row 23
+    category: component
+    make: Phoenix
+    model: "2900934"
+    ordering_code: "2900934"
+    description_template: "IPR Relay Base"
+
+  - part_id: IPR-SUPP-2900944  # 'Panel 1' row 24
+    category: component
+    make: Phoenix
+    model: "2900944"
+    ordering_code: "2900944"
+    description_template: "Suppression Module"
+
+  - part_id: IPR-BRACKET-2900954  # 'Panel 1' row 25
+    category: component
+    make: Phoenix
+    model: "2900954"
+    ordering_code: "2900954"
+    description_template: "Retaining Bracket - RIF-RH-2"
+
+  - part_id: COD-NEG-IRND150F12  # 'Panel 3' row 19: PSA3-COD-1
+    category: change_over_diode
+    make: Ruttonsha
+    model: IRND150F12
+    ordering_code: IRND150F12
+    description_template: "Change Over Diodes (Negative)"
+    tag_type: COD
+    tag_pattern: "{prefix}-COD-1"
+
+  - part_id: COD-POS-IRMD150F12  # 'Panel 3' row 20: PSA3-COD-2
+    category: change_over_diode
+    make: Ruttonsha
+    model: IRMD150F12
+    ordering_code: IRMD150F12
+    description_template: "Change Over Diodes (Positive)"
+    tag_type: COD
+    tag_pattern: "{prefix}-COD-2"
+
+  - part_id: SOCKET-730076  # 'Panel 2' row 26: PSA2-AUX PS
+    category: socket
+    make: Legrand
+    model: "730076"
+    ordering_code: "730076"
+    description_template: "Power Socket for Auxiliary Power Supply"
+    tag_type: AUX PS
+    tag_pattern: "{prefix}-AUX PS"
+
+  # --- Loose material (example workbook, 'Aux'!B49:G62) --------------------------------
+
+  - part_id: NAP-K55  # 'Aux' row 49: 55" LCD Alarm Annunciator
+    category: annunciator
+    make: Ultraview
+    model: NAP-K55
+    ordering_code: NAP-K55
+    description_template: '55" LCD Alarm Annunciator (Touch)  - Wall Mounted'
+    supply_type: VDC
+    voltage_v: 125
+    unit_power_w: 100  # 'Power Consumption'!I84
+    load_type: CONTINUOUS  # 'Power Consumption'!K84
+    power_supplies: 1  # single-fed through PSA3's change-over diodes (PSA3-QCOD-1)
+    min_branch_mcb_a: 2
+
+  - part_id: LPA37-696  # 'Aux' row 50 (child of the annunciator)
+    category: accessory
+    make: Lumi
+    model: LPA37-696
+    ordering_code: LPA37-696
+    description_template: "Wall Mount Kit"
+
+  - part_id: ZENON-V12  # 'Aux' row 51: SRV/OAS -HMI Software
+    category: software
+    make: COPADATA
+    model: Zenon V12
+    ordering_code: Zenon V12
+    description_template: "Zenon Energy Edition Sever/Client with Editor Studio"
+
+  - part_id: MS-OFFICE-2021  # 'Aux' row 52: SRV/OAS -MS Office
+    category: software
+    make: MS
+    model: "2021"
+    ordering_code: "2021"
+    description_template: "Microsoft Office 2021"
+
+  - part_id: SEL-9524B  # 'Aux' row 53: Time Server Accessories (GPS clock loose item)
+    category: accessory
+    make: SEL
+    model: SEL-9524B
+    ordering_code: "Included with SEL-2488"
+    description_template: "GPS/GLONASS Antenna"
+
+  - part_id: SEL-C961-050  # 'Aux' row 54 (GPS clock loose item)
+    category: cable
+    make: SEL
+    model: SEL-C961-050
+    description_template: "50 ft (15 Meters) LMR-400 cable"
+
+  - part_id: SEL-915900139  # 'Aux' row 55 (GPS clock loose item)
+    category: accessory
+    make: SEL
+    model: "915900139"
+    description_template: "Gas Tube Coaxial Surge Protector and Mounting Kit"
+
+  - part_id: SEL-C961-025  # 'Aux' row 56 (GPS clock loose item)
+    category: cable
+    make: SEL
+    model: SEL-C961-025
+    description_template: "25 ft (7 Meters) LMR-400 cable"
+
+  - part_id: SEL-915900043  # 'Aux' row 57 (GPS clock loose item)
+    category: accessory
+    make: SEL
+    model: "915900043"
+    description_template: "Antenna Pipe-Mounting Kit"
+
+  - part_id: ANN-DISPLAY-CABLE-10M  # 'Aux' row 58: ANN-Display Cable
+    category: cable
+    model: 10m
+    ordering_code: 10m
+    description_template: "Display Cable for Annunciator"
+
+  - part_id: ANN-USB-CABLE-10M  # 'Aux' row 59: ANN-USB Cable
+    category: cable
+    model: 10m
+    ordering_code: 10m
+    description_template: "USB cable for Annunciator"
+
+  - part_id: MON-DVI-CABLE-3M  # 'Aux' row 60: MON-DVI Cable
+    category: cable
+    model: 3m
+    ordering_code: 3m
+    description_template: "DVI Cable for Monitor"
+
+  - part_id: MON-USB-CABLE-3M  # 'Aux' row 61: MON-USB Cable
+    category: cable
+    model: 3m
+    ordering_code: 3m
+    description_template: "USB Cable for Monitor"
+
+  - part_id: FO-PATCH-CORDS  # 'Aux' row 62: FO, qty "1 Lot"
+    category: cable
+    description_template: "Fiber Optic Patch Cords"
+
+catalogues:
+  mcb:  # spec: Derivation rules -> Breaker part numbers
+    family: "Acti9 2P"  # ASSUMED
+    make: Schneider
+    poles: 2
+    ratings_a: [1, 2, 6, 10, 16]
+    code_pattern: "A9F742{rating:02d}"
+
+  aux_contact:  # 'Panel 1'!E33:G33 and E63:G63
+    make: Schneider
+    model: A9A26924
+    ordering_code: A9A26924
+
+  terminal_blocks:  # 'Panel 1'!E65:G74
+    UT-16: { make: Phoenix, ordering_code: "3044199" }
+    UT-2.5-MTD: { make: Phoenix, ordering_code: "3064085" }
+    UT-2.5-MT: { make: Phoenix, ordering_code: "3046362" }
+
+  # NOTE: the busbar rows' column-B labels ("AC SAFETY POWER-GROUND",
+  # "INSTRUMENT-GROUND", "POWER-GROUND") have no field in the busbar model.
+  busbars:
+    ac_safety_ground:  # 'Panel 1'!C76
+      description: |-
+        POWER/AC SAFETY GROUNDING BUSBAR - TINNED COPPER
+        For all exposed metal surfaces of cabinets, racks, chassis ground.
+        Wire type: 14AWG, Green with yellow tracer insulation
+    instrument_ground:  # 'Panel 1'!C77 (trailing space after line 1 trimmed)
+      description: |-
+        INSTRUMENT GROUNDING BUSBAR - TINNED COPPER
+        For all wire shields and DC common
+        Wire type: 14AWG, Green insulation
+    power_ground:  # 'Aux'!C45 (WS console)
+      description: |-
+        Power Safety Grounding Busbar-Tinned Copper
+        Interface: For all exposed metal surfaces of cabinets, racks, and chassis ground.
+        Wire Type: Wire type: min. 14AWG, Green with yellow tracer insulation
+
+  housekeeping:  # part ids of the group D records above (ADR 0010 item 1)
+    lamp: { part_id: SZ2500-LAMP }
+    # no door_switch: the lamp part includes it (SZ 2500.210, SZ 2500.470)
+    fan: { part_id: SK3243-FAN, airflow_m3h: 358 }  # per fan; the pair gives 716 (plan Q8)
+    vent_filter: { part_id: SK3238-FILTER }
+    thermostat: { part_id: SK3110-TH }
+    ipr_kit: { part_id: IPR-2903685 }
+    change_over_diodes: { negative: COD-NEG-IRND150F12, positive: COD-POS-IRMD150F12 }
+    socket: { part_id: SOCKET-730076, rating_a: 10 }

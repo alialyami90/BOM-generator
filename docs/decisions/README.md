@@ -15,3 +15,4 @@ An ADR stays "Proposed" until Ali accepts it in review.
 | 0007 | [Windows desktop app: pywebview + PyInstaller + Inno Setup](0007-windows-desktop-app-stack.md) | Proposed |
 | 0008 | [Device library updates as `.bomlib` packages](0008-library-update-packages.md) | Proposed |
 | 0009 | [Installer layout and tag-driven releases](0009-installer-layout-and-releases.md) | Proposed |
+| 0010 | [Input schema details and validation behaviour](0010-input-schema.md) | Proposed |

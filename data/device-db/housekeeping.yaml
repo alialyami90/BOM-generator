@@ -1,0 +1,1196 @@
+# Device database: Enclosures and cabinet housekeeping: lamp, fans, filters, thermostats, IPR kit, socket, change-over diodes.
+# Researched datasheet facts and alternative brands for the example project's parts.
+# Device part ids match examples/library.yaml, where the library fields live.
+# Catalogue ids (MCB-*, AUX-*, TB-*, BUSBAR-*, ENCL-*) are local to this database.
+# Format and field meanings: data/device-db/README.md
+schema_version: 1
+area: housekeeping
+title: 'Enclosures and cabinet housekeeping: lamp, fans, filters, thermostats, IPR kit, socket, change-over
+  diodes'
+records:
+- part_id: ENCL-RAWABI-2100
+  kind: catalogue
+  description: Cabinet H2100 x D1000 x W800 mm, base frame H100 x D950 x W750 mm, top cable entry (Rawabi
+    (Saudi panel builder, verify) Fixed Frame)
+  make: Rawabi
+  verified: unverified
+  datasheet:
+    manufacturer: Rawabi (unconfirmed; no public product page found)
+    summary: Floor-standing fixed-frame cabinet H2100 (incl. 100 mm base) x W800 x D1000 mm, top cable
+      entry
+    ratings:
+      overall_height_mm: 2100
+      base_frame: H100 x D950 x W750 mm
+      cable_entry: top
+    dimensions_mm:
+      h: 2100
+      w: 800
+      d: 1000
+    mounting: floor-standing on 100 mm base frame
+    notes: 'No manufacturer, datasheet or catalogue number could be found for a "Rawabi Fixed Frame" cabinet.
+      Searches for Rawabi panel/enclosure products returned nothing relevant; treat as a local panel-builder
+      fabricated cabinet and ask the vendor for a GA drawing and IP rating. Standard catalogue cabinets
+      are 2000 mm high + 100 mm plinth = 2100 mm overall. Saudi-local alternative worth asking about:
+      alfanar (modular panel enclosures/frames).'
+  alternatives:
+  - make: Schneider Electric
+    manufacturer: Schneider Electric
+    tiers:
+      low:
+        model: Spacial SF 2000x800x600 with mounting plate
+        ordering_code: NSYSF20860P
+        description: Assembled SF enclosure 2000x800x600 mm, single door, mounting plate; 400 mm shallower
+          than BOM
+        url: https://www.royalwholesaleelectric.com/schneider-electric/nsysf20860p-spacial-sf-enclosure-with-mounting-plate-assembled-2000x800x600-mm
+        notes: Add 100 mm plinth to reach 2100 mm overall
+        verified: true
+      mid:
+        model: Spacial SF 2000x800x800 with mounting plate
+        ordering_code: NSYSF20880P
+        description: Assembled SF enclosure 2000x800x800 mm with mounting plate, IP55
+        url: https://eshop.se.com/bh/spacial-sf-enclosure-with-mounting-plate-assembled-2000x800x800-mm-nsysf20880p.html
+        notes: Glazed-door variant NSYSF20880T also exists; plinth ordered separately
+        verified: true
+      high:
+        model: Spacial SF 2000x800x1000 extendable with mounting plate
+        ordering_code: NSYSF208100E
+        description: Exact 800 W x 1000 D footprint, extendable (bayable) version with mounting plate
+        url: https://www.se.com/gr/el/product/NSYSF208100E/
+        notes: Closest dimensional match to the BOM cabinet; plinth separate
+        verified: true
+  - make: Rittal
+    manufacturer: Rittal GmbH & Co. KG
+    tiers:
+      low:
+        model: VX25 baying enclosure 800x2000x600
+        ordering_code: VX 8806.000
+        description: Sheet-steel VX25 800 W x 2000 H x 600 D, single door, mounting plate; shallower than
+          BOM
+        url: https://www.digitec.ch/en/s1/product/rittal-vx-8806000-freestanding-frame-grey-server-cabinets-14163997
+        notes: Plinth (100 mm) ordered separately
+        verified: true
+      mid:
+        model: VX25 baying enclosure 800x2000x800
+        ordering_code: VX 8808.000
+        description: VX25 800x2000x800 mm, single door, IP55 (RS 228-9462 lists a VX25 2000x800x800 single-door
+          IP55)
+        url: https://www.rittal.com/pdf-creator/variant/es-es/8808000
+        notes: Rittal product page exists for 8808000 (seen in search results); RS 228-9462 lists the
+          same VX25 2000x800x800 single-door IP55
+        verified: true
+      high:
+        model: VX25 800x2000x1000
+        description: Exact 1000 mm depth VX25 variant
+        notes: Rittal offers 1000 mm deep VX/VX IT 800x2000 frames, but the catalogue number could not
+          be confirmed before the search budget ran out
+        verified: false
+  sources:
+  - https://www.royalwholesaleelectric.com/schneider-electric/nsysf20860p-spacial-sf-enclosure-with-mounting-plate-assembled-2000x800x600-mm
+  - https://eshop.se.com/bh/spacial-sf-enclosure-with-mounting-plate-assembled-2000x800x800-mm-nsysf20880p.html
+  - https://www.digitec.ch/en/s1/product/rittal-vx-8806000-freestanding-frame-grey-server-cabinets-14163997
+  - https://my.rs-online.com/web/p/floor-standing-enclosures/2289462
+- part_id: ENCL-RITTAL-PC5386
+  kind: catalogue
+  description: Console H1600 x D636 x W800 mm, base frame H100, side cable entry (Rittal PC 5386.050)
+  make: Rittal
+  verified: confirmed
+  datasheet:
+    full_name: PC enclosure system PC 5386.050 (Rittal PC cabinet with glazed monitor door, keyboard drawer
+      and component shelf)
+    manufacturer: Rittal GmbH & Co. KG
+    summary: Floor-standing PC workstation cabinet 800 W x 1600 H x 636 D mm for monitor, PC and keyboard
+    ratings:
+      protection: IP55 (IEC 60529), NEMA 12, UL 50E Type 1/12
+      max_keyboard_size_mm: 480 x 70 x 260
+      material: sheet steel housing/doors; aluminium door trim; single-pane safety glass viewing window
+      colour: RAL 7035 (handle/monitor field RAL 7015 on the sister model)
+    dimensions_mm:
+      h: 1600
+      w: 800
+      d: 636
+    weight_kg: 114
+    mounting: floor-standing
+    certifications:
+    - UL listed
+    - C-UL listed
+    - EU declaration of conformity
+    - UK declaration of conformity
+    ordering_code_decoded:
+      scope_of_supply: housing, front door, rear door, cable entry/base plates, glazed top door, keyboard
+        drawer, component shelf
+    datasheet_url: https://www.rittal.com/pdf-creator/variant/es-es/5386050
+    product_url: https://www.rittal.com/pdf-creator/variant/es-es/5386050
+    notes: 'Verified: PC 5386.050 is the 800 mm wide x 636 mm deep PC cabinet. Do not confuse with PC
+      5368.050 (600 W x 1600 H x 836 D, 108.5 kg). BOM dimensions match 5386.050. Net weight 114 kg (gross
+      115.8 kg). Side cable entry is not stated on the Rittal page; base plates are supplied.'
+  alternatives:
+  - make: nVent Hoffman
+    manufacturer: nVent
+    tiers:
+      low:
+        model: ProLine Gold computer workstation enclosure 1600 mm
+        ordering_code: PGLD1686CWS
+        description: ProLine Gold Type 12 computer workstation enclosure; size taken from the code pattern
+          (1600 H x 800 W x 600 D), not shown in the listing
+        url: https://www.platt.com/p/0569783/nvent-hoffman/computer-workstation-enclosure/783510128012/hofpgld1686cws
+        notes: Code and 'Computer Workstation Enclosure' title seen at Platt; confirm dimensions and that
+          the monitor window and keyboard shelf are included
+        verified: true
+      mid:
+        model: PROLINE-PC modular enclosure Type 12, 1600 x 800 x 600 mm
+        ordering_code: PPC1686
+        description: Steel ProLine PC enclosure, light grey, 1600 H x 800 W x 600 D; the same footprint
+          as the Rittal PC 5386.050
+        url: https://rexelusa.com/p/24643/nvent-hoffman/pc-enclosure-1600x800x600mm/783510988104/ppc1686
+        notes: Closest like-for-like. Keyboard shelf and monitor door are ProLine PC accessories, ordered
+          separately. A frame-only version is PFPC1686
+        verified: true
+      high:
+        model: PROLINE-PC modular enclosure Type 12, 1800 x 800 x 600 mm
+        ordering_code: PPC1886
+        description: Taller ProLine PC enclosure (1800 H) with room for a PC shelf plus a UPS or extra
+          equipment; size from the code pattern
+        url: https://www.vanmeterinc.com/product/nvent-hoffman-ppc1886-1147283
+        notes: Code seen at Van Meter; the 1800 x 800 x 600 size is inferred from the naming used by PPC1686
+          and PPC2086. Stainless variants (SS suffix, e.g. PPC1666SS) also exist
+        verified: true
+  - make: Schneider Electric
+    manufacturer: Schneider Electric
+    tiers:
+      low:
+        model: Spacial SF PC rack enclosure, assembled, 1600 x 600 x 600 mm
+        ordering_code: NSYSF16660PC
+        description: Spacial SF PC application cabinet; 200 mm narrower and 36 mm shallower than the Rittal
+          unit
+        url: https://rapidonline.com/nsysf16660pc-spacial-sf-pc-application-1600-x-600-x-600-32-6127
+        notes: Spacial SF PC cabinets come only 600 mm wide; check that the monitor fits
+        verified: true
+      mid:
+        model: Spacial SF PC rack enclosure, assembled, 1600 x 600 x 800 mm
+        ordering_code: NSYSF16680PC
+        description: Same height as the BOM; 600 W x 800 D instead of 800 W x 636 D
+        url: https://eshop.se.com/bh/panelset-sf-pc-rack-enclosure-assembled-1600x600x800-mm-nsysf16680pc.html
+        notes: Closest Spacial PC cabinet by internal volume
+        verified: true
+      high:
+        model: Spacial SF PC rack enclosure, assembled, 1800 x 600 x 800 mm
+        ordering_code: NSYSF18680PC
+        description: Taller PC cabinet with more internal volume
+        url: https://rapidonline.com/nsysf18680pc-spacial-sf-pc-application-1800-x-600-x-800-32-6163
+        notes: Matching 200 mm PC-application plinth is sold separately
+        verified: true
+  sources:
+  - https://www.rittal.com/pdf-creator/variant/es-es/5386050
+  - https://www.rittal.com/pdf-creator/variant/ca-en/5368050
+  - https://rexelusa.com/p/24643/nvent-hoffman/pc-enclosure-1600x800x600mm/783510988104/ppc1686
+  - https://www.platt.com/p/0569783/nvent-hoffman/computer-workstation-enclosure/783510128012/hofpgld1686cws
+  - https://www.vanmeterinc.com/product/nvent-hoffman-ppc1886-1147283
+  - https://www.platt.com/p/0272840/nvent-hoffman/pc-enclosure-2000x800x600mm/783510988708/hofppc2086
+  - https://rapidonline.com/nsysf16660pc-spacial-sf-pc-application-1600-x-600-x-600-32-6127
+  - https://eshop.se.com/bh/panelset-sf-pc-rack-enclosure-assembled-1600x600x800-mm-nsysf16680pc.html
+  - https://rapidonline.com/nsysf18680pc-spacial-sf-pc-application-1800-x-600-x-800-32-6163
+- part_id: SZ2500-LAMP
+  kind: device
+  description: Illumination Lamp with Door switch, 11W
+  make: Rittal
+  verified: confirmed
+  datasheet:
+    full_name: LED system light with socket SZ 2500.210
+    manufacturer: Rittal GmbH & Co. KG
+    summary: 437 mm LED enclosure light, 900 lm, 4000 K, with door position switch and Schuko socket
+    power:
+      input: 100-230 V AC, 50/60 Hz
+      typical_w: 11
+      max_w: 11
+    ratings:
+      luminous_flux_lm: 900
+      colour_temperature_k: 4000
+      socket: Type F (Schuko, CEE 7/3)
+      switch: door position switch
+      protection_class: II
+      ip: IP20
+      connection: 3-pole supply input + 3-pole pass-through (looping), connectors rotate 90 deg
+    dimensions_mm:
+      h: 80
+      w: 437
+      d: 44
+    weight_kg: 0.466
+    mounting: screw or clip onto 25 mm pitch enclosure profile
+    operating_temp_c:
+      min: -20
+      max: 55
+    certifications:
+    - ENEC
+    - EU declaration of conformity
+    - UK declaration of conformity
+    ordering_code_decoded:
+      SZ 2500.210: LED system light with socket, 100-230 V AC, 11 W
+      SZ 2500.470: Accessory listed by Distrelec as 'adapter for use with LED system light' (connection
+        accessory); exact type not confirmed
+    datasheet_url: https://www.rittal.com/pdf-creator/variant/de-de/2500210
+    product_url: https://www.rittal.com/pdf-creator/variant/de-de/2500210
+    notes: '11 W confirmed. Connection cables are not included and must be ordered separately; SZ 2500.470
+      appears to be such an adapter/connection cable but its spec could not be read. Other confirmed connection
+      accessory: SZ 2500.500 = 3 m adapter connection cable, 100-240 V AC. The Schuko socket on the light
+      is not suitable for BS 1363 plugs used in Saudi Arabia; check.'
+  alternatives:
+  - make: STEGO
+    manufacturer: STEGO Elektrotechnik GmbH
+    tiers:
+      low:
+        model: LED 025 (magnetic, on/off switch)
+        ordering_code: 02540.0-00
+        description: 351 mm LED enclosure light, 5 W, 6500 K, 110-240 V AC, magnet mount, on/off switch
+          (no door switch)
+        unit_power_w: 5
+        url: https://ph.rs-online.com/web/p/cabinet-lighting/8103176
+        notes: Lower lumen output; needs separate door switch
+        verified: true
+      mid:
+        model: LED 025 (screw mount, on/off switch)
+        ordering_code: 02540.0-01
+        description: Same as above with screw fixing
+        unit_power_w: 5
+        url: https://www.distrelec.be/en/stego-varioline-led-025-series-led-enclosure-light-110-240-ac-351-mm-length-6500k-stego-02540-01/p/30489816
+        notes: Door-switch variant not verified
+        verified: true
+      high:
+        model: SL 025 LED light
+        description: STEGO all-in-one LED enclosure light, 100-240 V AC, 4 W, 345 mm
+        unit_power_w: 4
+        url: https://uk.rs-online.com/web/p/cabinet-lighting/0655411
+        notes: Article number not confirmed
+        verified: false
+  - make: nVent Hoffman
+    manufacturer: nVent
+    tiers:
+      low:
+        model: EL LED enclosure light 900 lm
+        ordering_code: EL900D
+        description: 900 lm LED light with door-operated switch connection, 100-240 V AC
+        url: https://steinerelectric.com/Product/nVent-HOFFMAN-EL900D-EL-Enclosure-Light-With-Door-Operated-Switch-Connection100-to-240-VACPlastic-1189476
+        notes: Closest functional match without socket
+        verified: true
+      mid:
+        model: EL LED enclosure light with socket 1200 lm
+        ordering_code: EL1200DS-BF
+        description: 1200 lm LED light with integrated socket
+        url: https://www.lemu.dk/en/product/led-cabin-light-el1200ds-bf-id-7857990968
+        notes: Socket-type suffix (-BF/-US) meaning not verified; -US is US NEMA socket 100-125 V
+        verified: true
+      high:
+        model: EL LED enclosure light with motion sensor 1200 lm
+        ordering_code: EL1200M
+        description: 1200 lm LED light with motion sensor
+        url: https://mc-mc.com/Product/nvent-hoffman-el1200m
+        notes: Supply voltage of EL1200M not verified (a 24 V DC motion version also exists)
+        verified: true
+  sources:
+  - https://www.rittal.com/pdf-creator/variant/de-de/2500210
+  - https://uk.rs-online.com/web/p/server-cabinet-accessories/1876745
+  - https://www.distrelec.ch/en/rittal-adapter-for-use-with-led-system-light-rittal-2500470/p/30421963
+  - https://ph.rs-online.com/web/p/cabinet-lighting/8103176
+  - https://steinerelectric.com/Product/nVent-HOFFMAN-EL900D-EL-Enclosure-Light-With-Door-Operated-Switch-Connection100-to-240-VACPlastic-1189476
+- part_id: SK3243-FAN
+  kind: device
+  description: '230V AC Inlet and Exhaust Fan, Throughput: 716 m3/h, 87W'
+  make: Rittal
+  verified: confirmed
+  datasheet:
+    full_name: TopTherm fan-and-filter unit SK 3243.100
+    manufacturer: Rittal GmbH & Co. KG
+    summary: 323 x 323 mm TopTherm fan-and-filter unit, 230 V AC, 625/716 m3/h unimpeded
+    power:
+      input: 230 V, 1~, 50/60 Hz
+      typical_w: 70
+      max_w: 87
+    ratings:
+      airflow_unimpeded_pleated_m3h: 625 (50 Hz) / 716 (60 Hz)
+      airflow_unimpeded_chopped_fibre_m3h: 540 (50 Hz) / 590 (60 Hz)
+      airflow_with_1_outlet_filter_m3h: 405 (50 Hz) / 460 (60 Hz) with SK 3243.200
+      airflow_with_2_outlet_filters_m3h: 475 (50 Hz) / 520 (60 Hz)
+      rated_current_a: 0.37 (50 Hz) / 0.39 (60 Hz)
+      noise_dba: 59 (50 Hz) / 61 (60 Hz)
+      ip: IP54 standard; IP55 with pleated filter + absorber mat; IP56 with hose-proof hood
+      cutout_mm: 292 x 292
+      installation_depth_mm: 118.5
+    dimensions_mm:
+      h: 323
+      w: 323
+      d: 25
+    weight_kg: 3.58
+    mounting: enclosure wall/door cut-out
+    operating_temp_c:
+      min: -30
+      max: 55
+    certifications:
+    - UL
+    - C-UL
+    - UR
+    - C-UR
+    - CSA
+    - KC
+    - UK declaration of conformity
+    datasheet_url: https://rittal.com/pdf-creator/variant/uk-en/3243100
+    product_url: https://rittal.com/pdf-creator/variant/uk-en/3243100
+    notes: 716 m3/h is the 60 Hz unimpeded figure; at 50 Hz it is 625 m3/h, and with one matching outlet
+      filter (SK 3243.200) only 405/460 m3/h. 87 W is the 60 Hz power; 70 W at 50 Hz. Use the outlet-filter
+      figure for airflow sizing. Matching outlet filter is SK 3243.200, not SK 3238.200.
+  alternatives:
+  - make: Pfannenberg
+    manufacturer: Pfannenberg GmbH
+    tiers:
+      low:
+        model: PF 65.000 230 V
+        ordering_code: '11665104055'
+        description: 320 x 320 mm filter fan, approx. 480-505 m3/h filtered / 831 m3/h unimpeded, 230
+          V AC
+        url: https://www.motorsandcontrol.com/11665104055-pfannenberg.html
+        notes: Code-to-voltage mapping from distributor listing only
+        verified: true
+      mid:
+        model: PF 66.000 230 V
+        ordering_code: '11666102055'
+        description: Filter fan 230 V AC, 445 m3/h with outlet filter, 640-653 m3/h unimpeded
+        url: https://uk.rs-online.com/web/p/filter-fans/0497567
+        notes: Closest like-for-like airflow
+        verified: true
+      high:
+        model: PF 67.000 230 V
+        ordering_code: '11667103055'
+        description: Filter fan 230 V AC, 625 m3/h filtered, 925-950 m3/h unimpeded
+        url: https://uk.rs-online.com/web/p/filter-fans/0497589
+        notes: Higher airflow
+        verified: true
+  - make: STEGO
+    manufacturer: STEGO Elektrotechnik GmbH
+    tiers:
+      low:
+        model: Filter Fan Plus FPI 230 V (257 mm)
+        ordering_code: 01873.0-30
+        description: Filter fan approx. 179.5 cfm (305 m3/h) unimpeded, 230 V AC
+        url: https://solutionsdirectonline.com/stego-enclosure-exhaust-filter-fan-179-5-cfm-230-vac-01873-0-30
+        notes: Smaller unit; may need two
+        verified: true
+      mid:
+        model: Filter Fan Plus FPI 230 V (322 mm)
+        ordering_code: 01874.0-30
+        description: 322 x 322 mm filter fan, approx. 373 m3/h, 95 W, 230 V AC
+        unit_power_w: 95
+        url: https://buerklin.com/en/p/stego/panel-mount-fans/01874-0-30/80H7921
+        notes: Code confirmed at Buerklin and DirectIndustry; the 373 m3/h / 95 W figures were not re-checked
+        verified: true
+      high:
+        model: FPI/FPO 018 230 V
+        description: 291 x 291 mm filter fan, 599 m3/h filtered / 1010 m3/h unimpeded, 230 V AC
+        url: https://ph.rs-online.com/web/p/filter-fans/1947672
+        notes: STEGO article number not confirmed (RS 194-7672)
+        verified: false
+  sources:
+  - https://rittal.com/pdf-creator/variant/uk-en/3243100
+  - https://uk.rs-online.com/web/p/filter-fans/0497567
+  - https://uk.rs-online.com/web/p/filter-fans/0497589
+  - https://ph.rs-online.com/web/p/filter-fans/1947672
+- part_id: SK3238-FILTER
+  kind: device
+  description: Ventilation Filter
+  make: Rittal
+  verified: confirmed
+  datasheet:
+    full_name: Outlet filter (standard) SK 3238.200
+    manufacturer: Rittal GmbH & Co. KG
+    summary: 148.5 x 148.5 mm TopTherm outlet filter for SK 3238.1xx fan-and-filter units
+    ratings:
+      cutout_mm: 124 x 124
+      ip: IP54 (chopped-fibre/pleated filter); IP55 with absorber mat; IP56 with hose-proof hood
+      filter_mat: chopped-fibre mat supplied
+      material: ABS, RAL 7035
+    dimensions_mm:
+      h: 148.5
+      w: 148.5
+      d: 24
+    weight_kg: 0.17
+    mounting: enclosure wall/door cut-out
+    certifications:
+    - UL
+    - C-UL
+    - UR
+    - C-UR
+    - CSA
+    datasheet_url: https://www.rittal.com/pdf-creator/variant/ca-en/3238200
+    product_url: https://www.rittal.com/pdf-creator/variant/ca-en/3238200
+    notes: SK 3238.200 fits the small SK 3238.1xx fans (148.5 mm), NOT the SK 3243.100 (323 mm) fan. If
+      this filter is meant as the exhaust for the main SCADA cabinet fan, the correct part is SK 3243.200.
+      If it is for the PC console with its own SK 3238.100 fan, it is correct. Confirm with Ali.
+  alternatives:
+  - make: Pfannenberg
+    manufacturer: Pfannenberg GmbH
+    tiers:
+      low:
+        model: PFA 20.000 exhaust filter, 145 x 145 mm
+        ordering_code: '11720001055'
+        description: Exhaust filter for 125 x 125 mm cut-out (PF 22.000 size), thermoplastic frame, 145
+          x 145 x 31 mm
+        url: https://uk.rs-online.com/web/p/fan-filters/0497595
+        notes: Same cut-out class as SK 3238.200 (124 x 124 mm); frame 145 mm vs Rittal 148.5 mm
+        verified: true
+      mid:
+        model: PFA 20.000 exhaust filter, IP55, 145 x 145 mm
+        ordering_code: '11720003055'
+        description: As low, listed as the IP55 version, 145 x 145 x 31 mm
+        url: https://uk.rs-online.com/web/p/fan-filters/0497600
+        notes: Distrelec lists 11720003055 as 'Exhaust filter IP55 31 mm, 145 x 145 mm, PFA20000'. Closest
+          like-for-like
+        verified: true
+      high:
+        model: Exhaust filter 145 x 145 mm (119-series)
+        ordering_code: '11920001055'
+        description: Pfannenberg 119-series exhaust filter, 145 x 145 mm, IP54 per Distrelec listing
+        url: https://www.distrelec.ch/en/exhaust-filter-ip54-exhaust-145-145mm-pfannenberg-11920001055/p/30367832
+        notes: A sister 119-series part (11910001050) is sold as an EMC exhaust filter; that 11920001055
+          is the EMC version is not confirmed. Check with Pfannenberg
+        verified: true
+  - make: STEGO
+    manufacturer: STEGO Elektrotechnik GmbH
+    tiers:
+      low:
+        model: Filter Fan Plus exhaust filter for 92 x 92 mm cut-out
+        ordering_code: 11870.0-00
+        description: Smaller exhaust filter (3.6 in / 92 mm cut-out); fits only if the cut-out is made
+          for it
+        url: https://solutionsdirectonline.com/stego_exhaust_filter_3-6_x_3-6_11870-0-00
+        notes: Size step down; only valid with a matching smaller fan
+        verified: true
+      mid:
+        model: Filter Fan Plus FPI exhaust filter for 124 x 124 mm cut-out
+        ordering_code: 11871.0-00
+        description: Exhaust filter for 124 x 124 mm fans (152 x 152 mm frame, 60 mm), the same cut-out
+          as SK 3238.200
+        url: https://at.rs-online.com/web/p/lufterfilter/9160013
+        notes: Like-for-like size. RS 916-0013 lists manufacturer part 11871.0-00
+        verified: true
+      high:
+        model: Filter Fan Plus exhaust filter for 176 x 176 mm cut-out
+        ordering_code: 11872.0-00
+        description: Larger exhaust filter (6.9 in / 176 mm cut-out) for more exhaust area
+        url: https://solutionsdirectonline.com/stego_exhaust_filter_6-9_x_6-9_11872-0-00
+        notes: Size step up; only valid with a matching larger cut-out
+        verified: true
+  sources:
+  - https://www.rittal.com/pdf-creator/variant/ca-en/3238200
+  - https://rittal.com/pdf-creator/variant/uk-en/3243100
+  - https://uk.rs-online.com/web/p/fan-filters/0497595
+  - https://uk.rs-online.com/web/p/fan-filters/0497600
+  - https://www.distrelec.ch/en/exhaust-filter-ip55-31mm-exhaust-145-145mm-pfannenberg-pfa20000-11720003055/p/30472434
+  - https://www.distrelec.ch/en/exhaust-filter-ip54-exhaust-145-145mm-pfannenberg-11920001055/p/30367832
+  - https://at.rs-online.com/web/p/lufterfilter/9160013
+  - https://solutionsdirectonline.com/stego_exhaust_filter_3-6_x_3-6_11870-0-00
+  - https://solutionsdirectonline.com/stego_exhaust_filter_6-9_x_6-9_11872-0-00
+- part_id: SK3110-TH
+  kind: device
+  description: Thermostat, 30W
+  make: Rittal
+  verified: confirmed
+  datasheet:
+    full_name: Thermostat SK 3110.000 (internal enclosure thermostat)
+    manufacturer: Rittal GmbH & Co. KG
+    summary: Bi-metal enclosure thermostat, 5-60 C, single-pole change-over contact, DIN rail
+    power:
+      input: none (passive bi-metal); contact rated 24-230 V AC / 24-60 V DC
+      typical_w: 0
+      max_w: 0
+    ratings:
+      setting_range_c: 5 to 60
+      switching_difference_k: approx. 1 +/- 0.8
+      contact: single-pole change-over, quick-break
+      ac_heating: 10 (4) A at cos phi 0.6
+      ac_cooling: 5 (4) A at cos phi 0.6
+      dc_switching: max. 30 W
+    dimensions_mm:
+      h: 71
+      w: 71
+      d: 33.5
+    weight_kg: 0.095
+    mounting: 35 mm DIN rail (EN 50022) vertical/horizontal, or adapter clip
+    certifications:
+    - UL
+    - C-UL
+    - VDE
+    - UK declaration of conformity
+    datasheet_url: https://www.rittal.com/pdf-creator/variant/ca-en/3110000
+    product_url: https://www.rittal.com/pdf-creator/variant/ca-en/3110000
+    notes: The BOM "30 W" is the DC contact switching limit (max 30 W DC), NOT power consumption. The
+      thermostat is a passive bi-metal device and draws no power; it should be 0 W in power and heat budgets.
+      At 125 V DC the 30 W limit means max 0.24 A switched - use the AC side or an interposing relay for
+      DC loads.
+  alternatives:
+  - make: Pfannenberg
+    manufacturer: Pfannenberg GmbH
+    tiers:
+      low:
+        model: FLZ 530 (NO, 0-60 C)
+        ordering_code: '17121000000'
+        description: Single thermostat, NO contact (fan/alarm), 120-240 V AC
+        unit_power_w: 0
+        url: https://www.distrelec.be/en/pfannenberg-flz-no-enclosure-thermostat-120-240-ac-60-pfannenberg-flz530-17121000000/p/30485681
+        notes: NO only, not change-over
+        verified: true
+      mid:
+        model: FLZ 510 (change-over)
+        ordering_code: '17103000010'
+        description: Single thermostat, change-over contact, 10 A, 100-250 V
+        unit_power_w: 0
+        url: https://motorsandcontrol.com/pfannenberg-17103000010-change-over-contact-single-thermostat-flz-510
+        notes: Closest like-for-like
+        verified: true
+      high:
+        model: FLZ dual thermostat NO/NO
+        ordering_code: '17143000010'
+        description: Dual thermostat, two independent setpoints (e.g. fan + high-temp alarm)
+        unit_power_w: 0
+        url: https://solutionsdirectonline.com/pfannenberg-dual-enclosure-thermostat-no-no-17143000010
+        notes: Lets one device drive the fan and the alarm
+        verified: true
+  - make: STEGO
+    manufacturer: STEGO Elektrotechnik GmbH
+    tiers:
+      low:
+        model: KTS 011 (NO, 0-60 C)
+        ordering_code: 01141.0-00
+        description: Mini thermostat, NO contact, 250 V AC 10 A
+        unit_power_w: 0
+        url: https://industrial.rubicon.tech/products/stego-thermostat-2-state-regulator-no-0-60-c-250vac-10a
+        notes: NO only
+        verified: true
+      mid:
+        model: ZR 011 double thermostat (NC/NO, 0-60 C)
+        ordering_code: 01172.0-00
+        description: Dual thermostat, NC (heater) + NO (fan/alarm)
+        unit_power_w: 0
+        url: https://solutionsdirectonline.com/enclosure-dual-thermostat-ncno-0-60-c--011720-00-p5996.aspx
+        notes: Covers change-over function with two setpoints
+        verified: true
+      high:
+        model: ETR 011 electronic thermostat
+        description: Electronic thermostat with tighter hysteresis
+        url: https://dacpol.eu/en/10966-series-etr011
+        notes: Article number not confirmed
+        verified: false
+  sources:
+  - https://www.rittal.com/pdf-creator/variant/ca-en/3110000
+  - https://motorsandcontrol.com/pfannenberg-17103000010-change-over-contact-single-thermostat-flz-510
+  - https://solutionsdirectonline.com/enclosure-dual-thermostat-ncno-0-60-c--011720-00-p5996.aspx
+- part_id: IPR-2903685
+  kind: device
+  description: Interposing Relay for High Temp Alarm
+  make: Phoenix Contact
+  verified: confirmed
+  datasheet:
+    full_name: REL-IR4/L-230AC/4X21AU - Individual plug-in industrial relay
+    manufacturer: Phoenix Contact
+    summary: RIFLINE complete plug-in relay, 4 CO, 230 V AC coil, hard-gold-plated AgNi contacts, LED,
+      test button
+    power:
+      input: 230 V AC coil (179.4-317.4 V AC)
+      typical_w: 1.5
+      max_w: 1.5
+    ratings:
+      coil_current_ma: 6.5
+      contacts: 4 changeover (CO)
+      contact_material: AgNi + hard gold plating
+      gold_intact: max 30 V AC / 36 V DC, 50 mA, min 2 V / 2 mA
+      gold_burnt_off: max 250 V AC/DC, 6 A continuous, 16 A inrush 20 ms
+      dc_breaking_resistive: 52 W at 110 V DC; 48 W at 220 V DC
+      dc13: 0.22 A at 120 V; 0.11 A at 250 V
+      ac15: 1 A at 240 V
+      ac_breaking: 1500 VA at 250 V AC
+      insulation: 250 V rated, 2.5 kV impulse
+    dimensions_mm:
+      h: 27.5
+      w: 21.2
+      d: 35.6
+    mounting: plug-in into RIF-2 base (RIF-2-BPT/4X21)
+    operating_temp_c:
+      min: -40
+      max: 55
+    certifications:
+    - cULus Recognized E172140
+    - CSA
+    - VDE
+    - ISA-S71.04 G3
+    - IEC 61810
+    - IEC 60664
+    ordering_code_decoded:
+      REL-IR4: 4-pole industrial relay (RIF-2 size)
+      L: LED + test button + mechanical position indicator
+      230AC: 230 V AC coil
+      4X21: 4 changeover contacts
+      AU: hard-gold-plated contacts
+      pack: 10 pcs per pack
+    datasheet_url: https://www.phoenixcontact.com/fr/produits/2903685/pdf
+    product_url: https://www.phoenixcontact.com/fr/produits/2903685/pdf
+    notes: Coil is 230 V AC, so the high-temperature alarm loop is on auxiliary AC, not 125 V DC. Datasheet
+      gives 1.5 W max dissipation (6.5 mA x 230 V = 1.5 VA); BOM 1.56 W is close (perhaps taken from the
+      24 V AC variant's 1.58 W). Gold contacts suit low-level dry-contact signals to RTU/IED inputs; if
+      they switch >50 mA the gold burns off. RIF-1 kit counterpart 2903306 etc. not needed - this BOM
+      orders base, module and bracket separately.
+  alternatives:
+  - make: Finder
+    manufacturer: Finder S.p.A.
+    tiers:
+      low:
+        model: 40.52 2CO 8 A, 230 V AC coil
+        ordering_code: 40.52.8.230.0000
+        description: 2 CO PCB/plug-in relay, AgNi; fewer poles
+        url: https://www.elektramat.nl/finder-40-52-8-230-0000-find-relais-2w-8a-230vac
+        notes: Code seen at Elektramat and RS (249-4434). Needs a 95-series socket
+        verified: true
+      mid:
+        model: 55.34 4CO 7 A, 230 V AC coil, gold contacts
+        ordering_code: 55.34.8.230.5040
+        description: 4 CO industrial relay, AgNi+Au, lockable test button + mechanical indicator (option
+          0040)
+        url: https://powermatic.net/part/finder/55.34.8.230.5040/826418
+        notes: Code seen at distributors (Powermatic, Advantage Electric). Option decode is from Finder's
+          scheme. Needs socket 94.04/94.P4 + module 99.02
+        verified: true
+      high:
+        model: 55.34 4CO 230 V AC with LED + test button
+        ordering_code: 55.34.8.230.0050
+        description: As mid with LED indicator (option 0050), AgNi contacts
+        url: https://powermatic.net/part/finder/55.34.8.230.0050/826410
+        notes: Code seen at Powermatic. A gold-contact LED version (55.34.8.230.5050) is listed only by
+          a broker, so it is not given here
+        verified: true
+  - make: Weidmuller
+    manufacturer: Weidmuller Interface GmbH & Co. KG
+    tiers:
+      low:
+        model: D-SERIES DRM570730 (4CO 230 V AC)
+        ordering_code: '7760056086'
+        description: 4 CO industrial relay 230 V AC, no LED
+        url: https://uk.misumi-ec.com/pdf/ds/WML1/7760056086_DRM570730_eng.pdf
+        notes: Order number from the Weidmuller datasheet file name at Misumi
+        verified: true
+      mid:
+        model: D-SERIES DRM570730LT
+        ordering_code: '7760056104'
+        description: 4 CO 230 V AC 5 A with LED + test lever
+        url: https://www.distrelec.ch/en/industrial-relay-4co-ac-230v-5a-plug-in-terminal-series-drm-weidmueller-7760056104/p/30166857
+        notes: Closest like-for-like (Phoenix part has LED + test button)
+        verified: true
+      high:
+        model: D-SERIES DRM570730LT AU (gold)
+        ordering_code: '7760056190'
+        description: As mid with gold-plated contacts, like the Phoenix 2903685
+        url: https://uk.misumi-ec.com/pdf/ds/WML1/7760056190_DRM570730LT_AU_eng.pdf
+        notes: Order number from the Weidmuller datasheet file name at Misumi
+        verified: true
+  sources:
+  - https://www.phoenixcontact.com/fr/produits/2903685/pdf
+  - https://shop.shortec.com/phoenix-contact/2903685-rel-ir4l-230ac4x21au/
+  - https://www.phoenixcontact.com/fr/produits/2903686/pdf
+  - https://www.elektramat.nl/finder-40-52-8-230-0000-find-relais-2w-8a-230vac
+  - https://powermatic.net/part/finder/55.34.8.230.5040/826418
+  - https://powermatic.net/part/finder/55.34.8.230.0050/826410
+  - https://uk.misumi-ec.com/pdf/ds/WML1/7760056086_DRM570730_eng.pdf
+  - https://www.distrelec.ch/en/industrial-relay-4co-ac-230v-5a-plug-in-terminal-series-drm-weidmueller-7760056104/p/30166857
+  - https://uk.misumi-ec.com/pdf/ds/WML1/7760056190_DRM570730LT_AU_eng.pdf
+- part_id: IPR-BASE-2900934
+  kind: device
+  description: IPR Relay Base
+  make: Phoenix Contact
+  verified: confirmed
+  datasheet:
+    full_name: RIF-2-BPT/4X21 - Relay base
+    manufacturer: Phoenix Contact
+    summary: RIF-2 relay base for industrial relays with 2 or 4 CO, push-in connection, DIN rail
+    ratings:
+      rated_voltage: 250 V AC/DC
+      max_current_a: 12
+      conductor_solid_mm2: 0.14-1.5
+      conductor_flexible_mm2: 0.14-1 (with ferrule)
+      awg: 26-16
+      strip_length_mm: 8
+      accepts: REL-IR2/REL-IR4 relays; RIF plug-in modules; RIF-RH-2 bracket
+    dimensions_mm:
+      h: 96
+      w: 31
+      d: 75
+    weight_kg: 0.0675
+    mounting: NS 35/7.5 DIN rail
+    operating_temp_c:
+      min: -40
+      max: 85
+    certifications:
+    - UL Recognized E113228
+    - CSA
+    - EAC
+    - DNV
+    datasheet_url: https://www.phoenixcontact.com/it/prodotti/2900934/pdf
+    product_url: https://www.phoenixcontact.com/en-sa/products/relay-base-rif-2-bpt-4x21-2900934
+    notes: 31 mm wide per relay position. Base current rating 12 A but the REL-IR4 relay limits to 6 A.
+  alternatives:
+  - make: Finder
+    manufacturer: Finder S.p.A.
+    tiers:
+      low:
+        model: 94.04SMA screw-terminal socket
+        ordering_code: 94.04SMA
+        description: DIN-rail screw-terminal socket for 55.34 / 85.04 relays
+        url: https://nz.element14.com/finder/94-04sma/socket-85-series/dp/4269081
+        notes: Screw terminals, not push-in
+        verified: true
+      mid:
+        model: 94.P4 push-in socket
+        ordering_code: 94.P4
+        description: DIN-rail push-in socket for 55.32/55.34 relays, the like-for-like for the Phoenix
+          push-in base
+        url: https://www.conrad.com/p/finder-94p4-relay-socket-compatible-with-series-finder-55-series-finder-86-series-finder-094-series-finder-5532-f-1419657
+        notes: Code and 55-series fit seen at Conrad; that 'P' = push-in follows Finder's naming (95.P5
+          etc.) and is not stated in the listing
+        verified: true
+      high:
+        model: 94.84.3 socket, 10 A
+        ordering_code: 94.84.3
+        description: Socket 250 V 10 A for 55.32 and 55.34 relays (screw, separated input/output terminals)
+        url: https://www.rapidonline.com/catalogue/product/51-0647
+        notes: Terminal layout description from Finder's range, not from the listing
+        verified: true
+  - make: Weidmuller
+    manufacturer: Weidmuller Interface GmbH & Co. KG
+    tiers:
+      low:
+        model: SCM 4CO ECO socket
+        ordering_code: '7760056264'
+        description: Economy 4 CO socket for D-SERIES DRM570 relays
+        url: https://www.mouser.com/datasheet/2/575/7760056264_SCM_4CO_ECO_en-2471945.pdf
+        notes: Order number and type from the Weidmuller datasheet at Mouser
+        verified: true
+      mid:
+        model: SCM 4CO P push-in socket
+        ordering_code: '7760056363'
+        description: 4 CO socket with push-in terminals, like-for-like with the Phoenix push-in base
+        url: https://cdn.erply.com/files/396198/7760056363-SCM-4CO-P-en-2.pdf
+        notes: Order number and type from the Weidmuller datasheet
+        verified: true
+      high:
+        model: FS 4CO socket
+        ordering_code: '7760056107'
+        description: D-SERIES 4 CO relay socket base (FS type)
+        url: https://pacificautomation.com.au/electrical-components/relays-and-opto-couplers/general-purpose-relays/block-style-relays/weidmuller-7760056107-fs-4co-1018476
+        notes: Listed as 'FS 4CO DRM relay socket base'; feature differences vs SCM not confirmed
+        verified: true
+  sources:
+  - https://www.phoenixcontact.com/it/prodotti/2900934/pdf
+  - https://www.phoenixcontact.com/en-sa/products/relay-base-rif-2-bpt-4x21-2900934
+  - https://nz.element14.com/phoenix-contact/2900934/relay-socket-250v-din-rail/dp/3256657
+  - https://nz.element14.com/finder/94-04sma/socket-85-series/dp/4269081
+  - https://www.conrad.com/p/finder-94p4-relay-socket-compatible-with-series-finder-55-series-finder-86-series-finder-094-series-finder-5532-f-1419657
+  - https://www.rapidonline.com/catalogue/product/51-0647
+  - https://www.mouser.com/datasheet/2/575/7760056264_SCM_4CO_ECO_en-2471945.pdf
+  - https://cdn.erply.com/files/396198/7760056363-SCM-4CO-P-en-2.pdf
+  - https://pacificautomation.com.au/electrical-components/relays-and-opto-couplers/general-purpose-relays/block-style-relays/weidmuller-7760056107-fs-4co-1018476
+- part_id: IPR-SUPP-2900944
+  kind: device
+  description: Suppression Module
+  make: Phoenix Contact
+  verified: confirmed
+  datasheet:
+    full_name: RIF-LV-120-230AC/110DC - Plug-in module
+    manufacturer: Phoenix Contact
+    summary: Plug-in LED + varistor suppression module for RIF-1...4 bases
+    ratings:
+      function: yellow status LED + varistor surge suppression
+      nominal_voltage: 120-230 V AC +/-20 %; 110 V DC +/-20 %
+      fits: RIF-1, RIF-2, RIF-3, RIF-4 bases
+    mounting: plug-in into relay base
+    datasheet_url: https://www.phoenixcontact.com/us/products/2900944/pdf
+    product_url: https://www.phoenixcontact.com/us/products/2900944/pdf
+    notes: 'Correct for the 230 V AC coil of 2903685. Sister modules: RIF-RC-120-230UC (2900951) RC, RIF-V-120-230UC
+      (2900948) varistor only, RIF-LDP-110DC (2900941) LED+freewheel diode for 110 V DC coils.'
+  alternatives:
+  - make: Finder
+    manufacturer: Finder S.p.A.
+    tiers:
+      low:
+        model: 99.02 LED module 110-240 V
+        ordering_code: 99.02.0.230.59
+        description: LED indication only (no suppression) for 94 sockets
+        url: https://www.standardelectricsupply.com/347328-Finder-9902023059
+        notes: Code seen at Standard Electric Supply (as 9902023059); LED-only function from Finder's
+          code scheme
+        verified: true
+      mid:
+        model: 99.02 LED + varistor module 110-240 V AC/DC
+        ordering_code: 99.02.0.230.98
+        description: Coil indication and EMC suppression (LED + varistor), like-for-like with RIF-LV-120-230AC/110DC
+        url: https://www.rapidonline.com/finder-99-02-0-230-98-coil-indication-and-emc-suppression-module-110-240vac-dc-51-0442
+        notes: Also RS 623-9692
+        verified: true
+      high:
+        model: 99.02 RC module 110-240 V
+        ordering_code: 99.02.0.230.09
+        description: RC suppression module (better for AC coils), no LED
+        url: https://jp.rs-online.com/web/p/pluggable-function-modules/6239721
+        notes: RS 623-9721 lists it as an RC module
+        verified: true
+  - make: Weidmuller
+    manufacturer: Weidmuller Interface GmbH & Co. KG
+    tiers:
+      low:
+        model: RIM 3 110/230VAC (RC, no LED)
+        ordering_code: '7760056014'
+        description: Plug-in RC suppression module without LED for D-SERIES sockets, 110/230 V AC
+        url: https://www.mouser.lt/datasheet/3/864/1/7760056014_RIM_3_110_230VAC_en.pdf
+        notes: Conrad datasheet title confirms 'RC element without LED'
+        verified: true
+      mid:
+        model: RIM 3 110/230VAC LED
+        ordering_code: '7760056045'
+        description: As low with LED indication, closest to the Phoenix LED + suppression module
+        url: https://datasheet.weidmueller.com/pdf/en/7760056045/scope/2
+        notes: The type 'RIM 3 110/230VAC LED' is confirmed (van Egmond listing); 7760056045 is the Weidmuller
+          datasheet returned for that name but the pairing was not read on a page
+        verified: false
+      high:
+        model: RIM 5 6/230VAC
+        ordering_code: '1174670000'
+        description: Weidmuller RIM 5 plug-in module, 6-230 V AC
+        url: https://www.mouser.lt/datasheet/3/864/1/1174670000_RIM_5_6_230VAC_en.pdf
+        notes: Order number and type from the datasheet file name. Its function and fit in SCM/D-SERIES
+          sockets were not confirmed; check before use
+        verified: true
+  sources:
+  - https://www.phoenixcontact.com/us/products/2900944/pdf
+  - https://www.phoenixcontact.com/en-de/products/relay-base-rif-1-bpt-2x21-2900931
+  - https://www.rapidonline.com/finder-99-02-0-230-98-coil-indication-and-emc-suppression-module-110-240vac-dc-51-0442
+  - https://jp.rs-online.com/web/p/pluggable-function-modules/6239721
+  - https://www.standardelectricsupply.com/347328-Finder-9902023059
+  - https://www.mouser.lt/datasheet/3/864/1/7760056014_RIM_3_110_230VAC_en.pdf
+  - https://portal.vanegmond.nl/producten/weidmuller-toebehoren-onderdelen-voor-schakelrelais-rim-3-110-230vac-led/2237441
+  - https://www.mouser.lt/datasheet/3/864/1/1174670000_RIM_5_6_230VAC_en.pdf
+- part_id: IPR-BRACKET-2900954
+  kind: device
+  description: Retaining Bracket - RIF-RH-2
+  make: Phoenix Contact
+  verified: confirmed
+  datasheet:
+    full_name: RIF-RH-2 - Retaining bracket
+    manufacturer: Phoenix Contact
+    summary: Relay retaining bracket with ejector function and marking holder for RIF-2 bases
+    ratings:
+      fits: RIF-2 relay base
+      colour: orange
+      pack: 10 pcs
+    mounting: clips on RIF-2 base
+    datasheet_url: https://www.mouser.com/datasheet/2/324/4/2900954-1468416.pdf
+    product_url: https://rspsupply.com/p-836952-phoenix-contact-2900954-retaining-bracket-rif-rh-2.aspx
+    notes: Metal-free variant RIF-RHM-2 also exists. Sold in packs of 10 (MOQ 10).
+  alternatives:
+  - make: Finder
+    manufacturer: Finder S.p.A.
+    tiers:
+      low:
+        model: 094.71 metal retaining clip
+        ordering_code: '094.71'
+        description: Metal retaining clip for 94 sockets
+        url: https://www.standardelectricsupply.com/FINDER-09471-Retaining-Clip
+        notes: Listed as Finder 09471 'Retaining Clip'; metal material from Finder's range, not the listing
+        verified: true
+      mid:
+        model: 094.91.3 plastic retaining and release clip
+        ordering_code: 094.91.3
+        description: Blue plastic retaining and release (ejector) clip for 94 sockets, like-for-like with
+          RIF-RH-2
+        url: https://www.rapidonline.com/finder-094-91-3-plastic-retaining-and-release-clip-blue-for-94-series-sockets-51-0649
+        notes: Also at Buerklin
+        verified: true
+      high:
+        model: 094.00.4 marker tag
+        ordering_code: 094.00.4
+        description: Marker tag for 94 sockets; add to the clip to match the RIF-RH-2 marking holder
+        url: https://www.standardelectricsupply.com/358087-Finder-094004
+        notes: Code seen (as 094004); that it is the 94-socket marker tag follows Finder's accessory naming
+          and is not stated in the listing
+        verified: false
+  - make: Weidmuller
+    manufacturer: Weidmuller Interface GmbH & Co. KG
+    tiers:
+      low:
+        model: Retaining clip 7760056108
+        ordering_code: '7760056108'
+        description: Weidmuller D-SERIES retaining clip
+        url: https://rspsupply.com/p-212710-weidmuller-7760056108-retaining-clip.aspx
+        notes: Listed only as 'retaining clip'; check which socket type (FS/SCM) it fits
+        verified: true
+      mid:
+        model: SCM CLIP P
+        ordering_code: '7760056367'
+        description: Plastic retaining clip for SCM sockets (DRM relays)
+        url: https://eshop.weidmueller.com/es/scm-clip-p/p/7760056367
+        notes: Weidmuller e-shop listing
+        verified: true
+      high:
+        model: SLD CLIP 4CO M
+        ordering_code: '7760056235'
+        description: Weidmuller 4 CO clip (type name from the datasheet title)
+        url: https://mouser.com/datasheet/2/575/7760056235_SLD_CLIP_4CO_M_en-2471929.pdf
+        notes: Function and socket fit not read; confirm before use
+        verified: true
+  sources:
+  - https://www.mouser.com/datasheet/2/324/4/2900954-1468416.pdf
+  - https://www.standardelectricsupply.com/FINDER-09471-Retaining-Clip
+  - https://www.rapidonline.com/finder-094-91-3-plastic-retaining-and-release-clip-blue-for-94-series-sockets-51-0649
+  - https://www.standardelectricsupply.com/358087-Finder-094004
+  - https://rspsupply.com/p-212710-weidmuller-7760056108-retaining-clip.aspx
+  - https://eshop.weidmueller.com/es/scm-clip-p/p/7760056367
+  - https://mouser.com/datasheet/2/575/7760056235_SLD_CLIP_4CO_M_en-2471929.pdf
+- part_id: SOCKET-730076
+  kind: device
+  description: Power Socket for Auxiliary Power Supply
+  make: Legrand
+  verified: partial
+  datasheet:
+    full_name: Synergy 2 gang 13 A single pole switched socket outlet, white (730076)
+    manufacturer: Legrand
+    summary: BS 1363 (Type G) twin 13 A switched wall socket outlet, single-pole switching, white moulded
+      plate
+    ratings:
+      rated_current_a: 13
+      rated_voltage: 250 V AC
+      gangs: 2
+      switching: single pole
+      socket_standard: BS 1363 (Type G)
+      colour: white
+    mounting: Flush or surface wall box (standard UK/Gulf 2-gang box, ordered separately); NOT a DIN-rail
+      device
+    product_url: https://legrand.co.uk/en/catalog/products/synergy-2-gang-13a-single-pole-switched-socket-outlet-white-730076
+    notes: 'Identified: Legrand 730076 is the Synergy range 2-gang 13 A single-pole switched socket outlet,
+      white (Legrand UK and Legrand e-catalogue pages, "Socket outlet Synergy 2 gang switched 13 250 V
+      white 730076"). It is a BS 1363 wall-plate wiring device, not a DIN-rail socket, so the BOM needs
+      a 2-gang back box (flush or surface) or a cabinet-mount plate, and 13 A (not 10 A) is the rating.
+      Type G suits Saudi Arabia (SASO 2203 is BS 1363-based). Sister codes: 730060 = 1-gang 13 A DP switched,
+      730078 = 1-gang SP switched with USB.'
+  alternatives:
+  - make: Schneider Electric
+    manufacturer: Schneider Electric
+    tiers:
+      low:
+        model: Lisse 2 gang 13 A switched socket, white, without instructions
+        ordering_code: GGBL3020NIS
+        description: Same function, bulk-pack version without instruction leaflet
+        url: https://eshop.se.com/qa/lisse-switched-socket-without-instructions-13-a-230-v-2-gangs-white-ggbl3020nis.html
+        notes: Listed on the Schneider Qatar e-shop
+        verified: true
+      mid:
+        model: Lisse 2 gang 13 A single pole switched socket, white
+        ordering_code: GGBL3020S
+        description: BS 1363 twin SP switched socket, white moulded; like-for-like
+        url: https://cdn.yesss.co.uk/documents/1177896_03_GGBL3020S_Datasheet_2f24dc89370a0be3bdcae061f76203a7.pdf
+        notes: Code from the Schneider datasheet file at Yesss; Screwfix lists the 2-gang SP switched
+          Lisse socket
+        verified: true
+      high:
+        model: Lisse 2 gang 13 A double pole switched socket, white
+        ordering_code: GGBL3020DS
+        description: Double-pole switching (isolates L and N)
+        url: https://rapidonline.com/catalogue/product/65-2728
+        notes: Rapid lists 'GGBL3020DS LWM 2 Gang 13A DP Switched Mains Socket'
+        verified: true
+  - make: MK Electric (Honeywell)
+    manufacturer: Honeywell (MK Electric)
+    tiers:
+      low:
+        model: Logic Plus 2 gang 13 A DP switched socket, white
+        ordering_code: K2747WHI
+        description: BS 1363 twin DP switched socket, white moulded
+        url: https://cpcireland.farnell.com/mk/k2747whi/mk-2-gang-switched-socket/dp/PL00563
+        notes: Widely stocked in the Gulf; also RS 222-7910
+        verified: true
+      mid:
+        model: Logic Plus Rapid Fix 2 gang 13 A DP switched socket, white
+        ordering_code: K2747STWHI
+        description: As low with screwless (push) terminals for faster wiring
+        url: https://sparksdirect.co.uk/2-gang-13a-dp-switched-socket-with-screwless-terminal-connectors-white-plastic-mk-logic-plus-k2747stwhi-rapid-fix
+        notes: Replaces Phoenix Contact, which has no BS 1363 socket outlet
+        verified: true
+      high:
+        model: Metalclad Plus 2 gang 13 A DP switched socket with surface box
+        ordering_code: K2946ALM
+        description: Metal-clad twin DP switched socket complete with surface mounting box; robust for
+          cabinet or plant-room mounting
+        url: https://www.sparksdirect.co.uk/product/mk-metal-clad-2-gang-13a-switched-socket-double-pole-with-surface-mounting-box-mk-metalclad-plus-k2946alm
+        notes: No separate back box needed
+        verified: true
+  sources:
+  - https://legrand.co.uk/en/catalog/products/synergy-2-gang-13a-single-pole-switched-socket-outlet-white-730076
+  - https://legrand.com/ecatalogue/en/catalog/products/socket-outlet-synergy-2-gang-switched-13-250-v-white-730076
+  - https://eshop.se.com/qa/lisse-switched-socket-without-instructions-13-a-230-v-2-gangs-white-ggbl3020nis.html
+  - https://cdn.yesss.co.uk/documents/1177896_03_GGBL3020S_Datasheet_2f24dc89370a0be3bdcae061f76203a7.pdf
+  - https://rapidonline.com/catalogue/product/65-2728
+  - https://cpcireland.farnell.com/mk/k2747whi/mk-2-gang-switched-socket/dp/PL00563
+  - https://sparksdirect.co.uk/2-gang-13a-dp-switched-socket-with-screwless-terminal-connectors-white-plastic-mk-logic-plus-k2747stwhi-rapid-fix
+  - https://www.sparksdirect.co.uk/product/mk-metal-clad-2-gang-13a-switched-socket-double-pole-with-surface-mounting-box-mk-metalclad-plus-k2946alm
+- part_id: COD-NEG-IRND150F12
+  kind: device
+  description: Change Over Diodes (Negative)
+  make: Ruttonsha
+  verified: unverified
+  datasheet:
+    full_name: IRND150F12 diode module (Ruttonsha International Rectifier / RIR Power Electronics)
+    manufacturer: Ruttonsha International Rectifier Ltd (now RIR Power Electronics Ltd) - not confirmed
+    summary: Dual fast-recovery diode module, common anode, 150 A, 1200 V (inferred)
+    ratings:
+      configuration: common anode (inferred)
+      vrrm_v: 1200
+      current_a: 150
+      ifsm_a: 1800
+      package: SEMIPACK 2 style, isolated base, screw terminals (inferred)
+    dimensions_mm:
+      h: 30
+      w: 34
+      d: 94
+    mounting: screw-mounted on heatsink / panel
+    notes: No Ruttonsha datasheet could be found online. The part number mirrors Semikron's naming (SKND150F12
+      = common anode, SKMD150F12 = common cathode, SKKD = series pair; 150 = A, F = fast recovery, 12
+      = 1200 V). Ratings above are from Semikron SKND 150F12 and need confirmation from Ruttonsha. Common
+      anode = negative-pole change-over (two feeds' negatives joined), which matches the BOM "negative"
+      role. 1200 V is far above the 125 V DC need; forward drop (~1 V) at load current is the real heat
+      term - add to heat budget. Requires heatsink depending on load.
+  alternatives:
+  - make: Semikron Danfoss
+    manufacturer: Semikron Danfoss
+    tiers:
+      low:
+        model: SKND 105F12
+        ordering_code: SKND105F12
+        description: Common-anode fast diode module, ~100 A class, 1200 V
+        url: https://shop.richardsonrfpd.com/Products/Product/SKND105F12
+        notes: Lower current; ratings not read
+        verified: true
+      mid:
+        model: SKND 150F12
+        ordering_code: 230B1844
+        description: Common anode, 1200 V, 150 A, IFSM 1800 A, SEMIPACK 2 (legacy no. 07910550)
+        url: https://www.semikron-danfoss.com/products/p/sknd-150f12-230b1844
+        notes: Direct equivalent
+        verified: true
+      high:
+        model: SKKD 150F12
+        ordering_code: 230B1837
+        description: Series-connected pair, 1200 V 150 A (different topology - only if wiring changed)
+        url: https://www.semikron-danfoss.com/products/p/skkd-150f12-230b1837
+        notes: Not a drop-in; listed because no higher-current SKND was verified
+        verified: true
+  - make: IXYS (Littelfuse)
+    manufacturer: Littelfuse / IXYS
+    tiers:
+      low:
+        model: MEA75-12DA
+        ordering_code: MEA75-12DA
+        description: Common-anode fast dual diode, 1200 V 75 A, TO-240AA
+        url: https://uk.rs-online.com/web/p/schottky-diodes-rectifiers/1258054
+        notes: Half the current rating
+        verified: true
+      mid:
+        model: DSEI2X101-12A
+        ordering_code: DSEI2X101-12A
+        description: Two isolated 1200 V fast diodes, about 2 x 90 A, SOT-227B; wire the two anodes together
+          for a common-anode pair
+        url: https://uk.rs-online.com/web/p/schottky-diodes-rectifiers/0192433
+        notes: IXYS has no 150 A common-anode TO-240 part (MEA range jumps from 75 A to 250 A). Lower
+          current than the BOM part; derate or parallel
+        verified: true
+      high:
+        model: MEA250-12DA
+        ordering_code: MEA250-12DA
+        description: Common-anode FRED module 2 x 260 A, 1200 V, Y4-M6
+        url: https://www.ozdisan.com/en/p/module-diodes-388/ixys-mea250-12da-361957
+        notes: Higher current; also listed at TME
+        verified: true
+  sources:
+  - https://www.semikron-danfoss.com/products/p/sknd-150f12-230b1844
+  - https://www.tme.eu/en/katalog/diode-modules_113441/params/b227_load-current/p1440742_150a/
+  - https://www.tme.eu/en/katalog/diode-modules_113441/params/b35_case/p1441047_semipack2/
+  - https://uk.rs-online.com/web/p/schottky-diodes-rectifiers/1258054
+  - https://uk.rs-online.com/web/p/schottky-diodes-rectifiers/0192433
+- part_id: COD-POS-IRMD150F12
+  kind: device
+  description: Change Over Diodes (Positive)
+  make: Ruttonsha
+  verified: unverified
+  datasheet:
+    full_name: IRMD150F12 diode module (Ruttonsha International Rectifier / RIR Power Electronics)
+    manufacturer: Ruttonsha International Rectifier Ltd (now RIR Power Electronics Ltd) - not confirmed
+    summary: Dual fast-recovery diode module, common cathode, 150 A, 1200 V (inferred)
+    ratings:
+      configuration: common cathode (inferred)
+      vrrm_v: 1200
+      current_a: 150
+      ifsm_a: 1800
+      package: SEMIPACK 2 style (inferred)
+    dimensions_mm:
+      h: 30
+      w: 34
+      d: 94
+    mounting: screw-mounted on heatsink / panel
+    notes: No Ruttonsha datasheet found. Mirrors Semikron SKMD 150F12 (common cathode, 1200 V, 150 A,
+      IFSM 1800 A, SEMIPACK 2, 0.16 kg). Common cathode = positive-pole diode-OR of the two 125 V DC feeds,
+      matching the BOM "positive" role. Confirm ratings with Ruttonsha.
+  alternatives:
+  - make: Semikron Danfoss
+    manufacturer: Semikron Danfoss
+    tiers:
+      low:
+        model: SKKD 105F12
+        ordering_code: SKKD105F12
+        description: Series pair ~100 A 1200 V (different topology)
+        url: https://semikron-danfoss.com/products/p/skkd-105f12-07918480
+        notes: Not drop-in; SKMD 105F12 not verified
+        verified: true
+      mid:
+        model: SKMD 150F12
+        ordering_code: 230B1843
+        description: Common cathode, 1200 V, 150 A, IFSM 1800 A, SEMIPACK 2 (legacy no. 07910540)
+        url: https://www.semikron-danfoss.com/products/p/skmd-150f12-230b1843
+        notes: Direct equivalent
+        verified: true
+      high:
+        model: SKKE 310F12 (x2)
+        ordering_code: SKKE310F12
+        description: Single fast diode module 1200 V 310 A, SEMIPACK 2; two modules with cathodes bonded
+          give a 310 A common-cathode diode-OR
+        url: https://www.tme.eu/en/katalog/diode-modules_113441/params/b35_case/p1441047_semipack2/
+        notes: No SKMD above 150 A at 1200 V was found (TME SEMIPACK 2 list shows SKMD 150F12 only). Order
+          qty 2 per BOM item; needs heatsink
+        verified: true
+  - make: IXYS (Littelfuse)
+    manufacturer: Littelfuse / IXYS
+    tiers:
+      low:
+        model: DSEK60-12A
+        ordering_code: DSEK60-12A
+        description: Common-cathode dual FRED 1200 V 2 x 30 A, TO-247
+        url: https://uk.rs-online.com/web/p/schottky-diodes-rectifiers/7115320P
+        notes: Much lower current; only for light loads
+        verified: true
+      mid:
+        model: MEK150-04DA
+        ordering_code: MEK150-04DA
+        description: Common-cathode dual diode 400 V 150 A, TO-240AA
+        url: https://www.tme.eu/en/katalog/diode-modules_113441/params/b227_load-current/p1440742_150a/
+        notes: 400 V still ample for 125 V DC; same current
+        verified: true
+      high:
+        model: MEK250-12DA
+        ordering_code: MEK250-12DA
+        description: Common-cathode FRED module 2 x 260 A, 1200 V, Y4-M6
+        url: https://www.tme.com/th/en/details/mek250-12da/diode-modules/ixys/
+        notes: Higher current; common-cathode twin of MEA250-12DA
+        verified: true
+  sources:
+  - https://www.semikron-danfoss.com/products/p/skmd-150f12-230b1843
+  - https://www.tme.eu/en/katalog/diode-modules_113441/params/b227_load-current/p1440742_150a/
+  - https://www.tme.eu/en/katalog/diode-modules_113441/params/b35_case/p1441047_semipack2/
+  - https://www.tme.com/th/en/details/mek250-12da/diode-modules/ixys/

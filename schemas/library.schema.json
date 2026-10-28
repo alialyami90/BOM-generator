@@ -1,0 +1,759 @@
+{
+  "$defs": {
+    "AuxContact": {
+      "additionalProperties": false,
+      "description": "DC auxiliary alarm contact (spec: Inputs, commodity catalogues).",
+      "properties": {
+        "make": {
+          "title": "Make",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "ordering_code": {
+          "title": "Ordering Code",
+          "type": "string"
+        }
+      },
+      "required": [
+        "make",
+        "model",
+        "ordering_code"
+      ],
+      "title": "AuxContact",
+      "type": "object"
+    },
+    "Busbar": {
+      "additionalProperties": false,
+      "description": "Busbar entry (spec: Inputs, commodity catalogues).",
+      "properties": {
+        "description": {
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "description"
+      ],
+      "title": "Busbar",
+      "type": "object"
+    },
+    "Catalogues": {
+      "additionalProperties": false,
+      "description": "Commodity catalogues held by the library (spec: Inputs, 1. Device library).",
+      "properties": {
+        "aux_contact": {
+          "$ref": "#/$defs/AuxContact"
+        },
+        "busbars": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Busbar"
+          },
+          "minProperties": 1,
+          "title": "Busbars",
+          "type": "object"
+        },
+        "housekeeping": {
+          "$ref": "#/$defs/Housekeeping"
+        },
+        "mcb": {
+          "$ref": "#/$defs/McbCatalogue"
+        },
+        "terminal_blocks": {
+          "additionalProperties": {
+            "$ref": "#/$defs/TerminalBlockType"
+          },
+          "minProperties": 1,
+          "title": "Terminal Blocks",
+          "type": "object"
+        }
+      },
+      "required": [
+        "mcb",
+        "aux_contact",
+        "terminal_blocks",
+        "busbars",
+        "housekeeping"
+      ],
+      "title": "Catalogues",
+      "type": "object"
+    },
+    "Category": {
+      "enum": [
+        "network_switch",
+        "firewall",
+        "gateway",
+        "patch_panel",
+        "gps_clock",
+        "rtac",
+        "io_chassis",
+        "workstation",
+        "monitor",
+        "peripheral",
+        "sfp",
+        "cable_manager",
+        "serial_cable",
+        "component",
+        "lamp",
+        "door_switch",
+        "fan",
+        "vent_filter",
+        "thermostat",
+        "relay",
+        "socket",
+        "change_over_diode",
+        "annunciator",
+        "software",
+        "cable",
+        "accessory"
+      ],
+      "title": "Category",
+      "type": "string"
+    },
+    "ChangeOverDiodes": {
+      "additionalProperties": false,
+      "description": "COD-1 and COD-2 device records (spec: Tags, other device type codes).",
+      "properties": {
+        "negative": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+          "title": "Negative",
+          "type": "string"
+        },
+        "positive": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+          "title": "Positive",
+          "type": "string"
+        }
+      },
+      "required": [
+        "negative",
+        "positive"
+      ],
+      "title": "ChangeOverDiodes",
+      "type": "object"
+    },
+    "ChildRule": {
+      "additionalProperties": false,
+      "description": "A kit part added as a child row (spec: Inputs, ``children``).",
+      "properties": {
+        "part_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+          "title": "Part Id",
+          "type": "string"
+        },
+        "qty": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "const": "cores"
+            }
+          ],
+          "default": 1,
+          "title": "Qty"
+        }
+      },
+      "required": [
+        "part_id"
+      ],
+      "title": "ChildRule",
+      "type": "object"
+    },
+    "DeviceType": {
+      "additionalProperties": false,
+      "description": "One orderable part (spec: Inputs, 1. Device library).",
+      "properties": {
+        "alarm_on_branch_mcb": {
+          "default": false,
+          "title": "Alarm On Branch Mcb",
+          "type": "boolean"
+        },
+        "category": {
+          "$ref": "#/$defs/Category"
+        },
+        "children": {
+          "items": {
+            "$ref": "#/$defs/ChildRule"
+          },
+          "title": "Children",
+          "type": "array"
+        },
+        "cores": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cores"
+        },
+        "description_template": {
+          "title": "Description Template",
+          "type": "string"
+        },
+        "excluded_from_power": {
+          "default": false,
+          "description": "Defaults to true when the part has no supply_type, else false.",
+          "title": "Excluded From Power",
+          "type": "boolean"
+        },
+        "hwio_points": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Hwio Points",
+          "type": "integer"
+        },
+        "load_type": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LoadType"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "loose_items": {
+          "items": {
+            "$ref": "#/$defs/LooseItem"
+          },
+          "title": "Loose Items",
+          "type": "array"
+        },
+        "make": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Make"
+        },
+        "min_branch_mcb_a": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Branch Mcb A"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "ordering_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ordering Code"
+        },
+        "part_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+          "title": "Part Id",
+          "type": "string"
+        },
+        "ports": {
+          "items": {
+            "$ref": "#/$defs/PortGroup"
+          },
+          "title": "Ports",
+          "type": "array"
+        },
+        "power_supplies": {
+          "default": 0,
+          "enum": [
+            0,
+            1,
+            2
+          ],
+          "title": "Power Supplies",
+          "type": "integer"
+        },
+        "purdue_level": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PurdueLevel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "supply_type": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SupplyType"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "tag_pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tag Pattern"
+        },
+        "tag_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tag Type"
+        },
+        "terminals": {
+          "items": {
+            "$ref": "#/$defs/TerminalRule"
+          },
+          "title": "Terminals",
+          "type": "array"
+        },
+        "unit_power_w": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit Power W"
+        },
+        "voltage_v": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Voltage V"
+        }
+      },
+      "required": [
+        "part_id",
+        "category",
+        "description_template"
+      ],
+      "title": "DeviceType",
+      "type": "object"
+    },
+    "FanRef": {
+      "additionalProperties": false,
+      "properties": {
+        "airflow_m3h": {
+          "exclusiveMinimum": 0,
+          "title": "Airflow M3H",
+          "type": "number"
+        },
+        "part_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+          "title": "Part Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "part_id",
+        "airflow_m3h"
+      ],
+      "title": "FanRef",
+      "type": "object"
+    },
+    "Housekeeping": {
+      "additionalProperties": false,
+      "description": "Housekeeping kit roles (spec: Inputs, commodity catalogues).",
+      "properties": {
+        "change_over_diodes": {
+          "$ref": "#/$defs/ChangeOverDiodes"
+        },
+        "door_switch": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HousekeepingRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "fan": {
+          "$ref": "#/$defs/FanRef"
+        },
+        "ipr_kit": {
+          "$ref": "#/$defs/HousekeepingRef"
+        },
+        "lamp": {
+          "$ref": "#/$defs/HousekeepingRef"
+        },
+        "socket": {
+          "$ref": "#/$defs/SocketRef"
+        },
+        "thermostat": {
+          "$ref": "#/$defs/HousekeepingRef"
+        },
+        "vent_filter": {
+          "$ref": "#/$defs/HousekeepingRef"
+        }
+      },
+      "required": [
+        "lamp",
+        "fan",
+        "vent_filter",
+        "thermostat",
+        "ipr_kit",
+        "change_over_diodes",
+        "socket"
+      ],
+      "title": "Housekeeping",
+      "type": "object"
+    },
+    "HousekeepingRef": {
+      "additionalProperties": false,
+      "description": "Housekeeping role filled by a device record (ADR 0010 item 1).",
+      "properties": {
+        "part_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+          "title": "Part Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "part_id"
+      ],
+      "title": "HousekeepingRef",
+      "type": "object"
+    },
+    "LoadType": {
+      "enum": [
+        "CONTINUOUS",
+        "INTERMITTENT"
+      ],
+      "title": "LoadType",
+      "type": "string"
+    },
+    "LooseItem": {
+      "additionalProperties": false,
+      "description": "A part shipped loose, not in the panel (spec: Inputs, ``loose_items``).",
+      "properties": {
+        "part_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+          "title": "Part Id",
+          "type": "string"
+        },
+        "qty": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "const": "1 Lot"
+            }
+          ],
+          "default": 1,
+          "title": "Qty"
+        },
+        "tag": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tag"
+        }
+      },
+      "required": [
+        "part_id"
+      ],
+      "title": "LooseItem",
+      "type": "object"
+    },
+    "McbCatalogue": {
+      "additionalProperties": false,
+      "description": "MCB family by rating (spec: Inputs, commodity catalogues).",
+      "properties": {
+        "code_pattern": {
+          "title": "Code Pattern",
+          "type": "string"
+        },
+        "family": {
+          "title": "Family",
+          "type": "string"
+        },
+        "make": {
+          "title": "Make",
+          "type": "string"
+        },
+        "poles": {
+          "default": 2,
+          "exclusiveMinimum": 0,
+          "title": "Poles",
+          "type": "integer"
+        },
+        "ratings_a": {
+          "items": {
+            "exclusiveMinimum": 0,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Ratings A",
+          "type": "array"
+        }
+      },
+      "required": [
+        "family",
+        "make",
+        "ratings_a",
+        "code_pattern"
+      ],
+      "title": "McbCatalogue",
+      "type": "object"
+    },
+    "Media": {
+      "enum": [
+        "MM",
+        "SM",
+        "RJ45"
+      ],
+      "title": "Media",
+      "type": "string"
+    },
+    "PortGroup": {
+      "additionalProperties": false,
+      "description": "A count of identical ports on a device (spec: Inputs, ``ports``).",
+      "properties": {
+        "count": {
+          "exclusiveMinimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "kind": {
+          "$ref": "#/$defs/PortKind"
+        },
+        "media": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Media"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "speed": {
+          "$ref": "#/$defs/PortSpeed"
+        }
+      },
+      "required": [
+        "count",
+        "speed",
+        "kind"
+      ],
+      "title": "PortGroup",
+      "type": "object"
+    },
+    "PortKind": {
+      "enum": [
+        "fixed",
+        "sfp_slot"
+      ],
+      "title": "PortKind",
+      "type": "string"
+    },
+    "PortSpeed": {
+      "enum": [
+        "10M",
+        "100M",
+        "1G",
+        "10G"
+      ],
+      "title": "PortSpeed",
+      "type": "string"
+    },
+    "PurdueLevel": {
+      "enum": [
+        "L1",
+        "L2",
+        "EXT",
+        "L3"
+      ],
+      "title": "PurdueLevel",
+      "type": "string"
+    },
+    "SocketRef": {
+      "additionalProperties": false,
+      "properties": {
+        "part_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+          "title": "Part Id",
+          "type": "string"
+        },
+        "rating_a": {
+          "exclusiveMinimum": 0,
+          "title": "Rating A",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "part_id",
+        "rating_a"
+      ],
+      "title": "SocketRef",
+      "type": "object"
+    },
+    "SupplyType": {
+      "enum": [
+        "VDC",
+        "VAC"
+      ],
+      "title": "SupplyType",
+      "type": "string"
+    },
+    "TerminalBlockType": {
+      "additionalProperties": false,
+      "description": "Terminal block by type (spec: Inputs, commodity catalogues).",
+      "properties": {
+        "make": {
+          "title": "Make",
+          "type": "string"
+        },
+        "ordering_code": {
+          "title": "Ordering Code",
+          "type": "string"
+        }
+      },
+      "required": [
+        "make",
+        "ordering_code"
+      ],
+      "title": "TerminalBlockType",
+      "type": "object"
+    },
+    "TerminalRule": {
+      "additionalProperties": false,
+      "description": "A terminal strip a unit adds (spec: Inputs, ``terminals``; ADR 0010 item 3).",
+      "properties": {
+        "block": {
+          "title": "Block",
+          "type": "string"
+        },
+        "count": {
+          "exclusiveMinimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "first_slot": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z]$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "First Slot"
+        },
+        "per": {
+          "default": "unit",
+          "enum": [
+            "unit",
+            "serial_port"
+          ],
+          "title": "Per",
+          "type": "string"
+        },
+        "strip": {
+          "title": "Strip",
+          "type": "string"
+        }
+      },
+      "required": [
+        "strip",
+        "block",
+        "count"
+      ],
+      "title": "TerminalRule",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The device library file (spec: Inputs, 1. Device library).",
+  "properties": {
+    "catalogues": {
+      "$ref": "#/$defs/Catalogues"
+    },
+    "devices": {
+      "items": {
+        "$ref": "#/$defs/DeviceType"
+      },
+      "minItems": 1,
+      "title": "Devices",
+      "type": "array"
+    }
+  },
+  "required": [
+    "devices",
+    "catalogues"
+  ],
+  "title": "Library",
+  "type": "object"
+}

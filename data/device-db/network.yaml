@@ -1,0 +1,1185 @@
+# Device database: Network devices, transceivers and fibre management (cabinets 001/002).
+# Researched datasheet facts and alternative brands for the example project's parts.
+# Device part ids match examples/library.yaml, where the library fields live.
+# Catalogue ids (MCB-*, AUX-*, TB-*, BUSBAR-*, ENCL-*) are local to this database.
+# Format and field meanings: data/device-db/README.md
+schema_version: 1
+area: network
+title: Network devices, transceivers and fibre management (cabinets 001/002)
+records:
+- part_id: RST2228-L2
+  kind: device
+  description: LAN-{lan} Industrial Ethernet switch (Level-2)
+  make: Ruggedcom
+  verified: confirmed
+  datasheet:
+    full_name: SIMATIC NET RUGGEDCOM RST2228 managed Layer 2 19" rack switch with 10 Gbit/s uplinks
+    manufacturer: Siemens
+    summary: Fanless 1U modular Layer-2 Ethernet switch, 6 x 4-port media slots (24 ports) plus 4 x 1/10G
+      SFP+ uplinks, IEC 61850-3 / IEEE 1613.
+    power:
+      input: 88-300 VDC / 85-264 VAC (HV PSU, code C); dual redundant
+      redundant_psu: true
+      max_w: 77
+    ratings:
+      total_ports: 28
+      gigabit_slot_ports: 24 x 10/100/1000 (6 slots x 4 ports)
+      uplinks: 4 x 1/10 Gbit/s SFP+ (fixed, slot 0)
+      layer: L2, IEEE 1588 v2
+      degree_of_protection: IP40
+      vibration_shock: IEC 60255-21-1 / IEC 60255-21-2 class 2
+    ports:
+    - 4 x 1/10GBASE-X SFP+ uplinks (fixed)
+    - 'Slots 1-5 (B-F): RMM2972-4SFP, 4 x SFP each = 20 x 100BASE-FX/1000BASE-X SFP cages (SFPs not included)'
+    - 'Slot 6 (G): blank module RMM2931-4'
+    dimensions_mm:
+      h: 44.45
+      w: 440
+      d: 345
+    rack_units: 1
+    weight_kg: 8.0
+    mounting: 19" rack (rack + panel mount kit included, ordering digit 5)
+    operating_temp_c:
+      min: -40
+      max: 85
+    certifications:
+    - IEC 61850-3
+    - IEEE 1613
+    - IEC 61000-6-2
+    - CSA/UL 60950
+    - CE
+    ordering_code_decoded:
+      6GK6222-6AB00: RUGGEDCOM RST2228 (non-PoE) base unit
+      digit 13 = 5: 19" rack mounting kit + panel mount kit
+      digit 14 = C: 'PSU 1: 88-300 VDC / 85-264 VAC, screw terminal block'
+      digit 15 = C: 'PSU 2: 88-300 VDC / 85-264 VAC, screw terminal block (redundant)'
+      digit 16 = 0: Standard (no conformal coating; 1 = conformal coating)
+      A00: Service panel mounted on the front (connector side); A01 = rear (heatsink side)
+      B06: 'Slot 1: RMM2972-4SFP, 4 x SFP slot (100BASE-FX / 1000BASE-X)'
+      C06: 'Slot 2: RMM2972-4SFP'
+      D06: 'Slot 3: RMM2972-4SFP'
+      E06: 'Slot 4: RMM2972-4SFP'
+      F06: 'Slot 5: RMM2972-4SFP'
+      G00: 'Slot 6: RMM2931-4 blank module'
+    datasheet_url: https://assets.new.siemens.com/siemens/assets/api/uuid:7c5d5b6f-4c7a-4917-b9d4-4781694f0bb6/di-pa-ci-rst2228-brochure-en.pdf
+    product_url: https://siemens.com/us/en/products/automation/industrial-communication/rugged-communications/rack-switches/rst2228-p.html
+    notes: 'Result: 20 SFP cages + 4 x 10G SFP+ uplinks; transceivers are ordered separately (see SFP-*
+      refs). The 77 W maximum (HV AC; 76 W HV DC) comes from the installation manual and matches the BOM.
+      Weight 8.0 kg is from the installation manual (via manualslib). Slot letter map: B-G = slots 1-6,
+      A = service panel location.'
+  alternatives:
+  - make: Moxa
+    manufacturer: Moxa Inc.
+    tiers:
+      low:
+        model: PT-7528 series
+        ordering_code: PT-7528-20MSC-4TX-4GSFP-HV-HV
+        description: Fixed 28-port L2, 20 x 100BASE-FX MM SC + 4 x 10/100 TX + 4 x GbE SFP, dual 88-300
+          VDC/85-264 VAC; Fast Ethernet only, no 10G
+        unit_power_w: 35
+        url: https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/
+        notes: 'Datasheet gives current only: 0.313 A @ 110 VDC, so about 34-37 W (computed). IEC 61850-3
+          / IEEE 1613.'
+        verified: true
+      mid:
+        model: PT-G7728
+        ordering_code: PT-G7728 + 6 x LM-7000H-4GSFP + 2 x PWR-HV-NP
+        description: Modular 28-port full-Gigabit L2, 2 GbE TX + 2 GbE SFP fixed + 6 x 4-port module slots,
+          hot-swap dual 88-300 VDC/90-264 VAC PSUs; no 10G uplinks
+        unit_power_w: 41
+        url: https://www.moxa.com/product/PT-G7728_Series.htm
+        notes: 41 W = 12 W chassis (max 0.11 A @ 110 VDC per the Moxa product page) + 6 x 4.8 W max per
+          LM-7000H-4GSFP (Moxa LM-7000H datasheet v1.1); SFP transceivers not included. IEC 61850-3 Ed2
+          Class 2 and IEEE 1613. 443 x 44 x 280 mm, 3.08 kg. LM-7000H-4GSFP (RS 0633718) and PWR-HV-NP
+          (Moxa product page) are ordered separately.
+        verified: true
+      high:
+        model: PT-G7828
+        ordering_code: PT-G7828 + 6 x LM-7000H-4GSFP + 2 x PWR-HV-NP
+        description: Same modular chassis as PT-G7728 but Layer 3 routing; up to 28 GbE ports, IEC 61850-3/IEEE
+          1613
+        unit_power_w: 41
+        url: https://www.moxa.com/product/pt-g7828_series.htm
+        notes: Moxa PT-G78xx has no 10G ports; GbE uplinks only. 41 W assumes the same chassis draw as
+          PT-G7728 (12 W) + 6 x 4.8 W LM-7000H-4GSFP; the PT-G7828 chassis figure was not read this session.
+          SFPs not included.
+        verified: true
+  - make: Cisco
+    manufacturer: Cisco Systems
+    tiers:
+      low:
+        model: Catalyst IE9320
+        ordering_code: IE-9320-26S2C-E
+        description: 1U rugged rack switch, 22 x 100/1000 SFP + 2 x dual-media (SFP or RJ45) downlinks
+          + 4 x 100/1000 SFP uplinks, Network Essentials; no 10G
+        unit_power_w: 64
+        url: https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html
+        notes: 'Port split from Cisco datasheet Table 3; 64 W is Cisco''s indicative system power (Table
+          5). IEC 61850-3 and IEEE 1613:2009 listed (Table 12). Part number also seen at distributors
+          (barcodesinc, networkdevicesinc). PSUs are ordered separately (Cisco datasheet Table 7: PWR-RGD-LOW-DC-H
+          24-60 VDC, PWR-RGD-AC-DC-H 150 W, -AC-DC-250, -AC-DC-400); confirm the HV PSU''s DC input range
+          covers the 125 VDC battery.'
+        verified: true
+      mid:
+        model: Catalyst IE9320
+        ordering_code: IE-9320-22S2C4X-E
+        description: 1U rugged rack switch, 22 x GE SFP + 2 x GE combo + 4 x 10G SFP+ uplinks, Network
+          Essentials; closest like-for-like to the 24 SFP + 4 x 10G layout
+        unit_power_w: 73
+        url: https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html
+        notes: 'Cisco datasheet: 22 x 100/1000 SFP + 2 dual-media downlinks + 4 x 1/10G SFP+ uplinks;
+          73 W indicative system power (Table 5); IEC 61850-3 and IEEE 1613:2009 listed. Part number also
+          seen at distributors (xsnet.com.au). PSUs are ordered separately (Cisco datasheet Table 7: PWR-RGD-LOW-DC-H
+          24-60 VDC, PWR-RGD-AC-DC-H 150 W, -AC-DC-250, -AC-DC-400); confirm the HV PSU''s DC input range
+          covers the 125 VDC battery.'
+        verified: true
+      high:
+        model: Catalyst IE9320
+        ordering_code: IE-9320-22S2C4X-A
+        description: As the -E model but with Network Advantage licence (full L3, advanced features)
+        unit_power_w: 73
+        url: https://www.barcodesinc.com/cisco/part-ie-9320-22s2c4x-a.htm
+        notes: 'Same hardware as -E (73 W indicative, Cisco datasheet Table 5) with the Network Advantage
+          licence. PSUs are ordered separately (Cisco datasheet Table 7: PWR-RGD-LOW-DC-H 24-60 VDC, PWR-RGD-AC-DC-H
+          150 W, -AC-DC-250, -AC-DC-400); confirm the HV PSU''s DC input range covers the 125 VDC battery.'
+        verified: true
+  sources:
+  - https://cache.industry.siemens.com/dl/files/348/109766348/att_980977/v1/SIE_RST2228.pdf
+  - https://assets.new.siemens.com/siemens/assets/api/uuid:7c5d5b6f-4c7a-4917-b9d4-4781694f0bb6/di-pa-ci-rst2228-brochure-en.pdf
+  - https://cache.industry.siemens.com/dl/files/346/109766346/att_980972/v1/RUGGEDCOM_Switches_Ordering_Overview_EN.pdf
+  - https://www.manualslib.com/manual/1618609/Siemens-Ruggedcom-Rst2228.html
+  - https://www.manualslib.com/manual/1882811/Siemens-Simatic-Net-Ruggedcom-Rst2228.html
+  - https://www.moxa.com/product/PT-G7728_Series.htm
+  - https://automation.lubielectronics.com/wp-content/uploads/2023/01/moxa-pt-g7728-series-1.pdf
+  - https://www.moxa.com/product/pt-g7828_series.htm
+  - https://shop.thiim.com/TradePoint141/UserFiles/News/2014q3/PT-7528_Series.pdf
+  - https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/
+- part_id: RST2228-L1-24MM
+  kind: device
+  description: LAN-{lan} Industrial Ethernet switch (Level-1) (24 MM FO Ports)
+  make: Ruggedcom
+  verified: confirmed
+  datasheet:
+    full_name: SIMATIC NET RUGGEDCOM RST2228 managed Layer 2 19" rack switch with 10 Gbit/s uplinks
+    manufacturer: Siemens
+    summary: Level-1 (bay) RST2228 with 6 x RMM2942-4LC2 modules = 24 x 100BASE-FX multimode LC ports
+      plus 4 x 1/10G SFP+ uplinks.
+    power:
+      input: 88-300 VDC / 85-264 VAC (HV PSU, code C); dual redundant
+      redundant_psu: true
+      max_w: 77
+    ratings:
+      total_ports: 28
+      uplinks: 4 x 1/10 Gbit/s SFP+ (fixed, slot 0)
+      layer: L2, IEEE 1588 v2
+      degree_of_protection: IP40
+    ports:
+    - 4 x 1/10GBASE-X SFP+ uplinks (fixed)
+    - 'Slots 1-6 (B-G): RMM2942-4LC2, 4 x LC each = 24 x 100BASE-FX multimode, 1300 nm'
+    dimensions_mm:
+      h: 44.45
+      w: 440
+      d: 345
+    rack_units: 1
+    weight_kg: 8.0
+    mounting: 19" rack (rack + panel mount kit, digit 5)
+    operating_temp_c:
+      min: -40
+      max: 85
+    certifications:
+    - IEC 61850-3
+    - IEEE 1613
+    - IEC 61000-6-2
+    - CSA/UL 60950
+    - CE
+    ordering_code_decoded:
+      6GK6222-6AB00: RUGGEDCOM RST2228 (non-PoE) base unit
+      digit 13 = 5: 19" rack mounting kit + panel mount kit
+      digit 14 = C: 'PSU 1: 88-300 VDC / 85-264 VAC, screw terminal'
+      digit 15 = C: 'PSU 2: 88-300 VDC / 85-264 VAC, screw terminal (redundant)'
+      digit 16 = 0: Standard (no conformal coating)
+      A05: 'INVALID: option A is the service panel location and only A00 (front) or A01 (rear) exist.
+        Probably meant A00.'
+      B05: 'Slot 1: RMM2942-4LC2, 4 x LC, 100BASE-FX MM 1300 nm'
+      C05: 'Slot 2: RMM2942-4LC2'
+      D05: 'Slot 3: RMM2942-4LC2'
+      E05: 'Slot 4: RMM2942-4LC2'
+      F05: 'Slot 5: RMM2942-4LC2'
+      G05: 'Slot 6: RMM2942-4LC2'
+    datasheet_url: https://assets.new.siemens.com/siemens/assets/api/uuid:7c5d5b6f-4c7a-4917-b9d4-4781694f0bb6/di-pa-ci-rst2228-brochure-en.pdf
+    product_url: https://siemens.com/us/en/products/automation/industrial-communication/rugged-communications/rack-switches/rst2228-p.html
+    notes: 'ACTION: ''A05'' in the BOM option string is not a valid RST2228 Z-option. The published tables
+      (brochure and RUGGEDCOM Switches Ordering Overview) define only A00 and A01. Confirm with Siemens
+      or correct it to A00 (front service panel) before ordering. The 100BASE-FX ports are fixed LC optics
+      (no SFP needed); the 4 x 10G uplinks need SFP/SFP+ transceivers. 77 W max is the HV AC figure from
+      the installation manual and matches the BOM.'
+  alternatives:
+  - make: Moxa
+    manufacturer: Moxa Inc.
+    tiers:
+      low:
+        model: PT-7528 series
+        ordering_code: PT-7528-12MSC-12TX-4GSFP-HV-HV
+        description: Fixed L2, 12 x 100BASE-FX MM SC + 12 x 10/100 TX + 4 x GbE SFP, dual HV PSU; fewer
+          fibre ports
+        unit_power_w: 35
+        url: https://ipc2u.com/catalog/pt-7528-12msc-12tx-4gsfp-hv-hv/
+        notes: Power is computed (datasheet gives 0.313 A @ 110 VDC for >=8 fibre ports). IEC 61850-3
+          / IEEE 1613.
+        verified: true
+      mid:
+        model: PT-7528 series
+        ordering_code: PT-7528-20MSC-4TX-4GSFP-HV-HV
+        description: Fixed L2, 20 x 100BASE-FX MM SC + 4 x TX + 4 x GbE SFP, dual 88-300 VDC/85-264 VAC;
+          nearest fixed FE-fibre equivalent (SC, not LC)
+        unit_power_w: 35
+        url: https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/
+        notes: Power computed from datasheet current (0.313 A @ 110 VDC).
+        verified: true
+      high:
+        model: PT-G7728
+        ordering_code: PT-G7728 + 6 x LM-7000H-4GSFP + 2 x PWR-HV-NP
+        description: Modular full-Gigabit L2, 24 SFP module ports (fit 100FX or 1000X SFPs) + 4 fixed
+          GbE, hot-swap dual HV PSUs
+        unit_power_w: 41
+        url: https://www.moxa.com/product/PT-G7728_Series.htm
+        notes: Needs 24 x 100FX SFPs (e.g. Moxa SFP-1FEMLC-T). 41 W = 12 W chassis (max 0.11 A @ 110 VDC
+          per the Moxa product page) + 6 x 4.8 W max per LM-7000H-4GSFP (Moxa LM-7000H datasheet v1.1);
+          SFP transceivers not included. IEC 61850-3 Ed2 Class 2 and IEEE 1613. 443 x 44 x 280 mm, 3.08
+          kg. LM-7000H-4GSFP (RS 0633718) and PWR-HV-NP (Moxa product page) are ordered separately.
+        verified: true
+  - make: Cisco
+    manufacturer: Cisco Systems
+    tiers:
+      low:
+        model: Catalyst IE9320
+        ordering_code: IE-9320-26S2C-E
+        description: 1U rugged rack switch, 22 x 100/1000 SFP + 2 x dual-media (SFP or RJ45) downlinks
+          + 4 x 100/1000 SFP uplinks, Network Essentials; no 10G
+        unit_power_w: 64
+        url: https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html
+        notes: 'Port split from Cisco datasheet Table 3; 64 W is Cisco''s indicative system power (Table
+          5). IEC 61850-3 and IEEE 1613:2009 listed (Table 12). Part number also seen at distributors
+          (barcodesinc, networkdevicesinc). PSUs are ordered separately (Cisco datasheet Table 7: PWR-RGD-LOW-DC-H
+          24-60 VDC, PWR-RGD-AC-DC-H 150 W, -AC-DC-250, -AC-DC-400); confirm the HV PSU''s DC input range
+          covers the 125 VDC battery. 100BASE-FX SFP support on the downlinks not confirmed this session.'
+        verified: true
+      mid:
+        model: Catalyst IE9320
+        ordering_code: IE-9320-22S2C4X-E
+        description: 22 x GE SFP + 2 combo + 4 x 10G SFP+; nearest match to 24 bay ports + 10G uplinks
+        unit_power_w: 73
+        url: https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html
+        notes: 'Cisco datasheet: 22 x 100/1000 SFP + 2 dual-media downlinks + 4 x 1/10G SFP+ uplinks;
+          73 W indicative system power (Table 5); IEC 61850-3 and IEEE 1613:2009 listed. Part number also
+          seen at distributors (xsnet.com.au). PSUs are ordered separately (Cisco datasheet Table 7: PWR-RGD-LOW-DC-H
+          24-60 VDC, PWR-RGD-AC-DC-H 150 W, -AC-DC-250, -AC-DC-400); confirm the HV PSU''s DC input range
+          covers the 125 VDC battery. Use GLC-FE-100FX-RGD SFPs for the 100FX bay links.'
+        verified: true
+      high:
+        model: Catalyst IE9320
+        ordering_code: IE-9320-22S2C4X-A
+        description: As the -E model with Network Advantage (L3) licence
+        unit_power_w: 73
+        url: https://www.barcodesinc.com/cisco/part-ie-9320-22s2c4x-a.htm
+        notes: 'Same hardware as -E (73 W indicative, Cisco datasheet Table 5) with the Network Advantage
+          licence. PSUs are ordered separately (Cisco datasheet Table 7: PWR-RGD-LOW-DC-H 24-60 VDC, PWR-RGD-AC-DC-H
+          150 W, -AC-DC-250, -AC-DC-400); confirm the HV PSU''s DC input range covers the 125 VDC battery.'
+        verified: true
+  sources:
+  - https://assets.new.siemens.com/siemens/assets/api/uuid:7c5d5b6f-4c7a-4917-b9d4-4781694f0bb6/di-pa-ci-rst2228-brochure-en.pdf
+  - https://cache.industry.siemens.com/dl/files/346/109766346/att_980972/v1/RUGGEDCOM_Switches_Ordering_Overview_EN.pdf
+  - https://cache.industry.siemens.com/dl/files/348/109766348/att_980977/v1/SIE_RST2228.pdf
+  - https://www.manualslib.com/manual/1618609/Siemens-Ruggedcom-Rst2228.html
+  - https://shop.thiim.com/TradePoint141/UserFiles/News/2014q3/PT-7528_Series.pdf
+- part_id: SEL-2730M-EXT
+  kind: device
+  description: LAN-{lan} Industrial Ethernet switch (EXT) (16 MM Ports, 4 RJ45)
+  make: SEL
+  verified: partial
+  datasheet:
+    full_name: SEL-2730M Managed 24-Port Ethernet Switch
+    manufacturer: Schweitzer Engineering Laboratories (SEL)
+    summary: 'Substation-hardened managed 24-port Ethernet switch: 4 x Gigabit SFP + 4 x Gigabit RJ45
+      + 16 x Fast Ethernet (copper or LC fibre in groups of 4).'
+    power:
+      input: 'Options: 100/120/220/230 VAC 45-65 Hz, 100/125/220/250 VDC, or 24/48 VDC; one supply standard,
+        second (redundant) supply optional'
+      max_w: 45
+    ports:
+    - 'Ports 1-4: SFP Gigabit uplinks (0.5 km MM, 10-80 km SM, or copper SFPs)'
+    - 'Ports 5-8: 10/100/1000 RJ45'
+    - 'Ports 9-24: 10/100 RJ45 standard, or 100 Mbps LC fibre (MM or SM) in groups of 4 (9-12, 13-16,
+      17-20, 21-24)'
+    - BOM configuration (16 MM + 4 RJ45) = ports 9-24 as 100BASE-FX MM LC + ports 5-8 RJ45; SFP ports
+      1-4 per order
+    rack_units: 1
+    mounting: 19" rack (assumed, not stated on the spec page)
+    operating_temp_c:
+      min: -40
+      max: 85
+    certifications:
+    - IEC 61850-3 (not verified this session)
+    - IEEE 1613 (not verified this session)
+    ordering_code_decoded:
+      2730M: SEL-2730M managed 24-port switch
+      '#2CF9': 'SEL configured-part-number suffix: a short ID that SEL''s product configurator assigns
+        to one full set of options. It is not position-coded. Get the full option list for #2CF9 from
+        SEL''s configurator or the quote.'
+    datasheet_url: https://selinc.com/products/2730M/specs
+    product_url: https://selinc.com/products/2730M/
+    notes: 'Ports, PSU options and temperature come from the SEL spec page. Power consumption, dimensions,
+      weight and certifications are not on that page and could not be checked (fetch budget ran out).
+      The 45 W unit power is the BOM value. Confirm that #2CF9 includes the 125 VDC PSU and the optional
+      second (redundant) supply.'
+  alternatives:
+  - make: Moxa
+    manufacturer: Moxa Inc.
+    tiers:
+      low:
+        model: PT-7528 series
+        ordering_code: PT-7528-12MSC-12TX-4GSFP-HV-HV
+        description: 12 x 100FX MM SC + 12 x TX + 4 x GbE SFP, dual HV PSU; fewer fibre ports than needed
+        unit_power_w: 35
+        url: https://ipc2u.com/catalog/pt-7528-12msc-12tx-4gsfp-hv-hv/
+        notes: Power computed from datasheet current. IEC 61850-3 / IEEE 1613.
+        verified: true
+      mid:
+        model: PT-7528 series
+        ordering_code: PT-7528-20MSC-4TX-4GSFP-HV-HV
+        description: 20 x 100FX MM SC + 4 x TX + 4 x GbE SFP, dual 88-300 VDC/85-264 VAC; closest like-for-like
+          (16 MM + 4 RJ45 + GbE)
+        unit_power_w: 35
+        url: https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/
+        notes: Power computed (0.313 A @ 110 VDC).
+        verified: true
+      high:
+        model: PT-G7728
+        ordering_code: PT-G7728 + LM-7000H modules + 2 x PWR-HV-NP
+        description: Modular full-Gigabit L2 with hot-swap modules and PSUs, PRP/HSR module option
+        unit_power_w: 41
+        url: https://www.moxa.com/product/PT-G7728_Series.htm
+        notes: Power assumes 6 x LM-7000H-4GSFP. 41 W = 12 W chassis (max 0.11 A @ 110 VDC per the Moxa
+          product page) + 6 x 4.8 W max per LM-7000H-4GSFP (Moxa LM-7000H datasheet v1.1); SFP transceivers
+          not included. IEC 61850-3 Ed2 Class 2 and IEEE 1613. 443 x 44 x 280 mm, 3.08 kg. LM-7000H-4GSFP
+          (RS 0633718) and PWR-HV-NP (Moxa product page) are ordered separately.
+        verified: true
+  - make: Siemens
+    manufacturer: Siemens (SCALANCE / RUGGEDCOM)
+    tiers:
+      low:
+        model: SCALANCE XR324-4M EEC
+        ordering_code: 6GK5324-4QG10-3HR2
+        description: 19" managed L2 switch, 24 FE media-module ports + 4 GbE, substation-capable EEC variant
+        url: https://automation-warehouse.com/products/6gk5324-4qg10-3hr2
+        notes: Part number seen at several distributors (sparepartsnow, electro-matic, automation-warehouse).
+          Power supply variant and power were not verified this session.
+        verified: true
+      mid:
+        model: RUGGEDCOM RSG2300
+        ordering_code: 6GK6023-0AS24-4DC0-Z
+        description: 19" 1U modular managed switch, up to 4 GbE + 24 FE copper/fibre, IEC 61850-3 / IEEE
+          1613
+        url: https://mall.industry.siemens.com/mall/en/WW/Catalog/Product/6GK6023-0AS24-4DC0-Z
+        notes: Example base code from the Siemens Mall. Z options (media modules) and PSU letters must
+          be configured; they were not decoded this session.
+        verified: true
+      high:
+        model: RUGGEDCOM RST2228
+        ordering_code: 6GK6222-6AB00-5CC0-Z
+        description: 1U modular, 24 slot ports + 4 x 10G SFP+, dual HV PSU; same platform as the RST2228
+          refs
+        unit_power_w: 77
+        url: https://assets.new.siemens.com/siemens/assets/api/uuid:7c5d5b6f-4c7a-4917-b9d4-4781694f0bb6/di-pa-ci-rst2228-brochure-en.pdf
+        notes: Add Z options, e.g. A00+B05+C05+D05+E05+F01+G00 for 16 MM + 4 RJ45 (this example is not
+          checked against the Siemens configurator).
+        verified: true
+  sources:
+  - https://selinc.com/products/2730M/
+  - https://selinc.com/products/2730M/specs
+  - https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/
+  - https://mall.industry.siemens.com/mall/en/WW/Catalog/Product/6GK6023-0AS24-4DC0-Z
+- part_id: FGR-60F
+  kind: device
+  description: Industrial Firewall for External Systems
+  make: Fortigate
+  verified: partial
+  datasheet:
+    full_name: FortiGate Rugged 60F (FGR-60F)
+    manufacturer: Fortinet
+    summary: DIN-rail ruggedised next-generation firewall / secure SD-WAN appliance for industrial and
+      substation networks.
+    power:
+      input: '12-125 VDC (either polarity: +12..+125 V or -12..-125 V, per a Fortinet community answer);
+        dual redundant DC inputs (not verified)'
+      redundant_psu: true
+      max_w: 21
+    ports:
+    - GE RJ45 switch ports + GE SFP/RJ45 shared-media WAN ports, RJ45 console, DB9 serial (exact count
+      not verified this session)
+    mounting: DIN rail
+    certifications:
+    - IEC 61850-3
+    - IEEE 1613
+    ordering_code_decoded:
+      FGR-60F: Base hardware, no LTE
+      FGR-60F-3G4G: Variant with integrated 3G/4G LTE modem
+      FGR-60F-BDL-950-12: Hardware + 1-year FortiCare Premium + UTP bundle
+    product_url: https://www.fortinet.com/products/next-generation-firewall/rugged
+    notes: Could not open the datasheet (fetch budget ran out), so ports, temperature, dimensions and
+      certifications are NOT verified. The 12-125 VDC input comes from a Fortinet community thread and
+      works directly with the 125 VDC station supply, but check the tolerance against 125 VDC float/boost
+      voltage. 21 W is the BOM value (believed to match datasheet max). Order a FortiCare/FortiGuard bundle
+      (e.g. FGR-60F-BDL-950-12) for support and updates.
+  alternatives:
+  - make: Cisco
+    manufacturer: Cisco Systems
+    tiers:
+      low:
+        model: Secure Firewall ISA3000
+        ordering_code: ISA-3000-4C-K9
+        description: DIN-rail industrial firewall, 4 x GE copper; IEC 61850-3; low-voltage DC input (needs
+          DC/DC from 125 VDC)
+        url: https://www.xsnet.com.au/product/cisco/48319/isa-3000-4c-k9
+        notes: Part number seen at distributors (xsnet, networkdevicesinc, convergenttechnology). Power
+          not read.
+        verified: true
+      mid:
+        model: Secure Firewall ISA3000
+        ordering_code: ISA-3000-2C2F-K9
+        description: As ISA-3000-4C but 2 x GE copper + 2 x GE SFP fibre; closest like-for-like
+        url: https://www.xsnet.com.au/product/cisco/48318/isa-3000-2c2f-k9
+        notes: Part number seen at distributors (xsnet, networktigers, convergenttechnology). Power not
+          read.
+        verified: true
+      high:
+        model: Catalyst IR8340
+        ordering_code: IR8340-K9
+        description: 1U 19" rugged integrated-services router with firewall/IPS, IEC 61850-3, HV PSU options
+        url: https://www.connection.com/product/cisco-cisco-catalyst-ir8340-rugged-r/ir8340-k9/41420808
+        notes: Part number seen at distributors (Connection, CDW.ca, xsnet). Router platform; PSUs and
+          licences are ordered separately. Power not read.
+        verified: true
+  - make: Moxa
+    manufacturer: Moxa Inc.
+    tiers:
+      low:
+        model: EDR-G9010 series
+        ordering_code: EDR-G9010-VPN-2MGSFP-T
+        description: Industrial secure router/firewall, 8 GbE + 2 GbE combo SFP, 12-48 VDC, -40 to 75
+          C
+        url: https://uk.rs-online.com/web/p/routers/0288918
+        notes: Part number seen at RS (0288918) and ipc2u. 12-48 VDC model, so it needs a DC/DC converter
+          from 125 VDC; the HV standard-temperature variant EDR-G9010-VPN-2MGSFP-HV (RS 0288915) feeds
+          directly from 125 VDC.
+        verified: true
+      mid:
+        model: EDR-G9010 series
+        ordering_code: EDR-G9010-VPN-2MGSFP-HV-T
+        description: As above with HV input (110/220 VDC/VAC), IEC 61850-3 / IEEE 1613; feeds directly
+          from 125 VDC
+        url: https://uk.rs-online.com/web/p/routers/0288917
+        notes: Part number seen at RS (0288917) and ipc2u.
+        verified: true
+      high:
+        model: EDR-G9010 series + MXsecurity
+        ordering_code: EDR-G9010-VPN-2MGSFP-HV-T
+        description: HV model with IPS/DPI licence and MXsecurity management
+        url: https://uk.rs-online.com/web/p/routers/0288917
+        notes: Hardware code seen at RS (0288917); same hardware as mid. The high tier adds the IPS licence,
+          whose SKU was not found this session.
+        verified: true
+  sources:
+  - https://www.shi.com/product/40517097/Fortinet-FortiGate-Rugged-60F
+  - https://datacenter360.ca/shop/network-security/firewall/bundle/fortigaterugged-60f-hardware-plus-1-year-forticare-premium-and-fortiguard-unified-threat-protection-utp-fgr-60f-bdl-950-12/
+  - https://community.fortinet.com/t5/Support-Forum/Voltage-range-FGR-60F/m-p/369423
+- part_id: SFP-1G-LX-SM
+  kind: device
+  description: 1000BASE-LX SM SFP (1310nm, 10 Km)
+  make: Ruggedcom
+  verified: partial
+  datasheet:
+    full_name: RUGGEDCOM SFP transceiver 1 x 1000BASE-LX, single-mode, 1310 nm, LC, 10 km (legacy code
+      1FG52)
+    manufacturer: Siemens
+    summary: Rugged 1000BASE-LX single-mode SFP (1310 nm, LC duplex, 10 km) for RUGGEDCOM SFP cages.
+    ratings:
+      standard: 1000BASE-LX
+      fibre: single-mode 9/125
+      wavelength_nm: 1310
+      reach_km: 10
+      connector: LC duplex
+    operating_temp_c:
+      min: -40
+      max: 85
+    product_url: https://www.cebeo.be/catalog/fr-be/products/siemens-ruggedcom-accessory-sfp-1-x-1000mbit-s-1000base-lx-lc-in-terface-optical-s-5309926
+    notes: Legacy RUGGEDCOM code 1FG52; third-party compatibles are sold as 1FG52-AO (AddOn) and 1FG52-C
+      (ProLabs). 6GK6000-8FG53 is the 25 km variant. The -40/85 C rating is assumed from the RUGGEDCOM
+      family (not verified).
+  alternatives:
+  - make: Cisco
+    manufacturer: Cisco Systems
+    tiers:
+      low:
+        model: GLC-LH-SMD
+        ordering_code: GLC-LH-SMD
+        description: 1000BASE-LX/LH SMF 10 km, DOM, commercial temperature
+        url: https://au.stockinthechannel.com/Product/Cisco-GLC-LH-SMD-network-transceiver-module-1000-Mbit-s-SFP-1300-nm/8600444
+        notes: Part number seen on a manufacturer or distributor page this session.
+        verified: true
+      mid:
+        model: GLC-LX-SM-RGD
+        ordering_code: GLC-LX-SM-RGD
+        description: Rugged 1000BASE-LX SMF 10 km, industrial temperature; for Cisco IE switches
+        url: https://www.pbtech.com/product/NETCIS1002789/Cisco-GLC-LX-SM-RGD-GLC-LX-SM-RGD--1000Mbps-SNGL-M
+        notes: Part number seen on a manufacturer or distributor page this session.
+        verified: true
+      high:
+        model: GLC-ZX-SM-RGD
+        ordering_code: GLC-ZX-SM-RGD
+        description: Rugged 1000BASE-ZX SMF 70 km, industrial temperature
+        url: https://www.pbtech.com/product/NETCIS1141644/Cisco-GLC-ZX-SM-RGD-1000BASE-ZX-Single-Mode-Rugged
+        notes: Part number seen on a manufacturer or distributor page this session.
+        verified: true
+  - make: Moxa
+    manufacturer: Moxa Inc.
+    tiers:
+      low:
+        model: SFP-1GLXLC
+        ordering_code: SFP-1GLXLC
+        description: 1000BASE-LX SMF 10 km LC, 0 to 60 C
+        url: https://www.moxa.com/en/products/accessories/sfp-modules/gigabit-ethernet-sfp-modules/sfp-1g-series/sfp-1glxlc
+        notes: Part number seen on a manufacturer or distributor page this session.
+        verified: true
+      mid:
+        model: SFP-1GLXLC-T
+        ordering_code: SFP-1GLXLC-T
+        description: 1000BASE-LX SMF 10 km LC, -40 to 85 C
+        url: https://esaitech.com/products/moxa-media-sfp-1glxlc-t-ieee-802-3z-1g-port-gigabit-ethernet-sfp-transceiver-module
+        notes: Part number seen on a manufacturer or distributor page this session.
+        verified: true
+      high:
+        model: SFP-1GLHLC-T
+        ordering_code: SFP-1GLHLC-T
+        description: 1000BASE-LH SMF 30 km LC, -40 to 85 C
+        url: https://www.distrelec.ch/en/moxa-lc-single-mode-transceiver-module-full-duplex-half-duplex-1000-mbps-moxa-sfp-1glhlc/p/30519473
+        notes: Part number seen on a manufacturer or distributor page this session.
+        verified: true
+  sources:
+  - https://www.cebeo.be/catalog/fr-be/products/siemens-ruggedcom-accessory-sfp-1-x-1000mbit-s-1000base-lx-lc-in-terface-optical-s-5309926
+  - https://mall.industry.siemens.com/mall/en/kr/Catalog/Product/6GK6000-8FG53-0AB0
+  - https://addonnetworks.com/product/1FG52-AO
+- part_id: SFP-1G-SX-MM
+  kind: device
+  description: 1000BASE-SX MM SFP (850nm, <500m)
+  make: Ruggedcom
+  verified: partial
+  datasheet:
+    full_name: RUGGEDCOM SFP transceiver 1 x 1000BASE-SX, multimode, 850 nm, LC, 500 m (legacy code 1FG51)
+    manufacturer: Siemens
+    summary: Rugged 1000BASE-SX multimode SFP (850 nm, LC duplex, about 500 m) for RUGGEDCOM SFP cages.
+    ratings:
+      standard: 1000BASE-SX
+      fibre: multimode 50/125 or 62.5/125
+      wavelength_nm: 850
+      reach_m: 500
+      connector: LC duplex
+    operating_temp_c:
+      min: -40
+      max: 85
+    product_url: https://shop.electro-matic.com/6gk60008fg510aa0
+    notes: Legacy RUGGEDCOM code 1FG51; compatibles are sold as 1FG51-AO (AddOn) and 1FG51-C (ProLabs).
+      The -40/85 C rating is assumed from the RUGGEDCOM family (not verified).
+  alternatives:
+  - make: Cisco
+    manufacturer: Cisco Systems
+    tiers:
+      low:
+        model: GLC-SX-MMD
+        ordering_code: GLC-SX-MMD
+        description: 1000BASE-SX MMF, DOM, commercial temperature
+        url: https://eshop.spacecom.cz/detail/Cisco-GLCSXMMD-1000BASESX-SFP/638081
+        notes: Part number seen on a manufacturer or distributor page this session.
+        verified: true
+      mid:
+        model: SFP-GE-S
+        ordering_code: SFP-GE-S
+        description: 1000BASE-SX MMF, DOM, extended temperature
+        url: https://www.neweggbusiness.com/cisco-sfp-ge-s/p/9B-2AS-0093-00029
+        notes: Part number seen on a manufacturer or distributor page this session.
+        verified: true
+      high:
+        model: GLC-SX-MM-RGD
+        ordering_code: GLC-SX-MM-RGD
+        description: Rugged 1000BASE-SX MMF, industrial temperature (-40 to 85 C); for Cisco IE switches
+        url: https://www.xsnet.com.au/products/cisco-glc-sx-mm-rgd-1g-sfp-1000base-sx-850nm-550m-mmf-lc-rugged-ext-temp
+        notes: Part number seen on a manufacturer or distributor page this session.
+        verified: true
+  - make: Moxa
+    manufacturer: Moxa Inc.
+    tiers:
+      low:
+        model: SFP-1GSXLC
+        ordering_code: SFP-1GSXLC
+        description: 1000BASE-SX MMF LC, 0 to 60 C
+        url: https://adjditec.com/en/products/sfp-1gsxlc-moxa
+        notes: Part number seen on a manufacturer or distributor page this session.
+        verified: true
+      mid:
+        model: SFP-1GSXLC-T
+        ordering_code: SFP-1GSXLC-T
+        description: 1000BASE-SX MMF LC, -40 to 85 C
+        url: https://industry-electronics.com/moxa/sfp-1gsxlc-t-1000basesx-0.5-km-printview-678700.htm
+        notes: Part number seen on a manufacturer or distributor page this session.
+        verified: true
+      high:
+        model: SFP-1GLSXLC-T
+        ordering_code: SFP-1GLSXLC-T
+        description: 1000BASE-LSX MMF 1310 nm, longer MM reach (about 1-2 km), -40 to 85 C
+        url: https://rspsupply.com/p-9563-moxa-sfp-1glsxlc-t-plug-in-sfp-module-lc-multi-5-km.aspx
+        notes: Part number seen on a manufacturer or distributor page this session.
+        verified: true
+  sources:
+  - https://shop.electro-matic.com/6gk60008fg510aa0
+  - https://www.cebeo.be/catalog/fr-be/products/siemens-ruggedcom-accessory-sfp-1-x-1000mbit-s-1000base-sx-lc-in-terface-optical-m-5309923
+  - https://addonnetworks.com/product/1FG51-AO
+- part_id: SFP-100M-FX-MM
+  kind: device
+  description: 100BASE-FX MM SFP (1310nm, <2km)
+  make: Ruggedcom
+  verified: partial
+  datasheet:
+    full_name: RUGGEDCOM SFP transceiver 1 x 100BASE-FX, multimode, 1310 nm, LC, 2 km
+    manufacturer: Siemens
+    summary: Rugged 100BASE-FX multimode SFP (1310 nm, LC duplex, 2 km) for RUGGEDCOM SFP cages.
+    ratings:
+      standard: 100BASE-FX
+      fibre: multimode 50/125 or 62.5/125
+      wavelength_nm: 1310
+      reach_km: 2
+      connector: LC duplex
+    operating_temp_c:
+      min: -40
+      max: 85
+    notes: No manufacturer page found for this exact code this session. Its sibling 6GK6000-8FE50-0AA0
+      is listed on the Siemens Mall. The -40/85 C rating is assumed from the RUGGEDCOM family. The RMM2972-4SFP
+      module accepts 100BASE-FX SFPs.
+  alternatives:
+  - make: Cisco
+    manufacturer: Cisco Systems
+    tiers:
+      low:
+        model: GLC-FE-100FX
+        ordering_code: GLC-FE-100FX
+        description: 100BASE-FX MMF 1310 nm 2 km, commercial temperature
+        url: https://multitronic.fi/en/products/54396/cisco-100base-fx-sfp-module-for-gigabit-ethernet-ports--1310-nm-wavelength--2-km-over-mmf
+        notes: Part number seen on a manufacturer or distributor page this session.
+        verified: true
+      mid:
+        model: GLC-FE-100FX-RGD
+        ordering_code: GLC-FE-100FX-RGD
+        description: Rugged 100BASE-FX MMF 2 km, industrial temperature
+        url: https://www.distrelec.ch/en/fibre-optic-transceiver-multi-mode-100mbps-lc-sfp-2km-1300nm-cisco-glc-fe-100fx-rgd/p/30295866
+        notes: Part number seen at Distrelec (GLC-FE-100FX-RGD=) and on the Cisco outlet (refurb listing).
+        verified: true
+      high:
+        model: GLC-FE-100LX-RGD
+        ordering_code: GLC-FE-100LX-RGD
+        description: Rugged 100BASE-LX10 SMF 10 km, industrial temperature (needs SM fibre)
+        url: https://us.stockinthechannel.com/Product/Cisco-GLC-FE-100LX-RGD-network-transceiver-module-100-Mbit-s-SFP-1310-nm/46057492
+        notes: Part number seen on a manufacturer or distributor page this session.
+        verified: true
+  - make: Moxa
+    manufacturer: Moxa Inc.
+    tiers:
+      low:
+        model: SFP-1FEMLC-T
+        ordering_code: SFP-1FEMLC-T
+        description: 100BASE-FX MMF LC 1310 nm, -40 to 85 C
+        url: https://moxa.com/en/products/accessories/sfp-modules/fast-ethernet-sfp-modules/sfp-1fe-series/sfp-1femlc-t
+        notes: Moxa's only 100BASE-FX multimode SFP; every SFP-1FE model is a -T (-40 to 85 C) part, so
+          there is no cheaper commercial-temperature variant. Part number seen on a manufacturer or distributor
+          page this session.
+        verified: true
+      mid:
+        model: SFP-1FEMLC-T
+        ordering_code: SFP-1FEMLC-T
+        description: Same part as low; the closest like-for-like Moxa 100FX MM SFP
+        url: https://moxa.com/en/products/accessories/sfp-modules/fast-ethernet-sfp-modules/sfp-1fe-series/sfp-1femlc-t
+        notes: 'Kept identical to low on purpose: the other SFP-1FE models (SFP-1FESLC-T, SFP-1FELLC-T
+          80 km) are single-mode and do not work on the multimode bay fibre. Part number seen on a manufacturer
+          or distributor page this session.'
+        verified: true
+        same_as: low
+      high:
+        model: SFP-1FESLC-T
+        ordering_code: SFP-1FESLC-T
+        description: 100BASE single-mode LC, long reach (about 40 km), -40 to 85 C
+        url: https://www.moxa.com/en/products/accessories/sfp-modules/fast-ethernet-sfp-modules/sfp-1fe-series/sfp-1feslc-t
+        notes: Single-mode only, so it needs SM fibre. SFP-1FELLC-T (80 km) also exists. Part number seen
+          on a manufacturer or distributor page this session.
+        verified: true
+  sources:
+  - https://mall.industry.siemens.com/mall/en/us/Catalog/Product/6GK60008FE500AA0
+  - https://outlet.cisco.com/us/glc-fe-100fxrgd-rf.html
+- part_id: FR-TRAN-SX
+  kind: device
+  description: Industrial SFP (1Gig, MM)
+  make: Fortinet
+  verified: partial
+  datasheet:
+    full_name: Fortinet 1GE SFP SX transceiver module, -40 to 85 C operation, over MMF
+    manufacturer: Fortinet
+    summary: Rugged (industrial-temperature) 1000BASE-SX multimode SFP for FortiGate Rugged and other
+      Fortinet SFP / SFP+ slots.
+    ratings:
+      standard: 1000BASE-SX
+      fibre: multimode
+      wavelength_nm: 850
+      connector: LC duplex
+    operating_temp_c:
+      min: -40
+      max: 85
+    product_url: https://www.touchpoint.com.au/shop/fr-tran-sx-1ge-sfp-sx-transceiver-module-40-to-85c-over-mmf-for-all-systems-with-sfp-and-sfp-sfp-slots/
+    notes: 'FN-TRAN-SX is the commercial-temperature equivalent. Fortinet-coded third-party compatibles
+      exist: AddOn FR-TRAN-SX-AO, Axiom, ProLine. Non-Fortinet optics in a FortiGate may not be supported
+      by Fortinet TAC.'
+  alternatives:
+  - make: Cisco
+    manufacturer: Cisco Systems
+    tiers:
+      low:
+        model: GLC-SX-MMD
+        ordering_code: GLC-SX-MMD
+        description: 1000BASE-SX MMF DOM, commercial temperature (only if the firewall vendor changes)
+        url: https://eshop.spacecom.cz/detail/Cisco-GLCSXMMD-1000BASESX-SFP/638081
+        notes: Part number seen on a manufacturer or distributor page this session. Applies when the firewall
+          is changed to Cisco ISA3000.
+        verified: true
+      mid:
+        model: SFP-GE-S
+        ordering_code: SFP-GE-S
+        description: 1000BASE-SX MMF DOM, extended temperature
+        url: https://www.neweggbusiness.com/cisco-sfp-ge-s/p/9B-2AS-0093-00029
+        notes: Part number seen on a manufacturer or distributor page this session.
+        verified: true
+      high:
+        model: GLC-SX-MM-RGD
+        ordering_code: GLC-SX-MM-RGD
+        description: Rugged 1000BASE-SX MMF, -40 to 85 C (like-for-like rating)
+        url: https://www.xsnet.com.au/products/cisco-glc-sx-mm-rgd-1g-sfp-1000base-sx-850nm-550m-mmf-lc-rugged-ext-temp
+        notes: Part number seen on a manufacturer or distributor page this session.
+        verified: true
+  - make: Moxa
+    manufacturer: Moxa Inc.
+    tiers:
+      low:
+        model: SFP-1GSXLC
+        ordering_code: SFP-1GSXLC
+        description: 1000BASE-SX MMF LC, 0 to 60 C
+        url: https://adjditec.com/en/products/sfp-1gsxlc-moxa
+        notes: Part number seen on a manufacturer or distributor page this session. Applies when the firewall
+          is changed to Moxa EDR.
+        verified: true
+      mid:
+        model: SFP-1GSXLC-T
+        ordering_code: SFP-1GSXLC-T
+        description: 1000BASE-SX MMF LC, -40 to 85 C
+        url: https://industry-electronics.com/moxa/sfp-1gsxlc-t-1000basesx-0.5-km-printview-678700.htm
+        notes: Part number seen on a manufacturer or distributor page this session.
+        verified: true
+      high:
+        model: SFP-1GLSXLC-T
+        ordering_code: SFP-1GLSXLC-T
+        description: 1000BASE-LSX MMF 1310 nm, longer MM reach, -40 to 85 C
+        url: https://rspsupply.com/p-9563-moxa-sfp-1glsxlc-t-plug-in-sfp-module-lc-multi-5-km.aspx
+        notes: Part number seen on a manufacturer or distributor page this session.
+        verified: true
+  sources:
+  - https://datacenter360.ca/?p=146834
+  - https://www.touchpoint.com.au/shop/fr-tran-sx-1ge-sfp-sx-transceiver-module-40-to-85c-over-mmf-for-all-systems-with-sfp-and-sfp-sfp-slots/
+  - https://www.connection.com/product/fortinet-1ge-sfp-sx-mmf-transceiver/fr-tran-sx/18842978
+- part_id: FOPP-96SM
+  kind: device
+  description: LC, 96 core SM FOPP for L2-L3 Interface
+  make: Hubbell
+  verified: unverified
+  datasheet:
+    full_name: Hubbell Premise Wiring OptiChannel FEUR rack-mount fibre enclosure, 96-fibre LC single-mode
+      (as named in BOM)
+    manufacturer: Hubbell Premise Wiring
+    summary: 19" rack-mount fibre patch/splice enclosure, 96 fibres terminated on LC single-mode adapters;
+      passive.
+    mounting: 19" rack
+    notes: Could NOT find catalogue number FEUR96LCSM on hubbell.com or at distributors. The FEUR family
+      exists (e.g. FEUR12STM, FEUR48LCDOM3 spec sheets; accessory FEURFSPD = 1U rack panel with 3 FSP
+      panel openings). The FER family (e.g. FER48LCDSM) is the current Hubbell rack interconnect enclosure.
+      Confirm the exact 96F LC SM part number with Hubbell. It may be a configured or legacy code, or
+      a typo for an FER/FCR enclosure plus adapter panels.
+  alternatives:
+  - make: Corning
+    manufacturer: Corning Optical Communications
+    tiers:
+      low:
+        model: CCH-02U + 4 x CCH-CP24-A9
+        ordering_code: CCH-02U / CCH-CP24-A9
+        description: 2U Closet Connector Housing (4 panel slots) + four 12-duplex LC SM adapter panels
+          = 96 F
+        url: https://ecatalog.corning.com/optical-communications/US/en/p/CCH-02U
+        notes: CCH-02U seen on the Corning eCatalog. CCH-CP24-A9 (12 LC duplex OS2 panel) seen on the
+          Corning eCatalog.
+        verified: true
+      mid:
+        model: CCH-03U + 4 x CCH-CP24-A9
+        ordering_code: CCH-03U / CCH-CP24-A9
+        description: 3U CCH (6 slots) with 96 F LC SM and spare capacity for splice trays
+        url: https://ecatalog.corning.com/optical-communications/US/en/p/CCH-03U
+        notes: CCH-03U seen on the Corning eCatalog. CCH-CP24-A9 (12 LC duplex OS2 panel) seen on the
+          Corning eCatalog.
+        verified: true
+      high:
+        model: CCH-04U + 4 x CCH-CP24-A9
+        ordering_code: CCH-04U / CCH-CP24-A9
+        description: 4U CCH (12 slots), room to grow to 144 F LC
+        url: https://ecatalog.corning.com/optical-communications/US/en/p/CCH-04U
+        notes: CCH-04U seen on the Corning eCatalog. CCH-CP24-A9 (12 LC duplex OS2 panel) seen on the
+          Corning eCatalog.
+        verified: true
+  - make: Panduit
+    manufacturer: Panduit Corp.
+    tiers:
+      low:
+        model: FCE1U + 4 x FAP12WBUDLCZ
+        ordering_code: FCE1U / FAP12WBUDLCZ
+        description: 1U Opticom enclosure (4 FAP slots) + four 12-duplex LC SM adapter panels = 96 F;
+          no spare slot or splice room
+        url: https://www.heilind.com/panfce1u.html
+        notes: FCE1U seen at Heilind and Crescent ('1 RU, 4 Ports'). FAP12WBUDLCZ (Opticom FAP, 12 LC
+          duplex OS2, blue, zirconia) seen at Platt, Crescent and Digi-Key. Replaces FCE2U, which moved
+          to mid.
+        verified: true
+      mid:
+        model: FCE2U + 4 x FAP12WBUDLCZ
+        ordering_code: FCE2U / FAP12WBUDLCZ
+        description: 2U Opticom enclosure (8 FAP slots) + four 12-duplex LC SM adapter panels = 96 F,
+          with room for splice trays
+        url: https://www.panduit.com/en/products/fiber-optic-systems/fiber-optic-panels-cassettes-enclosures/fiber-optic-enclosures/fce2u.html
+        notes: FCE2U seen on panduit.com and at Crescent ('2 RU, 8 Ports'). FAP12WBUDLCZ (Opticom FAP,
+          12 LC duplex OS2, blue, zirconia) seen at Platt, Crescent and Digi-Key. The earlier mid tier
+          FCE3U does not appear to exist (Panduit lists FCE1U, FCE2U and FCE4U only).
+        verified: true
+      high:
+        model: FCE4U + 4 x FAP12WBUDLCZ
+        ordering_code: FCE4U / FAP12WBUDLCZ
+        description: 4U enclosure (12 FAP slots), expandable to 144 F
+        url: https://panduit.com/en/products/fiber-optic-systems/fiber-optic-panels-cassettes-enclosures/fiber-optic-enclosures/fce4u.html
+        notes: FCE4U seen on panduit.com and at Crescent ('4 RU, 12 Ports'). FAP12WBUDLCZ (Opticom FAP,
+          12 LC duplex OS2, blue, zirconia) seen at Platt, Crescent and Digi-Key.
+        verified: true
+  sources:
+  - https://hubbellcdn.com/specsheet/PREMISE_FEUR48LCDOM3_spec.pdf
+  - https://hubbellcdn.com/specsheet/PREMISE_FEUR12STM_spec.pdf
+  - https://hubbellcdn.com/specsheet/PREM_CA-FEURFSPD-SPEC-EN.pdf
+  - https://hubbellcdn.com/specsheet/PREM-FER48LCDSM-SPEC-EN.pdf
+- part_id: FOPP-SPOOL
+  kind: device
+  description: Fiber Management Spool
+  make: Hubbell
+  verified: partial
+  datasheet:
+    full_name: Hubbell Premise Wiring OptiChannel Fiber Management Spool Kit, yellow (OFSPOOLPK2)
+    manufacturer: Hubbell Premise Wiring
+    summary: Adhesive-backed fibre slack-management spool kit for OptiChannel enclosures.
+    ratings:
+      material: Injection-moulded plastic with adhesive backing
+      colour: yellow
+      upc: '662620322605'
+    datasheet_url: https://hubbellcdn.com/specsheet/PREMISE_OFSPOOLPK2_spec.pdf
+    notes: 'Best match found: listed under the ''FEUR Rack Mount Enclosures'' heading on Hubbell''s spec
+      sheet, but FEUR compatibility and pack quantity (PK2 suggests 2) are not stated. Confirm with Hubbell.'
+  alternatives:
+  - make: Panduit
+    manufacturer: Panduit Corp.
+    tiers:
+      low:
+        model: FMS2
+        ordering_code: FMS2
+        description: Fibre management spool for 2-4 RU enclosures
+        url: https://www.gexpro.com/p/515864/panduit/spool-fiber-management-2-4-ru-/074983029693/fms2
+        notes: 'Distributor listing title: ''Spool, Fiber Management. 2-4 RU''.'
+        verified: true
+      mid:
+        model: FMS2
+        ordering_code: FMS2
+        description: Same; the only Panduit spool confirmed this session
+        url: https://www.gexpro.com/p/515864/panduit/spool-fiber-management-2-4-ru-/074983029693/fms2
+        notes: 'Kept identical on purpose: FMS2 is the only Panduit fibre spool SKU found (Gexpro, Rexel,
+          Crescent, Stanion). Vary the quantity instead.'
+        verified: true
+        same_as: low
+      high:
+        model: FMS2
+        ordering_code: FMS2
+        description: Same
+        url: https://www.gexpro.com/p/515864/panduit/spool-fiber-management-2-4-ru-/074983029693/fms2
+        notes: Same part (only Panduit spool SKU found). Spool kits are normally specific to each enclosure
+          range, so pick the one that matches the chosen enclosure.
+        verified: true
+        same_as: low
+  - make: Corning
+    manufacturer: Corning Optical Communications
+    tiers:
+      low:
+        model: CCH housing built-in routing
+        ordering_code: CCH-02U
+        description: Corning CCH housings include internal slack-management guides, so no separate spool
+          is needed
+        url: https://ecatalog.corning.com/optical-communications/US/en/p/CCH-02U
+        notes: CCH-02U seen on the Corning eCatalog; internal slack routing not checked.
+        verified: true
+      mid:
+        model: CCH housing built-in routing
+        ordering_code: CCH-03U
+        description: As above
+        url: https://ecatalog.corning.com/optical-communications/US/en/p/CCH-03U
+        notes: CCH-03U seen on the Corning eCatalog; internal slack routing not checked.
+        verified: true
+      high:
+        model: CCH housing built-in routing
+        ordering_code: CCH-04U
+        description: As above, larger
+        url: https://ecatalog.corning.com/optical-communications/US/en/p/CCH-04U
+        notes: CCH-04U seen on the Corning eCatalog; internal slack routing not checked.
+        verified: true
+  sources:
+  - https://hubbellcdn.com/specsheet/PREMISE_OFSPOOLPK2_spec.pdf
+  - https://www.gexpro.com/p/515864/panduit/spool-fiber-management-2-4-ru-/074983029693/fms2
+- part_id: FOPP-SPLICE-HOLDER
+  kind: device
+  description: Splice Holder
+  make: Hubbell
+  verified: partial
+  datasheet:
+    full_name: Hubbell OptiChannel 24-fibre fusion splice tray, yellow, with clear snap-on cover (OFSPLKT24F)
+    manufacturer: Hubbell Premise Wiring
+    summary: Injection-moulded 24-fibre fusion splice tray with integrated fibre management; stud or Velcro
+      mounting.
+    ratings:
+      capacity_fibres: 24
+      splice_type: fusion
+      colour: yellow
+      upc: '662620322612'
+    notes: 'Listed under the ''FEUR Rack Mount Enclosures'' heading on Hubbell''s spec sheet, but FEUR
+      compatibility is not stated explicitly. For 96 pigtail splices, 4 trays are needed. Alternative
+      Hubbell splice hardware: FCR350SE (2U splice panel, 6 trays), FSS01S / FSS02S (spec sheets exist,
+      contents not checked).'
+    datasheet_url: https://hubbellcdn.com/specsheet/PREMISE_OFSPLKT24F_spec.pdf
+  alternatives:
+  - make: Corning
+    manufacturer: Corning Optical Communications
+    tiers:
+      low:
+        model: M67-048
+        ordering_code: M67-048
+        description: Splice tray for single fusion splices (12/24 F), fits CCH/Pretium housings
+        url: https://ecatalog.corning.com/optical-communications/US/en/p/M67-048
+        notes: M67-048 seen on the Corning eCatalog (splice tray, heat-shrink fusion splices); fit into
+          the chosen housing not checked.
+        verified: true
+      mid:
+        model: CCH-CS12-A9-P00RE
+        ordering_code: CCH-CS12-A9-P00RE
+        description: CCH splice cassette, 12 F LC SM pigtailed (splice + adapter in one)
+        url: https://ecatalog.corning.com/optical-communications/US/en/Fiber-Optic-Hardware/Panels-Modules-and-Cassettes/CCH-Pigtailed-Splice-Cassette/p/CCH-CS12-A9-P00RE
+        notes: Seen on the Corning eCatalog (CCH pigtailed splice cassette).
+        verified: true
+      high:
+        model: CCH-CS24-A9-P00RE
+        ordering_code: CCH-CS24-A9-P00RE
+        description: CCH splice cassette, 24 F LC SM pigtailed
+        url: https://ubbcentral.com/store/item/Corning-CCH-CS24-A9-P00RE-Pigtailed-Splice-Cassette-24F-LC-Duplex-SM-OS2-UPC-NEW_145857249978.html
+        notes: Part number seen in reseller listings (24F LC duplex SM OS2 UPC); the 12F version is on
+          the Corning eCatalog.
+        verified: true
+  - make: Panduit
+    manufacturer: Panduit Corp.
+    tiers:
+      low:
+        model: FST6
+        ordering_code: FST6
+        description: Opticom fibre splice tray kit, 6 in, 12 mechanical or fusion splices (two needed
+          for 24 F)
+        url: https://www.gexpro.com/p/58016/panduit/splice-tray-kit/074983648931/fst6
+        notes: Seen at Gexpro, Rexel, Digi-Key and panduit.com. Replaces 'FOST12', which was not found;
+          Panduit splice trays are FST-prefixed.
+        verified: true
+      mid:
+        model: FSC24
+        ordering_code: FSC24
+        description: Fibre optic splice holder, 24 splices; closest to a splice-holder kit
+        url: https://www.digikey.com/en/products/detail/panduit-corp/FSC24/7920008
+        notes: Seen at Digi-Key ('Fiber Optic Splice Holder'). Replaces 'FOST24', which was not found.
+          Fit into the chosen tray/enclosure not checked.
+        verified: true
+      high:
+        model: FST24
+        ordering_code: FST24
+        description: Fibre splice tray, 24 mechanical or fusion splices (complete tray with holders)
+        url: https://www.gexpro.com/p/400347/panduit/fiber-splice-tray-24-mechanical-or-fus/074983868193/fst24
+        notes: Seen at Gexpro, Rexel and MC-MC. Replaces 'FOSM24', which was not found (Panduit's FOSMF/FOSMM
+          are splice modules). A short version FST24S also exists.
+        verified: true
+  sources:
+  - https://hubbellcdn.com/specsheet/PREMISE_OFSPLKT24F_spec.pdf
+  - https://www.mrosupply.com/products/945319/as-markdown/
+- part_id: FOPP-PIGTAIL-LC-SM
+  kind: device
+  description: LC Single Mode pigtails
+  make: Hubbell
+  verified: partial
+  datasheet:
+    full_name: Hubbell Premise Wiring OptiChannel fibre optic pigtail, LC single-mode OS2, 6-fibre bundled,
+      3 m, 900 um
+    manufacturer: Hubbell Premise Wiring
+    summary: 6-fibre bundled LC single-mode (OS2) pigtail, 3 m, 900 um tight-buffered, for fusion splicing
+      inside the patch panel.
+    ratings:
+      fibre: single-mode OS2
+      connector: LC (UPC)
+      fibres_per_pigtail: 6
+      length_m: 3
+      buffer_um: 900
+      colour: yellow
+    datasheet_url: https://hubbellcdn.com/specsheet/PREM_CA-FPLCS3SM-SPEC-EN.pdf
+    product_url: https://www.hubbell.com/hubbellpremisewiring/en/products/fiber-optic-pigtail-lc-single-mode-3-meter-length/p/11348920
+    notes: Distributor listings describe FPLCS3SM as a 6-fibre bundled pigtail, so one unit gives 6 fibres.
+      A 96 F panel needs 16 units, not 96; check the BOM quantity. FHPLCS3SM is a related part (possibly
+      a single-fibre variant; not checked).
+  alternatives:
+  - make: Corning
+    manufacturer: Corning Optical Communications
+    tiers:
+      low:
+        model: LC UPC SM pigtail, 2 m
+        ordering_code: Corning 12-fibre LC SM pigtail (part number not verified)
+        description: Single-mode LC UPC pigtail
+        url: https://www.corning.com/optical-communications/worldwide/en/home/products/connectivity/pigtails.html
+        notes: Corning pigtail catalogue numbers were not verified this session.
+        verified: false
+      mid:
+        model: LC UPC SM pigtail
+        ordering_code: Corning LC SM pigtail (part number not verified)
+        description: Like-for-like
+        url: https://www.corning.com/optical-communications/worldwide/en/home/products/connectivity/pigtails.html
+        notes: Not verified.
+        verified: false
+      high:
+        model: CCH pre-pigtailed splice cassette
+        ordering_code: CCH-CS12-A9-P00RE
+        description: Replaces loose pigtails with a factory-pigtailed splice cassette
+        url: https://ecatalog.corning.com/optical-communications/US/en/Fiber-Optic-Hardware/Panels-Modules-and-Cassettes/CCH-Pigtailed-Splice-Cassette/p/CCH-CS12-A9-P00RE
+        notes: Seen on the Corning eCatalog.
+        verified: true
+  - make: Panduit
+    manufacturer: Panduit Corp.
+    tiers:
+      low:
+        model: Opti-Core OS2 simplex LC/UPC pigtail, 1 m
+        ordering_code: NKFP91BN1NKM001
+        description: Single-fibre OS2 LC/UPC pigtail, 1 m; order 6 to replace one 6-fibre Hubbell FPLCS3SM
+          bundle
+        url: https://www.guillevin.com/products/pigtail-os2-simplex-lc-upc-to-pigtail-1-m-nkfp91bn1nkm001-pan-nkfp91bn1nkm001
+        notes: Part number seen at Guillevin ('Pigtail OS2 simplex LC UPC to pigtail 1 m'). Buffer type
+          and colour not read.
+        verified: true
+      mid:
+        model: Opticom 12-fibre LC SM pigtail
+        ordering_code: Panduit 12F LC OS2 pigtail (part number not verified)
+        description: Bundled pigtail, like-for-like
+        url: https://www.panduit.com/en/products/fiber-optic-systems/fiber-optic-pigtails.html
+        notes: Not verified.
+        verified: false
+      high:
+        model: Pre-terminated splice cassette
+        ordering_code: Panduit pigtailed cassette (part number not verified)
+        description: Factory-pigtailed cassette
+        url: https://www.panduit.com/en/products/fiber-optic-systems/fiber-optic-pigtails.html
+        notes: Not verified.
+        verified: false
+  sources:
+  - https://hubbellcdn.com/specsheet/PREM_CA-FPLCS3SM-SPEC-EN.pdf
+  - https://www.hubbell.com/hubbellpremisewiring/en/products/fiber-optic-pigtail-lc-single-mode-3-meter-length/p/11348920
+  - https://steinerelectric.com/Product/Hubbell-Premise-Wiring-FPLCS3SM-OptiChannel-6-Fiber-Single-Mode-OS2-Standard-Fiber-PigtailLC3-m-L900-um-Conductor-481509
+  - https://www.lumen.ca/en/products/28-wire-cords-cables/03-datacom-low-voltage-cable/05-voice-data-video-cables/09-fiber-optic-patch-cords/p-SFVCRlBMQ1MzU00=-hubfplcs3sm-hubbell-fplcs3sm-optichannel-fiber-optic-pigtail-bundled-singlemode-os2-6-fiber-lc-plug-in-yellow-3-m-l
+- part_id: PL1U12NEBK
+  kind: device
+  description: Brush Type Cable Manager
+  make: Marshcom
+  verified: unverified
+  datasheet:
+    full_name: 1U 19" brush-type horizontal cable manager (as described in BOM)
+    summary: Passive 1U 19" brush-strip horizontal cable management panel.
+    rack_units: 1
+    mounting: 19" rack
+    notes: Could NOT identify the brand 'Marshcom' or part number PL1U12NEBK; an exact-match search returned
+      no results. Treat the make and part number as unverified and ask the supplier for a datasheet. Any
+      1U brush panel is functionally equivalent.
+  alternatives:
+  - make: StarTech.com
+    manufacturer: StarTech.com
+    tiers:
+      low:
+        model: CMBRUSH1U
+        ordering_code: CMBRUSH1U
+        description: 1U brush-strip horizontal cable management panel, steel
+        url: https://www.cdw.com/shop/products/StarTech.com/3185627.aspx
+        notes: Part number seen at several distributors; commodity grade.
+        verified: true
+      mid:
+        model: CMBRUSH1U
+        ordering_code: CMBRUSH1U
+        description: Same part as low; the closest like-for-like 1U brush panel
+        url: https://www.cdw.com/shop/products/StarTech.com/3185627.aspx
+        notes: 'Kept identical on purpose: no StarTech 2U or high-density brush panel with a separate
+          code was found (the ''high-density'' listings are CMBRUSH1U itself).'
+        verified: true
+        same_as: low
+      high:
+        model: CMDUCT2U
+        ordering_code: CMDUCT2U
+        description: 2U horizontal finger-duct cable management panel with cover; higher capacity, not
+          brush type, takes an extra RU
+        url: https://deploydepot.ca/products/startech-com-2u-horizontal-finger-duct-rack-cable-management-panel-with-cover-cmduct2u
+        notes: Part number seen at several distributors (deploydepot, stockinthechannel, area9). Replaces
+          the earlier duplicate of CMBRUSH1U.
+        verified: true
+  - make: Panduit
+    manufacturer: Panduit Corp.
+    tiers:
+      low:
+        model: NMF1
+        ordering_code: NMF1
+        description: NetManager 1U horizontal manager, front only, finger-type (not brush)
+        url: https://www.heilind.com/pannmf1.html
+        notes: Seen at Heilind, Crescent ('NetManager 1-sided high capacity horizontal cable manager,
+          1RU') and Van Meter.
+        verified: true
+      mid:
+        model: BR1B
+        ordering_code: BR1B
+        description: 1U brush-seal blanking panel with front-to-back cable pass-through, steel, black;
+          closest brush-type match
+        url: https://www.heilind.com/panbr1b.html
+        notes: Seen at Heilind, Crescent and MC-MC ('Blanking Panel with Brush Seal Pass-Through 1 RU,
+          Black').
+        verified: true
+      high:
+        model: NM1
+        ordering_code: NM1
+        description: NetManager 1U front and rear horizontal manager, high capacity
+        url: https://www.mc-mc.com/Product/panduit-nm1
+        notes: Seen at MC-MC and Online Components.
+        verified: true
+  sources:
+  - https://www.cdw.com/shop/products/StarTech.com/3185627.aspx
+  - https://www.farnell.com/datasheets/2602336.pdf
