@@ -39,6 +39,10 @@ tagged release.
 
 ### Changed
 
+- The installed app imports a double-clicked `.bomlib` through the library
+  store and shows the change summary or the refusal; `.bomproj` files get a
+  placeholder association; `BOMGEN_NO_DIALOGS=1` prints messages to stderr
+  for unattended runs (M11, #15).
 - `docs/agents.md` refreshed: merge order, next milestones, reserved ADR and
   open-question numbers (#13).
 - Plan Q29 resolved: the example keeps the workbook's thermostat load and fan

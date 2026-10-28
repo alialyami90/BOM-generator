@@ -31,6 +31,21 @@ Stack: as briefed (ADR 0002), with one agreed deviation: write the file with
 **XlsxWriter** because openpyxl cannot put the logo picture in the page header
 (ADR 0003). openpyxl stays for reading files back in tests.
 
+### Glossary
+
+Terms from ADR 0012 and ADR 0013; the rules themselves are in those ADRs and the
+design they cite.
+
+| Term | Meaning |
+| --- | --- |
+| Project | A folder with `project.yaml` (project info, library name and version, document register, defaults) and its substations. Exported, imported and backed up as one `.bomproj` file. |
+| Substation | One site of a project, in `substations/<id>/` with `substation.yaml`, its `panels/` and its `out/`. Its constants and spares override the project defaults key by key. |
+| System | Everything one substation produces: its panels, BOM, calculation sheets and workbook. Each substation has exactly one. |
+| Side | A or B: which unit of a redundant pair a device is. A device with `side: none` belongs to neither side. |
+| Stream | The panels one side fills: stream A in the odd panels (1, 3, …), stream B in the even panels (2, 4, …), so panel 2n holds the partners of panel 2n − 1 (ADR 0013, rule R6). |
+| Common device | A device with no side (`side: none`), such as the GPS clock, RTAC or Axion I/O. It shares the A/B panels; there is no separate common panel (Q26). |
+| Override | An engineer's change to the automatic layout: `layout.overrides` moves a device or pair after the fill, `layout.removed` drops one before it. Overrides survive re-running the layout. |
+
 ## 2. Module breakdown
 
 ### 2.1 Package layout
