@@ -1,5 +1,6 @@
 /* STAND-IN for the engine. Not UI code.
    In the app the Python engine supplies `layout_preview(substation, overrides) -> LayoutResult` (A8, ADR 0013).
+   A switch, firewall or patch panel is placed together with its 1 U cable manager as one block (Q32).
    This stub exists only so the Panels board can be tried in the prototype. It places devices the way the
    design describes (32 U usable, one blank plate between neighbours, A units in odd panels, B units in even
    panels, common devices in the first panel with room). The UI renders its result and never re-derives it. */
@@ -12,8 +13,8 @@
       for (let i = 0; i < it.count; i++) {
         const pair = it.count > 1 ? `${it.id}.${i + 1}` : it.id;
         const name = it.count > 1 ? `${it.label} ${i + 1}` : it.label;
-        if (it.redundant) ['A', 'B'].forEach((s) => out.push({ id: `${pair}.${s}`, pair, item: it.id, side: s, name, label: it.label, model: it.model, part: it.part, h: it.h, order: order * 10 + i, stem: it.stem, num: it.base + i, redundant: true }));
-        else out.push({ id: pair, pair: '', item: it.id, side: '', name, label: it.label, model: it.model, part: it.part, h: it.h, order: order * 10 + i, stem: it.stem, num: it.base + i, redundant: false });
+        if (it.redundant) ['A', 'B'].forEach((s) => out.push({ id: `${pair}.${s}`, pair, item: it.id, side: s, name, label: it.label, model: it.model, part: it.part, h: it.h + (it.cm ? 1 : 0), dev: it.h, cm: !!it.cm, order: order * 10 + i, stem: it.stem, num: it.base + i, redundant: true }));
+        else out.push({ id: pair, pair: '', item: it.id, side: '', name, label: it.label, model: it.model, part: it.part, h: it.h + (it.cm ? 1 : 0), dev: it.h, cm: !!it.cm, order: order * 10 + i, stem: it.stem, num: it.base + i, redundant: false });
       }
     });
     return out;
@@ -56,7 +57,7 @@
       panels.push({
         n, id: meta ? meta.id : 'psa' + n, name: meta ? meta.name : `PSA Cabinet - ${String(n).padStart(3, '0')}`, prefix: meta ? meta.prefix : 'PSA' + n,
         side: n % 2 ? 'A' : 'B', pair: Math.ceil(n / 2), capacity: CAPACITY, reserved: RESERVED, used, free: CAPACITY - used, plates: Math.max(0, list.length - 1), din: DB.dinParts[n] || 0,
-        devices: list.map((u) => ({ id: u.id, pair: u.pair, name: u.name, model: u.model, part: u.part, h: u.h, side: u.side, redundant: u.redundant, moved: moved.has(u.id),
+        devices: list.map((u) => ({ id: u.id, pair: u.pair, name: u.name, model: u.model, part: u.part, h: u.h, dev: u.dev, cm: u.cm, side: u.side, redundant: u.redundant, moved: moved.has(u.id),
           tag: `${(meta ? meta.prefix : 'PSA' + n)}-${u.stem}${u.redundant ? '-' + u.side : '-'}${String(u.num).padStart(2, '0')}` }))
       });
     }
