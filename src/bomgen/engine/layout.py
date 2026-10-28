@@ -96,10 +96,21 @@ class LayoutIssue:
         return self.kind not in WARNING_KINDS
 
 
-def used_u(blocks: Iterable[int], blank_plate_u: int) -> int:
-    """Rack units used: every block plus one blank plate between rack neighbours (R5)."""
-    rack = [b for b in blocks if b > 0]
-    return sum(rack) + max(0, len(rack) - 1) * blank_plate_u
+def blank_plates(units: Iterable[Unit]) -> int:
+    """Blank plates in a stack, top to bottom (R5).
+
+    A plate goes between two rack neighbours only when the upper block ends in its
+    active device; a block that ends in its cable manager, a passive plate, may touch
+    the device below it (Ali, 2026-10-28, backlog point 8).
+    """
+    rack = [x for x in units if x.block_u > 0]
+    return sum(1 for upper in rack[:-1] if upper.cable_manager_u == 0)
+
+
+def used_u(units: Iterable[Unit], blank_plate_u: int) -> int:
+    """Rack units used: every block plus the blank plates between them (R5)."""
+    stack = list(units)
+    return sum(x.block_u for x in stack) + blank_plates(stack) * blank_plate_u
 
 
 def _order(unit: Unit) -> tuple[int, str, int]:
@@ -112,20 +123,20 @@ class PanelFill:
     units: list[Unit] = field(default_factory=list)
 
     def used_u(self, rules: LayoutRules) -> int:
-        return used_u((x.block_u for x in self.units), rules.blank_plate_u)
+        return used_u(self.units, rules.blank_plate_u)
 
     def free_u(self, rules: LayoutRules) -> int:
         return rules.capacity_u - self.used_u(rules)
 
     def blank_plates(self) -> int:
-        return max(0, sum(1 for x in self.units if x.block_u > 0) - 1)
+        return blank_plates(self.units)
 
     def din_rail_count(self) -> int:
         return sum(1 for x in self.units if x.block_u == 0)
 
     def fits(self, unit: Unit, rules: LayoutRules) -> bool:
-        blocks = [x.block_u for x in self.units] + [unit.block_u]
-        return used_u(blocks, rules.blank_plate_u) <= rules.capacity_u
+        stack = sorted([*self.units, unit], key=_order)
+        return used_u(stack, rules.blank_plate_u) <= rules.capacity_u
 
     def add(self, unit: Unit) -> None:
         self.units.append(unit)

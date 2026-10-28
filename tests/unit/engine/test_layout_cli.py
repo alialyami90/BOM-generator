@@ -31,7 +31,7 @@ def test_cli_layout_writes_panels_and_prints_fill(substation: Path, tmp_path: Pa
     assert sorted(p.name for p in out.iterdir()) == ["psa1.yaml", "psa2.yaml"]
     assert yaml.safe_load((out / "psa1.yaml").read_text())["generated"] is True
     assert "IED count: 40" in result.stdout
-    assert "Panel 1: 29 U / 32 U" in result.stdout
+    assert "Panel 1: 23 U / 32 U" in result.stdout
 
 
 def test_cli_layout_keeps_hand_written_panels(substation: Path) -> None:
