@@ -1,8 +1,8 @@
 /* Screens: substation Settings and the Network inputs on bomgen.app.api (plan M10c).
-   Read-only until the substation writers exist. The L1 ranking and the Result card come from screens-panels.js.
+   Settings are read-only until their writers are wired; the Network inputs are edited here (M17c). The L1 ranking and the Result card come from screens-panels.js.
    Opened in a plain browser, the prototype's screens in screens-project.js and screens-layout.js are used instead. */
 (function () {
-  const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, field, input, pageHead, toast } = App;
+  const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, field, input, select, pageHead, toast } = App;
   const example = { settings: SCREENS.settings, network: SCREENS.network };
   const LATER = 'Editing substations in the app is not available yet. Edit substation.yaml, then open the project again.';
   const ro = (html) => html.replace('data-dirty="1"', 'readonly').replace('class="input', 'class="ctl input');
@@ -14,7 +14,7 @@
   const real = () => S.backend === 'yes' && S.project && S.project.real && S.sub;
   function page() {
     const key = `${S.project.file}#${S.sub}`;
-    if (SUB.key !== key) Object.assign(SUB, { key, state: 'idle', page: null, error: null });
+    if (SUB.key !== key) { Object.assign(SUB, { key, state: 'idle', page: null, error: null }); NET.draft = {}; NET.errors = {}; }
     if (SUB.state === 'idle') {
       SUB.state = 'loading';
       const current = () => SUB.key === key;  // the user may have moved on while it loaded
@@ -96,20 +96,64 @@
   const ROLES = { fopp: 'Fibre patch panel', l2_switch: 'L2 switch', l1_switch: 'L1 switch', ext_switch: 'External switch', firewall: 'Firewall', other: 'Other' };
   const SPARES = { port_fraction: ['Ports kept free on each switch', '%'], sfp_per_l1: ['Spare SFPs on each L1', ''], rack_u_reserved: ['Rack space kept free', 'U'], dc_branches_per_feed: ['Spare DC branches per feed', ''], ac_branches: ['Spare AC branches', ''] };
   const pct = (v) => Math.round(v * 100);
+  /* Network inputs are edited on the page and saved together (docs/ui/editing.md); the model checks every value. */
+  const NET = { draft: {}, errors: {}, saving: false };
+  const NF = {  // key -> [path, kind]; an emptied spare is removed, so the project's value applies
+    ied_count: [['network', 'ied_count'], 'int'], topology: [['network', 'topology'], 'text'], ring_max_switches: [['network', 'ring_max_switches'], 'int'],
+    ...Object.fromEntries(Object.keys(SPARES).map((k) => [k, [['spares', k], k === 'port_fraction' ? 'pct' : 'int']]))
+  };
+  function netSaved(p, key) {
+    if (key in p.network) return key === 'ied_count' && !p.network.ied_count ? '' : p.network[key];
+    const row = p.spares.find((x) => x.key === key);
+    return row ? (key === 'port_fraction' ? pct(row.value) : row.value) : '';
+  }
+  const netShown = (p, key) => (key in NET.draft ? NET.draft[key] : netSaved(p, key));
+  function toModel(kind, raw) {  // [value for the file, a message when it cannot be read]
+    const t = String(raw == null ? '' : raw).trim();
+    if (!t) return [null, null];
+    if (kind === 'text') return [t, null];
+    if (kind === 'int') return /^\d+$/.test(t) ? [Number(t), null] : [null, 'Enter a whole number, for example 40.'];
+    return /^\d+(\.\d+)?$/.test(t) ? [Math.round(Number(t) * 10) / 1000, null] : [null, 'Enter a percentage, for example 20.'];
+  }
+  const marked = (key, html) => (key in NET.draft ? html.replace('<div class="field">', '<div class="field changed">') : html);
+  function netInput(p, key, unit, help, o = {}) {
+    const err = NET.errors[key], v = netShown(p, key);
+    let html = input('n-' + key, v == null ? '' : String(v), { num: true, mono: true, invalid: !!err || !!o.required, placeholder: o.required ? 'Required' : '' });
+    if (unit) html = `<div class="input-affix">${html}<span class="affix">${esc(unit)}</span></div>`;
+    return marked(key, field(esc(o.label), html, help, err ? esc(err) : o.required ? 'Enter the number of field IEDs, for example 40.' : ''));
+  }
+  function netBar() {
+    const n = Object.keys(NET.draft).length, bad = Object.keys(NET.errors).length;
+    if (!n && !NET.saving) return '';
+    return `<div class="savebar${bad ? ' savebar--bad' : ''}" role="region" aria-label="Unsaved changes"><span class="savebar-msg">${NET.saving ? '<span class="spinner"></span><b>Saving…</b>' : bad ? `${icon('error')}<b>${bad} ${bad === 1 ? 'field needs' : 'fields need'} fixing</b> before you can save.` : `<span class="dot dot--warn" aria-hidden="true"></span><b>${plural(n, 'unsaved change')}</b> · saved to substation.yaml`}</span>
+      <span class="sp"></span><button class="btn btn--secondary" data-action="net-discard" ${NET.saving ? 'disabled' : ''}>Discard</button><button class="btn btn--primary" data-action="net-save" ${NET.saving || bad ? 'disabled' : ''}>${icon('save')}Save network <kbd class="kbd">Ctrl+S</kbd></button></div>`;
+  }
+  /* A new substation: what is left, in the order that works (components.md, Setup card). Gone once all is done. */
+  function setupCard(p) {
+    const hasIed = !!p.network.ied_count, hasEq = p.equipment.length > 0, hasPanels = !!p.panels;
+    if (hasIed && hasEq && hasPanels) return '';
+    const step = (done, now, title, text, act = '') => `<li class="${done ? 'done' : now ? 'now' : ''}">${icon(done ? 'check' : 'info')}<div><b>${title}</b><div class="muted small">${text}</div></div>${act}</li>`;
+    return `<div class="setup" style="margin-bottom:var(--space-5)"><h3>Set up ${esc(p.name)}</h3><p class="muted small" style="margin-top:var(--space-1)">The panels appear on their own once the network and equipment are entered.</p>
+      <ol>${step(true, false, 'Substation created', 'Its settings and calculation documents are in the register with blank numbers.', '<button class="btn btn--ghost btn--sm" data-action="goto" data-to="#/project/documents">Fill in numbers</button>')}
+      ${step(hasIed, !hasIed, 'Enter the number of field IEDs', 'It sizes the L1 switches. It is never listed in the BOM.', hasIed ? '' : '<button class="btn btn--secondary btn--sm" data-action="net-focus-ied">Enter</button>')}
+      ${step(hasEq, hasIed && !hasEq, 'Add the equipment', 'Switches, patch panel, gateway, firewall and the rest. Redundant devices come as an A and a B unit. For now they are written under <span class="mono">equipment</span> in substation.yaml.')}
+      ${step(hasPanels, hasIed && hasEq && !hasPanels, 'Look at the panels', 'Check the layout, then run Checks and build.', hasIed && hasEq ? '<a class="btn btn--primary btn--sm" href="#/panels">See the panels</a>' : '')}</ol></div>`;
+  }
+  ACTIONS['net-focus-ied'] = () => { const el = document.getElementById('n-ied_count'); if (el) { el.scrollIntoView({ block: 'center' }); el.focus(); } };
   SCREENS.network = () => {
     if (!real()) return example.network();
     const p = page(); if (!p) return waiting('Network');
     if (!p.network) return `<div class="page">${pageHead('Network', 'What the substation contains and how the network is sized.')}${problems(p)}</div>`;
-    const n = p.network, eq = p.equipment, unset = !n.ied_count;
-    return `<div class="page">${pageHead('Network', 'What the substation contains and how the network is sized. The panels are laid out from this.', '', '', LATER)}
-      ${problems(p)}${unset ? `<div style="margin-bottom:var(--space-4)">${banner('warn', '<b>The network is not set up yet.</b> Write the number of field IEDs and the equipment in substation.yaml.')}</div>` : ''}
+    const eq = p.equipment, unset = !p.network.ied_count && !('ied_count' in NET.draft), topo = netShown(p, 'topology');
+    return `<div class="page">${pageHead('Network', 'What the substation contains and how the network is sized. The panels are laid out from this.', '', '', 'Equipment rows cannot be edited in the app yet. Edit substation.yaml, then open the project again.')}
+      ${problems(p)}${setupCard(p)}
       <div class="net-grid">
         <div class="stack" style="gap:var(--space-6)">
           <section><h3>Field network</h3>
             <div class="form form--2" style="margin-top:var(--space-3)">
-              ${field('Field IEDs', `<div class="input-affix">${ro(input('n-ied', unset ? '' : n.ied_count, { num: true, mono: true, invalid: unset, placeholder: 'Required' }))}<span class="affix">IEDs</span></div>`, 'Sizes the L1 switches; never a BOM row.')}
-              ${field('Topology', ro(input('n-topo', n.topology === 'ring' ? 'Ring' : 'Star')), n.topology === 'star' ? 'One uplink per L1 switch plus an A–B interlink.' : 'L1 switches in rings; two ports close each ring.')}
-              ${n.topology === 'ring' ? field('Switches per ring', ro(input('n-ring', n.ring_max_switches, { num: true, mono: true })), 'Most L1 switches in one ring.') : ''}
+              ${netInput(p, 'ied_count', 'IEDs', unset ? '' : 'Sizes the L1 switches; never a BOM row.', { label: 'Field IEDs', required: unset })}
+              ${marked('topology', field('Topology', select('n-topology', [['star', 'Star'], ['ring', 'Ring']], topo, { invalid: !!NET.errors.topology }), topo === 'ring' ? 'L1 switches in rings; two ports close each ring.' : 'One uplink per L1 switch plus an A–B interlink.', NET.errors.topology ? esc(NET.errors.topology) : ''))}
+              ${topo === 'ring' ? netInput(p, 'ring_max_switches', '', 'Most L1 switches in one ring.', { label: 'Switches per ring' }) : ''}
             </div></section>
           <section><h3>L1 switch model</h3>${App.network.rankTable()}</section>
           <section><h3>Equipment</h3>
@@ -120,10 +164,50 @@
                 <td class="num">${e.l2_ports || '<span class="muted">0</span>'}</td><td class="num">${e.device && e.device.height_u != null ? (e.device.height_u ? e.device.height_u + ' U' : 'DIN') : '—'}</td></tr>`).join('')}</tbody></table>
               <div class="table-foot"><span>${plural(eq.length, 'item')} · height and mounting come from the library</span></div></div>` : `<div class="empty"><b>No equipment yet.</b><div class="muted small">The switches, gateways and other devices this substation needs go under <span class="mono">equipment</span>.</div></div>`}</section>
           <section><h3>Spares</h3>
-            <p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">Every spare starts from the project's shared defaults; the ones this substation changes are marked.</p>
-            <div class="form form--3">${p.spares.map((s) => { const [label, unit] = SPARES[s.key] || [s.key, '']; const v = s.key === 'port_fraction' ? pct(s.value) : s.value; return field(label, fixed(v, unit), s.changed ? `Changed from ${s.key === 'port_fraction' ? pct(s.default) : s.default}${unit && unit !== '%' ? ' ' + unit : unit}.` : 'Project default.'); }).join('')}</div></section>
+            <p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">Every spare starts from the project's shared defaults; the ones this substation changes are marked. Empty a field to use the project's value again.</p>
+            <div class="form form--3">${p.spares.map((s) => { const [label, unit] = SPARES[s.key] || [s.key, '']; const d = s.key === 'port_fraction' ? pct(s.default) : s.default; return netInput(p, s.key, unit, s.changed ? `Changed from ${d}${unit && unit !== '%' ? ' ' + unit : unit}.` : 'Project default.', { label }); }).join('')}</div></section>
         </div>
         <aside class="net-result" aria-live="polite">${App.network.resultCard()}</aside>
-      </div></div>`;
+      </div>${netBar()}</div>`;
   };
+  /* A field is read on change and checked by the model; the draft holds only what differs from the file. */
+  document.addEventListener('change', (e) => {
+    const m = /^n-(\w+)$/.exec(e.target.id || '');
+    if (!m || !(m[1] in NF) || App.route().a !== 'network' || !real() || !SUB.page) return;
+    const p = SUB.page, key = m[1], [path, kind] = NF[key], typed = e.target.value, was = netSaved(p, key);
+    if (String(typed).trim() === String(was == null ? '' : was)) { delete NET.draft[key]; delete NET.errors[key]; queueMicrotask(App.render); return; }
+    NET.draft[key] = typed;
+    const [value, local] = toModel(kind, typed);
+    if (local) { NET.errors[key] = local; queueMicrotask(App.render); return; }
+    delete NET.errors[key]; queueMicrotask(App.render);
+    if (value === null) return;  // emptied: removed on save
+    Bridge.call('check_substation_field', S.project.file, S.sub, path, value).then((msg) => {
+      if (NET.draft[key] !== typed || (NET.errors[key] || null) === (msg || null)) return;  // a render would drop what is being typed elsewhere
+      if (msg) NET.errors[key] = msg; else delete NET.errors[key];
+      App.render();
+    }).catch(() => {});
+  });
+  const netReset = () => { NET.draft = {}; NET.errors = {}; S.dirty = false; };
+  ACTIONS['net-discard'] = () => { netReset(); App.render(); toast('Changes discarded', 'undo'); };
+  ACTIONS['net-save'] = () => {
+    const keys = Object.keys(NET.draft), file = S.project.file, sub = S.sub, key0 = SUB.key;
+    if (NET.saving || !keys.length || Object.keys(NET.errors).length) return;
+    NET.saving = true; App.render();
+    let saved = null;
+    const next = (i) => {
+      if (i === keys.length) return Promise.resolve();
+      const key = keys[i], [path, kind] = NF[key];
+      return Bridge.call('set_substation_field', file, sub, path, toModel(kind, NET.draft[key])[0]).then((r) => { saved = r; delete NET.draft[key]; return next(i + 1); })
+        .catch((err) => { NET.errors[key] = err.message; throw err; });
+    };
+    next(0).then(() => { toast(`Saved ${plural(keys.length, 'change')} to substation.yaml`, 'check'); S.dirty = false; })
+      .catch(() => toast('Not saved: a value was refused. It is marked on the page.', 'error'))
+      .then(() => { NET.saving = false; if (saved && SUB.key === key0) { SUB.page = saved; App.network.reload(); } App.render(); });
+  };
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's' && App.route().a === 'network' && Object.keys(NET.draft).length) {
+      e.preventDefault(); if (document.activeElement) document.activeElement.blur(); queueMicrotask(ACTIONS['net-save']);
+    }
+  });
+  window.addEventListener('hashchange', () => { if (App.route().a !== 'network') { NET.draft = {}; NET.errors = {}; } });
 })();

@@ -58,7 +58,7 @@
       <p class="muted small" style="margin-top:var(--space-2)">${ring ? 'Rings: two ports close each ring.' : 'Star: each L1 switch has one uplink to its L2 switch plus an A–B interlink.'}</p>
       <a class="btn btn--secondary btn--sm" href="#/panels" style="margin-top:var(--space-3)">${icon('panels')}See the panels</a></div>`;
   }
-  App.network = { rankTable, resultCard };
+  App.network = { rankTable, resultCard, reload: () => { LAY.state = 'idle'; } };  // after a Network input is saved
 
   /* ---------- Panels ---------- */
   let selected = '';  // `${panel}:${key}:${side}` of the selected unit

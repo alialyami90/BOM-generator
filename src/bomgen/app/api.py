@@ -683,7 +683,8 @@ class Api:
         file = Path(project_file)
         if not file.is_file():
             raise FileNotFoundError(errno.ENOENT, "No project file here", str(file))
-        saved = lifecycle.delete_project(file, default_app_home(self._env) / DELETED_DIR)
+        with _edit_refusals():  # a .git folder, the home folder or a drive root
+            saved = lifecycle.delete_project(file, default_app_home(self._env) / DELETED_DIR)
         self._recent().remove(file)
         self._list(saved)
         return {"saved": saved}
@@ -810,6 +811,39 @@ class Api:
         """Settings and Network inputs of one substation, with its located problems."""
         with self._substation(substation_id):
             return substation_page(Path(project_file), substation_id, self._library_store())
+
+    @endpoint
+    def set_substation_field(
+        self, project_file: str, substation_id: str, path: Sequence[str | int], value: Any
+    ) -> dict[str, Any]:
+        """Write one field of a substation.yaml (None or "" removes it, so the project's
+        default applies); refused with the model's message. Returns the substation page."""
+        store = self._library_store()
+        with self._substation(substation_id), _edit_refusals():
+            if value is None or value == "":
+                result = remove_field(
+                    Path(project_file), tuple(path), substation=substation_id, store=store
+                )
+            else:
+                result = set_field(
+                    Path(project_file), tuple(path), value, substation=substation_id, store=store
+                )
+        _written(result)
+        return substation_page(Path(project_file), substation_id, store)
+
+    @endpoint
+    def check_substation_field(
+        self, project_file: str, substation_id: str, path: Sequence[str | int], value: Any
+    ) -> str | None:
+        """The model's message for setting a substation field to ``value``, or None."""
+        with self._substation(substation_id), _edit_refusals():
+            return validate_field(
+                Path(project_file),
+                tuple(path),
+                value,
+                substation=substation_id,
+                store=self._library_store(),
+            )
 
     # -- Checks and Build (docs/ui/screens.md: Checks, Build) --
 
