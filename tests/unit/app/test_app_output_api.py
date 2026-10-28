@@ -163,15 +163,11 @@ def test_build_is_blocked_by_input_errors(app: api.Api, project: Path, tmp_path:
 def test_a_workbook_open_in_excel_is_reported_as_open(
     app: api.Api, project: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    # Excel holds the file: the writer cannot create it, and cannot remove it either
+    # Excel holds the old workbook: the writer's move onto it is refused
     def held(*args: object, **kwargs: object) -> None:
-        raise PermissionError(13, "Permission denied")
+        raise PermissionError(13, "The process cannot access the file")
 
-    unlink = Path.unlink
-    monkeypatch.setattr(xlsxwriter.workbook, "ZipFile", held)
-    monkeypatch.setattr(
-        Path, "unlink", lambda p, *a, **k: held() if p.suffix == ".xlsx" else unlink(p, *a, **k)
-    )
+    monkeypatch.setattr(os, "replace", held)
 
     assert refused(app.build_workbook(str(project), "gis01", str(tmp_path))) == "file_open"
 
