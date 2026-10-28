@@ -8,7 +8,10 @@ import pytest
 from typer.testing import CliRunner
 
 from bomgen import build as build_module
+from bomgen import cli
 from bomgen.cli import app
+from bomgen.engine.errors import EngineError
+from bomgen.engine.layout import LayoutIssue, LayoutReport
 from bomgen.models.report import CheckItem, CheckReport, CheckStatus
 
 pytestmark = pytest.mark.golden
@@ -89,3 +92,22 @@ def test_compare_with_an_unreadable_file_exits_1(tmp_path: Path) -> None:
     assert result.exit_code == 1
     assert "not a readable .xlsx workbook" in result.stderr
     assert not (tmp_path / FILE_NAME).exists()
+
+
+def test_layout_warnings_show_when_the_engine_then_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    warning = LayoutIssue("stale-override", "l1", "names a unit that no longer exists")
+    report = LayoutReport(ied_count=40, port_lines=[], fill_lines=[], issues=[warning])
+    monkeypatch.setattr(cli, "with_layout", lambda target: (target, report))
+
+    def engine_fails(target: object) -> None:
+        raise EngineError("no rule for this")
+
+    monkeypatch.setattr(build_module, "build_bom", engine_fails)
+    result = runner.invoke(app, ["build", str(EXAMPLES / "project.yaml"), "-o", str(tmp_path)])
+    assert result.exit_code == 1
+    assert result.stderr.splitlines() == [
+        "gis01: warning: l1: names a unit that no longer exists",
+        "gis01: no rule for this",
+    ]

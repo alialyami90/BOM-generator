@@ -1,13 +1,12 @@
-"""The shared build sequence (``bomgen.build``) that ``bomgen build`` and the app call."""
+"""The shared build sequence (``bomgen.build``) that ``bomgen build`` and the app call;
+both lay out first."""
 
 import json
 from pathlib import Path
 
 import pytest
 
-from bomgen import build as build_module
 from bomgen.build import build_substation, workbook_name
-from bomgen.engine.layout import LayoutIssue, LayoutReport
 from bomgen.io.loader import LoadedSubstation, load_substation
 from bomgen.revision import read_previous_issue
 
@@ -34,7 +33,6 @@ def test_build_writes_the_workbook_and_its_check_report(
     assert outcome.path.is_file()
     assert outcome.result is not None
     assert outcome.revisions is None
-    assert outcome.layout is None  # the example's panels are hand-written
     assert outcome.checks is not None
     assert outcome.failed is False
     written = json.loads((tmp_path / "bom.checks.json").read_text("utf-8"))
@@ -55,28 +53,3 @@ def test_build_compares_with_a_previous_issue(loaded: LoadedSubstation, tmp_path
     outcome = build_substation(loaded, tmp_path / "after.xlsx", previous=previous)
     assert outcome.revisions is not None
     assert outcome.revisions.changes == ()
-
-
-def test_layout_errors_stop_the_build_before_writing(
-    loaded: LoadedSubstation, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    issue = LayoutIssue("device-too-tall", "gw", "too tall")
-    report = LayoutReport(ied_count=40, port_lines=[], fill_lines=[], issues=[issue])
-    monkeypatch.setattr(build_module, "with_layout", lambda target: (target, report))
-    outcome = build_substation(loaded, tmp_path / "bom.xlsx")
-    assert (outcome.path, outcome.result, outcome.checks) == (None, None, None)
-    assert outcome.layout is report
-    assert outcome.failed is True
-    assert not list(tmp_path.iterdir())
-
-
-def test_layout_false_builds_the_panel_files_as_they_are(
-    loaded: LoadedSubstation, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    def no_layout(target: LoadedSubstation) -> None:
-        raise AssertionError("the layout ran")
-
-    monkeypatch.setattr(build_module, "with_layout", no_layout)
-    outcome = build_substation(loaded, tmp_path / "bom.xlsx", layout=False, checks=False)
-    assert outcome.path is not None
-    assert outcome.path.is_file()

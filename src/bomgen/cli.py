@@ -13,6 +13,7 @@ from bomgen import __version__
 from bomgen.build import build_substation, workbook_name
 from bomgen.checks import render_text
 from bomgen.engine.errors import EngineError
+from bomgen.engine.layout import with_layout
 from bomgen.io.errors import InputError
 from bomgen.io.loader import LoadedProject, LoadedSubstation, load_inputs, load_substation
 from bomgen.io.schema import write_json_schemas
@@ -161,25 +162,23 @@ def build(
             _exit_on_input_error(error)
     failed = False
     for target in targets:
-        sub_id = target.substation.substation.id
         try:
+            if not no_layout:
+                target, layout_report = with_layout(target)
+                if layout_report is not None:
+                    # Warnings show too; errors stop the build with the whole report.
+                    bad = layout_report.has_errors
+                    lines = layout_report.lines() if bad else layout_report.problem_lines()
+                    for line in lines:
+                        typer.echo(f"{target.substation.substation.id}: {line}", err=True)
+                    if bad:
+                        raise typer.Exit(1)
             outcome = build_substation(
-                target,
-                out / workbook_name(target),
-                previous=previous,
-                layout=not no_layout,
-                checks=not no_checks,
+                target, out / workbook_name(target), previous=previous, checks=not no_checks
             )
         except (EngineError, WriterError) as error:
-            typer.echo(f"{sub_id}: {error}", err=True)
+            typer.echo(f"{target.substation.substation.id}: {error}", err=True)
             raise typer.Exit(1) from None
-        if outcome.layout is not None:
-            # Warnings show too; errors stop the build with the whole report.
-            bad = outcome.layout.has_errors
-            for line in outcome.layout.lines() if bad else outcome.layout.problem_lines():
-                typer.echo(f"{sub_id}: {line}", err=True)
-            if bad:
-                raise typer.Exit(1)
         typer.echo(str(outcome.path))
         if outcome.revisions is not None:
             typer.echo(render_revisions(outcome.revisions))
