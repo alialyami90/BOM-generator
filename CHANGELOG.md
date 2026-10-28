@@ -13,11 +13,67 @@ project uses [Semantic Versioning](https://semver.org/).
 
 - The installer ships the default device library, and the app loads it into
   an empty library store on first start (#86).
+- Panels board editing for generated panels (M17): drag and drop moves a
+  device to another panel or position (a pair moves together; Alt moves
+  one unit), pins hold a unit where it is, units can be deleted, and Undo
+  (Ctrl+Z) reverses each change. Alt+arrow keys move the selected unit
+  within its panel or to the neighbouring one, and the Move… dialog shows
+  each panel's rack space after the move. Pinned units and their positions
+  are shown on the board. `DeviceMove` and
+  `PairMove` take an optional `position` (1 = top), and every override pins
+  its units; ADR 0013 amended (#100, #110, #126, #129).
+- Library: the Library screen shows the catalogues (#93). Devices gain
+  `alt_group` and `tier`, so alternatives are ordinary library parts, and
+  further MCB brand sets live in `catalogue_brands`, chosen with
+  `catalogue_choice` on the project defaults or a substation; ADR 0017
+  (#97). An edited library is saved as a local version (`+local.N`) with a
+  `.bomlib` backup, through edit operations by path with per-field
+  validation (#105, #113, #114). `bomgen library export-csv` and
+  `import-csv` exchange a library as CSV tables for Excel; the import is a
+  dry run first and names a cell that starts like a formula; ADR 0018
+  (#116, #118). Comparison rows set a device beside its alternatives
+  (M16, #120).
+- Branch MCBs are sized from device data (M15, ADR 0019): running current
+  and inrush against the MCB's magnetic trip multiple, with a 2 A floor;
+  inrush shorter than 10 ms is ignored. Devices gain `inrush_a` and
+  `inrush_ms`, and the MCB catalogue gains `trip_curve`, AC and DC trip
+  multiples, `dc_rating_v` and a `codes` map (#97, #103).
+- The check report warns when an MCB's DC rating or a DC-fed device's
+  `input_v_max` is below the battery float voltage (`dc_float_v`, 140 V).
+  Device types gain `input_v_min` and `input_v_max` (#104, #109).
+- Loose material (M18): the table has its own Loose Material sheet after
+  the cabinet BOMs, read by Power Consumption and the revision comparison
+  (ADR 0020), and its own Preview tab in the app (#96, #108). A loose item
+  can be free text with a description instead of a library part
+  (ADR 0022, #122).
+- File writers (M17, ADR 0021): projects, substations and hand-written
+  panel files can be created, edited and deleted without hand-editing YAML.
+  Edits keep the files' own style and comments, are checked before they are
+  written, and are written atomically only when they add no new problem.
+  `io/round_trip.py`, `io/edit.py`, `io/panel_edit.py`, `io/fields.py`,
+  `io/lifecycle.py` and `io/loose_edit.py` hold the writers, and the app
+  exposes them as editing endpoints (#106, #112, #115, #117, #119, #122).
+- Device database: M14 electrical data for the alternatives and the MCB
+  brand sets, and the checker accepts the tier, inrush and input-range
+  keys (#95, #121).
 
 ### Changed
 
 - Version 0.1.1; the release workflow's publish step attaches to a release
   that already exists (#86).
+- A cable manager may sit directly against the device below it; a blank
+  plate now goes only under a rack block that ends in its active device.
+  The example's generated panels drop from 29U/25U to 23U/19U, and the BOM
+  is unchanged; ADR 0013 R5 amended (M12, #90).
+
+### Fixed
+
+- The Panels board draws blank plates where the engine counts them (#101).
+- No loose-material table is written when it has no rows (#123).
+- A loose item with neither a part nor a description gets a clearer
+  message (#124).
+- Library store: writing a package creates its folder, and a failed write
+  leaves no `.replaced` folder behind (#127).
 
 ## [0.1.0] - 2026-10-28
 
