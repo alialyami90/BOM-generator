@@ -204,7 +204,7 @@ output:
   power_footnotes: ["*Printer Power Consumption: 622 watts (Printing), …"]  # rows after NOTES; optional
 constants: { t_max_c: 40 }             # optional overrides of the project defaults
 spares: { port_fraction: 0.25 }        # optional overrides of the project defaults
-catalogue_choice: { mcb: abb-s200m, mcb_dc: c60h-dc }   # optional; key by key; mcb_dc unset = as mcb (ADR 0023)
+catalogue_choice: { mcb: abb-s200m, mcb_dc: schneider-c60h-dc }   # optional; key by key; mcb_dc unset = as mcb (ADR 0023)
 loose_material:                        # extras not tied to a device
   title: "PSA Panels Loose Material and Auxiliary Equipment"   # the table's title row
   host_panel: ws                       # its document heads the Loose Material sheet (ADR 0020)

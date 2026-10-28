@@ -78,7 +78,8 @@ A2's loader, and registers its command group in `bomgen.cli` with one
 ### A6 — Windows installer and release (M11)
 
 PyInstaller spec, Inno Setup per-user installer, `.bomlib` file association,
-and the tag-driven release workflow. Built early with placeholders; it wires
+and the release workflow (a merged version bump with its CHANGELOG section
+builds, tags and publishes; ADR 0009). Built early with placeholders; it wires
 the real CLI, library import and window as M1, M8 and M10 land.
 
 ### A8 — Sizing and layout engine (M1c)
