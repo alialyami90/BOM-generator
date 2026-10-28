@@ -14,11 +14,12 @@ setup, and page headers/footers.
 
 ## Status
 
-Milestones M0 (repository, spec, plan, CI) and M1 (input models, YAML loader,
-JSON Schemas, `examples/`, `bomgen validate`) are done. The rule engine, sheet
-models and Excel writer (M2–M7) come next; `bomgen build` arrives with them.
-An installable Windows desktop app with shareable device-library update
-packages follows (see the plan, M8–M11).
+Done: M0 (repository, spec, plan, CI), M1 (input models, YAML loader, JSON
+Schemas, `examples/`, `bomgen validate`), M8 (device-library update packages,
+`bomgen library …`) and M9 (UI design and clickable prototype in
+[`docs/ui/`](docs/ui/README.md), awaiting Ali's review). The rule engine, sheet
+models and Excel writer (M2–M7) come next; `bomgen build` arrives with them,
+followed by the Windows desktop app and installer (M10–M11).
 
 ## Usage
 
@@ -35,6 +36,24 @@ bomgen schema                                     # write JSON Schemas to schema
 file and path. The JSON Schemas in [`schemas/`](schemas/) let an editor check
 the YAML as you type (ADR 0010); a test fails if they drift from the models, so
 run `bomgen schema` after changing a model.
+
+### Device-library update packages
+
+A `.bomlib` package carries a device library to every installed copy
+(ADR 0008). Libraries are installed per user, under `%LOCALAPPDATA%\bomgen\libraries`
+on Windows and the XDG data directory elsewhere (override with
+`BOMGEN_LIBRARY_HOME`).
+
+```bash
+bomgen library pack examples/library.yaml --name psa-devices --version 1.0.0
+bomgen library import psa-devices-1.0.0.bomlib --dry-run   # show the part diff only
+bomgen library import psa-devices-1.0.0.bomlib             # verify, install, activate
+bomgen library list                                        # installed versions
+bomgen library rollback psa-devices                        # back to the previous version
+```
+
+`pack --add data/device-db` includes the researched device database
+([`data/device-db/`](data/device-db/README.md)) as reference data.
 
 ## Development
 

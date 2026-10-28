@@ -10,6 +10,14 @@ tagged release.
 
 ### Added
 
+- M9 UI design in `docs/ui/`: design tokens, component and screen specs, a
+  clickable HTML/CSS prototype and bundled fonts; ADR 0011 (#8).
+- `docs/agents.md`: agent roles, file ownership, numbering and the review and
+  merge flow (#3).
+- Device-library update packages: `.bomlib` pack and verify, a per-user
+  library store with import preview, downgrade refusal and rollback, and the
+  `bomgen library pack|import|list|rollback` commands (milestone M8, #9).
+- Changelog entries for #6 and #4 (#10).
 - Device database in `data/device-db/`: datasheet facts and two alternative
   brands (low, mid, high part numbers) for every part in the example library,
   as reference data the generator does not read; findings in
