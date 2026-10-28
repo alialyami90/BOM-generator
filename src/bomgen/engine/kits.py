@@ -59,7 +59,7 @@ def loose_table(
     library: Library,
 ) -> LooseTable | None:
     """The loose-material table: the project's items in order, then each device's loose
-    items as one parent block (plan Q30)."""
+    items as one parent block (plan Q30); None when it has no rows (ADR 0020)."""
     if material is None:
         return None
     items = [_loose_extra(extra, library) for extra in material.items]
@@ -67,6 +67,8 @@ def loose_table(
         for row in rows:
             if row.device.loose_items:
                 items.append(_device_loose(row, library))
+    if not items:
+        return None
     return LooseTable(
         title=(substation, material.title), lines=flatten(items), host_panel=material.host_panel
     )

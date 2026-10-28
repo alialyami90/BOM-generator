@@ -121,6 +121,22 @@ def test_no_loose_table_without_loose_material() -> None:
     assert build(loaded()).loose is None
 
 
+def test_no_loose_lines_no_loose_table() -> None:
+    # The Loose Material sheet is written only while it has rows (ADR 0020, 0022).
+    lib = library(*LOOSE_PARTS)
+    material = LooseMaterial(host_panel="ws", items=[])
+    assert loose_table(material, "GIS Substation", [], lib) is None
+
+
+def test_device_loose_items_fill_the_table_without_project_items() -> None:
+    lib = library(*LOOSE_PARTS)
+    p = panel([{"part_id": "GPS"}], id="psa3", lan=None, tag_prefix="PSA3")
+    material = LooseMaterial(host_panel="ws", items=[])
+    table = loose_table(material, "GIS Substation", [(p, expand_devices(p, lib))], lib)
+    assert table is not None
+    assert [line.part_id for line in table.lines] == ["ANT", "CABLE"]
+
+
 def test_loose_table_lists_project_items_then_device_loose_items() -> None:
     lib = library(*LOOSE_PARTS)
     p = panel([{"part_id": "GPS"}], id="psa3", lan=None, tag_prefix="PSA3")
