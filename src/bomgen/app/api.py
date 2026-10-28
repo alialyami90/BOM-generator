@@ -29,6 +29,7 @@ from pydantic import BaseModel, ValidationError
 
 from bomgen import __version__
 from bomgen.app.catalogues import catalogues_page
+from bomgen.app.editing import edit_reply, panel_options_page
 from bomgen.app.network import layout_page
 from bomgen.app.output import OutputRefusedError, build_file, build_target, checks_page
 from bomgen.app.preview import preview_page
@@ -39,6 +40,8 @@ from bomgen.app.substations import (
     substation_page,
 )
 from bomgen.bundle.errors import LibraryPackageError, RefusalKind
+from bomgen.io import edit
+from bomgen.io.edit import EditError, EditResult
 from bomgen.io.errors import InputError
 from bomgen.io.loader import PROJECT_FILE, load_library
 from bomgen.library_store.device_db import DeviceRecord, load_device_records
@@ -184,6 +187,15 @@ def endpoint[**P](method: Callable[P, object]) -> Callable[P, Envelope]:
             return error("internal", f"{type(exc).__name__}: {exc}")
 
     return wrapper
+
+
+@contextlib.contextmanager
+def _edit_refusals() -> Iterator[None]:
+    """An edit that names something the file does not have changes nothing."""
+    try:
+        yield
+    except EditError as exc:
+        raise AppError("edit_refused", str(exc)) from None
 
 
 class Api:
@@ -458,6 +470,87 @@ class Api:
         """The engine's network sizing, L1 ranking and panel layout, for Network and Panels."""
         with self._substation(substation_id):
             return layout_page(Path(project_file), substation_id, self._library_store())
+
+    # -- Editing (docs/ui/editing.md; writers in bomgen.io.edit, ADR 0021) --
+
+    def _edit(
+        self, project_file: str, substation_id: str, write: Callable[..., EditResult], *args: Any
+    ) -> dict[str, Any]:
+        store = self._library_store()
+        project = Path(project_file)
+        with self._substation(substation_id), _edit_refusals():
+            result = write(project, substation_id, *args, store=store)
+            return edit_reply(result, project, substation_id, store)
+
+    @endpoint
+    def set_layout_overrides(
+        self, project_file: str, substation_id: str, overrides: list[dict[str, Any]]
+    ) -> dict[str, Any]:
+        """Write the board's pins and moves (``layout.overrides``), in order."""
+        return self._edit(project_file, substation_id, edit.set_layout_overrides, overrides)
+
+    @endpoint
+    def set_layout_removed(
+        self, project_file: str, substation_id: str, removed: list[dict[str, Any]]
+    ) -> dict[str, Any]:
+        """Write the units left out of the layout (``layout.removed``)."""
+        return self._edit(project_file, substation_id, edit.set_layout_removed, removed)
+
+    @endpoint
+    def set_enclosure(
+        self, project_file: str, substation_id: str, enclosure: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Write the enclosure every generated panel uses."""
+        return self._edit(project_file, substation_id, edit.set_enclosure, enclosure)
+
+    @endpoint
+    def set_generated_document(
+        self, project_file: str, substation_id: str, document: str
+    ) -> dict[str, Any]:
+        """Write the register key of the generated panels' document."""
+        return self._edit(project_file, substation_id, edit.set_generated_document, document)
+
+    @endpoint
+    def panel_options(self, project_file: str, substation_id: str, panel: int) -> Any:
+        """Generated panel ``panel``'s options, each with the shared value and whether the
+        panel has its own."""
+        with self._substation(substation_id), _edit_refusals():
+            return panel_options_page(
+                Path(project_file), substation_id, panel, self._library_store()
+            )
+
+    @endpoint
+    def set_panel_option(
+        self, project_file: str, substation_id: str, key: str, value: Any, panel: int | None
+    ) -> dict[str, Any]:
+        """Write an option for every generated panel, or for ``panel`` only."""
+
+        def write(project: Path, sub: str, *, store: LibraryStore) -> EditResult:
+            return edit.set_option(project, sub, key, value, panel=panel, store=store)
+
+        return self._edit(project_file, substation_id, write)
+
+    @endpoint
+    def remove_panel_option(
+        self, project_file: str, substation_id: str, key: str, panel: int | None
+    ) -> dict[str, Any]:
+        """Remove a written option, so the shared value or the default applies again."""
+
+        def write(project: Path, sub: str, *, store: LibraryStore) -> EditResult:
+            return edit.remove_option(project, sub, key, panel=panel, store=store)
+
+        return self._edit(project_file, substation_id, write)
+
+    @endpoint
+    def set_port_plan(
+        self,
+        project_file: str,
+        substation_id: str,
+        equipment_id: str,
+        port_plan: dict[str, Any] | None,
+    ) -> dict[str, Any]:
+        """Write (or with ``None`` remove) an equipment row's port plan."""
+        return self._edit(project_file, substation_id, edit.set_port_plan, equipment_id, port_plan)
 
     @endpoint
     def preview_substation(self, project_file: str, substation_id: str) -> dict[str, Any]:
