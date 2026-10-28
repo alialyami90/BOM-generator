@@ -17,9 +17,10 @@ setup, and page headers/footers.
 Done: M0 (repository, spec, plan, CI), M1 (input models, YAML loader, JSON
 Schemas, `examples/`, `bomgen validate`), M8 (device-library update packages,
 `bomgen library …`) and M9 (UI design and clickable prototype in
-[`docs/ui/`](docs/ui/README.md), awaiting Ali's review). The rule engine, sheet
-models and Excel writer (M2–M7) come next; `bomgen build` arrives with them,
-followed by the Windows desktop app and installer (M10–M11).
+[`docs/ui/`](docs/ui/README.md), accepted as a prototype; a design rework
+follows). The rule engine, sheet models and Excel writer (M2–M7) come next;
+`bomgen build` arrives with them, followed by the Windows desktop app and
+installer (M10–M11).
 
 ## Usage
 
