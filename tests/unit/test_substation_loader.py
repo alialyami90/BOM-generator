@@ -121,6 +121,23 @@ def test_load_inputs_detects_file_kind(tmp_path: Path) -> None:
     assert isinstance(load_inputs(tmp_path / SUBSTATION_DIR / "substation.yaml"), LoadedSubstation)
 
 
+@pytest.mark.parametrize(
+    ("name", "message"),
+    [
+        (
+            f"{SUBSTATION_DIR}/panels/p1.yaml",
+            "this is a panel file; validate the substation.yaml or project.yaml that lists it",
+        ),
+        ("library.yaml", "this is a library file; validate the project.yaml that uses it"),
+    ],
+)
+def test_load_inputs_names_a_panel_or_library_file(tmp_path: Path, name: str, message: str) -> None:
+    write_project(tmp_path)
+    with pytest.raises(InputError) as caught:
+        load_inputs(tmp_path / name)
+    assert [(i.location, i.message) for i in caught.value.issues] == [("", message)]
+
+
 def test_substation_listed_twice(tmp_path: Path) -> None:
     project = default_project()
     project["substations"] = [

@@ -79,10 +79,17 @@ class LoadedProject:
 def load_inputs(
     path: Path, *, store: LibraryStore | None = None
 ) -> LoadedProject | LoadedSubstation:
-    """Load a project file or a substation file; only a project has ``project`` or ``library``."""
+    """Load a project file or a substation file, told apart by their top-level keys."""
     source = read_yaml(path)
-    if isinstance(source.data, dict) and source.data.keys() & {"project", "library"}:
+    keys = set(source.data) if isinstance(source.data, dict) else set()
+    if keys & {"project", "library"}:
         return load_project(path, store=store)
+    if "cabinet_number" in keys:
+        message = "this is a panel file; validate the substation.yaml or project.yaml that lists it"
+        raise InputError([Issue(path, "", message)])
+    if "catalogues" in keys:
+        message = f"this is a library file; validate the {PROJECT_FILE} that uses it"
+        raise InputError([Issue(path, "", message)])
     return load_substation(path, store=store)
 
 
