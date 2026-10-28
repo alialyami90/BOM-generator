@@ -3,7 +3,7 @@
 - Name: A1 - Lead developer, handing over to B1. Date: 2026-10-28.
 - Branch: per-topic branches `claude/project-thread-2fnqi0-<topic>`; this checkpoint is on
   `claude/project-thread-2fnqi0-checkpoint-b1`.
-- origin/main at checkpoint: see the "Verification" table. Releases: v0.1.0 (2064227) and v0.1.1
+- origin/main at checkpoint: 7d22194 (gate run on ad7d137; later commits are docs only). Releases: v0.1.0 (2064227) and v0.1.1
   (135d7ee, published with the installer and default.bomlib). Since #153 a merged version bump with
   its CHANGELOG section builds, tags and publishes itself (ADR 0009, amended); no one pushes tags.
 
@@ -17,7 +17,8 @@ M12–M18 are in [`docs/plan.md`](../../plan.md) → "M12–M18 (v0.2)".
   side plus device-record edits (#164) and the CSV `ac_rated` fix (#165), M17 writers and
   `part_users` (#163), M18 loose model and sheet (#88–#130).
 - Q39 (Ali, 2026-10-28): DC MCB brand chosen apart from AC. Model #151 (ADR 0023, Proposed),
-  engine #154 (group F and `dc_float` use `catalogues.dc_mcb`; CINC stays AC). #145 refuses a
+  engine #154 (group F, the DC distribution, and `dc_float` use `catalogues.dc_mcb`; CINC, the
+  group E main auxiliary AC breaker, stays on `catalogues.mcb`). #145 refuses a
   DC-only brand (`ac_rated: false`) as `mcb`.
 - Also merged after the v0.1.1 tag: #149 YAML parse cache, #152 `output.power_footnotes` model,
   #153 release from main, docs #158, #160, #168, ADR 0018 amendment #170.
@@ -30,7 +31,7 @@ M12–M18 are in [`docs/plan.md`](../../plan.md) → "M12–M18 (v0.2)".
 | PR | Owner | State |
 | --- | --- | --- |
 | #157 Power footnote rows on the sheet | B10 | Code fine, gate green; held for Ali's print-area card |
-| #166 Library list editing, Add, Delete, In use (M16 a2) | B11 | B4's fixes in 29a05ba; needs CI and Windows build |
+| #166 Library list editing, Add, Delete, In use (M16, second Library editor PR) | B11 | B4's fixes in 29a05ba; needs CI and Windows build |
 | #171 MCB sizing tests on the shipped library | B9 | Tests only; local gate green; CI running |
 
 ## Waiting on
@@ -46,7 +47,7 @@ M12–M18 are in [`docs/plan.md`](../../plan.md) → "M12–M18 (v0.2)".
 ## Threads (route work here)
 
 B2 `cmsg_01CGuLumA5u5e7gSGbisWmMi6PZvzPso7corbrGkzwhE7j`,
-A3 (signs as B3) `cmsg_01CGuLumA5u5e7gSGbisWmMiMn4Ay5kTA4wLV22n9mEuru`,
+B3 (thread still titled A3) `cmsg_01CGuLumA5u5e7gSGbisWmMiMn4Ay5kTA4wLV22n9mEuru`,
 B4 `cmsg_01CGuLumA5u5e7gSGbisWmMi9aAhgzZ2TPaUfJEPHXE2iF`,
 B5 `cmsg_01CGuLumA5u5e7gSGbisWmMiTNDc3q6MynAdyRny37PKC3`,
 B6 `cmsg_01CGuLumA5u5e7gSGbisWmMiHdmiF2zR4D9rPGYUSRQDkT`,
@@ -55,7 +56,9 @@ B8 `cmsg_01CGuLumA5u5e7gSGbisWmMiWrgyedtbG3UzCXSmJ5mdJm`,
 B9 `cmsg_01CGuLumA5u5e7gSGbisWmMiEVdwRwy2F5RdK8ptK2QkGn`,
 B10 `cmsg_01CGuLumA5u5e7gSGbisWmMi5oJH7cuxNZWDrjADGPLnRU`,
 B11 `cmsg_01CGuLumA5u5e7gSGbisWmMiSRmFy8hwGpYU6cXpyyR56y`.
-Retired A threads (A2, A4–A11) must not act; if one does, tell the coordinator.
+Retired A threads (A2, A4–A11) must not act; if one does, tell the coordinator
+(`message_coordinator`). This role's own thread: `cmsg_01CGuLumA5u5e7gSGbisWmMi3nTuZbpZkUB1t4T5nt6GfE`
+(the coordinator starts a new B1 thread at handover).
 `list_threads` shows the latest; the coordinator starts new threads as checkpoints merge.
 
 ## Verification

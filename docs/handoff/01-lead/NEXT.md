@@ -1,8 +1,9 @@
 # Role 1 (lead): next
 
-**Next action:** run `list_pull_requests state=open` and review and merge each PR, using the procedure in LESSONS.md, in the order below.
+**Next action:** in `alialyami90/BOM-generator`, run `list_pull_requests state=open`; merge whatever is ready (#171, #166 when green), using the procedure in LESSONS.md. Items 1 and 2 wait on Ali's cards; work the rest in order.
 
-1. **#157 (B10, power footnote rows).** Held for Ali's card on the print area (spec: A1:L97).
+1. **#157 (B10, power footnote rows).** Held for Ali's card on the print area (spec: A1:L97;
+   card `cmsg_01CGuLumA5u5e7gSGbisWmMiMH42ayNRhuWcnbjHvKGNWm`; close it with `close_decision`).
    "Print it": merge, then add a plan note that the print area now covers the footnote (a
    correction to the reference). "Keep it off the printout": B10 stops the print area at the
    NOTES first. Done when it is merged and the plan says which.
