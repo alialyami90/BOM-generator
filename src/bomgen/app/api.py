@@ -394,12 +394,33 @@ class Api:
         return self._editor().check(part_id, field, value)
 
     @endpoint
-    def add_library_edits(self, edits: list[dict[str, Any]]) -> dict[str, Any]:
-        """Add edits to the pending set; all are refused when one leaves the library invalid."""
+    def add_library_edits(
+        self, edits: list[dict[str, Any]], record_edits: list[dict[str, Any]] | None = None
+    ) -> dict[str, Any]:
+        """Add edits to the pending set; all are refused when one leaves the library invalid.
+        `record_edits` brings back discarded datasheet edits (Undo)."""
         try:
-            return self._editor().add(edits)
+            return self._editor().add(edits, record_edits or ())
         except (EditRefusedError, ValidationError) as exc:
             raise AppError("invalid_edit", f"The library cannot take this change: {exc}") from exc
+
+    @endpoint
+    def check_library_record(self, part_id: str, path: str, value: object) -> str | None:
+        """The model's message for setting a datasheet record field (a dotted path)."""
+        try:
+            return self._editor().check_record(part_id, path, value)
+        except KeyError as exc:
+            raise AppError("not_found", f"Part {part_id} has no datasheet record.") from exc
+
+    @endpoint
+    def set_library_record_fields(self, part_id: str, fields: dict[str, Any]) -> dict[str, Any]:
+        """Set datasheet record fields (dotted paths; null empties one) in the pending set."""
+        try:
+            return self._editor().set_record_fields(part_id, fields)
+        except KeyError as exc:
+            raise AppError("not_found", f"Part {part_id} has no datasheet record.") from exc
+        except (EditRefusedError, ValidationError) as exc:
+            raise AppError("invalid_edit", f"The record cannot take this change: {exc}") from exc
 
     @endpoint
     def add_library_device(
