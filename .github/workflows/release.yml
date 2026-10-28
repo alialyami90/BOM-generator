@@ -29,6 +29,7 @@ on:
       - "packaging/**"
       - "src/bomgen/app/**"
       - "data/library/**"
+      - "data/device-db/**"
       - "pyproject.toml"
       - ".github/workflows/release.yml"
   workflow_dispatch:
