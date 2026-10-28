@@ -10,6 +10,9 @@
   const real = () => S.backend === 'yes' && S.project && S.project.real && S.sub;
   const plural = (n, one) => `${n} ${one}${n === 1 ? '' : 's'}`;
   const U = 18; // px per rack unit on the board, as in the prototype
+  /* Only generated panels follow pins and deletes; Build uses hand-written panel files as they are. */
+  const editable = () => !!(LAY.data && LAY.data.generated);
+  const READ_ONLY = 'These panels are hand-written, so Build uses your panel files and a pin or delete here would not change the BOM.';
 
   /* ---------- data: one layout per (project file, substation id) ---------- */
   const LAY = { key: '', state: 'idle', data: null, error: null };
@@ -86,7 +89,7 @@
     const d = l.data;
     if (d.reason) return `<div class="page">${pageHead('Panels', 'Laid out from the equipment and network.')}${banner('bad', `<b>No layout.</b> ${esc(d.reason)}.`, '<a class="btn btn--secondary btn--sm" href="#/checks">Open checks</a>')}</div>`;
     const t = ['board', 'list'].includes(S.tab.panels) ? S.tab.panels : 'board';
-    return `<div class="page page--wide">${pageHead('Panels', 'Placed by the engine from the equipment and network. Drag a device to another panel or position, or pin it where it is. A pair moves together; hold Alt to move one unit.', history.length ? `<button class="btn btn--secondary" data-action="pv-undo">${icon('undo')}Undo</button>` : '')}
+    return `<div class="page page--wide">${pageHead('Panels', d.generated ? 'Placed by the engine from the equipment and network. Drag a device to another panel or position, or pin it where it is. A pair moves together; hold Alt to move one unit.' : 'Laid out by the engine from the equipment and network.', history.length ? `<button class="btn btn--secondary" data-action="pv-undo">${icon('undo')}Undo</button>` : '')}
       ${tabs('panels', [['board', 'Board'], ['list', 'List']], t, 'Panels view')}
       <div role="tabpanel" aria-labelledby="tab-panels-${t}" style="margin-top:var(--space-4)">${t === 'board' ? board(d) : list(d)}</div></div>`;
   };
@@ -103,30 +106,31 @@
       ${issuesBanner(d)}
       <div class="board-bar" role="status" aria-live="polite">
         ${sel ? `<div class="sel-bar"><span><b>${esc(name(sel.u))}</b> <span class="mono muted">${esc(sel.u.part_id)}</span> ${esc(sel.u.label)} · ${sel.u.side ? 'Side ' + sel.u.side : 'Common'} · ${sel.u.height_u} U${sel.u.cable_manager_u ? ` + ${sel.u.cable_manager_u} U cable manager` : ''} · ${esc(sel.p.cabinet_name)}${sel.u.pinned ? ' · pinned' : ''}</span><span class="sp"></span>
-          ${sel.u.pinned ? `<button class="btn btn--ghost btn--sm" data-action="pv-unpin">${icon('pin')}Unpin</button>` : `<button class="btn btn--ghost btn--sm" data-action="pv-pin">${icon('pin')}Pin here</button>`}
-          <button class="btn btn--ghost btn--sm" data-action="pv-delete">${icon('trash')}Delete${sel.u.side ? ' pair' : ''}</button>
+          ${!d.generated ? '' : sel.u.pinned ? `<button class="btn btn--ghost btn--sm" data-action="pv-unpin">${icon('pin')}Unpin</button>` : `<button class="btn btn--ghost btn--sm" data-action="pv-pin">${icon('pin')}Pin here</button>`}
+          ${d.generated ? `<button class="btn btn--ghost btn--sm" data-action="pv-delete">${icon('trash')}Delete${sel.u.side ? ' pair' : ''}</button>` : ''}
           <button class="btn btn--ghost btn--icon btn--sm" data-action="pv-clear-sel" aria-label="Clear selection">${icon('x')}</button></div>`
           : `<div class="row board-hint"><span class="muted small">Select a device to see its part and size.</span><span class="board-help" tabindex="0" role="img" aria-label="${esc(HELP)}" title="${esc(HELP)}">${icon('help')}</span><span class="sp"></span>${changes ? `<button class="btn btn--ghost btn--sm" data-action="pv-changes" aria-expanded="${showChanges}">${[d.overrides.length ? `${d.overrides.length} pinned` : '', d.removed.length ? `${d.removed.length} deleted` : ''].filter(Boolean).join(' · ')}${icon('chevd')}</button>` : '<span class="muted small">Nothing pinned or deleted</span>'}</div>`}
       </div>
+      ${d.generated ? '' : `<p class="muted small" style="margin-bottom:var(--space-3)">${READ_ONLY}</p>`}
       ${changes && showChanges ? changesList(d) : ''}
-      <div class="board" role="group" aria-label="Panels">${pairs.map((k) => { const cols = d.panels.filter((p) => p.pair === k); return `<div class="pair"><div class="pair-head">Pair ${k} <span class="muted">· panels ${cols.map((p) => p.number).join(' and ')}</span></div><div class="pair-cols">${cols.map((p) => column(p, d.reserved_u, sel)).join('')}</div></div>`; }).join('')}</div>
+      <div class="board" role="group" aria-label="Panels">${pairs.map((k) => { const cols = d.panels.filter((p) => p.pair === k); return `<div class="pair"><div class="pair-head">Pair ${k} <span class="muted">· panels ${cols.map((p) => p.number).join(' and ')}</span></div><div class="pair-cols">${cols.map((p) => column(p, d.reserved_u, sel, d.generated)).join('')}</div></div>`; }).join('')}</div>
       <p class="muted small" style="margin-top:var(--space-3)">${plural(d.panels.length, 'panel')} from the layout${d.list.some((p) => p.manual) ? `, ${d.list.filter((p) => p.manual).length} hand-written (${d.list.filter((p) => p.manual).map((p) => esc(p.cabinet_name)).join(', ')})` : ''}.</p></div>`;
   }
 
-  function column(p, reserved, sel) {
+  function column(p, reserved, sel, movable) {
     const pct = Math.round((p.used_u / p.capacity_u) * 100);
     const rack = p.units.filter((u) => u.block_u > 0);
     const partner = sel && sel.u.side ? `${sel.u.key}:${sel.u.side === 'A' ? 'B' : 'A'}` : '';
     const cards = [];
     rack.forEach((u) => {
       const id = uid(p, u), isSel = id === selected, isPartner = partner && `${u.key}:${u.side}` === partner;
-      cards.push(`<div class="dev ${u.cable_manager_u ? 'has-cm' : ''} ${isSel ? 'is-sel' : ''} ${isPartner ? 'is-partner' : ''} ${u.pinned ? 'is-pinned' : ''}" draggable="true" tabindex="0" role="button" aria-pressed="${isSel}" data-action="pv-select-dev" data-uid="${esc(id)}" style="height:${u.block_u * U}px"
+      cards.push(`<div class="dev ${u.cable_manager_u ? 'has-cm' : ''} ${isSel ? 'is-sel' : ''} ${isPartner ? 'is-partner' : ''} ${u.pinned ? 'is-pinned' : ''}" ${movable ? 'draggable="true" ' : ''}tabindex="0" role="button" aria-pressed="${isSel}" data-action="pv-select-dev" data-uid="${esc(id)}" style="height:${u.block_u * U}px"
         aria-label="${esc(name(u))}${u.side ? ', side ' + u.side : ', common'}, ${u.block_u} U${u.cable_manager_u ? ' including a 1 U cable manager' : ''}${u.pinned ? ', pinned by an override' : ''}" title="${esc(u.part_id)} · ${esc(u.label)}">
-        <span class="dev-row" style="height:${u.height_u * U - 2}px"><span class="dev-grip">${icon('grip')}</span><span class="dev-main"><b>${esc(name(u))}</b>${u.height_u >= 2 ? `<span class="mono">${esc(u.part_id)}</span>` : ''}</span>${u.pinned ? `<span class="dev-flag" title="Pinned by an override: stays here when the network changes">${icon('pin')}</span>` : ''}<span class="dev-u">${u.height_u} U</span></span>${u.cable_manager_u ? `<span class="dev-cm">Cable manager<span class="dev-u">${u.cable_manager_u} U</span></span>` : ''}</div>`);
+        <span class="dev-row" style="height:${u.height_u * U - 2}px">${movable ? `<span class="dev-grip">${icon('grip')}</span>` : ''}<span class="dev-main"><b>${esc(name(u))}</b>${u.height_u >= 2 ? `<span class="mono">${esc(u.part_id)}</span>` : ''}</span>${u.pinned ? `<span class="dev-flag" title="Pinned by an override: stays here when the network changes">${icon('pin')}</span>` : ''}<span class="dev-u">${u.height_u} U</span></span>${u.cable_manager_u ? `<span class="dev-cm">Cable manager<span class="dev-u">${u.cable_manager_u} U</span></span>` : ''}</div>`);
       if (u.plate_below_u) cards.push(`<div class="plate" style="height:${u.plate_below_u * U}px" title="Blank plate (not in the BOM)"></div>`);
     });
     const din = p.units.filter((u) => u.block_u === 0);
-    return `<section class="bcol" data-panel="${p.number}" aria-label=""${esc(p.cabinet_name)}, side ${esc(p.side || '')}, ${p.used_u} of ${p.capacity_u} U used">
+    return `<section class="bcol" data-panel="${p.number}" aria-label="${esc(p.cabinet_name)}, side ${esc(p.side || '')}, ${p.used_u} of ${p.capacity_u} U used">
       <header><b title="${esc(p.cabinet_name)}">${esc(p.cabinet_name)}</b>${p.side ? `<span class="badge badge--plain">Side ${esc(p.side)}</span>` : ''}</header>
       <div class="umeter ${p.free_u < 3 ? 'is-full' : ''}" role="img" aria-label="${p.used_u} of ${p.capacity_u} U used"><i style="width:${Math.min(100, pct)}%"></i></div>
       <div class="ulabel"><b>${p.used_u}</b> of ${p.capacity_u} U used · ${p.free_u} U free</div>
@@ -147,7 +151,7 @@
   const history = [];  // {overrides, removed} before each write, for Undo
   const unitOf = (id) => { for (const p of LAY.data.panels) for (const u of p.units) if (uid(p, u) === id) return { p, u }; return null; };
   const seen = {};  // device id -> {name, of}, kept so a deleted device still has its name
-  const learn = (d) => d.panels.forEach((p) => p.units.forEach((u) => { seen[u.device] = { name: u.of > 1 && ROLES[u.role] ? ROLES[u.role] : ROLES[u.role] || u.label, of: u.of }; }));
+  const learn = (d) => d.panels.forEach((p) => p.units.forEach((u) => { seen[u.device] = { name: ROLES[u.role] || u.label, of: u.of }; }));
   const deviceName = (device) => (seen[device] ? seen[device].name : device);
   const nth = (device, unit) => (unit && (!seen[device] || seen[device].of > 1) ? ' ' + unit : '');
   const lower = (side) => (side ? side.toLowerCase() : null);
@@ -169,6 +173,7 @@
 
   /* Write overrides and/or removed; the bridge refuses what the layout cannot take. */
   function write(change, said, undoable = true, ic = 'pin') {
+    if (!editable()) return Promise.resolve(false);
     const d = LAY.data, before = { overrides: d.overrides, removed: d.removed };
     const calls = [];
     if (change.overrides) calls.push(() => Bridge.call('set_layout_overrides', S.project.file, S.sub, change.overrides));
@@ -197,7 +202,7 @@
   ACTIONS['pv-changes'] = () => { showChanges = !showChanges; App.render(); };
   ACTIONS['pv-pin'] = () => {
     const sel = unitOf(selected); if (!sel) return;
-    const o = moveOf(sel.u, sel.p.number, null, false);
+    const o = moveOf(sel.u, sel.p.number, sel.u.position, false);  // the position too, so the pin holds where it is
     write({ overrides: [...LAY.data.overrides.filter((x) => !places(x, sel.u, false)), o] }, `Pinned ${describe(o)}`);
   };
   ACTIONS['pv-unpin'] = () => {
@@ -219,14 +224,15 @@
   };
   ACTIONS['pv-reset-go'] = () => { closeDialog(); showChanges = false; write({ overrides: [], removed: [] }, 'Reset to automatic'); };
   function changesList(d) {
-    const rows = [...d.overrides.map((o, i) => `<li><span>${icon('pin')}Pinned ${esc(describe(o))}</span><button class="btn btn--ghost btn--sm" data-action="pv-unpin-at" data-i="${i}">Unpin</button></li>`),
-      ...d.removed.map((r, i) => `<li><span>${icon('trash')}Deleted ${esc(unitName(r))}</span><button class="btn btn--ghost btn--sm" data-action="pv-restore-at" data-i="${i}">Restore</button></li>`)];
-    return `<div style="margin-bottom:var(--space-3)"><ul class="changes">${rows.join('')}</ul><div class="row" style="justify-content:flex-end;margin-top:var(--space-2)"><button class="btn btn--secondary btn--sm" data-action="pv-reset">Reset to automatic</button></div></div>`;
+    const act = (a, i, t) => (d.generated ? `<button class="btn btn--ghost btn--sm" data-action="${a}" data-i="${i}">${t}</button>` : '');
+    const rows = [...d.overrides.map((o, i) => `<li><span>${icon('pin')}Pinned ${esc(describe(o))}</span>${act('pv-unpin-at', i, 'Unpin')}</li>`),
+      ...d.removed.map((r, i) => `<li><span>${icon('trash')}Deleted ${esc(unitName(r))}</span>${act('pv-restore-at', i, 'Restore')}</li>`)];
+    return `<div style="margin-bottom:var(--space-3)"><ul class="changes">${rows.join('')}</ul>${d.generated ? '<div class="row" style="justify-content:flex-end;margin-top:var(--space-2)"><button class="btn btn--secondary btn--sm" data-action="pv-reset">Reset to automatic</button></div>' : ''}</div>`;
   }
 
   /* ---------- drag and drop: the bridge says which panels can take the move ---------- */
   let drag = null;  // { id, u, from, alone, fits: {panel: true|false|undefined}, at: {panel, position} }
-  const onBoard = () => real() && LAY.data && !LAY.data.reason && (S.tab.panels || 'board') === 'board';
+  const onBoard = () => real() && LAY.data && !LAY.data.reason && editable() && (S.tab.panels || 'board') === 'board';
   const others = (u, alone) => LAY.data.overrides.filter((x) => !places(x, u, alone));
   function probe(n) {
     const u = drag.u;
