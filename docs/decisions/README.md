@@ -19,3 +19,4 @@ An ADR stays "Proposed" until Ali accepts it in review.
 | 0011 | [UI design language and bundled fonts](0011-ui-design-language.md) | Proposed |
 | 0012 | [Projects hold substations; sharing by `.bomproj` export](0012-projects-substations-bomproj.md) | Accepted |
 | 0013 | [Switches sized from the IED count; panels laid out automatically](0013-network-sizing-and-panel-layout.md) | Accepted |
+| 0014 | [Engine output model and group A–D derivation choices](0014-engine-data-model.md) | Proposed |
