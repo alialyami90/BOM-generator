@@ -493,6 +493,19 @@ calling `bomgen` in-process through a small Python API. No browser, no local
 server port, works offline. The business rules stay in the engine. Ends with an
 impeccable polish/audit pass against the M9 design.
 
+Delivered in small PRs by A11, one screen group each (ADR 0015 for the bridge):
+
+- **M10a shell:** the M9 prototype in `src/bomgen/app/ui/`, `bomgen.app.window.run_window`
+  (the launcher's one call, wired by A6), `bomgen.app.api.Api` with `app_info`
+  (version, the `.bomproj` the app was opened with, workspace, installed libraries),
+  `ui/bridge.js`. pywebview is the `app` extra. Screens still show the prototype's
+  illustrative data, marked "not connected yet".
+- **M10b:** Home, Project, Library and Backup and share on `bomgen.library_store` and
+  `bomgen.project_store`.
+- **M10c:** Substation settings, Network and Panels after M1b and M1c.
+- **M10d:** Checks, Preview and Build after M4, M5 and M7.
+- **M10e:** A4's impeccable polish pass.
+
 ### M11 — Windows installer and releases
 - Freeze the app with PyInstaller (one folder) and wrap it in an Inno Setup
   installer: per-user install (no admin rights), Start-menu shortcut,
