@@ -15,4 +15,4 @@ The letter counts context resets (A, B, C, … Z, AA).
 | 8 | [08-sizing-layout](08-sizing-layout/) | A8 - Sizing and layout engine | 2026-10-28 | — |
 | 9 | [09-rule-engine](09-rule-engine/) | A9 - BOM rule engine | 2026-10-28 | — |
 | 10 | [10-workbook-writer](10-workbook-writer/) | A10 - Excel workbook writer | 2026-10-28 | — |
-| 11 | [11-desktop-app](11-desktop-app/) | A11 - Desktop app | 2026-10-28 | — |
+| 11 | [11-desktop-app](11-desktop-app/) | B11 - Desktop app | 2026-10-28 | [2026-10-28](11-desktop-app/checkpoints/2026-10-28.md) |
