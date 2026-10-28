@@ -25,7 +25,7 @@
 
   /* ---------- components ---------- */
   const badge = (kind, text, ic) => `<span class="badge badge--${kind}">${ic ? icon(ic) : ''}${esc(text)}</span>`;
-  const verified = (v) => ({ verified: badge('ok', 'Verified', 'check'), partial: badge('warn', 'Partly verified', 'info'), unverified: badge('plain', 'Unverified', 'info') }[v]);
+  const verified = (v) => ({ confirmed: badge('ok', 'Confirmed', 'check'), partial: badge('warn', 'Partial', 'info'), unverified: badge('plain', 'Unverified', 'info') }[v]);
   const banner = (kind, body, actions = '') => `<div class="banner banner--${kind}" role="${kind === 'bad' ? 'alert' : 'status'}">${icon({ bad: 'error', warn: 'warn', ok: 'check', info: 'info' }[kind])}<div class="grow">${body}</div>${actions}</div>`;
   const tabs = (group, items, active, label) =>
     `<div class="tabs" role="tablist" aria-label="${esc(label)}">${items.map(([id, text, extra]) =>

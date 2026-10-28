@@ -187,10 +187,12 @@ Sortable columns (library, projects) show a sort button in the header with
 20 px, 12 px medium text, 2 px radius, soft fill, optional 12 px icon. Kinds:
 ok, warn, bad, info, plain. Always text, never a bare coloured dot.
 
-Data-quality badges map the device-database `verified` level: Verified (ok),
-Partly verified (warn), Unverified (plain). The exact levels come from the
-device-database records and must be checked with that work before the UI is
-built.
+Data-quality badges map the device-database `verified` level (confirmed by A1):
+Confirmed (ok), Partial (warn), Unverified (plain).
+
+In the Alternatives table, `same_as` means a tier reuses the part number of a
+named lower tier. Show it as one row spanning those tiers (for example
+"Low, Mid"), not as duplicate rows. The prototype data has no such case yet.
 
 ### Key-value list
 Two columns, 180 px label (muted) and value (wraps anywhere for long codes).

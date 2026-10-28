@@ -78,8 +78,7 @@ up to roughly 150 BOM rows per panel, library of about 45 to a few hundred parts
 
 - Language: English only for the first release (decided by Ali).
 - Alternatives and datasheet field names follow the device-database records
-  (A3, confirmed by A1). Still to confirm with A3: the meaning of each `verified`
-  level and of `same_as`; the Alternatives table shows `verified` as a badge and
-  does not use `same_as` until then.
+  (A3, confirmed by A1). `verified` is confirmed/partial/unverified and `same_as`
+  means a tier reuses a lower tier's part number (shown as one spanning row).
 - Swapping a part for an alternative is a later extension. It needs a schema
   change (A2) and data (A3); the design only documents where it would go.

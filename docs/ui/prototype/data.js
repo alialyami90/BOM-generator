@@ -63,20 +63,20 @@
 
   const alt = (brand, rows) => ({ brand, rows });
   const devices = [
-    { id: 'FOPP-96SM', make: 'Corning', model: 'FOPP 96-core SM', cat: 'fibre_patch_panel', supply: '—', w: 0, verified: 'verified', alt: null },
-    { id: 'RST2228-L2', make: 'Ruggedcom', model: 'RST-2228', cat: 'network_switch', supply: '125 VDC', w: 77, verified: 'verified', alt: null },
-    { id: 'RST2228-L1-24MM', make: 'Ruggedcom', model: 'RST-2228 (24 MM)', cat: 'network_switch', supply: '125 VDC', w: 77, verified: 'verified',
+    { id: 'FOPP-96SM', make: 'Corning', model: 'FOPP 96-core SM', cat: 'fibre_patch_panel', supply: '—', w: 0, verified: 'confirmed', alt: null },
+    { id: 'RST2228-L2', make: 'Ruggedcom', model: 'RST-2228', cat: 'network_switch', supply: '125 VDC', w: 77, verified: 'confirmed', alt: null },
+    { id: 'RST2228-L1-24MM', make: 'Ruggedcom', model: 'RST-2228 (24 MM)', cat: 'network_switch', supply: '125 VDC', w: 77, verified: 'confirmed',
       code: '6GK6222-6AB00-5CC0-Z A05+B05+C05+D05+E05+F05+G05', tagType: 'ESW', level: 'L1', power: 'Dual feed (2 supplies)', mcb: '2 A branch',
       ds: { supply: '88–300 VDC / 85–264 VAC', typical: '62 W', max: '77 W', ports: '24 × 100M MM (fixed), 4 × 1G SFP slots', dims: '483 × 270 × 44 mm (1U)', weight: '4.1 kg', temp: '−40 to +85 °C', certs: 'IEC 61850-3, IEEE 1613', url: 'datasheet link (illustrative)' },
       src: ['Manufacturer datasheet (revision 2026-03)', 'Project workbook'],
       alt: [
         alt('Hirschmann', [
-          { tier: 'Low', model: 'HIR-RS20-2400M2', verified: 'verified' },
+          { tier: 'Low', model: 'HIR-RS20-2400M2', verified: 'confirmed' },
           { tier: 'Mid', model: 'HIR-RSP25-2400M4', verified: 'partial' },
           { tier: 'High', model: 'HIR-RSPE35-2400M4', verified: 'unverified' }]),
         alt('Moxa', [
-          { tier: 'Low', model: 'MOX-PT-G7728-LOW', verified: 'verified' },
-          { tier: 'Mid', model: 'MOX-PT-G7728-MID', verified: 'verified' },
+          { tier: 'Low', model: 'MOX-PT-G7728-LOW', verified: 'confirmed' },
+          { tier: 'Mid', model: 'MOX-PT-G7728-MID', verified: 'confirmed' },
           { tier: 'High', model: 'MOX-PT-G7828-HI', verified: 'partial' }])
       ] },
     { id: 'SEL-2730M-EXT', make: 'SEL', model: 'SEL-2730M', cat: 'network_switch', supply: '125 VDC', w: 23, verified: 'partial',
@@ -86,49 +86,49 @@
       alt: [
         alt('Hirschmann', [
           { tier: 'Low', model: 'HIR-GRS-1640-LOW', verified: 'unverified' },
-          { tier: 'Mid', model: 'HIR-GRS-1640-MID', verified: 'verified' },
-          { tier: 'High', model: 'HIR-GRS-1640-HI', verified: 'verified' }]),
+          { tier: 'Mid', model: 'HIR-GRS-1640-MID', verified: 'confirmed' },
+          { tier: 'High', model: 'HIR-GRS-1640-HI', verified: 'confirmed' }]),
         alt('Moxa', [
           { tier: 'Low', model: 'MOX-EDS-516-LOW', verified: 'partial' },
           { tier: 'Mid', model: 'MOX-PT-7520-MID', verified: 'unverified' },
-          { tier: 'High', model: 'MOX-PT-7828-HI', verified: 'verified' }])
+          { tier: 'High', model: 'MOX-PT-7828-HI', verified: 'confirmed' }])
       ] },
-    { id: 'SEL-3555-GW', make: 'SEL', model: 'SEL-3555', cat: 'gateway', supply: '125 VDC', w: 45, verified: 'verified',
+    { id: 'SEL-3555-GW', make: 'SEL', model: 'SEL-3555', cat: 'gateway', supply: '125 VDC', w: 45, verified: 'confirmed',
       code: '3555-GW-A', tagType: 'GW', level: 'L2', power: 'Dual feed (2 supplies)', mcb: '2 A branch',
       ds: { supply: '125–250 VDC / 120–240 VAC', typical: '36 W', max: '45 W', ports: '4 × Ethernet, 4 × serial', dims: '483 × 305 × 133 mm (3U)', weight: '7.8 kg', temp: '−40 to +75 °C', certs: 'IEC 60255, IEEE 1613', url: 'datasheet link (illustrative)' },
       src: ['Manufacturer datasheet (revision 2026-05)'],
       alt: [
         alt('Moxa', [
-          { tier: 'Low', model: 'MOX-MGate-LOW', verified: 'verified' },
+          { tier: 'Low', model: 'MOX-MGate-LOW', verified: 'confirmed' },
           { tier: 'Mid', model: 'MOX-DA-720-MID', verified: 'partial' },
           { tier: 'High', model: 'MOX-DA-820C-HI', verified: 'unverified' }]),
         alt('Hitachi Energy', [
-          { tier: 'Low', model: 'HE-COM600-LOW', verified: 'verified' },
-          { tier: 'Mid', model: 'HE-COM600-MID', verified: 'verified' },
+          { tier: 'Low', model: 'HE-COM600-LOW', verified: 'confirmed' },
+          { tier: 'Mid', model: 'HE-COM600-MID', verified: 'confirmed' },
           { tier: 'High', model: 'HE-COM600-HI', verified: 'partial' }])
       ] },
-    { id: 'FGR-60F', make: 'Fortinet', model: 'FortiGate Rugged 60F', cat: 'firewall', supply: '125 VDC', w: 24, verified: 'verified',
+    { id: 'FGR-60F', make: 'Fortinet', model: 'FortiGate Rugged 60F', cat: 'firewall', supply: '125 VDC', w: 24, verified: 'confirmed',
       code: 'FGR-60F', tagType: 'FW', level: 'EXT', power: 'Single feed via change-over diodes', mcb: '2 A branch, alarmed',
       ds: { supply: '9.6–60 VDC', typical: '19 W', max: '24 W', ports: '4 × 1G RJ45, 2 × SFP', dims: '216 × 160 × 45 mm', weight: '1.6 kg', temp: '−40 to +75 °C', certs: 'IEC 61850-3, IEEE 1613', url: 'datasheet link (illustrative)' },
       src: ['Manufacturer datasheet'],
       alt: [
         alt('Palo Alto', [
           { tier: 'Low', model: 'PAN-PA-220R-LOW', verified: 'unverified' },
-          { tier: 'Mid', model: 'PAN-PA-220R-MID', verified: 'verified' },
-          { tier: 'High', model: 'PAN-PA-450R-HI', verified: 'verified' }]),
+          { tier: 'Mid', model: 'PAN-PA-220R-MID', verified: 'confirmed' },
+          { tier: 'High', model: 'PAN-PA-450R-HI', verified: 'confirmed' }]),
         alt('Cisco', [
           { tier: 'Low', model: 'CIS-IR1101-LOW', verified: 'partial' },
           { tier: 'Mid', model: 'CIS-IR1833-MID', verified: 'unverified' },
-          { tier: 'High', model: 'CIS-FPR1010E-HI', verified: 'verified' }])
+          { tier: 'High', model: 'CIS-FPR1010E-HI', verified: 'confirmed' }])
       ] },
-    { id: 'SEL-2488', make: 'SEL', model: 'SEL-2488', cat: 'time_sync', supply: '125 VDC', w: 12, verified: 'verified', alt: null },
-    { id: 'SEL-3555-RTAC', make: 'SEL', model: 'SEL-3555 RTAC', cat: 'data_concentrator', supply: '125 VDC', w: 45, verified: 'verified', alt: null },
+    { id: 'SEL-2488', make: 'SEL', model: 'SEL-2488', cat: 'time_sync', supply: '125 VDC', w: 12, verified: 'confirmed', alt: null },
+    { id: 'SEL-3555-RTAC', make: 'SEL', model: 'SEL-3555 RTAC', cat: 'data_concentrator', supply: '125 VDC', w: 45, verified: 'confirmed', alt: null },
     { id: 'AXION-CHASSIS', make: 'SEL', model: 'SEL-2240 Axion', cat: 'io_chassis', supply: '125 VDC', w: 30, verified: 'partial', alt: null },
     { id: 'AXION-DI-MOD', make: 'SEL', model: 'SEL-2244-2', cat: 'io_module', supply: '—', w: 0, verified: 'partial', alt: null },
     { id: 'WS-HP-Z', make: 'HP', model: 'Z2 Workstation', cat: 'workstation', supply: '230 VAC', w: 160, verified: 'unverified', alt: null },
     { id: 'MON-24', make: 'Dell', model: 'P2422H', cat: 'monitor', supply: '230 VAC', w: 20, verified: 'unverified', alt: null },
-    { id: 'FAN-716', make: 'Rittal', model: 'Filter fan 716 m³/h', cat: 'housekeeping', supply: '230 VAC', w: 60, verified: 'verified', alt: null },
-    { id: 'TH-1', make: 'Rittal', model: 'Thermostat', cat: 'housekeeping', supply: '230 VAC', w: 2, verified: 'verified', alt: null }
+    { id: 'FAN-716', make: 'Rittal', model: 'Filter fan 716 m³/h', cat: 'housekeeping', supply: '230 VAC', w: 60, verified: 'confirmed', alt: null },
+    { id: 'TH-1', make: 'Rittal', model: 'Thermostat', cat: 'housekeeping', supply: '230 VAC', w: 2, verified: 'confirmed', alt: null }
   ];
 
   const importScenarios = {

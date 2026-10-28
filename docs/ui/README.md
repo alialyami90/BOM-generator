@@ -42,7 +42,7 @@ reorder. They are in `components.md` and `screens.md` and belong to M10.
 ## Depends on other work
 
 - Alternatives are browse-only. Swapping a part needs a schema change (A2) and data (A3).
-- Meaning of the `verified` levels and `same_as` to confirm with A3.
+- `verified` levels are confirmed/partial/unverified; `same_as` means a tier reuses a lower tier's part number and is shown as one spanning row (confirmed by A1).
 - Located errors (`file:line: path: message`) come from ADR 0010; the Checks screen
   assumes the engine returns them as data.
 
