@@ -54,7 +54,8 @@ Settled by A1:
 
 - **Golden R10:** with 40 IEDs R1 gives 2 L1 switches per side, not the spec example's 6, and the port plans differ from the hand-written ones (L1 SFPs 2 × 2 + 3 = 7, not 24 + 3). The golden records the rule results; the hand-written example panels keep every BOM golden value.
 - **UI contract** (`docs/ui/screens.md` → "What the app needs from the engine"): `layout_preview(substation, overrides) -> LayoutResult` with panels, U used, blank plates, DIN-rail counts and move errors; `NetworkPlan` read-only; stable equipment ids.
-- **Cable managers** (Q32, with Ali): default not counted against the 32U.
+- **Cable managers** (Q32, Ali 2026-10-28: count them): every rack-mounted switch or patch panel unit (`network_switch`, `firewall`, `patch_panel` with `height_u > 0`) takes a 1U cable manager directly under it. The pair is one block of `height_u + 1` with no blank plate inside it; blank plates go between blocks. `Unit` gets `cable_manager_u: int = 0` (1 for those categories) and `used_u` counts it. The panel's cable-manager count goes to A9's step 3 instead of today's fixed 9.
+- **Port spare default and switch model choice**: asked on cards; the plan keeps `port_fraction` 0.20 and the engineer's switch choice until Ali answers.
 
 ---
 
@@ -118,7 +119,8 @@ Settled by A1:
 - `used_u(heights: Sequence[int], blank_plate_u: int) -> int`: `Σ h + (k − 1) × blank_plate_u` over the k units with `h > 0`; 0 for k = 0.
 - `fill(units: Sequence[Unit], rules: LayoutRules) -> Layout`: A units in `rank` order into odd panels, B units into even panels, breaking at the same places (lock-step), then each `Side.NONE` unit in `rank` order into the panel with the most free U (ties → lowest number), opening the next odd/even pair when none fits. A trailing empty panel is dropped.
 
-- [ ] **Write the failing tests** (units built with a helper `u(key, h, side, rank)`):
+- [ ] **Write the failing tests** (units built with a helper `u(key, h, side, rank, cm=0)`):
+  - `test_r5_cable_manager_sits_under_its_switch`: a 1U switch with `cable_manager_u=1` then a 1U device → 1 + 1 + 1 gap + 1 = 4U; the cable manager adds no blank plate.
   - `test_r5_blank_plate_between_neighbours`: `used_u([1, 2, 1], 1) == 6`; `used_u([1], 1) == 1`; `used_u([], 1) == 0`.
   - `test_r5_din_rail_parts_cost_nothing`: `used_u([1, 0, 1], 1) == 3`.
   - `test_r5_fill_stops_at_32u_and_opens_a_new_panel`: 17 A/B pairs of 1U → 1 + 16 × 2 = 33 > 32, so panels 1–2 hold 16 pairs (31U) and panels 3–4 hold 1.
