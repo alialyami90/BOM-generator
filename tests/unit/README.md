@@ -29,6 +29,12 @@ A milestone with several modules may group them in a subfolder,
 | `writer/test_xlsx_cells.py`, `test_xlsx_layout.py` | M6 | values, live formulas, styles, merges, column widths, row heights, hidden columns, read back with openpyxl |
 | `writer/test_xlsx_print.py`, `test_xlsx_header_footer.py` | M6 | print setup, sheet view, page header and footer |
 | `writer/test_no_xlsx_in_repo.py` | M6 | no generated `.xlsx` is committed |
+| `test_substation_model.py` | M1b | substation model: documents, panels, equipment, network, spares, layout (ADR 0012/0013) |
+| `test_substation_loader.py` | M1b | loading a project with substations: key-by-key defaults, document register keys, equipment, library |
+| `library_store/test_library_preview.py` | M8b | library import dry-run: every check listed, nothing written |
+| `project_store/test_project_preview.py`, `test_project_backups.py` | M8b | project import dry-run; listing and restoring the backups in `Backups/` |
+| `app/test_app_window.py`, `test_app_api.py` | M10a | the pywebview window and its refusals (missing UI files or WebView2), the Python API the UI calls (ADR 0015) |
+| `app/test_app_ui_assets.py` | M10a | the app's UI files are complete, offline and in step with the M9 design |
 
 `builders.py`, `engine/engine_factories.py`, `project_store/project_builders.py`
 and `writer/writer_helpers.py` hold the small builders those tests share.

@@ -10,6 +10,22 @@ tagged release.
 
 ### Added
 
+- Desktop app shell: the approved UI in a pywebview window with a Python
+  bridge (`bomgen.app.window`, `bomgen.app.api`) and the `app` extra; it
+  refuses to open without its UI files or WebView2; ADR 0015 (milestone M10a,
+  #28).
+- Import dry-runs for libraries and projects that list every check and write
+  nothing, and listing and restoring project backups, for the desktop app
+  (#31).
+- Projects hold substations: `project.yaml` carries project info, library
+  name and version, the document register, defaults and the substation list;
+  `substations/<id>/substation.yaml` carries the former project settings plus
+  equipment, network, spares and layout inputs; the library gains rack heights,
+  port roles and enclosure heights; `bomgen validate` takes either file;
+  `examples/` becomes one project with one substation, golden values unchanged
+  (milestone M1b, #27).
+- Equipment purpose, HWIO points and per-unit port plans in the substation
+  inputs, with the example equipment in cabinet 001's group B order (#34).
 - BOM groups A–D as engine output: enclosure, devices and tags, kit
   children, network accessories, housekeeping kit and the loose-material
   table, with a golden test over every group A–D row; ADR 0014 (milestone M2,
@@ -54,9 +70,22 @@ tagged release.
 
 ### Changed
 
+- The `l1_switch` role takes an optional part: the tool ranks the library's
+  L1 switches and picks one unless the engineer pins it; layout checks report
+  every problem with its location; FOPP-96SM is 1U, NAP-F23 and KEYTEK-KBM 0U
+  (#33).
+- ADR 0013 records Q32 (cable managers count against the 32U as a block under
+  each switch, firewall or patch panel), Q33 (FOPP-96SM is 1U) and the L1
+  switch selection rule (#25, #29); the device database and the UI design
+  follow (#30, #32).
+- `docs/agents.md`: the A11 desktop app role, ADR 0015 taken, Q32 and Q33
+  resolved (#26, #35).
+- Changelog, README and test READMEs for #14–#23, and the plan glossary (#17).
 - M9 prototype reworked for projects and substations: project page with the
   document register and backup and share, a Network screen and a Panels board
   per substation (#23).
+- The launcher's self-test fixture names a module that will never exist
+  (#24).
 - The installed app imports a double-clicked `.bomlib` through the library
   store and shows the change summary or the refusal; `.bomproj` files get a
   placeholder association; `BOMGEN_NO_DIALOGS=1` prints messages to stderr
