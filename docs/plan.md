@@ -685,8 +685,10 @@ Delivered in small PRs by A11, one screen group each (ADR 0015 for the bridge):
   from the active one. The Project page is read-only: New project, New substation,
   Create from this and editing the overview, documents and defaults need project
   writers that do not exist yet, so they explain that the YAML files are edited for
-  now. An import that clashes offers Replace (backed up first) or Cancel; "Keep both"
-  arrives with `import_project(rename_to=)` and `suggested_id` (#53, ADR 0012). The installed-versions table counts the
+  now. An import that clashes offers Replace (backed up first), Keep both (imported
+  under the preview's `suggested_id` through `import_project(rename_to=)`, #53) or
+  Cancel. The restore review runs `preview_backup_restore` (#59), so a backup outside its
+  project's Backups folder shows as a failed check. The installed-versions table counts the
   projects built with each version. Substation screens opened from a real project keep
   the example data under a "not connected yet" banner, without the example's badges.
 - **M10c:** Substation settings, Network and Panels after M1b and M1c. First the

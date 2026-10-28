@@ -47,6 +47,7 @@ from bomgen.project_store import (
     export_project,
     import_project,
     list_backups,
+    preview_backup_restore,
     preview_project_import,
     restore_backup,
 )
@@ -416,21 +417,28 @@ class Api:
         return self._preview(package, preview)
 
     @endpoint
-    def import_project(self, path: str, replace: bool = False) -> dict[str, Any]:
-        """Import a ``.bomproj`` into the workspace; ``replace`` backs up and replaces a clash."""
+    def import_project(
+        self, path: str, replace: bool = False, rename_to: str | None = None
+    ) -> dict[str, Any]:
+        """Import a ``.bomproj`` into the workspace.
+
+        On a clash, ``replace`` backs up and replaces the project; ``rename_to`` keeps both
+        by importing under that new id (the preview's ``suggested_id``).
+        """
         result = import_project(
-            Path(path), workspace=self._workspace(), force=replace, store=self._library_store()
+            Path(path),
+            workspace=self._workspace(),
+            force=replace,
+            store=self._library_store(),
+            rename_to=rename_to or None,
         )
         return self._imported(result)
 
     @endpoint
     def preview_backup_restore(self, backup: str) -> dict[str, Any]:
-        """The review before a restore: the same dry-run, against the backup's own project."""
+        """The review before a restore: its refusals, then the import dry-run."""
         package = Path(backup)
-        preview = preview_project_import(
-            package, workspace=package.parent.parent.parent, store=self._library_store()
-        )
-        return self._preview(package, preview)
+        return self._preview(package, preview_backup_restore(package, store=self._library_store()))
 
     @endpoint
     def restore_backup(self, backup: str) -> dict[str, Any]:
