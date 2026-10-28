@@ -76,6 +76,9 @@ src/bomgen/
   revision.py       OUT-8 revised-cell highlighting
   library_store/    M8  .bomlib pack/import/verify, installed-library store, diff, rollback
   app/              M10 Windows desktop app: pywebview window + Python API for the UI
+    __init__.py     import-free (ADR 0009), so launcher.py never pulls in the window
+    launcher.py     M11 frozen-app entry points (app_main, cli_main, --self-test);
+                    M10 plugs the window in here, M8 the .bomlib import
     ui/             M9 HTML/CSS/JS from the impeccable design
   cli.py            typer app: build, validate, library pack/import/list/rollback
 packaging/          M11 PyInstaller spec, Inno Setup script, icons

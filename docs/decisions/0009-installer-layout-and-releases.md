@@ -24,6 +24,17 @@ end to end now and let those milestones plug in without touching packaging.
   `cli_main` answers `--version` itself (the CI smoke test relies on it) and
   hands every other argument to the typer app in `bomgen.cli` once M1 adds it.
   The spec collects every `bomgen` submodule, so new modules need no spec edits.
+- **`src/bomgen/app/` is shared with M10.** `app/__init__.py` stays import-free
+  (a unit test enforces it) so the launcher can start, answer `--self-test` and
+  import libraries without loading pywebview. M10 adds its modules beside
+  `launcher.py` and calls into them from `app_main`.
+- **`--self-test` checks the bundle, not just the launcher.** A frozen app can
+  only walk the modules PyInstaller kept, so a dropped module would pass
+  unnoticed. The spec writes the source tree's module list into the bundle
+  (`bomgen_modules.txt`) and `BOM Generator.exe --self-test` imports every entry,
+  exiting 1 and naming the failures. CI runs it on the frozen build and again on
+  the installed copy; it also runs `bomgen.exe --help`, which may exit 2 only
+  while `bomgen.cli` is absent.
 - **Per-user install:** `PrivilegesRequired=lowest`, no override dialog,
   installs to `%LOCALAPPDATA%\Programs\BOM Generator`, registers `.bomlib` under
   `HKCU\Software\Classes`, 64-bit Windows 10 21H2+ (Q20). Uninstall removes the
@@ -46,7 +57,9 @@ end to end now and let those milestones plug in without touching packaging.
 
 - M1, M8 and M10 replace placeholders in `bomgen.app.launcher` only.
 - The release workflow isn't in `ci-status`'s `needs` (ADR 0006); it runs only
-  for packaging paths and tags, so it can't block ordinary PRs.
+  for packaging paths and tags, so it can't block ordinary PRs. **Never make
+  `release.yml` a required check:** a path-filtered workflow reports no status on
+  other PRs, so a required check would hang them.
 - Each release smoke-tests the real installer on a clean per-user profile, but
   only on the runner's Windows version.
 - Until signed, users see SmartScreen on first run (`docs/install.md`).

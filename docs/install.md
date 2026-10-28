@@ -16,7 +16,9 @@ a terminal (`"%LOCALAPPDATA%\Programs\BOM Generator\bomgen.exe" --version`).
 
 ## Library update packages
 
-Double-click a `.bomlib` file to import it into the app (ADR 0008).
+Double-click a `.bomlib` file to open it in the app (ADR 0008). *Pending:*
+until library import ships (plan M8), the app only shows a "not available yet"
+message.
 
 ## Updating and uninstalling
 
