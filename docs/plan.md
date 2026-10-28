@@ -250,7 +250,8 @@ panels name must be one of that substation's register entries. Equipment parts
 must exist and carry `height_u`, and the two switch roles must be
 `network_switch` parts. `rack_u_reserved` must be below `enclosure_u`. A
 library given by name and version comes from the installed store; a missing
-version is a located error.
+version is a located error. Validating one substation loads the whole project
+that lists it, so a sibling substation's errors are reported too.
 
 ### 3.3 `library.yaml` (spec: Inputs → 1. Device library)
 

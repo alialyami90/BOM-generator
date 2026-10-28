@@ -2,7 +2,7 @@
 #
 # WS Console 0010, transcribed from the example workbook, hidden master sheet 'Aux'
 # (top table; issued copy: sheet '4'). The loose-material table under it is in
-# project.yaml. Values the workbook does not give carry a trailing "# ASSUMED".
+# ../substation.yaml. Values the workbook does not give carry a trailing "# ASSUMED".
 
 id: ws
 cabinet_number: 861-GIS01-PSA-0010
