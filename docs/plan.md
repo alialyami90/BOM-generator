@@ -922,6 +922,12 @@ writes its section's details when the work starts.
 
 Each has a proposed default that the plan assumes until Ali answers.
 
+**Q40 — Power footnote in the print area** (M5–M6; #157). *Resolved 2026-10-28:* Ali chose
+"Print it". The printer footnote rows under the NOTES on the Power Consumption sheet are inside
+the print area, which now ends after the last footnote row instead of at the reference
+workbook's A1:L97. This corrects the reference, where the footnote is on the sheet but does not
+print.
+
 **Q35 — Branch MCB sizing rule** (M15; backlog point 3). *Resolved 2026-10-28:* Ali chose
 "Computed, 2 A floor". A branch MCB is the smallest catalogue rating that meets all three:
 at least 1.3 × the running current, at least the inrush current divided by the MCB set's
