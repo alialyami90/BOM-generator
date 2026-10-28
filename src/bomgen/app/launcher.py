@@ -3,12 +3,12 @@
 The installer ships two executables built from this module:
 
 * ``BOM Generator.exe`` (windowed) runs :func:`app_main`. The Start-menu
-  shortcut opens it with no arguments, double-clicking a ``.bomlib`` file imports
-  that library (ADR 0008), and a ``.bomproj`` file is reserved for project export.
+  shortcut opens the window with no arguments, double-clicking a ``.bomlib`` file
+  imports that library (ADR 0008), and a ``.bomproj`` file opens the window on that
+  project.
 * ``bomgen.exe`` (console) runs :func:`cli_main`, the typer CLI.
 
-The window (M10) and project files (M8b) are placeholders until those
-milestones land; only their hand-off points live here.
+The window itself is ``bomgen.app.window`` (M10), imported only when it is needed.
 """
 
 import importlib
@@ -27,6 +27,7 @@ APP_TITLE = "BOM Generator"
 LIBRARY_SUFFIX = ".bomlib"
 PROJECT_SUFFIX = ".bomproj"
 MAX_SUMMARY_LINES = 20
+UI_ENTRY = "bomgen/app/ui/index.html"  # the window's start page; see bomgen.app.window
 NO_DIALOGS_ENV = "BOMGEN_NO_DIALOGS"  # set by unattended CI: print instead of a message box
 SELF_TEST_FLAG = "--self-test"
 MODULE_MANIFEST = "bomgen_modules.txt"  # written by packaging/bomgen.spec
@@ -77,13 +78,22 @@ def module_names() -> list[str]:
     ]
 
 
+def ui_entry_missing() -> str | None:
+    """The UI start page's bundle path when the window would find nothing to show."""
+    try:
+        window = importlib.import_module("bomgen.app.window")
+    except Exception:
+        return None  # self_test reports the failed import itself
+    return None if window.INDEX.is_file() else UI_ENTRY
+
+
 def self_test(
     import_module: Callable[[str], object] = importlib.import_module,
 ) -> list[str]:
-    """Import every ``bomgen`` module and return the names that failed.
+    """Import every ``bomgen`` module and check the UI is bundled; return what failed.
 
     Run from the frozen app (``--self-test``), this proves the bundle is complete;
-    a green build otherwise says nothing about modules added by later milestones.
+    a green build otherwise says nothing about modules or UI files added later.
     """
     try:
         names = module_names()
@@ -95,6 +105,8 @@ def self_test(
             import_module(name)
         except Exception:  # a broken module must be reported, not abort the test
             failed.append(name)
+    if (missing := ui_entry_missing()) is not None:
+        failed.append(missing)
     return sorted(set(failed))
 
 
@@ -123,26 +135,15 @@ def app_main(
     if launch.action == "self_test":
         failed = self_test()
         for name in failed:
-            print(f"self-test: cannot import {name}", file=sys.stderr)
+            print(f"self-test: missing or not importable: {name}", file=sys.stderr)
         return 1 if failed else 0
     if launch.action == "import_library":
         assert launch.path is not None
         message, imported = import_library_message(launch.path)
         notify(message)
         return 0 if imported else 1
-    if launch.action == "open_project":
-        assert launch.path is not None
-        notify(
-            f"{launch.path.name}\n\nProject files open with the app after M8b; "
-            "this build can't open them yet."
-        )
-        return 0
-    notify(
-        f"{APP_TITLE} {__version__}\n\n"
-        "The desktop app is not available yet (plan M10). "
-        "Use bomgen.exe in the install folder from a terminal."
-    )
-    return 0
+    window = importlib.import_module("bomgen.app.window")
+    return int(window.run_window(launch.path, notify))
 
 
 def cli_main(argv: Sequence[str] | None = None) -> int:

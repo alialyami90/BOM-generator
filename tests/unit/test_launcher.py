@@ -1,4 +1,4 @@
-"""Frozen-app entry points (plan M11; the window itself arrives in M10)."""
+"""Frozen-app entry points (plan M11); the window itself lives in bomgen.app.window (M10)."""
 
 import ast
 import importlib
@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 
 import bomgen
-from bomgen.app import launcher
+from bomgen.app import launcher, window
 from bomgen.library_store.diff import LibraryDiff
 from bomgen.library_store.package import pack
 from bomgen.library_store.store import LibraryStore
@@ -56,12 +56,33 @@ def test_self_test_flag_runs_self_test() -> None:
     assert launcher.parse_args(["--self-test"]) == launcher.Launch("self_test")
 
 
-def test_app_window_shows_placeholder_until_m10() -> None:
-    shown: list[str] = []
+def fake_window(
+    monkeypatch: pytest.MonkeyPatch, exit_code: int = 0
+) -> list[tuple[Path | None, object]]:
+    calls: list[tuple[Path | None, object]] = []
 
-    assert launcher.app_main([], notify=shown.append) == 0
-    assert len(shown) == 1
-    assert "desktop app" in shown[0]
+    def run_window(project_file: Path | None, notify: object) -> int:
+        calls.append((project_file, notify))
+        return exit_code
+
+    module = types.ModuleType("bomgen.app.window")
+    module.run_window = run_window  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "bomgen.app.window", module)
+    return calls
+
+
+def test_app_without_arguments_opens_the_window(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls = fake_window(monkeypatch)
+    notify = print
+
+    assert launcher.app_main([], notify=notify) == 0
+    assert calls == [(None, notify)]
+
+
+def test_app_returns_the_exit_code_of_the_window(monkeypatch: pytest.MonkeyPatch) -> None:
+    fake_window(monkeypatch, exit_code=1)
+
+    assert launcher.app_main([], notify=print) == 1
 
 
 def test_app_bomlib_imports_into_the_library_store(library_home: Path, package: Path) -> None:
@@ -141,12 +162,24 @@ def test_bomproj_argument_opens_project() -> None:
     )
 
 
-def test_app_bomproj_shows_placeholder_until_project_export() -> None:
-    shown: list[str] = []
+def test_app_bomproj_opens_the_window_with_the_project_file(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = fake_window(monkeypatch)
+    notify = print
 
-    assert launcher.app_main(["site.bomproj"], notify=shown.append) == 0
-    assert "site.bomproj" in shown[0]
-    assert "after M8b" in shown[0]
+    assert launcher.app_main(["site.bomproj"], notify=notify) == 0
+    assert calls == [(Path("site.bomproj"), notify)]
+
+
+def test_app_bomlib_does_not_open_the_window(
+    monkeypatch: pytest.MonkeyPatch, library_home: Path, package: Path
+) -> None:
+    calls = fake_window(monkeypatch)
+
+    launcher.app_main([str(package)], notify=lambda _: None)
+
+    assert calls == []
 
 
 def test_app_self_test_exits_cleanly_without_ui() -> None:
@@ -204,6 +237,21 @@ def test_self_test_reports_modules_that_fail_to_import() -> None:
         return importlib.import_module(name)
 
     assert launcher.self_test(import_module=fail_on_launcher) == ["bomgen.app.launcher"]
+
+
+def test_self_test_fails_when_the_ui_entry_file_is_not_in_the_bundle(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    # Without app/ui the window would open blank, so the bundle check names the file.
+    monkeypatch.setattr(window, "INDEX", tmp_path / "ui" / "index.html")
+
+    assert launcher.self_test() == [launcher.UI_ENTRY]
+
+
+def test_self_test_passes_with_the_ui_entry_file_present() -> None:
+    assert window.INDEX.is_file()
+    assert launcher.UI_ENTRY == "bomgen/app/ui/index.html"
+    assert launcher.self_test() == []
 
 
 def test_app_self_test_fails_when_a_module_is_missing(

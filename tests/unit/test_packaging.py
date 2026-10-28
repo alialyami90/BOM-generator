@@ -71,3 +71,29 @@ def test_spec_builds_windowed_app_and_console_cli_from_existing_entry_scripts() 
         assert (PACKAGING / script).is_file()
     assert re.search(r"name=APP_EXE_NAME,.*?console=False", SPEC, flags=re.DOTALL)
     assert re.search(r'name="bomgen",.*?console=True', SPEC, flags=re.DOTALL)
+
+
+def test_spec_bundles_the_ui_where_the_window_looks_for_it() -> None:
+    # window.INDEX is <bomgen package>/app/ui/index.html; frozen, that is
+    # <bundle>/bomgen/app/ui, which collect_data_files("bomgen.app") reproduces.
+    from bomgen.app import window
+
+    assert window.INDEX.relative_to(Path(window.__file__).parents[2]).as_posix() == (
+        "bomgen/app/ui/index.html"
+    )
+    assert 'collect_data_files("bomgen.app"' in SPEC
+    assert '"ui/' in SPEC
+
+
+def test_spec_collects_pywebview_without_listing_it_in_the_self_test_manifest() -> None:
+    # The manifest is imported by --self-test, which must not need pywebview's backends.
+    assert 'collect_submodules("webview")' in SPEC
+    assert re.search(r"hiddenimports\s*=\s*bomgen_modules\s*\+\s*webview_modules", SPEC)
+    assert re.search(r"write_text\([^)]*bomgen_modules", SPEC)
+
+
+def test_release_workflow_installs_the_app_extra() -> None:
+    workflow = (PACKAGING.parent / ".github" / "workflows" / "release.yml").read_text(
+        encoding="utf-8"
+    )
+    assert 'pip install ".[app]"' in workflow
