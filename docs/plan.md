@@ -558,6 +558,11 @@ update package (ADR 0008).
   M1b `Project` model: a backup or export must work on a project the model would
   reject (a half-edited file). A test checks that the plain read agrees with the
   model on the example project.
+- Device-database records in a `.bomlib` (follow-up for the Library screens,
+  amendment to ADR 0008): `pack --add data/device-db` carries the records in a
+  `device-db/` folder, validated at pack time; import extracts it; and
+  `bomgen.library_store.load_device_records(store, name, version)` returns
+  `dict[part_id, DeviceRecord]` (`{}` when absent).
 - Dry-runs and backups for the UI (follow-up to M8b):
   Follow-up for the "What the app needs from the engine" rows. Nothing here changes
   how a package is built or installed.

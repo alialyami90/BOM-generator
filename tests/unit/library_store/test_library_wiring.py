@@ -84,22 +84,22 @@ def test_dry_run_also_reports_schema_problems(runner: CliRunner, tmp_path: Path)
 def test_pack_only_carries_yaml_files_from_extra_directories(
     runner: CliRunner, tmp_path: Path
 ) -> None:
-    device_db = tmp_path / "device-db"
-    device_db.mkdir()
-    (device_db / "network.yaml").write_text("a: 1\n")
-    (device_db / "FINDINGS.md").write_text("notes\n")
-    (device_db / "scratch.tmp").write_text("x\n")
+    extras = tmp_path / "extras"
+    extras.mkdir()
+    (extras / "network.yaml").write_text("a: 1\n")
+    (extras / "FINDINGS.md").write_text("notes\n")
+    (extras / "scratch.tmp").write_text("x\n")
     out = tmp_path / "db.bomlib"
 
     args = ["library", "pack", str(EXAMPLE_LIBRARY), "--name", "psa", "--version", "1.0.0"]
-    args += ["--add", str(device_db), "--out", str(out)]
+    args += ["--add", str(extras), "--out", str(out)]
 
     result = runner.invoke(app, args)
 
     assert result.exit_code == 0, result.output
     with zipfile.ZipFile(out) as zf:
         assert sorted(zf.namelist()) == [
-            "device-db/network.yaml",
+            "extras/network.yaml",
             "library.yaml",
             "manifest.json",
         ]
