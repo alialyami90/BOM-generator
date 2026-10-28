@@ -91,6 +91,20 @@ def test_a_newer_version_is_compared_with_the_active_one(
     assert preview.previous == "1.0.0"
 
 
+def test_replacing_an_active_local_version_warns_that_the_edits_stay_installed(
+    store: LibraryStore, make_package: MakePackage
+) -> None:
+    store.import_package(make_package("1.0.0+local.2"))
+    preview = preview_library_import(make_package("1.1.0"), store=store)
+
+    check = _by_id(preview)["version"]
+    assert check.status is CheckStatus.WARNING
+    assert "1.0.0+local.2 stay installed but are no longer active" in check.detail
+    assert "roll back" in check.detail
+    assert preview.can_import
+    assert preview.previous == "1.0.0+local.2"
+
+
 def test_a_downgrade_fails_with_its_kind_unless_forced(
     store: LibraryStore, make_package: MakePackage
 ) -> None:

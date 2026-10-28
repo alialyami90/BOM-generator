@@ -140,7 +140,10 @@ class ProjectInfo(InputModel):
 
 
 LibraryVersion = Annotated[
-    str, StringConstraints(pattern=r"^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$")
+    str,
+    StringConstraints(
+        pattern=r"^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(\+local\.[1-9][0-9]*)?$"
+    ),
 ]
 
 

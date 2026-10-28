@@ -15,6 +15,7 @@ from bomgen.library_store.manifest import LIBRARY_FILE, Manifest
 from bomgen.library_store.package import PackageContents, parse_manifest
 from bomgen.library_store.service import validate_library
 from bomgen.library_store.store import LibraryStore, default_library_home
+from bomgen.library_store.versions import Version
 
 _SKIPPED_LABELS = {
     "library": "Library file is readable",
@@ -132,6 +133,14 @@ def _version(
     except (LibraryPackageError, OSError) as exc:
         kind = exc.kind if isinstance(exc, LibraryPackageError) else RefusalKind.STORE_DAMAGED
         return Check("version", label, CheckStatus.FAILED, str(exc), kind), None, None
+    if plan.previous is not None and Version.parse(plan.previous).is_local:
+        # ADR 0018: a local version is the person's own edits; an update would leave it behind.
+        note = (
+            f"your local edits in {plan.previous} stay installed but are no longer active;"
+            " roll back to keep using them"
+        )
+        detail = f"{warning}; {note}" if warning else f"{manifest.version} is installed, but {note}"
+        return Check("version", label, CheckStatus.WARNING, detail), plan.previous, plan.diff
     if warning is not None:
         return Check("version", label, CheckStatus.WARNING, warning), plan.previous, plan.diff
     if plan.previous is None:
