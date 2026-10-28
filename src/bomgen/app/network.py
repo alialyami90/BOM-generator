@@ -27,24 +27,18 @@ def _label(loaded: LoadedSubstation, unit: Unit) -> str:
     return f"{name} {entry.purpose}" if entry.purpose else name
 
 
-def _placed(result: LayoutResult) -> dict[tuple[str, Side], int]:
-    return {(u.key, u.side): f.number for f in result.fills for u in f.units}
-
-
 def _plates_below(units: list[Unit], plate_u: int) -> dict[int, int]:
     """Rack units of blank plate under each unit, by the engine's R5 rule on each neighbour pair."""
     rack = [u for u in units if u.block_u > 0]
     return {id(u): blank_plates(rack[i : i + 2]) * plate_u for i, u in enumerate(rack)}
 
 
-def _board(loaded: LoadedSubstation, result: LayoutResult, auto: LayoutResult) -> list[Any]:
-    automatic = _placed(auto)
+def _board(loaded: LoadedSubstation, result: LayoutResult) -> list[Any]:
     rules = result.rules
     roles = {e.id: e.role for e in loaded.substation.equipment}
     counts = Counter((u.device, u.side) for f in result.fills for u in f.units)
-    plates = {
-        k: v for f in result.fills for k, v in _plates_below(f.units, rules.blank_plate_u).items()
-    }
+    stacks = [fill.stack() for fill in result.fills]
+    plates = {k: v for s in stacks for k, v in _plates_below(s, rules.blank_plate_u).items()}
     return [
         {
             "number": fill.number,
@@ -72,19 +66,18 @@ def _board(loaded: LoadedSubstation, result: LayoutResult, auto: LayoutResult) -
                     "cable_manager_u": unit.cable_manager_u,
                     "block_u": unit.block_u,
                     "plate_below_u": plates.get(id(unit), 0),
-                    "moved": automatic.get((unit.key, unit.side)) != fill.number,
+                    "pinned": fill.is_pinned(unit),
+                    "position": fill.position(unit),
                 }
-                for unit in fill.units
+                for unit in stack
             ],
         }
-        for panel, fill in zip(result.panels, result.fills, strict=True)
+        for panel, fill, stack in zip(result.panels, result.fills, stacks, strict=True)
     ]
 
 
 def _network(loaded: LoadedSubstation, page: dict[str, Any]) -> None:
     result = layout_preview(loaded)
-    inputs = loaded.substation.layout
-    auto = layout_preview(loaded, inputs.model_copy(update={"overrides": []}))
     plan = result.plan
     devices = {d.part_id: d for d in loaded.library.devices}
     l1 = next(e for e in loaded.substation.equipment if e.role is EquipmentRole.L1_SWITCH)
@@ -114,7 +107,7 @@ def _network(loaded: LoadedSubstation, page: dict[str, Any]) -> None:
             }
             for c in result.l1_candidates
         ],
-        "panels": _board(loaded, result, auto),
+        "panels": _board(loaded, result),
         "issues": [
             {
                 "level": "error" if i.is_error else "warning",
