@@ -7,7 +7,7 @@ after. Units are named by equipment id and unit number, never by tag.
 """
 
 from collections.abc import Iterable, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Literal
 
 import yaml
@@ -608,3 +608,18 @@ def render_panel_yaml(panel: Panel) -> str:
     data = panel.model_dump(mode="json", exclude_defaults=True)
     data["generated"] = True
     return GENERATED_HEADER + yaml.safe_dump(data, sort_keys=False, allow_unicode=True)
+
+
+def with_layout(loaded: LoadedSubstation) -> tuple[LoadedSubstation, LayoutReport | None]:
+    """The substation with its generated panels re-laid out, for ``bomgen build``.
+
+    The layout replaces the ``panels`` list only once it owns it: when at least one of
+    those files was written by ``bomgen layout`` (``generated: true``). Hand-written
+    panels, such as the spec example's, are built as they are; manual panels always.
+    """
+    listed = [p for p in loaded.panels if p.id not in loaded.manual_panel_ids]
+    if not loaded.substation.equipment or not any(p.generated for p in listed):
+        return loaded, None
+    result = layout_substation(loaded)
+    manual = [p for p in loaded.panels if p.id in loaded.manual_panel_ids]
+    return replace(loaded, panels=(*result.panels, *manual)), result.report

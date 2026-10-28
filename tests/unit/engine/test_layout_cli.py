@@ -1,8 +1,9 @@
-"""``bomgen layout``: writes the generated panel files and prints the layout report."""
+"""``bomgen layout`` writes the generated panel files; ``bomgen build`` lays them out again."""
 
 import shutil
 from pathlib import Path
 
+import openpyxl
 import pytest
 import yaml
 from typer.testing import CliRunner
@@ -54,3 +55,21 @@ def test_cli_layout_exits_1_on_layout_errors(substation: Path, tmp_path: Path) -
     assert result.exit_code == 1
     assert "error: gw" in result.stdout
     assert "unknown-panel" not in result.stdout  # messages, not kinds
+
+
+def test_cli_build_after_layout_uses_the_generated_panels(substation: Path, tmp_path: Path) -> None:
+    assert runner.invoke(app, ["layout", "--substation", str(substation), "--force"]).exit_code == 0
+    out = tmp_path / "out"
+    result = runner.invoke(app, ["build", str(substation), "--out", str(out)])
+    assert result.exit_code == 0, result.output
+    book = openpyxl.load_workbook(next(out.glob("*.xlsx")))
+    assert book.sheetnames[:3] == ["1", "2", "4"]  # psa3's devices now sit in psa1 and psa2
+
+
+def test_cli_build_no_layout_builds_the_files_as_they_are(substation: Path, tmp_path: Path) -> None:
+    assert runner.invoke(app, ["layout", "--substation", str(substation), "--force"]).exit_code == 0
+    out = tmp_path / "out"
+    result = runner.invoke(app, ["build", str(substation), "--no-layout", "--out", str(out)])
+    assert result.exit_code == 0, result.output
+    book = openpyxl.load_workbook(next(out.glob("*.xlsx")))
+    assert book.sheetnames[:4] == ["1", "2", "3", "4"]

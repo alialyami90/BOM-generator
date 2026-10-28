@@ -19,6 +19,7 @@ from bomgen.engine.layout import (
     layout_substation,
     render_panel_yaml,
     used_u,
+    with_layout,
 )
 from bomgen.io.loader import LoadedSubstation, load_substation
 from bomgen.models.panel import Panel, PortAllocation
@@ -346,3 +347,21 @@ def test_r5_missing_height_is_reported(example: LoadedSubstation) -> None:
     issue = next(i for i in result.report.issues if i.kind == "missing-height")
     assert "SEL-2488" in issue.message
     assert result.report.has_errors
+
+
+def test_r9_build_keeps_hand_written_panels(example: LoadedSubstation) -> None:
+    assert with_layout(example) == (example, None)
+
+
+def test_r9_build_lays_out_generated_panels_again(example: LoadedSubstation) -> None:
+    owned = replace(
+        example,
+        panels=tuple(
+            p.model_copy(update={"generated": True}) if p.id == "psa1" else p
+            for p in example.panels
+        ),
+    )
+    rebuilt, report = with_layout(owned)
+    assert [p.id for p in rebuilt.panels] == ["psa1", "psa2", "ws"]
+    assert report is not None
+    assert report.lines()[0] == "IED count: 40"

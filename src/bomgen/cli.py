@@ -145,12 +145,17 @@ def build(
         ),
     ] = None,
     no_checks: Annotated[bool, typer.Option("--no-checks", help="Skip the check report.")] = False,
+    no_layout: Annotated[
+        bool, typer.Option("--no-layout", help="Build the panel files as they are.")
+    ] = False,
 ) -> None:
     """Build one BOM workbook per substation, print each file's path and its check report.
 
     Exits 1 when a check fails; the report is also written next to the workbook as
     <name>.checks.json.
     """
+    from bomgen.engine.layout import with_layout
+
     loaded = _load_or_exit(file)
     targets = _selected(loaded, substation)
     previous = None
@@ -166,6 +171,12 @@ def build(
     failed = False
     for target in targets:
         try:
+            if not no_layout:
+                target, layout_report = with_layout(target)
+                if layout_report is not None and layout_report.has_errors:
+                    for line in layout_report.lines():
+                        typer.echo(f"{target.substation.substation.id}: {line}", err=True)
+                    raise typer.Exit(1)
             result = build_bom(target)
             marked = result
             if previous is not None:
