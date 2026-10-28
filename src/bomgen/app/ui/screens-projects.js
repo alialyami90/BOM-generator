@@ -204,13 +204,13 @@
     const facts = `<dl class="kv" style="grid-template-columns:130px 1fr"><dt>File</dt><dd class="mono">${esc(v.file_name)}</dd><dt>Size</dt><dd>${kb(v.package_size)}</dd>${m ? `<dt>Project</dt><dd class="mono">${esc(m.project_id)}</dd><dt>Contains</dt><dd>${count(Object.keys(m.files).length, 'file')}</dd><dt>Built with</dt><dd>${esc([m.library_name, m.library_version].filter(Boolean).join(' ') || '—')}</dd><dt>Saved</dt><dd>${esc(day(m.created))}</dd>` : ''}</dl>`;
     const both = !restore && v.exists && v.suggested_id;  // keep both: import under a free id
     const clash = !v.can_import || !v.exists ? '' : restore ? banner('warn', '<b>Restoring replaces the project as it is now.</b> A backup of the current state is made first.')
-      : banner('warn', `<b>This PC already has the project <span class="mono">${esc(v.project_id)}</span>.</b> ${both ? `Keep both imports this one as <span class="mono">${esc(v.suggested_id)}</span>. Replace` : 'Importing replaces it;'} backs up your project first.`);
+      : banner('warn', `<b>This PC already has the project <span class="mono">${esc(v.project_id)}</span>.</b> ${both ? `Keep both imports this one as <span class="mono">${esc(v.suggested_id)}</span>. Replace backs up your project first.` : 'Importing replaces it and backs up your project first.'}`);
     const primary = !v.can_import ? '' : both
       ? '<button class="btn btn--secondary" data-action="import-confirm" data-mode="replace">Replace my project</button><button class="btn btn--primary" data-action="import-confirm" data-mode="keep">Keep both</button>'
       : `<button class="btn btn--primary" data-action="import-confirm" data-mode="replace">${restore ? 'Restore' : v.exists ? 'Replace my project' : 'Import'}</button>`;
-    dialog({ title: restore ? 'Restore a backup' : 'Import a project file', body: `<div class="stack">${facts}
+    dialog({ title: restore ? 'Restore a backup' : 'Import a project file', body: `<div class="stack">${clash}${facts}
       <ul class="checklist">${App.checkList(v.checks)}</ul>
-      ${v.library_note ? banner('warn', esc(v.library_note)) : ''}${clash}</div>`,
+      ${v.library_note ? banner('warn', esc(v.library_note)) : ''}</div>`,
       actions: `<button class="btn btn--secondary" data-action="close">Cancel</button>${primary}` });
   }
   ACTIONS['import-project'] = () => {
