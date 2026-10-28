@@ -201,6 +201,7 @@ output:
   file_name: "{doc_no}_PSA_BOM_Rev{rev}.xlsx"   # OUT-2
   sheet_names: { loose_material: "Loose Material", power_consumption: "Power Consumption",
                  heat_dissipation: "Heat Dissipation", heat_calculations: "Heat Calculations" }
+  power_footnotes: ["*Printer Power Consumption: 622 watts (Printing), …"]  # rows after NOTES; optional
 constants: { t_max_c: 40 }             # optional overrides of the project defaults
 spares: { port_fraction: 0.25 }        # optional overrides of the project defaults
 catalogue_choice: { mcb: abb-s200m, mcb_dc: c60h-dc }   # optional; key by key; mcb_dc unset = as mcb (ADR 0023)

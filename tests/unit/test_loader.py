@@ -405,3 +405,11 @@ def test_load_library_reports_schema_error_with_line(tmp_path: Path) -> None:
     assert issue.file == path
     assert issue.location == "devices[1].category"
     assert issue.line == line_of(path, "category: toaster")
+
+
+def test_the_example_carries_the_printer_footnote() -> None:
+    examples = Path(__file__).parents[2] / "examples"
+    (gis01,) = load_project(examples / "project.yaml").substations
+    (footnote,) = gis01.substation.output.power_footnotes
+    assert footnote.startswith("*Printer Power Consumption: 622 watts (Printing), ")
+    assert footnote.endswith("0.69 watts (Auto-Off/Auto-On/Wake on\nLAN);")

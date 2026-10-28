@@ -244,3 +244,18 @@ def test_library_name_is_a_plain_folder_name(bad: str) -> None:
 
 def test_dc_float_voltage_defaults_to_140() -> None:
     assert DesignConstants().dc_float_v == 140
+
+
+def test_power_footnotes_default_to_empty() -> None:
+    assert OutputSettings().power_footnotes == []
+
+
+def test_power_footnotes_keep_order_and_line_breaks() -> None:
+    notes = ["*Printer: 622 watts (Printing),\n31.3 watts (Ready);", "*Second note"]
+    assert OutputSettings(power_footnotes=notes).power_footnotes == notes
+
+
+@pytest.mark.parametrize("bad", ["", "   ", "\n"])
+def test_a_power_footnote_is_not_blank(bad: str) -> None:
+    with pytest.raises(ValidationError, match="power footnote must not be blank"):
+        OutputSettings(power_footnotes=["ok", bad])
