@@ -42,7 +42,7 @@ from bomgen.app.loose import loose_page
 from bomgen.app.network import layout_page
 from bomgen.app.output import OutputRefusedError, build_file, build_target, checks_page
 from bomgen.app.preview import preview_page
-from bomgen.app.projects import RecentProjects, project_files, summarize
+from bomgen.app.projects import RecentProjects, free_id, project_files, summarize
 from bomgen.app.substations import (
     ProjectInvalidError,
     SubstationNotFoundError,
@@ -50,10 +50,10 @@ from bomgen.app.substations import (
     substation_page,
 )
 from bomgen.bundle.errors import LibraryPackageError, RefusalKind
-from bomgen.io import edit, loose_edit
+from bomgen.io import edit, lifecycle, loose_edit
 from bomgen.io.edit import EditError, EditResult
 from bomgen.io.errors import InputError
-from bomgen.io.fields import PartUse, part_users
+from bomgen.io.fields import PartUse, part_users, set_field
 from bomgen.io.loader import PROJECT_FILE, load_library
 from bomgen.library_store.csv_export import GROUPS as CSV_GROUPS
 from bomgen.library_store.device_db import DeviceRecord, load_device_records
@@ -209,6 +209,16 @@ def _edit_refusals() -> Iterator[None]:
         yield
     except EditError as exc:
         raise AppError("edit_refused", str(exc)) from None
+
+
+DELETED_DIR = "deleted-projects"
+
+
+def _written(result: EditResult) -> None:
+    """A writer that wrote nothing refuses with the problems the edit would cause."""
+    if not result.written:
+        listed = "; ".join(f"{i.location}: {i.message}" for i in result.issues)
+        raise AppError("invalid_edit", listed or "The change was not written.")
 
 
 class Api:
@@ -561,6 +571,120 @@ class Api:
         if workspace not in file.resolve().parents:
             self._recent().add(file)
         return page
+
+    # -- Create, rename and delete (docs/ui/editing.md: Creating, Deleting; plan M17d) --
+
+    @endpoint
+    def new_project_form(self, name: str = "") -> dict[str, Any]:
+        """What the New project dialog shows: the folder the name gives and the library."""
+        installed = self._active_library()
+        if installed is None or installed.active is None:
+            raise AppError("not_installed", "Install a library before creating a project.")
+        workspace = self._workspace()
+        return {
+            "folder": workspace / free_id(name, workspace) if name.strip() else None,
+            "workspace": workspace,
+            "library": {"name": installed.name, "version": installed.active},
+            "versions": installed.versions,
+        }
+
+    @endpoint
+    def create_project(
+        self, name: str, client: str | None, library_version: str, substation: str | None
+    ) -> dict[str, Any]:
+        """Write a new project in the workspace, and its first substation when named."""
+        installed = self._active_library()
+        if installed is None:
+            raise AppError("not_installed", "Install a library before creating a project.")
+        if not name.strip():
+            raise AppError("invalid_edit", "A project needs a name.")
+        store = self._library_store()
+        with _edit_refusals():
+            made = lifecycle.create_project(
+                self._workspace(),
+                name,
+                library_name=installed.name,
+                library_version=library_version,
+                client=(client or "").strip() or None,
+                store=store,
+            )
+        self._list(made.project_file)
+        reply: dict[str, Any] = {"project_file": made.project_file, "substation": None}
+        if substation and substation.strip():
+            reply["substation"] = self._new_substation(made.project_file, substation, None)
+        return reply
+
+    def _new_substation(self, project_file: Path, name: str, copy_from: str | None) -> str:
+        if not name.strip():
+            raise AppError("invalid_edit", "A substation needs a name.")
+        substation_id = free_id(name, project_file.parent / lifecycle.SUBSTATIONS)
+        with _edit_refusals():
+            result = lifecycle.create_substation(
+                project_file,
+                substation_id,
+                name.strip(),
+                copy_from=copy_from,
+                store=self._library_store(),
+            )
+        _written(result)
+        return substation_id
+
+    @endpoint
+    def create_substation(
+        self, project_file: str, name: str, copy_from: str | None = None
+    ) -> dict[str, Any]:
+        """Add a substation, blank or a copy of ``copy_from``; its folder comes from the name."""
+        return {"id": self._new_substation(Path(project_file), name, copy_from)}
+
+    @endpoint
+    def rename_project(self, project_file: str, name: str) -> dict[str, Any]:
+        """Change the project's name; its folder and id stay."""
+        return self._rename(Path(project_file), ("project", "name"), name, None)
+
+    @endpoint
+    def rename_substation(self, project_file: str, substation_id: str, name: str) -> dict[str, Any]:
+        """Change a substation's name; its folder and id stay."""
+        return self._rename(Path(project_file), ("substation", "name"), name, substation_id)
+
+    def _rename(
+        self, project_file: Path, path: tuple[str, str], name: str, substation_id: str | None
+    ) -> dict[str, Any]:
+        if not name.strip():
+            raise AppError("invalid_edit", "A name cannot be empty.")
+        with _edit_refusals():
+            result = set_field(
+                project_file,
+                path,
+                name.strip(),
+                substation=substation_id,
+                store=self._library_store(),
+            )
+        _written(result)
+        return {"name": name.strip()}
+
+    @endpoint
+    def delete_substation(self, project_file: str, substation_id: str) -> dict[str, Any]:
+        """Back the project up, then remove the substation and its register documents."""
+        with self._substation(substation_id), _edit_refusals():
+            deleted = lifecycle.delete_substation(
+                Path(project_file), substation_id, store=self._library_store()
+            )
+        _written(deleted.result)
+        if deleted.backup is not None:
+            self._list(deleted.backup)
+        return {"backup": deleted.backup}
+
+    @endpoint
+    def delete_project(self, project_file: str) -> dict[str, Any]:
+        """Save the project as a ``.bomproj`` in the app's deleted-projects folder, then
+        remove its folder; importing that file brings it back."""
+        file = Path(project_file)
+        if not file.is_file():
+            raise FileNotFoundError(errno.ENOENT, "No project file here", str(file))
+        saved = lifecycle.delete_project(file, default_app_home(self._env) / DELETED_DIR)
+        self._recent().remove(file)
+        self._list(saved)
+        return {"saved": saved}
 
     @endpoint
     def choose_project_folder(self) -> str | None:
