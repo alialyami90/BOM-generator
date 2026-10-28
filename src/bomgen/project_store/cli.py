@@ -54,10 +54,18 @@ def import_command(
     force: Annotated[
         bool, typer.Option("--force", help="Replace a project with the same id (backed up first).")
     ] = False,
+    rename_to: Annotated[
+        str | None,
+        typer.Option(
+            "--rename-to",
+            metavar="ID",
+            help="Import under this new project id and keep the existing project.",
+        ),
+    ] = None,
 ) -> None:
     """Verify a .bomproj file and unpack it into the workspace."""
     try:
-        result = import_project(package, workspace=workspace, force=force)
+        result = import_project(package, workspace=workspace, force=force, rename_to=rename_to)
     except (LibraryPackageError, OSError) as exc:
         raise _fail(exc) from exc
     typer.echo(f"Imported project {result.manifest.project_id} into {result.project_dir}")
