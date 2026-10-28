@@ -40,6 +40,35 @@ def test_diff_reports_changed_catalogues() -> None:
     assert diff_libraries(old, new).catalogues_changed == ["mcb"]
 
 
+def _with_brands(**brands: list[dict[str, Any]]) -> dict[str, Any]:
+    return {"devices": [], "catalogues": {}, "catalogue_brands": brands}
+
+
+def test_diff_reports_added_changed_and_removed_brand_sets_by_kind_and_id() -> None:
+    old = _with_brands(
+        mcb=[{"id": "kept", "make": "A"}, {"id": "edited", "make": "A"}, {"id": "gone"}]
+    )
+    new = _with_brands(
+        mcb=[{"id": "kept", "make": "A"}, {"id": "edited", "make": "B"}, {"id": "new"}],
+        busbars=[{"id": "extra", "entries": {}}],
+    )
+
+    diff = diff_libraries(old, new)
+
+    assert diff.catalogues_changed == ["busbars:extra", "mcb:edited", "mcb:gone", "mcb:new"]
+    assert not diff.is_empty
+
+
+def test_diff_of_identical_brand_sets_is_empty() -> None:
+    brands = _with_brands(mcb=[{"id": "kept", "make": "A"}])
+
+    assert diff_libraries(brands, brands).is_empty
+
+
+def test_diff_against_a_library_without_brand_sets_ignores_the_missing_key() -> None:
+    assert diff_libraries(_library(), _with_brands(mcb=[])).is_empty
+
+
 def test_diff_against_nothing_adds_every_part() -> None:
     diff = diff_libraries(None, _library(SWITCH, FIREWALL))
 

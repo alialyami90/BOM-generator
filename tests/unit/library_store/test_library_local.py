@@ -147,6 +147,20 @@ def test_a_version_orders_between_its_base_and_the_next_release(store: LibrarySt
     assert Version.parse("1.0.0") < Version.parse(saved.manifest.version) < Version.parse("1.0.1")
 
 
+def test_a_change_to_a_brand_set_alone_is_a_change(store: LibraryStore) -> None:
+    library = _active(store)
+    data = library.model_dump(mode="json")
+    brand = data["catalogue_brands"]["mcb"][0]
+    brand["make"] = "Edited Make"
+    edited = Library.model_validate(data)
+
+    saved = save_local_version(store, "psa", edited)
+
+    assert saved.diff.catalogues_changed == [f"mcb:{brand['id']}"]
+    assert saved.manifest.release_notes.startswith("Local edit from 1.0.0:")
+    assert "catalogue" in saved.manifest.release_notes
+
+
 def test_saving_without_a_change_is_refused_and_writes_nothing(store: LibraryStore) -> None:
     with pytest.raises(LibraryPackageError) as caught:
         save_local_version(store, "psa", _active(store))
