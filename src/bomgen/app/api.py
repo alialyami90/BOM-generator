@@ -416,10 +416,20 @@ class Api:
         return self._preview(package, preview)
 
     @endpoint
-    def import_project(self, path: str, replace: bool = False) -> dict[str, Any]:
-        """Import a ``.bomproj`` into the workspace; ``replace`` backs up and replaces a clash."""
+    def import_project(
+        self, path: str, replace: bool = False, rename_to: str | None = None
+    ) -> dict[str, Any]:
+        """Import a ``.bomproj`` into the workspace.
+
+        On a clash, ``replace`` backs up and replaces the project; ``rename_to`` keeps both
+        by importing under that new id (the preview's ``suggested_id``).
+        """
         result = import_project(
-            Path(path), workspace=self._workspace(), force=replace, store=self._library_store()
+            Path(path),
+            workspace=self._workspace(),
+            force=replace,
+            store=self._library_store(),
+            rename_to=rename_to or None,
         )
         return self._imported(result)
 

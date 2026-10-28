@@ -242,6 +242,34 @@ def test_import_review_of_a_project_already_on_this_pc_warns_and_can_replace(
     assert result["project_file"] == str(example)
 
 
+def test_import_review_offers_a_free_id_to_keep_both(
+    app: api.Api, window: FakeWindow, example: Path, tmp_path: Path
+) -> None:
+    target = tmp_path / "shared.bomproj"
+    window.answers.append((str(target),))
+    ok(app.export_project(str(example)))
+
+    preview = ok(app.preview_project_import(str(target)))
+    result = ok(app.import_project(str(target), False, preview["suggested_id"]))
+
+    assert preview["suggested_id"]
+    assert preview["suggested_id"] != EXAMPLE_ID
+    assert result["replaced"] is False
+    assert result["manifest"]["project_id"] == preview["suggested_id"]
+    ids = sorted(p["id"] for p in ok(app.list_projects()))
+    assert ids == sorted([EXAMPLE_ID, preview["suggested_id"]])
+
+
+def test_keep_both_under_an_id_that_is_taken_is_refused(
+    app: api.Api, window: FakeWindow, example: Path, tmp_path: Path
+) -> None:
+    target = tmp_path / "shared.bomproj"
+    window.answers.append((str(target),))
+    ok(app.export_project(str(example)))
+
+    assert error_kind(app.import_project(str(target), False, EXAMPLE_ID)) == "project_exists"
+
+
 def test_import_into_an_empty_workspace(app: api.Api, window: FakeWindow, tmp_path: Path) -> None:
     source = copy_example(tmp_path / "colleague" / EXAMPLE_ID)
     target = tmp_path / "from-colleague.bomproj"
