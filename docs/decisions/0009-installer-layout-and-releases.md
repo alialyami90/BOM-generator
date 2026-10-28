@@ -72,6 +72,11 @@ end to end now and let those milestones plug in without touching packaging.
 - **Build tools stay out of `pyproject.toml`**: PyInstaller is pinned in
   `packaging/requirements.txt`, so packaging doesn't widen the dev install.
 
+- **The example project is the smoke test.** The frozen and the installed
+  `bomgen.exe` run `validate examples/project.yaml`, which loads every model, the
+  YAML and the library from the bundle, so a missing data file fails the job.
+  This becomes `bomgen build` on the example once M7 adds it.
+
 ## Consequences
 
 - M8b only has to teach the window what to do with a `.bomproj` file;
