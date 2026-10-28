@@ -925,6 +925,14 @@ Ali also chose "Ignore spikes under 10 ms": the inrush counts only when it lasts
 `inrush_min_ms` (10 ms) or no duration is given, and a DC load uses the set's DC trip multiple when
 it has one. A device with no inrush figure is sized by the running current and the floor.
 
+**Q39 — Separate AC and DC MCB brands** (M13, M15; backlog point 3). *Resolved 2026-10-28:*
+Ali chose "Separate AC and DC choices". A project or substation can choose the DC MCB brand set
+apart from the AC one, so a DC-only range (for example C60H-DC under Q37) can feed the DC branches
+while the AC branches keep an AC-rated set. The proposed shape, for ADR 0023 (B2): a
+`catalogue_choice` key `mcb_dc` that falls back to `mcb` when unset, so existing projects and the
+golden values do not change; `mcb` still refuses a brand that is not AC-rated (#145). B2 does the
+model, loader and schema; B9 sizes DC branches, mains and CINC from the DC set.
+
 **Q38 — Datasheet data in the shipped library** (M14; backlog point 3). *Resolved 2026-10-28:*
 Ali chose "Real data in shipped library only". The researched datasheet inrush (SEL originals) and
 DC input ranges go into the library the installer ships (psa-devices 1.1.0), so real projects size
