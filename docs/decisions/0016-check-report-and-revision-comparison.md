@@ -1,6 +1,6 @@
 # 0016. Check report and revision comparison
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-10-28)
 - Date: 2026-10-28
 - Spec sections: Data model and generation order (step 15); Output requirements
   (OUT-8); Derivation rules → DC distribution

@@ -1,6 +1,6 @@
 # 0018. Library CSV exchange
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-10-28)
 - Date: 2026-10-28
 - Spec sections: Inputs (1. Device library, commodity catalogues); ADR 0008 (library update
   packages), ADR 0010 (input models), ADR 0017 (alternatives and catalogue brands)

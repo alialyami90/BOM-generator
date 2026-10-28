@@ -1,6 +1,6 @@
 # 0004. One BOM sheet per cabinet with a hidden HWIO column
 
-- Status: Proposed (resolves a spec ambiguity; needs Ali's confirmation)
+- Status: Accepted (Ali, 2026-10-28)
 - Date: 2026-10-28
 - Spec sections: Workbook map; Output requirements (OUT-3, OUT-4); Formatting → Panel BOM sheets
 
@@ -11,7 +11,7 @@ issued copies (1–4). "Output requirements" OUT-3/OUT-4 and "Data model and
 generation order" ask for one BOM sheet per cabinet carrying the HWIO column
 hidden, "so no separate master sheets are needed".
 
-## Decision (proposed)
+## Decision
 
 Follow OUT-3/OUT-4: one visible BOM sheet per cabinet, column H (HWIO) hidden,
 H1 = `SUM(H3:Hn)`. Power Consumption references these sheets directly. Use the

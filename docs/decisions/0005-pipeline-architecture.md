@@ -1,6 +1,6 @@
 # 0005. Pipeline: rule engine → sheet models → thin writer
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-10-28)
 - Date: 2026-10-28
 - Spec sections: Data model and generation order; Relationships between sheets
 
@@ -12,7 +12,7 @@ calculation sheets must reference BOM cells with live formulas (OUT-5), so the
 cell address of every BOM row must be known before the calculation sheets are
 laid out.
 
-## Decision (proposed)
+## Decision
 
 Three layers, each testable on its own:
 

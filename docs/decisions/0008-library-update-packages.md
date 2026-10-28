@@ -1,6 +1,6 @@
 # 0008. Device library updates as `.bomlib` packages
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-10-28)
 - Date: 2026-10-28
 - Spec sections: Inputs the tool needs → 1. Device library
 
@@ -10,7 +10,7 @@ Ali wants each installed copy's device database to be updatable by sharing an
 update package. The device library is the input the spec keeps separate from
 panels and project settings, so it can be versioned on its own.
 
-## Decision (proposed)
+## Decision
 
 - A `.bomlib` file is a zip with `manifest.json` (name, version, schema
   version, minimum app version, release notes, SHA-256 per file) and
