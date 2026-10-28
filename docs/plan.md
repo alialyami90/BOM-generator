@@ -436,6 +436,9 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
   `unknown-panel`. A `pair` move on an entry without A/B units is a stale override.
 - `bomgen build` prints layout warnings to stderr and stops with the whole
   report on errors; these lines join the M7 check report.
+- After a layout, the annunciator's change-over diodes are fed from panel 001
+  (side A), Ali's answer. `examples/` keeps psa3 for the hand-written goldens;
+  the layout golden feeds the annunciator from psa1 through its input fixture.
 - Golden R10: the example substation's generated panels in
   `tests/golden/layout/`, pending Ali's confirmation (3 L1 switches per side
   from the rules, not the spec example's 6).

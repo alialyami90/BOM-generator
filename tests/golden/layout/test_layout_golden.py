@@ -1,5 +1,7 @@
 """Golden layout of the example substation (design rule R10, ADR 0013)."""
 
+import shutil
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -7,7 +9,8 @@ import pytest
 import yaml
 
 from bomgen.engine.layout import LayoutResult, layout_substation
-from bomgen.io.loader import load_substation
+from bomgen.engine.pipeline import build
+from bomgen.io.loader import LoadedSubstation, load_substation
 from bomgen.models.panel import PortPlan
 
 pytestmark = pytest.mark.golden
@@ -19,10 +22,20 @@ EXPECTED: dict[str, Any] = yaml.safe_load(
 
 
 @pytest.fixture(scope="module")
-def result() -> LayoutResult:
-    return layout_substation(
-        load_substation(ROOT / "examples" / "substations" / "gis01" / "substation.yaml")
-    )
+def example(tmp_path_factory: pytest.TempPathFactory) -> LoadedSubstation:
+    # Ali's answer (plan M1c): after a layout the annunciator is fed from panel 001
+    # (side A). examples/ keeps psa3 for the hand-written goldens, so feed it from psa1
+    # here.
+    root = tmp_path_factory.mktemp("layout") / "examples"
+    shutil.copytree(ROOT / "examples", root)
+    path = root / "substations" / "gis01" / "substation.yaml"
+    path.write_text(path.read_text(encoding="utf-8").replace("fed_from: psa3", "fed_from: psa1"))
+    return load_substation(path)
+
+
+@pytest.fixture(scope="module")
+def result(example: LoadedSubstation) -> LayoutResult:
+    return layout_substation(example)
 
 
 def test_r10_example_substation_sizing_matches_golden(result: LayoutResult) -> None:
@@ -53,9 +66,15 @@ def test_r10_example_substation_port_plans_match_golden(result: LayoutResult) ->
             assert panel.port_plans[part_id] == PortPlan.model_validate(plan), part_id
 
 
-def test_r10_example_substation_has_no_other_layout_issues(result: LayoutResult) -> None:
-    # The only issue: the annunciator is fed from the hand-written psa3, which the
-    # generated layout does not have (its devices move into psa1 and psa2).
-    assert [(i.kind, i.subject) for i in result.report.issues] == [
-        ("missing-panel", "loose_material.items[0].fed_from")
-    ]
+def test_r10_example_substation_has_no_layout_issues(result: LayoutResult) -> None:
+    assert result.report.issues == []
+
+
+def test_r10_generated_psa1_feeds_the_annunciator(
+    example: LoadedSubstation, result: LayoutResult
+) -> None:
+    manual = [p for p in example.panels if p.id in example.manual_panel_ids]
+    bom = build(replace(example, panels=(*result.panels, *manual)))
+    psa1 = next(p for p in bom.panels if p.panel_id == "psa1")
+    qcod = next(line for line in psa1.lines if line.tag == "PSA1-QCOD-1")
+    assert qcod.description == "2A, 2P MCB For Annunciator"
