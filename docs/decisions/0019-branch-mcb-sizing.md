@@ -31,9 +31,8 @@ otherwise the curve's lower bound) on the MCB catalogue; and the design constant
    value or its curve's lower bound. The branches here are all 125 V DC.
 3. An inrush shorter than the design constant `inrush_min_ms` (10 ms) does not count:
    a sub-millisecond switch-mode peak does not trip the magnetic release. The check
-   line shows it as "too short to trip". This is A1's default while Ali decides on a
-   card whether every peak should count; setting `inrush_min_ms` very low counts
-   every peak.
+   line shows it as "too short to trip". Ali chose this ("Ignore spikes under 10 ms",
+   2026-10-28); setting `inrush_min_ms` very low counts every peak.
 4. `DeviceType.min_branch_mcb_a` is deprecated. It still parses and is reported, but
    it no longer sets a rating.
 5. Each sizing records the numbers behind it: the running need, the inrush and its
@@ -47,6 +46,12 @@ otherwise the curve's lower bound) on the MCB catalogue; and the design constant
      the library asked for a bigger breaker than it now gets;
    - the device has an inrush figure but the catalogue has no trip curve, so (b)
      could not be checked.
+7. The DC MCBs and DC-fed devices are checked against the battery float voltage
+   `dc_float_v` (140 V). One `dc_float` item for the MCB catalogue, when any panel has
+   DC feeds, warns when its `dc_rating_v` is below the float or not given. One item per
+   DC-fed device type that gives `input_v_max` warns when that is below the float; a
+   device without the figure is not listed. These are warnings: the rating stays as
+   sized, and the choice of a DC-rated brand is the project's (`catalogue_brands`).
 
 ## Consequences
 
@@ -57,3 +62,5 @@ otherwise the curve's lower bound) on the MCB catalogue; and the design constant
   item 3 keeps such spikes from raising the rating, and M14's data should carry
   `inrush_ms` wherever the datasheet gives it.
 - Spares still repeat the largest branch rating on their feed.
+- The example's iC60N 2P is rated 125 V DC, so every example report warns that it is
+  under the 140 V float until a DC-rated set is picked.

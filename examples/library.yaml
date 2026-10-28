@@ -604,6 +604,7 @@ catalogues:
     poles: 2
     ratings_a: [1, 2, 6, 10, 16]
     code_pattern: "A9F742{rating:02d}"
+    dc_rating_v: 125  # iC60N 2P: 10 kA at <= 125 V DC (data/device-db/electrical.yaml)
 
   aux_contact:  # 'Panel 1'!E33:G33 and E63:G63
     make: Schneider

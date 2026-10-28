@@ -87,3 +87,10 @@ def test_every_branch_mcb_is_2a_from_the_floor(report: CheckReport) -> None:
     assert {(i.status, i.values["rating_a"]) for i in branches} == {(CheckStatus.PASS, 2)}
     assert {i.values["set_by"] for i in branches} == {"floor", "running,floor"}
     assert len(branches) == 50
+
+
+def test_ic60n_dc_rating_is_below_the_battery_float(report: CheckReport) -> None:
+    # iC60N 2P is rated 125 V DC; the battery floats at 140 V (dc_float_v).
+    (item,) = [i for i in report.items if i.check == "dc_float"]
+    assert (item.status, item.subject) == (CheckStatus.WARN, "Acti9 2P")
+    assert item.values == {"dc_rating_v": 125, "dc_float_v": 140}
