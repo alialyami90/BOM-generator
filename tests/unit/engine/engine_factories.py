@@ -100,7 +100,11 @@ def library(*devices: dict[str, Any], **housekeeping: Any) -> Library:
                     "model": "A9A26924",
                     "ordering_code": "A9A26924",
                 },
-                "terminal_blocks": {"UT-16": {"make": "Phoenix", "ordering_code": "3044199"}},
+                "terminal_blocks": {
+                    "UT-16": {"make": "Phoenix", "ordering_code": "3044199"},
+                    "UT-2.5-MTD": {"make": "Phoenix", "ordering_code": "3064085"},
+                    "UT-2.5-MT": {"make": "Phoenix", "ordering_code": "3046362"},
+                },
                 "busbars": {"ac_safety_ground": {"description": "AC SAFETY"}},
                 "housekeeping": roles,
             },
