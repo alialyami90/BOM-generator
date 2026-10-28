@@ -9,7 +9,7 @@ The letter counts context resets (A, B, C, … Z, AA).
 | 2 | [02-input-models](02-input-models/) | A2 - Input models and examples | 2026-10-28 | — |
 | 3 | [03-device-db](03-device-db/) | A3 - Device database researcher | 2026-10-28 | — |
 | 4 | [04-ui-design](04-ui-design/) | A4 - UI designer | 2026-10-28 | — |
-| 5 | [05-library-packages](05-library-packages/) | A5 - Library update packages | 2026-10-28 | — |
+| 5 | [05-library-packages](05-library-packages/) | B5 - Library update packages | 2026-10-28 | 2026-10-28 |
 | 6 | [06-installer-release](06-installer-release/) | A6 - Windows installer and release | 2026-10-28 | — |
 | 7 | [07-lead-assistant](07-lead-assistant/) | A7 - Lead developer assistant | 2026-10-28 | — |
 | 8 | [08-sizing-layout](08-sizing-layout/) | A8 - Sizing and layout engine | 2026-10-28 | — |
