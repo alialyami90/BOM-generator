@@ -1,0 +1,206 @@
+"""Device-database records shipped inside a `.bomlib` (ADR 0008 amendment).
+
+The records are reference data: datasheet facts and two alternative brands per
+part, researched in `data/device-db/` (its README is the format). The generator
+never builds from them; the UI reads them next to the library's parts. A package
+carries them in a `device-db/` folder of YAML files, which import extracts into
+the version folder like any other member.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Mapping
+from pathlib import PurePosixPath
+from typing import TYPE_CHECKING, Any, Literal
+
+import yaml
+from pydantic import BaseModel, ConfigDict, ValidationError
+
+from bomgen.library_store.errors import LibraryPackageError, RefusalKind
+
+if TYPE_CHECKING:
+    from bomgen.library_store.store import LibraryStore
+
+DEVICE_DB_DIR = "device-db"
+DEVICE_DB_SCHEMA_VERSION = 1
+
+Scalar = str | int | float | bool
+
+
+class _Model(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True, coerce_numbers_to_str=True)
+
+
+class Power(_Model):
+    input: str | None = None
+    redundant_psu: Scalar | None = None
+    typical_w: Scalar | None = None
+    max_w: Scalar | None = None
+
+
+class Dimensions(_Model):
+    h: Scalar | None = None
+    w: Scalar | None = None
+    d: Scalar | None = None
+
+
+class TemperatureRange(_Model):
+    min: Scalar | None = None
+    max: Scalar | None = None
+
+
+class PortGroup(_Model):
+    ports: str
+    count: int
+    speed: str
+    media: str
+    kind: str
+    usable_for: Literal["ied", "uplink", "any"]
+    note: str | None = None
+
+
+class Datasheet(_Model):
+    """Whatever could be confirmed; keys are left out when unknown."""
+
+    full_name: str | None = None
+    manufacturer: str | None = None
+    summary: str
+    notes: str
+    power: Power | None = None
+    ratings: dict[str, Any] | None = None
+    ports: list[Any] | None = None
+    dimensions_mm: Dimensions | None = None
+    rack_units: Scalar | None = None
+    weight_kg: Scalar | None = None
+    mounting: str | None = None
+    operating_temp_c: TemperatureRange | None = None
+    certifications: list[str] | None = None
+    ordering_code_decoded: dict[Any, Any] | None = None
+    datasheet_url: str | None = None
+    product_url: str | None = None
+    mounting_kind: Literal["rack", "din_rail", "plug_in", "enclosure", "external"]
+    height_u: int
+    height_note: str | None = None
+    port_groups: list[PortGroup] | None = None
+
+
+class Tier(_Model):
+    model: str
+    description: str
+    ordering_code: str | None = None
+    unit_power_w: Scalar | None = None
+    url: str | None = None
+    notes: str | None = None
+    verified: bool
+    same_as: Literal["low", "mid"] | None = None
+
+
+class Tiers(_Model):
+    low: Tier
+    mid: Tier
+    high: Tier
+
+
+class Alternative(_Model):
+    make: str
+    manufacturer: str | None = None
+    tiers: Tiers
+
+
+class DeviceRecord(_Model):
+    """One part, or one catalogue entry (`kind: catalogue`) with a database-local id."""
+
+    part_id: str
+    kind: Literal["device", "catalogue"]
+    library_refs: list[str] | None = None
+    description: str
+    make: str | None = None
+    verified: Literal["confirmed", "partial", "unverified"]
+    datasheet: Datasheet
+    alternatives: list[Alternative]
+    sources: list[str]
+
+
+class DeviceFile(_Model):
+    schema_version: Literal[1]
+    area: str
+    title: str
+    records: list[DeviceRecord]
+
+
+def _location(loc: tuple[int | str, ...]) -> str:
+    text = ""
+    for part in loc:
+        text += f"[{part}]" if isinstance(part, int) else f".{part}" if text else str(part)
+    return text
+
+
+def _describe(error: Any) -> str:
+    where = _location(tuple(error["loc"]))
+    message = "unknown key" if error["type"] == "extra_forbidden" else error["msg"]
+    return f"{where}: {message}"
+
+
+def parse_device_records(
+    files: Mapping[str, bytes], *, kind: RefusalKind = RefusalKind.VALIDATION_FAILED
+) -> dict[str, DeviceRecord]:
+    """Parse the YAML files under `device-db/` and key the records by `part_id`.
+
+    `files` maps a path to its bytes; only `device-db/*.yaml` and `*.yml` are read.
+    Raises `LibraryPackageError` naming the file and the field of the first bad file.
+    """
+    records: dict[str, DeviceRecord] = {}
+    origin: dict[str, str] = {}
+    for name in sorted(files):
+        path = PurePosixPath(name)
+        if path.parts[:1] != (DEVICE_DB_DIR,) or path.suffix not in (".yaml", ".yml"):
+            continue
+        try:
+            document = yaml.safe_load(files[name].decode("utf-8"))
+            parsed = DeviceFile.model_validate(document)
+        except (UnicodeDecodeError, yaml.YAMLError) as exc:
+            raise LibraryPackageError(f"{name} is not valid YAML: {exc}", kind) from exc
+        except ValidationError as exc:
+            problems = "\n".join(f"  {_describe(error)}" for error in exc.errors())
+            raise LibraryPackageError(f"{name} fails validation:\n{problems}", kind) from exc
+        for record in parsed.records:
+            if record.part_id in records:
+                raise LibraryPackageError(
+                    f"part_id {record.part_id!r} is in both {origin[record.part_id]} and {name}",
+                    kind,
+                )
+            records[record.part_id] = record
+            origin[record.part_id] = name
+    return records
+
+
+def load_device_records(store: LibraryStore, name: str, version: str) -> dict[str, DeviceRecord]:
+    """The installed version's device-database records; `{}` when it ships none."""
+    library_dir = store.library_file(name, version).parent
+    folder = library_dir / DEVICE_DB_DIR
+    if not folder.is_dir():
+        return {}
+    files: dict[str, bytes] = {}
+    try:
+        for path in sorted(folder.iterdir()):
+            if path.is_file():
+                files[f"{DEVICE_DB_DIR}/{path.name}"] = path.read_bytes()
+    except OSError as exc:
+        raise LibraryPackageError(
+            f"library {name} {version}: cannot read {DEVICE_DB_DIR}: {exc}",
+            RefusalKind.STORE_DAMAGED,
+        ) from exc
+    try:
+        return parse_device_records(files, kind=RefusalKind.STORE_DAMAGED)
+    except LibraryPackageError as exc:
+        raise LibraryPackageError(
+            f"library {name} {version}: installed device database is damaged: {exc}", exc.kind
+        ) from exc
+
+
+__all__ = [
+    "DEVICE_DB_DIR",
+    "DeviceRecord",
+    "load_device_records",
+    "parse_device_records",
+]

@@ -81,14 +81,14 @@ def test_cli_pack_defaults_output_name(
 
 
 def test_cli_pack_adds_extra_directories(runner: CliRunner, tmp_path: Path) -> None:
-    device_db = tmp_path / "device-db"
-    device_db.mkdir()
-    (device_db / "network.yaml").write_text("a: 1\n")
+    extras = tmp_path / "extras"
+    extras.mkdir()
+    (extras / "network.yaml").write_text("a: 1\n")
 
-    package = _pack(runner, tmp_path, "1.0.0", V1, "--add", str(device_db))
+    package = _pack(runner, tmp_path, "1.0.0", V1, "--add", str(extras))
 
     with zipfile.ZipFile(package) as zf:
-        assert "device-db/network.yaml" in zf.namelist()
+        assert "extras/network.yaml" in zf.namelist()
 
 
 def test_cli_import_dry_run_installs_nothing(runner: CliRunner, tmp_path: Path) -> None:

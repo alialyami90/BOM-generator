@@ -1,0 +1,184 @@
+"""Device-database records inside a `.bomlib` and the loader that reads them (ADR 0008)."""
+
+from pathlib import Path
+
+import pytest
+import yaml
+
+from bomgen.library_store.device_db import (
+    DEVICE_DB_DIR,
+    DeviceRecord,
+    load_device_records,
+    parse_device_records,
+)
+from bomgen.library_store.errors import LibraryPackageError, RefusalKind
+from bomgen.library_store.package import pack, read_package
+from bomgen.library_store.store import LibraryStore
+
+ROOT = Path(__file__).parents[3]
+EXAMPLE_LIBRARY = ROOT / "examples" / "library.yaml"
+DEVICE_DB = ROOT / "data" / "device-db"
+
+MINIMAL = """\
+schema_version: 1
+area: test
+title: Test
+records:
+  - part_id: SW-1
+    kind: device
+    description: A switch
+    verified: confirmed
+    datasheet:
+      summary: s
+      notes: n
+      mounting_kind: rack
+      height_u: 1
+    alternatives:
+      - make: Moxa
+        manufacturer: Moxa Inc.
+        tiers:
+          low: {model: A, description: a, verified: true}
+          mid: {model: B, description: b, verified: false}
+          high: {model: B, description: b, verified: false, same_as: mid}
+    sources: [https://example.com]
+"""
+
+
+@pytest.fixture
+def store(tmp_path: Path) -> LibraryStore:
+    return LibraryStore(tmp_path / "libraries")
+
+
+def _device_db(tmp_path: Path, **files: str) -> Path:
+    folder = tmp_path / DEVICE_DB_DIR
+    folder.mkdir()
+    for name, text in files.items():
+        (folder / name).write_text(text)
+    return folder
+
+
+def _install(tmp_path: Path, store: LibraryStore, *extra: Path) -> None:
+    package = tmp_path / "psa-1.0.0.bomlib"
+    pack(EXAMPLE_LIBRARY, package, name="psa", version="1.0.0", extra_dirs=list(extra))
+    store.import_package(package)
+
+
+def test_the_researched_database_loads_and_keys_on_part_id() -> None:
+    files = {f"{DEVICE_DB_DIR}/{p.name}": p.read_bytes() for p in DEVICE_DB.glob("*.yaml")}
+
+    records = parse_device_records(files)
+
+    expected = sum(len(yaml.safe_load(data)["records"]) for data in files.values())
+    assert len(records) == expected == 63
+    switch = records["RST2228-L1-24MM"]
+    assert isinstance(switch, DeviceRecord)
+    assert switch.kind == "device"
+    assert switch.datasheet.mounting_kind == "rack"
+    assert switch.datasheet.port_groups
+    assert switch.datasheet.port_groups[0].usable_for in {"ied", "uplink", "any"}
+    assert {a.make for a in switch.alternatives}
+    catalogue = [r for r in records.values() if r.kind == "catalogue"]
+    assert catalogue
+    assert all(r.library_refs is not None or r.part_id.startswith("ENCL") for r in catalogue)
+
+
+def test_a_packed_database_is_installed_and_loaded(tmp_path: Path, store: LibraryStore) -> None:
+    _install(tmp_path, store, DEVICE_DB)
+
+    records = load_device_records(store, "psa", "1.0.0")
+
+    assert "RST2228-L1-24MM" in records
+    installed = store.root / "psa" / "1.0.0" / DEVICE_DB_DIR
+    assert sorted(p.name for p in installed.iterdir()) == sorted(
+        p.name for p in DEVICE_DB.glob("*.yaml")
+    )
+
+
+def test_a_package_without_a_database_loads_nothing(tmp_path: Path, store: LibraryStore) -> None:
+    _install(tmp_path, store)
+
+    assert load_device_records(store, "psa", "1.0.0") == {}
+
+
+def test_an_uninstalled_version_is_refused(store: LibraryStore) -> None:
+    with pytest.raises(LibraryPackageError) as caught:
+        load_device_records(store, "psa", "9.9.9")
+
+    assert caught.value.kind is RefusalKind.NOT_INSTALLED
+
+
+def test_pack_refuses_a_malformed_record_and_names_the_file(tmp_path: Path) -> None:
+    folder = _device_db(tmp_path, **{"bad.yaml": MINIMAL.replace("kind: device", "kind: gadget")})
+
+    with pytest.raises(LibraryPackageError) as caught:
+        pack(
+            EXAMPLE_LIBRARY, tmp_path / "x.bomlib", name="psa", version="1.0.0", extra_dirs=[folder]
+        )
+
+    assert caught.value.kind is RefusalKind.VALIDATION_FAILED
+    assert "device-db/bad.yaml" in str(caught.value)
+    assert "records[0].kind" in str(caught.value)
+
+
+def test_pack_refuses_an_unknown_key(tmp_path: Path) -> None:
+    text = MINIMAL.replace(
+        "    description: A switch\n", "    description: A switch\n    colour: red\n"
+    )
+    folder = _device_db(tmp_path, **{"bad.yaml": text})
+
+    with pytest.raises(LibraryPackageError, match=r"records\[0\]\.colour"):
+        pack(
+            EXAMPLE_LIBRARY, tmp_path / "x.bomlib", name="psa", version="1.0.0", extra_dirs=[folder]
+        )
+
+
+def test_pack_refuses_the_same_part_id_in_two_files(tmp_path: Path) -> None:
+    folder = _device_db(tmp_path, **{"a.yaml": MINIMAL, "b.yaml": MINIMAL})
+
+    with pytest.raises(LibraryPackageError, match=r"SW-1.*a\.yaml.*b\.yaml"):
+        pack(
+            EXAMPLE_LIBRARY, tmp_path / "x.bomlib", name="psa", version="1.0.0", extra_dirs=[folder]
+        )
+
+
+def test_pack_refuses_a_file_that_is_not_yaml(tmp_path: Path) -> None:
+    folder = _device_db(tmp_path, **{"bad.yaml": "records: [unclosed"})
+
+    with pytest.raises(LibraryPackageError, match=r"device-db/bad\.yaml"):
+        pack(
+            EXAMPLE_LIBRARY, tmp_path / "x.bomlib", name="psa", version="1.0.0", extra_dirs=[folder]
+        )
+
+
+def test_other_extra_folders_are_not_checked(tmp_path: Path) -> None:
+    other = tmp_path / "notes"
+    other.mkdir()
+    (other / "bad.yaml").write_text("kind: gadget\n")
+
+    pack(EXAMPLE_LIBRARY, tmp_path / "x.bomlib", name="psa", version="1.0.0", extra_dirs=[other])
+
+
+def test_loading_a_damaged_installed_database_raises(tmp_path: Path, store: LibraryStore) -> None:
+    folder = _device_db(tmp_path, **{"ok.yaml": MINIMAL})
+    _install(tmp_path, store, folder)
+    (store.root / "psa" / "1.0.0" / DEVICE_DB_DIR / "ok.yaml").write_text("kind: gadget\n")
+
+    with pytest.raises(LibraryPackageError) as caught:
+        load_device_records(store, "psa", "1.0.0")
+
+    assert caught.value.kind is RefusalKind.STORE_DAMAGED
+
+
+def test_the_package_reader_still_accepts_the_folder(tmp_path: Path) -> None:
+    folder = _device_db(tmp_path, **{"ok.yaml": MINIMAL})
+    package = tmp_path / "x.bomlib"
+    pack(EXAMPLE_LIBRARY, package, name="psa", version="1.0.0", extra_dirs=[folder])
+
+    assert f"{DEVICE_DB_DIR}/ok.yaml" in read_package(package).files
+
+
+def test_the_loader_is_a_public_entry_point() -> None:
+    from bomgen import library_store
+
+    assert library_store.load_device_records is load_device_records
+    assert library_store.DeviceRecord is DeviceRecord

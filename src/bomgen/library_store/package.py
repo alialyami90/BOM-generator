@@ -17,6 +17,7 @@ from pydantic import ValidationError
 import bomgen
 from bomgen.bundle.container import MANIFEST_NAME, collect_tree, read_bundle, sha256, write_bundle
 from bomgen.bundle.paths import check_case_collisions
+from bomgen.library_store.device_db import parse_device_records
 from bomgen.library_store.diff import parse_library
 from bomgen.library_store.errors import LibraryPackageError, RefusalKind
 from bomgen.library_store.manifest import (
@@ -69,6 +70,7 @@ def pack(
     files = {LIBRARY_FILE: library.read_bytes()}
     parse_library(files[LIBRARY_FILE])
     _collect_extra(extra_dirs, files)
+    parse_device_records(files)
     try:
         manifest = Manifest(
             format_version=FORMAT_VERSION,

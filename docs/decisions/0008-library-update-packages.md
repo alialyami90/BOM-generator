@@ -72,3 +72,29 @@ Code: `src/bomgen/library_store/`.
   files (ADR 0012, plan M8b). `LibraryPackageError` and `RefusalKind` moved
   there too and are re-exported from `bomgen.library_store`.
 
+
+## Amendment: device-database records in the package
+
+The Library screens show datasheet facts and alternative brands next to each
+part, and those records (`data/device-db/`, format in its README) had no way to
+reach an installed copy. A package may now carry them.
+
+- A package may hold a `device-db/` folder of YAML files (`bomgen library pack
+  ... --add data/device-db`). Import extracts it into the version folder like
+  any other member, and a package without it imports as before. Only YAML files
+  are packed, so the README stays behind; a folder with another name is packed
+  as before and never read as records.
+- `bomgen library pack` checks the folder against the record model and refuses
+  a malformed or duplicated record, so a bad database is caught on the
+  publisher's PC. Import does not re-check it, so older packages and hand-made
+  ones keep installing.
+- `bomgen.library_store.load_device_records(store, name, version)` returns the
+  installed version's records as `dict[part_id, DeviceRecord]`, or `{}` when it
+  ships none. Catalogue records (`kind: catalogue`) are keyed by their
+  database-local id. A damaged installed folder raises `LibraryPackageError`
+  (`STORE_DAMAGED`).
+- The record model is strict (unknown keys are errors) except for the
+  free-form `ratings`, `ports` and `ordering_code_decoded`. A new key in the
+  README needs a matching change in `bomgen.library_store.device_db`; a test
+  loads all of `data/device-db/` to catch drift.
+- The generator still never reads these records.
