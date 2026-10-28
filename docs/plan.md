@@ -925,6 +925,13 @@ Ali also chose "Ignore spikes under 10 ms": the inrush counts only when it lasts
 `inrush_min_ms` (10 ms) or no duration is given, and a DC load uses the set's DC trip multiple when
 it has one. A device with no inrush figure is sized by the running current and the floor.
 
+**Q38 — Datasheet data in the shipped library** (M14; backlog point 3). *Resolved 2026-10-28:*
+Ali chose "Real data in shipped library only". The researched datasheet inrush (SEL originals) and
+DC input ranges go into the library the installer ships (psa-devices 1.1.0), so real projects size
+their branch MCBs from them under Q35. `examples/library.yaml` stays the spec's example project
+without them, so the golden values do not change. A3 generates both libraries from
+`data/device-db`; A6 points `release.yml` at the shipped one.
+
 **Q37 — Default MCB set for the 125 V DC feeds** (M14, M15). *Resolved 2026-10-28:* Ali chose
 "Keep iC60N as default". The Schneider iC60N 2P (A9F742xx) is rated to exactly 125 V DC, while the
 battery floats at about 135–140 V. It stays the default; the DC-rated ranges (Schneider C60H-DC,
