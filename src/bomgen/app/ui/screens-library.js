@@ -99,7 +99,7 @@
     else if (t === 'datasheet') body = d.ds ? `${d.ds.summary ? `<p style="margin-bottom:var(--space-3)">${esc(d.ds.summary)}</p>` : ''}<dl class="kv"><dt>Supply range</dt><dd>${esc(d.ds.supply)}</dd><dt>Typical power</dt><dd>${esc(d.ds.typical)}</dd><dt>Maximum power</dt><dd>${esc(d.ds.max)}</dd><dt>Ports</dt><dd>${esc(d.ds.ports)}</dd><dt>Dimensions</dt><dd>${esc(d.ds.dims)}</dd><dt>Weight</dt><dd>${esc(d.ds.weight)}</dd><dt>Operating temperature</dt><dd>${esc(d.ds.temp)}</dd><dt>Certifications</dt><dd>${esc(d.ds.certs)}</dd>${d.ds.url ? `<dt>Datasheet</dt><dd class="row" style="gap:4px;flex-wrap:nowrap"><span class="mono small" style="overflow-wrap:anywhere">${esc(d.ds.url)}</span><button class="btn btn--ghost btn--icon btn--sm" data-action="copy" data-v="${esc(d.ds.url)}" aria-label="Copy the datasheet link">${icon('copy')}</button></dd>` : ''}</dl>
       ${(d.src || []).length ? `<div class="section" style="margin-top:var(--space-4);padding-bottom:0"><h3>Sources</h3><ul style="margin:var(--space-2) 0 0;padding-left:18px">${d.src.map((x) => `<li style="overflow-wrap:anywhere">${esc(x)}</li>`).join('')}</ul></div>` : ''}` : `<p class="muted">No datasheet recorded for this device.</p>`;
     else body = d.alt ? `${banner('info', 'Alternatives are for reference. Swapping a device inside a panel is not available yet.')}
-      ${d.alt.map((a) => `<h3 style="margin-top:var(--space-4)">${esc(a.brand)}</h3><div class="table-wrap" style="margin-top:6px"><table class="table"><thead><tr><th style="width:56px">Tier</th><th>Model</th><th>Data</th><th style="width:40px"><span class="sr-only">Copy</span></th></tr></thead><tbody>${a.rows.map((r) => `<tr><td>${esc(r.tier)}</td><td class="mono">${esc(r.model)}<span class="cell-sub" style="font-family:var(--font-sans)">${r.same_as ? `Same as ${esc(r.same_as)}` : esc(r.sub || '')}</span></td><td>${verified(r.verified)}</td><td><button class="btn btn--ghost btn--icon btn--sm" data-action="copy" data-v="${esc(r.model)}" aria-label="Copy ${esc(r.model)}">${icon('copy')}</button></td></tr>`).join('')}</tbody></table></div>`).join('')}`
+      ${d.alt.map((a) => `<h3 style="margin-top:var(--space-4)">${esc(a.brand)}</h3><div class="table-wrap" style="margin-top:6px"><table class="table"><thead><tr><th style="width:56px">Tier</th><th>Model</th><th>Data</th><th style="width:40px"><span class="sr-only">Copy</span></th></tr></thead><tbody>${a.rows.map((r) => `<tr><td>${esc(r.tier)}</td><td><span class="mono nowrap">${esc(r.model)}</span><span class="cell-sub">${r.same_as ? `Same as ${esc(r.same_as)}` : esc(r.sub || '')}</span></td><td>${verified(r.verified)}</td><td style="width:40px"><button class="btn btn--ghost btn--icon btn--sm" data-action="copy" data-v="${esc(r.model)}" aria-label="Copy ${esc(r.model)}">${icon('copy')}</button></td></tr>`).join('')}</tbody></table></div>`).join('')}`
       : `<p class="muted">No alternatives recorded for this device.</p>`;
     return `<aside class="detail" aria-label="Device detail"><h2 class="mono" style="font-size:18px;font-family:var(--font-mono)">${esc(d.id)}</h2><p class="muted" style="margin-bottom:var(--space-3)">${esc(d.make)} ${esc(d.model)}</p>
       ${tabs('libdetail', tabsList, t, 'Device detail')}<div role="tabpanel" aria-labelledby="tab-libdetail-${t}">${body}</div></aside>`;
@@ -167,7 +167,7 @@
         <section><h3>Package</h3><dl class="kv" style="margin-top:var(--space-2);grid-template-columns:130px 1fr"><dt>File</dt><dd class="mono">${esc(p.file_name)}</dd><dt>Size</dt><dd>${kb(p.package_size)}</dd>
           ${m ? `<dt>Library</dt><dd>${esc(m.name)}</dd><dt>Version</dt><dd><b>${esc(m.version)}</b> <span class="muted">(${active ? `active ${esc(active)}` : 'first install'})</span></dd><dt>Library schema</dt><dd>${esc(m.schema_version)}</dd><dt>Needs app</dt><dd>${esc(m.min_app_version)} or later</dd><dt>Built</dt><dd>${esc(String(m.created).replace('T', ' ').slice(0, 16))}</dd>` : ''}</dl>
         ${m && m.release_notes ? `<h3 style="margin-top:var(--space-4)">Release notes</h3><p style="margin-top:6px">${esc(m.release_notes)}</p>` : ''}</section>
-        <section><h3>Verification</h3><ul class="checklist" style="margin-top:var(--space-2)">${p.checks.map((c) => { const [cls, ic] = CHECK[c.status]; return `<li class="${cls}">${icon(ic)}<span style="color:var(--color-text)">${esc(c.label)}${c.status === 'skipped' ? ' <span class="muted">(skipped)</span>' : ''}${c.detail ? `<span class="cell-sub">${esc(c.detail)}</span>` : ''}</span></li>`; }).join('')}</ul></section></div>
+        <section><h3>Verification</h3><ul class="checklist" style="margin-top:var(--space-2)">${checkList(p.checks, !!failed)}</ul></section></div>
       ${d ? `<section><h3>What changes</h3>
         ${n.a + n.c + n.r + d.catalogues_changed.length + n.f === 0 ? '<p class="muted" style="margin-top:6px">No changes.</p>' : `
         <div class="row" style="margin:var(--space-2) 0 var(--space-3)">${badge('ok', `${n.a} added`)}${badge('info', `${n.c} changed`)}${badge('bad', `${n.r} removed`)}${d.catalogues_changed.length ? badge('plain', `${d.catalogues_changed.length} catalogues changed`) : ''}${n.f ? badge('plain', `${n.f} data files`) : ''}</div>
@@ -181,13 +181,28 @@
         <button class="btn btn--secondary" data-action="import-cancel">Choose a different package</button></div></div>`;
   }
   const group = (title, items, kind, fields) => items.length ? `<details ${kind === 'info' || kind === 'bad' ? 'open' : ''}><summary>${icon('chevr', 'chev')}${esc(title)} ${badge(kind, items.length)}</summary><div class="items">${items.map(([a, b]) => `<div><span class="mono">${esc(a)}</span><span class="muted">${fields && b ? 'fields: ' + esc(b) : esc(b)}</span></div>`).join('')}</div></details>` : '';
+  /* After a failure the later checks did not run: one muted line instead of a row each. */
+  function checkList(checks, failed) {
+    const item = (cls, ic, label, detail) => `<li class="${cls}">${icon(ic)}<span style="color:var(--color-text)">${esc(label)}${detail ? `<span class="cell-sub">${esc(detail)}</span>` : ''}</span></li>`;
+    const shown = failed ? checks.filter((c) => c.status !== 'skipped') : checks;
+    const skipped = checks.length - shown.length;
+    return shown.map((c) => {
+      if (c.id === 'signature' && c.status === 'skipped') return item('info', 'info', 'Not signed (not used)', c.detail);
+      const [cls, ic] = CHECK[c.status];
+      return item(cls, ic, c.label, c.detail);
+    }).join('') + (skipped ? `<li class="info">${icon('info')}<span>${skipped} later ${skipped === 1 ? 'check was' : 'checks were'} not run</span></li>` : '');
+  }
   const fail = (err) => { toast(err.kind === 'no_backend' ? 'Importing works in the app, not in a browser.' : err.message, 'error'); };
   function review(force) {
     IMP.force = force; IMP.step = 'checking'; App.render();
     return Bridge.call('preview_library_import', IMP.path, force)
       .then((preview) => { IMP.preview = preview; IMP.step = 'review'; })
       .catch((err) => { IMP.step = 'choose'; fail(err); })
-      .then(() => App.render());
+      .then(() => {
+        App.render();
+        const next = $(force ? '[data-action="force-off"]' : '[data-action="force-toggle"]') || $('[data-action="do-import"]:not([disabled])') || $('[data-action="import-cancel"]');
+        if (next) next.focus();  // keep the keyboard where the person is working
+      });
   }
   ACTIONS['pick-file'] = () => {
     Bridge.call('choose_file', 'bomlib').then((path) => { if (path) { IMP.path = path; review(false); } }).catch(fail);
