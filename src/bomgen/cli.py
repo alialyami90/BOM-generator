@@ -200,7 +200,7 @@ def schema(
         typer.echo(str(path))
 
 
-def _utf8_console() -> None:
+def utf8_console() -> None:
     """Write UTF-8 even where the console is not (the frozen exe on Windows gets cp1252)."""
     for stream in (sys.stdout, sys.stderr):
         reconfigure = getattr(stream, "reconfigure", None)
@@ -210,5 +210,5 @@ def _utf8_console() -> None:
 
 
 def main() -> None:
-    _utf8_console()
+    utf8_console()
     app()

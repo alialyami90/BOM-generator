@@ -158,6 +158,7 @@ def cli_main(argv: Sequence[str] | None = None) -> int:
             raise
         print("bomgen: the command line is not available in this build (plan M1).", file=sys.stderr)
         return 2
+    cli.utf8_console()  # the frozen exe's console is cp1252; cli.main() isn't used here
     try:
         cli.app(args=args, prog_name="bomgen")
     except SystemExit as exc:
