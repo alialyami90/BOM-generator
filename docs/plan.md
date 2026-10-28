@@ -781,8 +781,10 @@ for a plain start or a `.bomproj` file; the spec bundles the UI folder and
 pywebview. The release workflow installs, checks and uninstalls the installer
 on the runner, opens a `.bomlib` with the installed app, and starts the frozen
 window, and runs `bomgen validate` and `bomgen build` on `examples/project.yaml`
-from the frozen and the installed CLI, asserting the printed workbook exists; the
-bundled default library follows once M8 writes `out/default.bomlib`.
+from the frozen and the installed CLI, asserting the printed workbook exists. The
+default library is bundled: the workflow packs `out/default.bomlib`, the installer
+ships it, and the first start imports it into an empty library store (smoke-tested,
+including that a reinstall leaves the store unchanged).
 The app icon comes with the M9 design (`packaging/icons/bomgen.ico`).
 
 ## 5. Testing strategy

@@ -17,7 +17,7 @@ Bump `__version__` in `src/bomgen/__init__.py` and `version` in
 `pyproject.toml`, merge, then push a matching tag:
 
 ```bash
-git tag v0.1.0 && git push origin v0.1.0
+git tag v0.1.1 && git push origin v0.1.1
 ```
 
 Don't cut a release tag until M10 is finished and A1 or Ali say so: the window
@@ -31,9 +31,9 @@ workflow) to get the installer as an artifact without releasing.
 ```powershell
 pip install ".[app]" -r packaging/requirements.txt
 pyinstaller packaging/bomgen.spec --noconfirm --clean
-& "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" /DAppVersion=0.1.0 packaging\bomgen.iss
+& "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" /DAppVersion=0.1.1 packaging\bomgen.iss
 ```
 
-Output: `out\installer\bomgen-setup-0.1.0.exe` (`out/`, `build/` and `dist/`
+Output: `out\installer\bomgen-setup-0.1.1.exe` (`out/`, `build/` and `dist/`
 are git-ignored). PyInstaller also runs on Linux and macOS for checking the
 spec, but the installer is Windows-only.

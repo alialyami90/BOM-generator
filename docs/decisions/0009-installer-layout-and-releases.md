@@ -66,9 +66,16 @@ end to end now and let those milestones plug in without touching packaging.
   `bomgen.__version__`. `.github/workflows/release.yml` freezes, smoke-tests the
   frozen executables, compiles the installer, installs it silently, checks
   files, shortcut and registry, uninstalls and checks cleanup, then creates the
-  GitHub Release with `bomgen-setup-<version>.exe` (and `default.bomlib` once M8
-  produces `out/default.bomlib`). PRs touching packaging run the same build
-  without publishing. Unsigned for now (Q19).
+  GitHub Release with `bomgen-setup-<version>.exe` and `default.bomlib`. PRs
+  touching packaging run the same build without publishing. Unsigned for now (Q19).
+- **The default device library ships inside the installer.** The workflow packs
+  `examples/library.yaml` plus `data/device-db` into `out/default.bomlib` (name and
+  version are the project's `library:`), and `bomgen.iss` installs it to
+  `{app}\library`. When the window starts and the library store holds no library,
+  the launcher imports it through `library_store`; a store with any library is
+  never touched, so a reinstall or upgrade changes nothing. A refusal or an
+  unwritable folder is shown and never blocks the window. A double-clicked
+  `.bomlib` skips this step.
 - **Build tools stay out of `pyproject.toml`**: PyInstaller is pinned in
   `packaging/requirements.txt`, so packaging doesn't widen the dev install.
 

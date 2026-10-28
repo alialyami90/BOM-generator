@@ -3,4 +3,4 @@
 Builds the BOM workbook described in ``docs/spec/generator-spec-v2.md``.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
