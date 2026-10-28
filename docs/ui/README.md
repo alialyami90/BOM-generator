@@ -1,14 +1,18 @@
 # UI design (M9)
 
 Design for the Windows desktop app (ADR 0007, library updates per ADR 0008).
-Design only: the app itself is M10. Status: ready for Ali's review.
+Design only: the app itself is M10. Status: the first prototype was accepted (#8). This
+revision reworks it for projects and substations (Home lists projects; a project holds
+substations and the document register; `.bomproj` export, import and backups) and adds the
+Network screen and the Panels board from A1's design
+(`docs/superpowers/specs/2026-10-28-substations-and-auto-layout-design.md`). Ready for Ali's review.
 
 ## Read in this order
 
 | File | What it holds |
 |---|---|
 | `brief.md` | Approved brief: audience, direction, scope, open decisions |
-| `design-language.md` | Principles, the readiness rail, colour, type, layout, motion, voice |
+| `design-language.md` | Principles, the readiness rail, the panels board, colour, type, layout, motion, voice |
 | `tokens.json` | Design tokens (W3C format): colour light/dark, type, space, size, radius, motion |
 | `components.md` | Every component with sizes, states and accessibility notes |
 | `screens.md` | Screen map, flows, per-screen layout and states, what the app needs from the engine |
@@ -22,9 +26,13 @@ Double-click `prototype/index.html` in Edge or Chrome on a PC. No server or inst
 It loads its CSS, scripts and fonts from beside it, so it shows a blank page when
 opened alone from a phone or a file manager. For that, build one self-contained file:
 `node docs/ui/tools/build-standalone.mjs` writes `out/ui-prototype.html` (git-ignored).
-The "Prototype states" button in the status bar jumps between states (empty
-library, errors, clean, import outcomes, build outcomes). It is not part of the app.
-All data is illustrative.
+The "Prototype states" button in the status bar jumps between states (first run,
+started from a `.bomproj` file, errors, clean, import outcomes, build outcomes). It is not
+part of the app. All data is illustrative. Try: Home → open the project → Substations →
+open GIS Substation 01 → Panels (select a device, drag it, "Move pair…", Undo, Reset to
+automatic); switch to Control Building 03 in the rail for a substation with no network.
+`prototype/engine-stub.js` stands in for the layout engine so the board can be tried; it is
+not UI code: it applies the sizes in A1's design (32 U usable, one blank plate between neighbours, A in odd panels, B in even) just well enough to demonstrate, and A8's engine is authoritative.
 
 ## Regenerate tokens
 
@@ -37,7 +45,7 @@ node docs/ui/tools/build-tokens.mjs --check  # fail if out of date
 
 ## Specified but not in the prototype
 
-Ctrl+S, Ctrl+O and F6, the unsaved-changes dialog, overwrite confirmation, the empty
+Ctrl+S, Ctrl+O and F6 (Ctrl+Z works on the Panels board only), the unsaved-changes dialog, overwrite confirmation, the empty
 recent-projects state, Home/End in tab lists, the "Open a project first" nav
 tooltip, sortable table headers, Undo after removing a device row, keyboard
 reorder.
@@ -46,6 +54,11 @@ In the prototype: deep links (`#/panels/<id>/<tab>`, `#/project/<tab>`) and the
 device picker keys (↑ ↓ Enter Esc). They are in `components.md` and `screens.md` and belong to M10.
 
 ## Depends on other work
+
+- The engine contract for the board: `layout_preview(substation, overrides) -> LayoutResult`,
+  a read-only `NetworkPlan`, stable equipment ids, a project import dry-run, a backups
+  listing and an "opened from a .bomproj file" state (see `screens.md`, "What the app needs
+  from the engine").
 
 - Alternatives are browse-only. Swapping a part needs a schema change (A2) and data (A3).
 - `verified` levels are confirmed/partial/unverified; `same_as` means a tier reuses a lower tier's part number and is shown as one spanning row (confirmed by A1).

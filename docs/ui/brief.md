@@ -13,6 +13,11 @@ engine; the UI only shows what the engine returns.
   as printed A4 sheets.
 - **Job:** go from a project to a correct, issued `.xlsx` workbook, trust the
   numbers on the way, and keep every installed copy on the same device library.
+- **Structure (Ali, after the first prototype review):** engineers work on several
+  projects. A project holds several substations plus the document register,
+  project information and shared defaults. Each substation has one system (its
+  own network, panels, BOMs and workbook) and can be created from an existing one.
+  Projects are backed up and shared as a single `.bomproj` file.
 
 ## Outcome and proof
 
@@ -40,9 +45,15 @@ engine; the UI only shows what the engine returns.
 
 - Fidelity: full clickable HTML/CSS prototype of every screen and its states,
   built on the example project. Design only: no app code, no `src/` changes.
-- Screens: project home; project settings; panels list and panel editor (form
-  and YAML tab); device library (browse, datasheet, alternatives); library
-  import and versions; checks; BOM and calculation preview; build and save.
+- Screens: home (all projects); project (overview, substations, document
+  register, backup and share); substation settings; network; panels (board and
+  list) and panel editor (form and YAML tab); device library (browse, datasheet,
+  alternatives); library import and versions; checks; BOM and calculation
+  preview; build and save.
+- Added after review (A1's design for projects, substations and automatic
+  layout): the Network screen and the Panels board, where an engineer moves,
+  deletes or resets devices that the layout engine placed. The board only
+  writes layout overrides; the rules stay in the engine.
 - Entering data: forms generated from the models' JSON Schema with a label and
   help override file, plus a YAML tab. The YAML tab edits project and panel
   files only. The library is read-only and changes only by importing a
@@ -57,17 +68,20 @@ engine; the UI only shows what the engine returns.
 
 ## States and ranges
 
-First run with no project, empty panel, loading a project, validation errors
+First run with no project, a substation with no network yet, a move that does not
+fit, a project opened from a `.bomproj` file, an import that clashes with an
+existing project, empty panel, loading a project, validation errors
 and warnings (located by file and field), library out of date versus the
 project's recorded version, import refused (downgrade, bad checksum, schema
-mismatch), build success and failure, unsaved changes. Ranges: 1–10 panels,
+mismatch), build success and failure, unsaved changes. Ranges: 1–10 projects, up to roughly 10 substations each, 1–10 panels,
 up to roughly 150 BOM rows per panel, library of about 45 to a few hundred parts.
 
 ## Interaction and layout
 
-- Shell: navy top bar (project name, library version, theme toggle), left
-  navigation in workflow order (Project, Panels, Library, Checks, Preview,
-  Build), content area, status footer with unsaved and validation state.
+- Shell: navy top bar (project and substation name, library version, theme
+  toggle), left navigation (Home, Library, Project; a substation switcher over
+  Settings, Network, Panels; then Checks, Preview, Build), content area, status
+  footer with unsaved and validation state.
 - Validation is always visible as a count; clicking a message jumps to the field
   or the YAML line. Preview and Build work without opening any editor.
 - Keyboard-first tables, visible focus, 4.5:1 text contrast, no information by
