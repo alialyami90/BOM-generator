@@ -6,7 +6,7 @@ The letter counts context resets (A, B, C, … Z, AA).
 | Role | Folder | Current name | Since | Last checkpoint |
 | --- | --- | --- | --- | --- |
 | 1 | [01-lead](01-lead/) | A1 - Lead developer | 2026-10-28 | — |
-| 2 | [02-input-models](02-input-models/) | A2 - Input models and examples | 2026-10-28 | — |
+| 2 | [02-input-models](02-input-models/) | B2 - Input models and examples | 2026-10-28 | [2026-10-28](02-input-models/checkpoints/2026-10-28.md) |
 | 3 | [03-device-db](03-device-db/) | A3 - Device database researcher | 2026-10-28 | — |
 | 4 | [04-ui-design](04-ui-design/) | A4 - UI designer | 2026-10-28 | — |
 | 5 | [05-library-packages](05-library-packages/) | A5 - Library update packages | 2026-10-28 | — |
