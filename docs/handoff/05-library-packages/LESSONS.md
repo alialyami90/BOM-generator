@@ -27,3 +27,12 @@
 - **Environment trap:** `pip show bomgen` is an editable install of `/home/user/BOM-generator`; a git worktree
   imports that checkout's `src`, not its own. Gate results from a worktree are wrong unless run with
   `PYTHONPATH=src`. I misreported 3 failures as main's; A1 corrected it. Check `bomgen.__file__` first.
+- **Drift (B5, 2026-10-28):** none in code; main moved by docs only. The container had no
+  install, and PATH `mypy` uses another Python (use `python -m mypy`). See STATE environment note.
+- **Device records are edited like the library, keyed by `part_id`.** Why: one op format for the
+  app's pending set. Rejected: a field-per-function record API. Records stay in their file; new
+  ones go to `device-db/local.yaml`, so unchanged files keep their bytes.
+- **Pydantic union errors** (`int | float`) come back once per member with the member as an extra
+  loc segment; cut the loc where the data reaches a scalar and keep one message per location.
+- **Another agent may change my files on main** (#165 by A1/B3 added `ac_rated` and amended ADR
+  0018). Fetch and read main's ADR before amending it.
