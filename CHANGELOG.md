@@ -3,10 +3,11 @@
 All notable changes to this project are listed here, one entry per merged pull
 request; a milestone split across several PRs gets one entry. The format
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
-project will use [Semantic Versioning](https://semver.org/) from its first
-tagged release.
+project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
+
+## [0.1.0] - 2026-10-28
 
 ### Added
 
@@ -132,6 +133,7 @@ tagged release.
 
 ### Changed
 
+- Version 0.1.0, the first release (#84).
 - Desktop app polish from A4's findings: a compact Panels board header, one
   "not available yet" line under each page's subtitle, a pulsing Build busy
   bar, a neutral "Partial" badge and smaller fixes across the screens
@@ -205,3 +207,6 @@ tagged release.
 - Plan Q29 resolved: the example keeps the workbook's thermostat load and fan
   airflow; future library defaults use 0 W for the SK 3110 thermostat and
   460 m³/h for the SK 3243.100 fan with its outlet filter (#12).
+
+[Unreleased]: https://github.com/alialyami90/BOM-generator/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/alialyami90/BOM-generator/releases/tag/v0.1.0
