@@ -12,12 +12,13 @@ agent; the milestones are in [`plan.md`](plan.md) → "Milestones".
 
 | Agent | Thread | Delivers | Owns (may change freely) |
 | --- | --- | --- | --- |
-| A1 | Lead developer | Reviews, cross-thread consistency, this file | `docs/agents.md`, `CLAUDE.md`, `README.md`, `.github/workflows/ci.yml`, plan sections 1, 2, 4 (intro), 5 |
+| A1 | Lead developer | Reviews, cross-thread consistency, this file | `docs/agents.md`, `CLAUDE.md`, `.github/workflows/ci.yml`, plan sections 1, 2, 4 (intro), 5 |
 | A2 | Input models and examples | M1 | `src/bomgen/models/`, `src/bomgen/io/`, `src/bomgen/cli.py`, `examples/`, plan section 3 and the M1 section |
 | A3 | Device database researcher | Reference data, outside the milestones | `data/device-db/`, its validation test |
 | A4 | UI designer | M9 | `docs/ui/`, the M9 section |
 | A5 | Library update packages | M8 | `src/bomgen/library_store/`, ADR 0008, the M8 section |
 | A6 | Windows installer and release | M11 | `packaging/`, `.github/workflows/release.yml`, `docs/install.md`, `src/bomgen/app/launcher.py`, ADR 0009, the M11 section |
+| A7 | Lead developer assistant | Documentation and small tasks A1 hands out | `README.md`, `tests/unit/README.md`, `tests/golden/README.md`; other files only when A1 assigns them |
 
 Each agent also owns its tests (`tests/unit/<area>/` or `tests/unit/test_<area>.py`)
 and its implementation plan under `docs/superpowers/plans/`.
@@ -72,6 +73,15 @@ PyInstaller spec, Inno Setup per-user installer, `.bomlib` file association,
 and the tag-driven release workflow. Built early with placeholders; it wires
 the real CLI, library import and window as M1, M8 and M10 land.
 
+### A7 — Lead developer assistant
+
+Supports A1 with documentation and small tasks: keeps `README.md` and the
+test READMEs in step with what has merged, checks that docs links and the ADR
+index are correct, and does the small, well-defined fixes A1 assigns. Works on
+its own branch and PRs like everyone else and does not approve PRs. Anything
+that touches another agent's files goes through that agent, unless A1 says
+otherwise.
+
 ## Shared files
 
 These files belong to more than one agent. Change only your own part, keep the
@@ -84,7 +94,8 @@ change small, and rebase on `main` before asking for review.
 | `pyproject.toml` | Add only the dependencies, extras and entry points your milestone needs. The `bomgen` console script is A2's. |
 | `src/bomgen/cli.py` | A2's. Other command groups live in their own module and attach with one `app.add_typer(...)` line. |
 | `.github/workflows/` | `ci.yml` is A1's; a new job must join `ci-status`'s `needs` (ADR 0006). Other workflows belong to the agent that adds them. |
-| `CLAUDE.md`, `README.md` | A1. Ask A1 for changes. |
+| `CLAUDE.md` | A1. Ask A1 for changes. |
+| `README.md` | A7, under A1's direction. |
 
 ## Numbers
 
