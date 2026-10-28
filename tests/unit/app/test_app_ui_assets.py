@@ -185,3 +185,11 @@ def test_project_creation_is_live_and_deleting_a_project_asks_for_its_name() -> 
     for name in ("create_project", "create_substation", "rename_project", "rename_substation"):
         assert f"Bridge.call('{name}'" in js
     assert "Type the project name to confirm" in js
+
+
+def test_project_overview_edits_client_logo_defaults_and_brands_in_the_app() -> None:
+    js = (UI_DIR / "screens-projects.js").read_text(encoding="utf-8")
+    assert "cannot be edited in the app yet" not in js
+    for name in ("set_project_field", "check_project_field", "set_project_logo"):
+        assert f"Bridge.call('{name}'" in js
+    assert "Same as the AC branches" in js  # mcb_dc, ADR 0023
