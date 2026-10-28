@@ -309,7 +309,6 @@ fieldset.readonly .btn, fieldset.readonly .grip { opacity: .5; cursor: default; 
 .toast-btn { all: unset; cursor: pointer; margin-left: var(--space-2); font-weight: var(--weight-semibold); text-decoration: underline; text-underline-offset: 2px; }
 .toast-btn:focus-visible { outline: var(--size-focus-ring) solid var(--color-on-bar); outline-offset: 2px; }
 .page--wide { max-width: none; }
-.not-connected { position: sticky; top: 0; z-index: 5; background: var(--color-ground); }  /* stays above the screen while it scrolls (M10c, M10d) */
 .popwrap { position: relative; }
 .card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-4); }
 .table--plain { width: 100%; }

@@ -1,5 +1,5 @@
 /* Screens: substation Settings and the Network inputs on bomgen.app.api (plan M10c).
-   Read-only until the substation writers exist. The L1 ranking and the Result card wait for the layout engine (M1c).
+   Read-only until the substation writers exist. The L1 ranking and the Result card come from screens-panels.js.
    Opened in a plain browser, the prototype's screens in screens-project.js and screens-layout.js are used instead. */
 (function () {
   const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, field, input, pageHead, toast } = App;
@@ -97,7 +97,7 @@
       ${Object.entries(errs).map(([line, m]) => `<div class="err small" style="color:var(--color-danger-text);margin-top:8px;display:flex;gap:6px">${icon('error')}<span>Line ${line}: ${esc(m)}</span></div>`).join('')}`;
   }
 
-  /* ---------- Network: the inputs (the engine's sizing comes with M1c) ---------- */
+  /* ---------- Network: the inputs, with the engine's ranking and result ---------- */
   const ROLES = { fopp: 'Fibre patch panel', l2_switch: 'L2 switch', l1_switch: 'L1 switch', ext_switch: 'External switch', firewall: 'Firewall', other: 'Other' };
   const SPARES = { port_fraction: ['Ports kept free on each switch', '%'], sfp_per_l1: ['Spare SFPs on each L1', ''], rack_u_reserved: ['Rack space kept free', 'U'], dc_branches_per_feed: ['Spare DC branches per feed', ''], ac_branches: ['Spare AC branches', ''] };
   const pct = (v) => Math.round(v * 100);
@@ -116,8 +116,7 @@
               ${field('Topology', ro(input('n-topo', n.topology === 'ring' ? 'Ring' : 'Star')), n.topology === 'star' ? 'Each L1 switch has one uplink to its L2 switch plus an A–B interlink.' : 'L1 switches are joined in rings. Two ports close each ring.')}
               ${n.topology === 'ring' ? field('Switches per ring', ro(input('n-ring', n.ring_max_switches, { num: true, mono: true })), 'Most L1 switches in one ring.') : ''}
             </div></section>
-          <section><h3>L1 switch model</h3>
-            <div class="empty" style="margin-top:var(--space-3)"><b>No ranking yet.</b><div class="muted small">${unset ? 'It appears once the IED count is set.' : 'The engine ranks the library’s L1 switches. It is not connected in this version.'}</div></div></section>
+          <section><h3>L1 switch model</h3>${App.network.rankTable()}</section>
           <section><h3>Equipment</h3>
             <p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">What the substation has, before any panel exists. Redundant devices come as an A and a B unit.</p>
             ${eq.length ? `<div class="table-wrap"><table class="table"><thead><tr><th>Device</th><th style="width:150px">Role</th><th style="width:90px">A and B</th><th class="num" style="width:90px">L2 ports</th><th class="num" style="width:64px">Height</th></tr></thead><tbody>
@@ -129,7 +128,7 @@
             <p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">Every spare starts from the project's shared defaults; the ones this substation changes are marked.</p>
             <div class="form form--3">${p.spares.map((s) => { const [label, unit] = SPARES[s.key] || [s.key, '']; const v = s.key === 'port_fraction' ? pct(s.value) : s.value; return field(label, fixed(v, unit), s.changed ? `Changed from ${s.key === 'port_fraction' ? pct(s.default) : s.default}${unit && unit !== '%' ? ' ' + unit : unit}.` : 'Project default.'); }).join('')}</div></section>
         </div>
-        <aside class="net-result" aria-live="polite"><div class="card"><h3>Result</h3><p class="muted small" style="margin-top:var(--space-2)">The L1 and L2 switches per side, ports and links are calculated by the engine, which is not connected in this version.</p></div></aside>
+        <aside class="net-result" aria-live="polite">${App.network.resultCard()}</aside>
       </div></div>`;
   };
 })();

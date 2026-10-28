@@ -28,6 +28,7 @@ from typing import Any, Protocol
 from pydantic import BaseModel, ValidationError
 
 from bomgen import __version__
+from bomgen.app.network import layout_page
 from bomgen.app.output import OutputRefusedError, build_file, build_target, checks_page
 from bomgen.app.preview import preview_page
 from bomgen.app.projects import RecentProjects, project_files, summarize
@@ -442,6 +443,12 @@ class Api:
         """The workbook's file name and default folder, and the problems that block a build."""
         with self._substation(substation_id):
             return build_target(Path(project_file), substation_id, self._library_store())
+
+    @endpoint
+    def substation_layout(self, project_file: str, substation_id: str) -> dict[str, Any]:
+        """The engine's network sizing, L1 ranking and panel layout, for Network and Panels."""
+        with self._substation(substation_id):
+            return layout_page(Path(project_file), substation_id, self._library_store())
 
     @endpoint
     def preview_substation(self, project_file: str, substation_id: str) -> dict[str, Any]:
