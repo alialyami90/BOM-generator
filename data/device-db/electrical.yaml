@@ -68,6 +68,8 @@ records:
       which is above the 125 V DC breaking-capacity voltage. Check the battery maximum against this rating,
       or use a UC/DC range (e.g. ABB S200M UC, Siemens 5SY5) for the 125 V DC circuits. Accepts the iOF
       auxiliary contact A9A26924 on its left side.'
+    mounting_kind: din_rail
+    height_u: 0
   alternatives:
   - make: ABB
     manufacturer: ABB
@@ -196,6 +198,8 @@ records:
       higher, which is above the 125 V DC breaking-capacity voltage. Check the battery maximum against
       this rating, or use a UC/DC range (e.g. ABB S200M UC, Siemens 5SY5) for the 125 V DC circuits. Accepts
       the iOF auxiliary contact A9A26924 on its left side.'
+    mounting_kind: din_rail
+    height_u: 0
   alternatives:
   - make: ABB
     manufacturer: ABB
@@ -323,6 +327,8 @@ records:
       higher, which is above the 125 V DC breaking-capacity voltage. Check the battery maximum against
       this rating, or use a UC/DC range (e.g. ABB S200M UC, Siemens 5SY5) for the 125 V DC circuits. Accepts
       the iOF auxiliary contact A9A26924 on its left side.'
+    mounting_kind: din_rail
+    height_u: 0
   alternatives:
   - make: ABB
     manufacturer: ABB
@@ -451,6 +457,8 @@ records:
       this rating, or use a UC/DC range (e.g. ABB S200M UC, Siemens 5SY5) for the 125 V DC circuits. Accepts
       the iOF auxiliary contact A9A26924 on its left side. The 10 A page is a distributor copy of the
       Schneider datasheet.'
+    mounting_kind: din_rail
+    height_u: 0
   alternatives:
   - make: ABB
     manufacturer: ABB
@@ -578,6 +586,8 @@ records:
       higher, which is above the 125 V DC breaking-capacity voltage. Check the battery maximum against
       this rating, or use a UC/DC range (e.g. ABB S200M UC, Siemens 5SY5) for the 125 V DC circuits. Accepts
       the iOF auxiliary contact A9A26924 on its left side.'
+    mounting_kind: din_rail
+    height_u: 0
   alternatives:
   - make: ABB
     manufacturer: ABB
@@ -683,6 +693,9 @@ records:
     notes: Rated 1 A at 130 V DC (DC-12), which fits 125 V DC indication circuits. The minimum load is
       100 mA, so very low-current SCADA DI wetting may need the low-level iOF variant; not checked here.
       Height not stated on the page.
+    mounting_kind: din_rail
+    height_u: 0
+    height_note: Clips onto the MCB
   alternatives:
   - make: ABB
     manufacturer: ABB
@@ -787,6 +800,8 @@ records:
     notes: The datasheet gives 55.5 mm overall and 55 / 62.5 mm height on NS 35/7.5 / NS 35/15. Needs
       the D-UT 16 end cover (order no. not checked) and FBS 2-12 / RB UT reducing bridges where needed.
       The product_url is the Phoenix page format; the PDF link is the one actually read.
+    mounting_kind: din_rail
+    height_u: 0
   alternatives:
   - make: Weidmuller
     manufacturer: Weidmuller
@@ -889,6 +904,8 @@ records:
       length 57.8 mm is given as d. Variants: UT 2,5-MTD BU 3064108 (blue), UT 2,5-MTD P/P 3064098, UT
       2,5-MTD-PE 3064124. The temperature range is from the RS listing (-60 to 105 C), not the Phoenix
       datasheet.'
+    mounting_kind: din_rail
+    height_u: 0
   alternatives:
   - make: Weidmuller
     manufacturer: Weidmuller
@@ -988,6 +1005,8 @@ records:
       20 A max; test plugs PS-5 3030983, MPS-MT 0201744; pick-off LPO 2,5 3270517. The voltage rating
       differs between sources (Phoenix web page 500 V, older e-sonic datasheet 400 V). Operating temperature
       is not stated. Blue variant: UT 2,5-MT P/P BU 3046566 (push-in).'
+    mounting_kind: din_rail
+    height_u: 0
   alternatives:
   - make: Weidmuller
     manufacturer: Weidmuller
@@ -1057,6 +1076,9 @@ records:
       3/10 SN 1000MM (0402174, 10 x 3 mm tinned Cu, 1 m) on metal supports AB-SK (3025341) or AB-SK 65
       (3026489), with AK 4 (0404017) clamp terminals per conductor. Panel-bolted builds use a drilled
       bar such as nVent ERICO EGBA. Size the bar for the incoming PE conductor and the number of lugs.'
+    mounting_kind: enclosure
+    height_u: 0
+    height_note: Bolted to the frame or mounting plate
   alternatives:
   - make: Phoenix Contact
     manufacturer: Phoenix Contact
@@ -1134,6 +1156,9 @@ records:
       3/10 SN 1000MM (0402174) on insulated supports AB-SK/E (3026476) or AB-SK-D TOP INSULATED (3062087)
       with AK 4 / AKG 4 clamps. A panel build uses nVent ERICO EGBA bars, which ship with insulators and
       brackets. Bond to the station earth at one point only.
+    mounting_kind: enclosure
+    height_u: 0
+    height_note: On insulated stand-offs
   alternatives:
   - make: Phoenix Contact
     manufacturer: Phoenix Contact
