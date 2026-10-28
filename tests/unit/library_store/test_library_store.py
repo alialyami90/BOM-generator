@@ -319,6 +319,46 @@ def test_interrupted_force_reinstall_keeps_the_installed_version(
     assert _snapshot(store.root) == before
 
 
+def _active_write_fails(monkeypatch: pytest.MonkeyPatch) -> None:
+    def refuse(path: Path, text: str) -> None:
+        raise PermissionError("active is locked")
+
+    monkeypatch.setattr("bomgen.library_store.store._write_text_atomic", refuse)
+
+
+def test_a_failed_active_write_on_a_force_reinstall_restores_the_installed_version(
+    store: LibraryStore, make_package: MakePackage, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    package = make_package("1.0.0")
+    store.import_package(package)
+    before = _snapshot(store.root)
+    _active_write_fails(monkeypatch)
+
+    with pytest.raises(PermissionError):
+        store.import_package(package, force=True)
+    monkeypatch.undo()
+
+    assert _snapshot(store.root) == before
+    assert not [p for p in (store.root / "psa-devices").iterdir() if p.name.startswith(".")]
+    assert store.active_version("psa-devices") == "1.0.0"
+
+
+def test_a_failed_active_write_on_a_new_version_leaves_no_trace_of_it(
+    store: LibraryStore, make_package: MakePackage, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    store.import_package(make_package("1.0.0"))
+    before = _snapshot(store.root)
+    _active_write_fails(monkeypatch)
+
+    with pytest.raises(PermissionError):
+        store.import_package(make_package("1.1.0"))
+    monkeypatch.undo()
+
+    assert _snapshot(store.root) == before
+    assert store.versions("psa-devices") == ["1.0.0"]
+    assert store.active_version("psa-devices") == "1.0.0"
+
+
 def test_failed_validation_of_a_new_library_leaves_no_trace(
     store: LibraryStore, make_package: MakePackage
 ) -> None:

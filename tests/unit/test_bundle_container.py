@@ -259,3 +259,22 @@ def test_inspect_details_use_the_singular_for_one_file(tmp_path: Path) -> None:
     assert details["paths"] == "2 entries"
     assert details["files"] == "1 file"
     assert details["checksums"] == "the file matches"
+
+
+def test_write_bundle_creates_the_missing_folders(tmp_path: Path) -> None:
+    out = tmp_path / "backups" / "2026" / "x.bundle"
+    manifest = _Manifest(files={})
+
+    write_bundle(out, manifest, {})
+
+    assert out.is_file()
+
+
+def test_write_bundle_refuses_cleanly_when_the_folder_cannot_be_made(tmp_path: Path) -> None:
+    blocker = tmp_path / "taken"
+    blocker.write_text("a file, not a folder")
+
+    with pytest.raises(LibraryPackageError, match="cannot write") as raised:
+        write_bundle(blocker / "x.bundle", _Manifest(files={}), {})
+
+    assert str(blocker) in str(raised.value)

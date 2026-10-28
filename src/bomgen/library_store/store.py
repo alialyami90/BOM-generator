@@ -216,6 +216,7 @@ class LibraryStore:
         replaced = library_dir / f".replaced-{uuid.uuid4().hex}"
         target = library_dir / version
         committed = False
+        swapped = False
         try:
             self._extract(contents, incoming)
             if validate is not None:
@@ -228,10 +229,16 @@ class LibraryStore:
                 if replaced.exists():
                     os.replace(replaced, target)
                 raise
+            swapped = True
             _write_text_atomic(library_dir / ACTIVE_FILE, version)
             committed = True
         finally:
             shutil.rmtree(incoming, ignore_errors=True)
+            if swapped and not committed:
+                # the active pointer was not written: put the version that was there back
+                shutil.rmtree(target, ignore_errors=True)
+                if replaced.exists():
+                    os.replace(replaced, target)
             if committed:
                 shutil.rmtree(replaced, ignore_errors=True)
             if created_dir and not committed:

@@ -273,3 +273,28 @@ def test_cli_import_csv_with_nothing_to_change_says_so(runner: CliRunner, tmp_pa
 
     assert result.exit_code == 1
     assert "nothing differs from 1.0.0" in result.output
+
+
+def test_cli_pack_creates_the_folder_of_the_package_file(runner: CliRunner, tmp_path: Path) -> None:
+    out = tmp_path / "backups" / "2026" / "psa.bomlib"
+
+    _pack(runner, tmp_path, "1.0.0", V1, "--out", str(out))
+
+    assert out.is_file()
+
+
+def test_cli_pack_into_an_unusable_folder_is_a_clean_error(
+    runner: CliRunner, tmp_path: Path
+) -> None:
+    source = tmp_path / "library.yaml"
+    source.write_text(V1)
+    blocker = tmp_path / "taken"
+    blocker.write_text("a file, not a folder")
+    args = ["pack", str(source), "--name", "psa-devices", "--version", "1.0.0"]
+
+    result = runner.invoke(library_app, [*args, "--out", str(blocker / "psa.bomlib")])
+
+    assert result.exit_code == 1
+    assert "error: cannot write" in result.output
+    assert "Traceback" not in result.output
+    assert "Errno" not in result.output
