@@ -26,3 +26,5 @@
 
 ## Drift found
 - 2026-10-28: my design let a free-text loose item feed a cabinet; ADR 0022 refuses `fed_from` for free text. Cause: the design was written before the ADR. Fix is NEXT.md task 1.
+- 2026-10-28 (B4): origin/main moved 9313db1 → ded5fe4 by handoff checkpoints only; gate green (2414 passed). The impeccable detector at `/root/.impeccable/bin/0.1.14/` is absent in the new container and fetching it with npx was refused; craft floor checked by hand until it is available.
+- 2026-10-28 (B4): the design's Qty rule ("a number with a unit such as 1 Lot") was wider than the model (`_validate_quantity`: whole number ≥ 1 or `1 Lot`). Fixed in the ADR 0022 docs PR.
