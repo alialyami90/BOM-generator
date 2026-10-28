@@ -373,7 +373,6 @@
         "format": "path",
         "type": "string"
       },
-      "minItems": 1,
       "title": "Substations",
       "type": "array"
     }

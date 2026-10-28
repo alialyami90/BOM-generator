@@ -224,8 +224,6 @@ class Substation(InputModel):
 
     @model_validator(mode="after")
     def _consistent(self) -> "Substation":
-        if not self.panels and not self.manual_panels:
-            raise ValueError("list at least one file in panels or manual_panels")
         both = sorted(
             {p.as_posix() for p in self.panels} & {p.as_posix() for p in self.manual_panels}
         )

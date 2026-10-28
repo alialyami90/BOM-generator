@@ -11,6 +11,7 @@ from pathlib import Path
 
 from bomgen.checks import check_report
 from bomgen.checks import render_json as render_checks_json
+from bomgen.engine.errors import EngineError
 from bomgen.engine.pipeline import build as build_bom
 from bomgen.io.loader import LoadedSubstation
 from bomgen.models.bom import BuildResult
@@ -51,6 +52,11 @@ def build_substation(
 ) -> BuildOutcome:
     """Build ``target`` (already laid out) into the workbook ``out_path``, and its
     ``.checks.json`` beside it."""
+    if not target.panels:
+        raise EngineError(
+            f"substation '{target.substation.substation.id}' has no panels yet: "
+            "list its equipment or add a panel"
+        )
     result = build_bom(target)
     marked: BuildResult = result
     revisions: RevisionReport | None = None

@@ -60,6 +60,25 @@ lists the first writers, and each one returns the new layout preview and its pro
    - `assumed_fields` and `confirm_field`: values whose comment says `ASSUMED`, and
      dropping that mark when the person confirms one. The rest of the comment stays.
    - `file_fingerprint`: a hash, so the app can tell when a file changed on disk.
+
+   *M17d:* `io/lifecycle.py` creates and deletes projects and substations:
+   - `create_project` writes `<workspace>/<id>/project.yaml`. The id comes from the
+     name, gets `-2`, `-3` and so on when that folder is taken, and the project starts
+     with no substations.
+   - `create_substation` adds a blank substation or copies another:
+     - A blank one has no panels and three register documents (BOM, power, heat), whose
+       number and date are marked `ASSUMED`.
+     - A copy takes the other substation's files with their comments. Its register
+       documents and every `document:` key are renamed to the new id.
+   - `delete_substation` checks the delete, saves a `.bomproj` backup (ADR 0012), then
+     removes the folder, the project's entry for it and its register documents.
+   - `delete_project` saves `<Deleted>/<id>.bomproj`, then removes the folder.
+   - Names are edited with `set_field`. Ids name folders and register keys, so they stay
+     read-only, as A4's design has them.
+   - Two model rules are loosened so that a new project or substation can load:
+     `substations` may be an empty list (the key is still required), and a substation
+     may list no panel files. `build_substation` raises `EngineError` ("has no panels
+     yet") for such a substation.
 2. **Check before writing** (`io/edit.py`). The writer loads the whole project with the
    edited text in place of the file (`yaml_source.pending_texts`), so the edit passes
    through the same loader checks as a build would.

@@ -2,12 +2,14 @@
 both lay out first."""
 
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import openpyxl
 import pytest
 
 from bomgen.build import build_substation, workbook_name
+from bomgen.engine.errors import EngineError
 from bomgen.io.loader import LoadedSubstation, load_substation
 from bomgen.revision import read_previous_issue
 
@@ -55,3 +57,11 @@ def test_build_compares_with_a_previous_issue(loaded: LoadedSubstation, tmp_path
     outcome = build_substation(loaded, tmp_path / "after.xlsx", previous=previous)
     assert outcome.revisions is not None
     assert outcome.revisions.changes == ()
+
+
+def test_a_substation_without_panels_does_not_build(
+    loaded: LoadedSubstation, tmp_path: Path
+) -> None:
+    with pytest.raises(EngineError, match="has no panels yet"):
+        build_substation(replace(loaded, panels=()), tmp_path / "bom.xlsx")
+    assert not (tmp_path / "bom.xlsx").exists()

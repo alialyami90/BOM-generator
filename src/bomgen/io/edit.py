@@ -118,6 +118,11 @@ def commit(
     return EditResult(True, tuple(after), _preview(loaded, substation_id))
 
 
+def project_problems(project_file: Path, *, store: LibraryStore | None = None) -> list[Issue]:
+    """Every problem the project has as it is on disk."""
+    return _load(project_file, store, {})[0]
+
+
 def _load(
     project_file: Path, store: LibraryStore | None, texts: Mapping[Path, str | None]
 ) -> tuple[list[Issue], LoadedProject | None]:

@@ -179,7 +179,7 @@ class Project(InputModel):
     library: LibrarySelection
     documents: list[RegisterEntry] = Field(default_factory=list)
     defaults: Defaults = Field(default_factory=Defaults)
-    substations: list[Path] = Field(min_length=1)
+    substations: list[Path]  # required, but a new project may list none yet
 
     @field_validator("documents")
     @classmethod
