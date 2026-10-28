@@ -80,15 +80,17 @@
         : `<span class="mono">${esc(it.part_id)}</span><span class="cell-sub">${esc(makeModel(it) || 'Library part')}${it.children && it.children.length ? ` · comes with <span class="mono">${esc(it.children.join(', '))}</span>` : ''}</span>`;
       const fed = free ? '<span class="muted small" title="A free-text item has no library data, so it cannot be fed">—</span>'
         : ctl(select('lm-fed-' + i, fedOptions().concat(it.fed_from && !d.fed_options.some((p) => p.id === it.fed_from) ? [[it.fed_from, it.fed_from]] : []), it.fed_from || ''));
-      return `<tr${r.orig == null || !same(it, r.base) ? ' class="is-changed"' : ''}><td class="num muted" style="width:44px">${i + 1}</td><td>${first}</td><td>${ctl(input('lm-tag-' + i, it.tag || '', { placeholder: 'Designation on the sheet' }))}</td>
-        <td>${described(ctl(input('lm-qty-' + i, it.qty == null ? '' : String(it.qty), { num: true, mono: true, invalid: !!bad.qty })), 'lm-qty-' + i, bad.qty)}${cellErr('lm-qty-' + i, bad.qty)}</td><td>${fed}</td>
+      /* An edited cell, or every cell of a new row, gets the forms' changed highlight. */
+      const ch = (k) => (r.orig == null || !same({ [k]: it[k] }, { [k]: r.base[k] }) ? ' class="changed"' : '');
+      return `<tr><td class="num muted" style="width:44px">${i + 1}</td><td${ch(free ? 'description' : 'part_id')}>${first}</td><td${ch('tag')}>${ctl(input('lm-tag-' + i, it.tag || '', { placeholder: 'Designation on the sheet' }))}</td>
+        <td${ch('qty')}>${described(ctl(input('lm-qty-' + i, it.qty == null ? '' : String(it.qty), { num: true, mono: true, invalid: !!bad.qty })), 'lm-qty-' + i, bad.qty)}${cellErr('lm-qty-' + i, bad.qty)}</td><td${free ? '' : ch('fed_from')}>${fed}</td>
         <td><button class="btn btn--ghost btn--icon btn--sm" data-action="lm-remove" data-i="${i}" aria-label="Remove ${esc(free ? (it.description || 'item ' + (i + 1)) : it.part_id)}" ${saving ? 'disabled' : ''}>${icon('trash')}</button></td></tr>`;
     }).join('');
     const host = d.host_options.map((p) => [p.id, `${p.name} (${p.sheet})`]);
     return `<div class="page">${head}${notice}
       <div class="stack" style="gap:var(--space-5)">
         <div><div class="table-wrap"><table class="table"><caption class="sr-only">Loose material, in the sheet's order</caption><thead><tr><th class="num">No.</th><th style="min-width:190px">Part or description</th><th style="min-width:230px">Designation</th><th style="width:110px">Qty</th><th style="width:200px">Fed from</th><th style="width:40px"><span class="sr-only">Actions</span></th></tr></thead><tbody>${rows}</tbody></table>
-          <div class="table-foot"><span>${plural(draft.rows.length, 'item')}</span><span>Quantity is a number, or a number with a unit such as 1 Lot.</span></div></div>
+          <div class="table-foot"><span>${plural(draft.rows.length, 'item')}</span><span>Quantity: A whole number, or 1 Lot.</span></div></div>
           <p class="muted small" style="margin-top:var(--space-3);max-width:68ch">An item that needs power names the cabinet that feeds it, and the engine adds its load to that cabinet. Parts that come with an item are added by the library and listed under it.</p></div>
         <aside class="lm-cards" aria-label="Where it goes in the workbook">
           <section class="card" style="padding:var(--space-4)"><h3>On the workbook</h3>
@@ -116,7 +118,7 @@
     const t = e.target, m = /^lm-(tag|qty|fed|desc)-(\d+)$/.exec(t.id || ''), r = m && draft.rows[+m[2]];
     if (r) r.item[{ tag: 'tag', qty: 'qty', fed: 'fed_from', desc: 'description' }[m[1]]] = m[1] === 'qty' ? qtyOf(t.value) : t.value.trim() || null;
     if (t.id === 'lm-host') draft.host = t.value;
-    if (r || t.id === 'lm-host') App.render();
+    if (r || t.id === 'lm-host') queueMicrotask(App.render);  /* change can fire on a blur inside a render */
   });
   ACTIONS['lm-remove'] = (el) => {
     const i = +el.dataset.i, [r] = draft.rows.splice(i, 1);
@@ -153,16 +155,21 @@
     steps.push(() => (draft.host === LM.data.host_panel || LM.data.host_panel == null ? null : step((f, s) => Bridge.call('set_loose_host_panel', f, s, draft.host), () => {})));
     return steps;
   }
-  ACTIONS['lm-save'] = () => {
-    if (saving || !dirty() || invalid()) return;
+  function save() {  // resolves true once everything is written
+    if (saving || !dirty() || invalid()) return Promise.resolve(false);
     saving = true; refusal = ''; App.render();
-    plan().reduce((chain, s) => chain.then(() => s()), Promise.resolve())
-      .then(() => { reset(LM.data); toast('Saved substation.yaml'); })
-      .catch((err) => { refusal = /[.!?]$/.test(err.message) ? err.message : err.message + '.'; })
-      .then(() => { saving = false; App.render(); });
-  };
+    return plan().reduce((chain, s) => chain.then(() => s()), Promise.resolve())
+      .then(() => { reset(LM.data); toast('Saved substation.yaml'); return true; })
+      .catch((err) => { refusal = /[.!?]$/.test(err.message) ? err.message : err.message + '.'; return false; })
+      .then((ok) => { saving = false; App.render(); return ok; });
+  }
+  ACTIONS['lm-save'] = () => { save(); };
   document.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's' && real() && App.route().a === 'loose') { e.preventDefault(); ACTIONS['lm-save'](); }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's' && real() && App.route().a === 'loose') {
+      e.preventDefault();
+      if (document.activeElement) document.activeElement.blur();  /* commits the field being typed in */
+      ACTIONS['lm-save']();
+    }
   });
 
   /* ---------- Add: from the library, or free text; the engine checks the item before it joins the draft ---------- */
@@ -182,7 +189,7 @@
   ACTIONS['lm-add-lib'] = () => dialog({ title: 'Add a library part as loose material', body: `<div class="stack">
     <div class="input-wrap"><label class="sr-only" for="lm-q">Search library</label>${icon('search')}<input class="input" id="lm-q" type="search" placeholder="Search part, make or model" autocomplete="off"></div>
     <div class="pick-list" id="lm-list" role="radiogroup" aria-label="Library parts">${pickRows('')}</div>
-    <div class="form form--3">${field('Quantity', input('lm-nq', '1', { num: true, mono: true }), 'A number, or with a unit: 1 Lot.')}${field('Designation', input('lm-nt', '', { placeholder: 'e.g. SRV/OAS - HMI Software' }))}${field('Fed from', select('lm-nf', fedOptions(), ''))}</div>
+    <div class="form form--3">${field('Quantity', input('lm-nq', '1', { num: true, mono: true }), 'A whole number, or 1 Lot.')}${field('Designation', input('lm-nt', '', { placeholder: 'e.g. SRV/OAS - HMI Software' }))}${field('Fed from', select('lm-nf', fedOptions(), ''))}</div>
     <p class="muted small">Anything that comes with the part, such as a cable or a mounting kit, is added from the library.</p><div id="lm-err"></div></div>`,
     actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="lm-add-lib-do">Add item</button>' });
   document.addEventListener('input', (e) => { if (e.target.id === 'lm-q') $('#lm-list').innerHTML = pickRows(e.target.value); });
@@ -196,7 +203,7 @@
   };
   ACTIONS['lm-add-free'] = () => dialog({ title: 'Add a free-text item', body: `<div class="stack">
     <div class="form">${field('Description', input('lm-fd', '', { placeholder: 'e.g. Fibre optic patch cords, LC to LC' }), 'Printed as it is. Required.')}</div>
-    <div class="form form--3">${field('Quantity', input('lm-fq', '1', { num: true, mono: true }), 'A number, or with a unit: 1 Lot.')}${field('Designation', input('lm-ft', ''))}</div>
+    <div class="form form--3">${field('Quantity', input('lm-fq', '1', { num: true, mono: true }), 'A whole number, or 1 Lot.')}${field('Designation', input('lm-ft', ''))}</div>
     ${banner('info', 'A free-text item has no part, so the sheet shows no ordering code, make or model for it, and it cannot be fed from a cabinet. Add the part to the library to get them.')}<div id="lm-err"></div></div>`,
     actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="lm-add-free-do">Add item</button>' });
   ACTIONS['lm-add-free-do'] = () => {
@@ -213,8 +220,13 @@
     if (!was.startsWith('#/loose') || location.hash.startsWith('#/loose') || !dirty() || saving) return;
     const to = location.hash;
     history.replaceState(null, '', was); here = was; App.render();
-    dialog({ title: 'Save the loose material first?', body: `<p>You have ${plural(changes(), 'unsaved change')} on this page.</p>`,
-      actions: `<button class="btn btn--secondary" data-action="close">Stay</button><button class="btn btn--secondary" data-action="lm-leave-discard" data-to="${esc(to)}">Discard and leave</button>` });
+    const bad = invalid(), why = bad ? `${plural(bad, 'field')} ${bad === 1 ? 'needs' : 'need'} fixing before you can save.` : '';
+    dialog({ title: 'Save the loose material first?', body: `<p>You have ${plural(changes(), 'unsaved change')} on this page.</p>${bad ? `<p class="small" id="lm-leave-why" style="color:var(--color-danger-text);display:flex;gap:6px">${icon('error')}${esc(why)}</p>` : ''}`,
+      actions: `<button class="btn btn--secondary" data-action="close">Keep editing</button><button class="btn btn--secondary" data-action="lm-leave-discard" data-to="${esc(to)}">Discard changes</button><button class="btn btn--primary" data-action="lm-leave-save" data-to="${esc(to)}" ${bad ? `disabled aria-describedby="lm-leave-why" title="${esc(why)}"` : ''}>${icon('save')}Save and leave</button>` });
   });
   ACTIONS['lm-leave-discard'] = (el) => { closeDialog(); reset(LM.data); go(el.dataset.to); };
+  ACTIONS['lm-leave-save'] = (el) => {
+    const to = el.dataset.to;
+    closeDialog(); save().then((ok) => { if (ok) go(to); });  /* refused: stay, the banner says why */
+  };
 })();

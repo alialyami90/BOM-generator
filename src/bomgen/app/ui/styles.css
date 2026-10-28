@@ -415,7 +415,6 @@ fieldset.readonly .btn, fieldset.readonly .grip { opacity: .5; cursor: default; 
 /* Loose material (docs/ui/editing.md, Loose material v0.2) */
 .lm-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); align-items: start; }
 @media (max-width: 900px) { .lm-cards { grid-template-columns: 1fr; } }
-.table tr.is-changed > td:first-child { box-shadow: inset 3px 0 0 var(--color-bar-warn); }
 .pick-list { display: grid; border: 1px solid var(--color-border-control); border-radius: var(--radius-sm); background: var(--color-surface); max-height: 240px; overflow: auto; }
 .pick-row { display: flex; align-items: center; gap: var(--space-3); padding: 7px 10px; cursor: pointer; border-top: 1px solid var(--color-border); }
 .pick-row:first-child { border-top: 0; }
