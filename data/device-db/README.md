@@ -19,8 +19,9 @@ bomgen library pack examples/library.yaml --name psa-devices --version 1.0.0 \
   --add data/device-db
 ```
 
-The package keeps the YAML files under `device-db/`, and import checks every record
-against the field rules below.
+The package keeps the YAML files under `device-db/`. `pack` checks every record
+against the field rules below and refuses to build a package that breaks them; import
+does not re-check them.
 
 Records of `kind: device` key on the library's `part_id`s, so a tool or a person can
 join the two. Records of `kind: catalogue` (`MCB-*`, `AUX-*`, `TB-*`, `BUSBAR-*`,
