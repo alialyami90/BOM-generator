@@ -49,7 +49,7 @@
     const head = pageHead('Review library changes', `These edits become a new local version of ${esc(p.name)}. Nothing changes in any project until you apply them and a project records the new version.`, '', crumbs);
     if (!p.count) return `<div class="page">${head}<div class="empty" style="max-width:640px"><b>Nothing to review</b><div class="muted small" style="margin:4px 0 12px">Device edits you save appear here before they are applied.</div><a class="btn btn--secondary" href="#/library">Back to the library</a></div></div>`;
     const of = (k) => p.entries.filter((e) => e.kind === k);
-    const line = (e) => `<div><span class="mono">${esc(e.label)}</span><span class="muted">${e.kind === 'changed' ? `${e.field ? `${esc(labelOf(e.field))}: ` : ''}${esc(e.from || 'empty')} → ${esc(e.to || 'empty')}` : esc(e.to || e.from)}</span></div>`;
+    const line = (e) => `<div><span class="mono">${esc(e.label)}</span><span class="muted">${e.kind === 'changed' ? `${e.field ? `${esc(labelOf(e.field))}: ` : ''}${esc(withUnit(e.field, e.from))} → ${esc(withUnit(e.field, e.to))}` : esc(e.to || e.from)}</span></div>`;
     const group = (title, items, tone) => (items.length ? `<details open><summary>${icon('chevr', 'chev')}${esc(title)} ${badge(tone, items.length)}</summary><div class="items">${items.map(line).join('')}</div></details>` : '');
     const moved = p.active && p.active !== p.base ? `<div style="margin-bottom:var(--space-4)">${banner('warn', `<b>Started from ${esc(p.base)}; ${esc(p.active)} is now active.</b> Applying builds on ${esc(p.base)}, the version these edits started from.`)}</div>` : '';
     return `<div class="page">${head}${moved}<div class="stack" style="max-width:920px">
@@ -85,6 +85,7 @@
   const FIELDS = Object.values(TABS).flatMap(([, f]) => f);
   const kindOf = (key) => (FIELDS.find((f) => f[0] === key) || [])[2];
   const labelOf = (key) => (FIELDS.find((f) => f[0] === key) || [key, key])[1];
+  const withUnit = (key, v) => { const u = (FIELDS.find((f) => f[0] === key) || [])[5]; return v ? (u ? `${v} ${u}` : v) : 'empty'; };
 
   function loadDevice(id) {
     Object.assign(ED, { key: id, state: 'loading', reply: null, error: null, draft: {}, errors: {}, refusal: '' });
@@ -129,7 +130,7 @@
     const fields = TABS[t][1], spans = (f) => (f[4] === 2 ? `<div class="span-2">${control(f)}</div>` : control(f));
     const ports = t === 'ports' ? `<h3 style="margin-top:var(--space-5)">Port groups</h3>${d.ports.length ? `<div class="table-wrap" style="max-width:760px;margin-top:var(--space-2)"><table class="table"><thead><tr><th class="num">Count</th><th>Speed</th><th>Media</th><th>Kind</th><th>Used for</th></tr></thead><tbody>
       ${d.ports.map((g) => `<tr><td class="num">${esc(g.count)}</td><td>${esc(g.speed || '—')}</td><td>${esc(g.media || '—')}</td><td>${esc(g.kind || '—')}</td><td>${esc(g.usable_for || '—')}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted small" style="margin-top:var(--space-2)">No port groups.</p>'}
-      <p class="muted small" style="margin-top:var(--space-2)">Editing port groups comes with the next library update of the app.</p>` : '';
+      <p class="muted small" style="margin-top:var(--space-2)">Port groups can't be edited here yet.</p>` : '';
     const pend = ED.reply.pending_fields.length && ED.reply.saved ? `<div style="margin-bottom:var(--space-4)">${banner('info', `<b>This device has pending changes</b> (${ED.reply.pending_fields.map(esc).join(', ')}). The fields show them; the library keeps the saved values until you apply.`)}</div>` : '';
     const notice = ED.refusal ? `<div style="margin-bottom:var(--space-4)">${banner('bad', `<b>Not saved.</b> ${esc(ED.refusal)}`)}</div>` : '';
     return `<div class="page">${pageHead(esc(d.part_id), esc([d.make, d.model].filter(Boolean).join(' ')), '', crumbs)}${notice}${pend}
