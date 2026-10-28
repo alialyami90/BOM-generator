@@ -43,3 +43,7 @@
 - 2026-10-28 validation by a fresh reader found these gaps, now fixed: short paths, what
   `test_cli_build.py` and `kits.py` belong to, the gate run on a commit other than HEAD, the
   stash being local, and no fallback when A1 assigns nothing. Write full paths.
+- 2026-10-28, A1: only Ali accepts ADRs. The checkpoint's draft task to mark ADR 0016 and
+  0019 Accepted was dropped; A1 offers Ali a batch card instead.
+- 2026-10-28, #141 conflicted on ROSTER.md with the neighbouring rows that merged first.
+  Merge main and keep main's rows, changing only role 9's row.

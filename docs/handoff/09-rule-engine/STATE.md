@@ -61,9 +61,12 @@ unrun: this role has no GUI or Windows-only parts. Golden tests need `pycel`
 (`pip install -e '.[dev]'`).
 
 ## Waiting on
-- A1: the next role-9 task. Every assigned milestone is merged (since 2026-10-28).
-- A1: ADR 0016 and ADR 0019 still say "Status: Proposed", though both are implemented and
-  merged. Accepting them is A1's review call (since 2026-10-28).
+- A3: the Q38 follow-up PR (`data/library/psa-devices.yaml`). NEXT.md task 1 starts when it
+  merges (since 2026-10-28).
+- Ali, through A1's card: separate AC and DC MCB choices. If Ali picks that, NEXT.md task 2
+  follows B2's model PR (since 2026-10-28).
+- Ali: ADR 0016 and ADR 0019 still say "Status: Proposed". Only Ali accepts ADRs, and A1
+  offers him a batch card (since 2026-10-28).
 - Ali: plan §6 Q30 (where a device's loose items go) and Q31 (group A–D rules stated only by
   example). Both run on the ADR 0014 defaults until Ali answers (since M2).
 
@@ -72,7 +75,7 @@ unrun: this role has no GUI or Windows-only parts. Golden tests need `pycel`
   Q38 the spec example keeps its values, so the goldens should not move. This is
   unverified until #130 merges. A2's review of #130 notes that a DC-only brand
   (C60H-DC) can be picked for AC branches. A2 plans a model check; whether the engine
-  (`ac_dist.py`, `mcb.py`) should also refuse it is open (NEXT.md 1).
+  (`ac_dist.py`, `mcb.py`) is involved depends on Ali's AC/DC choice card (NEXT.md 2).
 - Shipped-library devices with a datasheet `inrush_a` and no `inrush_ms` count the
   inrush (ADR 0019 item 1b), which can give 6 A or 10 A branches. This is intended;
   M14's data should carry `inrush_ms`.
