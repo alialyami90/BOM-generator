@@ -25,3 +25,4 @@ An ADR stays "Proposed" until Ali accepts it in review.
 | 0017 | [Alternatives as library parts; catalogue brand sets](0017-alternatives-and-catalogue-brands.md) | Proposed |
 | 0018 | [Library CSV exchange](0018-library-csv-exchange.md) | Proposed |
 | 0020 | [Loose material on its own sheet](0020-loose-material-sheet.md) | Accepted |
+| 0021 | [Round-trip YAML writers, checked before they write](0021-round-trip-writers.md) | Proposed |

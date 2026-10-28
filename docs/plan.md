@@ -852,6 +852,15 @@ writes its section's details when the work starts.
   and substations from scratch, every settings field is editable, and the Panels board gets
   drag and drop, pins and the panel editor. YAML and `.bomproj` files are then for import,
   export and backup only.
+  *Details (A2 writers, ADR 0021):*
+  - The writers round-trip with ruamel.yaml, keeping the files' comments and style.
+  - Each writer checks the edited project before writing, writes nothing when the edit
+    causes a problem, and returns the problems and the new layout preview.
+  - M17a covers the generated-panel editor and the board: enclosure, document, options
+    for every panel or one panel, port plans, and `layout.overrides` and `removed`.
+  - M17b covers hand-written panel files.
+  - M17c covers project and substation settings, per-field validation, and create,
+    rename and delete.
 - **M18 — Loose material (A2 model; A9 engine; A10 sheet; A11 editor).** Backlog point 6.
   Each substation has its own editable loose-material list, on its own "Loose Material"
   sheet (Q36, ADR 0020) and in Preview.
