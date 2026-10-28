@@ -72,6 +72,15 @@ jobs:
             Write-Error "bomgen.exe --version gave '$out' (exit $LASTEXITCODE)"
             exit 1
           }
+          # Exit 2 means "bomgen.cli not in this build yet" (M1); once it exists --help must work.
+          $ErrorActionPreference = "Continue"  # a native command's stderr must not abort here
+          $help = & "dist\bomgen\bomgen.exe" --help 2>&1
+          $expected = if (Test-Path src\bomgen\cli.py) { 0 } else { 2 }
+          if ($LASTEXITCODE -ne $expected) {
+            Write-Error "bomgen.exe --help exited $LASTEXITCODE (expected $expected): $help"
+            exit 1
+          }
+          # Imports every bomgen module from the frozen bundle (bomgen.app.launcher.self_test).
           $app = Start-Process "dist\bomgen\BOM Generator.exe" -ArgumentList "--self-test" -Wait -PassThru
           if ($app.ExitCode) { Write-Error "BOM Generator.exe --self-test exited $($app.ExitCode)"; exit 1 }
 
@@ -81,8 +90,9 @@ jobs:
         run: |
           $iscc = Join-Path ${env:ProgramFiles(x86)} "Inno Setup 6\ISCC.exe"
           if (-not (Test-Path $iscc)) {
-            choco install innosetup --no-progress -y
-            if ($LASTEXITCODE) { exit $LASTEXITCODE }
+            # No unpinned download here: a release must not change with upstream.
+            Write-Error "Inno Setup 6 not found at $iscc; the runner image no longer ships it. Pin an installer version here."
+            exit 1
           }
           & $iscc "/DAppVersion=$env:VERSION" packaging\bomgen.iss
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
@@ -105,6 +115,8 @@ jobs:
           }
           $out = & "$dir\bomgen.exe" --version
           if ($out -ne "bomgen $env:VERSION") { Fail "Installed bomgen.exe --version gave '$out'" }
+          $app = Start-Process $exe -ArgumentList "--self-test" -Wait -PassThru
+          if ($app.ExitCode) { Fail "Installed BOM Generator.exe --self-test exited $($app.ExitCode)" }
           $shortcut = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\BOM Generator.lnk"
           if (-not (Test-Path $shortcut)) { Fail "Missing Start-menu shortcut $shortcut" }
 
