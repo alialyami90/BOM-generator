@@ -200,6 +200,17 @@
         "mcb": {
           "$ref": "#/$defs/McbCatalogue"
         },
+        "mcb_dc": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/McbCatalogue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "terminal_blocks": {
           "additionalProperties": {
             "$ref": "#/$defs/TerminalBlockType"
