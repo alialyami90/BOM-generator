@@ -108,6 +108,10 @@ def test_release_workflow_builds_the_example_project_with_the_frozen_and_install
     assert (PACKAGING.parent / "examples" / "project.yaml").is_file()
     assert workflow.count("validate examples\\project.yaml") == 2
     assert workflow.count("build examples\\project.yaml --out") == 2
+    # The first output line is the workbook; the checks file and "0 failed" prove the report.
+    assert workflow.count("$built[0]") == 2
+    assert workflow.count('".checks.json"') == 2
+    assert workflow.count("0 failed") >= 2
 
 
 def test_release_workflow_has_no_variable_followed_by_a_colon() -> None:
