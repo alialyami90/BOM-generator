@@ -202,6 +202,8 @@ class DeviceType(InputModel):
     tier: Tier | None = None
     inrush_a: PositiveFloat | None = None  # peak inrush current
     inrush_ms: PositiveFloat | None = None  # inrush duration
+    input_v_min: PositiveFloat | None = None  # rated input voltage range, V
+    input_v_max: PositiveFloat | None = None
 
     @model_validator(mode="before")
     @classmethod
@@ -237,6 +239,9 @@ class DeviceType(InputModel):
             raise ValueError("a device excluded from power must have power_supplies 0")
         if self.cores is None and any(child.qty == "cores" for child in self.children):
             raise ValueError("a child with qty 'cores' needs cores on the parent")
+        low, high = self.input_v_min, self.input_v_max
+        if low is not None and high is not None and low > high:
+            raise ValueError("input_v_min must not be above input_v_max")
         return self
 
     @property

@@ -171,6 +171,7 @@ defaults:                              # inherited key by key by every substatio
     min_main_mcb_a: 6
     min_branch_mcb_a: 2                # ADR 0017, used by M15
     inrush_min_ms: 10                  # ADR 0017, used by M15
+    dc_float_v: 140                    # battery float; checked against devices' input_v_max
   catalogue_choice: { mcb: default }   # brand set per catalogue (ADR 0017); unset = default
   spares:                              # ADR 0013; every spare is an input
     port_fraction: 0.20
@@ -297,6 +298,8 @@ devices:
     tier: mid                          # optional: low | mid | high
     inrush_a: 20                       # optional peak inrush current (M15)
     inrush_ms: 5                       # optional inrush duration (M15)
+    input_v_min: 88                    # optional rated input range, V (check report)
+    input_v_max: 150
 
 catalogues:                            # the brand set named default
   enclosure_u: 42                      # rack units of the enclosure (ADR 0013)

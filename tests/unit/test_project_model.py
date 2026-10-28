@@ -217,3 +217,7 @@ def test_loose_extra_rejects_zero_quantity() -> None:
 def test_library_name_is_a_plain_folder_name(bad: str) -> None:
     with pytest.raises(ValidationError, match="name"):
         LibrarySelection(name=bad, version="1.0.0")
+
+
+def test_dc_float_voltage_defaults_to_140() -> None:
+    assert DesignConstants().dc_float_v == 140

@@ -82,7 +82,7 @@ def test_constants_show_the_project_default_and_mark_a_changed_one(
     page = ok(app.open_substation(str(project), "gis01"))
 
     constants = {c["key"]: c for c in page["constants"]}
-    assert len(constants) == 12
+    assert len(constants) == 13
     assert constants["power_margin"] == {
         "key": "power_margin",
         "value": 0.3,
