@@ -69,6 +69,7 @@ def build_workbook(
             logo,
             fitting_size(styles.CALC_MARGINS, power_module.SCALE),
         ),
+        loaded.substation.output.power_footnotes,
     )
     dissipation = heat_diss_sheet.heat_dissipation_sheet(
         names.heat_dissipation,

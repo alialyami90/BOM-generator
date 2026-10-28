@@ -4,7 +4,8 @@ Every row references its BOM row for description, quantity, make and model, so t
 BOM and the calculation always describe the same equipment (OUT-5).
 """
 
-from collections.abc import Mapping
+import math
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
 from bomgen.models.bom import BomLine, QtySum
@@ -59,6 +60,8 @@ LABEL_HEIGHT = 20.25
 HEADER_HEIGHT = 32.25
 ROW_HEIGHT = 18.75
 AFTER_BLOCK_HEIGHT = 15.75
+FOOTNOTE_LINE_HEIGHT = 15.0  # per line; Excel doesn't fit a merged cell's height
+FOOTNOTE_GAP = 2  # blank rows between the NOTES and the footnotes, as in the reference
 
 # columns
 B, C, D, E, F, G, H, I, J, K = range(2, 12)  # noqa: E741 - column letters
@@ -87,6 +90,7 @@ def power_sheet(
     cabinet_names: Mapping[str, str],
     constants: DesignConstants,
     header_footer: HeaderFooter | None = None,
+    footnotes: Sequence[str] = (),
 ) -> PowerSheet:
     layout = _Layout(SheetBuilder(name), sources)
     sheet = layout.sheet
@@ -104,6 +108,7 @@ def power_sheet(
         row = layout.cabinet(row, "Power Consumption for External Equipment", (power.external,))
     row = layout.summary(row, constants, power)
     row = _notes(sheet, row + 1, constants)
+    _footnotes(sheet, row + FOOTNOTE_GAP, footnotes)
 
     setup = PrintSetup(
         orientation="landscape",
@@ -245,3 +250,12 @@ def _notes(sheet: SheetBuilder, row: int, constants: DesignConstants) -> int:
     for offset, note in enumerate(notes):
         sheet.set(row + offset, B, note, styles.NOTE)
     return row + len(notes)
+
+
+def _footnotes(sheet: SheetBuilder, row: int, footnotes: Sequence[str]) -> None:
+    """One row per footnote, merged across the printed columns and wrapped."""
+    width = sum(WIDTHS.get(col, 0) for col in range(B, LAST_PRINTED_COL + 1))
+    for offset, footnote in enumerate(footnotes):
+        lines = sum(max(1, math.ceil(len(line) / width)) for line in footnote.split("\n"))
+        sheet.merge(row + offset, B, row + offset, LAST_PRINTED_COL, footnote, styles.FOOTNOTE)
+        sheet.height(row + offset, lines * FOOTNOTE_LINE_HEIGHT)

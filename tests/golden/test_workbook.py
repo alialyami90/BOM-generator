@@ -117,6 +117,21 @@ def test_loose_material_sheet(formulas: openpyxl.Workbook) -> None:
     assert loose.print_options.horizontalCentered
 
 
+def test_power_consumption_footnote(formulas: openpyxl.Workbook) -> None:
+    # Power Consumption sheet, item 5: the printer footnote (output.power_footnotes) two
+    # rows below the NOTES, across the printed width, wrapped at its line break, printed.
+    sheet = formulas["Power Consumption"]
+    notes = row_of(sheet, "B", "NOTES:")
+    row = notes + 5
+    footnote = sheet.cell(row, 2)
+    assert str(footnote.value).startswith("*Printer Power Consumption: 622 watts (Printing)")
+    assert str(footnote.value).endswith("Wake on\nLAN);")
+    assert footnote.alignment.wrap_text
+    assert f"B{row}:L{row}" in {str(m) for m in sheet.merged_cells.ranges}
+    assert sheet.row_dimensions[row].height == 30
+    assert sheet.print_area == f"'Power Consumption'!$A$1:$L${row}"
+
+
 def zone(sheet: Worksheet, part: str, side: str) -> str:
     """The text of one header/footer zone, e.g. ``zone(sheet, "oddHeader", "center")``."""
     header_footer = getattr(sheet, part)
