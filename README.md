@@ -18,6 +18,9 @@ Done:
 
 - M0 (repository, spec, plan, CI) and M1 (input models, YAML loader, JSON
   Schemas, `examples/`, `bomgen validate`).
+- M1b: projects that hold substations (ADR 0012), with the sizing and layout
+  inputs of each substation (ADR 0013); `examples/` is one project with one
+  substation.
 - M2: BOM groups A–D (enclosure, devices and tags, kit children, network
   accessories, housekeeping) and the loose-material table, as engine output;
   ADR 0014.
@@ -26,34 +29,40 @@ Done:
   sharing and backup as `.bomproj` files (`bomgen project …`).
 - M9: UI design and clickable prototype in [`docs/ui/`](docs/ui/README.md),
   reworked for projects, substations and the panels board.
+- M10a: the desktop app shell, a pywebview window showing the approved UI
+  through a Python bridge (ADR 0015); its screens still show the prototype's
+  example data.
 - M11, built early (ADR 0009): the Windows installer and tag-driven releases.
-  Double-clicking a `.bomlib` imports it; the desktop window and opening a
-  `.bomproj` are still placeholders.
+  Double-clicking a `.bomlib` imports it; the installed app does not open the
+  window or a `.bomproj` yet.
 
-Next: M1b (projects that hold substations, ADR 0012), M1c (switch sizing and
-automatic panel layout, ADR 0013), M3–M4 (groups E–H, HWIO, power and heat)
-and M5 (sheet models filled from the engine). `bomgen build` arrives with them,
-and the desktop app (M10) follows. Who builds what is in
-[`docs/agents.md`](docs/agents.md); the terms project, substation, side and
-stream are defined in `docs/plan.md` → "Glossary".
+Next: M1c (switch sizing and automatic panel layout, `bomgen layout`), M3–M4
+(groups E–H, HWIO, power and heat), M5 (sheet models filled from the engine)
+and the remaining M10 screens. `bomgen build` arrives with them. Who builds
+what is in [`docs/agents.md`](docs/agents.md); the terms project, substation,
+side and stream are defined in `docs/plan.md` → "Glossary".
 
 To install the Windows app, see [`docs/install.md`](docs/install.md).
 
 ## Usage
 
-Inputs are three YAML sets (device library, panel definitions, project
-settings); see `docs/plan.md` → "Input file schemas" and
+A project is a folder: `project.yaml` (project info, library name and
+version, document register, defaults, list of substations), a device library,
+and one folder per substation under `substations/<id>/` with its
+`substation.yaml` and `panels/`. See `docs/plan.md` → "Input file schemas" and
 [`examples/`](examples/).
 
 ```bash
-bomgen validate --project examples/project.yaml   # check the inputs, build nothing
-bomgen schema                                     # write JSON Schemas to schemas/
+bomgen validate examples/project.yaml                        # the whole project
+bomgen validate examples/substations/gis01/substation.yaml   # one substation
+bomgen schema                                                # write JSON Schemas to schemas/
 ```
 
-`validate` prints `OK:` with the panel and part counts, or each error with its
-file and path. The JSON Schemas in [`schemas/`](schemas/) let an editor check
-the YAML as you type (ADR 0010); a test fails if they drift from the models, so
-run `bomgen schema` after changing a model.
+`validate` builds nothing. It prints `OK:` with the substation, panel and part
+counts, or each error with its file and path. The JSON Schemas in
+[`schemas/`](schemas/) let an editor check the YAML as you type (ADR 0010); a
+test fails if they drift from the models, so run `bomgen schema` after changing
+a model.
 
 ### Device-library update packages
 
@@ -75,23 +84,20 @@ bomgen library rollback psa-devices                        # back to the previou
 
 ### Sharing and backing up projects
 
-A project (ADR 0012) travels as one `.bomproj` file: the project folder without
-its `out/` folders, plus a manifest with checksums and the library version it
-was built with.
+A project (ADR 0012) travels as one `.bomproj` file: the project folder plus a
+manifest with checksums and the library version it was built with.
 
 ```bash
-bomgen project export my-project/project.yaml          # writes <id>.bomproj
-bomgen project import my-project.bomproj               # unpacks into the workspace
-bomgen project backup my-project/project.yaml          # export into my-project/Backups/
+bomgen project export examples/project.yaml    # writes jfgp2-pkg3.bomproj (the project id)
+bomgen project import jfgp2-pkg3.bomproj       # unpacks into the workspace
+bomgen project backup my-project/project.yaml  # saves into my-project/Backups/
 ```
 
-The workspace is `BOMGEN_WORKSPACE`, or `Documents/BOM Generator` in your home
-folder, unless `--workspace` names one. Import refuses to replace a project
-with the same id unless you pass `--force`, and then it backs the old one up
-first. If the project was built with another library version, import names the
-`.bomlib` to install. These commands need the project format from M1b
-(`project.id` and the library name and version in `project.yaml`); today's
-`examples/` gets it with M1b.
+Export leaves out `out/` and `Backups/`. The workspace is `BOMGEN_WORKSPACE`,
+or `Documents/BOM Generator` in your home folder, unless `--workspace` names
+one. Import refuses to replace a project with the same id unless you pass
+`--force`, and then it backs the old one up first. If the project's library
+version is not installed, import names the `.bomlib` to install.
 
 ## Development
 
