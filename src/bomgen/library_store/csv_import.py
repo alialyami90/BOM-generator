@@ -19,7 +19,7 @@ import re
 import zipfile
 from collections import defaultdict
 from collections.abc import Iterable, Mapping, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path, PurePosixPath
 from typing import Any, Literal, get_args, get_origin
 
@@ -79,6 +79,7 @@ _EXCEL_DAMAGE = re.compile(
     re.IGNORECASE,
 )
 _FORMULA_START = ("=", "+", "@")
+_FORMULA_HINT = " (probably an Excel formula)"
 _DECIMAL_COMMA = re.compile(r"^-?\d+,\d+$")
 _WHOLE = re.compile(r"^\d+$")
 _PART_ID = TypeAdapter(PartId)
@@ -386,7 +387,20 @@ def _assemble(
         "entries",
     )
     _housekeeping(tables, base, skip_invalid, asm)
+    _name_formulas(tables, asm)
     return asm
+
+
+def _name_formulas(tables: Mapping[str, _Table], asm: _Assembly) -> None:
+    """Say so on a cell problem when the cell starts like an Excel formula (`=`, `+`, `-`, `@`),
+    because that is how a formula Excel kept as text reaches the file."""
+    raw = {file: dict(table.records) for file, table in tables.items()}
+    for index, found in enumerate(asm.problems):
+        if found.column is None:
+            continue
+        value = raw.get(found.table, {}).get(found.row, {}).get(found.column, "").strip()
+        if value.startswith(("=", "+", "-", "@")):
+            asm.problems[index] = replace(found, message=found.message + _FORMULA_HINT)
 
 
 def _devices(

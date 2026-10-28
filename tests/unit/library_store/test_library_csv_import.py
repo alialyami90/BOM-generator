@@ -448,6 +448,28 @@ def test_text_starting_like_a_formula_is_a_warning(store: LibraryStore, folder: 
     assert _by_id(_preview(store, folder))["cells"].status is CheckStatus.WARNING
 
 
+@pytest.mark.parametrize("cell", ["=B2*2", "+A1", "-A1", "@SUM(B2)"])
+def test_a_bad_cell_starting_like_a_formula_is_named_as_probably_an_excel_formula(
+    store: LibraryStore, folder: Path, cell: str
+) -> None:
+    target = _read(folder, "devices.csv")[0]["part_id"]
+    _edit(folder, "devices.csv", lambda rows: _set(rows, target, voltage_v=cell))
+
+    problems = _preview(store, folder).problems
+
+    assert [p.column for p in problems] == ["voltage_v"]
+    assert problems[0].message.endswith("(probably an Excel formula)")
+
+
+def test_a_bad_cell_that_is_not_a_formula_gets_no_formula_hint(
+    store: LibraryStore, folder: Path
+) -> None:
+    target = _read(folder, "devices.csv")[0]["part_id"]
+    _edit(folder, "devices.csv", lambda rows: _set(rows, target, voltage_v="abc"))
+
+    assert "formula" not in _preview(store, folder).problems[0].message
+
+
 def test_booleans_are_read_in_any_case(store: LibraryStore, folder: Path) -> None:
     _edit(folder, "devices.csv", lambda rows: _set(rows, SWITCH, alarm_on_branch_mcb="TRUE"))
 

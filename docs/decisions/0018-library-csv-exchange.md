@@ -173,3 +173,7 @@ checks table above, this wins.
   `import_csv` saves that library, in the order of the file's rows, so the round trip keeps
   device order.
 - **Numbers.** A numeric column accepts `12`, `12.5` and, in a `;` file, `12,5`.
+- **Formulas.** A row problem on a cell that starts with `=`, `+`, `-` or `@` ends with
+  "(probably an Excel formula)", because that is how a formula Excel kept as text reaches the
+  file. A valid value is never flagged (`-5` is a number); a text cell that starts with `=`,
+  `+` or `@` and is valid still only warns in the `cells` check.
