@@ -1,38 +1,17 @@
 {
   "$defs": {
-    "CalcDocument": {
+    "Defaults": {
       "additionalProperties": false,
-      "description": "Header values of a calculation sheet; ``scope`` is its scope line.",
+      "description": "Values every substation inherits key by key.",
       "properties": {
-        "doc_no": {
-          "title": "Doc No",
-          "type": "string"
+        "constants": {
+          "$ref": "#/$defs/DesignConstants"
         },
-        "issue_date": {
-          "format": "date",
-          "title": "Issue Date",
-          "type": "string"
-        },
-        "rev": {
-          "minLength": 1,
-          "title": "Rev",
-          "type": [
-            "string",
-            "integer"
-          ]
-        },
-        "scope": {
-          "title": "Scope",
-          "type": "string"
+        "spares": {
+          "$ref": "#/$defs/Spares"
         }
       },
-      "required": [
-        "doc_no",
-        "rev",
-        "issue_date",
-        "scope"
-      ],
-      "title": "CalcDocument",
+      "title": "Defaults",
       "type": "object"
     },
     "DesignConstants": {
@@ -101,42 +80,14 @@
       "title": "DesignConstants",
       "type": "object"
     },
-    "Documents": {
+    "LibrarySelection": {
       "additionalProperties": false,
+      "description": "The installed library every substation uses; ``file`` loads one from disk instead.",
       "properties": {
-        "heat_calculations": {
-          "$ref": "#/$defs/CalcDocument"
-        },
-        "heat_dissipation": {
-          "$ref": "#/$defs/CalcDocument"
-        },
-        "power_consumption": {
-          "$ref": "#/$defs/CalcDocument"
-        }
-      },
-      "required": [
-        "power_consumption",
-        "heat_dissipation",
-        "heat_calculations"
-      ],
-      "title": "Documents",
-      "type": "object"
-    },
-    "LooseExtra": {
-      "additionalProperties": false,
-      "description": "A loose-material row, optionally with kit children and a feeding panel.",
-      "properties": {
-        "children": {
-          "items": {
-            "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
-            "type": "string"
-          },
-          "title": "Children",
-          "type": "array"
-        },
-        "fed_from": {
+        "file": {
           "anyOf": [
             {
+              "format": "path",
               "type": "string"
             },
             {
@@ -144,87 +95,43 @@
             }
           ],
           "default": null,
-          "title": "Fed From"
+          "title": "File"
         },
-        "part_id": {
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
-          "title": "Part Id",
+        "name": {
+          "title": "Name",
           "type": "string"
         },
-        "qty": {
-          "anyOf": [
-            {
-              "minimum": 1,
-              "type": "integer"
-            },
-            {
-              "const": "1 Lot"
-            }
-          ],
-          "default": 1,
-          "title": "Qty"
-        },
-        "tag": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Tag"
+        "version": {
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Version",
+          "type": "string"
         }
       },
       "required": [
-        "part_id"
+        "name",
+        "version"
       ],
-      "title": "LooseExtra",
-      "type": "object"
-    },
-    "LooseMaterial": {
-      "additionalProperties": false,
-      "properties": {
-        "host_panel": {
-          "title": "Host Panel",
-          "type": "string"
-        },
-        "items": {
-          "items": {
-            "$ref": "#/$defs/LooseExtra"
-          },
-          "title": "Items",
-          "type": "array"
-        }
-      },
-      "required": [
-        "host_panel"
-      ],
-      "title": "LooseMaterial",
-      "type": "object"
-    },
-    "OutputSettings": {
-      "additionalProperties": false,
-      "description": "Workbook file name template and calculation sheet names.",
-      "properties": {
-        "file_name": {
-          "default": "{doc_no}_PSA_BOM_Rev{rev}.xlsx",
-          "title": "File Name",
-          "type": "string"
-        },
-        "sheet_names": {
-          "$ref": "#/$defs/SheetNames"
-        }
-      },
-      "title": "OutputSettings",
+      "title": "LibrarySelection",
       "type": "object"
     },
     "ProjectInfo": {
       "additionalProperties": false,
       "properties": {
-        "doc_no": {
-          "title": "Doc No",
+        "client": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Client"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]*$",
+          "title": "Id",
           "type": "string"
         },
         "logo": {
@@ -243,9 +150,34 @@
         "name": {
           "title": "Name",
           "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "ProjectInfo",
+      "type": "object"
+    },
+    "RegisterEntry": {
+      "additionalProperties": false,
+      "description": "One document of the project's register; ``key`` is what panels and sheets name.",
+      "properties": {
+        "doc_no": {
+          "title": "Doc No",
+          "type": "string"
+        },
+        "issue_date": {
+          "format": "date",
+          "title": "Issue Date",
+          "type": "string"
+        },
+        "key": {
+          "pattern": "^[a-z0-9][a-z0-9_-]*$",
+          "title": "Key",
+          "type": "string"
         },
         "rev": {
-          "default": "0",
           "minLength": 1,
           "title": "Rev",
           "type": [
@@ -254,56 +186,70 @@
           ]
         },
         "substation": {
+          "pattern": "^[a-z0-9][a-z0-9_-]*$",
           "title": "Substation",
           "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
         }
       },
       "required": [
-        "name",
-        "substation",
-        "doc_no"
+        "doc_no",
+        "rev",
+        "issue_date",
+        "key",
+        "substation"
       ],
-      "title": "ProjectInfo",
+      "title": "RegisterEntry",
       "type": "object"
     },
-    "SheetNames": {
+    "Spares": {
       "additionalProperties": false,
+      "description": "Every spare as a user input, defaults as today (ADR 0013).",
       "properties": {
-        "heat_calculations": {
-          "default": "Heat Calculations",
-          "maxLength": 31,
-          "minLength": 1,
-          "pattern": "^(?!')(?:[^\\[\\]:*?/\\\\']|'(?!$))*$",
-          "title": "Heat Calculations",
-          "type": [
-            "string",
-            "integer"
-          ]
+        "ac_branches": {
+          "default": 1,
+          "minimum": 0,
+          "title": "Ac Branches",
+          "type": "integer"
         },
-        "heat_dissipation": {
-          "default": "Heat Dissipation",
-          "maxLength": 31,
-          "minLength": 1,
-          "pattern": "^(?!')(?:[^\\[\\]:*?/\\\\']|'(?!$))*$",
-          "title": "Heat Dissipation",
-          "type": [
-            "string",
-            "integer"
-          ]
+        "dc_branches_per_feed": {
+          "default": 3,
+          "minimum": 0,
+          "title": "Dc Branches Per Feed",
+          "type": "integer"
         },
-        "power_consumption": {
-          "default": "Power Consumption",
-          "maxLength": 31,
-          "minLength": 1,
-          "pattern": "^(?!')(?:[^\\[\\]:*?/\\\\']|'(?!$))*$",
-          "title": "Power Consumption",
-          "type": [
-            "string",
-            "integer"
-          ]
+        "port_fraction": {
+          "default": 0.2,
+          "exclusiveMaximum": 1,
+          "minimum": 0,
+          "title": "Port Fraction",
+          "type": "number"
+        },
+        "rack_u_reserved": {
+          "default": 10,
+          "minimum": 0,
+          "title": "Rack U Reserved",
+          "type": "integer"
+        },
+        "sfp_per_l1": {
+          "default": 3,
+          "minimum": 0,
+          "title": "Sfp Per L1",
+          "type": "integer"
         }
       },
-      "title": "SheetNames",
+      "title": "Spares",
       "type": "object"
     }
   },
@@ -311,49 +257,36 @@
   "additionalProperties": false,
   "description": "The project file (``project.yaml``).",
   "properties": {
-    "constants": {
-      "$ref": "#/$defs/DesignConstants"
+    "defaults": {
+      "$ref": "#/$defs/Defaults"
     },
     "documents": {
-      "$ref": "#/$defs/Documents"
+      "items": {
+        "$ref": "#/$defs/RegisterEntry"
+      },
+      "title": "Documents",
+      "type": "array"
     },
     "library": {
-      "format": "path",
-      "title": "Library",
-      "type": "string"
+      "$ref": "#/$defs/LibrarySelection"
     },
-    "loose_material": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/LooseMaterial"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null
+    "project": {
+      "$ref": "#/$defs/ProjectInfo"
     },
-    "output": {
-      "$ref": "#/$defs/OutputSettings"
-    },
-    "panels": {
+    "substations": {
       "items": {
         "format": "path",
         "type": "string"
       },
       "minItems": 1,
-      "title": "Panels",
+      "title": "Substations",
       "type": "array"
-    },
-    "project": {
-      "$ref": "#/$defs/ProjectInfo"
     }
   },
   "required": [
     "project",
     "library",
-    "panels",
-    "documents"
+    "substations"
   ],
   "title": "Project",
   "type": "object"

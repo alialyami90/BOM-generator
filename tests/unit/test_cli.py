@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from builders import default_p1, write_project
+from builders import SUBSTATION_DIR, default_p1, write_project
 from typer.testing import CliRunner
 
 from bomgen import __version__
@@ -21,7 +21,23 @@ def test_validate_ok_prints_summary(tmp_path: Path) -> None:
     project_file = write_project(tmp_path)
     result = runner.invoke(app, ["validate", "--project", str(project_file)])
     assert result.exit_code == 0
-    assert result.stdout.strip() == "OK: GIS 01: 2 panels (p1, p2), 11 library parts"
+    assert result.stdout.strip() == (
+        "OK: GIS 01: 1 substation(s); s1: 2 panels (p1, p2); 11 library parts"
+    )
+
+
+def test_validate_project_positional(tmp_path: Path) -> None:
+    result = runner.invoke(app, ["validate", str(write_project(tmp_path))])
+    assert result.exit_code == 0
+    assert result.stdout.startswith("OK: GIS 01: 1 substation(s)")
+
+
+def test_validate_substation_file(tmp_path: Path) -> None:
+    write_project(tmp_path)
+    substation_file = tmp_path / SUBSTATION_DIR / "substation.yaml"
+    result = runner.invoke(app, ["validate", str(substation_file)])
+    assert result.exit_code == 0
+    assert result.stdout.strip() == "OK: GIS 01 / s1: 2 panels (p1, p2), 11 library parts"
 
 
 def test_validate_accepts_short_option(tmp_path: Path) -> None:
@@ -45,16 +61,22 @@ def test_validate_reports_issues_and_exits_1(tmp_path: Path) -> None:
     assert "NO-SUCH-PART" in lines[0]
 
 
-def test_validate_requires_project_option() -> None:
-    result = runner.invoke(app, ["validate"])
-    assert result.exit_code == 2
+def test_validate_needs_exactly_one_file(tmp_path: Path) -> None:
+    assert runner.invoke(app, ["validate"]).exit_code == 2
+    project_file = str(write_project(tmp_path))
+    assert runner.invoke(app, ["validate", project_file, "-p", project_file]).exit_code == 2
 
 
 def test_schema_command_writes_files(tmp_path: Path) -> None:
     out_dir = tmp_path / "out"
     result = runner.invoke(app, ["schema", "--out", str(out_dir)])
     assert result.exit_code == 0
-    names = ["library.schema.json", "panel.schema.json", "project.schema.json"]
+    names = [
+        "library.schema.json",
+        "panel.schema.json",
+        "project.schema.json",
+        "substation.schema.json",
+    ]
     assert sorted(path.name for path in out_dir.iterdir()) == names
     for name in names:
         assert str(out_dir / name) in result.stdout

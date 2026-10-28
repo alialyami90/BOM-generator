@@ -1,0 +1,116 @@
+# yaml-language-server: $schema=../../../schemas/substation.schema.json
+#
+# The example substation (ADR 0012/0013): GIS Substation, PSA Cabinets 001-003 and the
+# WS Console 0010, transcribed from the example workbook. The hand-written panels below
+# keep every golden value; equipment, network, spares, layout and generated_panels are
+# the inputs of the automatic layout (M1c). Values the workbook does not give carry a
+# trailing "# ASSUMED".
+
+substation:
+  id: gis01
+  name: "GIS Substation"
+
+document: gis01-bom  # the workbook: VD-EL0009-861GISPSA-001 rev 02 names the file
+
+calculations:
+  power_consumption:
+    document: gis01-power
+    scope: "861-GIS01-PSA-001/002"
+  heat_dissipation:
+    document: gis01-heat
+    scope: "861-GIS01-PSA-001/002"
+  heat_calculations:
+    document: gis01-heat
+    scope: "861-GIS01-PSA-001/002"
+
+panels:  # panel order = sheet order (OUT-3); the layout rewrites these (M1c)
+  - panels/psa1.yaml
+  - panels/psa2.yaml
+  - panels/psa3.yaml
+
+manual_panels:  # never touched by the layout; follow the panels above
+  - panels/ws.yaml
+
+output:  # the defaults, written out
+  file_name: "{doc_no}_PSA_BOM_Rev{rev}.xlsx"
+  sheet_names:
+    power_consumption: "Power Consumption"
+    heat_dissipation: "Heat Dissipation"
+    heat_calculations: "Heat Calculations"
+
+# constants and spares: the project defaults apply (project.yaml); write a key here to
+# override it for this substation only.
+
+equipment:  # what the substation needs before panels exist (design 3.2)
+  - { part_id: RST2228-L2, role: l2_switch, redundant: true }
+  - { part_id: RST2228-L1-24MM, role: l1_switch, redundant: true }  # count from ied_count
+  - { part_id: SEL-2730M-EXT, role: ext_switch, redundant: true }
+  - { part_id: FGR-60F, role: firewall, redundant: true, l2_ports: 1 }
+  - { part_id: FOPP-96SM, role: fopp, redundant: true }
+  - { part_id: SEL-3555-GW, role: other, redundant: true, l2_ports: 1 }  # ASSUMED l2_ports
+  - { part_id: SEL-2488, role: other, l2_ports: 1, l2_speed: 100M }  # GPS clock
+  - { part_id: SEL-3555-RTAC, role: other, l2_ports: 2 }
+  - { part_id: SEL-2240, role: other }  # Axion I/O, no L2 link
+
+network:
+  ied_count: 40  # field IEDs: sizes the L1 switches, never a BOM row (R4)
+  topology: star
+  ring_max_switches: 6
+  l1_uplinks_per_switch: 1
+  l1_interlink: true
+  l3_uplinks_per_l2: 2
+
+layout:
+  blank_plate_u: 1  # space between neighbours; no part, no BOM row (Q25)
+  overrides: []
+  removed: []
+
+generated_panels:  # identity of the panels the layout writes; {n} is the panel number
+  id: "psa{n}"
+  cabinet_number: "861-GIS01-PSA-{n:04d}"
+  cabinet_name: "PSA Cabinet - {n:03d}"
+  tag_prefix: "PSA{n}"
+  sheet_name: "{n}"
+  kind: network
+  enclosure:  # as psa1
+    make: Rawabi
+    model: "Fixed Frame"
+    ordering_code: "Fixed Frame"
+    h_mm: 2100
+    d_mm: 1000
+    w_mm: 800
+    base_frame: { h_mm: 100, d_mm: 950, w_mm: 750 }
+    cable_entry: top
+  document: gis01-bom
+  options:  # as psa1
+    dc_spare_branches_per_feed: 3
+    ac_spare_branches: 1
+    main_mcb_override_a: 16
+    inter_panel_terminals: 40
+  options_by_panel:
+    2: { aux_socket_a: 10 }  # as psa2
+
+loose_material:  # 'Aux' rows 49-62, under the WS console BOM
+  host_panel: ws
+  items:
+    - part_id: NAP-K55  # row 49
+      tag: '55" LCD Alarm Annunciator'
+      children: [LPA37-696]  # row 50: Wall Mount Kit
+      fed_from: psa3  # PSA3-QCOD-1 "2A, 2P MCB For Annunciator" (plan Q13)
+    - part_id: ZENON-V12  # row 51
+      tag: "SRV/OAS -HMI Software"
+    - part_id: MS-OFFICE-2021  # row 52
+      tag: "SRV/OAS -MS Office"
+    # Rows 53-57 (Time Server Accessories) are the GPS clock's loose_items (library.yaml,
+    # SEL-2488), not entries of this list.
+    - part_id: ANN-DISPLAY-CABLE-10M  # row 58
+      tag: "ANN-Display Cable"
+    - part_id: ANN-USB-CABLE-10M  # row 59
+      tag: "ANN-USB Cable"
+    - part_id: MON-DVI-CABLE-3M  # row 60
+      tag: "MON-DVI Cable"
+    - part_id: MON-USB-CABLE-3M  # row 61
+      tag: "MON-USB Cable"
+    - part_id: FO-PATCH-CORDS  # row 62
+      tag: FO
+      qty: "1 Lot"

@@ -36,6 +36,7 @@ devices:
 
   - part_id: FOPP-96SM  # 'Panel 1' row 4: PSA1-FOPP-CCR-A01
     category: patch_panel
+    height_u: 2  # A3 (PR #18): not confirmed, inferred from Hubbell FEUR48 = 1U per 48 fibres
     make: Hubbell
     model: FEUR96LCSM
     ordering_code: FEUR96LCSM
@@ -67,6 +68,7 @@ devices:
 
   - part_id: RST2228-L2  # 'Panel 1' row 8: PSA1-L2-ESW-A01
     category: network_switch
+    height_u: 1  # A3 (PR #18)
     make: Ruggedcom
     model: RST-2228
     ordering_code: "6GK6222-6AB00-5CC0-Z A00+B06+C06+D06+E06+F06+G00"
@@ -80,11 +82,14 @@ devices:
     power_supplies: 2
     min_branch_mcb_a: 2
     hwio_points: 1  # 'Panel 1'!H8
-    # NOTE: the workbook gives no port inventory for this switch; ports are left empty.
+    ports:  # A3 (PR #18); the workbook gives no port inventory. Slot 6 is blank (G00).
+      - { count: 20, speed: 1G, kind: sfp_slot, usable_for: any }  # slots 1-5, 100M/1G
+      - { count: 4, speed: 1G, kind: sfp_slot, usable_for: uplink }  # slot 0, SFP+
 
   - part_id: RST2228-L1-24MM  # 'Panel 1' row 9: PSA1-L1-ESW-A11 to A16
     # The spec's library example (Inputs the tool needs -> 1. Device library).
     category: network_switch
+    height_u: 1  # A3 (PR #18)
     make: Ruggedcom
     model: RST-2228
     ordering_code: "6GK6222-6AB00-5CC0-Z A05+B05+C05+D05+E05+F05+G05"
@@ -100,12 +105,13 @@ devices:
     alarm_on_branch_mcb: false
     hwio_points: 1  # the panel row overrides this with 10 ('Panel 1'!H9, plan Q5)
     ports:
-      - { count: 24, speed: 100M, media: MM, kind: fixed }
-      - { count: 4, speed: 1G, kind: sfp_slot }
+      - { count: 24, speed: 100M, media: MM, kind: fixed, usable_for: ied }
+      - { count: 4, speed: 1G, kind: sfp_slot, usable_for: uplink }  # SFP+ (1/10G), 1G fitted
     excluded_from_power: false
 
   - part_id: SEL-2730M-EXT  # 'Panel 1' row 10: PSA1-EXT-ESW-A
     category: network_switch
+    height_u: 1  # A3 (PR #18)
     make: SEL
     model: SEL-2730M
     ordering_code: "2730M#2CF9"
@@ -119,11 +125,16 @@ devices:
     power_supplies: 2
     min_branch_mcb_a: 2
     hwio_points: 1  # 'Panel 1'!H10
+    ports:  # A3 (PR #18)
+      - { count: 4, speed: 1G, kind: sfp_slot, usable_for: uplink }  # ports 1-4
+      - { count: 4, speed: 1G, media: RJ45, kind: fixed, usable_for: any }  # ports 5-8
+      - { count: 16, speed: 100M, media: MM, kind: fixed, usable_for: ied }  # ports 9-24
     # NOTE: the issued sheets '1'!F10:G10 and '2'!F10:G10 list a Ruggedcom RST-2228
     # (...E01+F00+G00) here; this follows the master 'Panel 1', which Power Consumption reads.
 
   - part_id: SEL-3555-GW  # 'Panel 1' row 11: PSA1-DHPCC-GW-1
     category: gateway
+    height_u: 3  # A3 (PR #18)
     make: SEL
     model: SEL-3555
     ordering_code: "3555#0KVC"
@@ -139,6 +150,7 @@ devices:
 
   - part_id: FGR-60F  # 'Panel 1' row 12: PSA1-EXT-FW-A
     category: firewall
+    height_u: 0  # A3 (PR #18): DIN rail
     make: Fortigate
     model: FGR-60F
     ordering_code: FGR-60F
@@ -157,6 +169,7 @@ devices:
 
   - part_id: SEL-2488  # 'Panel 3' row 4: PSA3-GPS
     category: gps_clock
+    height_u: 1  # A3 (PR #18)
     make: SEL
     model: SEL-2488
     ordering_code: "2488#J544"
@@ -181,6 +194,7 @@ devices:
 
   - part_id: SEL-3555-RTAC  # 'Panel 3' row 5: PSA3-RTAC
     category: rtac
+    height_u: 3  # A3 (PR #18)
     make: SEL
     model: SEL-3555
     ordering_code: "3555#F2R2"
@@ -198,6 +212,7 @@ devices:
 
   - part_id: SEL-2240  # 'Panel 3' row 6: PSA3-HWIO
     category: io_chassis
+    height_u: 5  # A3 (PR #18): the chassis; its modules are 0
     make: SEL
     model: SEL-2240
     description_template: "Axion IO and Non-IEC Protocol Gateway"
@@ -217,6 +232,7 @@ devices:
 
   - part_id: SEL-2242  # 'Panel 3' row 7
     category: component
+    height_u: 0
     make: SEL
     model: SEL-2242
     ordering_code: "2242#5DPM"
@@ -224,6 +240,7 @@ devices:
 
   - part_id: SEL-2241  # 'Panel 3' row 8
     category: component
+    height_u: 0
     make: SEL
     model: SEL-2241
     ordering_code: "2241#4D2J"
@@ -231,6 +248,7 @@ devices:
 
   - part_id: SEL-2243  # 'Panel 3' row 9
     category: component
+    height_u: 0
     make: SEL
     model: SEL-2243
     ordering_code: "224311X0"
@@ -238,6 +256,7 @@ devices:
 
   - part_id: SEL-2244-2  # 'Panel 3' row 10
     category: component
+    height_u: 0
     make: SEL
     model: SEL-2244-2
     ordering_code: "22442424X0"
@@ -249,6 +268,7 @@ devices:
 
   - part_id: SEL-3355  # 'Aux' row 4: WS-SRV/OAS/EAS
     category: workstation
+    height_u: 3  # A3 (PR #18)
     make: SEL
     model: SEL-3355
     ordering_code: "3355#F5P8"
@@ -331,6 +351,7 @@ devices:
 
   - part_id: PL1U12NEBK  # 'Panel 1' row 18: Cable Manager (9 per network cabinet)
     category: cable_manager
+    height_u: 1  # A3 (PR #18)
     make: Marshcom
     model: PL1U12NEBK
     ordering_code: PL1U12NEBK
@@ -559,6 +580,7 @@ devices:
     description_template: "Fiber Optic Patch Cords"
 
 catalogues:
+  enclosure_u: 42  # rack units of the standard enclosure (ADR 0013)
   mcb:  # spec: Derivation rules -> Breaker part numbers
     family: "Acti9 2P"  # ASSUMED
     make: Schneider

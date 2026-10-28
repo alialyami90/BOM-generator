@@ -40,6 +40,19 @@
       "additionalProperties": false,
       "description": "A device placed in a panel, in group B display order.",
       "properties": {
+        "first_nn": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "First Nn"
+        },
         "hwio_points": {
           "anyOf": [
             {
@@ -109,36 +122,6 @@
         "part_id"
       ],
       "title": "DeviceInstance",
-      "type": "object"
-    },
-    "DocumentInfo": {
-      "additionalProperties": false,
-      "description": "A BOM sheet's document header and footer values.",
-      "properties": {
-        "doc_no": {
-          "title": "Doc No",
-          "type": "string"
-        },
-        "issue_date": {
-          "format": "date",
-          "title": "Issue Date",
-          "type": "string"
-        },
-        "rev": {
-          "minLength": 1,
-          "title": "Rev",
-          "type": [
-            "string",
-            "integer"
-          ]
-        }
-      },
-      "required": [
-        "doc_no",
-        "rev",
-        "issue_date"
-      ],
-      "title": "DocumentInfo",
       "type": "object"
     },
     "Enclosure": {
@@ -236,10 +219,17 @@
           "type": "array"
         },
         "document": {
-          "$ref": "#/$defs/DocumentInfo"
+          "pattern": "^[a-z0-9][a-z0-9_-]*$",
+          "title": "Document",
+          "type": "string"
         },
         "enclosure": {
           "$ref": "#/$defs/Enclosure"
+        },
+        "generated": {
+          "default": false,
+          "title": "Generated",
+          "type": "boolean"
         },
         "id": {
           "pattern": "^[a-z0-9][a-z0-9_-]*$",
@@ -330,7 +320,14 @@
           "type": "string"
         },
         "document": {
-          "$ref": "#/$defs/DocumentInfo"
+          "pattern": "^[a-z0-9][a-z0-9_-]*$",
+          "title": "Document",
+          "type": "string"
+        },
+        "generated": {
+          "default": false,
+          "title": "Generated",
+          "type": "boolean"
         },
         "id": {
           "pattern": "^[a-z0-9][a-z0-9_-]*$",

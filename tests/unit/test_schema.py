@@ -1,4 +1,4 @@
-"""JSON Schema export for the three input files."""
+"""JSON Schema export for the four input files."""
 
 import json
 from pathlib import Path
@@ -8,15 +8,21 @@ import yaml
 
 from bomgen.io.schema import json_schemas, write_json_schemas
 
-NAMES = ["library.schema.json", "panel.schema.json", "project.schema.json"]
+NAMES = [
+    "library.schema.json",
+    "panel.schema.json",
+    "project.schema.json",
+    "substation.schema.json",
+]
 
 
-def test_json_schemas_cover_the_three_input_files() -> None:
+def test_json_schemas_cover_the_four_input_files() -> None:
     schemas = json_schemas()
     assert sorted(schemas) == NAMES
     assert schemas["project.schema.json"]["title"] == "Project"
     assert schemas["library.schema.json"]["title"] == "Library"
     assert schemas["panel.schema.json"]["title"] == "Panel"
+    assert schemas["substation.schema.json"]["title"] == "Substation"
     assert "mirror_of" in json.dumps(schemas["panel.schema.json"])
     for schema in schemas.values():
         assert schema["$schema"] == "https://json-schema.org/draft/2020-12/schema"
@@ -66,6 +72,9 @@ def test_example_files_carry_every_key_the_schemas_require() -> None:
 
     project = load(examples / "project.yaml")
     assert missing(schemas["project.schema.json"]["required"], project) == []
+    substation_dir = examples / "substations" / "gis01"
+    substation = load(substation_dir / "substation.yaml")
+    assert missing(schemas["substation.schema.json"]["required"], substation) == []
 
     library = load(examples / "library.yaml")
     library_schema = schemas["library.schema.json"]
@@ -75,7 +84,7 @@ def test_example_files_carry_every_key_the_schemas_require() -> None:
         assert missing(device_required, device) == [], device["part_id"]
 
     panel_defs = schemas["panel.schema.json"]["$defs"]
-    for panel_file in sorted((examples / "panels").glob("*.yaml")):
+    for panel_file in sorted((substation_dir / "panels").glob("*.yaml")):
         panel = load(panel_file)
         kind = "PanelMirror" if "mirror_of" in panel else "Panel"
         assert missing(panel_defs[kind]["required"], panel) == [], panel_file.name

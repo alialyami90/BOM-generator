@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../schemas/panel.schema.json
+# yaml-language-server: $schema=../../../../schemas/panel.schema.json
 #
 # WS Console 0010, transcribed from the example workbook, hidden master sheet 'Aux'
 # (top table; issued copy: sheet '4'). The loose-material table under it is in
@@ -33,7 +33,4 @@ options:
   inter_panel_terminals: 12  # WS-XIP
   grounding_busbars: [power_ground]  # 'Aux' row 45: POWER-GROUND only
 
-document:
-  doc_no: VD-EL0009-861GISPSA-001
-  rev: "02"
-  issue_date: 2026-10-28  # ASSUMED
+document: gis01-bom  # VD-EL0009-861GISPSA-001 rev 02 (project.yaml documents)

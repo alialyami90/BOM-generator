@@ -63,7 +63,7 @@ def psa1_dict() -> dict[str, Any]:
             "terminal_overrides": {},
             "grounding_busbars": ["ac_safety_ground", "instrument_ground"],
         },
-        "document": {"doc_no": "DOC-1", "rev": "0", "issue_date": "2026-10-28"},
+        "document": "psa1-bom",
         "revision": {"highlight": [{"tag": "PSA1-Q1.3", "columns": ["D"]}]},
     }
 
@@ -78,7 +78,7 @@ def mirror_dict() -> dict[str, Any]:
         "lan": "B",
         "sheet_name": "2",
         "options": {"aux_socket_a": 10},
-        "document": {"doc_no": "DOC-2", "rev": "0", "issue_date": "2026-10-28"},
+        "document": "psa2-bom",
     }
 
 
@@ -264,3 +264,26 @@ def test_mirror_shares_panel_id_and_prefix_patterns() -> None:
     data["mirror_of"] = "PSA1"
     with pytest.raises(ValidationError):
         PanelMirror.model_validate(data)
+
+
+def test_panel_document_is_a_register_key() -> None:
+    assert Panel.model_validate(psa1_dict()).document == "psa1-bom"
+    data = psa1_dict()
+    data["document"] = {"doc_no": "DOC-1", "rev": "0", "issue_date": "2026-10-28"}
+    with pytest.raises(ValidationError, match="document"):
+        Panel.model_validate(data)
+    data["document"] = "PSA1 BOM"
+    with pytest.raises(ValidationError, match="document"):
+        Panel.model_validate(data)
+
+
+def test_panel_generated_defaults_false() -> None:
+    assert Panel.model_validate(psa1_dict()).generated is False
+    assert Panel.model_validate({**psa1_dict(), "generated": True}).generated is True
+
+
+def test_device_first_nn_defaults_to_none_and_must_be_positive() -> None:
+    assert DeviceInstance.model_validate({"part_id": "X"}).first_nn is None
+    assert DeviceInstance.model_validate({"part_id": "X", "first_nn": 15}).first_nn == 15
+    with pytest.raises(ValidationError, match="first_nn"):
+        DeviceInstance.model_validate({"part_id": "X", "first_nn": 0})

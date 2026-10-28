@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../schemas/panel.schema.json
+# yaml-language-server: $schema=../../../../schemas/panel.schema.json
 #
 # PSA Cabinet 003 (time sync, RTAC, hardwired IO), transcribed from the example
 # workbook, hidden master sheet 'Panel 3' (issued copy: sheet '3'). Values the
@@ -39,7 +39,4 @@ options:
   terminal_overrides:
     XDIN: 40  # PSA3-XDIN ('Panel 3'!D59, plan Q6)
 
-document:
-  doc_no: VD-EL0009-861GISPSA-001
-  rev: "02"
-  issue_date: 2026-10-28  # ASSUMED
+document: gis01-bom  # VD-EL0009-861GISPSA-001 rev 02 (project.yaml documents)

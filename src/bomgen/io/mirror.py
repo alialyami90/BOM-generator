@@ -52,6 +52,7 @@ def mirror_panel(base: Panel, mirror: PanelMirror) -> Panel:
             "port_plans": port_plans,
             "options": options,
             "document": mirror.document,
+            "generated": mirror.generated,
             "revision": mirror.revision,
         }
     )

@@ -10,7 +10,7 @@ import pytest
 from typer.testing import CliRunner
 
 from bomgen.cli import app
-from bomgen.io.loader import LoadedProject, load_project
+from bomgen.io.loader import LoadedSubstation, load_project, load_substation
 from bomgen.models.library import DeviceType
 from bomgen.models.panel import Panel
 
@@ -18,31 +18,32 @@ pytestmark = pytest.mark.golden
 
 EXAMPLES = Path(__file__).resolve().parents[2] / "examples"
 PROJECT_FILE = EXAMPLES / "project.yaml"
+SUBSTATION_FILE = EXAMPLES / "substations" / "gis01" / "substation.yaml"
 
 
 @pytest.fixture(scope="module")
-def loaded() -> LoadedProject:
-    return load_project(PROJECT_FILE)
+def loaded() -> LoadedSubstation:
+    return load_substation(SUBSTATION_FILE)
 
 
-def panel(loaded: LoadedProject, panel_id: str) -> Panel:
+def panel(loaded: LoadedSubstation, panel_id: str) -> Panel:
     return next(p for p in loaded.panels if p.id == panel_id)
 
 
-def part(loaded: LoadedProject, part_id: str) -> DeviceType:
+def part(loaded: LoadedSubstation, part_id: str) -> DeviceType:
     device = loaded.library.get(part_id)
     assert device is not None, part_id
     return device
 
 
-def test_example_project_loads(loaded: LoadedProject) -> None:
+def test_example_project_loads(loaded: LoadedSubstation) -> None:
     # Overview (4 cabinets in this order); Output requirements OUT-3 (one sheet per
     # cabinet in panel order); example workbook, sheets '1'-'4'.
     assert [p.id for p in loaded.panels] == ["psa1", "psa2", "psa3", "ws"]
     assert [p.sheet_name for p in loaded.panels] == ["1", "2", "3", "4"]
 
 
-def test_cabinet_numbers_and_names(loaded: LoadedProject) -> None:
+def test_cabinet_numbers_and_names(loaded: LoadedSubstation) -> None:
     # Overview (cabinet numbers); names from example workbook, '1'!A1, '2'!A1, '3'!A1, '4'!A1.
     assert [(p.cabinet_number, p.cabinet_name, p.tag_prefix) for p in loaded.panels] == [
         ("861-GIS01-PSA-0001", "PSA Cabinet - 001", "PSA1"),
@@ -54,7 +55,7 @@ def test_cabinet_numbers_and_names(loaded: LoadedProject) -> None:
     assert [p.lan for p in loaded.panels] == ["A", "B", None, None]
 
 
-def test_unit_wattages_match_power_consumption_sheet(loaded: LoadedProject) -> None:
+def test_unit_wattages_match_power_consumption_sheet(loaded: LoadedSubstation) -> None:
     # Example workbook, 'Power Consumption'!I7:I11, I49:I51, I68:I69, I84 (DC) and
     # I17:I20 (AC). These unit watts are what make the spec's "Power Consumption sheet"
     # totals come out at 2,177.5 W DC and 1,090.3 W AC.
@@ -93,14 +94,14 @@ def test_unit_wattages_match_power_consumption_sheet(loaded: LoadedProject) -> N
         ), part_id
 
 
-def test_l1_row_hwio_override(loaded: LoadedProject) -> None:
+def test_l1_row_hwio_override(loaded: LoadedSubstation) -> None:
     # Example workbook, 'Panel 1'!H9 (the six-L1-switch row carries 10); plan Q5.
     l1_row = next(d for d in panel(loaded, "psa1").devices if d.part_id == "RST2228-L1-24MM")
     assert l1_row.qty == 6
     assert l1_row.hwio_points == 10
 
 
-def test_psa2_mirrors_psa1_with_lan_b_and_socket(loaded: LoadedProject) -> None:
+def test_psa2_mirrors_psa1_with_lan_b_and_socket(loaded: LoadedSubstation) -> None:
     # How each panel BOM groups its materials -> "What changes by panel type":
     # 002 is the LAN-B mirror of 001 plus an auxiliary power socket.
     psa1, psa2 = panel(loaded, "psa1"), panel(loaded, "psa2")
@@ -114,12 +115,12 @@ def test_psa2_mirrors_psa1_with_lan_b_and_socket(loaded: LoadedProject) -> None:
     assert psa2.options.model_copy(update={"aux_socket_a": None}) == psa1.options
 
 
-def test_dc_spare_branches_per_panel(loaded: LoadedProject) -> None:
+def test_dc_spare_branches_per_panel(loaded: LoadedSubstation) -> None:
     # Derivation rules -> DC distribution: 3 spares per feed in 001/002, 1 in 003 and WS.
     assert [p.options.dc_spare_branches_per_feed for p in loaded.panels] == [3, 3, 1, 1]
 
 
-def test_l1_switch_matches_library_example(loaded: LoadedProject) -> None:
+def test_l1_switch_matches_library_example(loaded: LoadedSubstation) -> None:
     # Inputs the tool needs -> 1. Device library, example column (L1 switch).
     l1 = part(loaded, "RST2228-L1-24MM")
     assert l1.category == "network_switch"
@@ -138,7 +139,7 @@ def test_l1_switch_matches_library_example(loaded: LoadedProject) -> None:
     assert l1.excluded_from_power is False
 
 
-def test_breaker_codes(loaded: LoadedProject) -> None:
+def test_breaker_codes(loaded: LoadedSubstation) -> None:
     # Derivation rules -> "Breaker part numbers".
     mcb = loaded.library.catalogues.mcb
     assert (mcb.make, mcb.poles) == ("Schneider", 2)
@@ -152,7 +153,7 @@ def test_breaker_codes(loaded: LoadedProject) -> None:
     assert loaded.library.catalogues.aux_contact.ordering_code == "A9A26924"
 
 
-def test_terminal_block_codes(loaded: LoadedProject) -> None:
+def test_terminal_block_codes(loaded: LoadedSubstation) -> None:
     # Derivation rules -> "Terminal block quantities (group G)", Type / code column.
     blocks = loaded.library.catalogues.terminal_blocks
     assert {name: block.ordering_code for name, block in blocks.items()} == {
@@ -162,16 +163,16 @@ def test_terminal_block_codes(loaded: LoadedProject) -> None:
     }
 
 
-def test_ws_console_dimensions(loaded: LoadedProject) -> None:
+def test_ws_console_dimensions(loaded: LoadedSubstation) -> None:
     # Heat Dissipation and Heat Calculations sheets -> natural convection (WS console):
     # H = 1.6 m, W = 0.8 m, D = 0.636 m.
     enclosure = panel(loaded, "ws").enclosure
     assert (enclosure.h_mm, enclosure.w_mm, enclosure.d_mm) == (1600, 800, 636)
 
 
-def test_design_constants_are_spec_values(loaded: LoadedProject) -> None:
+def test_design_constants_are_spec_values(loaded: LoadedSubstation) -> None:
     # Inputs the tool needs -> 3. Project settings, design constants.
-    constants = loaded.project.constants
+    constants = loaded.constants
     assert constants.dc_voltage_v == 125
     assert constants.ac_voltage_v == 230
     assert constants.power_margin == 0.25
@@ -185,7 +186,43 @@ def test_design_constants_are_spec_values(loaded: LoadedProject) -> None:
 
 
 def test_example_validates_from_the_cli() -> None:
-    # Plan M1: `bomgen validate` accepts the example project.
-    result = CliRunner().invoke(app, ["validate", "-p", str(PROJECT_FILE)])
-    assert result.exit_code == 0, result.output
-    assert result.stdout.startswith("OK: JAFURAH JFGP2 PKG.3")
+    # Plan M1/M1b: `bomgen validate` accepts the example project and its substation.
+    for args in (["-p", str(PROJECT_FILE)], [str(PROJECT_FILE)], [str(SUBSTATION_FILE)]):
+        result = CliRunner().invoke(app, ["validate", *args])
+        assert result.exit_code == 0, result.output
+        assert result.stdout.startswith("OK: JAFURAH JFGP2 PKG.3")
+
+
+def test_example_project_has_one_substation() -> None:
+    # ADR 0012: today's example becomes one project with one substation; the register
+    # carries the workbook's three document numbers (page footers).
+    project = load_project(PROJECT_FILE)
+    assert [s.substation.substation.id for s in project.substations] == ["gis01"]
+    (gis01,) = project.substations
+    assert {k: (e.doc_no, e.rev) for k, e in gis01.documents.items()} == {
+        "gis01-bom": ("VD-EL0009-861GISPSA-001", "02"),
+        "gis01-power": ("VD-EL0009-861GISPSA-002", "00"),
+        "gis01-heat": ("VD-EL0009-861GISPSA-003", "00"),
+    }
+    assert {p.document for p in gis01.panels} == {"gis01-bom"}
+    assert gis01.manual_panel_ids == frozenset({"ws"})
+
+
+def test_example_substation_layout_inputs(loaded: LoadedSubstation) -> None:
+    # Design (substations and auto layout) 3.2 and R1, R10: 40 IEDs in a star, 32U usable
+    # of a 42U panel, today's "=24+3" as sfp_per_l1.
+    network = loaded.substation.network
+    assert (network.ied_count, network.topology) == (40, "star")
+    assert loaded.panel_capacity_u == 32
+    assert loaded.spares.sfp_per_l1 == 3
+    assert loaded.spares.port_fraction == 0.20
+    assert loaded.substation.layout.blank_plate_u == 1
+    roles = {e.role.value: e.part_id for e in loaded.substation.equipment}
+    assert roles["l1_switch"] == "RST2228-L1-24MM"
+    assert roles["l2_switch"] == "RST2228-L2"
+    # R1 example: the RST2228 has 28 ports (24 for IEDs, 4 uplink slots).
+    l1 = part(loaded, "RST2228-L1-24MM")
+    assert sum(g.count for g in l1.ports) == 28
+    assert [g.usable_for for g in l1.ports] == ["ied", "uplink"]
+    for equipment in loaded.substation.equipment:
+        assert part(loaded, equipment.part_id).height_u is not None, equipment.part_id
