@@ -476,6 +476,13 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
 - Tests: every OUT-5 formula present at the right cell and pointing at the right
   source row; evaluating the formulas (Q15) gives the M4 numbers; header/footer
   strings per "Output requirements".
+- Delivered in M5: `bomgen.sheets` (`build_workbook(loaded, result, logo=)`
+  returns the `WorkbookModel`; one module per sheet, shared `styles` and `grid`).
+  Layout decisions are in `docs/superpowers/plans/2026-10-28-m5-sheet-models.md`.
+  Calculation-sheet header size comes from the top margin and print scale (Q11,
+  at most 20 pt). The header logo is passed in resolved; the loader does not
+  resolve `project.logo` yet. `tests/golden/test_workbook.py` evaluates every
+  formula with pycel (Q15).
 
 ### M6 — Excel writer
 - Step 14: XlsxWriter translation of sheet models: fonts, fills, borders,
@@ -780,7 +787,10 @@ that highlights cells whose value changed.
 **Q11 — Calculation sheet header details.** The `<scope>` in "Power Consumption
 for <scope>" and the calc-sheet header font size are not defined. *Default:*
 scope is a per-document field in `project.yaml` (e.g. "GIS Substation PSA
-System"); project name bold at 20 pt on calculation sheets.
+System"); project name bold at 20 pt on calculation sheets. *M5:* 20 pt is the
+cap; a calculation sheet uses the largest size whose three header lines, scaled
+with the sheet's print scale, fit between the header and top margins (17 pt on
+Power Consumption and Heat Dissipation, 11 pt on Heat Calculations).
 
 **Q12 — Tags that don't fit `<PANEL>-<LEVEL>-<TYPE>-<LAN><NN>`.** FOPP
 (`PSA1-FOPP-CCR-A01`) and gateways (`PSA1-DHPCC-GW-1`, numbered by LAN index).
