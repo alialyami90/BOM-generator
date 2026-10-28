@@ -40,7 +40,7 @@ class ProjectImportResult:
     library_note: str | None
 
 
-def _parse_manifest(raw: object) -> ProjectManifest:
+def parse_project_manifest(raw: object) -> ProjectManifest:
     if isinstance(raw, dict) and "project_id" not in raw and "schema_version" in raw:
         raise LibraryPackageError(
             "this is a .bomlib library, not a .bomproj project; "
@@ -94,15 +94,10 @@ def import_project(
     import saves it to its `Backups/` first, keeps its `Backups/` and `out/`
     folders, and restores it if the import fails.
     """
-    manifest, files = read_bundle(package, _parse_manifest, ".bomproj project file")
-    identity = parse_project_identity(files[PROJECT_FILE].decode("utf-8", "replace"))
-    if identity.id != manifest.project_id:
-        raise LibraryPackageError(
-            f"the manifest names project {manifest.project_id!r} "
-            f"but {PROJECT_FILE} names {identity.id!r}"
-        )
-    _refuse_build_output(files)
-    note = _library_note_or_none(manifest, store or LibraryStore(default_library_home()))
+    manifest, files = read_bundle(package, parse_project_manifest, ".bomproj project file")
+    check_identity(manifest, files)
+    refuse_build_output(files)
+    note = library_note_or_none(manifest, store or LibraryStore(default_library_home()))
     workspace = workspace or default_workspace()
     target = workspace / manifest.project_id
     exists = target.exists()
@@ -149,7 +144,17 @@ def import_project(
     )
 
 
-def _refuse_build_output(files: dict[str, bytes]) -> None:
+def check_identity(manifest: ProjectManifest, files: dict[str, bytes]) -> None:
+    """The manifest and the packed `project.yaml` must name the same project."""
+    identity = parse_project_identity(files[PROJECT_FILE].decode("utf-8", "replace"))
+    if identity.id != manifest.project_id:
+        raise LibraryPackageError(
+            f"the manifest names project {manifest.project_id!r} "
+            f"but {PROJECT_FILE} names {identity.id!r}"
+        )
+
+
+def refuse_build_output(files: dict[str, bytes]) -> None:
     """A `.bomproj` never holds `out/`, `.git/`, caches or the top-level `Backups/`."""
     for name in files:
         parts = name.split("/")
@@ -159,7 +164,7 @@ def _refuse_build_output(files: dict[str, bytes]) -> None:
             )
 
 
-def _library_note_or_none(manifest: ProjectManifest, store: LibraryStore) -> str | None:
+def library_note_or_none(manifest: ProjectManifest, store: LibraryStore) -> str | None:
     """The note is advice; a locked library folder must not turn a good import into an error."""
     try:
         return library_note(manifest, store)
