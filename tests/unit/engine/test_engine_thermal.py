@@ -7,10 +7,13 @@ from engine_factories import panel
 from bomgen.engine.thermal import (
     choose_ventilation,
     forced_check,
+    heat_dissipation,
     line_up_check,
     natural_check,
     surface_area_m2,
 )
+from bomgen.models.calc import CabinetPower, LineRef, PowerBlock, PowerConsumption, PowerLine
+from bomgen.models.library import LoadType, SupplyType
 from bomgen.models.panel import Panel, Ventilation
 from bomgen.models.project import DesignConstants
 
@@ -71,3 +74,35 @@ def test_auto_ventilation_picks_filters_when_natural_rise_is_within_limit(
 def test_explicit_ventilation_option_wins() -> None:
     forced = panel([{"part_id": "LAMP"}], options={"ventilation": "forced"})
     assert choose_ventilation(forced, 1, C) is Ventilation.FORCED
+
+
+def power_line(panel_id: str | None, unit_w: float, supply: SupplyType, qty: int = 1) -> PowerLine:
+    return PowerLine(
+        source=LineRef(panel_id=panel_id, line=0),
+        supply_type=supply,
+        voltage_v=125 if supply is SupplyType.VDC else 230,
+        qty=qty,
+        unit_w=unit_w,
+        load_type=LoadType.CONTINUOUS,
+        current_factor=1.3,
+    )
+
+
+def block(supply: SupplyType, *lines: PowerLine) -> PowerBlock:
+    return PowerBlock(supply_type=supply, lines=lines, margin=0.25)
+
+
+def test_heat_dissipation_has_dc_then_ac_rows_per_cabinet_and_an_auxiliary_block() -> None:
+    dc = block(SupplyType.VDC, power_line("psa1", 77, SupplyType.VDC, 6))
+    ac = block(SupplyType.VAC, power_line("psa1", 87, SupplyType.VAC, 2))
+    external = block(SupplyType.VDC, power_line(None, 100, SupplyType.VDC))
+    power = PowerConsumption(
+        cabinets=(CabinetPower(panel_id="psa1", dc=dc, ac=ac),), external=external
+    )
+    cabinet, auxiliary = heat_dissipation(power, C)
+    assert cabinet.panel_id == "psa1"
+    assert [line.power.unit_w for line in cabinet.lines] == [77, 87]
+    assert cabinet.total_w == 6 * 77 + 2 * 87  # no margin
+    assert cabinet.total_btu_h == pytest.approx((6 * 77 + 2 * 87) * 3.41)
+    assert auxiliary.panel_id is None
+    assert auxiliary.total_w == 100

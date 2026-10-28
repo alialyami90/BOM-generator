@@ -3,7 +3,15 @@ sheets, "Rule for the tool"; Data model and generation order, step 4)."""
 
 from collections.abc import Sequence
 
-from bomgen.models.calc import ForcedVentCheck, LineUpCheck, NaturalConvCheck
+from bomgen.models.calc import (
+    CabinetHeat,
+    ForcedVentCheck,
+    HeatLine,
+    LineUpCheck,
+    NaturalConvCheck,
+    PowerBlock,
+    PowerConsumption,
+)
 from bomgen.models.panel import Panel, Ventilation
 from bomgen.models.project import DesignConstants
 
@@ -56,3 +64,24 @@ def choose_ventilation(panel: Panel, heat_w: float, constants: DesignConstants) 
         return option
     natural = natural_check(panel, heat_w, constants)
     return Ventilation.NATURAL if natural.passes else Ventilation.FORCED
+
+
+def heat_dissipation(
+    power: PowerConsumption, constants: DesignConstants
+) -> tuple[CabinetHeat, ...]:
+    """One block per cabinet (DC rows, then AC rows) and the auxiliary equipment block
+    outside the panels; no margin."""
+
+    def heat(panel_id: str | None, *blocks: PowerBlock | None) -> CabinetHeat:
+        lines = tuple(
+            HeatLine(power=line, btu_per_w=constants.btu_per_w)
+            for block in blocks
+            if block is not None
+            for line in block.lines
+        )
+        return CabinetHeat(panel_id=panel_id, lines=lines)
+
+    result = [heat(c.panel_id, c.dc, c.ac) for c in power.cabinets]
+    if power.external is not None:
+        result.append(heat(None, power.external))
+    return tuple(result)
