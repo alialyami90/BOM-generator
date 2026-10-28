@@ -91,8 +91,8 @@ def pack(
 def parse_manifest(raw: object, app_version: str) -> Manifest:
     if isinstance(raw, dict) and "project_id" in raw:
         raise LibraryPackageError(
-            "this is a .bomproj project, not a .bomlib library; "
-            "use 'bomgen project import' to open it"
+            "this is a .bomproj project, not a .bomlib library",
+            hint="use 'bomgen project import' to open it",
         )
     format_version = raw.get("format_version") if isinstance(raw, dict) else None
     if isinstance(format_version, int) and format_version > FORMAT_VERSION:

@@ -249,3 +249,13 @@ def test_read_bundle_still_raises_the_first_failure(tmp_path: Path) -> None:
 
     with pytest.raises(LibraryPackageError, match="not a test bundle"):
         read_bundle(junk, _parse, "test bundle")
+
+
+def test_inspect_details_use_the_singular_for_one_file(tmp_path: Path) -> None:
+    inspection = inspect_bundle(_write(tmp_path, {"a.yaml": b"a: 1\n"}), _parse, "test bundle")
+
+    details = {c.id: c.detail for c in inspection.checks}
+
+    assert details["paths"] == "2 entries"
+    assert details["files"] == "1 file"
+    assert details["checksums"] == "the file matches"

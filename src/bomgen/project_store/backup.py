@@ -132,9 +132,9 @@ def restore_backup(
     project_dir = backup.parent.parent
     if backup.parent.name != BACKUPS_DIR:
         raise LibraryPackageError(
-            f"{backup.name} is not in a project's {BACKUPS_DIR} folder; "
-            "import it with 'bomgen project import' instead",
+            f"{backup.name} is not in a project's {BACKUPS_DIR} folder",
             RefusalKind.INVALID_PROJECT,
+            hint="import it with 'bomgen project import' instead",
         )
     try:
         recorded = read_backup_manifest(backup).project_id

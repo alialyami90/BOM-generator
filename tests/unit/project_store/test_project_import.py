@@ -224,8 +224,11 @@ def test_a_bomlib_given_to_project_import_is_explained(
     bomlib = tmp_path / "psa-1.0.0.bomlib"
     pack(source, bomlib, name="psa", version="1.0.0")
 
-    with pytest.raises(LibraryPackageError, match=r"\.bomlib library.*bomgen library import"):
+    with pytest.raises(LibraryPackageError, match=r"\.bomlib library, not a \.bomproj") as caught:
         import_project(bomlib, workspace=workspace, store=store)
+
+    assert "bomgen" not in str(caught.value)
+    assert caught.value.hint == "use 'bomgen library import' to install it"
 
 
 def test_import_names_the_bomlib_to_install_when_the_library_is_missing(
@@ -235,7 +238,8 @@ def test_import_names_the_bomlib_to_install_when_the_library_is_missing(
 
     assert result.library_note is not None
     assert "psa-devices 1.2.0" in result.library_note
-    assert "bomgen library import psa-devices-1.2.0.bomlib" in result.library_note
+    assert "bomgen" not in result.library_note
+    assert result.library_hint == "bomgen library import psa-devices-1.2.0.bomlib"
 
 
 def test_import_names_the_bomlib_to_install_when_the_active_version_differs(
@@ -247,7 +251,7 @@ def test_import_names_the_bomlib_to_install_when_the_active_version_differs(
 
     assert result.library_note is not None
     assert "the active version is 1.1.0" in result.library_note
-    assert "bomgen library import psa-devices-1.2.0.bomlib" in result.library_note
+    assert result.library_hint == "bomgen library import psa-devices-1.2.0.bomlib"
 
 
 def test_import_names_rollback_when_the_version_is_installed_but_inactive(
@@ -259,7 +263,9 @@ def test_import_names_rollback_when_the_version_is_installed_but_inactive(
     result = import_project(package, workspace=workspace, store=store)
 
     assert result.library_note is not None
-    assert "bomgen library rollback psa-devices --to 1.2.0" in result.library_note
+    assert "installed but not active" in result.library_note
+    assert "bomgen" not in result.library_note
+    assert result.library_hint == "bomgen library rollback psa-devices --to 1.2.0"
 
 
 def test_no_library_note_when_the_versions_match(

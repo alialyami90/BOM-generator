@@ -117,7 +117,7 @@ class _Reader[M: _HasFiles]:
         if len(set(self.names)) != len(self.names):
             raise LibraryPackageError("package contains duplicate entries")
         check_case_collisions(self.names)
-        return f"{len(self.names)} entries"
+        return _count(len(self.names), "entry", "entries")
 
     def size(self) -> str:
         total = sum(info.file_size for info in self.infos)
@@ -143,7 +143,7 @@ class _Reader[M: _HasFiles]:
             raise LibraryPackageError(f"files not listed in the manifest: {', '.join(unlisted)}")
         if missing := sorted(self.manifest.files.keys() - members):
             raise LibraryPackageError(f"files missing from the package: {', '.join(missing)}")
-        return f"{len(members)} files"
+        return _count(len(members), "file", "files")
 
     def checksums(self) -> str:
         assert self.zf is not None
@@ -153,7 +153,11 @@ class _Reader[M: _HasFiles]:
             if sha256(data) != self.manifest.files[member]:
                 raise LibraryPackageError(f"checksum mismatch: {member} has been changed")
             self.files[member] = data
-        return f"all {len(self.files)} files match"
+        return "the file matches" if len(self.files) == 1 else f"all {len(self.files)} files match"
+
+
+def _count(number: int, singular: str, plural: str) -> str:
+    return f"{number} {singular if number == 1 else plural}"
 
 
 _STAGES = (

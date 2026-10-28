@@ -112,8 +112,9 @@ def test_a_library_that_differs_is_a_warning_with_the_remedy(
 
     library = next(c for c in preview.checks if c.id == "library")
     assert library.status is CheckStatus.WARNING
-    assert "bomgen library import psa-devices-1.2.0.bomlib" in library.detail
+    assert "bomgen" not in library.detail
     assert preview.library_note == library.detail
+    assert preview.library_hint == "bomgen library import psa-devices-1.2.0.bomlib"
     assert preview.can_import
 
 
@@ -243,3 +244,11 @@ def test_build_output_in_the_package_fails_contents_and_skips_the_rest(
     assert statuses["name"] is CheckStatus.SKIPPED
     assert statuses["library"] is CheckStatus.SKIPPED
     assert not preview.can_import
+
+
+def test_the_name_check_has_a_neutral_label(
+    workspace: Path, package: Path, store: LibraryStore
+) -> None:
+    preview = preview_project_import(package, workspace=workspace, store=store)
+
+    assert next(c for c in preview.checks if c.id == "name").label == "Project id in the workspace"

@@ -11,6 +11,7 @@ from bomgen.bundle.container import inspect_bundle
 from bomgen.bundle.errors import LibraryPackageError
 from bomgen.library_store.store import LibraryStore, default_library_home
 from bomgen.project_store.importer import (
+    LibraryNote,
     check_identity,
     library_note,
     parse_project_manifest,
@@ -41,6 +42,7 @@ class ProjectImportPreview:
     target_dir: Path | None
     exists: bool
     library_note: str | None
+    library_hint: str | None = None
 
     @property
     def can_import(self) -> bool:
@@ -57,7 +59,7 @@ def preview_project_import(
     workspace = workspace or default_workspace()
     target = workspace / manifest.project_id if manifest else None
     exists = bool(target and target.exists())
-    note: str | None = None
+    note: LibraryNote | None = None
 
     verified = inspection.files
     ready = verified is not None and manifest is not None and target is not None
@@ -73,7 +75,7 @@ def preview_project_import(
         library_check, note = _library_check(manifest, store)
         checks.append(library_check)
     else:
-        checks.append(Check("name", "Project id is new in the workspace", CheckStatus.SKIPPED))
+        checks.append(Check("name", "Project id in the workspace", CheckStatus.SKIPPED))
         checks.append(Check("library", "Built with the active library", CheckStatus.SKIPPED))
 
     files = (
@@ -88,7 +90,8 @@ def preview_project_import(
         manifest.project_id if manifest else None,
         target,
         exists,
-        note,
+        note.text if note else None,
+        note.hint if note else None,
     )
 
 
@@ -109,7 +112,7 @@ def _run(
 
 
 def _name_check(project_id: str, workspace: Path, exists: bool) -> Check:
-    label = "Project id is new in the workspace"
+    label = "Project id in the workspace"
     if not exists:
         return Check("name", label, CheckStatus.OK, f"no project {project_id!r} in {workspace}")
     return Check(
@@ -123,7 +126,7 @@ def _name_check(project_id: str, workspace: Path, exists: bool) -> Check:
 
 def _library_check(
     manifest: ProjectManifest, store: LibraryStore | None
-) -> tuple[Check, str | None]:
+) -> tuple[Check, LibraryNote | None]:
     label = "Built with the active library"
     if manifest.library_name is None:
         return Check("library", label, CheckStatus.OK, "the project records no library"), None
@@ -136,4 +139,4 @@ def _library_check(
     if note is None:
         detail = f"{manifest.library_name} {manifest.library_version} is active"
         return Check("library", label, CheckStatus.OK, detail), None
-    return Check("library", label, CheckStatus.WARNING, note), note
+    return Check("library", label, CheckStatus.WARNING, note.text), note
