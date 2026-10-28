@@ -58,36 +58,126 @@ records:
     mounting_kind: rack
     height_u: 3
     height_note: 3U rack/panel mount (SEL Automation catalog)
+    inrush_a: 20
+    inrush_basis: datasheet
+    inrush_note: 'SEL-3555 data sheet PDS3555-01 (date code 20221221), SEL-9331 160 W supply, high-voltage
+      option 125/250 Vdc or 120/220/240 Vac: ''DC Range: 100-300 Vdc'', ''Maximum Constant Burden: 155
+      W, 160 VA'', ''Maximum Peak Burden: 240 W, 248 VA'', ''Peak Inrush: 20 A'', ''Maximum DC Dropout:
+      88 Vdc''. Per PSU; with the redundant second SEL-9331 each feed sees 20 A. (48 Vdc option: 38-58
+      Vdc, 149 W, 20 A.)'
+    input_v_min: 100
+    input_v_max: 300
   alternatives:
   - make: Siemens
     manufacturer: Siemens AG (Smart Infrastructure)
     tiers:
       low:
         model: SICAM A8000 CP-8031
-        ordering_code: 6MF2803-1AA00
+        ordering_code: 6MF2803-1AA00 + PS-8622 6MF2862-2AA00
         description: DIN-rail RTU/gateway CPU with fewer comm ports and I/O; no local HDMI-type HMI
         url: https://mall.industry.siemens.com/mall/tr/tr/Catalog/Product/6MF2803-1AA00
-        notes: Order number confirmed on the Siemens Industry Mall. Needs a separate A8000 power supply
-          module.
-        verified: true
+        notes: 'Order number confirmed on the Siemens Industry Mall. Needs a separate A8000 power supply
+          module. M14 changed the ordering code from 6MF2803-1AA00. M14: Siemens Mall: ''CP-8031 is a
+          master module which supports 2x RJ45 Ethernet and 2x serial interfaces. Power supply PS-862x
+          or PS-864x is required. Singular or redundant power supply is supported. Up to 8x SICAM A8000
+          I/O modules can be connected right beside the power supply.'' Net weight 0.414 kg. So the CPU
+          has no supply of its own and the ordering code must include the PSU. PS-8622 (6MF2862-2AA00)
+          is the high-voltage 12 W module: data sheet (distributor copy) ''supply voltage / at DC: 82.5
+          ... 286 V'', ''supplied active power (total) / of power supply unit / maximum: 12 W'' (5.15
+          V bus 9 W, 28 V bus 12 W), 30 x 132 x 124 mm. Its ''consumed active power / of the module /
+          maximum: 18 mW'' is clearly not the input power; input power and inrush are not stated. Ethernet
+          speed is not stated on the Mall page, so no port_groups are given.'
+        verified: false
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 82.5
+        input_v_max: 286
+        supply_option: Separate PS-8622 module 6MF2862-2AA00 (82.5-286 VDC); PS-8620 is the 24-60 VDC
+          version
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 15.0
+        power_basis: assumed
+        power_note: 'Assumed: the PS-8622 can deliver at most 12 W to the CPU and I/O bus; 12 W / ~0.8
+          efficiency = 15 W input. No input-power figure is published for the PS-8622.'
+        inrush_basis: not_given
+        sources:
+        - https://mall.industry.siemens.com/mall/tr/tr/Catalog/Product/6MF2803-1AA00
+        - https://novapart.co/datasheet/farnell:3555595/
+        - https://novapart.co/products/6MF2862-2AA00/power-supply-ps-8622-253-vdc-12-w-screw-terminal
       mid:
         model: SICAM A8000 CP-8050
-        ordering_code: 6MF2805-0AA00
+        ordering_code: 6MF2805-0AA00 + PS-8642 6MF2864-2AA00
         description: Top A8000 master/gateway CPU (IEC 61850, IEC 60870-5-101/104, DNP3, Modbus), expandable
           with CI comm modules; DIN rail, not 19-inch
         url: https://mall.industry.siemens.com/mall/en/oeii/Catalog/Product/6MF28050AA00
-        notes: Order number confirmed on the Siemens Industry Mall. Closest functional match for a protocol
-          gateway. Power and certifications not fetched.
-        verified: true
+        notes: 'Order number confirmed on the Siemens Industry Mall. Closest functional match for a protocol
+          gateway. Power and certifications not fetched. M14 changed the ordering code from 6MF2805-0AA00.
+          M14: A8000 catalogue excerpt: CP-8050 has ''2 x RJ45 (Ethernet)'' on the unit plus ''10 x RJ45
+          (Ethernet) with optional CI modules''. Siemens Mall lists the CP-8050 (net weight 0.423 kg)
+          but names no supply module or data. PS-8642 data sheet (distributor copy): ''PS-8642 POWER SUPPLY
+          110-220VDC or 230VAC 45W'' - nominal range only, no tolerance, input current or inrush. input_v_min/max
+          are that nominal range. The PS-8642 is chosen as the larger 110-220 V module (PS-8622, 12 W,
+          also covers 125 VDC); confirm the right module with Siemens for the I/O fitted. Ethernet speed
+          not stated, so no port_groups.'
+        verified: false
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 110
+        input_v_max: 220
+        supply_option: 'Separate PS-8642 module 6MF2864-2AA00: 110-220 VDC or 230 VAC, 45 W output'
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 56.0
+        power_basis: assumed
+        power_note: 'Assumed upper bound: PS-8642 rated output 45 W / ~0.8 efficiency = 56 W input. No
+          input-power figure is published for the PS-8642 or the CP-8050.'
+        inrush_basis: not_given
+        sources:
+        - https://mall.industry.siemens.com/mall/en/oeii/Catalog/Product/6MF28050AA00
+        - https://automationtrader.com/en/products/siemens/6mf2864-2aa00/downloads/6mf2864-2aa00_datasheet_en_automation-trader.pdf
+        - https://pdf.directindustry.com/pdf/siemens-energy-automation-smart-grid/sicam-a8000-series-operation-telecontrol-automation-smallest-spaces/30064-959712.html
       high:
         model: SICAM A8000 CP-8050 (redundant pair) + CI Ethernet expansion modules
-        ordering_code: 6MF2805-0AA00
+        ordering_code: 2 x 6MF2805-0AA00 + 2 x PS-8642 6MF2864-2AA00 + CI Ethernet modules (CI codes not
+          verified)
         description: Two CP-8050 in a redundant configuration with extra Ethernet interface modules for
           more ports and redundancy
         url: https://www.siemens.com/ja-jp/products/sicam/a8000-cp8050/
-        notes: Not web-verified that CP-8050 redundancy fits this gateway role; the CI module order numbers
-          were not confirmed. Check with Siemens.
-        verified: true
+        notes: 'Not web-verified that CP-8050 redundancy fits this gateway role; the CI module order numbers
+          were not confirmed. Check with Siemens. M14 changed the ordering code from 6MF2805-0AA00. M14:
+          Two CPUs, each fed by its own PS-8642 module (two branch feeds, 56 W assumed each). A8000 catalogue
+          excerpt: CP-8050 has ''2 x RJ45 (Ethernet)'' on the unit plus ''10 x RJ45 (Ethernet) with optional
+          CI modules''. Siemens Mall lists the CP-8050 (net weight 0.423 kg) but names no supply module
+          or data. PS-8642 data sheet (distributor copy): ''PS-8642 POWER SUPPLY 110-220VDC or 230VAC
+          45W'' - nominal range only, no tolerance, input current or inrush. input_v_min/max are that
+          nominal range. The PS-8642 is chosen as the larger 110-220 V module (PS-8622, 12 W, also covers
+          125 VDC); confirm the right module with Siemens for the I/O fitted. Ethernet speed not stated,
+          so no port_groups.'
+        verified: false
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 110
+        input_v_max: 220
+        supply_option: 'Separate PS-8642 module 6MF2864-2AA00: 110-220 VDC or 230 VAC, 45 W output'
+        supply_ok: true
+        power_supplies: 2
+        unit_power_w: 112.0
+        power_basis: assumed
+        power_note: 'Assumed upper bound: two PS-8642 at 45 W output / ~0.8 efficiency = 56 W each, 112
+          W total. No input-power figure is published.'
+        inrush_basis: not_given
+        sources:
+        - https://www.siemens.com/ja-jp/products/sicam/a8000-cp8050/
+        - https://mall.industry.siemens.com/mall/en/oeii/Catalog/Product/6MF28050AA00
+        - https://automationtrader.com/en/products/siemens/6mf2864-2aa00/downloads/6mf2864-2aa00_datasheet_en_automation-trader.pdf
+        - https://pdf.directindustry.com/pdf/siemens-energy-automation-smart-grid/sicam-a8000-series-operation-telecontrol-automation-smallest-spaces/30064-959712.html
   - make: Hitachi Energy
     manufacturer: Hitachi Energy
     tiers:
@@ -96,24 +186,106 @@ records:
         ordering_code: 540CMD01
         description: Compact DIN-rail RTU540 communication unit for small gateways
         url: https://www.hitachienergy.com/jp/ja/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu540-product-line1
-        notes: 1KGT catalogue number not verified (a search hit suggests 1KGT021600R0001, unconfirmed).
+        notes: '1KGT catalogue number not verified (a search hit suggests 1KGT021600R0001, unconfirmed).
+          M14: DISCONTINUED: Hitachi Energy''s RTU540 page says the product line is no longer available
+          and points to the RTU530 line as its replacement. Published 540CMD01 data: DIN rail, metal housing,
+          supply ''DC 24-125V'', 4 x serial (RS-232/RS-485), 2 x Ethernet (10/100BaseT), 2 x USB, RTU500
+          I/O expansion bus. 125 VDC is the top of the published nominal range; the tolerance above it
+          (battery float voltage) is not stated, so confirm before use. Power consumption, dimensions
+          and inrush not given; the 1KGT ordering number was not found.'
         verified: false
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 24
+        input_v_max: 125
+        supply_option: Built-in supply, DC 24-125 V (nominal range as published)
+        supply_ok: true
+        power_supplies: 1
+        inrush_basis: not_given
+        port_groups:
+        - ports: ETH1-ETH2
+          count: 2
+          speed: 100M
+          media: RJ45
+          kind: fixed
+          usable_for: any
+        sources:
+        - https://www.hitachienergy.com/jp/ja/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu540-product-line1
       mid:
         model: RTU560 communication unit 560CMR02 R0001
-        ordering_code: 1KGT036300R0001
+        ordering_code: 1KGT036300R0001 (+ 560PSU01 rack PSU, believed 1KGT006600R0002)
         description: RTU560 CMU, 32-bit CPU, 6 serial (RS-232/485), 2 x 10/100BASE-T Ethernet, USB, battery-backed
           RTC; protocol licences and SD card ordered separately
         url: https://proax.ca/en/product/1108941/abb1kgt036300r0001
-        notes: Order code confirmed at a distributor (Proax). Mounts in an RTU560 rack with a 560PSU power
-          supply (not verified).
-        verified: true
+        notes: 'Order code confirmed at a distributor (Proax). Mounts in an RTU560 rack with a 560PSU
+          power supply (not verified). M14 changed the ordering code from 1KGT036300R0001. M14: 560CMR02
+          data sheet (Scribd mirror, (c) 2018 ABB): Ethernet E1 and E2 ''Type IEEE 802.3, 10/100BaseT'',
+          RJ45; serial ''RS232C or RS485''; ordering ''560CMR02 R0001 1KGT036300R0001''. Hitachi Energy
+          page: ''2x Ethernet; 6x serial (RS-232/RS-485); USB for webserver access''. The board draws
+          from the rack supply. Rack supply 560PSU01: Hitachi Energy''s RTU560 page lists ''560PSU01:
+          110...220 V DC input; 5 and 24 V DC output; suitable for redundant supply in 560MPR03/560SFR02''
+          (560PSR00 is the 24-60 VDC version). Proax sells 1KGT006600R0002 with the same description (''Power
+          supply unit for RTU560 racks'', 110-220 VDC, redundant in 560MPR03/560SFR02) and an invoice
+          text ''110...220 VDC, 44.3W''; that the code is the 560PSU01 and that 44.3 W is its rating are
+          inferred. Only the nominal 110-220 VDC range is published; input power, inrush and the rack
+          (560MPR03/560SFR02) height were not found.'
+        verified: false
+        height_u: 0
+        mounting_kind: plug_in
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 110
+        input_v_max: 220
+        supply_option: Powered from the RTU560 rack supply 560PSU01 (110-220 VDC nominal)
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 44.3
+        power_basis: assumed
+        power_note: 'Assumed: 44.3 W from Proax''s invoice text for the 110-220 VDC RTU560 rack PSU (unlabelled,
+          taken as the PSU rating and so an upper bound for the CMU plus rack); no input-power figure
+          published'
+        inrush_basis: not_given
+        port_groups:
+        - ports: E1-E2
+          count: 2
+          speed: 100M
+          media: RJ45
+          kind: fixed
+          usable_for: any
+        sources:
+        - https://www.scribd.com/document/703961666/560CMR02-DS-en
+        - https://www.hitachienergy.com/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu560-product-line
+        - https://proax.ca/en/product/1108941/abb1kgt036300r0001
+        - https://proax.ca/en/product/2568173/abb1kgt006600r0002
       high:
         model: RTU560 communication unit 560CMG10
         description: Higher-performance RTU560 CMU with more Ethernet ports for large gateway / data-concentrator
           duty
         url: https://www.hitachienergy.com/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu560-product-line
-        notes: Model name from the Hitachi RTU560 product line; 1KGT number not verified.
+        notes: 'Model name from the Hitachi RTU560 product line; 1KGT number not verified. M14: Probably
+          not a current part: Hitachi Energy''s RTU560 product-line page lists only the 560CMR01 and 560CMR02
+          communication units, and no 560CMG10 data sheet, ordering code or distributor listing was found.
+          Kept as instructed; ask Hitachi Energy for the current high-end CMU. Supply range shown is the
+          560PSU01 rack supply. Rack supply 560PSU01: Hitachi Energy''s RTU560 page lists ''560PSU01:
+          110...220 V DC input; 5 and 24 V DC output; suitable for redundant supply in 560MPR03/560SFR02''
+          (560PSR00 is the 24-60 VDC version). Proax sells 1KGT006600R0002 with the same description (''Power
+          supply unit for RTU560 racks'', 110-220 VDC, redundant in 560MPR03/560SFR02) and an invoice
+          text ''110...220 VDC, 44.3W''; that the code is the 560PSU01 and that 44.3 W is its rating are
+          inferred. Only the nominal 110-220 VDC range is published; input power, inrush and the rack
+          (560MPR03/560SFR02) height were not found.'
         verified: false
+        mounting_kind: plug_in
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 110
+        input_v_max: 220
+        supply_option: Would be powered from the RTU560 rack supply 560PSU01 (110-220 VDC nominal)
+        inrush_basis: not_given
+        height_u: 0
+        sources:
+        - https://www.hitachienergy.com/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu560-product-line
   sources:
   - https://selinc.com/api/download/107948
   - https://cms-cdn.selinc.com/assets/Literature/Publications/Product%20Catalogs/Catalog%20Sections/SEL%20Automation.pdf
@@ -122,6 +294,8 @@ records:
   - https://mall.industry.siemens.com/mall/tr/tr/Catalog/Product/6MF2803-1AA00
   - https://mall.industry.siemens.com/mall/en/oeii/Catalog/Product/6MF28050AA00
   - https://proax.ca/en/product/1108941/abb1kgt036300r0001
+  - https://selinc.com/api/download/107766/
+  - https://manuals.plus/m/d53b3e995df9a4a04a808a7672d28e8e9f850c14abb33a3922d0e5950e1bdfd8.pdf
 - part_id: SEL-3555-RTAC
   kind: device
   description: PSA RTAC and Data Concentrator for DCS
@@ -166,33 +340,124 @@ records:
     mounting_kind: rack
     height_u: 3
     height_note: 3U rack/panel mount (SEL Automation catalog)
+    inrush_a: 20
+    inrush_basis: datasheet
+    inrush_note: 'SEL-3555 data sheet PDS3555-01 (date code 20221221), SEL-9331 160 W supply, high-voltage
+      option 125/250 Vdc or 120/220/240 Vac: ''DC Range: 100-300 Vdc'', ''Maximum Constant Burden: 155
+      W, 160 VA'', ''Maximum Peak Burden: 240 W, 248 VA'', ''Peak Inrush: 20 A'', ''Maximum DC Dropout:
+      88 Vdc''. Per PSU; with the redundant second SEL-9331 each feed sees 20 A. (48 Vdc option: 38-58
+      Vdc, 149 W, 20 A.)'
+    input_v_min: 100
+    input_v_max: 300
   alternatives:
   - make: Siemens
     manufacturer: Siemens AG (Smart Infrastructure)
     tiers:
       low:
         model: SICAM A8000 CP-8031
-        ordering_code: 6MF2803-1AA00
+        ordering_code: 6MF2803-1AA00 + PS-8622 6MF2862-2AA00
         description: Smaller A8000 CPU; enough for a modest number of IED connections and one upstream
           DCS link
         url: https://mall.industry.siemens.com/mall/tr/tr/Catalog/Product/6MF2803-1AA00
-        notes: Order number confirmed on the Siemens Industry Mall.
-        verified: true
+        notes: 'Order number confirmed on the Siemens Industry Mall. M14 changed the ordering code from
+          6MF2803-1AA00. M14: Siemens Mall: ''CP-8031 is a master module which supports 2x RJ45 Ethernet
+          and 2x serial interfaces. Power supply PS-862x or PS-864x is required. Singular or redundant
+          power supply is supported. Up to 8x SICAM A8000 I/O modules can be connected right beside the
+          power supply.'' Net weight 0.414 kg. So the CPU has no supply of its own and the ordering code
+          must include the PSU. PS-8622 (6MF2862-2AA00) is the high-voltage 12 W module: data sheet (distributor
+          copy) ''supply voltage / at DC: 82.5 ... 286 V'', ''supplied active power (total) / of power
+          supply unit / maximum: 12 W'' (5.15 V bus 9 W, 28 V bus 12 W), 30 x 132 x 124 mm. Its ''consumed
+          active power / of the module / maximum: 18 mW'' is clearly not the input power; input power
+          and inrush are not stated. Ethernet speed is not stated on the Mall page, so no port_groups
+          are given.'
+        verified: false
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 82.5
+        input_v_max: 286
+        supply_option: Separate PS-8622 module 6MF2862-2AA00 (82.5-286 VDC); PS-8620 is the 24-60 VDC
+          version
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 15.0
+        power_basis: assumed
+        power_note: 'Assumed: the PS-8622 can deliver at most 12 W to the CPU and I/O bus; 12 W / ~0.8
+          efficiency = 15 W input. No input-power figure is published for the PS-8622.'
+        inrush_basis: not_given
+        sources:
+        - https://mall.industry.siemens.com/mall/tr/tr/Catalog/Product/6MF2803-1AA00
+        - https://novapart.co/datasheet/farnell:3555595/
+        - https://novapart.co/products/6MF2862-2AA00/power-supply-ps-8622-253-vdc-12-w-screw-terminal
       mid:
         model: SICAM A8000 CP-8050
-        ordering_code: 6MF2805-0AA00
+        ordering_code: 6MF2805-0AA00 + PS-8642 6MF2864-2AA00
         description: Full A8000 master CPU, the closest like-for-like data concentrator (IEC 61850 client,
           DNP3/Modbus/IEC 104 server to the DCS)
         url: https://mall.industry.siemens.com/mall/en/oeii/Catalog/Product/6MF28050AA00
-        notes: Order number confirmed on the Siemens Industry Mall.
-        verified: true
+        notes: 'Order number confirmed on the Siemens Industry Mall. M14 changed the ordering code from
+          6MF2805-0AA00. M14: A8000 catalogue excerpt: CP-8050 has ''2 x RJ45 (Ethernet)'' on the unit
+          plus ''10 x RJ45 (Ethernet) with optional CI modules''. Siemens Mall lists the CP-8050 (net
+          weight 0.423 kg) but names no supply module or data. PS-8642 data sheet (distributor copy):
+          ''PS-8642 POWER SUPPLY 110-220VDC or 230VAC 45W'' - nominal range only, no tolerance, input
+          current or inrush. input_v_min/max are that nominal range. The PS-8642 is chosen as the larger
+          110-220 V module (PS-8622, 12 W, also covers 125 VDC); confirm the right module with Siemens
+          for the I/O fitted. Ethernet speed not stated, so no port_groups.'
+        verified: false
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 110
+        input_v_max: 220
+        supply_option: 'Separate PS-8642 module 6MF2864-2AA00: 110-220 VDC or 230 VAC, 45 W output'
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 56.0
+        power_basis: assumed
+        power_note: 'Assumed upper bound: PS-8642 rated output 45 W / ~0.8 efficiency = 56 W input. No
+          input-power figure is published for the PS-8642 or the CP-8050.'
+        inrush_basis: not_given
+        sources:
+        - https://mall.industry.siemens.com/mall/en/oeii/Catalog/Product/6MF28050AA00
+        - https://automationtrader.com/en/products/siemens/6mf2864-2aa00/downloads/6mf2864-2aa00_datasheet_en_automation-trader.pdf
+        - https://pdf.directindustry.com/pdf/siemens-energy-automation-smart-grid/sicam-a8000-series-operation-telecontrol-automation-smallest-spaces/30064-959712.html
       high:
         model: SICAM A8000 CP-8050 (redundant pair) + CI Ethernet expansion modules
-        ordering_code: 6MF2805-0AA00
+        ordering_code: 2 x 6MF2805-0AA00 + 2 x PS-8642 6MF2864-2AA00 + CI Ethernet modules (CI codes not
+          verified)
         description: Redundant CP-8050 pair with extra Ethernet interface modules
         url: https://www.siemens.com/ja-jp/products/sicam/a8000-cp8050/
-        notes: The redundancy architecture and CI module order numbers are not web-verified.
-        verified: true
+        notes: 'The redundancy architecture and CI module order numbers are not web-verified. M14 changed
+          the ordering code from 6MF2805-0AA00. M14: Two CPUs, each fed by its own PS-8642 module (two
+          branch feeds, 56 W assumed each). A8000 catalogue excerpt: CP-8050 has ''2 x RJ45 (Ethernet)''
+          on the unit plus ''10 x RJ45 (Ethernet) with optional CI modules''. Siemens Mall lists the CP-8050
+          (net weight 0.423 kg) but names no supply module or data. PS-8642 data sheet (distributor copy):
+          ''PS-8642 POWER SUPPLY 110-220VDC or 230VAC 45W'' - nominal range only, no tolerance, input
+          current or inrush. input_v_min/max are that nominal range. The PS-8642 is chosen as the larger
+          110-220 V module (PS-8622, 12 W, also covers 125 VDC); confirm the right module with Siemens
+          for the I/O fitted. Ethernet speed not stated, so no port_groups.'
+        verified: false
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 110
+        input_v_max: 220
+        supply_option: 'Separate PS-8642 module 6MF2864-2AA00: 110-220 VDC or 230 VAC, 45 W output'
+        supply_ok: true
+        power_supplies: 2
+        unit_power_w: 112.0
+        power_basis: assumed
+        power_note: 'Assumed upper bound: two PS-8642 at 45 W output / ~0.8 efficiency = 56 W each, 112
+          W total. No input-power figure is published.'
+        inrush_basis: not_given
+        sources:
+        - https://www.siemens.com/ja-jp/products/sicam/a8000-cp8050/
+        - https://mall.industry.siemens.com/mall/en/oeii/Catalog/Product/6MF28050AA00
+        - https://automationtrader.com/en/products/siemens/6mf2864-2aa00/downloads/6mf2864-2aa00_datasheet_en_automation-trader.pdf
+        - https://pdf.directindustry.com/pdf/siemens-energy-automation-smart-grid/sicam-a8000-series-operation-telecontrol-automation-smallest-spaces/30064-959712.html
   - make: Hitachi Energy
     manufacturer: Hitachi Energy
     tiers:
@@ -201,21 +466,101 @@ records:
         ordering_code: 540CMD01
         description: Compact RTU540 CMU
         url: https://www.hitachienergy.com/jp/ja/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu540-product-line1
-        notes: 1KGT number not verified.
+        notes: '1KGT number not verified. M14: DISCONTINUED: Hitachi Energy''s RTU540 page says the product
+          line is no longer available and points to the RTU530 line as its replacement. Published 540CMD01
+          data: DIN rail, metal housing, supply ''DC 24-125V'', 4 x serial (RS-232/RS-485), 2 x Ethernet
+          (10/100BaseT), 2 x USB, RTU500 I/O expansion bus. 125 VDC is the top of the published nominal
+          range; the tolerance above it (battery float voltage) is not stated, so confirm before use.
+          Power consumption, dimensions and inrush not given; the 1KGT ordering number was not found.'
         verified: false
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 24
+        input_v_max: 125
+        supply_option: Built-in supply, DC 24-125 V (nominal range as published)
+        supply_ok: true
+        power_supplies: 1
+        inrush_basis: not_given
+        port_groups:
+        - ports: ETH1-ETH2
+          count: 2
+          speed: 100M
+          media: RJ45
+          kind: fixed
+          usable_for: any
+        sources:
+        - https://www.hitachienergy.com/jp/ja/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu540-product-line1
       mid:
         model: RTU560 communication unit 560CMR02 R0001
-        ordering_code: 1KGT036300R0001
+        ordering_code: 1KGT036300R0001 (+ 560PSU01 rack PSU, believed 1KGT006600R0002)
         description: RTU560 CMU, 6 serial + 2 Ethernet ports, battery-backed RTC
         url: https://proax.ca/en/product/1108941/abb1kgt036300r0001
-        notes: Order code confirmed at a distributor (Proax).
-        verified: true
+        notes: 'Order code confirmed at a distributor (Proax). M14 changed the ordering code from 1KGT036300R0001.
+          M14: 560CMR02 data sheet (Scribd mirror, (c) 2018 ABB): Ethernet E1 and E2 ''Type IEEE 802.3,
+          10/100BaseT'', RJ45; serial ''RS232C or RS485''; ordering ''560CMR02 R0001 1KGT036300R0001''.
+          Hitachi Energy page: ''2x Ethernet; 6x serial (RS-232/RS-485); USB for webserver access''. The
+          board draws from the rack supply. Rack supply 560PSU01: Hitachi Energy''s RTU560 page lists
+          ''560PSU01: 110...220 V DC input; 5 and 24 V DC output; suitable for redundant supply in 560MPR03/560SFR02''
+          (560PSR00 is the 24-60 VDC version). Proax sells 1KGT006600R0002 with the same description (''Power
+          supply unit for RTU560 racks'', 110-220 VDC, redundant in 560MPR03/560SFR02) and an invoice
+          text ''110...220 VDC, 44.3W''; that the code is the 560PSU01 and that 44.3 W is its rating are
+          inferred. Only the nominal 110-220 VDC range is published; input power, inrush and the rack
+          (560MPR03/560SFR02) height were not found.'
+        verified: false
+        height_u: 0
+        mounting_kind: plug_in
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 110
+        input_v_max: 220
+        supply_option: Powered from the RTU560 rack supply 560PSU01 (110-220 VDC nominal)
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 44.3
+        power_basis: assumed
+        power_note: 'Assumed: 44.3 W from Proax''s invoice text for the 110-220 VDC RTU560 rack PSU (unlabelled,
+          taken as the PSU rating and so an upper bound for the CMU plus rack); no input-power figure
+          published'
+        inrush_basis: not_given
+        port_groups:
+        - ports: E1-E2
+          count: 2
+          speed: 100M
+          media: RJ45
+          kind: fixed
+          usable_for: any
+        sources:
+        - https://www.scribd.com/document/703961666/560CMR02-DS-en
+        - https://www.hitachienergy.com/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu560-product-line
+        - https://proax.ca/en/product/1108941/abb1kgt036300r0001
+        - https://proax.ca/en/product/2568173/abb1kgt006600r0002
       high:
         model: RTU560 communication unit 560CMG10
         description: Higher-performance RTU560 CMU for large data concentrators
         url: https://www.hitachienergy.com/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu560-product-line
-        notes: 1KGT number not verified.
+        notes: '1KGT number not verified. M14: Probably not a current part: Hitachi Energy''s RTU560 product-line
+          page lists only the 560CMR01 and 560CMR02 communication units, and no 560CMG10 data sheet, ordering
+          code or distributor listing was found. Kept as instructed; ask Hitachi Energy for the current
+          high-end CMU. Supply range shown is the 560PSU01 rack supply. Rack supply 560PSU01: Hitachi
+          Energy''s RTU560 page lists ''560PSU01: 110...220 V DC input; 5 and 24 V DC output; suitable
+          for redundant supply in 560MPR03/560SFR02'' (560PSR00 is the 24-60 VDC version). Proax sells
+          1KGT006600R0002 with the same description (''Power supply unit for RTU560 racks'', 110-220 VDC,
+          redundant in 560MPR03/560SFR02) and an invoice text ''110...220 VDC, 44.3W''; that the code
+          is the 560PSU01 and that 44.3 W is its rating are inferred. Only the nominal 110-220 VDC range
+          is published; input power, inrush and the rack (560MPR03/560SFR02) height were not found.'
         verified: false
+        mounting_kind: plug_in
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 110
+        input_v_max: 220
+        supply_option: Would be powered from the RTU560 rack supply 560PSU01 (110-220 VDC nominal)
+        inrush_basis: not_given
+        height_u: 0
+        sources:
+        - https://www.hitachienergy.com/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu560-product-line
   sources:
   - https://selinc.com/api/download/107948
   - https://cms-cdn.selinc.com/assets/Literature/Publications/Product%20Catalogs/Catalog%20Sections/SEL%20Automation.pdf
@@ -223,6 +568,8 @@ records:
   - https://mall.industry.siemens.com/mall/tr/tr/Catalog/Product/6MF2803-1AA00
   - https://mall.industry.siemens.com/mall/en/oeii/Catalog/Product/6MF28050AA00
   - https://proax.ca/en/product/1108941/abb1kgt036300r0001
+  - https://selinc.com/api/download/107766/
+  - https://manuals.plus/m/d53b3e995df9a4a04a808a7672d28e8e9f850c14abb33a3922d0e5950e1bdfd8.pdf
 - part_id: SEL-2488
   kind: device
   description: GPS Clock with Antenna and accessories (SNTP/IRIG-B), 125VDC redundant, 100mbps SFP ports
@@ -288,6 +635,13 @@ records:
       pipe-mount kit are separate line items in this BOM.
     mounting_kind: rack
     height_u: 1
+    inrush_a: 8
+    inrush_basis: datasheet
+    inrush_note: 'SEL-9330-A (125-250 V PSU, 88-300 VDC / 85-264 VAC): ''Peak Inrush: 8 A'', burden DC
+      < 45 W, AC < 75 VA; interruption 50 ms at 125 V. Per PSU; with two A-type PSUs fitted, each feed
+      sees 8 A. (SEL-9330-C 24-48 V PSU: 18 A.) SEL-2488 data sheet PDS2488-01, date code 20260331.'
+    input_v_min: 88
+    input_v_max: 300
   alternatives:
   - make: Meinberg
     manufacturer: Meinberg Funkuhren GmbH & Co. KG
@@ -298,55 +652,178 @@ records:
         description: Compact IEEE 1588 PTP grandmaster and NTP server with GNSS receiver and IRIG/pulse
           outputs; lower cost than the LANTIME range
         url: https://www.meinbergglobal.com/english/productinfo/microsync.htm
-        notes: Replaces LANTIME M300/GPS, which Meinberg now lists only in its product archive (discontinued).
+        notes: 'Replaces LANTIME M300/GPS, which Meinberg now lists only in its product archive (discontinued).
           Order code is configured per order (receiver, PSU, outputs); confirm a 125 VDC supply option
-          and substation (IEC 61850-3) rating with Meinberg.
+          and substation (IEC 61850-3) rating with Meinberg. M14: microSyncHR data sheet (revision October
+          28, 2025): ''Nominal Voltage UN = 48 V DC'', ''Max. Voltage Range Umax = 20-60 V DC'', DC10
+          variant 24 V / 10-36 V DC, ''Nominal Current IN = 0.63 A''; ''Housing Type 9.5" (Half-Rack),
+          1U'', 2.2 kg; LAN0-LAN3 = 4 x SFP (LAN2/3 PTP-capable). No AC/DC or redundant-PSU variant on
+          the data sheet, so it cannot run from 125 VDC station DC without a DC/DC converter. voltage_v
+          is the data sheet''s 48 V nominal. Meinberg''s manual list also shows microSync RX AC/DC models,
+          not researched.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 48
+        input_v_min: 20
+        input_v_max: 60
+        supply_option: 'DC only: standard 20-60 VDC (48 V nominal) or DC10 10-36 VDC; no 125 VDC or 230
+          VAC variant listed'
+        supply_ok: false
+        power_supplies: 1
+        unit_power_w: 30.2
+        power_basis: computed
+        power_note: Nominal current 0.63 A at 48 VDC nominal = 30.2 W
+        inrush_basis: not_given
+        sources:
+        - https://www.meinbergglobal.com/download/docs/datasheets/english/ds_microsync_hr.pdf
+        - https://www.meinbergglobal.com/english/productinfo/microsync.htm
       mid:
         model: LANTIME M600/GPS PTP (LANTIME PTP Grandmaster)
         ordering_code: LANTIME M600/GPS/PTPv2
         description: 1U NTP/PTP grandmaster with integrated GPS receiver and IRIG-B outputs; redundant
           PSU option; closest like-for-like
         url: https://www.meinbergglobal.com/english/products/lantime-m600-gps-ptpv2.htm
-        notes: Current product page found (some older M600 variant pages are archived). Configured per
-          order; confirm the 125 VDC PSU variant and IEC 61850-3 status with Meinberg.
-        verified: true
+        notes: 'Current product page found (some older M600 variant pages are archived). Configured per
+          order; confirm the 125 VDC PSU variant and IEC 61850-3 status with Meinberg. M14: DISCONTINUED:
+          Meinberg''s page says ''This product is no longer available'' and that it ''has been discontinued
+          and has been replaced with: LANTIME M1000''. Archived specs: 1U 19-inch module case 483 x 350
+          mm, 5 x RJ45 10/100 (one PTP-capable), 85-264 VAC. The input URL (lantime-m600-gps-ptpv2.htm)
+          now shows a 3U/84HP modular grandmaster with PSU options AD10 90-265 VAC / 90-250 VDC, DC20,
+          DC10, ''Redundant power supplies available'', ''50W (max. 100W)'' - a different product. supply_ok
+          is false for 125 VDC on the archived M600; the M1000/M1000S (high tier) is the current replacement.'
+        verified: false
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 85-264 VAC 50/60 Hz only on the archived product page; no DC option listed
+        supply_ok: false
+        power_supplies: 1
+        unit_power_w: 25.0
+        power_basis: datasheet_typical
+        power_note: 'Archived product page: power consumption ''25W'' (not stated as max)'
+        inrush_basis: not_given
+        sources:
+        - https://www.meinbergglobal.com/english/archive/ptp-time-server-gps.htm
+        - https://www.meinbergglobal.com/english/products/lantime-m600-gps-ptpv2.htm
       high:
         model: IMS-LANTIME M1000S
-        ordering_code: IMS-LANTIME M1000S
+        ordering_code: IMS-LANTIME M1000S with 2 x IMS-PWR AD10
         description: Modular time server platform with redundant receivers/PSUs and many I/O cards
         url: https://www.meinbergglobal.com/download/docs/shortinfo/german/info_ims-lantime-m1000-s.pdf
-        notes: Model confirmed by a Meinberg short-info PDF; the older IMS-LANTIME M1000 page is in Meinberg's
+        notes: 'Model confirmed by a Meinberg short-info PDF; the older IMS-LANTIME M1000 page is in Meinberg''s
           archive, so check the M1000S is still current. Configured per order. Substation (IEC 61850-3)
-          rating not confirmed.
+          rating not confirmed. M14 changed the ordering code from IMS-LANTIME M1000S. M14: M1000S data
+          sheet rev 2026.0930.1604: ''IMS-PWR: Bis zu zwei redundante Netzteile'', 19-inch 1 HE/84 TE
+          housing; CPU-C05F1 1 x 10/100 RJ45 or CPU-C15G2 1 x 100/1000BASE-T RJ45 + 1 x 1000BASE-T SFP;
+          4 to 16 extra network ports by expansion. PWR-AD10 info sheet rev 2025.1208.1322: internal fuse
+          T4A/250V; no inrush figure in either sheet. The 100 W figure is the two-PSU system maximum;
+          per feed the PWR-AD10 Pmax is 50 W.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 90
+        input_v_max: 250
+        supply_option: 'IMS-PWR AD10: 90-265 VAC / 90-250 VDC (rated 100-240 VAC / 100-200 VDC); DC20/DC10
+          do not cover 125 VDC'
+        supply_ok: true
+        power_supplies: 2
+        unit_power_w: 100.0
+        power_basis: datasheet_max
+        power_note: 'Data sheet: Pmax = 50 W with one PWR module, 100 W with two PWR modules; PWR-AD10
+          Pmax 50 W each'
+        inrush_basis: not_given
+        sources:
+        - https://www.meinbergglobal.com/download/docs/shortinfo/german/info_ims-lantime-m1000-s.pdf
+        - https://www.meinberg.de/download/docs/shortinfo/english/info_pwr-ad10.pdf
   - make: Arbiter Systems
     manufacturer: Arbiter Systems, Inc.
     tiers:
       low:
         model: Model 1201B/C GNSS Synchronized Clock (100 ns)
-        ordering_code: 1201B/C
+        ordering_code: 1201B/C with Power Supply A01 + B01
         description: Compact utility-grade GNSS clock with IRIG-B outputs and optional NTP
         url: https://arbiter.com/catalog/product/model-1201b-c-gnss-satellite-precision-time-synchronized-clock-100ns.php
-        notes: Arbiter catalogue page confirmed. Power-supply and output options are chosen from Arbiter's
+        notes: 'Arbiter catalogue page confirmed. Power-supply and output options are chosen from Arbiter''s
           option list (https://www.arbiter.com/catalog/options/index.php); the 125 VDC option code was
-          not read.
+          not read. M14 changed the ordering code from 1201B/C. M14: Data sheet PD0053800I: ''Accommodates
+          any combination of the two available power supplies in a single or redundant configuration'';
+          438 x 280 x 44 mm, 1U; COM1 RS-232/RS-422/485, COM2 RS-232; network time only via optional NTP/PTP
+          server module. Inrush not specified.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 100
+        input_v_max: 350
+        supply_option: 'Option A01 (and B01 for the second supply): 100-240 VAC 47-440 Hz / 100-350 VDC'
+        supply_ok: true
+        power_supplies: 2
+        unit_power_w: 30.0
+        power_basis: datasheet_max
+        power_note: 'Data sheet: universal supply 100-350 Vdc 30 W maximum (AC: 20 VA max); 24-48 Vdc
+          supply 30 W max'
+        inrush_basis: not_given
+        sources:
+        - https://www.arbiter.com/files/product-attachments/1201.pdf
+        - https://arbiter.com/catalog/product/model-1201b-c-gnss-satellite-precision-time-synchronized-clock-100ns.php
       mid:
         model: Model 1202B/C GNSS Synchronized Clock (100 ns)
-        ordering_code: 1202B/C
+        ordering_code: 1202B/C with Power Supply A01 + B01
         description: Utility GNSS clock with more outputs and network time options
         url: https://arbiter.com/catalog/product/model-1202b-c-gnss-synchronized-clock-100ns-.php
-        notes: Arbiter catalogue page confirmed; options as for the 1201B/C.
-        verified: true
+        notes: 'Arbiter catalogue page confirmed; options as for the 1201B/C. M14 changed the ordering
+          code from 1202B/C. M14: Catalogue page confirms supply options A01/B01 ''100 Vac to 240 Vac,
+          100 Vdc to 350 Vdc'', ''Redundant power supply available'', 425 x 280 x 44 mm with 1 RU rack
+          kit, NTP/PTP server options F06/F07/F08. Power consumption not found (the data-sheet excerpt
+          showed a ''Power Requirements'' heading with no values); the sibling 1201B/C and 1206B/C are
+          rated 30 W and 75 W max on DC.'
+        verified: false
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 100
+        input_v_max: 350
+        supply_option: 'Option A01 / B01: 100-240 VAC, 100-350 VDC (A02/B02: 24-48 VDC)'
+        supply_ok: true
+        power_supplies: 2
+        inrush_basis: not_given
+        sources:
+        - https://arbiter.com/catalog/product/model-1202b-c-gnss-synchronized-clock-100ns-.php
+        - https://pdf.directindustry.com/pdf/arbiter-systems/model-1202b-c-gnss-synchronized-clock/58762-812279.html
       high:
         model: Model 1206B/C GNSS Synchronized Clock (40 ns)
-        ordering_code: 1206B/C
+        ordering_code: 1206B/C with Power Supply A01 + B01
         description: Higher-accuracy (40 ns) GNSS clock with expanded outputs and network time options
         url: https://arbiter.com/catalog/product/model-1206b-c-gnss-satellite-precision-time-synchronized-clock-40ns.php
-        notes: Replaces the 1088B, which Arbiter marks DISCONTINUED. PTP support and option codes were
-          not read; check the 1206 data sheet.
+        notes: 'Replaces the 1088B, which Arbiter marks DISCONTINUED. PTP support and option codes were
+          not read; check the 1206 data sheet. M14 changed the ordering code from 1206B/C. M14: Data sheet
+          PD0056700C: 438 x 350 x 66 mm, ''19 in, 1.5 Rack Unit'' (counted as 2U); ''3 Ethernet ports;
+          10/100 BT (standard) or Fiber (optional)'' (D01-D04); single or redundant supplies. Inrush not
+          specified.'
         verified: true
+        height_u: 2
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 100
+        input_v_max: 350
+        supply_option: 'Universal supply (A01/B01): 100-240 VAC 47-440 Hz / 100-350 VDC'
+        supply_ok: true
+        power_supplies: 2
+        unit_power_w: 75.0
+        power_basis: datasheet_max
+        power_note: 'Data sheet: ''100 Vdc to 350 Vdc, 75 W maximum'' (AC 20 VA max; 24-48 Vdc 75 W max)'
+        inrush_basis: not_given
+        sources:
+        - https://www.arbiter.com/files/product-attachments/1206.pdf
+        - https://arbiter.com/catalog/product/model-1206b-c-gnss-satellite-precision-time-synchronized-clock-40ns.php
   sources:
   - https://selinc.com/api/download/105748
   - https://selinc.com/api/download/104225
@@ -395,32 +872,117 @@ records:
     height_u: 5
     height_note: 'Axion system: 5U rack/panel or surface mount (10-slot, 4-slot, dual 4-slot); the height
       belongs to the SEL-2242 chassis, counted once here'
+    inrush_a: 17
+    inrush_basis: datasheet
+    inrush_note: 'SEL-2243 power coupler, high-voltage model (125-250 VDC nominal, 85-300 VDC operating):
+      ''Max Inrush 17 A'' (test voltage not stated); max DC burden 75 W, max AC burden 160 VA; interruption
+      50 ms at 125 V. Per coupler; with redundant couplers each feed sees 17 A. SEL-2243 data sheet PDS2243-01,
+      date code 20240716.'
+    input_v_min: 85
+    input_v_max: 300
   alternatives:
   - make: Siemens
     manufacturer: Siemens AG (Smart Infrastructure)
     tiers:
       low:
         model: SICAM A8000 CP-8031 + power supply + DI modules
-        ordering_code: 6MF2803-1AA00
+        ordering_code: 6MF2803-1AA00 + PS-8622 6MF2862-2AA00 + DI modules
         description: Smaller A8000 CPU with local I/O modules on DIN rail
         url: https://mall.industry.siemens.com/mall/tr/tr/Catalog/Product/6MF2803-1AA00
-        notes: CPU order number confirmed; add a PS module and DI modules (see the SEL-2243 and SEL-2244-2
-          entries).
-        verified: true
+        notes: 'CPU order number confirmed; add a PS module and DI modules (see the SEL-2243 and SEL-2244-2
+          entries). M14 changed the ordering code from 6MF2803-1AA00. M14: Siemens Mall: ''CP-8031 is
+          a master module which supports 2x RJ45 Ethernet and 2x serial interfaces. Power supply PS-862x
+          or PS-864x is required. Singular or redundant power supply is supported. Up to 8x SICAM A8000
+          I/O modules can be connected right beside the power supply.'' Net weight 0.414 kg. So the CPU
+          has no supply of its own and the ordering code must include the PSU. PS-8622 (6MF2862-2AA00)
+          is the high-voltage 12 W module: data sheet (distributor copy) ''supply voltage / at DC: 82.5
+          ... 286 V'', ''supplied active power (total) / of power supply unit / maximum: 12 W'' (5.15
+          V bus 9 W, 28 V bus 12 W), 30 x 132 x 124 mm. Its ''consumed active power / of the module /
+          maximum: 18 mW'' is clearly not the input power; input power and inrush are not stated. DI modules
+          draw from the same PS-8622 (12 W output limit); binary-input wetting current is extra.'
+        verified: false
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 82.5
+        input_v_max: 286
+        supply_option: Separate PS-8622 module 6MF2862-2AA00 (82.5-286 VDC); PS-8620 is the 24-60 VDC
+          version
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 15.0
+        power_basis: assumed
+        power_note: 'Assumed: the PS-8622 can deliver at most 12 W to the CPU and I/O bus; 12 W / ~0.8
+          efficiency = 15 W input. No input-power figure is published for the PS-8622.'
+        inrush_basis: not_given
+        sources:
+        - https://mall.industry.siemens.com/mall/tr/tr/Catalog/Product/6MF2803-1AA00
+        - https://novapart.co/datasheet/farnell:3555595/
+        - https://novapart.co/products/6MF2862-2AA00/power-supply-ps-8622-253-vdc-12-w-screw-terminal
       mid:
         model: SICAM A8000 CP-8050 + power supply + DI modules
-        ordering_code: 6MF2805-0AA00
+        ordering_code: 6MF2805-0AA00 + PS-8642 6MF2864-2AA00 + DI modules
         description: Full A8000 CPU with local I/O, the closest like-for-like
         url: https://mall.industry.siemens.com/mall/en/oeii/Catalog/Product/6MF28050AA00
-        notes: CPU order number confirmed.
-        verified: true
+        notes: 'CPU order number confirmed. M14 changed the ordering code from 6MF2805-0AA00. M14: A8000
+          catalogue excerpt: CP-8050 has ''2 x RJ45 (Ethernet)'' on the unit plus ''10 x RJ45 (Ethernet)
+          with optional CI modules''. Siemens Mall lists the CP-8050 (net weight 0.423 kg) but names no
+          supply module or data. PS-8642 data sheet (distributor copy): ''PS-8642 POWER SUPPLY 110-220VDC
+          or 230VAC 45W'' - nominal range only, no tolerance, input current or inrush. input_v_min/max
+          are that nominal range. The PS-8642 is chosen as the larger 110-220 V module (PS-8622, 12 W,
+          also covers 125 VDC); confirm the right module with Siemens for the I/O fitted.'
+        verified: false
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 110
+        input_v_max: 220
+        supply_option: 'Separate PS-8642 module 6MF2864-2AA00: 110-220 VDC or 230 VAC, 45 W output'
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 56.0
+        power_basis: assumed
+        power_note: 'Assumed upper bound: PS-8642 rated output 45 W / ~0.8 efficiency = 56 W input. No
+          input-power figure is published for the PS-8642 or the CP-8050.'
+        inrush_basis: not_given
+        sources:
+        - https://mall.industry.siemens.com/mall/en/oeii/Catalog/Product/6MF28050AA00
+        - https://automationtrader.com/en/products/siemens/6mf2864-2aa00/downloads/6mf2864-2aa00_datasheet_en_automation-trader.pdf
+        - https://pdf.directindustry.com/pdf/siemens-energy-automation-smart-grid/sicam-a8000-series-operation-telecontrol-automation-smallest-spaces/30064-959712.html
       high:
         model: SICAM A8000 CP-8050 with redundant power supplies and remote I/O lines
-        ordering_code: 6MF2805-0AA00
+        ordering_code: 6MF2805-0AA00 + 2 x PS-8642 6MF2864-2AA00 + I/O line modules (I/O codes not verified)
         description: Adds redundant supply and Ethernet-connected I/O expansion
         url: https://www.siemens.com/ja-jp/products/sicam/a8000-cp8050/
-        notes: Expansion module order numbers not verified.
-        verified: true
+        notes: 'Expansion module order numbers not verified. M14 changed the ordering code from 6MF2805-0AA00.
+          M14: A8000 catalogue excerpt: CP-8050 has ''2 x RJ45 (Ethernet)'' on the unit plus ''10 x RJ45
+          (Ethernet) with optional CI modules''. Siemens Mall lists the CP-8050 (net weight 0.423 kg)
+          but names no supply module or data. PS-8642 data sheet (distributor copy): ''PS-8642 POWER SUPPLY
+          110-220VDC or 230VAC 45W'' - nominal range only, no tolerance, input current or inrush. input_v_min/max
+          are that nominal range. The PS-8642 is chosen as the larger 110-220 V module (PS-8622, 12 W,
+          also covers 125 VDC); confirm the right module with Siemens for the I/O fitted.'
+        verified: false
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 110
+        input_v_max: 220
+        supply_option: 'Separate PS-8642 module 6MF2864-2AA00: 110-220 VDC or 230 VAC, 45 W output'
+        supply_ok: true
+        power_supplies: 2
+        unit_power_w: 56.0
+        power_basis: assumed
+        power_note: 'Assumed upper bound: PS-8642 rated output 45 W / ~0.8 efficiency = 56 W. With redundant
+          supplies sharing one CPU the total draw does not double; 56 W is the per-feed worst case.'
+        inrush_basis: not_given
+        sources:
+        - https://www.siemens.com/ja-jp/products/sicam/a8000-cp8050/
+        - https://mall.industry.siemens.com/mall/en/oeii/Catalog/Product/6MF28050AA00
+        - https://automationtrader.com/en/products/siemens/6mf2864-2aa00/downloads/6mf2864-2aa00_datasheet_en_automation-trader.pdf
+        - https://pdf.directindustry.com/pdf/siemens-energy-automation-smart-grid/sicam-a8000-series-operation-telecontrol-automation-smallest-spaces/30064-959712.html
   - make: Hitachi Energy
     manufacturer: Hitachi Energy
     tiers:
@@ -429,24 +991,95 @@ records:
         ordering_code: 540CMD01
         description: Compact DIN-rail RTU with on-board I/O
         url: https://www.hitachienergy.com/jp/ja/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu540-product-line1
-        notes: 1KGT number not verified.
+        notes: '1KGT number not verified. M14: DISCONTINUED: Hitachi Energy''s RTU540 page says the product
+          line is no longer available and points to the RTU530 line as its replacement. Published 540CMD01
+          data: DIN rail, metal housing, supply ''DC 24-125V'', 4 x serial (RS-232/RS-485), 2 x Ethernet
+          (10/100BaseT), 2 x USB, RTU500 I/O expansion bus. 125 VDC is the top of the published nominal
+          range; the tolerance above it (battery float voltage) is not stated, so confirm before use.
+          Power consumption, dimensions and inrush not given; the 1KGT ordering number was not found.'
         verified: false
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 24
+        input_v_max: 125
+        supply_option: Built-in supply, DC 24-125 V (nominal range as published)
+        supply_ok: true
+        power_supplies: 1
+        inrush_basis: not_given
+        sources:
+        - https://www.hitachienergy.com/jp/ja/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu540-product-line1
       mid:
         model: RTU560 rack with 560CMR02 CMU + binary input boards
-        ordering_code: 1KGT036300R0001
+        ordering_code: 1KGT036300R0001 (CMU) + 560PSU01 (believed 1KGT006600R0002) + RTU560 rack and 560BIR01
+          boards (codes not verified)
         description: Rack RTU with CMU (6 serial, 2 Ethernet) and plug-in I/O boards
         url: https://proax.ca/en/product/1108941/abb1kgt036300r0001
-        notes: The CMU code is confirmed; rack, PSU and I/O board codes are not verified.
-        verified: true
+        notes: 'The CMU code is confirmed; rack, PSU and I/O board codes are not verified. M14 changed
+          the ordering code from 1KGT036300R0001. M14: 560CMR02 data sheet (Scribd mirror, (c) 2018 ABB):
+          Ethernet E1 and E2 ''Type IEEE 802.3, 10/100BaseT'', RJ45; serial ''RS232C or RS485''; ordering
+          ''560CMR02 R0001 1KGT036300R0001''. Hitachi Energy page: ''2x Ethernet; 6x serial (RS-232/RS-485);
+          USB for webserver access''. The board draws from the rack supply. Rack supply 560PSU01: Hitachi
+          Energy''s RTU560 page lists ''560PSU01: 110...220 V DC input; 5 and 24 V DC output; suitable
+          for redundant supply in 560MPR03/560SFR02'' (560PSR00 is the 24-60 VDC version). Proax sells
+          1KGT006600R0002 with the same description (''Power supply unit for RTU560 racks'', 110-220 VDC,
+          redundant in 560MPR03/560SFR02) and an invoice text ''110...220 VDC, 44.3W''; that the code
+          is the 560PSU01 and that 44.3 W is its rating are inferred. Only the nominal 110-220 VDC range
+          is published; input power, inrush and the rack (560MPR03/560SFR02) height were not found. Hitachi
+          page: 560BIR01 16-channel binary input board for 24-60 V DC and 110/125 V DC; rack height not
+          found, so height_u is left out.'
+        verified: false
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 110
+        input_v_max: 220
+        supply_option: Powered from the RTU560 rack supply 560PSU01 (110-220 VDC nominal)
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 44.3
+        power_basis: assumed
+        power_note: 'Assumed: 44.3 W from Proax''s invoice text for the 110-220 VDC RTU560 rack PSU (unlabelled,
+          taken as the PSU rating and so an upper bound for the CMU plus rack); no input-power figure
+          published'
+        inrush_basis: not_given
+        sources:
+        - https://www.scribd.com/document/703961666/560CMR02-DS-en
+        - https://www.hitachienergy.com/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu560-product-line
+        - https://proax.ca/en/product/1108941/abb1kgt036300r0001
+        - https://proax.ca/en/product/2568173/abb1kgt006600r0002
       high:
         model: RTU560 with 560CMG10 CMU and redundant PSUs
         description: Higher-performance CMU and redundant supplies
         url: https://www.hitachienergy.com/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu560-product-line
-        notes: Not verified.
+        notes: 'Not verified. M14 changed the ordering code from (none). M14: Probably not a current part:
+          Hitachi Energy''s RTU560 product-line page lists only the 560CMR01 and 560CMR02 communication
+          units, and no 560CMG10 data sheet, ordering code or distributor listing was found. Kept as instructed;
+          ask Hitachi Energy for the current high-end CMU. Supply range shown is the 560PSU01 rack supply.
+          Rack supply 560PSU01: Hitachi Energy''s RTU560 page lists ''560PSU01: 110...220 V DC input;
+          5 and 24 V DC output; suitable for redundant supply in 560MPR03/560SFR02'' (560PSR00 is the
+          24-60 VDC version). Proax sells 1KGT006600R0002 with the same description (''Power supply unit
+          for RTU560 racks'', 110-220 VDC, redundant in 560MPR03/560SFR02) and an invoice text ''110...220
+          VDC, 44.3W''; that the code is the 560PSU01 and that 44.3 W is its rating are inferred. Only
+          the nominal 110-220 VDC range is published; input power, inrush and the rack (560MPR03/560SFR02)
+          height were not found.'
         verified: false
+        ordering_code: 560CMG10 (not found) + 2 x 560PSU01 (believed 1KGT006600R0002)
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 110
+        input_v_max: 220
+        supply_option: Would be powered from the RTU560 rack supply 560PSU01 (110-220 VDC nominal)
+        power_supplies: 2
+        inrush_basis: not_given
+        sources:
+        - https://www.hitachienergy.com/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu560-product-line
   sources:
   - https://selinc.com/api/download/97809
   - https://cms-cdn.selinc.com/assets/Literature/Publications/Product%20Catalogs/Catalog%20Sections/SEL%20Automation.pdf
+  - https://selinc.com/api/download/97909
 - part_id: SEL-2242
   kind: device
   description: Chassis/Backpane
@@ -484,6 +1117,9 @@ records:
         url: https://www.siemens.com/en-us/products/sicam/a8000/
         notes: Not web-verified. No orderable chassis item exists, so the low/mid/high tiers do not apply.
         verified: false
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: SICAM A8000 (no chassis; DIN rail)
         description: Same as low
@@ -491,6 +1127,9 @@ records:
         notes: No chassis needed.
         verified: false
         same_as: low
+        height_u: 0
+        mounting_kind: plug_in
+        supply_type: none
       high:
         model: SICAM A8000 (no chassis; DIN rail)
         description: Same as low
@@ -498,6 +1137,9 @@ records:
         notes: No chassis needed.
         verified: false
         same_as: low
+        height_u: 0
+        mounting_kind: plug_in
+        supply_type: none
   - make: Hitachi Energy
     manufacturer: Hitachi Energy
     tiers:
@@ -507,18 +1149,27 @@ records:
         url: https://www.hitachienergy.com/jp/ja/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu540-product-line1
         notes: Not verified.
         verified: false
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: RTU560 subrack (19-inch)
         description: 19-inch RTU560 subrack for CMU, PSU and I/O boards
         url: https://www.hitachienergy.com/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu560-product-line
         notes: Rack type designation and 1KGT number not verified.
         verified: false
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: RTU560 subrack (19-inch) for redundant CMU/PSU
         description: Subrack variant that holds redundant CMU and PSU
         url: https://www.hitachienergy.com/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu560-product-line
         notes: Not verified.
         verified: false
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   sources:
   - https://selinc.com/api/download/97809
   - https://cms-cdn.selinc.com/assets/Literature/Publications/Product%20Catalogs/Catalog%20Sections/SEL%20Automation.pdf
@@ -570,6 +1221,9 @@ records:
         url: https://mall.industry.siemens.com/mall/tr/tr/Catalog/Product/6MF2803-1AA00
         notes: Order number confirmed.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: SICAM A8000 CP-8050
         ordering_code: 6MF2805-0AA00
@@ -577,6 +1231,9 @@ records:
         url: https://mall.industry.siemens.com/mall/en/oeii/Catalog/Product/6MF28050AA00
         notes: Order number confirmed.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: SICAM A8000 CP-8050 (redundant pair)
         ordering_code: 6MF2805-0AA00
@@ -584,6 +1241,9 @@ records:
         url: https://www.siemens.com/ja-jp/products/sicam/a8000-cp8050/
         notes: The redundancy configuration is not verified.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   - make: Hitachi Energy
     manufacturer: Hitachi Energy
     tiers:
@@ -594,6 +1254,9 @@ records:
         url: https://www.hitachienergy.com/jp/ja/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu540-product-line1
         notes: 1KGT number not verified.
         verified: false
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: 560CMR02 R0001
         ordering_code: 1KGT036300R0001
@@ -601,12 +1264,18 @@ records:
         url: https://proax.ca/en/product/1108941/abb1kgt036300r0001
         notes: Order code confirmed at a distributor.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: 560CMG10
         description: Higher-performance RTU560 CMU
         url: https://www.hitachienergy.com/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu560-product-line
         notes: Not verified.
         verified: false
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   sources:
   - https://selinc.com/api/download/97809
   - https://cms-cdn.selinc.com/assets/Literature/Publications/Product%20Catalogs/Catalog%20Sections/SEL%20Automation.pdf
@@ -653,6 +1322,9 @@ records:
         url: https://www.rowse-automation.co.uk/siemens-6mf2862-0aa00
         notes: The order number exists (distributor listing). The voltage range is not web-verified.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: SICAM A8000 PS-8622
         ordering_code: 6MF2862-2AA00
@@ -662,6 +1334,9 @@ records:
         notes: Order number confirmed on the Siemens Industry Mall. Voltage range is from catalogue knowledge;
           verify.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: SICAM A8000 PS-8642
         ordering_code: 6MF2864-2AA00
@@ -671,6 +1346,9 @@ records:
         notes: The name and order number pairing is shown in distributor listings. The role and voltage
           range are not web-verified.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   - make: Hitachi Energy
     manufacturer: Hitachi Energy
     tiers:
@@ -680,18 +1358,27 @@ records:
         url: https://www.hitachienergy.com/jp/ja/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu540-product-line1
         notes: Not verified.
         verified: false
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: RTU560 power supply module (560PSU family), 110-125 VDC variant
         description: Rack PSU module for an RTU560 subrack
         url: https://www.hitachienergy.com/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu560-product-line
         notes: Type designation and 1KGT number not verified.
         verified: false
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: RTU560 redundant power supply modules (2 x 560PSU)
         description: Redundant rack PSUs
         url: https://www.hitachienergy.com/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu560-product-line
         notes: Not verified.
         verified: false
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   sources:
   - https://selinc.com/api/download/97809
   - https://cms-cdn.selinc.com/assets/Literature/Publications/Product%20Catalogs/Catalog%20Sections/SEL%20Automation.pdf
@@ -744,6 +1431,9 @@ records:
           returns that RS item (275-1773) as the top hit, which supports the pairing. Check that the 110
           VDC module accepts 125 VDC +10%.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: SICAM A8000 DI-8112 (16 DI, 110 VDC) x2
         ordering_code: 6MF2811-2AA00
@@ -751,6 +1441,9 @@ records:
         url: https://uk.rs-online.com/web/p/plc-io-modules/2751773
         notes: Same order number as low; see its note.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: SICAM A8000 DI-8113 (16 DI, 220 VDC) x2
         ordering_code: 6MF2811-3AA00
@@ -759,6 +1452,9 @@ records:
         notes: The order number exists; RS lists the 220 VDC module. Listed only to complete the voltage
           range; use DI-8112 for 125 VDC.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   - make: Hitachi Energy
     manufacturer: Hitachi Energy
     tiers:
@@ -768,18 +1464,27 @@ records:
         url: https://www.hitachienergy.com/jp/ja/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu540-product-line1
         notes: Not verified.
         verified: false
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: RTU560 binary input board, 16 DI, 110-125 VDC
         description: RTU560 plug-in 16-point binary input board (two needed for 24 points)
         url: https://www.hitachienergy.com/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu560-product-line
         notes: Board type (23BE-series) and 1KGT number not verified.
         verified: false
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: RTU560 binary input board with SOE time stamping, 110-125 VDC
         description: Higher-performance binary input board
         url: https://www.hitachienergy.com/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu560-product-line
         notes: Not verified.
         verified: false
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   sources:
   - https://selinc.com/api/download/97809
   - https://cms-cdn.selinc.com/assets/Literature/Publications/Product%20Catalogs/Catalog%20Sections/SEL%20Automation.pdf
@@ -818,6 +1523,9 @@ records:
         notes: Code confirmed at distributors and in the Moxa serial cables datasheet. The pinout is Moxa's,
           not SEL's; verify or re-pin.
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: CBL-RJ45F9-150
         ordering_code: CBL-RJ45F9-150
@@ -825,6 +1533,9 @@ records:
         url: https://azcus.digikey.com/en/products/detail/moxa/CBL-RJ45F9-150/14671470
         notes: Code confirmed at Digi-Key; pinout caveat as low.
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: CBL-RJ45SF9-150
         ordering_code: CBL-RJ45SF9-150
@@ -832,6 +1543,9 @@ records:
         url: https://shop.manuauto.com/products/moxa-cbl-rj45sf9-150-serial-cable
         notes: Code confirmed at a distributor; pinout caveat as low.
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   - make: Digi
     manufacturer: Digi International
     tiers:
@@ -843,6 +1557,9 @@ records:
         notes: Part number and description seen in distributor listings (Connection, Westward). Digi pinout;
           verify against SEL.
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: 76000201
         ordering_code: '76000201'
@@ -850,6 +1567,9 @@ records:
         url: https://www.connection.com/product/digi-rj-45-m-to-db9-f-cable-4ft/76000201/347572
         notes: Seen in a distributor listing title. Digi pinout; verify against SEL.
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: 76000645
         ordering_code: '76000645'
@@ -858,6 +1578,9 @@ records:
         notes: Crossover wiring for a direct DTE-to-DTE link; seen at Westward Sales and Fleet Network.
           Digi pinout; verify against SEL.
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   sources:
   - https://selinc.com/api/download/107948
   - https://westwardsales.com/digi-76000240-
@@ -914,6 +1637,14 @@ records:
     mounting_kind: rack
     height_u: 3
     height_note: 19-inch rack or panel mount, 3U
+    inrush_a: 20
+    inrush_basis: datasheet
+    inrush_note: 'SEL-3355 base PSU 125-250 VDC / 120-240 VAC (100-300 VDC, 85-264 VAC): ''Peak inrush
+      20 A''; max burden 189 W continuous, 240 W peak. Optional second PSU is the same unit or a 48 VDC
+      unit (178 W / 225 W peak, inrush not listed). Flyer PF00299, 20250102. Note the BOM''s 91 W is well
+      below the 189 W PSU rating (that is a PSU limit, not the computer''s draw).'
+    input_v_min: 100
+    input_v_max: 300
   alternatives:
   - make: Advantech
     manufacturer: Advantech Co., Ltd.
@@ -923,27 +1654,94 @@ records:
         ordering_code: ECU-4553-R12SAE
         description: Rack-mountable fanless power-automation computer, lower CPU tier, 19-inch rack
         url: https://ipc2u.com/catalog/ecu-4553-r12sae
-        notes: Order code seen at ipc2u. Option-suffix decode and IEC 61850-3 / IEEE 1613 status of this
-          model were not confirmed.
+        notes: 'Order code seen at ipc2u. Option-suffix decode and IEC 61850-3 / IEEE 1613 status of this
+          model were not confirmed. M14: ECU-4553 data sheet (last updated 27-Jun-2018): power ''100 ~
+          240 VAC, 100 ~ 240 VDC'', ''1U Rackmount'', ''4 x 10/100 Base-T RJ-45 ports''; ordering ''ECU-4553-R12SAE
+          TI Cortex A8 Power Automation Computer with 4 x LAN, 16 x COM, 2 x CAN, 1 x IRIG-B''. Certifications
+          listed are only CE and FCC (no IEC 61850-3 / IEEE 1613). Single supply (no redundant option
+          stated). An ARM Cortex-A8 box is far below the SEL-3355''s x86 class; it suits only light gateway
+          duty, not an HMI/engineering workstation.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 100
+        input_v_max: 240
+        supply_option: Built-in supply 100-240 VAC / 100-240 VDC
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 10.0
+        power_basis: datasheet_typical
+        power_note: 'Data sheet: ''Power Consumption (typical) 10 W''; no maximum given'
+        inrush_basis: not_given
+        sources:
+        - https://automation.lubielectronics.com/wp-content/uploads/2022/06/ECU-4553.pdf
+        - https://ipc2u.com/catalog/ecu-4553-r12sae
       mid:
         model: ECU-4784
         ordering_code: ECU-4784-D55SBE
         description: IEC 61850-3 certified substation computer with Intel Core/Xeon class CPU, redundant
           PSU option, closest like-for-like
         url: https://www.walkerindustrial.com/ECU-4784-D55SBE-Advantech-p/ecu-4784-d55sbe.htm
-        notes: Order code seen at Walker Industrial and ipc2u; IEC 61850-3 certification per Advantech
-          press releases. Suffix decode (CPU/PSU) not read; check the ECU-4784 datasheet.
+        notes: 'Order code seen at Walker Industrial and ipc2u; IEC 61850-3 certification per Advantech
+          press releases. Suffix decode (CPU/PSU) not read; check the ECU-4784 datasheet. M14: ECU-4784
+          data sheet (last updated 22-Aug-2016): ''ECU-4784-D55SBE Intel Haswell Core i7 1.7GHz, 8GB RAM,
+          8 x LAN, 10 x COM, 2 x Slot Computer''; Power1/Power2 ''100~240 VAC, 100~240 VDC''; 440 x 280
+          x 88 mm (2U); 8 x 10/100/1000 RJ45. Dual power is the XECU-FSP150-1H35 add-on ordered through
+          CTOS, so this code is single-PSU. D55SBE is missing from the current (2024) data sheet, which
+          lists only Skylake builds, so this Haswell build may be end-of-life; confirm availability with
+          Advantech.'
         verified: true
+        height_u: 2
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 100
+        input_v_max: 240
+        supply_option: Power1 100-240 VAC / 100-240 VDC; second XECU-FSP150-1H35 150 W module (100-240
+          V AC/DC) via Advantech CTOS
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 25.0
+        power_basis: datasheet_typical
+        power_note: '2016 data sheet: ''25 W (ECU-4784-D55SBE/ D56SBE/ C25SAE/ E15SAE) (Typical)''; no
+          maximum given'
+        inrush_basis: not_given
+        sources:
+        - https://f.ipc2u.com/files/add/doc/54c/DSECU-4784.pdf
+        - https://www.walkerindustrial.com/ECU-4784-D55SBE-Advantech-p/ecu-4784-d55sbe.htm
+        - https://advdownload.advantech.com/productfile/PIS/ECU-4784/file/ECU-4784-C3_E2_E3_E4_E5_DS(042624)20240506162307.pdf
       high:
         model: ECU-4784 (alternative build)
         ordering_code: ECU-4784-E56SAE
         description: Another ECU-4784 configuration; Advantech offers ECU-4784 in Core i and Xeon versions
         url: https://walkerindustrial.com/ECU-4784-E56SAE-Advantech-p/ecu-4784-e56sae.htm
-        notes: Code seen at Walker Industrial. That this suffix is the Xeon / higher build is not confirmed.
+        notes: 'Code seen at Walker Industrial. That this suffix is the Xeon / higher build is not confirmed.
           The older UNO-4683 (IEC 61850-3, Core i7, e.g. UNO-4683-7S50) is another option but is an earlier
-          generation.
+          generation. M14: ECU-4784 Xeon data sheet (last updated 5-Mar-2018): ''ECU-4784-E56SAE Intel
+          SkyLake Xeon E3-1505L Quad-core 2.0GHz processor with ECC 16GB RAM, 8xLAN, 10xCOM, 2xExpansion
+          slots'', 35 W typical, 2U 440 x 280 x 88 mm, PSU ''XECU-FSP150-1H35 FSP AC/DC 100 ~ 240V, 150W''.
+          The 2024 data sheet still lists E56SAE with PSU = 1 and E56DAE with PSU = 2.'
         verified: true
+        height_u: 2
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 100
+        input_v_max: 240
+        supply_option: Power1 100-240 VAC / 100-240 VDC; ECU-4784-E56DAE is the same build with 2 PSUs
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 35.0
+        power_basis: datasheet_typical
+        power_note: '2018 data sheet: power consumption ''35W'' (typical); no maximum given; PSU module
+          is FSP 150 W'
+        inrush_basis: not_given
+        sources:
+        - https://dtsheet.com/doc/2822481/advantech-ecu-4784-intel-xeon-iec-61850-3-certified-power...
+        - https://advdownload.advantech.com/productfile/PIS/ECU-4784/file/ECU-4784-C3_E2_E3_E4_E5_DS(042624)20240506162307.pdf
+        - https://walkerindustrial.com/ECU-4784-E56SAE-Advantech-p/ecu-4784-e56sae.htm
   - make: Siemens
     manufacturer: Siemens AG
     tiers:
@@ -952,25 +1750,67 @@ records:
         ordering_code: 6AG4141-5BB17-0FA0
         description: Box/DIN-rail embedded IPC; not substation (IEC 61850-3) rated
         url: https://steinerelectric.com/Catalog/Automation-And-Pneumatics/Industrial-Computer-And-Human-Machine-Interface/Industrial-Computers/Siemens-6AG41415BB170FA0-Siemens-IPC427E-1044846
-        notes: One example configuration listed as IPC427E at Steiner Electric; the order code is configured
-          per build (CPU, RAM, storage, OS).
-        verified: true
+        notes: 'One example configuration listed as IPC427E at Steiner Electric; the order code is configured
+          per build (CPU, RAM, storage, OS). M14: Siemens data sheet for the sibling 6AG4141-5AB17-0FA0:
+          ''SIMATIC IPC427E (Microbox PC)'', ''Type of supply voltage 24 V DC'', 262 x 133 x 55.5 mm.
+          The permissible range, power consumption and inrush are not in that data sheet; the exact 5BB17
+          code was not read. No 125 VDC or 230 VAC variant, so supply_ok is false.'
+        verified: false
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: VDC
+        voltage_v: 24
+        supply_option: 24 VDC only; needs a 125/24 VDC converter on station DC
+        supply_ok: false
+        power_supplies: 1
+        inrush_basis: not_given
+        sources:
+        - https://cdn.shopify.com/s/files/1/0611/1530/2046/files/6AG41415AB170FA0_datasheet_en.pdf
+        - https://steinerelectric.com/Catalog/Automation-And-Pneumatics/Industrial-Computer-And-Human-Machine-Interface/Industrial-Computers/Siemens-6AG41415BB170FA0-Siemens-IPC427E-1044846
       mid:
         model: SIMATIC IPC647E
         ordering_code: 6AG4112-3HR13-4BJ1
         description: 1U 19-inch rack industrial PC; industrial-grade, not IEC 61850-3/IEEE 1613
         url: https://mall.industry.siemens.com/mall/es/WW/Catalog/Product/6AG4112-3HR13-4BJ1
-        notes: The code is on the Siemens Industry Mall, but the listing seen did not name the generation;
-          IPC647E is inferred from the 6AG4112-3 prefix (6AG4114-3 = IPC847E). Configured per build.
+        notes: 'The code is on the Siemens Industry Mall, but the listing seen did not name the generation;
+          IPC647E is inferred from the 6AG4112-3 prefix (6AG4114-3 = IPC847E). Configured per build. M14:
+          Siemens Mall for this exact code: ''SIMATIC IPC647E (Rack PC, 19", 2U)'' - 2U, not the 1U given
+          in the earlier round; ''100/240 V AC industrial power supply unit''; Core i7-8700, 32 GB, 3
+          x GbE RJ45; net weight 14 kg. No DC supply, so supply_ok is false for station DC (it could run
+          from 230 VAC aux). Power consumption and inrush not given.'
         verified: false
+        height_u: 2
+        mounting_kind: rack
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 100/240 V AC industrial power supply unit (AC only in this code)
+        supply_ok: false
+        power_supplies: 1
+        inrush_basis: not_given
+        sources:
+        - https://mall.industry.siemens.com/mall/es/WW/Catalog/Product/6AG4112-3HR13-4BJ1
       high:
         model: SIMATIC IPC847E
         ordering_code: 6AG4114-3MR12-3BX1
         description: 4U 19-inch rack IPC with many expansion slots and redundant PSU options
         url: https://dattech.com.vn/p/6ag4114-3mr12-3bx1/
-        notes: One example configuration listed as 'SIMATIC IPC847E (Rack PC, 19 in, 4HU)'; configured
-          per build. Unlike the SEL-3355, this is not substation-hardened.
-        verified: true
+        notes: 'One example configuration listed as ''SIMATIC IPC847E (Rack PC, 19 in, 4HU)''; configured
+          per build. Unlike the SEL-3355, this is not substation-hardened. M14: Distributor page for this
+          exact code: ''SIMATIC IPC847E (Rack PC, 19", 4HU)'', ''100/240 V AC industrial power supply
+          unit'', Xeon E-2176G, 16 GB, 3 x GbE RJ45, 11 slots. Redundant supply not mentioned for this
+          code (power_supplies 1). No DC supply, so supply_ok is false for station DC. Power consumption
+          and inrush not given.'
+        verified: false
+        height_u: 4
+        mounting_kind: rack
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 100/240 V AC industrial power supply unit (AC only in this code)
+        supply_ok: false
+        power_supplies: 1
+        inrush_basis: not_given
+        sources:
+        - https://dattech.com.vn/p/6ag4114-3mr12-3bx1/
   sources:
   - https://cms-cdn.selinc.com/assets/Literature/Publications/Product%20Catalogs/Catalog%20Sections/SEL%20Automation.pdf
   - https://selinc.com/api/download/102494/
@@ -983,6 +1823,7 @@ records:
   - https://mall.industry.siemens.com/mall/es/WW/Catalog/Product/6AG4112-3HR13-4BJ1
   - https://dattech.com.vn/p/6ag4114-3mr12-3bx1/
   - https://selinc.com/products/comparisons/computing-platforms/
+  - https://cdn.selinc.com/assets/Literature/Product%20Literature/Flyers/3355_PF00299.pdf?v=20191206-204201
 - part_id: SEL-9524B
   kind: device
   description: GPS/GLONASS Antenna
@@ -1030,16 +1871,25 @@ records:
         description: GPS-only antenna for Meinberg GPS receivers (works only with Meinberg clocks)
         notes: Not web-verified; match it to the alternative clock chosen.
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: Meinberg multi-GNSS L1 antenna
         description: GPS/GLONASS/Galileo L1 antenna for Meinberg GNSS receivers
         notes: Not web-verified.
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: Meinberg multi-GNSS antenna kit with surge protector
         description: Antenna, cable and surge protection bundle
         notes: Not web-verified.
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   - make: Arbiter Systems
     manufacturer: Arbiter Systems, Inc.
     tiers:
@@ -1051,16 +1901,25 @@ records:
         notes: Arbiter accessory page confirmed. Works only with Arbiter clocks; Arbiter also sells an
           AS0049000 surge protector kit.
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: Arbiter GNSS antenna kit
         description: Multi-GNSS antenna option
         notes: Not researched.
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: Arbiter antenna kit with in-line amplifier for long runs
         description: For cable runs beyond the standard kit length
         notes: Not researched.
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   sources:
   - https://selinc.com/api/download/111703/?lang=en-us
   - https://selinc.com/api/download/105184
@@ -1099,6 +1958,9 @@ records:
         description: Thinner, higher-loss cable; acceptable for short runs only
         notes: LMR-240 is a real cable type; the assembly part number was not researched.
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: LMR-400 cable assembly with TNC male connectors, 50 ft
         ordering_code: LMR-400 + 2 x TC-400-TM-X
@@ -1107,6 +1969,9 @@ records:
         notes: Built from bulk LMR-400 and two Times TC-400-TM-X TNC male crimp connectors (connector
           confirmed on the Times page); no ready-made assembly part number was researched.
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: LMR-400-FR cable assembly with TNC male connectors, 50 ft
         ordering_code: LMR-400-FR + 2 x TC-400-TM-X
@@ -1115,6 +1980,9 @@ records:
         notes: TC-400-TM-X is listed for LMR-400, LMR-400-DB and LMR-400-FR cable. No ready-made assembly
           number researched.
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   - make: Meinberg
     manufacturer: Meinberg Funkuhren GmbH & Co. KG
     tiers:
@@ -1123,16 +1991,25 @@ records:
         description: Coax supplied to match Meinberg antennas (only valid with Meinberg clocks)
         notes: Not researched.
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: Meinberg low-loss antenna cable (per length)
         description: Low-loss cable option
         notes: Not researched.
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: Meinberg fiber-optic antenna link
         description: Optical antenna link for galvanic isolation over long runs
         notes: Not researched; existence not verified.
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   sources:
   - https://selinc.com/api/download/101828
   - https://selinc.com/products/coaxial-cables/
@@ -1171,6 +2048,9 @@ records:
         description: Thinner, higher-loss cable
         notes: Assembly part number not researched.
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: LMR-400 cable assembly with TNC male connectors, 25 ft
         ordering_code: LMR-400 + 2 x TC-400-TM-X
@@ -1179,6 +2059,9 @@ records:
         notes: Built from bulk LMR-400 and two Times TC-400-TM-X TNC male crimp connectors (connector
           confirmed on the Times page); no ready-made assembly number researched.
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: LMR-400-FR cable assembly with TNC male connectors, 25 ft
         ordering_code: LMR-400-FR + 2 x TC-400-TM-X
@@ -1186,6 +2069,9 @@ records:
         url: https://www.l-com.com/TNC-Male-Connector-Crimp-Solder-Attachment-for-LMR-400-LMR-400-DB-LMR-400-FR-400-Series-Cable-TC-400-TM-X
         notes: TC-400-TM-X fits LMR-400-FR. No ready-made assembly number researched.
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   - make: Meinberg
     manufacturer: Meinberg Funkuhren GmbH & Co. KG
     tiers:
@@ -1194,16 +2080,25 @@ records:
         description: Only valid with Meinberg clocks
         notes: Not researched.
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: Meinberg low-loss antenna cable (per length)
         description: Low-loss option
         notes: Not researched.
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: Meinberg fiber-optic antenna link
         description: Optical isolation for long runs
         notes: Not researched; existence not verified.
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   sources:
   - https://selinc.com/api/download/101828
   - https://selinc.com/products/coaxial-cables/
@@ -1241,6 +2136,9 @@ records:
         notes: Part number not researched (search budget exhausted); DGXZ-series GPS protectors are the
           usual pick.
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: PolyPhaser DGXZ+06TFTF-A
         ordering_code: DGXZ+06TFTF-A
@@ -1250,6 +2148,9 @@ records:
         notes: Code confirmed at RSP Supply and everything RF. Check that its DC-pass voltage covers the
           clock's antenna supply (SEL-9524B 3.5-6 VDC).
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: PolyPhaser DGXZ+15TFTF-A
         ordering_code: DGXZ+15TFTF-A
@@ -1259,6 +2160,9 @@ records:
         notes: Code confirmed at Richardson RFPD and everything RF; the voltage class is read from the
           part name, not a datasheet.
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   - make: Meinberg
     manufacturer: Meinberg Funkuhren GmbH & Co. KG
     tiers:
@@ -1267,17 +2171,26 @@ records:
         description: Meinberg antenna-line surge protector (for Meinberg antenna systems)
         notes: Model name recalled, not web-verified.
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: MBG S-PRO surge protector
         description: Same; Meinberg offers one variant per antenna type
         notes: Not web-verified.
         verified: false
         same_as: low
+        height_u: 0
+        mounting_kind: external
+        supply_type: none
       high:
         model: Meinberg fiber-optic antenna link
         description: Removes the copper path entirely
         notes: Not verified.
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   sources:
   - https://selinc.com/api/download/105184
   - https://rspsupply.com/p-713276-polyphaser-dgxz06tftf-a-coaxial-rf-surge-protector.aspx
@@ -1310,17 +2223,26 @@ records:
         description: Mast/wall bracket that ships with Meinberg antennas
         notes: Not researched.
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: Meinberg antenna mounting kit
         description: Same
         notes: Not researched.
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: Meinberg antenna mounting kit
         description: Same
         notes: Not researched.
         verified: false
         same_as: mid
+        height_u: 0
+        mounting_kind: external
+        supply_type: none
   - make: Arbiter Systems
     manufacturer: Arbiter Systems, Inc.
     tiers:
@@ -1329,17 +2251,26 @@ records:
         description: Mast mount for Arbiter antennas
         notes: Not researched.
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: Arbiter antenna mounting kit
         description: Same
         notes: Not researched.
         verified: false
         same_as: low
+        height_u: 0
+        mounting_kind: external
+        supply_type: none
       high:
         model: Arbiter antenna mounting kit
         description: Same
         notes: Not researched.
         verified: false
         same_as: low
+        height_u: 0
+        mounting_kind: external
+        supply_type: none
   sources:
   - https://selinc.com/api/download/105184

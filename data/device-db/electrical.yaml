@@ -37,6 +37,32 @@ records:
       connection: 1-25 mm2 solid / 1-16 mm2 flexible, 2 N.m, 14 mm strip
       endurance: 20,000 mechanical / 10,000 electrical cycles
       ip: IP20
+      range: Acti9 iC60N 2P C
+      standard: IEC/EN 60898-1 and IEC/EN 60947-2
+      trip_curve: C
+      magnetic_trip_multiple: 6.4
+      magnetic_trip_multiple_dc: 9.05
+      magnetic_trip_ac_in: 6.4-9.6
+      magnetic_trip_dc_in: 9.05-13.6
+      dc_rating_v: 125
+      rated_for_125vdc: at the limit only (<=125 V DC)
+      breaking_capacity_ac_ka: 6
+      breaking_capacity_dc_ka: 10
+      magnetic_trip_note: 'AC: datasheet gives 8 x In +/-20 % (inside the IEC 60898-1 C band 5-10 In).
+        DC: Schneider Acti9 catalogue says DC thresholds are offset by sqrt(2): C 9.05-13.6 In (11.3 In
+        +/-20 %); B 4.5-6.8 In; D/K 13.6-20.4 In.'
+      same_brand_dc_range:
+        ordering_code: A9N61521
+        range: Acti9 C60H-DC 2P C
+        standard: IEC/EN 60947-2
+        trip_curve: C
+        magnetic_trip_multiple_dc: 6.8
+        magnetic_trip_dc_in: 6.8-10.2
+        dc_rating_v: 500
+        rated_for_125vdc: true
+        breaking_capacity_dc_ka: 20
+        magnetic_trip_note: 'Catalogue: Ii = 8.5 In +/-20 % (compatible with curve C), stated for this
+          DC device.'
     dimensions_mm:
       h: 85
       w: 36
@@ -80,9 +106,32 @@ records:
         description: System pro M compact S200, 2P C, 6 kA (IEC 60898-1); basic range; DC rating not confirmed
           in this session
         url: https://automa.net/product/abb/2cds252001r0014-63a38e3bca04b4f25935fc3a
-        notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
-          opened.
+        notes: 'Ordering code confirmed by a distributor listing (search result title/URL); datasheet
+          not opened. M14: S200 data taken from the S200 family table it shares with S200M.'
         verified: true
+        ratings:
+          range: System pro M compact S200M 2P C
+          standard: IEC/EN 60898-1 and IEC/EN 60947-2
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7.5
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7.5-15
+          dc_rating_v: 125
+          rated_for_125vdc: at the limit only (60 V DC per pole, 125 V DC multi-pole)
+          breaking_capacity_ac_ka: 10
+          breaking_capacity_dc_ka: 10
+          magnetic_trip_note: 'AC: ABB S200 table C = 5 In (no trip, >0.1 s) to 10 In (trip <0.1 s), valid
+            16 2/3-60 Hz. DC: ABB gives a multiplier table (100 Hz 1.1, 200 Hz 1.2, 400 Hz 1.5, DC 1.5);
+            the extracted columns were garbled, so DC x1.5 is read from the column order, not confirmed
+            cleanly.'
+        sources:
+        - https://cdn.gescan.com/PIM_Docs/Docs/STEP_ASSETS_PDF/13624970.pdf
+        - https://library.e.abb.com/public/5eecb35a6e9c483281234e43541d3ae4/9AKK108468A3912_en_9AKK108468A3912_B01_E_B01%20Electrical%20installation%20solutions%20for%20buildings%20part%20B01%20MCBs%20_EN_%20%28PDF%29.pdf
+        - https://kr.rs-online.com/web/p/mcbs/0132009
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       mid:
         model: S202M-C1
         ordering_code: 2CDS272001R0014
@@ -91,6 +140,29 @@ records:
         notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
           opened.
         verified: true
+        ratings:
+          range: System pro M compact S200M 2P C
+          standard: IEC/EN 60898-1 and IEC/EN 60947-2
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7.5
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7.5-15
+          dc_rating_v: 125
+          rated_for_125vdc: at the limit only (60 V DC per pole, 125 V DC multi-pole)
+          breaking_capacity_ac_ka: 10
+          breaking_capacity_dc_ka: 10
+          magnetic_trip_note: 'AC: ABB S200 table C = 5 In (no trip, >0.1 s) to 10 In (trip <0.1 s), valid
+            16 2/3-60 Hz. DC: ABB gives a multiplier table (100 Hz 1.1, 200 Hz 1.2, 400 Hz 1.5, DC 1.5);
+            the extracted columns were garbled, so DC x1.5 is read from the column order, not confirmed
+            cleanly.'
+        sources:
+        - https://cdn.gescan.com/PIM_Docs/Docs/STEP_ASSETS_PDF/13624970.pdf
+        - https://library.e.abb.com/public/5eecb35a6e9c483281234e43541d3ae4/9AKK108468A3912_en_9AKK108468A3912_B01_E_B01%20Electrical%20installation%20solutions%20for%20buildings%20part%20B01%20MCBs%20_EN_%20%28PDF%29.pdf
+        - https://kr.rs-online.com/web/p/mcbs/0132009
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       high:
         model: S202M-C1UC
         ordering_code: 2CDS272061R0014
@@ -100,6 +172,32 @@ records:
         notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
           opened. Check whether the UC device is polarity-marked (+/-) before wiring; not confirmed here.
         verified: true
+        ratings:
+          range: System pro M compact S200M UC 2P C
+          standard: IEC/EN 60898-1 (AC), IEC/EN 60898-2 (DC), IEC/EN 60947-2
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7-15
+          dc_rating_v: 440
+          rated_for_125vdc: true
+          breaking_capacity_ac_ka: 10
+          breaking_capacity_dc_ka: 10
+          magnetic_trip_note: 'ABB draws the S200M UC C curve to ''IEC 60898-1 (AC) / 60898-2 (DC)''.
+            AC 5-10 In from the S200 table. DC 7-15 In is the IEC 60898-2 C band, NOT a number ABB prints:
+            pass 2 re-read the ABB B01 catalogue and the S 200 M UC catalogue; neither has a text range.
+            Raw chart labels from B01: ''C (up to 4A) AC 5 7 8; DC 12'', ''C (6A up to 63A) AC 5 7 8 12;
+            DC (none)'', ''C (60947-2) AC 5 8 12''. The S200-family multiplier table (100 Hz 1.1, 200
+            Hz 1.2, 400 Hz 1.5, DC 1.5, column mapping garbled) would give 7.5-15 In. Either way dc_max
+            = 15 In.'
+        sources:
+        - https://media.onlinecomponents.com/productfiles/mf-abb/1sxu400144l0201_systempromcompactmcbs200muc0915.pdf
+        - https://manualmachine.com/abb/s202mc6uc/7630478-technical-data
+        - https://library.e.abb.com/public/5eecb35a6e9c483281234e43541d3ae4/9AKK108468A3912_en_9AKK108468A3912_B01_E_B01%20Electrical%20installation%20solutions%20for%20buildings%20part%20B01%20MCBs%20_EN_%20%28PDF%29.pdf
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
   - make: Siemens
     manufacturer: Siemens
     tiers:
@@ -109,9 +207,30 @@ records:
         description: SENTRON 5SY6, 2P C, 6 kA (IEC 60898-1); basic AC range; DC rating not confirmed (use
           5SY5 for 125 V DC)
         url: https://www.tme.eu/en/details/5sy6201-7/circuit-breakers/siemens/
-        notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
-          opened.
+        notes: 'Ordering code confirmed by a distributor listing (search result title/URL); datasheet
+          not opened. M14: 5SY6 shares the 5SY4 DC limits (60 V DC per pole); breaking capacity is 6 kA
+          AC.'
         verified: true
+        ratings:
+          range: SENTRON 5SY4 2P C
+          standard: IEC/EN 60898-1
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7-14
+          rated_for_125vdc: false
+          breaking_capacity_ac_ka: 10
+          magnetic_trip_note: 'Siemens configuration manual: tripping characteristic applies at 50-60
+            Hz; correction factor for magnetic tripping at 0 Hz (DC) = 1.4 for 5SY 0.3-63 A (1.5 for 5SP
+            80-125 A). C AC 5-10 In -> DC 7-14 In.'
+        sources:
+        - https://media.distrelec.com/Web/Downloads/_b/ro/CirquitBreakers_eng_bro.pdf
+        - https://www.cjsautomation.com/parts/siemens/part/5sy4203-7/
+        - https://octopart.com/part/siemens/5SY4204-7
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       mid:
         model: 5SY4 2P C1
         ordering_code: 5SY4201-7
@@ -121,6 +240,26 @@ records:
         notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
           opened. Use 5SY5 for the 125 V DC circuits.
         verified: true
+        ratings:
+          range: SENTRON 5SY4 2P C
+          standard: IEC/EN 60898-1
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7-14
+          rated_for_125vdc: false
+          breaking_capacity_ac_ka: 10
+          magnetic_trip_note: 'Siemens configuration manual: tripping characteristic applies at 50-60
+            Hz; correction factor for magnetic tripping at 0 Hz (DC) = 1.4 for 5SY 0.3-63 A (1.5 for 5SP
+            80-125 A). C AC 5-10 In -> DC 7-14 In.'
+        sources:
+        - https://media.distrelec.com/Web/Downloads/_b/ro/CirquitBreakers_eng_bro.pdf
+        - https://www.cjsautomation.com/parts/siemens/part/5sy4203-7/
+        - https://octopart.com/part/siemens/5SY4204-7
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       high:
         model: 5SY5 2P C1 (UC)
         ordering_code: 5SY5201-7
@@ -129,6 +268,33 @@ records:
         notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
           opened. Check the 5SY5 DC wiring/polarity diagram before use.
         verified: true
+        ratings:
+          range: SENTRON 5SY5 2P C
+          standard: IEC/EN 60898-1 (AC), EN 60898-2 (DC), IEC 60947-2
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7-14
+          dc_rating_v: 440
+          rated_for_125vdc: true
+          breaking_capacity_ac_ka: 10
+          breaking_capacity_dc_ka: 10
+          magnetic_trip_note: The 5SY5 brochure's own frequency-correction table for magnetic tripping
+            gives 0 Hz (DC) = 1.4 for 5SY5 0.3-63 A (1.5 for 5SP5 80-125 A), so C AC 5-10 In becomes DC
+            7-14 In. No numeric DC band is printed (curves are graphics only). The 5SY5 is tested to EN
+            60898-2, whose DC C band is 7-15 In; if the program needs a guaranteed-trip upper bound, 15
+            In is the conservative value.
+        sources:
+        - https://images.jumpseller.com/store/suneo-energy-sas/4884114/attachments/0b31b491be26b3a716ebe79c33bcf435/5SY5_breakers.pdf?0=
+        - https://www.e-sonic.com/productfiles/mf-SIE/SIE-5SY52087.pdf
+        - https://media.distrelec.com/Web/Downloads/_b/ro/CirquitBreakers_eng_bro.pdf
+        - https://ie.rs-online.com/web/p/mcbs/2096011
+        - https://www.galaxus.ch/en/s4/product/siemens-siem-5sy5204-7-miniature-circuit-breaker-4a-2p-residual-current-device-32135521
+        - https://www.galaxus.de/en/s4/product/siemens-siem-5sy5203-7-miniature-circuit-breaker-c-3a-2p-residual-current-device-32135520
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
   sources:
   - https://docs.rs-online.com/791b/A700000015875337.pdf
   - https://eezee.sg/zh/product/schneider-electric-a9f74201-ic60n-miniature-circuit-breaker-2p-1a-c-curve-913c2e4317
@@ -138,6 +304,11 @@ records:
   - https://automa.net/product/siemens/5sy5201-7-63a37b18ca04b4f2592cb1ba
   - https://european-automation.com/my/abb/product/2cds272061r0014
   - https://www.tme.eu/en/details/5sy6201-7/circuit-breakers/siemens/
+  - https://batpro-madagascar.com/wp-content/uploads/2020/09/Acti9-iC60_A9F74203.pdf
+  - https://storage.electrika.com/flips/1173-acti9-rti-15/files/assets/basic-html/page-355.html
+  - https://spareparts2day.com/product/schneider-electric-a9f74204-ic60n
+  - https://www.manomano.co.uk/p/schneider-a9f74213-acti9-ic60n-circuit-breaker-2p-13a-c-curve-400vac-6000a10ka-76924654
+  - https://ple.vn/images/virtuemart/datasheet/4773-c60h-dc-catalogue.pdf
 - part_id: MCB-A9F74202
   kind: catalogue
   library_refs:
@@ -168,6 +339,32 @@ records:
       connection: 1-25 mm2 solid / 1-16 mm2 flexible, 2 N.m, 14 mm strip
       endurance: 20,000 mechanical / 10,000 electrical cycles
       ip: IP20
+      range: Acti9 iC60N 2P C
+      standard: IEC/EN 60898-1 and IEC/EN 60947-2
+      trip_curve: C
+      magnetic_trip_multiple: 6.4
+      magnetic_trip_multiple_dc: 9.05
+      magnetic_trip_ac_in: 6.4-9.6
+      magnetic_trip_dc_in: 9.05-13.6
+      dc_rating_v: 125
+      rated_for_125vdc: at the limit only (<=125 V DC)
+      breaking_capacity_ac_ka: 6
+      breaking_capacity_dc_ka: 10
+      magnetic_trip_note: 'AC: datasheet gives 8 x In +/-20 % (inside the IEC 60898-1 C band 5-10 In).
+        DC: Schneider Acti9 catalogue says DC thresholds are offset by sqrt(2): C 9.05-13.6 In (11.3 In
+        +/-20 %); B 4.5-6.8 In; D/K 13.6-20.4 In.'
+      same_brand_dc_range:
+        ordering_code: A9N61522
+        range: Acti9 C60H-DC 2P C
+        standard: IEC/EN 60947-2
+        trip_curve: C
+        magnetic_trip_multiple_dc: 6.8
+        magnetic_trip_dc_in: 6.8-10.2
+        dc_rating_v: 500
+        rated_for_125vdc: true
+        breaking_capacity_dc_ka: 20
+        magnetic_trip_note: 'Catalogue: Ii = 8.5 In +/-20 % (compatible with curve C), stated for this
+          DC device.'
     dimensions_mm:
       h: 85
       w: 36
@@ -210,9 +407,32 @@ records:
         description: System pro M compact S200, 2P C, 6 kA (IEC 60898-1); basic range; DC rating not confirmed
           in this session
         url: https://adjditec.com/en/products/2cds252001r0024-s202-c2-abb
-        notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
-          opened.
+        notes: 'Ordering code confirmed by a distributor listing (search result title/URL); datasheet
+          not opened. M14: S200 data taken from the S200 family table it shares with S200M.'
         verified: true
+        ratings:
+          range: System pro M compact S200M 2P C
+          standard: IEC/EN 60898-1 and IEC/EN 60947-2
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7.5
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7.5-15
+          dc_rating_v: 125
+          rated_for_125vdc: at the limit only (60 V DC per pole, 125 V DC multi-pole)
+          breaking_capacity_ac_ka: 10
+          breaking_capacity_dc_ka: 10
+          magnetic_trip_note: 'AC: ABB S200 table C = 5 In (no trip, >0.1 s) to 10 In (trip <0.1 s), valid
+            16 2/3-60 Hz. DC: ABB gives a multiplier table (100 Hz 1.1, 200 Hz 1.2, 400 Hz 1.5, DC 1.5);
+            the extracted columns were garbled, so DC x1.5 is read from the column order, not confirmed
+            cleanly.'
+        sources:
+        - https://cdn.gescan.com/PIM_Docs/Docs/STEP_ASSETS_PDF/13624970.pdf
+        - https://library.e.abb.com/public/5eecb35a6e9c483281234e43541d3ae4/9AKK108468A3912_en_9AKK108468A3912_B01_E_B01%20Electrical%20installation%20solutions%20for%20buildings%20part%20B01%20MCBs%20_EN_%20%28PDF%29.pdf
+        - https://kr.rs-online.com/web/p/mcbs/0132009
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       mid:
         model: S202M-C2
         ordering_code: 2CDS272001R0024
@@ -221,6 +441,29 @@ records:
         notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
           opened.
         verified: true
+        ratings:
+          range: System pro M compact S200M 2P C
+          standard: IEC/EN 60898-1 and IEC/EN 60947-2
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7.5
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7.5-15
+          dc_rating_v: 125
+          rated_for_125vdc: at the limit only (60 V DC per pole, 125 V DC multi-pole)
+          breaking_capacity_ac_ka: 10
+          breaking_capacity_dc_ka: 10
+          magnetic_trip_note: 'AC: ABB S200 table C = 5 In (no trip, >0.1 s) to 10 In (trip <0.1 s), valid
+            16 2/3-60 Hz. DC: ABB gives a multiplier table (100 Hz 1.1, 200 Hz 1.2, 400 Hz 1.5, DC 1.5);
+            the extracted columns were garbled, so DC x1.5 is read from the column order, not confirmed
+            cleanly.'
+        sources:
+        - https://cdn.gescan.com/PIM_Docs/Docs/STEP_ASSETS_PDF/13624970.pdf
+        - https://library.e.abb.com/public/5eecb35a6e9c483281234e43541d3ae4/9AKK108468A3912_en_9AKK108468A3912_B01_E_B01%20Electrical%20installation%20solutions%20for%20buildings%20part%20B01%20MCBs%20_EN_%20%28PDF%29.pdf
+        - https://kr.rs-online.com/web/p/mcbs/0132009
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       high:
         model: S202M-C2UC
         ordering_code: 2CDS272061R0024
@@ -230,6 +473,32 @@ records:
         notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
           opened. Check whether the UC device is polarity-marked (+/-) before wiring; not confirmed here.
         verified: true
+        ratings:
+          range: System pro M compact S200M UC 2P C
+          standard: IEC/EN 60898-1 (AC), IEC/EN 60898-2 (DC), IEC/EN 60947-2
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7-15
+          dc_rating_v: 440
+          rated_for_125vdc: true
+          breaking_capacity_ac_ka: 10
+          breaking_capacity_dc_ka: 10
+          magnetic_trip_note: 'ABB draws the S200M UC C curve to ''IEC 60898-1 (AC) / 60898-2 (DC)''.
+            AC 5-10 In from the S200 table. DC 7-15 In is the IEC 60898-2 C band, NOT a number ABB prints:
+            pass 2 re-read the ABB B01 catalogue and the S 200 M UC catalogue; neither has a text range.
+            Raw chart labels from B01: ''C (up to 4A) AC 5 7 8; DC 12'', ''C (6A up to 63A) AC 5 7 8 12;
+            DC (none)'', ''C (60947-2) AC 5 8 12''. The S200-family multiplier table (100 Hz 1.1, 200
+            Hz 1.2, 400 Hz 1.5, DC 1.5, column mapping garbled) would give 7.5-15 In. Either way dc_max
+            = 15 In.'
+        sources:
+        - https://media.onlinecomponents.com/productfiles/mf-abb/1sxu400144l0201_systempromcompactmcbs200muc0915.pdf
+        - https://manualmachine.com/abb/s202mc6uc/7630478-technical-data
+        - https://library.e.abb.com/public/5eecb35a6e9c483281234e43541d3ae4/9AKK108468A3912_en_9AKK108468A3912_B01_E_B01%20Electrical%20installation%20solutions%20for%20buildings%20part%20B01%20MCBs%20_EN_%20%28PDF%29.pdf
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
   - make: Siemens
     manufacturer: Siemens
     tiers:
@@ -239,9 +508,30 @@ records:
         description: SENTRON 5SY6, 2P C, 6 kA (IEC 60898-1); basic AC range; DC rating not confirmed (use
           5SY5 for 125 V DC)
         url: https://automa.net/it/prodotto/siemens/5sy6202-7-63a379d5ca04b4f2592b0714
-        notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
-          opened.
+        notes: 'Ordering code confirmed by a distributor listing (search result title/URL); datasheet
+          not opened. M14: 5SY6 shares the 5SY4 DC limits (60 V DC per pole); breaking capacity is 6 kA
+          AC.'
         verified: true
+        ratings:
+          range: SENTRON 5SY4 2P C
+          standard: IEC/EN 60898-1
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7-14
+          rated_for_125vdc: false
+          breaking_capacity_ac_ka: 10
+          magnetic_trip_note: 'Siemens configuration manual: tripping characteristic applies at 50-60
+            Hz; correction factor for magnetic tripping at 0 Hz (DC) = 1.4 for 5SY 0.3-63 A (1.5 for 5SP
+            80-125 A). C AC 5-10 In -> DC 7-14 In.'
+        sources:
+        - https://media.distrelec.com/Web/Downloads/_b/ro/CirquitBreakers_eng_bro.pdf
+        - https://www.cjsautomation.com/parts/siemens/part/5sy4203-7/
+        - https://octopart.com/part/siemens/5SY4204-7
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       mid:
         model: 5SY4 2P C2
         ordering_code: 5SY4202-7
@@ -251,6 +541,26 @@ records:
         notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
           opened. Use 5SY5 for the 125 V DC circuits.
         verified: true
+        ratings:
+          range: SENTRON 5SY4 2P C
+          standard: IEC/EN 60898-1
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7-14
+          rated_for_125vdc: false
+          breaking_capacity_ac_ka: 10
+          magnetic_trip_note: 'Siemens configuration manual: tripping characteristic applies at 50-60
+            Hz; correction factor for magnetic tripping at 0 Hz (DC) = 1.4 for 5SY 0.3-63 A (1.5 for 5SP
+            80-125 A). C AC 5-10 In -> DC 7-14 In.'
+        sources:
+        - https://media.distrelec.com/Web/Downloads/_b/ro/CirquitBreakers_eng_bro.pdf
+        - https://www.cjsautomation.com/parts/siemens/part/5sy4203-7/
+        - https://octopart.com/part/siemens/5SY4204-7
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       high:
         model: 5SY5 2P C2 (UC)
         ordering_code: 5SY5202-7
@@ -259,6 +569,33 @@ records:
         notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
           opened. Check the 5SY5 DC wiring/polarity diagram before use.
         verified: true
+        ratings:
+          range: SENTRON 5SY5 2P C
+          standard: IEC/EN 60898-1 (AC), EN 60898-2 (DC), IEC 60947-2
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7-14
+          dc_rating_v: 440
+          rated_for_125vdc: true
+          breaking_capacity_ac_ka: 10
+          breaking_capacity_dc_ka: 10
+          magnetic_trip_note: The 5SY5 brochure's own frequency-correction table for magnetic tripping
+            gives 0 Hz (DC) = 1.4 for 5SY5 0.3-63 A (1.5 for 5SP5 80-125 A), so C AC 5-10 In becomes DC
+            7-14 In. No numeric DC band is printed (curves are graphics only). The 5SY5 is tested to EN
+            60898-2, whose DC C band is 7-15 In; if the program needs a guaranteed-trip upper bound, 15
+            In is the conservative value.
+        sources:
+        - https://images.jumpseller.com/store/suneo-energy-sas/4884114/attachments/0b31b491be26b3a716ebe79c33bcf435/5SY5_breakers.pdf?0=
+        - https://www.e-sonic.com/productfiles/mf-SIE/SIE-5SY52087.pdf
+        - https://media.distrelec.com/Web/Downloads/_b/ro/CirquitBreakers_eng_bro.pdf
+        - https://ie.rs-online.com/web/p/mcbs/2096011
+        - https://www.galaxus.ch/en/s4/product/siemens-siem-5sy5204-7-miniature-circuit-breaker-4a-2p-residual-current-device-32135521
+        - https://www.galaxus.de/en/s4/product/siemens-siem-5sy5203-7-miniature-circuit-breaker-c-3a-2p-residual-current-device-32135520
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
   sources:
   - https://www.all4sps.com/mediafiles/Sonstiges/A9F74202.pdf
   - https://adjditec.com/en/products/2cds252001r0024-s202-c2-abb
@@ -267,6 +604,12 @@ records:
   - https://automa.net/it/prodotto/siemens/5sy6202-7-63a379d5ca04b4f2592b0714
   - https://bspautomation.com/brand/siemens/5sy5202-7
   - https://uk.rs-online.com/web/p/mcbs/7721278
+  - https://docs.rs-online.com/791b/A700000015875337.pdf
+  - https://batpro-madagascar.com/wp-content/uploads/2020/09/Acti9-iC60_A9F74203.pdf
+  - https://storage.electrika.com/flips/1173-acti9-rti-15/files/assets/basic-html/page-355.html
+  - https://spareparts2day.com/product/schneider-electric-a9f74204-ic60n
+  - https://www.manomano.co.uk/p/schneider-a9f74213-acti9-ic60n-circuit-breaker-2p-13a-c-curve-400vac-6000a10ka-76924654
+  - https://ple.vn/images/virtuemart/datasheet/4773-c60h-dc-catalogue.pdf
 - part_id: MCB-A9F74206
   kind: catalogue
   library_refs:
@@ -297,6 +640,32 @@ records:
       connection: 1-25 mm2 solid / 1-16 mm2 flexible, 2 N.m, 14 mm strip
       endurance: 20,000 mechanical / 10,000 electrical cycles
       ip: IP20
+      range: Acti9 iC60N 2P C
+      standard: IEC/EN 60898-1 and IEC/EN 60947-2
+      trip_curve: C
+      magnetic_trip_multiple: 6.4
+      magnetic_trip_multiple_dc: 9.05
+      magnetic_trip_ac_in: 6.4-9.6
+      magnetic_trip_dc_in: 9.05-13.6
+      dc_rating_v: 125
+      rated_for_125vdc: at the limit only (<=125 V DC)
+      breaking_capacity_ac_ka: 6
+      breaking_capacity_dc_ka: 10
+      magnetic_trip_note: 'AC: datasheet gives 8 x In +/-20 % (inside the IEC 60898-1 C band 5-10 In).
+        DC: Schneider Acti9 catalogue says DC thresholds are offset by sqrt(2): C 9.05-13.6 In (11.3 In
+        +/-20 %); B 4.5-6.8 In; D/K 13.6-20.4 In.'
+      same_brand_dc_range:
+        ordering_code: A9N61526
+        range: Acti9 C60H-DC 2P C
+        standard: IEC/EN 60947-2
+        trip_curve: C
+        magnetic_trip_multiple_dc: 6.8
+        magnetic_trip_dc_in: 6.8-10.2
+        dc_rating_v: 500
+        rated_for_125vdc: true
+        breaking_capacity_dc_ka: 20
+        magnetic_trip_note: 'Catalogue: Ii = 8.5 In +/-20 % (compatible with curve C), stated for this
+          DC device.'
     dimensions_mm:
       h: 85
       w: 36
@@ -339,9 +708,32 @@ records:
         description: System pro M compact S200, 2P C, 6 kA (IEC 60898-1); basic range; DC rating not confirmed
           in this session
         url: https://www.tme.com/mx/en/details/s202-c6/circuit-breakers/abb/2cds252001r0064/
-        notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
-          opened.
+        notes: 'Ordering code confirmed by a distributor listing (search result title/URL); datasheet
+          not opened. M14: S200 data taken from the S200 family table it shares with S200M.'
         verified: true
+        ratings:
+          range: System pro M compact S200M 2P C
+          standard: IEC/EN 60898-1 and IEC/EN 60947-2
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7.5
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7.5-15
+          dc_rating_v: 125
+          rated_for_125vdc: at the limit only (60 V DC per pole, 125 V DC multi-pole)
+          breaking_capacity_ac_ka: 10
+          breaking_capacity_dc_ka: 10
+          magnetic_trip_note: 'AC: ABB S200 table C = 5 In (no trip, >0.1 s) to 10 In (trip <0.1 s), valid
+            16 2/3-60 Hz. DC: ABB gives a multiplier table (100 Hz 1.1, 200 Hz 1.2, 400 Hz 1.5, DC 1.5);
+            the extracted columns were garbled, so DC x1.5 is read from the column order, not confirmed
+            cleanly.'
+        sources:
+        - https://cdn.gescan.com/PIM_Docs/Docs/STEP_ASSETS_PDF/13624970.pdf
+        - https://library.e.abb.com/public/5eecb35a6e9c483281234e43541d3ae4/9AKK108468A3912_en_9AKK108468A3912_B01_E_B01%20Electrical%20installation%20solutions%20for%20buildings%20part%20B01%20MCBs%20_EN_%20%28PDF%29.pdf
+        - https://kr.rs-online.com/web/p/mcbs/0132009
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       mid:
         model: S202M-C6
         ordering_code: 2CDS272001R0064
@@ -350,6 +742,29 @@ records:
         notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
           opened.
         verified: true
+        ratings:
+          range: System pro M compact S200M 2P C
+          standard: IEC/EN 60898-1 and IEC/EN 60947-2
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7.5
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7.5-15
+          dc_rating_v: 125
+          rated_for_125vdc: at the limit only (60 V DC per pole, 125 V DC multi-pole)
+          breaking_capacity_ac_ka: 10
+          breaking_capacity_dc_ka: 10
+          magnetic_trip_note: 'AC: ABB S200 table C = 5 In (no trip, >0.1 s) to 10 In (trip <0.1 s), valid
+            16 2/3-60 Hz. DC: ABB gives a multiplier table (100 Hz 1.1, 200 Hz 1.2, 400 Hz 1.5, DC 1.5);
+            the extracted columns were garbled, so DC x1.5 is read from the column order, not confirmed
+            cleanly.'
+        sources:
+        - https://cdn.gescan.com/PIM_Docs/Docs/STEP_ASSETS_PDF/13624970.pdf
+        - https://library.e.abb.com/public/5eecb35a6e9c483281234e43541d3ae4/9AKK108468A3912_en_9AKK108468A3912_B01_E_B01%20Electrical%20installation%20solutions%20for%20buildings%20part%20B01%20MCBs%20_EN_%20%28PDF%29.pdf
+        - https://kr.rs-online.com/web/p/mcbs/0132009
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       high:
         model: S202M-C6UC
         ordering_code: 2CDS272061R0064
@@ -359,6 +774,32 @@ records:
         notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
           opened. Check whether the UC device is polarity-marked (+/-) before wiring; not confirmed here.
         verified: true
+        ratings:
+          range: System pro M compact S200M UC 2P C
+          standard: IEC/EN 60898-1 (AC), IEC/EN 60898-2 (DC), IEC/EN 60947-2
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7-15
+          dc_rating_v: 440
+          rated_for_125vdc: true
+          breaking_capacity_ac_ka: 10
+          breaking_capacity_dc_ka: 10
+          magnetic_trip_note: 'ABB draws the S200M UC C curve to ''IEC 60898-1 (AC) / 60898-2 (DC)''.
+            AC 5-10 In from the S200 table. DC 7-15 In is the IEC 60898-2 C band, NOT a number ABB prints:
+            pass 2 re-read the ABB B01 catalogue and the S 200 M UC catalogue; neither has a text range.
+            Raw chart labels from B01: ''C (up to 4A) AC 5 7 8; DC 12'', ''C (6A up to 63A) AC 5 7 8 12;
+            DC (none)'', ''C (60947-2) AC 5 8 12''. The S200-family multiplier table (100 Hz 1.1, 200
+            Hz 1.2, 400 Hz 1.5, DC 1.5, column mapping garbled) would give 7.5-15 In. Either way dc_max
+            = 15 In.'
+        sources:
+        - https://media.onlinecomponents.com/productfiles/mf-abb/1sxu400144l0201_systempromcompactmcbs200muc0915.pdf
+        - https://manualmachine.com/abb/s202mc6uc/7630478-technical-data
+        - https://library.e.abb.com/public/5eecb35a6e9c483281234e43541d3ae4/9AKK108468A3912_en_9AKK108468A3912_B01_E_B01%20Electrical%20installation%20solutions%20for%20buildings%20part%20B01%20MCBs%20_EN_%20%28PDF%29.pdf
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
   - make: Siemens
     manufacturer: Siemens
     tiers:
@@ -368,9 +809,30 @@ records:
         description: SENTRON 5SY6, 2P C, 6 kA (IEC 60898-1); basic AC range; DC rating not confirmed (use
           5SY5 for 125 V DC)
         url: https://www.electricautomationnetwork.com/en/siemens/5sy6206-7-5sy62067-siemens-circuit-breaker-400v-6ka-2-pole-c-6a-d70mm
-        notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
-          opened.
+        notes: 'Ordering code confirmed by a distributor listing (search result title/URL); datasheet
+          not opened. M14: 5SY6 shares the 5SY4 DC limits (60 V DC per pole); breaking capacity is 6 kA
+          AC.'
         verified: true
+        ratings:
+          range: SENTRON 5SY4 2P C
+          standard: IEC/EN 60898-1
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7-14
+          rated_for_125vdc: false
+          breaking_capacity_ac_ka: 10
+          magnetic_trip_note: 'Siemens configuration manual: tripping characteristic applies at 50-60
+            Hz; correction factor for magnetic tripping at 0 Hz (DC) = 1.4 for 5SY 0.3-63 A (1.5 for 5SP
+            80-125 A). C AC 5-10 In -> DC 7-14 In.'
+        sources:
+        - https://media.distrelec.com/Web/Downloads/_b/ro/CirquitBreakers_eng_bro.pdf
+        - https://www.cjsautomation.com/parts/siemens/part/5sy4203-7/
+        - https://octopart.com/part/siemens/5SY4204-7
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       mid:
         model: 5SY4 2P C6
         ordering_code: 5SY4206-7
@@ -380,6 +842,26 @@ records:
         notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
           opened. Use 5SY5 for the 125 V DC circuits.
         verified: true
+        ratings:
+          range: SENTRON 5SY4 2P C
+          standard: IEC/EN 60898-1
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7-14
+          rated_for_125vdc: false
+          breaking_capacity_ac_ka: 10
+          magnetic_trip_note: 'Siemens configuration manual: tripping characteristic applies at 50-60
+            Hz; correction factor for magnetic tripping at 0 Hz (DC) = 1.4 for 5SY 0.3-63 A (1.5 for 5SP
+            80-125 A). C AC 5-10 In -> DC 7-14 In.'
+        sources:
+        - https://media.distrelec.com/Web/Downloads/_b/ro/CirquitBreakers_eng_bro.pdf
+        - https://www.cjsautomation.com/parts/siemens/part/5sy4203-7/
+        - https://octopart.com/part/siemens/5SY4204-7
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       high:
         model: 5SY5 2P C6 (UC)
         ordering_code: 5SY5206-7
@@ -388,6 +870,33 @@ records:
         notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
           opened. Check the 5SY5 DC wiring/polarity diagram before use.
         verified: true
+        ratings:
+          range: SENTRON 5SY5 2P C
+          standard: IEC/EN 60898-1 (AC), EN 60898-2 (DC), IEC 60947-2
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7-14
+          dc_rating_v: 440
+          rated_for_125vdc: true
+          breaking_capacity_ac_ka: 10
+          breaking_capacity_dc_ka: 10
+          magnetic_trip_note: The 5SY5 brochure's own frequency-correction table for magnetic tripping
+            gives 0 Hz (DC) = 1.4 for 5SY5 0.3-63 A (1.5 for 5SP5 80-125 A), so C AC 5-10 In becomes DC
+            7-14 In. No numeric DC band is printed (curves are graphics only). The 5SY5 is tested to EN
+            60898-2, whose DC C band is 7-15 In; if the program needs a guaranteed-trip upper bound, 15
+            In is the conservative value.
+        sources:
+        - https://images.jumpseller.com/store/suneo-energy-sas/4884114/attachments/0b31b491be26b3a716ebe79c33bcf435/5SY5_breakers.pdf?0=
+        - https://www.e-sonic.com/productfiles/mf-SIE/SIE-5SY52087.pdf
+        - https://media.distrelec.com/Web/Downloads/_b/ro/CirquitBreakers_eng_bro.pdf
+        - https://ie.rs-online.com/web/p/mcbs/2096011
+        - https://www.galaxus.ch/en/s4/product/siemens-siem-5sy5204-7-miniature-circuit-breaker-4a-2p-residual-current-device-32135521
+        - https://www.galaxus.de/en/s4/product/siemens-siem-5sy5203-7-miniature-circuit-breaker-c-3a-2p-residual-current-device-32135520
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
   sources:
   - https://cdn.contentspeed.ro/pimromstal.websales.ro/cs-content/cs-docs/products/55sb15052021fisatehnicaacti9ic60a9f74206_37589_41_1784571189.pdf
   - https://automa.net/product/siemens/5sy5206-7-63a37cf2ca04b4f2592e7402
@@ -396,6 +905,12 @@ records:
   - https://uk.rs-online.com/web/p/mcbs/2322318
   - https://www.electricautomationnetwork.com/en/abb/miniature-circuit-breaker-s200-2p-c-16-a-abb-s202-c16-2cds252001r0164
   - https://www.tme.eu/en/details/5sy6201-7/circuit-breakers/siemens/
+  - https://docs.rs-online.com/791b/A700000015875337.pdf
+  - https://batpro-madagascar.com/wp-content/uploads/2020/09/Acti9-iC60_A9F74203.pdf
+  - https://storage.electrika.com/flips/1173-acti9-rti-15/files/assets/basic-html/page-355.html
+  - https://spareparts2day.com/product/schneider-electric-a9f74204-ic60n
+  - https://www.manomano.co.uk/p/schneider-a9f74213-acti9-ic60n-circuit-breaker-2p-13a-c-curve-400vac-6000a10ka-76924654
+  - https://ple.vn/images/virtuemart/datasheet/4773-c60h-dc-catalogue.pdf
 - part_id: MCB-A9F74210
   kind: catalogue
   library_refs:
@@ -426,6 +941,32 @@ records:
       connection: 1-25 mm2 solid / 1-16 mm2 flexible, 2 N.m, 14 mm strip
       endurance: 20,000 mechanical / 10,000 electrical cycles
       ip: IP20
+      range: Acti9 iC60N 2P C
+      standard: IEC/EN 60898-1 and IEC/EN 60947-2
+      trip_curve: C
+      magnetic_trip_multiple: 6.4
+      magnetic_trip_multiple_dc: 9.05
+      magnetic_trip_ac_in: 6.4-9.6
+      magnetic_trip_dc_in: 9.05-13.6
+      dc_rating_v: 125
+      rated_for_125vdc: at the limit only (<=125 V DC)
+      breaking_capacity_ac_ka: 6
+      breaking_capacity_dc_ka: 10
+      magnetic_trip_note: 'AC: datasheet gives 8 x In +/-20 % (inside the IEC 60898-1 C band 5-10 In).
+        DC: Schneider Acti9 catalogue says DC thresholds are offset by sqrt(2): C 9.05-13.6 In (11.3 In
+        +/-20 %); B 4.5-6.8 In; D/K 13.6-20.4 In.'
+      same_brand_dc_range:
+        ordering_code: A9N61528
+        range: Acti9 C60H-DC 2P C
+        standard: IEC/EN 60947-2
+        trip_curve: C
+        magnetic_trip_multiple_dc: 6.8
+        magnetic_trip_dc_in: 6.8-10.2
+        dc_rating_v: 500
+        rated_for_125vdc: true
+        breaking_capacity_dc_ka: 20
+        magnetic_trip_note: 'Catalogue: Ii = 8.5 In +/-20 % (compatible with curve C), stated for this
+          DC device.'
     dimensions_mm:
       h: 85
       w: 36
@@ -469,9 +1010,32 @@ records:
         description: System pro M compact S200, 2P C, 6 kA (IEC 60898-1); basic range; DC rating not confirmed
           in this session
         url: https://www.pricerunner.dk/pl/710-3200104708/Elartikler/ABB-2CDS252001R0104-Sammenlign-Priser
-        notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
-          opened.
+        notes: 'Ordering code confirmed by a distributor listing (search result title/URL); datasheet
+          not opened. M14: S200 data taken from the S200 family table it shares with S200M.'
         verified: true
+        ratings:
+          range: System pro M compact S200M 2P C
+          standard: IEC/EN 60898-1 and IEC/EN 60947-2
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7.5
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7.5-15
+          dc_rating_v: 125
+          rated_for_125vdc: at the limit only (60 V DC per pole, 125 V DC multi-pole)
+          breaking_capacity_ac_ka: 10
+          breaking_capacity_dc_ka: 10
+          magnetic_trip_note: 'AC: ABB S200 table C = 5 In (no trip, >0.1 s) to 10 In (trip <0.1 s), valid
+            16 2/3-60 Hz. DC: ABB gives a multiplier table (100 Hz 1.1, 200 Hz 1.2, 400 Hz 1.5, DC 1.5);
+            the extracted columns were garbled, so DC x1.5 is read from the column order, not confirmed
+            cleanly.'
+        sources:
+        - https://cdn.gescan.com/PIM_Docs/Docs/STEP_ASSETS_PDF/13624970.pdf
+        - https://library.e.abb.com/public/5eecb35a6e9c483281234e43541d3ae4/9AKK108468A3912_en_9AKK108468A3912_B01_E_B01%20Electrical%20installation%20solutions%20for%20buildings%20part%20B01%20MCBs%20_EN_%20%28PDF%29.pdf
+        - https://kr.rs-online.com/web/p/mcbs/0132009
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       mid:
         model: S202M-C10
         ordering_code: 2CDS272001R0104
@@ -480,6 +1044,29 @@ records:
         notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
           opened.
         verified: true
+        ratings:
+          range: System pro M compact S200M 2P C
+          standard: IEC/EN 60898-1 and IEC/EN 60947-2
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7.5
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7.5-15
+          dc_rating_v: 125
+          rated_for_125vdc: at the limit only (60 V DC per pole, 125 V DC multi-pole)
+          breaking_capacity_ac_ka: 10
+          breaking_capacity_dc_ka: 10
+          magnetic_trip_note: 'AC: ABB S200 table C = 5 In (no trip, >0.1 s) to 10 In (trip <0.1 s), valid
+            16 2/3-60 Hz. DC: ABB gives a multiplier table (100 Hz 1.1, 200 Hz 1.2, 400 Hz 1.5, DC 1.5);
+            the extracted columns were garbled, so DC x1.5 is read from the column order, not confirmed
+            cleanly.'
+        sources:
+        - https://cdn.gescan.com/PIM_Docs/Docs/STEP_ASSETS_PDF/13624970.pdf
+        - https://library.e.abb.com/public/5eecb35a6e9c483281234e43541d3ae4/9AKK108468A3912_en_9AKK108468A3912_B01_E_B01%20Electrical%20installation%20solutions%20for%20buildings%20part%20B01%20MCBs%20_EN_%20%28PDF%29.pdf
+        - https://kr.rs-online.com/web/p/mcbs/0132009
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       high:
         model: S202M-C10UC
         ordering_code: 2CDS272061R0104
@@ -489,6 +1076,32 @@ records:
         notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
           opened. Check whether the UC device is polarity-marked (+/-) before wiring; not confirmed here.
         verified: true
+        ratings:
+          range: System pro M compact S200M UC 2P C
+          standard: IEC/EN 60898-1 (AC), IEC/EN 60898-2 (DC), IEC/EN 60947-2
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7-15
+          dc_rating_v: 440
+          rated_for_125vdc: true
+          breaking_capacity_ac_ka: 10
+          breaking_capacity_dc_ka: 10
+          magnetic_trip_note: 'ABB draws the S200M UC C curve to ''IEC 60898-1 (AC) / 60898-2 (DC)''.
+            AC 5-10 In from the S200 table. DC 7-15 In is the IEC 60898-2 C band, NOT a number ABB prints:
+            pass 2 re-read the ABB B01 catalogue and the S 200 M UC catalogue; neither has a text range.
+            Raw chart labels from B01: ''C (up to 4A) AC 5 7 8; DC 12'', ''C (6A up to 63A) AC 5 7 8 12;
+            DC (none)'', ''C (60947-2) AC 5 8 12''. The S200-family multiplier table (100 Hz 1.1, 200
+            Hz 1.2, 400 Hz 1.5, DC 1.5, column mapping garbled) would give 7.5-15 In. Either way dc_max
+            = 15 In.'
+        sources:
+        - https://media.onlinecomponents.com/productfiles/mf-abb/1sxu400144l0201_systempromcompactmcbs200muc0915.pdf
+        - https://manualmachine.com/abb/s202mc6uc/7630478-technical-data
+        - https://library.e.abb.com/public/5eecb35a6e9c483281234e43541d3ae4/9AKK108468A3912_en_9AKK108468A3912_B01_E_B01%20Electrical%20installation%20solutions%20for%20buildings%20part%20B01%20MCBs%20_EN_%20%28PDF%29.pdf
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
   - make: Siemens
     manufacturer: Siemens
     tiers:
@@ -498,9 +1111,30 @@ records:
         description: SENTRON 5SY6, 2P C, 6 kA (IEC 60898-1); basic AC range; DC rating not confirmed (use
           5SY5 for 125 V DC)
         url: https://automa.net/product/siemens/5sy6210-7-63a37b5fca04b4f2592d04a1
-        notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
-          opened.
+        notes: 'Ordering code confirmed by a distributor listing (search result title/URL); datasheet
+          not opened. M14: 5SY6 shares the 5SY4 DC limits (60 V DC per pole); breaking capacity is 6 kA
+          AC.'
         verified: true
+        ratings:
+          range: SENTRON 5SY4 2P C
+          standard: IEC/EN 60898-1
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7-14
+          rated_for_125vdc: false
+          breaking_capacity_ac_ka: 10
+          magnetic_trip_note: 'Siemens configuration manual: tripping characteristic applies at 50-60
+            Hz; correction factor for magnetic tripping at 0 Hz (DC) = 1.4 for 5SY 0.3-63 A (1.5 for 5SP
+            80-125 A). C AC 5-10 In -> DC 7-14 In.'
+        sources:
+        - https://media.distrelec.com/Web/Downloads/_b/ro/CirquitBreakers_eng_bro.pdf
+        - https://www.cjsautomation.com/parts/siemens/part/5sy4203-7/
+        - https://octopart.com/part/siemens/5SY4204-7
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       mid:
         model: 5SY4 2P C10
         ordering_code: 5SY4210-7
@@ -510,6 +1144,26 @@ records:
         notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
           opened. Use 5SY5 for the 125 V DC circuits.
         verified: true
+        ratings:
+          range: SENTRON 5SY4 2P C
+          standard: IEC/EN 60898-1
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7-14
+          rated_for_125vdc: false
+          breaking_capacity_ac_ka: 10
+          magnetic_trip_note: 'Siemens configuration manual: tripping characteristic applies at 50-60
+            Hz; correction factor for magnetic tripping at 0 Hz (DC) = 1.4 for 5SY 0.3-63 A (1.5 for 5SP
+            80-125 A). C AC 5-10 In -> DC 7-14 In.'
+        sources:
+        - https://media.distrelec.com/Web/Downloads/_b/ro/CirquitBreakers_eng_bro.pdf
+        - https://www.cjsautomation.com/parts/siemens/part/5sy4203-7/
+        - https://octopart.com/part/siemens/5SY4204-7
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       high:
         model: 5SY5 2P C10 (UC)
         ordering_code: 5SY5210-7
@@ -518,6 +1172,33 @@ records:
         notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
           opened. Check the 5SY5 DC wiring/polarity diagram before use.
         verified: true
+        ratings:
+          range: SENTRON 5SY5 2P C
+          standard: IEC/EN 60898-1 (AC), EN 60898-2 (DC), IEC 60947-2
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7-14
+          dc_rating_v: 440
+          rated_for_125vdc: true
+          breaking_capacity_ac_ka: 10
+          breaking_capacity_dc_ka: 10
+          magnetic_trip_note: The 5SY5 brochure's own frequency-correction table for magnetic tripping
+            gives 0 Hz (DC) = 1.4 for 5SY5 0.3-63 A (1.5 for 5SP5 80-125 A), so C AC 5-10 In becomes DC
+            7-14 In. No numeric DC band is printed (curves are graphics only). The 5SY5 is tested to EN
+            60898-2, whose DC C band is 7-15 In; if the program needs a guaranteed-trip upper bound, 15
+            In is the conservative value.
+        sources:
+        - https://images.jumpseller.com/store/suneo-energy-sas/4884114/attachments/0b31b491be26b3a716ebe79c33bcf435/5SY5_breakers.pdf?0=
+        - https://www.e-sonic.com/productfiles/mf-SIE/SIE-5SY52087.pdf
+        - https://media.distrelec.com/Web/Downloads/_b/ro/CirquitBreakers_eng_bro.pdf
+        - https://ie.rs-online.com/web/p/mcbs/2096011
+        - https://www.galaxus.ch/en/s4/product/siemens-siem-5sy5204-7-miniature-circuit-breaker-4a-2p-residual-current-device-32135521
+        - https://www.galaxus.de/en/s4/product/siemens-siem-5sy5203-7-miniature-circuit-breaker-c-3a-2p-residual-current-device-32135520
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
   sources:
   - https://prof-elec.com/a9f74210-en/
   - https://assets.sparepartsnow.de/product-assets/media/205/5SY4210-7.pdf
@@ -526,6 +1207,12 @@ records:
   - https://prof-elec.com/all-categories/modular-circuit-breakers/circuit-breakers/s202m-en
   - https://sg.rs-online.com/web/p/mcbs/2096676
   - https://www.electricautomationnetwork.com/en/abb/miniature-circuit-breaker-s200-2p-c-16-a-abb-s202-c16-2cds252001r0164
+  - https://docs.rs-online.com/791b/A700000015875337.pdf
+  - https://batpro-madagascar.com/wp-content/uploads/2020/09/Acti9-iC60_A9F74203.pdf
+  - https://storage.electrika.com/flips/1173-acti9-rti-15/files/assets/basic-html/page-355.html
+  - https://spareparts2day.com/product/schneider-electric-a9f74204-ic60n
+  - https://www.manomano.co.uk/p/schneider-a9f74213-acti9-ic60n-circuit-breaker-2p-13a-c-curve-400vac-6000a10ka-76924654
+  - https://ple.vn/images/virtuemart/datasheet/4773-c60h-dc-catalogue.pdf
 - part_id: MCB-A9F74216
   kind: catalogue
   library_refs:
@@ -556,6 +1243,32 @@ records:
       connection: 1-25 mm2 solid / 1-16 mm2 flexible, 2 N.m, 14 mm strip
       endurance: 20,000 mechanical / 10,000 electrical cycles
       ip: IP20
+      range: Acti9 iC60N 2P C
+      standard: IEC/EN 60898-1 and IEC/EN 60947-2
+      trip_curve: C
+      magnetic_trip_multiple: 6.4
+      magnetic_trip_multiple_dc: 9.05
+      magnetic_trip_ac_in: 6.4-9.6
+      magnetic_trip_dc_in: 9.05-13.6
+      dc_rating_v: 125
+      rated_for_125vdc: at the limit only (<=125 V DC)
+      breaking_capacity_ac_ka: 6
+      breaking_capacity_dc_ka: 10
+      magnetic_trip_note: 'AC: datasheet gives 8 x In +/-20 % (inside the IEC 60898-1 C band 5-10 In).
+        DC: Schneider Acti9 catalogue says DC thresholds are offset by sqrt(2): C 9.05-13.6 In (11.3 In
+        +/-20 %); B 4.5-6.8 In; D/K 13.6-20.4 In.'
+      same_brand_dc_range:
+        ordering_code: A9N61531
+        range: Acti9 C60H-DC 2P C
+        standard: IEC/EN 60947-2
+        trip_curve: C
+        magnetic_trip_multiple_dc: 6.8
+        magnetic_trip_dc_in: 6.8-10.2
+        dc_rating_v: 500
+        rated_for_125vdc: true
+        breaking_capacity_dc_ka: 20
+        magnetic_trip_note: 'Catalogue: Ii = 8.5 In +/-20 % (compatible with curve C), stated for this
+          DC device.'
     dimensions_mm:
       h: 85
       w: 36
@@ -598,9 +1311,32 @@ records:
         description: System pro M compact S200, 2P C, 6 kA (IEC 60898-1); basic range; DC rating not confirmed
           in this session
         url: https://www.electricautomationnetwork.com/en/abb/miniature-circuit-breaker-s200-2p-c-16-a-abb-s202-c16-2cds252001r0164
-        notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
-          opened.
+        notes: 'Ordering code confirmed by a distributor listing (search result title/URL); datasheet
+          not opened. M14: S200 data taken from the S200 family table it shares with S200M.'
         verified: true
+        ratings:
+          range: System pro M compact S200M 2P C
+          standard: IEC/EN 60898-1 and IEC/EN 60947-2
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7.5
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7.5-15
+          dc_rating_v: 125
+          rated_for_125vdc: at the limit only (60 V DC per pole, 125 V DC multi-pole)
+          breaking_capacity_ac_ka: 10
+          breaking_capacity_dc_ka: 10
+          magnetic_trip_note: 'AC: ABB S200 table C = 5 In (no trip, >0.1 s) to 10 In (trip <0.1 s), valid
+            16 2/3-60 Hz. DC: ABB gives a multiplier table (100 Hz 1.1, 200 Hz 1.2, 400 Hz 1.5, DC 1.5);
+            the extracted columns were garbled, so DC x1.5 is read from the column order, not confirmed
+            cleanly.'
+        sources:
+        - https://cdn.gescan.com/PIM_Docs/Docs/STEP_ASSETS_PDF/13624970.pdf
+        - https://library.e.abb.com/public/5eecb35a6e9c483281234e43541d3ae4/9AKK108468A3912_en_9AKK108468A3912_B01_E_B01%20Electrical%20installation%20solutions%20for%20buildings%20part%20B01%20MCBs%20_EN_%20%28PDF%29.pdf
+        - https://kr.rs-online.com/web/p/mcbs/0132009
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       mid:
         model: S202M-C16
         ordering_code: 2CDS272001R0164
@@ -609,6 +1345,29 @@ records:
         notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
           opened.
         verified: true
+        ratings:
+          range: System pro M compact S200M 2P C
+          standard: IEC/EN 60898-1 and IEC/EN 60947-2
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7.5
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7.5-15
+          dc_rating_v: 125
+          rated_for_125vdc: at the limit only (60 V DC per pole, 125 V DC multi-pole)
+          breaking_capacity_ac_ka: 10
+          breaking_capacity_dc_ka: 10
+          magnetic_trip_note: 'AC: ABB S200 table C = 5 In (no trip, >0.1 s) to 10 In (trip <0.1 s), valid
+            16 2/3-60 Hz. DC: ABB gives a multiplier table (100 Hz 1.1, 200 Hz 1.2, 400 Hz 1.5, DC 1.5);
+            the extracted columns were garbled, so DC x1.5 is read from the column order, not confirmed
+            cleanly.'
+        sources:
+        - https://cdn.gescan.com/PIM_Docs/Docs/STEP_ASSETS_PDF/13624970.pdf
+        - https://library.e.abb.com/public/5eecb35a6e9c483281234e43541d3ae4/9AKK108468A3912_en_9AKK108468A3912_B01_E_B01%20Electrical%20installation%20solutions%20for%20buildings%20part%20B01%20MCBs%20_EN_%20%28PDF%29.pdf
+        - https://kr.rs-online.com/web/p/mcbs/0132009
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       high:
         model: S202M-C16UC
         ordering_code: 2CDS272061R0164
@@ -618,6 +1377,32 @@ records:
         notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
           opened. Check whether the UC device is polarity-marked (+/-) before wiring; not confirmed here.
         verified: true
+        ratings:
+          range: System pro M compact S200M UC 2P C
+          standard: IEC/EN 60898-1 (AC), IEC/EN 60898-2 (DC), IEC/EN 60947-2
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7-15
+          dc_rating_v: 440
+          rated_for_125vdc: true
+          breaking_capacity_ac_ka: 10
+          breaking_capacity_dc_ka: 10
+          magnetic_trip_note: 'ABB draws the S200M UC C curve to ''IEC 60898-1 (AC) / 60898-2 (DC)''.
+            AC 5-10 In from the S200 table. DC 7-15 In is the IEC 60898-2 C band, NOT a number ABB prints:
+            pass 2 re-read the ABB B01 catalogue and the S 200 M UC catalogue; neither has a text range.
+            Raw chart labels from B01: ''C (up to 4A) AC 5 7 8; DC 12'', ''C (6A up to 63A) AC 5 7 8 12;
+            DC (none)'', ''C (60947-2) AC 5 8 12''. The S200-family multiplier table (100 Hz 1.1, 200
+            Hz 1.2, 400 Hz 1.5, DC 1.5, column mapping garbled) would give 7.5-15 In. Either way dc_max
+            = 15 In.'
+        sources:
+        - https://media.onlinecomponents.com/productfiles/mf-abb/1sxu400144l0201_systempromcompactmcbs200muc0915.pdf
+        - https://manualmachine.com/abb/s202mc6uc/7630478-technical-data
+        - https://library.e.abb.com/public/5eecb35a6e9c483281234e43541d3ae4/9AKK108468A3912_en_9AKK108468A3912_B01_E_B01%20Electrical%20installation%20solutions%20for%20buildings%20part%20B01%20MCBs%20_EN_%20%28PDF%29.pdf
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
   - make: Siemens
     manufacturer: Siemens
     tiers:
@@ -627,9 +1412,30 @@ records:
         description: SENTRON 5SY6, 2P C, 6 kA (IEC 60898-1); basic AC range; DC rating not confirmed (use
           5SY5 for 125 V DC)
         url: https://www.standardelectricsupply.com/Siemens-5SY6216-7-Sentron-Supplementary-Protector
-        notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
-          opened.
+        notes: 'Ordering code confirmed by a distributor listing (search result title/URL); datasheet
+          not opened. M14: 5SY6 shares the 5SY4 DC limits (60 V DC per pole); breaking capacity is 6 kA
+          AC.'
         verified: true
+        ratings:
+          range: SENTRON 5SY4 2P C
+          standard: IEC/EN 60898-1
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7-14
+          rated_for_125vdc: false
+          breaking_capacity_ac_ka: 10
+          magnetic_trip_note: 'Siemens configuration manual: tripping characteristic applies at 50-60
+            Hz; correction factor for magnetic tripping at 0 Hz (DC) = 1.4 for 5SY 0.3-63 A (1.5 for 5SP
+            80-125 A). C AC 5-10 In -> DC 7-14 In.'
+        sources:
+        - https://media.distrelec.com/Web/Downloads/_b/ro/CirquitBreakers_eng_bro.pdf
+        - https://www.cjsautomation.com/parts/siemens/part/5sy4203-7/
+        - https://octopart.com/part/siemens/5SY4204-7
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       mid:
         model: 5SY4 2P C16
         ordering_code: 5SY4216-7
@@ -639,6 +1445,26 @@ records:
         notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
           opened. Use 5SY5 for the 125 V DC circuits.
         verified: true
+        ratings:
+          range: SENTRON 5SY4 2P C
+          standard: IEC/EN 60898-1
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7-14
+          rated_for_125vdc: false
+          breaking_capacity_ac_ka: 10
+          magnetic_trip_note: 'Siemens configuration manual: tripping characteristic applies at 50-60
+            Hz; correction factor for magnetic tripping at 0 Hz (DC) = 1.4 for 5SY 0.3-63 A (1.5 for 5SP
+            80-125 A). C AC 5-10 In -> DC 7-14 In.'
+        sources:
+        - https://media.distrelec.com/Web/Downloads/_b/ro/CirquitBreakers_eng_bro.pdf
+        - https://www.cjsautomation.com/parts/siemens/part/5sy4203-7/
+        - https://octopart.com/part/siemens/5SY4204-7
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       high:
         model: 5SY5 2P C16 (UC)
         ordering_code: 5SY5216-7
@@ -647,6 +1473,33 @@ records:
         notes: Ordering code confirmed by a distributor listing (search result title/URL); datasheet not
           opened. Check the 5SY5 DC wiring/polarity diagram before use.
         verified: true
+        ratings:
+          range: SENTRON 5SY5 2P C
+          standard: IEC/EN 60898-1 (AC), EN 60898-2 (DC), IEC 60947-2
+          trip_curve: C
+          magnetic_trip_multiple: 5
+          magnetic_trip_multiple_dc: 7
+          magnetic_trip_ac_in: 5-10
+          magnetic_trip_dc_in: 7-14
+          dc_rating_v: 440
+          rated_for_125vdc: true
+          breaking_capacity_ac_ka: 10
+          breaking_capacity_dc_ka: 10
+          magnetic_trip_note: The 5SY5 brochure's own frequency-correction table for magnetic tripping
+            gives 0 Hz (DC) = 1.4 for 5SY5 0.3-63 A (1.5 for 5SP5 80-125 A), so C AC 5-10 In becomes DC
+            7-14 In. No numeric DC band is printed (curves are graphics only). The 5SY5 is tested to EN
+            60898-2, whose DC C band is 7-15 In; if the program needs a guaranteed-trip upper bound, 15
+            In is the conservative value.
+        sources:
+        - https://images.jumpseller.com/store/suneo-energy-sas/4884114/attachments/0b31b491be26b3a716ebe79c33bcf435/5SY5_breakers.pdf?0=
+        - https://www.e-sonic.com/productfiles/mf-SIE/SIE-5SY52087.pdf
+        - https://media.distrelec.com/Web/Downloads/_b/ro/CirquitBreakers_eng_bro.pdf
+        - https://ie.rs-online.com/web/p/mcbs/2096011
+        - https://www.galaxus.ch/en/s4/product/siemens-siem-5sy5204-7-miniature-circuit-breaker-4a-2p-residual-current-device-32135521
+        - https://www.galaxus.de/en/s4/product/siemens-siem-5sy5203-7-miniature-circuit-breaker-c-3a-2p-residual-current-device-32135520
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
   sources:
   - https://docs.rs-online.com/7f16/A700000014392453.pdf
   - https://prof-elec.com/a9f74216-en/
@@ -656,6 +1509,12 @@ records:
   - https://www.electricautomationnetwork.com/en/abb/miniature-circuit-breaker-s200-2p-c-16-a-abb-s202-c16-2cds252001r0164
   - https://www.tme.eu/en/details/5sy6201-7/circuit-breakers/siemens/
   - https://za.rs-online.com/web/p/mcbs/0132122
+  - https://docs.rs-online.com/791b/A700000015875337.pdf
+  - https://batpro-madagascar.com/wp-content/uploads/2020/09/Acti9-iC60_A9F74203.pdf
+  - https://storage.electrika.com/flips/1173-acti9-rti-15/files/assets/basic-html/page-355.html
+  - https://spareparts2day.com/product/schneider-electric-a9f74204-ic60n
+  - https://www.manomano.co.uk/p/schneider-a9f74213-acti9-ic60n-circuit-breaker-2p-13a-c-curve-400vac-6000a10ka-76924654
+  - https://ple.vn/images/virtuemart/datasheet/4773-c60h-dc-catalogue.pdf
 - part_id: AUX-A9A26924
   kind: catalogue
   library_refs:
@@ -678,6 +1537,16 @@ records:
       width: 1 x 9 mm pitch (half module)
       connection: 1-4 mm2 rigid / 0.5-2.5 mm2 flexible, 1 N.m
       ip: IP20
+      same_brand_dc_range:
+        model: Acti9 OF auxiliary contact (for C60H-DC)
+        ordering_code: A9N26924
+        fits: 'C60H-DC: the Schneider datasheet lists ''C60H-DC'' under product compatibility and ''Acti
+          9 C60H-DC'' under range compatibility.'
+        contacts: 1 C/O
+        rating: 1 A at 130 V DC; 1.5 A at 60 V DC; 2 A at 48 V DC; 6 A at 220-240 V AC; 3 A at 380-415
+          V AC
+        width_mm: 9
+        verified: true
     dimensions_mm:
       w: 9
       d: 73
@@ -709,14 +1578,39 @@ records:
         notes: Code seen at Farnell (2CDS200936R0001 S2C-H11L) and on the ABB India e-shop. Replaces the
           earlier duplicate of the mid tier. Price relative to S2C-H6R not checked.
         verified: true
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       mid:
         model: S2C-H6R
         ordering_code: 2CDS200912R0001
         description: Auxiliary contact 1NO+1NC for S200/S200M, right-side mount; closest like-for-like
         url: https://shop.sa.abb.com/s2c-h6r-auxiliary-contact.html
         notes: 'Code confirmed on the ABB e-shop and at distributors (plc-direct, adjditec: 2CDS200912R0001
-          S2C-H6R, 1NC + 1NO, side mount).'
+          S2C-H6R, 1NC + 1NO, side mount). M14: Code, contact, width and fit verified. The DC rating is
+          in ABB data sheet 9AKK106930A8017, which was not reachable: Farnell''s sheet, the Octopart copy
+          (blocked) and the distributor pages give no DC current. Ask ABB or read 9AKK106930A8017 before
+          relying on it for 125 V DC indication. Left-mount alternative S2C-H11L 2CDS200936R0001 (earlier
+          research).'
         verified: true
+        ratings:
+          fits: 'S200M UC: listed as the ''H auxiliary contact'' in the ABB S 200 M UC catalogue. ABB/distributor
+            compatibility lists name S200, S200M, S200P, S200S, S300P, SN201, F200, DS201/DS202C/DS200
+            (S200M UC not named there). Right-side mount; up to three units can be lined up.'
+          contacts: 1 C/O (SPDT)
+          rating: DC rating at 110-125 V NOT found. Min load 10 mA at 12 V / 5 mA at 24 V (ABB aux-contact
+            table). The RS listing '110 V dc, 240 V ac, 1.5 A dc, 6 A ac' belongs to S2C-S/H6R 2CDS200922R0001,
+            not S2C-H6R.
+          width_mm: 8.8
+          standards: IEC/EN 60947-5-1, UL 1077
+        sources:
+        - https://www.electricautomationnetwork.com/en/abb/s2c-h6r-auxiliary-contact-abb-s2c-h6r-2cds200912r0001
+        - https://jp.farnell.com/en-JP/abb/s2c-h6r/auxiliary-contact-side-fitted/dp/1775159
+        - https://pdf.datasheet.live/0ed3460c/abbsem.com/S2C-H6R.html
+        - https://media.onlinecomponents.com/productfiles/mf-abb/1sxu400144l0201_systempromcompactmcbs200muc0915.pdf
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       high:
         model: S2C-S/H6R
         ordering_code: 2CDS200922R0001
@@ -724,6 +1618,9 @@ records:
         url: https://uk.rs-online.com/web/p/auxiliary-contacts/4886448
         notes: Code confirmed at RS and Farnell (2CDS200922R0001 S2C-S/H6R, 1 NO + 1 NC, 6 A 240 V AC).
         verified: true
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
   - make: Siemens
     manufacturer: Siemens
     tiers:
@@ -736,13 +1633,33 @@ records:
         notes: Code confirmed on the Siemens Mall and at RS (RS 0328326, 2NO SENTRON 5ST3). Replaces the
           earlier duplicate of the mid tier; price relative to 5ST3010 not checked.
         verified: true
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       mid:
         model: 5ST3010 (AS 1NO+1NC)
         ordering_code: 5ST3010
         description: Auxiliary switch 1NO+1NC for 5SY/5SL MCBs, 0.5 module; closest like-for-like
         url: https://mall.industry.siemens.com/mall/en/us/Catalog/Product/5ST3010
-        notes: Code confirmed on the Siemens Mall and at distributors (Buerklin, Rowse).
+        notes: 'Code confirmed on the Siemens Mall and at distributors (Buerklin, Rowse). M14: Ratings
+          read in the Siemens MCB configuration manual (2010); 1 A DC-13 at both 110 V and 220 V DC brackets
+          125 V DC. Width 0.5 MW from the Siemens data sheet.'
         verified: true
+        ratings:
+          fits: 'Siemens data sheet: MCB series 5SL, 5SY, 5SP (no sub-series given), plus RCBO 5SU1 and
+            RCD 5SV. The 5SY5 brochure says 5SY5 combines with the 5SY-series auxiliary switches. Neither
+            names 5SY5 + 5ST3010 together.'
+          contacts: 1 NO + 1 NC (not a single changeover)
+          rating: 'AC-14/AC-13: 6 A 230 V AC, 2 A 400 V AC; DC-13: 1 A at 220 V DC, 1 A at 110 V DC, 3
+            A at 60 V DC, 6 A at 24 V DC; min 50 mA at 24 V'
+          width: 0.5 MW
+        sources:
+        - https://media.distrelec.com/Web/Downloads/_b/ro/CirquitBreakers_eng_bro.pdf
+        - https://efobasen.efo.no/mime_root/661/5ST3010_en - Kopi.pdf
+        - https://images.jumpseller.com/store/suneo-energy-sas/4884114/attachments/0b31b491be26b3a716ebe79c33bcf435/5SY5_breakers.pdf?0=
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       high:
         model: 5ST3020 (FC 1NO+1NC)
         ordering_code: 5ST3020
@@ -751,9 +1668,14 @@ records:
         notes: Code confirmed on the Siemens Mall and at distributors (fault signal contact 1NO+1NC for
           5SL/5SY/5SP).
         verified: true
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
   sources:
   - https://eshop.se.com/sa/acti9-iof-240-415vac-24-130vdc-oc-contac-a9a26924.html
   - https://eshop.se.com/id/auxiliary-contact-acti9-a9a-iof-1-c-o-100ma-to-6a-24vac-to-415vac-24-130-vdc-bottom-connection.html
+  - https://media.distrelec.com/Web/Downloads/_t/ds/A9N26924_eng_tds.pdf
+  - https://www.crescentelectric.com/product/773577/m9a26924-auxiliary-contact-240-to-415-vac24-to-130-vdc-36-a-1-contact-for-use-with-gfp-c60bp-c60bpr-c60sp-c60h-dc-miniature-circuit-breaker-clamp-terminal-connection
 - part_id: TB-UT-16
   kind: catalogue
   library_refs:
@@ -811,8 +1733,23 @@ records:
         ordering_code: '1020400000'
         description: W-series 16 mm2 screw feed-through, 76 A / 1000 V; like-for-like screw clamp
         url: https://uk.rs-online.com/web/p/din-rail-terminal-blocks/0425235
-        notes: 76 A / 1000 V per the distributor title (pacificautomation.com.au).
+        notes: '76 A / 1000 V per the distributor title (pacificautomation.com.au). M14: All figures read
+          on the Weidmuller datasheet. 1000 V confirmed (the 800 V seen earlier belongs to the WDU 16
+          ZA variant). Franklin Empire gives a 0.201 in width, which does not match the datasheet.'
         verified: true
+        ratings:
+          type: feed-through, screw clamp
+          cross_section_mm2: 16
+          rated_a: 76
+          rated_v: 1000
+          width_mm: 11.9
+          connections: 2
+        sources:
+        - https://datasheet.weidmueller.com/pdf/en/1020400000/scope/1
+        - https://franklinempire.com/en/1020400000-7005-1020400000.html
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       mid:
         model: A2C 16
         ordering_code: '2494000000'
@@ -820,6 +1757,9 @@ records:
         url: https://www.rowse-automation.co.uk/weidmuller-2494000000
         notes: Code taken from the distributor title; datasheet not opened.
         verified: true
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       high:
         model: A2C 35
         ordering_code: '2551510000'
@@ -828,6 +1768,9 @@ records:
         notes: Order number 2551510000 = A2C 35 per the distributor listing (Weidmuller datasheet 2551510000
           also returned for 'A2C 35'). RS lists other A2C 35 colour variants (e.g. 2551520000 green/yellow).
         verified: true
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
   - make: WAGO
     manufacturer: WAGO
     tiers:
@@ -838,19 +1781,39 @@ records:
         url: https://buerklin.com/en/p/wago/series-terminals/283-101/09H606
         notes: Rating not read in this session; nominally 16 mm2 class.
         verified: true
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       mid:
         model: TOPJOB S 2016-1201
         ordering_code: 2016-1201
         description: Push-in CAGE CLAMP 16 mm2 2-conductor through terminal block, 76 A
         url: https://uk.rs-online.com/web/p/din-rail-terminal-blocks/5076866
-        notes: 76 A per the RS listing for the 2016 series.
+        notes: '76 A per the RS listing for the 2016 series. M14: WAGO datasheet (02.05.2019): 76 A (70
+          A Ex e II), 800 V per IEC/EN 60664-1 (III/3), 12 mm. Lower voltage than Phoenix UT 16 (1000
+          V); fine for 125 V DC / 230 V AC.'
         verified: true
+        ratings:
+          type: feed-through, push-in CAGE CLAMP (WAGO has no screw-clamp rail terminals)
+          cross_section_mm2: 16
+          rated_a: 76
+          rated_v: 800
+          width_mm: 12
+          connections: 2
+        sources:
+        - https://s3.amazonaws.com/shopforautomation.com/WAGO_DATASHEET/2016-1201.pdf
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       high:
         model: TOPJOB S 2016-1301
         ordering_code: 2016-1301
         description: Push-in CAGE CLAMP 16 mm2 3-conductor through terminal block (extra outgoing conductor)
         url: https://uk.rs-online.com/web/p/din-rail-terminal-blocks/5076894
         verified: true
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
   sources:
   - https://www.phoenixcontact.com/us/products/3044199/pdf
   - https://www.masterelectronics.com/en/phoenix-contact/3044199-12158096.html
@@ -915,8 +1878,23 @@ records:
         ordering_code: '1020000000'
         description: W-series 2.5 mm2 screw feed-through terminal, 5.1 mm pitch class
         url: https://nz.rs-online.com/web/p/din-rail-terminal-blocks/0425190
-        notes: Ratings not read in this session.
+        notes: 'Ratings not read in this session. M14: Read on the Weidmuller datasheet. The Phoenix part
+          3064085 (UT 2,5-MTD) is a FEED-THROUGH block in the MT disconnect profile (earlier research),
+          not a disconnect, so the like-for-like is a feed-through. If a disconnect is wanted here, use
+          the UT-2.5-MT entries.'
         verified: true
+        ratings:
+          type: feed-through, screw clamp
+          cross_section_mm2: 2.5
+          rated_a: 24
+          rated_v: 800
+          width_mm: 5.1
+          connections: 2
+        sources:
+        - https://datasheet.weidmueller.com/pdf/en/1020000000/scope/1
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       mid:
         model: A2C 2.5
         ordering_code: '1521850000'
@@ -924,6 +1902,9 @@ records:
         url: https://www.rowse-automation.co.uk/weidmuller-1521850000
         notes: 24 A / 800 V per the distributor title of the A2C 2.5 colour variants.
         verified: true
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       high:
         model: ADT 2.5 2C
         ordering_code: '1989800000'
@@ -931,6 +1912,9 @@ records:
         url: https://www.rowse-automation.co.uk/weidmuller-1989800000
         notes: Ratings not read in this session.
         verified: true
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
   - make: WAGO
     manufacturer: WAGO
     tiers:
@@ -939,8 +1923,21 @@ records:
         ordering_code: 2002-1201
         description: Push-in 2.5 mm2 2-conductor through terminal block
         url: https://buerklin.com/en/p/wago/series-terminals/2002-1201/09H7450
-        notes: Ratings not read in this session.
+        notes: 'Ratings not read in this session. M14: WAGO data sheet copy: 24 A (second value 32 A listed),
+          800 V (III/3), 8 kV impulse, 5.2 mm.'
         verified: true
+        ratings:
+          type: feed-through, push-in CAGE CLAMP
+          cross_section_mm2: 2.5
+          rated_a: 24
+          rated_v: 800
+          width_mm: 5.2
+          connections: 2
+        sources:
+        - https://manualmachine.com/wago/20021201/16937902-data-sheet
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       mid:
         model: TOPJOB S 2002-1301
         ordering_code: 2002-1301
@@ -948,12 +1945,29 @@ records:
           clamping'
         url: https://uk.rs-online.com/web/p/din-rail-terminal-blocks/5076563
         verified: true
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       high:
         model: TOPJOB S 2002-1671
         ordering_code: 2002-1671
         description: Push-in 2.5 mm2 2-conductor disconnect/test terminal block, orange disconnect link
         url: https://uk.rs-online.com/web/p/din-rail-terminal-blocks/2783231
         verified: true
+        ratings:
+          type: 2-conductor disconnect/test terminal, orange disconnect link, push-in CAGE CLAMP
+          cross_section_mm2: 2.5
+          rated_a: 16
+          rated_v: 400
+          width_mm: 5.2
+          connections: 2
+        sources:
+        - https://www.wagoproducts.com/rail-mounted-terminal-blocks/series-2002/wago-2002-1671
+        notes: 'M14: 16 A (IEC/EN 60947-7-1), 400 V (III/3), UL 300 V, 5.2 mm. Lower current than Phoenix
+          UT 2,5-MT (20 A); fine for DI/COM circuits. Not screw clamp. 4-conductor variant 2002-1871.'
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
   sources:
   - https://www.phoenixcontact.com/en-pc/products/feed-through-terminal-block-ut-25-mtd-3064085
   - https://docs.rs-online.com/efc8/0900766b812c0d9c.pdf
@@ -1018,13 +2032,30 @@ records:
         url: https://www.rowse-automation.co.uk/weidmuller-1989800000
         notes: Ratings not read in this session.
         verified: true
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       mid:
         model: WTR 2.5
         ordering_code: '1855610000'
         description: W-series 2.5 mm2 screw test-disconnect terminal, 24 A / 500 V; like-for-like
         url: https://befr.rs-online.com/web/p/din-rail-terminal-blocks/0180008
-        notes: 24 A / 500 V per the pacificautomation.com.au title.
+        notes: '24 A / 500 V per the pacificautomation.com.au title. M14: Read on the Weidmuller datasheet
+          (test-disconnect terminal for measuring circuits, de-energised). Like-for-like screw. Variant
+          WTR 2.5 STB2.3 1855620000 adds test sockets.'
         verified: true
+        ratings:
+          type: test-disconnect (knife), screw clamp
+          cross_section_mm2: 2.5
+          rated_a: 24
+          rated_v: 500
+          width_mm: 5.1
+          connections: 2
+        sources:
+        - https://datasheet.weidmueller.com/pdf/en/1855610000/scope/1
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       high:
         model: WTL 6/1
         ordering_code: '1016700000'
@@ -1033,6 +2064,9 @@ records:
         url: https://it.misumi-ec.com/pdf/ds/WML1/1016700000_WTL_6_1_it.pdf
         notes: 41 A / 500 V per the distributor title of WTL 6/1 STB.
         verified: true
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
   - make: WAGO
     manufacturer: WAGO
     tiers:
@@ -1043,12 +2077,29 @@ records:
           WAGO part
         url: https://uk.rs-online.com/web/p/din-rail-terminal-blocks/2783231
         verified: true
+        ratings:
+          type: 2-conductor disconnect/test terminal, orange disconnect link, push-in CAGE CLAMP
+          cross_section_mm2: 2.5
+          rated_a: 16
+          rated_v: 400
+          width_mm: 5.2
+          connections: 2
+        sources:
+        - https://www.wagoproducts.com/rail-mounted-terminal-blocks/series-2002/wago-2002-1671
+        notes: 'M14: 16 A (IEC/EN 60947-7-1), 400 V (III/3), UL 300 V, 5.2 mm. Lower current than Phoenix
+          UT 2,5-MT (20 A); fine for DI/COM circuits. Not screw clamp. 4-conductor variant 2002-1871.'
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       mid:
         model: TOPJOB S 2002-1871
         ordering_code: 2002-1871
         description: 'Push-in 2.5 mm2 4-conductor disconnect/test terminal: 2 conductors per side'
         url: https://www.rapidonline.com/wago-2002-1871-4-conductor-disconnect-terminal-block-grey-50-8561
         verified: true
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       high:
         model: TOPJOB S 2006-1671
         ordering_code: 2006-1671
@@ -1056,6 +2107,9 @@ records:
         url: https://uk.rs-online.com/web/p/din-rail-terminal-blocks/2815883
         notes: Ratings not read in this session.
         verified: true
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
   sources:
   - https://www.phoenixcontact.com/en-pc/products/knife-disconnect-terminal-block-ut-25-mt-3046362
   - https://media.e-sonic.com/productfiles/mf-ph/3046362.pdf
@@ -1089,8 +2143,21 @@ records:
         description: 10 x 3 mm tinned Cu busbar, 1 m, cut to length; on AB-SK (3025341) metal supports
           on DIN rail
         url: https://www.phoenixcontact.com/us/products/0402174
-        notes: Order the supports separately (AB-SK 3025341) and AK 4 clamps (0404017) per conductor.
+        notes: 'Order the supports separately (AB-SK 3025341) and AK 4 clamps (0404017) per conductor.
+          M14: Support and clamp codes from the earlier research (not re-read); AK 4 cross-section range
+          not read.'
         verified: true
+        ratings:
+          size: 3 x 10 x 1000 mm
+          material: tinned copper
+          holes_or_terminals: 'Undrilled bar: no holes. The terminal count is however many AK 4 / AKG
+            4 clamps are fitted (one per conductor), chosen per project.'
+        sources:
+        - https://www.phoenixcontact.com/us/products/0402174
+        - https://gabbyelectric.com/products/0402174-phoenix-contact-nls-cu-busbar-3x10x1000mm-tin-plated-sn-140a
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
       mid:
         model: NLS-CU 3/10 SN 1000MM + AB-SK 65
         ordering_code: 0402174 + 3026489
@@ -1098,6 +2165,9 @@ records:
         url: https://www.phoenixcontact.com/en-be/products/support-bracket-ab-sk-65-3026489
         notes: AK 4 (0404017) clamp terminals per conductor.
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
       high:
         model: NLS-CU 3/10 SN 1000MM + AB-SK + AK 4 terminals
         ordering_code: 0402174 + 3025341 + 0404017
@@ -1106,6 +2176,9 @@ records:
         url: https://www.electricautomationnetwork.com/en/phoenix_contact/connection-terminal-block-phoenix-contact-ak-4-0404017
         notes: AK 4 cross-section range not read in this session.
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
   - make: nVent ERICO
     manufacturer: nVent
     tiers:
@@ -1115,8 +2188,21 @@ records:
         description: Tinned copper grounding busbar 6 x 4 x 1/4 in, with insulators and brackets, NN hole
           pattern
         url: https://www.platt.com/p/0356108/nvent-erico/grounding-busbar-w-insulators-and-brackets-nn-6-x-4-x-025-tinned/782856590248/cadegba14406nnt
-        notes: Imperial sizes (US telecom/utility style). Hole pattern and lug count not read.
+        notes: 'Imperial sizes (US telecom/utility style). Hole pattern and lug count not read. M14: Platt
+          reads 6 x 4 x 0.25 in, copper, tin plated. Ships with insulators per nVent E908S, which suits
+          a single-point-bonded instrument earth. Not in nVent''s stocked list (special/stock-by-distributor).
+          Hole count and lug size need the nVent drawing.'
         verified: true
+        ratings:
+          size: 6 x 4 x 0.25 in
+          material: copper, tin plated
+          holes_or_terminals: NN pattern; hole count NOT stated in any source read
+        sources:
+        - https://www.platt.com/p/0356108/nvent-erico/grounding-busbar-w-insulators-and-brackets-nn-6-x-4-x-025-tinned/782856590248/cadegba14406nnt
+        - https://origin-nvent.nvent.com/sites/default/files/acquiadam_assets/2022-12/E908S-USEN.pdf
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
       mid:
         model: EGBA14412HHT
         ordering_code: EGBA14412HHT
@@ -1124,6 +2210,22 @@ records:
           hole pattern
         url: https://www.platt.com/p/0356173/nvent-erico/grounding-busbar-w-insulators-and-brackets-hh-12-x-4-x-025-tinned/782856611035/cadegba14412hht
         verified: true
+        ratings:
+          size: 12 x 4 x 0.25 in
+          material: copper, tin plated ('T' suffix = electro-tin plating)
+          holes_or_terminals: HH pattern; hole count NOT stated (nVent shows patterns only as drawings;
+            Platt page has no hole data)
+        sources:
+        - https://www.platt.com/p/0356173/nvent-erico/grounding-busbar-w-insulators-and-brackets-hh-12-x-4-x-025-tinned/782856611035/cadegba14412hht
+        - https://origin-nvent.nvent.com/sites/default/files/acquiadam_assets/2022-12/E908S-USEN.pdf
+        notes: 'M14: nVent E908S: EGBA = 1/4 in bar; digits = width x length; letters = hole pattern;
+          add ''T'' for tin plating; ''All bars shown include insulators, stainless steel brackets, stainless
+          steel mounting bolts, and are UL Listed.'' EGBA14412HHT itself is not in nVent''s stocked list
+          (EGBA14412GG and EGBA14412NN are); Platt lists it. Smaller EGBA14406NNT and larger EGBA14612GGT
+          also listed by Platt. Imperial (US) sizes.'
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
       high:
         model: EGBA14612GGT
         ordering_code: EGBA14612GGT
@@ -1131,6 +2233,9 @@ records:
           lug positions
         url: https://www.platt.com/p/0356434/nvent-erico/grounding-busbar-w-insulators-and-brackets-gg-12-x-6-x-025-tinned/782856623755/cadegba14612ggt
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
   sources:
   - https://www.phoenixcontact.com/us/products/0402174
   - https://www.phoenixcontact.com/us/products/3025341
@@ -1171,12 +2276,26 @@ records:
         notes: Insulation of AB-SK/E inferred from the Phoenix '/E' naming; the datasheet (onlinecomponents
           3026476.pdf) was not opened.
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
       mid:
         model: NLS-CU 3/10 SN 1000MM + AB-SK-D TOP INSULATED
         ordering_code: 0402174 + 3062087
         description: Same bar on AB-SK-D TOP INSULATED supports (explicitly insulated)
         url: https://shop.shortec.com/phoenix-contact/3062087-ab-sk-d-top-insulated/
         verified: true
+        ratings:
+          size: 3 x 10 x 1000 mm
+          material: tinned copper
+          holes_or_terminals: Undrilled bar; terminal count = number of clamps fitted.
+        sources:
+        - https://www.phoenixcontact.com/us/products/0402174
+        - https://shop.shortec.com/phoenix-contact/3062087-ab-sk-d-top-insulated/
+        notes: 'M14: Bar verified; support/clamp codes from earlier research, not re-read.'
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
       high:
         model: NLS-CU 3/10 SN 1000MM + AB-SK-D TOP INSULATED + AKG 4
         ordering_code: 0402174 + 3062087 + 0421016
@@ -1184,6 +2303,9 @@ records:
         url: https://rspsupply.com/p-41504-phoenix-contact-0421016-connection-terminal-block-akg-4-bu.aspx
         notes: AKG 4 BU is blue; a green-yellow version exists but its code was not checked.
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
   - make: nVent ERICO
     manufacturer: nVent
     tiers:
@@ -1193,8 +2315,21 @@ records:
         description: Tinned copper grounding busbar 6 x 4 x 1/4 in, with insulators and brackets, NN hole
           pattern
         url: https://www.platt.com/p/0356108/nvent-erico/grounding-busbar-w-insulators-and-brackets-nn-6-x-4-x-025-tinned/782856590248/cadegba14406nnt
-        notes: Imperial sizes (US telecom/utility style). Hole pattern and lug count not read.
+        notes: 'Imperial sizes (US telecom/utility style). Hole pattern and lug count not read. M14: Platt
+          reads 6 x 4 x 0.25 in, copper, tin plated. Ships with insulators per nVent E908S, which suits
+          a single-point-bonded instrument earth. Not in nVent''s stocked list (special/stock-by-distributor).
+          Hole count and lug size need the nVent drawing.'
         verified: true
+        ratings:
+          size: 6 x 4 x 0.25 in
+          material: copper, tin plated
+          holes_or_terminals: NN pattern; hole count NOT stated in any source read
+        sources:
+        - https://www.platt.com/p/0356108/nvent-erico/grounding-busbar-w-insulators-and-brackets-nn-6-x-4-x-025-tinned/782856590248/cadegba14406nnt
+        - https://origin-nvent.nvent.com/sites/default/files/acquiadam_assets/2022-12/E908S-USEN.pdf
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
       mid:
         model: EGBA14412HHT
         ordering_code: EGBA14412HHT
@@ -1202,6 +2337,22 @@ records:
           hole pattern
         url: https://www.platt.com/p/0356173/nvent-erico/grounding-busbar-w-insulators-and-brackets-hh-12-x-4-x-025-tinned/782856611035/cadegba14412hht
         verified: true
+        ratings:
+          size: 12 x 4 x 0.25 in
+          material: copper, tin plated ('T' suffix = electro-tin plating)
+          holes_or_terminals: HH pattern; hole count NOT stated (nVent shows patterns only as drawings;
+            Platt page has no hole data)
+        sources:
+        - https://www.platt.com/p/0356173/nvent-erico/grounding-busbar-w-insulators-and-brackets-hh-12-x-4-x-025-tinned/782856611035/cadegba14412hht
+        - https://origin-nvent.nvent.com/sites/default/files/acquiadam_assets/2022-12/E908S-USEN.pdf
+        notes: 'M14: nVent E908S: EGBA = 1/4 in bar; digits = width x length; letters = hole pattern;
+          add ''T'' for tin plating; ''All bars shown include insulators, stainless steel brackets, stainless
+          steel mounting bolts, and are UL Listed.'' EGBA14412HHT itself is not in nVent''s stocked list
+          (EGBA14412GG and EGBA14412NN are); Platt lists it. Smaller EGBA14406NNT and larger EGBA14612GGT
+          also listed by Platt. Imperial (US) sizes.'
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
       high:
         model: EGBA14612GGT
         ordering_code: EGBA14612GGT
@@ -1209,6 +2360,9 @@ records:
           lug positions
         url: https://www.platt.com/p/0356434/nvent-erico/grounding-busbar-w-insulators-and-brackets-gg-12-x-6-x-025-tinned/782856623755/cadegba14612ggt
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
   sources:
   - https://www.phoenixcontact.com/us/products/0402174
   - https://shop.shortec.com/phoenix-contact/3026476-ab-ske/

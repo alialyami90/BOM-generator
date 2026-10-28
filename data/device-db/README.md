@@ -72,7 +72,11 @@ records:
       - make: Moxa
         manufacturer: ...
         tiers:
-          low:  {model, ordering_code, description, unit_power_w, url, notes, verified}
+          low:  {model, ordering_code, description, unit_power_w, url, notes, verified,
+                 height_u, mounting_kind, supply_type, voltage_v, input_v_min, input_v_max,
+                 supply_option, supply_ok, power_supplies, power_basis, power_note,
+                 inrush_a, inrush_ms, inrush_basis, inrush_note, port_groups, airflow_m3h,
+                 ratings, sources}
           mid:  {...}
           high: {..., same_as: mid}   # only when no distinct part exists for this tier
     sources: [https://...]
@@ -99,6 +103,36 @@ Readers (the tests, and the app's loader) can rely on these:
   given; `note` is optional. `media` is `MM`, `SM` or `RJ45` on fixed ports and the cage
   type (`SFP`, `SFP+`) on SFP slots.
 - `height_u` is a whole number, at least 1 for `rack` and 0 for every other mounting.
+
+### Electrical data for the library (M14)
+
+Each alternative tier carries what a library device needs, so it can become a pickable
+part and its branch MCB can be sized from its own data:
+
+- `height_u` and `mounting_kind` as on the datasheet. A rack part whose height was not
+  found leaves `height_u` out rather than writing 0.
+- `supply_type` (`VDC | VAC | none`) and `voltage_v`, the supply the BOM would use
+  (125 V DC station DC, 230 V AC auxiliary). `input_v_min` and `input_v_max` give the DC
+  input range of the chosen supply variant where the datasheet states one.
+- `supply_option` names the power-supply option the ordering code selects;
+  `supply_ok: false` means no variant takes 125 V DC (or 230 V AC for an AC part), so the
+  part needs a converter. `power_supplies` is 2 when the code includes a redundant supply.
+- `unit_power_w` with `power_basis`: `datasheet_max`, `datasheet_typical`, `computed`
+  (current × voltage, with the arithmetic in `power_note`) or `assumed` (reason in
+  `power_note`).
+- `inrush_a` (peak A) and `inrush_ms` where a datasheet gives them, with `inrush_basis`
+  (`datasheet | not_given | assumed`) and `inrush_note`. Most datasheets give none.
+- `port_groups` on switches and firewalls, as on the datasheet. `airflow_m3h` on fans:
+  the figure with the outlet filter.
+- `ratings` is free-form: MCB trip data (`trip_curve`, `magnetic_trip_multiple` and
+  `magnetic_trip_multiple_dc`, the lower bound of the magnetic trip band in multiples of
+  In, plus `dc_rating_v` for the poles in series), terminal cross-sections, socket
+  ratings and the like.
+- `sources` lists the pages for that tier's figures.
+
+The original part's datasheet carries the same inrush and input-range keys. An MCB
+record's `datasheet.ratings.same_brand_dc_range` gives the Schneider C60H-DC code for that
+rating, the DC-rated range in the original's brand.
 
 The model and ordering code the BOM uses are not repeated here; the record's
 `datasheet.ordering_code_decoded` explains them where they could be decoded.
@@ -136,3 +170,7 @@ record cites a source and repeats no library field, that each has two other bran
 with low, mid and high parts (a repeated part only when marked `same_as`), that each
 record gives its mounting and a whole `height_u` (non-zero only for rack parts), and
 that every library switch, and only a switch, lists port groups with a known role.
+They also check that every alternative states its mounting and supply, that a powered
+one says where its power figure comes from, that a DC input range contains the nominal
+voltage, and that every MCB gives its trip curve and a DC magnetic multiple at or above
+the AC one.

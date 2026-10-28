@@ -66,10 +66,21 @@ records:
       needs the DVI-D input option ordered (or use HDMI). Not IEC 61850-3 / IEEE 1613 rated; 0-55 degC
       operating. Per-model power values in the datasheet table could not be mapped with certainty (55
       W likely F23). Manual: https://www.austin-hughes.com/wp-content/uploads/2021/03/UM-UV-F23.pdf ;
-      drawing: https://www.austin-hughes.com/wp-content/uploads/2023/03/PD-UV-F23.pdf'
+      drawing: https://www.austin-hughes.com/wp-content/uploads/2023/03/PD-UV-F23.pdf M14: Library 52
+      W is plausible. The F23 manual gives screen-on max 45 W. The FHD datasheet table is garbled (55
+      W / 90 W). The DC module''s full-load input is 749 mA x 110 V = 82 W (module rating, not monitor
+      draw).'
     mounting_kind: external
     height_u: 0
     height_note: Desk or VESA mount on the WS console
+    inrush_basis: not_given
+    inrush_note: 'Neither the FHD family datasheet nor the F23 user manual states an inrush/surge/start-up
+      current for the AC adapter or the 125 VDC option module. DC option (manual p.25, column headed 125V
+      / labelled 110-Volt): input 66-160 V, 35 mA no-load, 749 mA full-load, 12 V 6.25 A out, 91 % eff.
+      The family datasheet instead lists 40 mA / 993 mA / 92 % for the 125 VDC module. Manual gives screen-on
+      max 45 W, power saving max 9 W, off max 2 W.'
+    input_v_min: 66
+    input_v_max: 160
   alternatives:
   - make: Advantech
     manufacturer: Advantech Co., Ltd.
@@ -80,26 +91,79 @@ records:
         description: 21.5in FHD industrial monitor, 10-pt P-CAP touch, IP66 front, HDMI input only, 12
           VDC lockable DC jack, 0..50 degC
         url: https://www.advantech.com/en/products/1-2mlc1h/fpm-221w/mod_0243f1c1-4b75-41e7-a45b-db6bafb04500
-        notes: Smaller than 23in. 12 VDC only - needs a 125/12 VDC converter. Code seen on PB Tech listing
-          (FPM-221W-P4AE); power consumption not published on product page
+        notes: 'Smaller than 23in. 12 VDC only - needs a 125/12 VDC converter. Code seen on PB Tech listing
+          (FPM-221W-P4AE); power consumption not published on product page M14: No 125 VDC variant. Needs
+          the 230 VAC aux supply via the adapter, or a 125 VDC to 12 VDC converter. 558.4 x 349.8 x 56.2
+          mm. Mounting: panel, desktop, VESA. Operating range 0-50 degC. HDMI only, so the BOM''s DVI
+          cable would need changing. Monitor DC jack is 12 VDC (nominal only, no tolerance stated in the
+          datasheet); fed from the included AC adapter'
         verified: true
+        height_u: 0
+        mounting_kind: external
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 'External 60 W adapter included: 100-240 VAC in, 12 VDC 5 A out (96PSA-A60W12V1-4)'
+        supply_ok: false
+        power_supplies: 1
+        unit_power_w: 60.0
+        power_basis: assumed
+        power_note: Datasheet gives no consumption figure. 60 W is the included adapter's rating (12 V
+          x 5 A), used as an upper bound.
+        inrush_basis: not_given
+        sources:
+        - https://advdownload.advantech.com/productfile/PIS/FPM-221W/file/FPM-221W_DS%28090826%2920260914094910.pdf
+        - https://www.advantech.com/en/products/1-2mlc1h/fpm-221w/mod_0243f1c1-4b75-41e7-a45b-db6bafb04500
       mid:
         model: FPM-7211W
         ordering_code: FPM-7211W-P3AE
         description: 21.5in FHD industrial monitor, P-CAP 10-pt touch, IP66 magnesium-alloy front, VGA
           + DVI-D inputs (suits the BOM's DVI cable), 24 VDC, 0..55 degC, UL/CE/FCC A
         url: https://digikey.cn/en/products/detail/advantech-corporation/FPM-7211W-P3AE/9857627
-        notes: Specs from Advantech FPM-7211W product page; 24 VDC only - needs 125/24 VDC converter
+        notes: 'Specs from Advantech FPM-7211W product page; 24 VDC only - needs 125/24 VDC converter
+          M14: Data sheet copy hosted by distributor Coast IPC. No 125 VDC variant: needs a 125/24 VDC
+          converter or the optional AC adapter on 230 VAC. Size 558.4 x 349.8 x 47.7 mm. Mounting: panel,
+          wall, desktop, VESA. Operating range 0-55 degC. Both datasheet editions (2020, 2026) state only
+          ''24 VDC input'', no range or tolerance; min = max = nominal'
         verified: true
+        height_u: 0
+        mounting_kind: external
+        supply_type: VDC
+        voltage_v: 24
+        supply_option: 24 VDC Phoenix terminal; optional PWR-247-DE adapter 100-240 VAC to 24 V 2.5 A
+          60 W
+        supply_ok: false
+        power_supplies: 1
+        unit_power_w: 30.0
+        power_basis: computed
+        power_note: Datasheet states '25 W + 20%' = 30 W max
+        inrush_basis: not_given
+        sources:
+        - https://coastipc.com/media/productattach/f/p/fpm-7211w_data_sheet_050726.pdf
       high:
         model: FPM-724W
         ordering_code: FPM-724W-P9AE
         description: 23.8in FHD industrial monitor (closest size), P-CAP 10-pt touch, IP66 front, HDMI
           + DP + VGA, 24 VDC, 0..50 degC
         url: https://www.advantech.com/en/products/1-2mlc1h/fpm-724w/mod_50895519-12b6-42d7-ac9e-3f54e4582765
-        notes: Code seen at Advantech iotmart and distributors; no DVI input (use HDMI/DP); bracket adapter
-          FPM-7000G-ADKE; 24 VDC - needs 125/24 VDC converter
+        notes: 'Code seen at Advantech iotmart and distributors; no DVI input (use HDMI/DP); bracket adapter
+          FPM-7000G-ADKE; 24 VDC - needs 125/24 VDC converter M14: Figures from a distributor spec table;
+          no Advantech PDF was read for this model. No 125 VDC variant. Size 595.9 x 374.1 x 53 mm. Mounting:
+          stand, wall, panel, VESA 75. Operating range 0-50 degC for the FPM-724W. Spec states only ''Terminal
+          Block: 24 VDC input'', no range; min = max = nominal'
         verified: true
+        height_u: 0
+        mounting_kind: external
+        supply_type: VDC
+        voltage_v: 24
+        supply_option: 24 VDC terminal block; optional PWR-247-DE adapter 100-240 VAC to 24 V 60 W
+        supply_ok: false
+        power_supplies: 1
+        unit_power_w: 24.41
+        power_basis: datasheet_max
+        power_note: 'PB Tech spec table: 0.161 W standby, 24.41 W max (units implied)'
+        inrush_basis: not_given
+        sources:
+        - https://www.pbtech.com/product/IPCAVH221479/Advantech-FPM-724W-P9AE-238-Full-HD-Industrial-Mon
   - make: Siemens
     manufacturer: Siemens AG
     tiers:
@@ -109,26 +173,94 @@ records:
         description: 23.8in (24in class) 1920x1080 multi-touch Industrial Flat Panel monitor for front/panel
           mounting, 24 VDC
         url: https://buerklin.com/en/p/siemens/hmi/6av7863-7ma00-2aa0/70P4279
-        notes: -2NA0 suffix (6AV7863-7MA00-2NA0) = neutral design without Siemens branding. Siemens IFP
+        notes: '-2NA0 suffix (6AV7863-7MA00-2NA0) = neutral design without Siemens branding. Siemens IFP
           family is 24 VDC; 125 VDC needs an external DC-DC converter. Interfaces and power draw not read
+          M14: The Siemens data sheet gives starting-current I2t 0.5 A2s but no peak inrush. No 125 VDC
+          variant: needs a 125/24 VDC converter. Built-in unit for a 569 x 347 mm cut-out in a console.
+          Operating range 0-45 degC.'
         verified: true
+        height_u: 0
+        mounting_kind: external
+        supply_type: VDC
+        voltage_v: 24
+        input_v_min: 19.2
+        input_v_max: 28.8
+        supply_option: 24 VDC only (19.2-28.8 VDC, PELV/SELV)
+        supply_ok: false
+        power_supplies: 1
+        unit_power_w: 45.6
+        power_basis: computed
+        power_note: Current consumption max 1.9 A x 24 V = 45.6 W (rated 1.5 A = 36 W; power loss typ
+          36 W / max 41 W)
+        inrush_basis: not_given
+        sources:
+        - https://appliedautomationstoragepublic.s3-us-west-1.amazonaws.com/PartAttachment/1679473/6AV7863-7MA00-2AA0%20Datasheet.pdf
       mid:
         model: SIMATIC IFP2400 V2 extended
         ordering_code: 6AV7863-7MA10-2AA0
         description: IFP2400 V2 'extended' variant, 24in 1920x1080 multi-touch, for remote (long-distance)
           connection to the PC
         url: https://www.electricautomationnetwork.com/pt/siemens/6av7863-7ma10-2aa0-siemens-simatic-ifp2400-v2-extended-24-multi-touch-display-16-9-with-1920x1080-pixel-r
-        notes: Exact extended-link interface not read; 24 VDC; neutral-design variant 6AV7863-7MA10-2NA0
-        verified: true
+        notes: 'Exact extended-link interface not read; 24 VDC; neutral-design variant 6AV7863-7MA10-2NA0
+          M14: 24 VDC confirmed, but no consumption figure was found for this code (pass 2 re-checked
+          Lieske as well). The W and input range are assumed from sister data sheets. Lieske describes
+          it as a built-in unit with DisplayPort, HDBaseT up to 100 m from the IPC, and rear USB, for
+          remote installation. RS and Lieske list the order number as 6AV7863-7MA10-2NA0 (neutral-design
+          suffix 2NA0), not 2AA0. No 125 VDC variant. Range taken from sister IFP2400 V2 data sheets (standard
+          7MA00-2AA0 and PRO 7MA16-2AA0 both 19.2-28.8 V); not read for this code'
+        verified: false
+        height_u: 0
+        mounting_kind: external
+        supply_type: VDC
+        voltage_v: 24
+        input_v_min: 19.2
+        input_v_max: 28.8
+        supply_option: 24 VDC only
+        supply_ok: false
+        power_supplies: 1
+        unit_power_w: 45.6
+        power_basis: assumed
+        power_note: 'No figure published for this code. Assumed equal to the sister IFP2400 V2 units,
+          whose Siemens data sheets both give rated 1.5 A, max 1.9 A at 24 V (1.9 x 24 = 45.6 W), I2t
+          0.5 A2s, power loss 36/41 W: standard 6AV7863-7MA00-2AA0 and PRO 6AV7863-7MA16-2AA0 (which also
+          has HDBaseT).'
+        inrush_basis: not_given
+        sources:
+        - https://automationtrader.com/en/products/siemens/6av78637ma102aa0/downloads/6av78637ma102aa0_datasheet_en_automation-trader.pdf
+        - https://ph.rs-online.com/web/p/hmi-displays/2527324
+        - https://industry-electronics.com/siemens/6av78637ma102na0-6av7863-7ma10-2na0-ipc-ifp2400-v2-24-multitouch-ext.version-lieske_1293396.htm
+        - https://exponentcontrols.com.ph/storage/products/4975/specs/1700725558_6AV78637MA162AA0.pdf
       high:
         model: SIMATIC IFP2400 V2 PRO
         ordering_code: 6AV7863-7MA14-2NA0
         description: IFP2400 V2 PRO 24in 1920x1080 multi-touch, fully enclosed PRO housing for stand/support-arm
           mounting, DisplayPort + HDBaseT (up to 100 m), rear USB, 24 VDC, neutral design
         url: https://mall.industry.siemens.com/mall/en/en/Catalog/Product/6AV78637MA142NA0
-        notes: Read on Siemens Industry Mall; other PRO variants 6AV7863-7MA14-2AA0 / -7MA15 / -7MA16
-          / -7MA17 differ by mounting/design (not decoded)
-        verified: true
+        notes: 'Read on Siemens Industry Mall; other PRO variants 6AV7863-7MA14-2AA0 / -7MA15 / -7MA16
+          / -7MA17 differ by mounting/design (not decoded) M14: Siemens Mall shows the product as active
+          (PM300) with a 24 VDC description, but gives no current or power for this code. The figures
+          come from the sister PRO data sheet. No 125 VDC variant. From the sister PRO data sheet 6AV7863-7MA16-2AA0
+          (19.2-28.8 V); not read for 7MA14-2NA0 itself'
+        verified: false
+        height_u: 0
+        mounting_kind: external
+        supply_type: VDC
+        voltage_v: 24
+        input_v_min: 19.2
+        input_v_max: 28.8
+        supply_option: 24 VDC only
+        supply_ok: false
+        power_supplies: 1
+        unit_power_w: 45.6
+        power_basis: assumed
+        power_note: Assumed equal to the sister PRO unit 6AV7863-7MA16-2AA0 (IFP2400 V2 PRO, support-arm
+          version). Its Siemens data sheet gives rated 1.5 A, max 1.9 A at 24 V (45.6 W), I2t 0.5 A2s,
+          power loss 36/41 W.
+        inrush_basis: not_given
+        sources:
+        - https://mall.industry.siemens.com/mall/en/en/Catalog/Product/6AV78637MA142NA0
+        - https://automationtrader.com/en/products/siemens/6av7863-7ma14-2na0/downloads/6av7863-7ma14-2na0_datasheet_en_automation-trader.pdf
+        - https://exponentcontrols.com.ph/storage/products/4975/specs/1700725558_6AV78637MA162AA0.pdf
   sources:
   - https://austin-hughes.com/?p=14180
   - https://www.austin-hughes.com/wp-content/uploads/2020/07/CA-UV-FHD-L.pdf
@@ -139,6 +271,7 @@ records:
   - https://www.pbtech.com/pacific/product/IPCAVH220707/Advantech-FPM-221W-P4AE-215-Full-HD-Industrial-Mon
   - https://mall.industry.siemens.com/mall/en/en/Catalog/Product/6AV78637MA142NA0
   - https://ph.rs-online.com/web/p/hmi-displays/2527321
+  - https://www.austin-hughes.com/wp-content/uploads/2021/03/UM-UV-F23.pdf
 - part_id: NAP-K55
   kind: device
   description: 55" LCD Alarm Annunciator (Touch) - Wall Mounted
@@ -198,15 +331,24 @@ records:
       options: 125VDC DC input, TPC10 / IR10 touch, glass, portrait, SDI modules are ordered as options
     datasheet_url: https://www.austin-hughes.com/wp-content/uploads/2020/07/CA-UV-4K-L.pdf
     product_url: https://www.austin-hughes.com/product/k55/
-    notes: NAP-K55 confirmed on the manufacturer page. BOM 100 W matches the 100 W screen-on figure; the
-      datasheet also lists 335 W max (column mapping in the PDF is ambiguous) while the 125 VDC module
+    notes: 'NAP-K55 confirmed on the manufacturer page. BOM 100 W matches the 100 W screen-on figure;
+      the datasheet also lists 335 W max (column mapping in the PDF is ambiguous) while the 125 VDC module
       is rated 150 W, so confirm the DC-fed consumption with Austin Hughes. Weight for the NAP variant
-      is 48.6 kg in the 4K-L datasheet but 45 kg in the 42U K55 brochure. The BOM's "touch" requires the
-      touch option to be specified (PCAP or IR). Package includes 6 ft DP cable. Not IEC 61850-3 rated.
+      is 48.6 kg in the 4K-L datasheet but 45 kg in the 42U K55 brochure. The BOM''s "touch" requires
+      the touch option to be specified (PCAP or IR). Package includes 6 ft DP cable. Not IEC 61850-3 rated.
       Manual https://www.austin-hughes.com/wp-content/uploads/2020/07/UM-UV-K55.pdf ; drawing https://www.austin-hughes.com/wp-content/uploads/2023/03/PD-UV-K55.pdf
+      M14: Library 100 W matches the manual''s screen-on max for the standard (non-sunlight-readable)
+      version. Note 1540 mA x 110 V = 169 W is the DC module''s full-load input, not the display draw.'
     mounting_kind: external
     height_u: 0
     height_note: Wall mounted
+    inrush_basis: not_given
+    inrush_note: 'The K55 user manual and the 4K datasheet give no inrush/surge figure. DC option (manual
+      s.5.6, column headed 125V / labelled 110-Volt): input 43-160 V, 10 mA no-load, 1540 mA full-load,
+      24 V 6.25 A out (150 W module), 89 % eff. Screen-on max 100 W (standard) / 335 W (sunlight-readable),
+      power saving 9 W, off 2 W.'
+    input_v_min: 43
+    input_v_max: 160
   alternatives:
   - make: Advantech
     manufacturer: Advantech Co., Ltd.
@@ -216,26 +358,70 @@ records:
         ordering_code: DSD-3055N-40FHA1E
         description: 55in Full HD digital signage display, non-touch, 100-240 VAC
         url: https://buy.advantech.com/Displays/Digital-Signage-Displays/model-DSD-3055N-40FHA1E.htm
-        notes: No touch - fails the BOM 'touch' requirement; AC only (feed from inverter/UPS). FHD power
-          not read
+        notes: 'No touch - fails the BOM ''touch'' requirement; AC only (feed from inverter/UPS). FHD
+          power not read M14: AC only, no 125 VDC variant (supply_ok false for the original''s 125 VDC
+          feed). The 100-240 VAC range is from the DSD-3055 family datasheet. Weight 31 kg, operating
+          range 5-45 degC. The current family datasheet (2023) lists only the 4K -50UHA1 models, so the
+          FHD -40FHA1E may be an older generation. Check availability.'
         verified: true
+        height_u: 0
+        mounting_kind: external
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: Internal PSU 100-240 VAC
+        supply_ok: false
+        power_supplies: 1
+        unit_power_w: 150.0
+        power_basis: datasheet_max
+        power_note: 'Advantech eStore spec: ''power consumption 150 W'' (single figure)'
+        inrush_basis: not_given
+        sources:
+        - https://buy.advantech.com/Displays/Digital-Signage-Displays/model-DSD-3055N-40FHA1E.htm
       mid:
         model: DSD-3055T
         ordering_code: DSD-3055T-40FHA1E
         description: 55in Full HD digital signage display with touch screen, 100-240 VAC
         url: https://buy.advantech.com/full+HD+digital+signage+touch+sc/DSD+3055T+40FHA1E/model-DSD-3055T-40FHA1E.htm
-        notes: FHD (K55 is 4K). AC only; power/VESA for FHD variant not read
+        notes: 'FHD (K55 is 4K). AC only; power/VESA for FHD variant not read M14: AC only, no 125 VDC
+          variant. Weight 50 kg, operating range 5-45 degC. Same availability caveat as the -40FHA1E non-touch
+          model.'
         verified: true
+        height_u: 0
+        mounting_kind: external
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: Internal PSU 100-240 VAC
+        supply_ok: false
+        power_supplies: 1
+        unit_power_w: 150.0
+        power_basis: datasheet_max
+        power_note: 'Advantech eStore spec: ''power consumption 150 W'' (single figure)'
+        inrush_basis: not_given
+        sources:
+        - https://buy.advantech.com/full+HD+digital+signage+touch+sc/DSD+3055T+40FHA1E/model-DSD-3055T-40FHA1E.htm
       high:
         model: DSD-3055T (UHD)
         ordering_code: DSD-3055T-50UHA1
         description: 55in 4K UHD 500 cd/m2, optical 2-point touch over USB 2.0, VGA/HDMI/DP, 100-240 VAC,
           102 W, 50 kg net, 5..45 degC
-        unit_power_w: 102
+        unit_power_w: 102.0
         url: https://advdownload.advantech.com/productfile/PIS/DSD-3055/file/DSD-3055_DS(102122)20231127002352.pdf
-        notes: VESA 400x400 (not 600x400 - check the wall mount); non-touch sibling DSD-3055N-50UHA1 is
-          100 W, 31 kg
+        notes: 'VESA 400x400 (not 600x400 - check the wall mount); non-touch sibling DSD-3055N-50UHA1
+          is 100 W, 31 kg M14: AC only. 1315 x 798 x 82.7 mm, 50 kg, VESA 400x400, operating range 5-45
+          degC.'
         verified: true
+        height_u: 0
+        mounting_kind: external
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: Internal PSU 100-240 VAC
+        supply_ok: false
+        power_supplies: 1
+        power_basis: datasheet_max
+        power_note: 'Datasheet single figure 102 W (non-touch DSD-3055N-50UHA1: 100 W)'
+        inrush_basis: not_given
+        sources:
+        - https://advdownload.advantech.com/productfile/PIS/DSD-3055/file/DSD-3055_DS(102122)20231127002352.pdf
   - make: Samsung
     manufacturer: Samsung Electronics
     tiers:
@@ -244,23 +430,73 @@ records:
         ordering_code: LH55QBCEBGCXEN
         description: 55in 4K UHD 350 cd/m2 smart signage, 16/7 duty, Tizen SoC, no touch
         url: https://screenmoove.com/products/samsung-qb55c-lh55qbcebgcxen-55-professional-smart-signage-display
-        notes: No touch; 16 h/day rating; AC only - needs inverter or 125 VDC/230 VAC supply
+        notes: 'No touch; 16 h/day rating; AC only - needs inverter or 125 VDC/230 VAC supply M14: Only
+          the EU on-mode (typical) figure was found. Max will be higher, so allow margin. The spec table
+          gives 16/7 duty (not 24/7), 1237.9 x 708.8 x 28.5 mm and VESA 200x200. That table gives 500
+          nit, against the input''s 350 cd/m2. AC only.'
         verified: true
+        height_u: 0
+        mounting_kind: external
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: Internal PSU AC 100-240 V 50/60 Hz
+        supply_ok: false
+        power_supplies: 1
+        unit_power_w: 85.0
+        power_basis: datasheet_typical
+        power_note: 'EU product information sheet (EPREL 1653476): on-mode SDR 85.0 W, standby 0.5 W.
+          Samsung''s max figure is ''TBD'' on the spec table seen'
+        inrush_basis: not_given
+        sources:
+        - https://manuals.plus/m/fcff16567b7ef1fd9afaca15fb667e7f5b58da621cbdc22a15f12db3134e7c98
+        - https://knitec.com/pages/samsung-qb-c-series-specifications
       mid:
         model: QM55C
         ordering_code: LH55QMCEBGCXEN
         description: 55in 4K UHD smart signage, 24/7 duty, 500 cd/m2 (reseller listing), no touch
         url: https://screenmoove.com/products/samsung-qm55c-lh55qmcebgcxen-55-4k-ultra-hd-smart-digital-signage-display
-        notes: No touch (add overlay or pick QM55B-T); AC only
+        notes: 'No touch (add overlay or pick QM55B-T); AC only M14: Samsung''s ''On Mode'' figure is
+          not labelled as max. The higher of the two (154 W) is used. 15.7 kg, VESA 200x200, 24/7. AC
+          only.'
         verified: true
+        height_u: 0
+        mounting_kind: external
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: Internal PSU AC 100-240 V 50/60 Hz
+        supply_ok: false
+        power_supplies: 1
+        unit_power_w: 154.0
+        power_basis: datasheet_typical
+        power_note: 'Spec listing: ''Power Consumption (On Mode): 154 W'', sleep < 0.5 W. EU fiche (EPREL
+          1588325) on-mode SDR 102 W'
+        inrush_basis: not_given
+        sources:
+        - https://www.fullcompass.com/prod/625803-samsung-qm55c-55-commercial-4k-uhd-display
+        - https://manuals.plus/m/92c7d422319ca2df8e709c34332d68f9d086fee60b9783904e9dd7d5720c820f
       high:
         model: QM55B-T
         ordering_code: LH55QMBTBGCXEN
         description: 55in 4K UHD interactive touch display, 24/7, 500 cd/m2, HDMI/DP/RS-232C/RJ45
         url: https://www.scan.co.uk/products/55-samsung-qm55b-t-4k-uhd-interactive-touch-display-hdmi-dp-rs232c-rj45-500nit-24-7
-        notes: Code from Samsung support page https://www.samsung.com/lt/support/model/LH55QMBTBGCXEN
-          ; predecessor QM55R-T = LH55QMRTBGCXEN. AC only
+        notes: 'Code from Samsung support page https://www.samsung.com/lt/support/model/LH55QMBTBGCXEN
+          ; predecessor QM55R-T = LH55QMRTBGCXEN. AC only M14: Spec sheet copy at manuals.plus. 1253.8
+          x 734.6 x 56.7 mm, 26.9 kg, VESA 200x200, 24/7. AC only. The QM55B-T is the previous (B) generation,
+          so check availability.'
         verified: true
+        height_u: 0
+        mounting_kind: external
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: Internal PSU AC 100-240 V 50/60 Hz
+        supply_ok: false
+        power_supplies: 1
+        unit_power_w: 143.0
+        power_basis: datasheet_typical
+        power_note: 'Spec sheet: On Mode 143 W, standby 0.5 W (not labelled max)'
+        inrush_basis: not_given
+        sources:
+        - https://manuals.plus/m/49c2821705d0b8e382bfbb5e36db238ee007a922cac79d56d62209a1773a5561
   sources:
   - https://www.austin-hughes.com/product/k55/
   - https://www.austin-hughes.com/wp-content/uploads/2020/07/CA-UV-4K-L.pdf
@@ -270,6 +506,7 @@ records:
   - https://buy.advantech.com/Displays/Digital-Signage-Displays/model-DSD-3055N-40FHA1E.htm
   - https://www.samsung.com/lt/support/model/LH55QMBTBGCXEN
   - https://www.samsung.com/ch/business/smart-signage/interactive-display/interactive-display-qmr-t-series-lh55qmrtbgcxen/
+  - https://www.austin-hughes.com/wp-content/uploads/2020/07/UM-UV-K55.pdf
 - part_id: LPA37-696
   kind: device
   description: Wall Mount Kit
@@ -317,6 +554,9 @@ records:
         url: https://www.markertek.com/product/chf-lsa1u/chief-fusion-large-fixed-tv-wall-mount-black
         notes: Load rating and VESA range not read; micro-adjust variant LSM1U also listed
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: Fusion Large Tilt Wall Mount
         ordering_code: LTA1U
@@ -324,6 +564,9 @@ records:
         url: https://www.markertek.com/product/chf-lta1u/chief-lta1u-large-fusion-tilt-wall-mount-vesa-100x100-878x500-mm-black
         notes: Load rating not read; micro-adjust tilt variant LTM1U also listed
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: THINSTALL Dual Swing-Arm Wall Mount
         ordering_code: TS325TU
@@ -333,6 +576,9 @@ records:
         notes: Load, extension and VESA range not read - check 48.6 kg NAP-K55 and 600x400; in-wall box
           accessory TA500
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   - make: Peerless-AV
     manufacturer: Peerless Industries
     tiers:
@@ -343,6 +589,9 @@ records:
         url: https://peerless-av.com/products/SF660P
         notes: SF660 = same mount with security hardware. Load/VESA not read
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: SmartMount Universal Tilt Wall Mount
         ordering_code: ST660P
@@ -350,6 +599,9 @@ records:
         url: https://www.adiglobaldistribution.pr/product/qp-st660p
         notes: ST660 = security-hardware version. Load/VESA not read
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: SmartMount Articulating Wall Mount
         ordering_code: SA771PU
@@ -358,6 +610,9 @@ records:
         url: https://peerless-av.com/products/SA771PU
         notes: Read on Peerless page; mount weight 16.5 kg; wood stud / concrete / block walls
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   sources:
   - https://www.lumi.cn/en/lumi-home/tv-mounts/full-motion-tv-wall-mount/lpa37-696
   - https://www.av-iq.com/avcat/ctl9959/index.cfm?manufacturer=lumi-legend-corporation&product=lpa37-696&dl=en-gb
@@ -429,6 +684,9 @@ records:
         url: https://ikey.com/products/sealed-keyboard-integrated-touchpad-sk-97-tp
         notes: CE, UL60950, FCC Class B; also SK-97-TP-PS2
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: SLK-97-TP
         ordering_code: SLK-97-TP-USB-BLK
@@ -436,6 +694,9 @@ records:
         url: https://ikey.com/products/sealed-keyboard-integrated-touchpad-backlighting-black
         notes: white version SLK-97-TP-USB; specs not read in detail
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: PM-65-TP-SS
         ordering_code: PM-65-TP-SS-USB
@@ -444,6 +705,9 @@ records:
         notes: Panel-mount - needs a console cut-out; model confirmed on iKey product page and CDW (5847133);
           USB suffix per iKey model list, detailed specs not read
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   - make: GETT (formerly InduKey)
     manufacturer: GETT Geraetetechnik GmbH
     tiers:
@@ -455,6 +719,9 @@ records:
         url: https://gett-group.com/images/Products/Keyboards/TKS_Folie/105c-TOUCH/Desktop/Documentations/GETT_TKS-105c-TOUCH-KGEH_Datasheet_Rev-10-2025.pdf
         notes: 482.6x184.6x34.9 mm, ~1.3 kg, CE/FCC; DE layout KS18240
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: TKV-084-FIT-TOUCH-IP65-MGEH
         ordering_code: KV23204 (TKV-084-FIT-TOUCH-IP65-MGEH-USB-US)
@@ -462,6 +729,9 @@ records:
         url: https://gett-group.com/en/keyboards/stainless-steel-keyboards/tkv-084-fit-touch-ip65-mgeh-usb-de
         notes: 392x154x26 mm, 1.76 kg, -10..+50 degC, USB 5 V 80 mA; US/Arab layout KV23222
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: TKG-104-TOUCH-IP68
         ordering_code: TKG-104-TOUCH-IP68
@@ -471,6 +741,9 @@ records:
           (gap-fill pass could not open the datasheet); full-size stainless desktop KV21237 (TKV-105-FIT-TOUCH)
           is EOL
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   sources:
   - https://innova.se/product/k-tek-a420tp-kp-fn-mdt/
   - https://www.directindustry.com/prod/key-technology-china-limited/product-68381-1648099.html
@@ -514,17 +787,26 @@ records:
         url: https://assets.new.siemens.com/siemens/assets/api/uuid:cd38cc6d-96c0-45f2-a9b3-43cac24aa425/SICAM-SCC-brochure-EN.pdf
         notes: Ordering codes 6MD55xx not verified in this session
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: SICAM SCC server + engineering
         description: Closest like-for-like substation HMI
         url: https://assets.new.siemens.com/siemens/assets/api/uuid:ca8b3364-c780-4d13-a3c2-26ade2cdb86a/SICAM-SCC-Profile-EN.pdf
         notes: not verified
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: SIMATIC WinCC Open Architecture
         description: Scalable/redundant SCADA platform
         notes: not verified
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   - make: Hitachi Energy
     manufacturer: Hitachi Energy Ltd
     tiers:
@@ -534,17 +816,26 @@ records:
         url: https://www.hitachienergy.com/products-and-solutions/substation-automation-protection-and-control/products/microscada-x/microscada-x-sys600c-the-compact-system
         notes: Model on Hitachi Energy page; no public ordering code
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: MicroSCADA X SYS600
         description: Substation HMI/SCADA, IEC 61850 native
         url: https://hitachienergy.com/products-and-solutions/scada/microscada-x/scada--microscada-x-sys600
         notes: Licence sized by objects; codes not verified
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: MicroSCADA X SYS600 hot-standby
         description: Redundant SYS600 server pair
         notes: not verified
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   sources:
   - https://www.copadata.com/en/industries/energy-infrastructure/energy-solutions/zenon-energy-automated-substations
   - https://www.copadata.com/hubfs/Downloads/PR%20-%20News/PR_Downloads/2023/PR_zenon_12_release_EN.docx
@@ -587,6 +878,9 @@ records:
         url: https://freeoffice.com/en/features/freeoffice-comparison
         notes: No ordering code exists (free download); check client policy on unsupported freeware
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: SoftMaker Office Standard 2024
         ordering_code: BN-0015-E
@@ -594,6 +888,9 @@ records:
         url: https://www.bhphotovideo.com/c/product/1791561-REG/softmaker_bn_0015_e_office_standard_2024_for.html
         notes: 'Volume licences: https://www.softmaker.com/en/shop/softmaker-office/volume-licenses'
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: SoftMaker Office Professional 2024
         ordering_code: BN-0016-E
@@ -601,6 +898,9 @@ records:
         url: https://www.staples.com/softmaker-office-professional-2024-for-5-devices-windows-macos-linux-download-bn-0016-e/product_24585778
         notes: Code confirmed on Staples and Quill listings (also Adorama smrbn0016e)
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   - make: Corel WordPerfect Office
     manufacturer: Alludo (Corel Corporation)
     tiers:
@@ -612,6 +912,9 @@ records:
         notes: Replaces Collabora (no public SKUs). Home & Student ESDWP2021HSEF is non-commercial - do
           not use
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: WordPerfect Office 2021 Standard (volume licence)
         ordering_code: LCWP2021ML1
@@ -619,6 +922,9 @@ records:
         url: https://store.datek.co.uk/corel-wordperfect-office-2021-standard-office-suite-volume-licence-1-license-s-multilingual-lcwp2021ml1
         notes: Closest to Office LTSC (commercial perpetual, offline)
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: WordPerfect Office 2021 Professional (volume licence)
         ordering_code: LCWP2021PRML1
@@ -627,6 +933,9 @@ records:
         notes: ESD single-user Professional = ESDWP2021PREF. WordPerfect file formats differ from MS Office
           - check document exchange needs
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   sources:
   - https://www.znetlive.com/store/products/dg7gmgf0d7fx-office-ltsc-professional-plus-2021
   - https://www.senetic.co.uk/product/DG7GMGF0D7FX-0002
@@ -671,6 +980,9 @@ records:
         url: https://store.midwich.com/products/details/LINDY41071
         notes: ''
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: 10m Active DisplayPort 1.2 Cable
         ordering_code: '41078'
@@ -678,6 +990,9 @@ records:
         url: https://shop.wearesync.co.uk/lindy-10m-active-displayport-1-2-cable-41078.html
         notes: GPU must have DP out
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: 10m Fibre Optic Hybrid HDMI 8K60 Cable
         ordering_code: '38510'
@@ -685,6 +1000,9 @@ records:
         url: https://www.comms-express.com/products/lindy-38510-10m-fibre-optic-hybrid-hdmi-8k60-cable/
         notes: Best choice near switchgear EMI
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   - make: Kramer
     manufacturer: Kramer Electronics Ltd
     tiers:
@@ -696,6 +1014,9 @@ records:
         notes: Passive copper - 4K60 18 Gbps over 10.7 m not confirmed (fine for 1080p); prefer the active
           optical tiers for the 4K annunciator
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: CLS-AOCH/60-33
         ordering_code: CLS-AOCH/60-33
@@ -703,6 +1024,9 @@ records:
         url: https://www.hdtvsupply.com/kramer-cls-aoch-60-33-4k60-active-optical-hdmi-cable.html
         notes: LSZH suits control buildings
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: CP-AOCH/60-33
         ordering_code: CP-AOCH/60-33
@@ -710,6 +1034,9 @@ records:
         url: https://www.shi.com/product/34070345/Kramer-CP-AOCH60-Series-CP-AOCH60-33
         notes: Details not read
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   sources:
   - https://uk.rs-online.com/web/p/hdmi-cables/1765693
   - https://au.element14.com/startech/hd2mm10ma/cable-assy-hdmi-plug-plug-10m/dp/4339118
@@ -753,6 +1080,9 @@ records:
         notes: Lindy 42817 is the 5 m slim extension and 42631 the 20 m extension - no plain 10 m A-A
           active extension code confirmed; hub port count not read
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: 10m USB 2.0 Type A to B Active Cable
         ordering_code: '42761'
@@ -760,6 +1090,9 @@ records:
         url: https://www.comms-express.com/products/lindy-42761-10m-usb-2-0-active-cable-type-a-to-b/
         notes: ''
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: 100m USB 2.0 Cat.6 Extender
         ordering_code: '42674'
@@ -768,6 +1101,9 @@ records:
         notes: For long or EMI-exposed routes; 4-port versions 42679 (60 m) / 42681 (50 m) also listed.
           PSU/power not read
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   - make: Icron
     manufacturer: Icron Technologies (Analog Devices)
     tiers:
@@ -778,6 +1114,9 @@ records:
         url: https://screenmoove.com/products/icron-single-port-usb-2-0-extender-up-to-100-meters-over-catx-cabling-00-00403
         notes: LEX + REX pair; power data not read
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: USB 2.0 Ranger 2312
         ordering_code: 00-00408
@@ -786,6 +1125,9 @@ records:
         notes: Midwich also lists Icron 00-00407 for the 2312 (probably a regional PSU variant) - confirm
           the code for the Saudi/UK plug
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: USB 2.0 Ranger 2324
         ordering_code: Ranger 2324
@@ -795,6 +1137,9 @@ records:
         notes: Icron 00-00xxx order code for the 2324 not confirmed (2344 UK-power = 00-00418 seen); order
           by model
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   sources:
   - https://rapidonline.com/startech-usb2aaext10m-10m-usb-2-0-active-extension-cable-m-f-19-8919
   - https://uk.rs-online.com/web/p/usb-cables/1863178
@@ -828,6 +1173,9 @@ records:
         url: https://rapidonline.com/startech-hddvimm3m-3m-hdmi-to-dvi-d-cable-m-m-19-9401
         notes: RS stock no. 1765677
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: 3m DVI-D Single Link Cable M/M
         ordering_code: DVIDSMM3M
@@ -835,6 +1183,9 @@ records:
         url: https://boxxe.com/shop/boxxe-shop-by-brand/startech-com/dvidsmm3m-startech-com-3m-dvi-d-single-link-cable-m-m
         notes: 'RS stock no. 1765740 appears to be this cable (title: DVI-D single link, 3 m)'
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: 3m DVI-D Dual Link Cable M/M
         ordering_code: DVIDDMM3M
@@ -842,6 +1193,9 @@ records:
         url: https://www.lambda-tek.com/StarTech-com-DVIDDMM3M-sh/B732097
         notes: Dual link not needed for 1080p; RS stock no. 1765722
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   - make: Lindy
     tiers:
       low:
@@ -851,6 +1205,9 @@ records:
         url: https://store.digital-origin.co.uk/lindy-3m-dvi-d-single-link-cable-black-line-36257.html
         notes: ''
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: 3m HDMI to DVI-D Single Link Cable Black Line
         ordering_code: '36273'
@@ -859,6 +1216,9 @@ records:
         url: https://www.huss-licht-ton.de/product_info.php/Lindy-36273-Video-Adapterkabel-30m-Black-Line-HDMI-DVI-D/info/34720.html
         notes: ''
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: 3m DVI-D Dual Link Cable Black Line
         ordering_code: '36253'
@@ -866,6 +1226,9 @@ records:
         url: https://store.digital-origin.co.uk/lindy-3m-dvi-d-dual-link-cable-black-line-36253.html
         notes: ''
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   sources:
   - https://austin-hughes.com/?p=14180
   - https://rapidonline.com/startech-hddvimm3m-3m-hdmi-to-dvi-d-cable-m-m-19-9401
@@ -903,6 +1266,9 @@ records:
         url: https://store.bsl-it.com/lindy-3m-usb-2-0-cable-type-a-to-b-transparent-41754.html
         notes: ''
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: 3m USB 2.0 Type A to B Cable Anthra Line
         ordering_code: '36674'
@@ -910,6 +1276,9 @@ records:
         url: https://shop.wearesync.co.uk/lindy-3m-usb-2-0-type-a-to-b-cable-anthra-line-36674.html
         notes: ''
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: 3m USB 2.0 Type A to B Cable Cromo Line
         ordering_code: '36643'
@@ -917,6 +1286,9 @@ records:
         url: https://shop.teqex.co.uk/lindy-3m-usb-2-0-type-a-to-b-cable-cromo-line-36643.html
         notes: ''
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   - make: Belkin
     tiers:
       low:
@@ -926,6 +1298,9 @@ records:
         url: https://store.digital-origin.co.uk/belkin-usb-2-0-a-usb-2-0-b-3m-usb-cable-usb-a-usb-b-grey-f3u154bt3m.html
         notes: ''
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: Pro Series USB 2.0 A-B Device Cable 10 ft
         ordering_code: F3U133B10
@@ -933,6 +1308,9 @@ records:
         url: https://ibselectronics.com/products/belkin/f3u133b10
         notes: Shielding/plating per Belkin Pro Series family, not read on this listing
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: Pro Series USB 2.0 A-B Device Cable 16 ft
         ordering_code: F3U133B16
@@ -941,6 +1319,9 @@ records:
         notes: Belkin offers no premium 3 m A-B variant beyond the Pro Series; longer length is the only
           step up
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   sources:
   - https://uk.rs-online.com/web/p/usb-cables/1862797
   - https://store.digital-origin.co.uk/startech-com-3m-usb-2-0-a-to-b-cable-m-m-usb2hab3m.html
@@ -974,6 +1355,9 @@ records:
         notes: 'Riser (OFNR) version FX2ERLNLNSNM003. Code pattern inferred from listing titles: X=OM3
           / Z=OM4 / 9=OS2, 2=2-fibre, E=1.6 mm, L=LSZH / R=riser, LN LN=LC duplex both ends, NM003=3 m'
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: Opti-Core OM4 LC-LC duplex patch cord 3 m LSZH
         ordering_code: FZ2ELLNLNSNM003
@@ -981,6 +1365,9 @@ records:
         url: https://elektrobode.nl/products/panduit-om4-patch-cord-50-125-duplex-lc-lc-lszh-3m-07498379333
         notes: Riser version FZ2ERLNLNSNM003
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: Opti-Core OS2 singlemode LC-LC duplex patch cord 3 m LSZH
         ordering_code: F92ELLNLNSNM003
@@ -989,6 +1376,9 @@ records:
         notes: Riser version F92ERLNLNSNM003 (Master Electronics, Stoneway). Use only where the switch
           SFPs are singlemode 1310 nm
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   - make: Corning
     manufacturer: Corning Optical Communications
     tiers:
@@ -1001,6 +1391,9 @@ records:
           confirmed at Specialized and 050502T5120007M/-008M on Corning eCatalog; exact 3 m code not seen
           - confirm with Corning'
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: Fiber Optic Jumper, 2 F, LC Duplex to LC Duplex, zipcord, riser, 2.0 mm, OM4, 3 m
         ordering_code: 050502Q5120003M
@@ -1009,6 +1402,9 @@ records:
         notes: 1 m sibling 050502Q5120001M is on Corning eCatalog and Q=OM4 is confirmed by 055702Q5120003M
           (LC-SC OM4 3 m); exact LC-LC 3 m code not seen - confirm with Corning
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: LC/UPC-LC/UPC duplex singlemode jumper, 2.0 mm, 3 m
         ordering_code: 040402G5120003M
@@ -1016,6 +1412,9 @@ records:
         url: https://specialized.net/corning-040402g5120005m-lc-u-lc-u-duplex-sm-patch-cord-2mm-5m.html
         notes: Code shown in distributor listing title (3 m); jacket rating not read
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   sources:
   - https://elektrobode.nl/products/panduit-om3-2f-1-6mm-pc-lszh-lc-dup-lc-dup-std-polarity-std-il-3m-07498392215
   - https://elektrobode.nl/products/panduit-om4-patch-cord-50-125-duplex-lc-lc-lszh-3m-07498379333

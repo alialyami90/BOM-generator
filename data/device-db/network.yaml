@@ -84,6 +84,13 @@ records:
       kind: sfp_slot
       usable_for: uplink
       note: Fixed 1/10G SFP+ uplinks; take 1G SFPs too
+    inrush_basis: not_given
+    inrush_note: 'RST2228 Installation Guide, section 5.1 (Power Supply Specifications) gives no inrush
+      figure. HV PSU (88-300 VDC / 85-264 VAC): internal fuse 3.15 A, max consumption 77 W (AC) / 76 W
+      (DC) at 60 W output load. The guide says to size the external breaker or fuse from the internal
+      fuse rating. The Siemens technical data sheet gives no inrush figure either.'
+    input_v_min: 88
+    input_v_max: 300
   alternatives:
   - make: Moxa
     manufacturer: Moxa Inc.
@@ -93,40 +100,156 @@ records:
         ordering_code: PT-7528-20MSC-4TX-4GSFP-HV-HV
         description: Fixed 28-port L2, 20 x 100BASE-FX MM SC + 4 x 10/100 TX + 4 x GbE SFP, dual 88-300
           VDC/85-264 VAC; Fast Ethernet only, no 10G
-        unit_power_w: 35
+        unit_power_w: 34.4
         url: https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/
         notes: 'Datasheet gives current only: 0.313 A @ 110 VDC, so about 34-37 W (computed). IEC 61850-3
-          / IEEE 1613.'
+          / IEEE 1613. M14: Datasheet v1.3: 440 x 44 x 325 mm, 19-inch rack mounting (44 mm = 1U). Fast
+          Ethernet fibre only (SC, not LC) and no 10G. The datasheet ordering table prints the code as
+          PT-7528-20MSC4TX-4GSFP-HV-HV (one hyphen fewer), probably a PDF line-break artefact. The distributor
+          and the input use PT-7528-20MSC-4TX-4GSFP-HV-HV, so it is kept. No inrush figure in the datasheet.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 88
+        input_v_max: 300
+        supply_option: HV input 110/220 VDC/VAC (88-300 VDC, 85-264 VAC); -HV-HV = two HV inputs (redundant)
+        supply_ok: true
+        power_supplies: 2
+        power_basis: computed
+        power_note: 'Datasheet input current for models with 8 or more fibre ports: 0.313 A at 110 VDC.
+          0.313 A x 110 V = 34.4 W. (At 220 VDC: 0.167 A; at 110 VAC: 0.586 A.)'
+        inrush_basis: not_given
+        port_groups:
+        - ports: FE fibre ports
+          count: 20
+          speed: 100M
+          media: MM
+          kind: fixed
+          usable_for: any
+        - ports: FE copper ports
+          count: 4
+          speed: 100M
+          media: RJ45
+          kind: fixed
+          usable_for: any
+        - ports: Gigabit ports
+          count: 4
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: uplink
+        sources:
+        - https://cdn.shopify.com/s/files/1/0665/7409/0561/files/pt-7528-series-datasheet-v1_3.pdf
+        - https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/
       mid:
         model: PT-G7728
         ordering_code: PT-G7728 + 6 x LM-7000H-4GSFP + 2 x PWR-HV-NP
         description: Modular 28-port full-Gigabit L2, 2 GbE TX + 2 GbE SFP fixed + 6 x 4-port module slots,
           hot-swap dual 88-300 VDC/90-264 VAC PSUs; no 10G uplinks
-        unit_power_w: 41
+        unit_power_w: 40.9
         url: https://www.moxa.com/product/PT-G7728_Series.htm
-        notes: 41 W = 12 W chassis (max 0.11 A @ 110 VDC per the Moxa product page) + 6 x 4.8 W max per
+        notes: '41 W = 12 W chassis (max 0.11 A @ 110 VDC per the Moxa product page) + 6 x 4.8 W max per
           LM-7000H-4GSFP (Moxa LM-7000H datasheet v1.1); SFP transceivers not included. IEC 61850-3 Ed2
           Class 2 and IEEE 1613. 443 x 44 x 280 mm, 3.08 kg. LM-7000H-4GSFP (RS 0633718) and PWR-HV-NP
-          (Moxa product page) are ordered separately.
+          (Moxa product page) are ordered separately. M14: 443 x 44 x 280 mm, 3.08 kg, 19-inch rack. IEC
+          61850-3 Ed2 Class 2 and IEEE 1613. No 10G ports: the uplinks are GbE only. Power modules and
+          interface modules are ordered separately. Neither the product page nor the PWR datasheet gives
+          an inrush figure. The LM-7000H-4GSFP slots are 100/1000; Moxa lists 100BASE-FX SFPs (SFP-1FEMLC-T)
+          as accessories, but the datasheet does not state their compatibility with this module explicitly.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 88
+        input_v_max: 300
+        supply_option: 'PWR-HV-NP power module: 110/220 VDC/VAC (88-300 VDC, 90-264 VAC); two power-module
+          slots'
+        supply_ok: true
+        power_supplies: 2
+        power_basis: computed
+        power_note: 'Chassis with PWR-HV-NP: max 0.11 A at 110 VDC = 12.1 W (Moxa product page). LM-7000H-4GSFP:
+          4.8 W max each (LM-7000H datasheet v1.1). 12.1 + 6 x 4.8 = 40.9 W. SFP transceivers not included.'
+        inrush_basis: not_given
+        port_groups:
+        - ports: Module slots 1-6 (6 x LM-7000H-4GSFP)
+          count: 24
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: any
+        - ports: Fixed GbE SFP
+          count: 2
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: uplink
+        - ports: Fixed GbE RJ45
+          count: 2
+          speed: 1G
+          media: RJ45
+          kind: fixed
+          usable_for: uplink
+        sources:
+        - https://www.moxa.com/product/PT-G7728_Series.htm
+        - https://www.moxa.com/getmedia/83018fe7-d7f9-474f-8224-497652084c6b/moxa-lm-7000h-module-series-datasheet-v1.1.pdf
+        - https://aveon.ru/technical_support/moxa/pwr-power-module-series-datasheet-v11.pdf
       high:
         model: PT-G7828
         ordering_code: PT-G7828 + 6 x LM-7000H-4GSFP + 2 x PWR-HV-NP
         description: Same modular chassis as PT-G7728 but Layer 3 routing; up to 28 GbE ports, IEC 61850-3/IEEE
           1613
-        unit_power_w: 41
+        unit_power_w: 40.9
         url: https://www.moxa.com/product/pt-g7828_series.htm
-        notes: Moxa PT-G78xx has no 10G ports; GbE uplinks only. 41 W assumes the same chassis draw as
+        notes: 'Moxa PT-G78xx has no 10G ports; GbE uplinks only. 41 W assumes the same chassis draw as
           PT-G7728 (12 W) + 6 x 4.8 W LM-7000H-4GSFP; the PT-G7828 chassis figure was not read this session.
-          SFPs not included.
+          SFPs not included. M14: Same chassis as PT-G7728 (443 x 44 x 280 mm, 3.08 kg) with Layer 3.
+          The Moxa page lists no 10G ports. No inrush figure given.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 88
+        input_v_max: 300
+        supply_option: 'PWR-HV-NP power module: 110/220 VDC/VAC (88-300 VDC, 90-264 VAC); two power-module
+          slots'
+        supply_ok: true
+        power_supplies: 2
+        power_basis: computed
+        power_note: 'PT-G7828 page: max 0.11 A at 110 VDC with PWR-HV-NP = 12.1 W. Add 6 x 4.8 W max LM-7000H-4GSFP
+          (LM-7000H datasheet v1.1): 12.1 + 28.8 = 40.9 W. SFPs not included.'
+        inrush_basis: not_given
+        port_groups:
+        - ports: Module slots 1-6 (6 x LM-7000H-4GSFP)
+          count: 24
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: any
+        - ports: Fixed GbE SFP
+          count: 2
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: uplink
+        - ports: Fixed GbE RJ45
+          count: 2
+          speed: 1G
+          media: RJ45
+          kind: fixed
+          usable_for: uplink
+        sources:
+        - https://www.moxa.com/product/pt-g7828_series.htm
+        - https://www.moxa.com/getmedia/83018fe7-d7f9-474f-8224-497652084c6b/moxa-lm-7000h-module-series-datasheet-v1.1.pdf
   - make: Cisco
     manufacturer: Cisco Systems
     tiers:
       low:
         model: Catalyst IE9320
-        ordering_code: IE-9320-26S2C-E
+        ordering_code: IE-9320-26S2C-E + 2 x PWR-RGD-AC-DC-H
         description: 1U rugged rack switch, 22 x 100/1000 SFP + 2 x dual-media (SFP or RJ45) downlinks
           + 4 x 100/1000 SFP uplinks, Network Essentials; no 10G
         unit_power_w: 64
@@ -135,11 +258,55 @@ records:
           5). IEC 61850-3 and IEEE 1613:2009 listed (Table 12). Part number also seen at distributors
           (barcodesinc, networkdevicesinc). PSUs are ordered separately (Cisco datasheet Table 7: PWR-RGD-LOW-DC-H
           24-60 VDC, PWR-RGD-AC-DC-H 150 W, -AC-DC-250, -AC-DC-400); confirm the HV PSU''s DC input range
-          covers the 125 VDC battery.'
+          covers the 125 VDC battery. M14 changed the ordering code from IE-9320-26S2C-E. M14: Inrush
+          is per PSU module: the PWR-RGD-AC-DC(-H) 150 W module spec (in the Cisco IR8340 data sheet,
+          same module used in IE9300) gives cold-start inrush below 30 A at 125 VDC and below 60 A at
+          250 VDC (25 C). On AC it is below 30 A at 115 VAC and below 60 A at 230 VAC. No duration is
+          given. Layer23 confirms the module fits the IE9300. PSUs are separate product IDs. Order two
+          for the redundant 125 VDC feed. The data sheet lists 1RU, 1.72 x 17.5 x 14.0 in; the rack-mount
+          kit is sold separately. No 10G uplinks.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 88
+        input_v_max: 300
+        supply_option: 'PWR-RGD-AC-DC-H 150 W: nominal 100-250 VDC (88-300 VDC) or 100-240 VAC (85-264
+          VAC); two PSU bays (dual AC/DC power inputs)'
+        supply_ok: true
+        power_supplies: 2
+        power_basis: datasheet_typical
+        power_note: Cisco IE9300 data sheet gives 64 W as 'indicative' system power. It depends on SFP
+          types, PSU type and number of PSUs. It is not a stated maximum.
+        inrush_a: 30
+        inrush_basis: datasheet
+        port_groups:
+        - ports: Downlink SFP
+          count: 22
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: any
+        - ports: Downlink dual-media (SFP or RJ45)
+          count: 2
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: any
+        - ports: Uplinks
+          count: 4
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: uplink
+        sources:
+        - https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html
+        - https://www.cisco.com/c/en/us/products/collateral/routers/catalyst-ir8300-rugged-series-router/nb-06-cat-ir8340-rugged-ser-rout-ds-cte-en.html
+        - https://www.layer23-switch.com/pwr-rgd-ac-dc-h.html
       mid:
         model: Catalyst IE9320
-        ordering_code: IE-9320-22S2C4X-E
+        ordering_code: IE-9320-22S2C4X-E + 2 x PWR-RGD-AC-DC-H
         description: 1U rugged rack switch, 22 x GE SFP + 2 x GE combo + 4 x 10G SFP+ uplinks, Network
           Essentials; closest like-for-like to the 24 SFP + 4 x 10G layout
         unit_power_w: 73
@@ -148,18 +315,98 @@ records:
           73 W indicative system power (Table 5); IEC 61850-3 and IEEE 1613:2009 listed. Part number also
           seen at distributors (xsnet.com.au). PSUs are ordered separately (Cisco datasheet Table 7: PWR-RGD-LOW-DC-H
           24-60 VDC, PWR-RGD-AC-DC-H 150 W, -AC-DC-250, -AC-DC-400); confirm the HV PSU''s DC input range
-          covers the 125 VDC battery.'
+          covers the 125 VDC battery. M14 changed the ordering code from IE-9320-22S2C4X-E. M14: This
+          is the closest like-for-like to the RST2228-L2 (24 x 1G bays + 4 x 10G). Inrush is the PWR-RGD-AC-DC(-H)
+          module figure: below 30 A at 125 VDC, cold start at 25 C, no duration (Cisco IR8340 data sheet,
+          PSU table). The ordering table calls the downlinks ''24 Ports GE SFP Downlinks'', which counts
+          the 2 combo ports. The data sheet lists IEC 61850-3 and IEEE 1613.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 88
+        input_v_max: 300
+        supply_option: 'PWR-RGD-AC-DC-H 150 W: nominal 100-250 VDC (88-300 VDC) or 100-240 VAC (85-264
+          VAC); two PSU bays'
+        supply_ok: true
+        power_supplies: 2
+        power_basis: datasheet_typical
+        power_note: Cisco IE9300 data sheet gives 73 W as 'indicative' system power. It is not a stated
+          maximum.
+        inrush_a: 30
+        inrush_basis: datasheet
+        port_groups:
+        - ports: Downlink SFP
+          count: 22
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: any
+        - ports: Downlink dual-media (SFP or RJ45)
+          count: 2
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: any
+        - ports: Uplinks
+          count: 4
+          speed: 10G
+          media: SFP+
+          kind: sfp_slot
+          usable_for: uplink
+        sources:
+        - https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html
+        - https://www.cisco.com/c/en/us/products/collateral/routers/catalyst-ir8300-rugged-series-router/nb-06-cat-ir8340-rugged-ser-rout-ds-cte-en.html
       high:
         model: Catalyst IE9320
-        ordering_code: IE-9320-22S2C4X-A
+        ordering_code: IE-9320-22S2C4X-A + 2 x PWR-RGD-AC-DC-H
         description: As the -E model but with Network Advantage licence (full L3, advanced features)
         unit_power_w: 73
         url: https://www.barcodesinc.com/cisco/part-ie-9320-22s2c4x-a.htm
         notes: 'Same hardware as -E (73 W indicative, Cisco datasheet Table 5) with the Network Advantage
           licence. PSUs are ordered separately (Cisco datasheet Table 7: PWR-RGD-LOW-DC-H 24-60 VDC, PWR-RGD-AC-DC-H
-          150 W, -AC-DC-250, -AC-DC-400); confirm the HV PSU''s DC input range covers the 125 VDC battery.'
+          150 W, -AC-DC-250, -AC-DC-400); confirm the HV PSU''s DC input range covers the 125 VDC battery.
+          M14 changed the ordering code from IE-9320-22S2C4X-A. M14: Same hardware as -E (the data sheet
+          lists -E/-A together). Inrush is the PSU module figure: below 30 A at 125 VDC, cold start.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 88
+        input_v_max: 300
+        supply_option: 'PWR-RGD-AC-DC-H 150 W: nominal 100-250 VDC (88-300 VDC) or 100-240 VAC (85-264
+          VAC); two PSU bays'
+        supply_ok: true
+        power_supplies: 2
+        power_basis: datasheet_typical
+        power_note: 'Cisco IE9300 data sheet: 73 W indicative system power for IE-9320-22S2C4X-E/-A.'
+        inrush_a: 30
+        inrush_basis: datasheet
+        port_groups:
+        - ports: Downlink SFP
+          count: 22
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: any
+        - ports: Downlink dual-media (SFP or RJ45)
+          count: 2
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: any
+        - ports: Uplinks
+          count: 4
+          speed: 10G
+          media: SFP+
+          kind: sfp_slot
+          usable_for: uplink
+        sources:
+        - https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html
+        - https://www.cisco.com/c/en/us/products/collateral/routers/catalyst-ir8300-rugged-series-router/nb-06-cat-ir8340-rugged-ser-rout-ds-cte-en.html
+        - https://www.barcodesinc.com/cisco/part-ie-9320-22s2c4x-a.htm
   sources:
   - https://cache.industry.siemens.com/dl/files/348/109766348/att_980977/v1/SIE_RST2228.pdf
   - https://assets.new.siemens.com/siemens/assets/api/uuid:7c5d5b6f-4c7a-4917-b9d4-4781694f0bb6/di-pa-ci-rst2228-brochure-en.pdf
@@ -171,6 +418,7 @@ records:
   - https://www.moxa.com/product/pt-g7828_series.htm
   - https://shop.thiim.com/TradePoint141/UserFiles/News/2014q3/PT-7528_Series.pdf
   - https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/
+  - https://www.manualslib.com/manual/1618609/Siemens-Ruggedcom-Rst2228.html?page=37
 - part_id: RST2228-L1-24MM
   kind: device
   description: LAN-{lan} Industrial Ethernet switch (Level-1) (24 MM FO Ports)
@@ -247,6 +495,12 @@ records:
       kind: sfp_slot
       usable_for: uplink
       note: Fixed 1/10G SFP+ uplinks; the example fits 1000BASE-SX SFPs
+    inrush_basis: not_given
+    inrush_note: 'As RST2228-L2: the installation guide (section 5.1) gives no inrush figure. HV PSU internal
+      fuse 3.15 A; max 77 W (AC) / 76 W (DC). Correction still open from the earlier round: Z-option A05
+      is not a valid RST2228 option (only A00/A01 exist).'
+    input_v_min: 88
+    input_v_max: 300
   alternatives:
   - make: Moxa
     manufacturer: Moxa Inc.
@@ -256,38 +510,150 @@ records:
         ordering_code: PT-7528-12MSC-12TX-4GSFP-HV-HV
         description: Fixed L2, 12 x 100BASE-FX MM SC + 12 x 10/100 TX + 4 x GbE SFP, dual HV PSU; fewer
           fibre ports
-        unit_power_w: 35
+        unit_power_w: 34.4
         url: https://ipc2u.com/catalog/pt-7528-12msc-12tx-4gsfp-hv-hv/
-        notes: Power is computed (datasheet gives 0.313 A @ 110 VDC for >=8 fibre ports). IEC 61850-3
-          / IEEE 1613.
+        notes: 'Power is computed (datasheet gives 0.313 A @ 110 VDC for >=8 fibre ports). IEC 61850-3
+          / IEEE 1613. M14: Only 12 MM fibre ports (SC) against the 24 needed. The datasheet prints the
+          code as PT-7528-12MSC12TX-4GSFP-HV-HV (PDF line-break artefact); the input form is kept. 440
+          x 44 x 325 mm, rack. No inrush figure.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 88
+        input_v_max: 300
+        supply_option: HV input 110/220 VDC/VAC (88-300 VDC, 85-264 VAC); -HV-HV = two HV inputs (redundant)
+        supply_ok: true
+        power_supplies: 2
+        power_basis: computed
+        power_note: 'Datasheet: 0.313 A at 110 VDC for models with 8 or more fibre ports. 0.313 x 110
+          = 34.4 W.'
+        inrush_basis: not_given
+        port_groups:
+        - ports: FE fibre ports
+          count: 12
+          speed: 100M
+          media: MM
+          kind: fixed
+          usable_for: ied
+        - ports: FE copper ports
+          count: 12
+          speed: 100M
+          media: RJ45
+          kind: fixed
+          usable_for: ied
+        - ports: Gigabit ports
+          count: 4
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: uplink
+        sources:
+        - https://cdn.shopify.com/s/files/1/0665/7409/0561/files/pt-7528-series-datasheet-v1_3.pdf
+        - https://ipc2u.com/catalog/pt-7528-12msc-12tx-4gsfp-hv-hv/
       mid:
         model: PT-7528 series
         ordering_code: PT-7528-20MSC-4TX-4GSFP-HV-HV
         description: Fixed L2, 20 x 100BASE-FX MM SC + 4 x TX + 4 x GbE SFP, dual 88-300 VDC/85-264 VAC;
           nearest fixed FE-fibre equivalent (SC, not LC)
-        unit_power_w: 35
+        unit_power_w: 34.4
         url: https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/
-        notes: Power computed from datasheet current (0.313 A @ 110 VDC).
+        notes: 'Power computed from datasheet current (0.313 A @ 110 VDC). M14: 20 MM fibre ports (SC,
+          not LC), 4 short of 24. GbE uplinks only (no 10G). No inrush figure.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 88
+        input_v_max: 300
+        supply_option: HV input 110/220 VDC/VAC (88-300 VDC, 85-264 VAC); -HV-HV = two HV inputs (redundant)
+        supply_ok: true
+        power_supplies: 2
+        power_basis: computed
+        power_note: 0.313 A at 110 VDC (datasheet, models with 8 or more fibre ports) = 34.4 W.
+        inrush_basis: not_given
+        port_groups:
+        - ports: FE fibre ports
+          count: 20
+          speed: 100M
+          media: MM
+          kind: fixed
+          usable_for: ied
+        - ports: FE copper ports
+          count: 4
+          speed: 100M
+          media: RJ45
+          kind: fixed
+          usable_for: ied
+        - ports: Gigabit ports
+          count: 4
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: uplink
+        sources:
+        - https://cdn.shopify.com/s/files/1/0665/7409/0561/files/pt-7528-series-datasheet-v1_3.pdf
+        - https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/
       high:
         model: PT-G7728
         ordering_code: PT-G7728 + 6 x LM-7000H-4GSFP + 2 x PWR-HV-NP
         description: Modular full-Gigabit L2, 24 SFP module ports (fit 100FX or 1000X SFPs) + 4 fixed
           GbE, hot-swap dual HV PSUs
-        unit_power_w: 41
+        unit_power_w: 40.9
         url: https://www.moxa.com/product/PT-G7728_Series.htm
-        notes: Needs 24 x 100FX SFPs (e.g. Moxa SFP-1FEMLC-T). 41 W = 12 W chassis (max 0.11 A @ 110 VDC
-          per the Moxa product page) + 6 x 4.8 W max per LM-7000H-4GSFP (Moxa LM-7000H datasheet v1.1);
+        notes: 'Needs 24 x 100FX SFPs (e.g. Moxa SFP-1FEMLC-T). 41 W = 12 W chassis (max 0.11 A @ 110
+          VDC per the Moxa product page) + 6 x 4.8 W max per LM-7000H-4GSFP (Moxa LM-7000H datasheet v1.1);
           SFP transceivers not included. IEC 61850-3 Ed2 Class 2 and IEEE 1613. 443 x 44 x 280 mm, 3.08
-          kg. LM-7000H-4GSFP (RS 0633718) and PWR-HV-NP (Moxa product page) are ordered separately.
+          kg. LM-7000H-4GSFP (RS 0633718) and PWR-HV-NP (Moxa product page) are ordered separately. M14:
+          The 24 module SFP slots are 100/1000; speed 100M here means they are fitted with 100BASE-FX
+          MM SFPs (e.g. Moxa SFP-1FEMLC-T, ordered separately) for the IED role. The LM-7000H datasheet
+          lists 100Base SFP accessories but does not explicitly confirm 100FX in this module. No 10G.
+          No inrush figure.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 88
+        input_v_max: 300
+        supply_option: 'PWR-HV-NP power module: 110/220 VDC/VAC (88-300 VDC, 90-264 VAC); two power-module
+          slots'
+        supply_ok: true
+        power_supplies: 2
+        power_basis: computed
+        power_note: 12.1 W chassis (max 0.11 A at 110 VDC, Moxa page) + 6 x 4.8 W LM-7000H-4GSFP (datasheet
+          max) = 40.9 W; SFP transceivers excluded.
+        inrush_basis: not_given
+        port_groups:
+        - ports: Module slots 1-6 (6 x LM-7000H-4GSFP)
+          count: 24
+          speed: 100M
+          media: SFP
+          kind: sfp_slot
+          usable_for: ied
+        - ports: Fixed GbE SFP
+          count: 2
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: uplink
+        - ports: Fixed GbE RJ45
+          count: 2
+          speed: 1G
+          media: RJ45
+          kind: fixed
+          usable_for: uplink
+        sources:
+        - https://www.moxa.com/product/PT-G7728_Series.htm
+        - https://www.moxa.com/getmedia/83018fe7-d7f9-474f-8224-497652084c6b/moxa-lm-7000h-module-series-datasheet-v1.1.pdf
   - make: Cisco
     manufacturer: Cisco Systems
     tiers:
       low:
         model: Catalyst IE9320
-        ordering_code: IE-9320-26S2C-E
+        ordering_code: IE-9320-26S2C-E + 2 x PWR-RGD-AC-DC-H
         description: 1U rugged rack switch, 22 x 100/1000 SFP + 2 x dual-media (SFP or RJ45) downlinks
           + 4 x 100/1000 SFP uplinks, Network Essentials; no 10G
         unit_power_w: 64
@@ -296,11 +662,51 @@ records:
           5). IEC 61850-3 and IEEE 1613:2009 listed (Table 12). Part number also seen at distributors
           (barcodesinc, networkdevicesinc). PSUs are ordered separately (Cisco datasheet Table 7: PWR-RGD-LOW-DC-H
           24-60 VDC, PWR-RGD-AC-DC-H 150 W, -AC-DC-250, -AC-DC-400); confirm the HV PSU''s DC input range
-          covers the 125 VDC battery. 100BASE-FX SFP support on the downlinks not confirmed this session.'
+          covers the 125 VDC battery. 100BASE-FX SFP support on the downlinks not confirmed this session.
+          M14 changed the ordering code from IE-9320-26S2C-E. M14: The downlinks are 100/1000 SFP. Speed
+          100M here means they are fitted with GLC-FE-100FX-RGD (2 km MMF, listed in the data sheet''s
+          SFP table) for the IED role. The data sheet does not map SFP support per SKU. Inrush: PWR-RGD-AC-DC(-H)
+          module below 30 A at 125 VDC, cold start.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 88
+        input_v_max: 300
+        supply_option: 'PWR-RGD-AC-DC-H 150 W: nominal 100-250 VDC (88-300 VDC) or 100-240 VAC; two PSU
+          bays'
+        supply_ok: true
+        power_supplies: 2
+        power_basis: datasheet_typical
+        power_note: 'Cisco data sheet: 64 W indicative system power.'
+        inrush_a: 30
+        inrush_basis: datasheet
+        port_groups:
+        - ports: Downlink SFP
+          count: 22
+          speed: 100M
+          media: SFP
+          kind: sfp_slot
+          usable_for: ied
+        - ports: Downlink dual-media (SFP or RJ45)
+          count: 2
+          speed: 100M
+          media: SFP
+          kind: sfp_slot
+          usable_for: ied
+        - ports: Uplinks
+          count: 4
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: uplink
+        sources:
+        - https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html
+        - https://www.cisco.com/c/en/us/products/collateral/routers/catalyst-ir8300-rugged-series-router/nb-06-cat-ir8340-rugged-ser-rout-ds-cte-en.html
       mid:
         model: Catalyst IE9320
-        ordering_code: IE-9320-22S2C4X-E
+        ordering_code: IE-9320-22S2C4X-E + 2 x PWR-RGD-AC-DC-H
         description: 22 x GE SFP + 2 combo + 4 x 10G SFP+; nearest match to 24 bay ports + 10G uplinks
         unit_power_w: 73
         url: https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html
@@ -308,24 +714,102 @@ records:
           73 W indicative system power (Table 5); IEC 61850-3 and IEEE 1613:2009 listed. Part number also
           seen at distributors (xsnet.com.au). PSUs are ordered separately (Cisco datasheet Table 7: PWR-RGD-LOW-DC-H
           24-60 VDC, PWR-RGD-AC-DC-H 150 W, -AC-DC-250, -AC-DC-400); confirm the HV PSU''s DC input range
-          covers the 125 VDC battery. Use GLC-FE-100FX-RGD SFPs for the 100FX bay links.'
+          covers the 125 VDC battery. Use GLC-FE-100FX-RGD SFPs for the 100FX bay links. M14 changed the
+          ordering code from IE-9320-22S2C4X-E. M14: This is the nearest match to the 24 IED fibre ports
+          + 4 x 10G uplinks, with GLC-FE-100FX-RGD SFPs in the downlinks. Inrush: PSU module below 30
+          A at 125 VDC, cold start.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 88
+        input_v_max: 300
+        supply_option: 'PWR-RGD-AC-DC-H 150 W: nominal 100-250 VDC (88-300 VDC) or 100-240 VAC; two PSU
+          bays'
+        supply_ok: true
+        power_supplies: 2
+        power_basis: datasheet_typical
+        power_note: 'Cisco data sheet: 73 W indicative system power.'
+        inrush_a: 30
+        inrush_basis: datasheet
+        port_groups:
+        - ports: Downlink SFP
+          count: 22
+          speed: 100M
+          media: SFP
+          kind: sfp_slot
+          usable_for: ied
+        - ports: Downlink dual-media (SFP or RJ45)
+          count: 2
+          speed: 100M
+          media: SFP
+          kind: sfp_slot
+          usable_for: ied
+        - ports: Uplinks
+          count: 4
+          speed: 10G
+          media: SFP+
+          kind: sfp_slot
+          usable_for: uplink
+        sources:
+        - https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html
+        - https://www.cisco.com/c/en/us/products/collateral/routers/catalyst-ir8300-rugged-series-router/nb-06-cat-ir8340-rugged-ser-rout-ds-cte-en.html
       high:
         model: Catalyst IE9320
-        ordering_code: IE-9320-22S2C4X-A
+        ordering_code: IE-9320-22S2C4X-A + 2 x PWR-RGD-AC-DC-H
         description: As the -E model with Network Advantage (L3) licence
         unit_power_w: 73
         url: https://www.barcodesinc.com/cisco/part-ie-9320-22s2c4x-a.htm
         notes: 'Same hardware as -E (73 W indicative, Cisco datasheet Table 5) with the Network Advantage
           licence. PSUs are ordered separately (Cisco datasheet Table 7: PWR-RGD-LOW-DC-H 24-60 VDC, PWR-RGD-AC-DC-H
-          150 W, -AC-DC-250, -AC-DC-400); confirm the HV PSU''s DC input range covers the 125 VDC battery.'
+          150 W, -AC-DC-250, -AC-DC-400); confirm the HV PSU''s DC input range covers the 125 VDC battery.
+          M14 changed the ordering code from IE-9320-22S2C4X-A. M14: Same hardware as -E with the Network
+          Advantage licence. Inrush: PSU module below 30 A at 125 VDC, cold start.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 88
+        input_v_max: 300
+        supply_option: 'PWR-RGD-AC-DC-H 150 W: nominal 100-250 VDC (88-300 VDC) or 100-240 VAC; two PSU
+          bays'
+        supply_ok: true
+        power_supplies: 2
+        power_basis: datasheet_typical
+        power_note: 'Cisco data sheet: 73 W indicative system power (-E/-A).'
+        inrush_a: 30
+        inrush_basis: datasheet
+        port_groups:
+        - ports: Downlink SFP
+          count: 22
+          speed: 100M
+          media: SFP
+          kind: sfp_slot
+          usable_for: ied
+        - ports: Downlink dual-media (SFP or RJ45)
+          count: 2
+          speed: 100M
+          media: SFP
+          kind: sfp_slot
+          usable_for: ied
+        - ports: Uplinks
+          count: 4
+          speed: 10G
+          media: SFP+
+          kind: sfp_slot
+          usable_for: uplink
+        sources:
+        - https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html
+        - https://www.barcodesinc.com/cisco/part-ie-9320-22s2c4x-a.htm
   sources:
   - https://assets.new.siemens.com/siemens/assets/api/uuid:7c5d5b6f-4c7a-4917-b9d4-4781694f0bb6/di-pa-ci-rst2228-brochure-en.pdf
   - https://cache.industry.siemens.com/dl/files/346/109766346/att_980972/v1/RUGGEDCOM_Switches_Ordering_Overview_EN.pdf
   - https://cache.industry.siemens.com/dl/files/348/109766348/att_980977/v1/SIE_RST2228.pdf
   - https://www.manualslib.com/manual/1618609/Siemens-Ruggedcom-Rst2228.html
   - https://shop.thiim.com/TradePoint141/UserFiles/News/2014q3/PT-7528_Series.pdf
+  - https://www.manualslib.com/manual/1618609/Siemens-Ruggedcom-Rst2228.html?page=37
 - part_id: SEL-2730M-EXT
   kind: device
   description: LAN-{lan} Industrial Ethernet switch (EXT) (16 MM Ports, 4 RJ45)
@@ -389,6 +873,13 @@ records:
       kind: fixed
       usable_for: ied
       note: 'Ordered as 4-port multimode LC groups (BOM: 16 MM ports)'
+    inrush_basis: not_given
+    inrush_note: 'SEL-2730M data sheet (2013-12-04) gives no inrush figure. 125/250 V supply: rated 125-250
+      VDC / 110-240 VAC, range 88-300 VDC / 85-264 VAC, consumption DC < 45 W, AC < 60 VA, ride-through
+      50 ms at 125 V. Redundant hot-swappable second supply is optional. The BOM''s 45 W matches the DC
+      figure. 1U, 43.7 x 482.5 x 232.1 mm, 1.96 kg.'
+    input_v_min: 88
+    input_v_max: 300
   alternatives:
   - make: Moxa
     manufacturer: Moxa Inc.
@@ -397,30 +888,142 @@ records:
         model: PT-7528 series
         ordering_code: PT-7528-12MSC-12TX-4GSFP-HV-HV
         description: 12 x 100FX MM SC + 12 x TX + 4 x GbE SFP, dual HV PSU; fewer fibre ports than needed
-        unit_power_w: 35
+        unit_power_w: 34.4
         url: https://ipc2u.com/catalog/pt-7528-12msc-12tx-4gsfp-hv-hv/
-        notes: Power computed from datasheet current. IEC 61850-3 / IEEE 1613.
+        notes: 'Power computed from datasheet current. IEC 61850-3 / IEEE 1613. M14: 12 MM fibre ports
+          (SC) against the 16 needed. Copper ports are 10/100, not Gigabit as on the SEL-2730M. No inrush
+          figure.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 88
+        input_v_max: 300
+        supply_option: HV input 110/220 VDC/VAC (88-300 VDC, 85-264 VAC); -HV-HV = two HV inputs (redundant)
+        supply_ok: true
+        power_supplies: 2
+        power_basis: computed
+        power_note: 0.313 A at 110 VDC (datasheet, models with 8 or more fibre ports) = 34.4 W.
+        inrush_basis: not_given
+        port_groups:
+        - ports: Gigabit ports
+          count: 4
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: uplink
+        - ports: FE copper ports
+          count: 12
+          speed: 100M
+          media: RJ45
+          kind: fixed
+          usable_for: any
+        - ports: FE fibre ports
+          count: 12
+          speed: 100M
+          media: MM
+          kind: fixed
+          usable_for: ied
+        sources:
+        - https://cdn.shopify.com/s/files/1/0665/7409/0561/files/pt-7528-series-datasheet-v1_3.pdf
+        - https://ipc2u.com/catalog/pt-7528-12msc-12tx-4gsfp-hv-hv/
       mid:
         model: PT-7528 series
         ordering_code: PT-7528-20MSC-4TX-4GSFP-HV-HV
         description: 20 x 100FX MM SC + 4 x TX + 4 x GbE SFP, dual 88-300 VDC/85-264 VAC; closest like-for-like
           (16 MM + 4 RJ45 + GbE)
-        unit_power_w: 35
+        unit_power_w: 34.4
         url: https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/
-        notes: Power computed (0.313 A @ 110 VDC).
+        notes: 'Power computed (0.313 A @ 110 VDC). M14: Covers 16 MM (SC, not LC) + 4 RJ45 + 4 GbE SFP.
+          The RJ45 ports are 10/100 rather than Gigabit. No inrush figure.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 88
+        input_v_max: 300
+        supply_option: HV input 110/220 VDC/VAC (88-300 VDC, 85-264 VAC); -HV-HV = two HV inputs (redundant)
+        supply_ok: true
+        power_supplies: 2
+        power_basis: computed
+        power_note: 0.313 A at 110 VDC (datasheet) = 34.4 W.
+        inrush_basis: not_given
+        port_groups:
+        - ports: Gigabit ports
+          count: 4
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: uplink
+        - ports: FE copper ports
+          count: 4
+          speed: 100M
+          media: RJ45
+          kind: fixed
+          usable_for: any
+        - ports: FE fibre ports
+          count: 20
+          speed: 100M
+          media: MM
+          kind: fixed
+          usable_for: ied
+        sources:
+        - https://cdn.shopify.com/s/files/1/0665/7409/0561/files/pt-7528-series-datasheet-v1_3.pdf
+        - https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/
       high:
         model: PT-G7728
-        ordering_code: PT-G7728 + LM-7000H modules + 2 x PWR-HV-NP
+        ordering_code: PT-G7728 + 4 x LM-7000H-4GSFP + 1 x LM-7000H-4GTX + 2 x PWR-HV-NP
         description: Modular full-Gigabit L2 with hot-swap modules and PSUs, PRP/HSR module option
-        unit_power_w: 41
+        unit_power_w: 34.9
         url: https://www.moxa.com/product/PT-G7728_Series.htm
-        notes: Power assumes 6 x LM-7000H-4GSFP. 41 W = 12 W chassis (max 0.11 A @ 110 VDC per the Moxa
+        notes: 'Power assumes 6 x LM-7000H-4GSFP. 41 W = 12 W chassis (max 0.11 A @ 110 VDC per the Moxa
           product page) + 6 x 4.8 W max per LM-7000H-4GSFP (Moxa LM-7000H datasheet v1.1); SFP transceivers
           not included. IEC 61850-3 Ed2 Class 2 and IEEE 1613. 443 x 44 x 280 mm, 3.08 kg. LM-7000H-4GSFP
-          (RS 0633718) and PWR-HV-NP (Moxa product page) are ordered separately.
+          (RS 0633718) and PWR-HV-NP (Moxa product page) are ordered separately. M14 changed the ordering
+          code from PT-G7728 + LM-7000H modules + 2 x PWR-HV-NP. M14: The input gave a generic ''LM-7000H
+          modules'' code. The module mix shown (4 x 4GSFP + 1 x 4GTX, one slot left free) is a concrete
+          build for the 16 MM + 4 RJ45 + 4 GbE role, not a Moxa-published bundle. A PRP/HSR module is
+          available for the free slot. Fit 100BASE-FX MM SFPs (SFP-1FEMLC-T) in the 16 module SFPs. No
+          inrush figure.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 88
+        input_v_max: 300
+        supply_option: 'PWR-HV-NP power module: 110/220 VDC/VAC (88-300 VDC, 90-264 VAC); two power-module
+          slots'
+        supply_ok: true
+        power_supplies: 2
+        power_basis: computed
+        power_note: 12.1 W chassis (max 0.11 A at 110 VDC) + 4 x 4.8 W LM-7000H-4GSFP + 3.63 W LM-7000H-4GTX
+          (LM-7000H datasheet max values) = 34.9 W; SFPs excluded.
+        inrush_basis: not_given
+        port_groups:
+        - ports: Fixed GbE SFP
+          count: 2
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: uplink
+        - ports: Fixed GbE RJ45 + LM-7000H-4GTX
+          count: 6
+          speed: 1G
+          media: RJ45
+          kind: fixed
+          usable_for: any
+        - ports: Module slots (4 x LM-7000H-4GSFP)
+          count: 16
+          speed: 100M
+          media: SFP
+          kind: sfp_slot
+          usable_for: ied
+        sources:
+        - https://www.moxa.com/product/PT-G7728_Series.htm
+        - https://www.moxa.com/getmedia/83018fe7-d7f9-474f-8224-497652084c6b/moxa-lm-7000h-module-series-datasheet-v1.1.pdf
   - make: Siemens
     manufacturer: Siemens (SCALANCE / RUGGEDCOM)
     tiers:
@@ -429,33 +1032,164 @@ records:
         ordering_code: 6GK5324-4QG10-3HR2
         description: 19" managed L2 switch, 24 FE media-module ports + 4 GbE, substation-capable EEC variant
         url: https://automation-warehouse.com/products/6gk5324-4qg10-3hr2
-        notes: Part number seen at several distributors (sparepartsnow, electro-matic, automation-warehouse).
-          Power supply variant and power were not verified this session.
-        verified: true
+        notes: 'Part number seen at several distributors (sparepartsnow, electro-matic, automation-warehouse).
+          Power supply variant and power were not verified this session. M14: WRONG CODE FOR THE MODEL.
+          6GK5324-4QG10-3HR2 is the SCALANCE XR324-4M PoE (8 PoE + 8 RJ45 + 4 x 2-port media modules,
+          ports at the back, 230 VAC), per electro-matic. It is not the EEC substation variant and has
+          no 125 VDC input. The EEC family is 6GK5324-4GG10-xxR2. 125 VDC EEC variant (Siemens data sheets
+          read): 6GK5324-4GG10-4JR2, SCALANCE XR324-4M EEC, 16 x GbE RJ45 + 4 media-module slots (max
+          8 optical: 100 Mbit/s MM ST/SC or 1000 Mbit/s MM/SM LC), redundant power supply ''yes'', described
+          as 2x 230 V AC wide-range units. Each unit takes 80-276 V AC or 60-250 V DC (so input_v_min
+          60, input_v_max 250 for that variant), max 0.7 A, 42 W rated power loss per supply. 483 x 44
+          x 305 mm, 1 U, 7 kg, IEC 61850-3 yes, IEEE 1613 listed under EMC. The single-supply sibling
+          6GK5324-4GG10-3ER2 has the same 80-276 V AC / 60-250 V DC unit, 0.7 A max and 42 W, but ''redundant
+          power supply unit: No'' and weighs 6.6 kg. Even the EEC gives at most 8 fibre ports, not 16
+          MM. Power for the code as given was not found. height_u 1 is assumed from the 1 U EEC sibling.
+          port_groups assume MM 100M media modules (module order codes not decoded). Ask before swapping.'
+        verified: false
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 230 VAC only (per distributor description of 6GK5324-4QG10-3HR2); no DC input range
+          known, so input_v_min/max are left out
+        supply_ok: false
+        power_supplies: 1
+        inrush_basis: not_given
+        port_groups:
+        - ports: RJ45 (8 with PoE, 8 without)
+          count: 16
+          speed: 1G
+          media: RJ45
+          kind: fixed
+          usable_for: any
+        - ports: 4 media-module slots x 2 ports
+          count: 8
+          speed: 100M
+          media: MM
+          kind: fixed
+          usable_for: ied
+        sources:
+        - https://shop.electro-matic.com/6gk53244qg103hr2
+        - https://www.mouser.com/datasheet/2/1412/6GK53244GG104JR2_datasheet_en-3294102.pdf
+        - https://www.mouser.com/datasheet/2/1412/6GK53244GG103ER2_datasheet_en-3293853.pdf
       mid:
         model: RUGGEDCOM RSG2300
-        ordering_code: 6GK6023-0AS24-4DC0-Z
+        ordering_code: 6GK6023-0AS23-3DC0-Z A05+B05+C08+D08
         description: 19" 1U modular managed switch, up to 4 GbE + 24 FE copper/fibre, IEC 61850-3 / IEEE
           1613
         url: https://mall.industry.siemens.com/mall/en/WW/Catalog/Product/6GK6023-0AS24-4DC0-Z
-        notes: Example base code from the Siemens Mall. Z options (media modules) and PSU letters must
-          be configured; they were not decoded this session.
+        notes: 'Example base code from the Siemens Mall. Z options (media modules) and PSU letters must
+          be configured; they were not decoded this session. M14 changed the ordering code from 6GK6023-0AS24-4DC0-Z.
+          M14: ORDERING CODE CHANGED for the 125 VDC variant. The input code 6GK6023-0AS24-4DC0-Z decodes
+          (Siemens RUGGEDCOM ordering overview) to PSU1 = 4 and PSU2 = 4 = 24 VDC (10-36 VDC) with pluggable
+          terminals, which cannot take 125 VDC. 6GK6023-0AS23-3DC0 = dual 88-300 VDC / 85-264 VAC on screw
+          terminals, D = 19-inch rack kit, C = Ethernet and LEDs on front with power at the rear, 0 =
+          no coating. Z options from the same overview: A05/B05 = 2 x 100BASE-FX MM 1300 nm LC (slots
+          1-2); C08/D08 = 2 x 1000BASE-SX SFP incl. SFPs (slots 3-4). Not checked in the Siemens configurator.
+          Max 8 x 100FX fibre ports in total, so it cannot provide the 16 MM IED ports of the SEL-2730M.
+          Port layout confirmed in the RSG2300 user manual (Ethernet panel): ''three banks of eight 10/100Tx
+          copper ports (for a total of 24 fixed 10/100Tx ports)''. Slots 1-2 take two-port fibre or copper
+          modules up to 100 Mbit/s, and slots 3-4 take two-port modules up to 1 Gbit/s. Fully populated
+          that is 24 + 8 = 32 ports; modules do not replace copper ports. Install guide: HI PSU internal
+          fuse 2 A (T). No inrush figure. 1.74 in high (1U), 5.2 kg. IEC 61850-3 and IEEE 1613 Class 2.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 88
+        input_v_max: 300
+        supply_option: HI 88-300 VDC / 85-264 VAC; PSU digit 3 = screw terminal (6 = pluggable), PSU 1
+          and PSU 2 must use the same terminal type
+        supply_ok: true
+        power_supplies: 2
+        unit_power_w: 32
+        power_basis: datasheet_max
+        power_note: 'RSG2300 series datasheet: 32 W maximum. The older RSG2300 installation guide table
+          gives 25 W max for every PSU type; 32 W is kept as the higher value.'
+        inrush_basis: not_given
+        port_groups:
+        - ports: Fixed 10/100TX
+          count: 24
+          speed: 100M
+          media: RJ45
+          kind: fixed
+          usable_for: any
+        - ports: Slots S1-S2 (A05, B05)
+          count: 4
+          speed: 100M
+          media: MM
+          kind: fixed
+          usable_for: ied
+        - ports: Slots S3-S4 (C08, D08)
+          count: 4
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: uplink
+        sources:
+        - https://cache.industry.siemens.com/dl/files/346/109766346/att_980972/v1/RUGGEDCOM_Switches_Ordering_Overview_EN.pdf
+        - https://www.manualsdir.com/manuals/202611/ruggedcom-rsg2300.html?page=26
+        - https://cdn.shopify.com/s/files/1/0455/5286/1338/files/RSG2300_series.pdf
+        - https://www.manualsdir.com/manuals/202611/ruggedcom-rsg2300.html?page=7
+        - https://www.manualsdir.com/manuals/202611/ruggedcom-rsg2300.html?page=11
       high:
         model: RUGGEDCOM RST2228
-        ordering_code: 6GK6222-6AB00-5CC0-Z
+        ordering_code: 6GK6222-6AB00-5CC0-Z A00+B05+C05+D05+E05+F01+G00
         description: 1U modular, 24 slot ports + 4 x 10G SFP+, dual HV PSU; same platform as the RST2228
           refs
         unit_power_w: 77
         url: https://assets.new.siemens.com/siemens/assets/api/uuid:7c5d5b6f-4c7a-4917-b9d4-4781694f0bb6/di-pa-ci-rst2228-brochure-en.pdf
-        notes: Add Z options, e.g. A00+B05+C05+D05+E05+F01+G00 for 16 MM + 4 RJ45 (this example is not
-          checked against the Siemens configurator).
+        notes: 'Add Z options, e.g. A00+B05+C05+D05+E05+F01+G00 for 16 MM + 4 RJ45 (this example is not
+          checked against the Siemens configurator). M14 changed the ordering code from 6GK6222-6AB00-5CC0-Z.
+          M14: Z options B05-E05 = RMM2942-4LC2 (4 x 100BASE-FX MM LC), as decoded in the earlier round.
+          F01 (taken as a 4-port 10/100/1000 RJ45 module) was not checked this session, so the RJ45 group
+          speed is shown as 100M conservatively. Confirm in the Siemens configurator. 440 x 44.45 x 345
+          mm (1U). HV PSU internal fuse 3.15 A. No inrush figure.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 88
+        input_v_max: 300
+        supply_option: 'PSU 1 and PSU 2 code C: 88-300 VDC / 85-264 VAC, screw terminal block'
+        supply_ok: true
+        power_supplies: 2
+        power_basis: datasheet_max
+        power_note: 'RST2228 installation guide section 5.1: HV AC/DC max 77 W / 76 W (based on nominal
+          input and 60 W output load).'
+        inrush_basis: not_given
+        port_groups:
+        - ports: Slot 0 uplinks
+          count: 4
+          speed: 10G
+          media: SFP+
+          kind: sfp_slot
+          usable_for: uplink
+        - ports: Slot 5 (F01)
+          count: 4
+          speed: 100M
+          media: RJ45
+          kind: fixed
+          usable_for: any
+        - ports: Slots 1-4 (B05-E05, RMM2942-4LC2)
+          count: 16
+          speed: 100M
+          media: MM
+          kind: fixed
+          usable_for: ied
+        sources:
+        - https://www.manualslib.com/manual/1618609/Siemens-Ruggedcom-Rst2228.html?page=37
+        - https://cache.industry.siemens.com/dl/files/348/109766348/att_980977/v1/SIE_RST2228.pdf
+        - https://assets.new.siemens.com/siemens/assets/api/uuid:7c5d5b6f-4c7a-4917-b9d4-4781694f0bb6/di-pa-ci-rst2228-brochure-en.pdf
   sources:
   - https://selinc.com/products/2730M/
   - https://selinc.com/products/2730M/specs
   - https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/
   - https://mall.industry.siemens.com/mall/en/WW/Catalog/Product/6GK6023-0AS24-4DC0-Z
+  - https://www.ien.eu/uploads/tx_etim/2730M_DS_20131204.pdf
   - https://www.ien.eu/uploads/tx_etim/2730M_DS_20131204.pdf
   - https://www.ien.eu/uploads/tx_etim/2730M_DS_20131204.pdf
 - part_id: FGR-60F
@@ -492,6 +1226,17 @@ records:
       (e.g. FGR-60F-BDL-950-12) for support and updates.
     mounting_kind: din_rail
     height_u: 0
+    inrush_basis: not_given
+    inrush_note: 'No inrush figure in the FortiGate Rugged data sheet (FGR-DAT-R17-202010) or the FGR-60F
+      QuickStart Guide (2025-01-29). Corrections and confirmations: power 15 W average / 21 W max, 72
+      BTU/h. Input is a terminal block for +12 to +125 VDC (or -12 to -125 VDC), 2 A max per terminal,
+      with optional dual DC inputs for failover. No AC adapter. 42.7 x 216 x 165 mm, desktop/DIN/wall.
+      Ports: 4 x GE RJ45 + 2 x GE RJ45/SFP shared-media pairs (WAN1/WAN2) + 1 bypass RJ45 pair + console
+      + DB9 serial. WARNING: 125 VDC is the TOP of the stated input range. A 125 VDC station battery on
+      float/boost charge (typically about 135-140 V) exceeds it. Confirm with Fortinet before feeding
+      it directly from station DC.'
+    input_v_min: 12
+    input_v_max: 125
   alternatives:
   - make: Cisco
     manufacturer: Cisco Systems
@@ -502,25 +1247,132 @@ records:
         description: DIN-rail industrial firewall, 4 x GE copper; IEC 61850-3; low-voltage DC input (needs
           DC/DC from 125 VDC)
         url: https://www.xsnet.com.au/product/cisco/48319/isa-3000-4c-k9
-        notes: Part number seen at distributors (xsnet, networkdevicesinc, convergenttechnology). Power
-          not read.
+        notes: 'Part number seen at distributors (xsnet, networkdevicesinc, convergenttechnology). Power
+          not read. M14: NO 125 VDC OPTION: the input range is 9.6-60 VDC. voltage_v 24 is the native
+          input; the branch MCB must be sized for the 125 VDC to 24 VDC converter, not this device. Data
+          sheet: 13 x 11.2 x 16 cm, DIN rail, IEC 61850-3 and IEEE 1613 in the standards tables. power_supplies
+          2 = two DC inputs on one unit (as for the FGR-60F). The data sheet does not explicitly say the
+          inputs are redundant. No SFP ports, so it cannot take the original''s 2 x 1G SFP. No inrush
+          figure.'
         verified: true
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: VDC
+        voltage_v: 24
+        input_v_min: 9.6
+        input_v_max: 60
+        supply_option: Nominal 12/24/48 VDC, range 9.6-60 VDC, dual internal DC inputs; no HV option (needs
+          a 125/24 VDC converter)
+        supply_ok: false
+        power_supplies: 2
+        unit_power_w: 24
+        power_basis: datasheet_max
+        power_note: 'ISA 3000 data sheet: power consumption 24 W (single figure, not split into typical
+          and maximum).'
+        inrush_basis: not_given
+        port_groups:
+        - ports: GE copper
+          count: 4
+          speed: 1G
+          media: RJ45
+          kind: fixed
+          usable_for: any
+        sources:
+        - https://bxin.cisco.com/c/dam/global/zh_cn/products/collateral/security/industrial-security-appliance-isa/data-sheet-c78-735839.pdf
+        - https://www.industrialnetworking.com/isa-3000-industrial-security-appliances
+        - https://www.xsnet.com.au/product/cisco/48319/isa-3000-4c-k9
       mid:
         model: Secure Firewall ISA3000
         ordering_code: ISA-3000-2C2F-K9
         description: As ISA-3000-4C but 2 x GE copper + 2 x GE SFP fibre; closest like-for-like
         url: https://www.xsnet.com.au/product/cisco/48318/isa-3000-2c2f-k9
-        notes: Part number seen at distributors (xsnet, networktigers, convergenttechnology). Power not
-          read.
+        notes: 'Part number seen at distributors (xsnet, networktigers, convergenttechnology). Power not
+          read. M14: NO 125 VDC OPTION (9.6-60 VDC). It needs a DC/DC converter from the station battery.
+          Closest port match (2 x SFP like the FGR-60F). SFPs are sold separately. No inrush figure.'
         verified: true
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: VDC
+        voltage_v: 24
+        input_v_min: 9.6
+        input_v_max: 60
+        supply_option: Nominal 12/24/48 VDC, range 9.6-60 VDC, dual internal DC inputs; no HV option (needs
+          a 125/24 VDC converter)
+        supply_ok: false
+        power_supplies: 2
+        unit_power_w: 24
+        power_basis: datasheet_max
+        power_note: 'ISA 3000 data sheet: power consumption 24 W.'
+        inrush_basis: not_given
+        port_groups:
+        - ports: GE SFP
+          count: 2
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: any
+        - ports: GE copper
+          count: 2
+          speed: 1G
+          media: RJ45
+          kind: fixed
+          usable_for: any
+        sources:
+        - https://bxin.cisco.com/c/dam/global/zh_cn/products/collateral/security/industrial-security-appliance-isa/data-sheet-c78-735839.pdf
+        - https://www.industrialnetworking.com/isa-3000-industrial-security-appliances
+        - https://www.xsnet.com.au/product/cisco/48318/isa-3000-2c2f-k9
       high:
         model: Catalyst IR8340
-        ordering_code: IR8340-K9
+        ordering_code: IR8340-K9 + 2 x PWR-RGD-AC-DC-H
         description: 1U 19" rugged integrated-services router with firewall/IPS, IEC 61850-3, HV PSU options
         url: https://www.connection.com/product/cisco-cisco-catalyst-ir8340-rugged-r/ir8340-k9/41420808
-        notes: Part number seen at distributors (Connection, CDW.ca, xsnet). Router platform; PSUs and
-          licences are ordered separately. Power not read.
+        notes: 'Part number seen at distributors (Connection, CDW.ca, xsnet). Router platform; PSUs and
+          licences are ordered separately. Power not read. M14 changed the ordering code from IR8340-K9.
+          M14: HEIGHT CORRECTED: the input said 1U, but the Cisco data sheet gives 2RU, 88.9 x 438.2 x
+          381 mm, with a 19-inch rack kit included. The install guide asks for one free RU above and below
+          for ventilation. Inrush (data sheet PSU table, cold start at 25 C): 150 W AC/DC module below
+          30 A at 125 VDC, below 60 A at 250 VDC; 250 W module below 40 A at 125 VDC. Whether PSUs ship
+          with IR8340-K9 is not stated, so order 2 x PWR-RGD-AC-DC-H. IEC 61850-3 and IEEE 1613. It is
+          a router with firewall/IPS, not a dedicated NGFW.'
         verified: true
+        height_u: 2
+        mounting_kind: rack
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 88
+        input_v_max: 300
+        supply_option: 'PWR-RGD-AC-DC(-H) 150 W: 100-250 VDC (88-300 VDC), 2.0 A or 100-240 VAC; dual
+          PSUs (default on IR8300)'
+        supply_ok: true
+        power_supplies: 2
+        unit_power_w: 67.5
+        power_basis: datasheet_typical
+        power_note: 'Cisco IR8340 data sheet: base power 67.5 W (from the SKU description). No maximum
+          is stated. The PoE budget (120 W) is extra and needs a PoE-capable PSU.'
+        inrush_a: 30
+        inrush_basis: datasheet
+        port_groups:
+        - ports: WAN GE combo (RJ45/SFP)
+          count: 2
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: uplink
+        - ports: LAN GE SFP + combo
+          count: 8
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: any
+        - ports: LAN GE RJ45 (PoE)
+          count: 4
+          speed: 1G
+          media: RJ45
+          kind: fixed
+          usable_for: any
+        sources:
+        - https://www.cisco.com/c/en/us/products/collateral/routers/catalyst-ir8300-rugged-series-router/nb-06-cat-ir8340-rugged-ser-rout-ds-cte-en.html
+        - https://www.connection.com/product/cisco-cisco-catalyst-ir8340-rugged-r/ir8340-k9/41420808
   - make: Moxa
     manufacturer: Moxa Inc.
     tiers:
@@ -530,30 +1382,131 @@ records:
         description: Industrial secure router/firewall, 8 GbE + 2 GbE combo SFP, 12-48 VDC, -40 to 75
           C
         url: https://uk.rs-online.com/web/p/routers/0288918
-        notes: Part number seen at RS (0288918) and ipc2u. 12-48 VDC model, so it needs a DC/DC converter
+        notes: 'Part number seen at RS (0288918) and ipc2u. 12-48 VDC model, so it needs a DC/DC converter
           from 125 VDC; the HV standard-temperature variant EDR-G9010-VPN-2MGSFP-HV (RS 0288915) feeds
-          directly from 125 VDC.
+          directly from 125 VDC. M14: NO 125 VDC in this code (LV 9.6-60 VDC), so it needs a DC/DC converter.
+          The HV sibling EDR-G9010-VPN-2MGSFP-HV-T (mid tier) takes 88-300 VDC directly. Datasheet v2.8:
+          58 x 135 x 105 mm, 1.03 kg, DIN rail, IP40. Standards table lists IEC 61850-3 Ed2 and IEEE 1613
+          (not restricted to models). No inrush figure.'
         verified: true
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: VDC
+        voltage_v: 24
+        input_v_min: 9.6
+        input_v_max: 60
+        supply_option: 'LV: 12/24/48 VDC (9.6-60 VDC), two redundant inputs; no HV input in this code
+          (HV variant is -HV-T)'
+        supply_ok: false
+        power_supplies: 2
+        unit_power_w: 16.8
+        power_basis: computed
+        power_note: 'Datasheet input current 0.70 A at 24 VDC: 0.70 x 24 = 16.8 W (1.51 A at 12 V = 18.1
+          W; 0.35 A at 48 V = 16.8 W).'
+        inrush_basis: not_given
+        port_groups:
+        - ports: SFP slots (1000/2500)
+          count: 2
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: any
+        - ports: GbE RJ45
+          count: 8
+          speed: 1G
+          media: RJ45
+          kind: fixed
+          usable_for: any
+        sources:
+        - https://www.moxa.com/getmedia/d473464e-d5b1-4dee-be63-b14b124ba6c3/moxa-edr-g9010-series-datasheet-v2.8-cht.pdf
+        - https://uk.rs-online.com/web/p/routers/0288918
       mid:
         model: EDR-G9010 series
         ordering_code: EDR-G9010-VPN-2MGSFP-HV-T
         description: As above with HV input (110/220 VDC/VAC), IEC 61850-3 / IEEE 1613; feeds directly
           from 125 VDC
         url: https://uk.rs-online.com/web/p/routers/0288917
-        notes: Part number seen at RS (0288917) and ipc2u.
+        notes: 'Part number seen at RS (0288917) and ipc2u. M14: Feeds directly from 125 VDC. Datasheet
+          v2.8 (Chinese-language edition; the figures are language-independent): HV models 64 x 135 x
+          105 mm, 1.15 kg, DIN rail or wall kit. The standards table lists IEC 61850-3 Ed2 and IEEE 1613.
+          No inrush figure.'
         verified: true
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 88
+        input_v_max: 300
+        supply_option: 'HV: rated 120/240 VDC/VAC, operating 88-300 VDC / 90-264 VAC, two redundant inputs'
+        supply_ok: true
+        power_supplies: 2
+        unit_power_w: 18
+        power_basis: computed
+        power_note: 'Datasheet input current 0.15 A at 120 VDC: 0.15 x 120 = 18 W (0.28 A at 120 VAC;
+          0.08 A at 240 VDC).'
+        inrush_basis: not_given
+        port_groups:
+        - ports: SFP slots (1000/2500)
+          count: 2
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: any
+        - ports: GbE RJ45
+          count: 8
+          speed: 1G
+          media: RJ45
+          kind: fixed
+          usable_for: any
+        sources:
+        - https://www.moxa.com/getmedia/d473464e-d5b1-4dee-be63-b14b124ba6c3/moxa-edr-g9010-series-datasheet-v2.8-cht.pdf
+        - https://ipc2u.com/catalog/edr-g9010-vpn-2mgsfp-hv-t/
+        - https://uk.rs-online.com/web/p/routers/0288917
       high:
         model: EDR-G9010 series + MXsecurity
         ordering_code: EDR-G9010-VPN-2MGSFP-HV-T
         description: HV model with IPS/DPI licence and MXsecurity management
         url: https://uk.rs-online.com/web/p/routers/0288917
-        notes: Hardware code seen at RS (0288917); same hardware as mid. The high tier adds the IPS licence,
-          whose SKU was not found this session.
+        notes: 'Hardware code seen at RS (0288917); same hardware as mid. The high tier adds the IPS licence,
+          whose SKU was not found this session. M14: Hardware identical to mid. The IPS licence and MXsecurity
+          SKUs were not identified (the earlier round also did not find them), so the tier differs only
+          by software.'
         verified: true
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 88
+        input_v_max: 300
+        supply_option: 'HV: rated 120/240 VDC/VAC, operating 88-300 VDC / 90-264 VAC, two redundant inputs'
+        supply_ok: true
+        power_supplies: 2
+        unit_power_w: 18
+        power_basis: computed
+        power_note: 'Same hardware as mid: 0.15 A at 120 VDC = 18 W.'
+        inrush_basis: not_given
+        port_groups:
+        - ports: SFP slots (1000/2500)
+          count: 2
+          speed: 1G
+          media: SFP
+          kind: sfp_slot
+          usable_for: any
+        - ports: GbE RJ45
+          count: 8
+          speed: 1G
+          media: RJ45
+          kind: fixed
+          usable_for: any
+        sources:
+        - https://www.moxa.com/getmedia/d473464e-d5b1-4dee-be63-b14b124ba6c3/moxa-edr-g9010-series-datasheet-v2.8-cht.pdf
+        - https://uk.rs-online.com/web/p/routers/0288917
   sources:
   - https://www.shi.com/product/40517097/Fortinet-FortiGate-Rugged-60F
   - https://datacenter360.ca/shop/network-security/firewall/bundle/fortigaterugged-60f-hardware-plus-1-year-forticare-premium-and-fortiguard-unified-threat-protection-utp-fgr-60f-bdl-950-12/
   - https://community.fortinet.com/t5/Support-Forum/Voltage-range-FGR-60F/m-p/369423
+  - https://avfirewalls.com/datasheets/FortiGate/FortiGate_Rugged_Series-New.pdf
+  - https://content.etilize.com/Additional-pdf2/1066667359.pdf
 - part_id: SFP-1G-LX-SM
   kind: device
   description: 1000BASE-LX SM SFP (1310nm, 10 Km)
@@ -591,6 +1544,9 @@ records:
         url: https://au.stockinthechannel.com/Product/Cisco-GLC-LH-SMD-network-transceiver-module-1000-Mbit-s-SFP-1300-nm/8600444
         notes: Part number seen on a manufacturer or distributor page this session.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: GLC-LX-SM-RGD
         ordering_code: GLC-LX-SM-RGD
@@ -598,6 +1554,9 @@ records:
         url: https://www.pbtech.com/product/NETCIS1002789/Cisco-GLC-LX-SM-RGD-GLC-LX-SM-RGD--1000Mbps-SNGL-M
         notes: Part number seen on a manufacturer or distributor page this session.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: GLC-ZX-SM-RGD
         ordering_code: GLC-ZX-SM-RGD
@@ -605,6 +1564,9 @@ records:
         url: https://www.pbtech.com/product/NETCIS1141644/Cisco-GLC-ZX-SM-RGD-1000BASE-ZX-Single-Mode-Rugged
         notes: Part number seen on a manufacturer or distributor page this session.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   - make: Moxa
     manufacturer: Moxa Inc.
     tiers:
@@ -615,6 +1577,9 @@ records:
         url: https://www.moxa.com/en/products/accessories/sfp-modules/gigabit-ethernet-sfp-modules/sfp-1g-series/sfp-1glxlc
         notes: Part number seen on a manufacturer or distributor page this session.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: SFP-1GLXLC-T
         ordering_code: SFP-1GLXLC-T
@@ -622,6 +1587,9 @@ records:
         url: https://esaitech.com/products/moxa-media-sfp-1glxlc-t-ieee-802-3z-1g-port-gigabit-ethernet-sfp-transceiver-module
         notes: Part number seen on a manufacturer or distributor page this session.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: SFP-1GLHLC-T
         ordering_code: SFP-1GLHLC-T
@@ -629,6 +1597,9 @@ records:
         url: https://www.distrelec.ch/en/moxa-lc-single-mode-transceiver-module-full-duplex-half-duplex-1000-mbps-moxa-sfp-1glhlc/p/30519473
         notes: Part number seen on a manufacturer or distributor page this session.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   sources:
   - https://www.cebeo.be/catalog/fr-be/products/siemens-ruggedcom-accessory-sfp-1-x-1000mbit-s-1000base-lx-lc-in-terface-optical-s-5309926
   - https://mall.industry.siemens.com/mall/en/kr/Catalog/Product/6GK6000-8FG53-0AB0
@@ -668,6 +1639,9 @@ records:
         url: https://eshop.spacecom.cz/detail/Cisco-GLCSXMMD-1000BASESX-SFP/638081
         notes: Part number seen on a manufacturer or distributor page this session.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: SFP-GE-S
         ordering_code: SFP-GE-S
@@ -675,6 +1649,9 @@ records:
         url: https://www.neweggbusiness.com/cisco-sfp-ge-s/p/9B-2AS-0093-00029
         notes: Part number seen on a manufacturer or distributor page this session.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: GLC-SX-MM-RGD
         ordering_code: GLC-SX-MM-RGD
@@ -682,6 +1659,9 @@ records:
         url: https://www.xsnet.com.au/products/cisco-glc-sx-mm-rgd-1g-sfp-1000base-sx-850nm-550m-mmf-lc-rugged-ext-temp
         notes: Part number seen on a manufacturer or distributor page this session.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   - make: Moxa
     manufacturer: Moxa Inc.
     tiers:
@@ -692,6 +1672,9 @@ records:
         url: https://adjditec.com/en/products/sfp-1gsxlc-moxa
         notes: Part number seen on a manufacturer or distributor page this session.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: SFP-1GSXLC-T
         ordering_code: SFP-1GSXLC-T
@@ -699,6 +1682,9 @@ records:
         url: https://industry-electronics.com/moxa/sfp-1gsxlc-t-1000basesx-0.5-km-printview-678700.htm
         notes: Part number seen on a manufacturer or distributor page this session.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: SFP-1GLSXLC-T
         ordering_code: SFP-1GLSXLC-T
@@ -706,6 +1692,9 @@ records:
         url: https://rspsupply.com/p-9563-moxa-sfp-1glsxlc-t-plug-in-sfp-module-lc-multi-5-km.aspx
         notes: Part number seen on a manufacturer or distributor page this session.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   sources:
   - https://shop.electro-matic.com/6gk60008fg510aa0
   - https://www.cebeo.be/catalog/fr-be/products/siemens-ruggedcom-accessory-sfp-1-x-1000mbit-s-1000base-sx-lc-in-terface-optical-m-5309923
@@ -745,6 +1734,9 @@ records:
         url: https://multitronic.fi/en/products/54396/cisco-100base-fx-sfp-module-for-gigabit-ethernet-ports--1310-nm-wavelength--2-km-over-mmf
         notes: Part number seen on a manufacturer or distributor page this session.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: GLC-FE-100FX-RGD
         ordering_code: GLC-FE-100FX-RGD
@@ -752,6 +1744,9 @@ records:
         url: https://www.distrelec.ch/en/fibre-optic-transceiver-multi-mode-100mbps-lc-sfp-2km-1300nm-cisco-glc-fe-100fx-rgd/p/30295866
         notes: Part number seen at Distrelec (GLC-FE-100FX-RGD=) and on the Cisco outlet (refurb listing).
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: GLC-FE-100LX-RGD
         ordering_code: GLC-FE-100LX-RGD
@@ -759,6 +1754,9 @@ records:
         url: https://us.stockinthechannel.com/Product/Cisco-GLC-FE-100LX-RGD-network-transceiver-module-100-Mbit-s-SFP-1310-nm/46057492
         notes: Part number seen on a manufacturer or distributor page this session.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   - make: Moxa
     manufacturer: Moxa Inc.
     tiers:
@@ -771,6 +1769,9 @@ records:
           there is no cheaper commercial-temperature variant. Part number seen on a manufacturer or distributor
           page this session.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: SFP-1FEMLC-T
         ordering_code: SFP-1FEMLC-T
@@ -781,6 +1782,9 @@ records:
           or distributor page this session.'
         verified: true
         same_as: low
+        height_u: 0
+        mounting_kind: plug_in
+        supply_type: none
       high:
         model: SFP-1FESLC-T
         ordering_code: SFP-1FESLC-T
@@ -789,6 +1793,9 @@ records:
         notes: Single-mode only, so it needs SM fibre. SFP-1FELLC-T (80 km) also exists. Part number seen
           on a manufacturer or distributor page this session.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   sources:
   - https://mall.industry.siemens.com/mall/en/us/Catalog/Product/6GK60008FE500AA0
   - https://outlet.cisco.com/us/glc-fe-100fxrgd-rf.html
@@ -829,6 +1836,9 @@ records:
         notes: Part number seen on a manufacturer or distributor page this session. Applies when the firewall
           is changed to Cisco ISA3000.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: SFP-GE-S
         ordering_code: SFP-GE-S
@@ -836,6 +1846,9 @@ records:
         url: https://www.neweggbusiness.com/cisco-sfp-ge-s/p/9B-2AS-0093-00029
         notes: Part number seen on a manufacturer or distributor page this session.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: GLC-SX-MM-RGD
         ordering_code: GLC-SX-MM-RGD
@@ -843,6 +1856,9 @@ records:
         url: https://www.xsnet.com.au/products/cisco-glc-sx-mm-rgd-1g-sfp-1000base-sx-850nm-550m-mmf-lc-rugged-ext-temp
         notes: Part number seen on a manufacturer or distributor page this session.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   - make: Moxa
     manufacturer: Moxa Inc.
     tiers:
@@ -854,6 +1870,9 @@ records:
         notes: Part number seen on a manufacturer or distributor page this session. Applies when the firewall
           is changed to Moxa EDR.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: SFP-1GSXLC-T
         ordering_code: SFP-1GSXLC-T
@@ -861,6 +1880,9 @@ records:
         url: https://industry-electronics.com/moxa/sfp-1gsxlc-t-1000basesx-0.5-km-printview-678700.htm
         notes: Part number seen on a manufacturer or distributor page this session.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: SFP-1GLSXLC-T
         ordering_code: SFP-1GLSXLC-T
@@ -868,6 +1890,9 @@ records:
         url: https://rspsupply.com/p-9563-moxa-sfp-1glsxlc-t-plug-in-sfp-module-lc-multi-5-km.aspx
         notes: Part number seen on a manufacturer or distributor page this session.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   sources:
   - https://datacenter360.ca/?p=146834
   - https://www.touchpoint.com.au/shop/fr-tran-sx-1ge-sfp-sx-transceiver-module-40-to-85c-over-mmf-for-all-systems-with-sfp-and-sfp-sfp-slots/
@@ -892,6 +1917,8 @@ records:
     mounting_kind: rack
     height_u: 1
     height_note: 1U, confirmed by Ali on 2026-10-28 (plan Q33)
+    inrush_basis: not_given
+    inrush_note: Passive fibre patch panel; no supply.
   alternatives:
   - make: Corning
     manufacturer: Corning Optical Communications
@@ -902,25 +1929,52 @@ records:
         description: 2U Closet Connector Housing (4 panel slots) + four 12-duplex LC SM adapter panels
           = 96 F
         url: https://ecatalog.corning.com/optical-communications/US/en/p/CCH-02U
-        notes: CCH-02U seen on the Corning eCatalog. CCH-CP24-A9 (12 LC duplex OS2 panel) seen on the
-          Corning eCatalog.
+        notes: 'CCH-02U seen on the Corning eCatalog. CCH-CP24-A9 (12 LC duplex OS2 panel) seen on the
+          Corning eCatalog. M14: Corning eCatalog (read): ''Closet Connector Housing (CCH) Two rack units,
+          holds four CCH connector panels'', height 91.5 mm (3.6 in), for 19-in racks (23-in option).
+          Four panels fill it: no spare slot.'
         verified: true
+        height_u: 2
+        mounting_kind: rack
+        supply_type: none
+        unit_power_w: 0
+        power_basis: assumed
+        sources:
+        - https://ecatalog.corning.com/optical-communications/US/en/p/CCH-02U
+        - https://www.markertek.com/product/cor-cch-02u/corning-cch-02u-closet-connector-housing-cch-two-rack-units-holds-four-cch-connector-panels
       mid:
         model: CCH-03U + 4 x CCH-CP24-A9
         ordering_code: CCH-03U / CCH-CP24-A9
         description: 3U CCH (6 slots) with 96 F LC SM and spare capacity for splice trays
         url: https://ecatalog.corning.com/optical-communications/US/en/p/CCH-03U
-        notes: CCH-03U seen on the Corning eCatalog. CCH-CP24-A9 (12 LC duplex OS2 panel) seen on the
-          Corning eCatalog.
+        notes: 'CCH-03U seen on the Corning eCatalog. CCH-CP24-A9 (12 LC duplex OS2 panel) seen on the
+          Corning eCatalog. M14: Corning eCatalog (read): ''Three rack units, holds six CCH connector
+          panels'', height 135 mm (5.31 in), for 19-in racks. Two spare panel slots with 96 F fitted.'
         verified: true
+        height_u: 3
+        mounting_kind: rack
+        supply_type: none
+        unit_power_w: 0
+        power_basis: assumed
+        sources:
+        - https://ecatalog.corning.com/optical-communications/US/en/Fiber-Optic-Hardware/Housings/Closet-Connector-Housing-%28CCH%29/p/CCH-03U
       high:
         model: CCH-04U + 4 x CCH-CP24-A9
         ordering_code: CCH-04U / CCH-CP24-A9
         description: 4U CCH (12 slots), room to grow to 144 F LC
         url: https://ecatalog.corning.com/optical-communications/US/en/p/CCH-04U
-        notes: CCH-04U seen on the Corning eCatalog. CCH-CP24-A9 (12 LC duplex OS2 panel) seen on the
-          Corning eCatalog.
+        notes: 'CCH-04U seen on the Corning eCatalog. CCH-CP24-A9 (12 LC duplex OS2 panel) seen on the
+          Corning eCatalog. M14: Corning eCatalog title: ''Closet Connector Housing (CCH) Four rack units,
+          holds 12 CCH connector panels''. Page body not opened (title from search result only); 3U and
+          2U siblings were read and follow the same naming.'
         verified: true
+        height_u: 4
+        mounting_kind: rack
+        supply_type: none
+        unit_power_w: 0
+        power_basis: assumed
+        sources:
+        - https://ecatalog.corning.com/optical-communications/EMEA/en/Fiber-Optic-Hardware/Housings/Closet-Connector-Housing-(CCH)/p/CCH-04U
   - make: Panduit
     manufacturer: Panduit Corp.
     tiers:
@@ -930,28 +1984,56 @@ records:
         description: 1U Opticom enclosure (4 FAP slots) + four 12-duplex LC SM adapter panels = 96 F;
           no spare slot or splice room
         url: https://www.heilind.com/panfce1u.html
-        notes: FCE1U seen at Heilind and Crescent ('1 RU, 4 Ports'). FAP12WBUDLCZ (Opticom FAP, 12 LC
-          duplex OS2, blue, zirconia) seen at Platt, Crescent and Digi-Key. Replaces FCE2U, which moved
-          to mid.
+        notes: 'FCE1U seen at Heilind and Crescent (''1 RU, 4 Ports''). FAP12WBUDLCZ (Opticom FAP, 12
+          LC duplex OS2, blue, zirconia) seen at Platt, Crescent and Digi-Key. Replaces FCE2U, which moved
+          to mid. M14: Heilind (read): ''uses up to 4 FAP or FMP adapter panels in a 1 RU footprint'',
+          1.73 in H x 17.60 in W x 17.9 in D (43.9 x 447.0 x 454 mm). Full with 4 panels: no spare slot.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: none
+        unit_power_w: 0
+        power_basis: assumed
+        sources:
+        - https://www.heilind.com/panfce1u.html
       mid:
         model: FCE2U + 4 x FAP12WBUDLCZ
         ordering_code: FCE2U / FAP12WBUDLCZ
         description: 2U Opticom enclosure (8 FAP slots) + four 12-duplex LC SM adapter panels = 96 F,
           with room for splice trays
         url: https://www.panduit.com/en/products/fiber-optic-systems/fiber-optic-panels-cassettes-enclosures/fiber-optic-enclosures/fce2u.html
-        notes: FCE2U seen on panduit.com and at Crescent ('2 RU, 8 Ports'). FAP12WBUDLCZ (Opticom FAP,
+        notes: 'FCE2U seen on panduit.com and at Crescent (''2 RU, 8 Ports''). FAP12WBUDLCZ (Opticom FAP,
           12 LC duplex OS2, blue, zirconia) seen at Platt, Crescent and Digi-Key. The earlier mid tier
-          FCE3U does not appear to exist (Panduit lists FCE1U, FCE2U and FCE4U only).
+          FCE3U does not appear to exist (Panduit lists FCE1U, FCE2U and FCE4U only). M14: Crescent (read):
+          ''up to 8 FAP or FMP adapter panels in a 2 RU footprint'', 3.48 in H x 17.60 in W x 17.9 in
+          D (88.4 x 447.0 x 454 mm). The panduit.com URL now opens an unrelated sliding-tray page.'
         verified: true
+        height_u: 2
+        mounting_kind: rack
+        supply_type: none
+        unit_power_w: 0
+        power_basis: assumed
+        sources:
+        - https://www.crescentelectric.com/product/190669/fce2u-opticom-quicknet-2ru-fiber-cassette-enclosure
+        - https://www.panduit.com/en/products/fiber-optic-systems/fiber-optic-panels-cassettes-enclosures/fiber-optic-enclosures/fce2u.html
       high:
         model: FCE4U + 4 x FAP12WBUDLCZ
         ordering_code: FCE4U / FAP12WBUDLCZ
         description: 4U enclosure (12 FAP slots), expandable to 144 F
         url: https://panduit.com/en/products/fiber-optic-systems/fiber-optic-panels-cassettes-enclosures/fiber-optic-enclosures/fce4u.html
-        notes: FCE4U seen on panduit.com and at Crescent ('4 RU, 12 Ports'). FAP12WBUDLCZ (Opticom FAP,
-          12 LC duplex OS2, blue, zirconia) seen at Platt, Crescent and Digi-Key.
+        notes: 'FCE4U seen on panduit.com and at Crescent (''4 RU, 12 Ports''). FAP12WBUDLCZ (Opticom
+          FAP, 12 LC duplex OS2, blue, zirconia) seen at Platt, Crescent and Digi-Key. M14: Crescent (read):
+          ''Panduit Opticom QuickNet Fiber Cassette Enclosure, 4RU, Rack Mounting, Black'' (listing title
+          ''4 RU, 12 Ports''). The panduit.com URL now opens an unrelated sliding-tray page, so it was
+          dropped.'
         verified: true
+        height_u: 4
+        mounting_kind: rack
+        supply_type: none
+        unit_power_w: 0
+        power_basis: assumed
+        sources:
+        - https://www.crescentelectric.com/product/167133/opticom-rack-mount-fiber-enclosure-black-4-ru-12-ports
   sources:
   - https://hubbellcdn.com/specsheet/PREMISE_FEUR48LCDOM3_spec.pdf
   - https://hubbellcdn.com/specsheet/PREMISE_FEUR12STM_spec.pdf
@@ -987,6 +2069,9 @@ records:
         url: https://www.gexpro.com/p/515864/panduit/spool-fiber-management-2-4-ru-/074983029693/fms2
         notes: 'Distributor listing title: ''Spool, Fiber Management. 2-4 RU''.'
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: FMS2
         ordering_code: FMS2
@@ -996,6 +2081,9 @@ records:
           Crescent, Stanion). Vary the quantity instead.'
         verified: true
         same_as: low
+        height_u: 0
+        mounting_kind: plug_in
+        supply_type: none
       high:
         model: FMS2
         ordering_code: FMS2
@@ -1005,6 +2093,9 @@ records:
           range, so pick the one that matches the chosen enclosure.
         verified: true
         same_as: low
+        height_u: 0
+        mounting_kind: plug_in
+        supply_type: none
   - make: Corning
     manufacturer: Corning Optical Communications
     tiers:
@@ -1016,6 +2107,9 @@ records:
         url: https://ecatalog.corning.com/optical-communications/US/en/p/CCH-02U
         notes: CCH-02U seen on the Corning eCatalog; internal slack routing not checked.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: CCH housing built-in routing
         ordering_code: CCH-03U
@@ -1023,6 +2117,9 @@ records:
         url: https://ecatalog.corning.com/optical-communications/US/en/p/CCH-03U
         notes: CCH-03U seen on the Corning eCatalog; internal slack routing not checked.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: CCH housing built-in routing
         ordering_code: CCH-04U
@@ -1030,6 +2127,9 @@ records:
         url: https://ecatalog.corning.com/optical-communications/US/en/p/CCH-04U
         notes: CCH-04U seen on the Corning eCatalog; internal slack routing not checked.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   sources:
   - https://hubbellcdn.com/specsheet/PREMISE_OFSPOOLPK2_spec.pdf
   - https://www.gexpro.com/p/515864/panduit/spool-fiber-management-2-4-ru-/074983029693/fms2
@@ -1068,6 +2168,9 @@ records:
         notes: M67-048 seen on the Corning eCatalog (splice tray, heat-shrink fusion splices); fit into
           the chosen housing not checked.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: CCH-CS12-A9-P00RE
         ordering_code: CCH-CS12-A9-P00RE
@@ -1075,6 +2178,9 @@ records:
         url: https://ecatalog.corning.com/optical-communications/US/en/Fiber-Optic-Hardware/Panels-Modules-and-Cassettes/CCH-Pigtailed-Splice-Cassette/p/CCH-CS12-A9-P00RE
         notes: Seen on the Corning eCatalog (CCH pigtailed splice cassette).
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: CCH-CS24-A9-P00RE
         ordering_code: CCH-CS24-A9-P00RE
@@ -1083,6 +2189,9 @@ records:
         notes: Part number seen in reseller listings (24F LC duplex SM OS2 UPC); the 12F version is on
           the Corning eCatalog.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   - make: Panduit
     manufacturer: Panduit Corp.
     tiers:
@@ -1095,6 +2204,9 @@ records:
         notes: Seen at Gexpro, Rexel, Digi-Key and panduit.com. Replaces 'FOST12', which was not found;
           Panduit splice trays are FST-prefixed.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: FSC24
         ordering_code: FSC24
@@ -1103,6 +2215,9 @@ records:
         notes: Seen at Digi-Key ('Fiber Optic Splice Holder'). Replaces 'FOST24', which was not found.
           Fit into the chosen tray/enclosure not checked.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: FST24
         ordering_code: FST24
@@ -1111,6 +2226,9 @@ records:
         notes: Seen at Gexpro, Rexel and MC-MC. Replaces 'FOSM24', which was not found (Panduit's FOSMF/FOSMM
           are splice modules). A short version FST24S also exists.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   sources:
   - https://hubbellcdn.com/specsheet/PREMISE_OFSPLKT24F_spec.pdf
   - https://www.mrosupply.com/products/945319/as-markdown/
@@ -1151,6 +2269,9 @@ records:
         url: https://www.corning.com/optical-communications/worldwide/en/home/products/connectivity/pigtails.html
         notes: Corning pigtail catalogue numbers were not verified this session.
         verified: false
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: LC UPC SM pigtail
         ordering_code: Corning LC SM pigtail (part number not verified)
@@ -1158,6 +2279,9 @@ records:
         url: https://www.corning.com/optical-communications/worldwide/en/home/products/connectivity/pigtails.html
         notes: Not verified.
         verified: false
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: CCH pre-pigtailed splice cassette
         ordering_code: CCH-CS12-A9-P00RE
@@ -1165,6 +2289,9 @@ records:
         url: https://ecatalog.corning.com/optical-communications/US/en/Fiber-Optic-Hardware/Panels-Modules-and-Cassettes/CCH-Pigtailed-Splice-Cassette/p/CCH-CS12-A9-P00RE
         notes: Seen on the Corning eCatalog.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   - make: Panduit
     manufacturer: Panduit Corp.
     tiers:
@@ -1177,6 +2304,9 @@ records:
         notes: Part number seen at Guillevin ('Pigtail OS2 simplex LC UPC to pigtail 1 m'). Buffer type
           and colour not read.
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: Opticom 12-fibre LC SM pigtail
         ordering_code: Panduit 12F LC OS2 pigtail (part number not verified)
@@ -1184,6 +2314,9 @@ records:
         url: https://www.panduit.com/en/products/fiber-optic-systems/fiber-optic-pigtails.html
         notes: Not verified.
         verified: false
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: Pre-terminated splice cassette
         ordering_code: Panduit pigtailed cassette (part number not verified)
@@ -1191,6 +2324,9 @@ records:
         url: https://www.panduit.com/en/products/fiber-optic-systems/fiber-optic-pigtails.html
         notes: Not verified.
         verified: false
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   sources:
   - https://hubbellcdn.com/specsheet/PREM_CA-FPLCS3SM-SPEC-EN.pdf
   - https://www.hubbell.com/hubbellpremisewiring/en/products/fiber-optic-pigtail-lc-single-mode-3-meter-length/p/11348920
@@ -1212,6 +2348,8 @@ records:
     mounting_kind: rack
     height_u: 1
     height_note: 1U by its part number; the part itself was not found online
+    inrush_basis: not_given
+    inrush_note: Passive cable manager; no supply.
   alternatives:
   - make: StarTech.com
     manufacturer: StarTech.com
@@ -1221,8 +2359,17 @@ records:
         ordering_code: CMBRUSH1U
         description: 1U brush-strip horizontal cable management panel, steel
         url: https://www.cdw.com/shop/products/StarTech.com/3185627.aspx
-        notes: Part number seen at several distributors; commodity grade.
+        notes: 'Part number seen at several distributors; commodity grade. M14: CDW (read): ''1U Brush
+          Strip / Horizontal Server Rack Cable Management Panel'', MPN CMBRUSH1U, steel with high-density
+          nylon bristles, for 19-in 2- or 4-post racks.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: none
+        unit_power_w: 0
+        power_basis: assumed
+        sources: &id001
+        - https://www.cdw.com/shop/products/StarTech.com/3185627.aspx
       mid:
         model: CMBRUSH1U
         ordering_code: CMBRUSH1U
@@ -1232,15 +2379,32 @@ records:
           code was found (the ''high-density'' listings are CMBRUSH1U itself).'
         verified: true
         same_as: low
+        height_u: 1
+        mounting_kind: rack
+        supply_type: none
+        unit_power_w: 0
+        power_basis: assumed
+        sources: *id001
       high:
         model: CMDUCT2U
         ordering_code: CMDUCT2U
         description: 2U horizontal finger-duct cable management panel with cover; higher capacity, not
           brush type, takes an extra RU
         url: https://deploydepot.ca/products/startech-com-2u-horizontal-finger-duct-rack-cable-management-panel-with-cover-cmduct2u
-        notes: Part number seen at several distributors (deploydepot, stockinthechannel, area9). Replaces
-          the earlier duplicate of CMBRUSH1U.
+        notes: 'Part number seen at several distributors (deploydepot, stockinthechannel, area9). Replaces
+          the earlier duplicate of CMBRUSH1U. M14: Deploy Depot (read): ''StarTech.com 2U Horizontal Finger
+          Duct Rack Cable Management Panel with Cover CMDUCT2U'', 2U, 19 in wide, in stock. Some other
+          distributors list CMDUCT2U2 under a similar title; the Deploy Depot page does not mention a
+          successor.'
         verified: true
+        height_u: 2
+        mounting_kind: rack
+        supply_type: none
+        unit_power_w: 0
+        power_basis: assumed
+        sources:
+        - https://texas.gs.shi.com/product/29271857/StarTech.com-Horizontal-2U-Server-Rack-Cable-Management-Finger-Duct-w-Cover
+        - https://deploydepot.ca/products/startech-com-2u-horizontal-finger-duct-rack-cable-management-panel-with-cover-cmduct2u
   - make: Panduit
     manufacturer: Panduit Corp.
     tiers:
@@ -1249,25 +2413,55 @@ records:
         ordering_code: NMF1
         description: NetManager 1U horizontal manager, front only, finger-type (not brush)
         url: https://www.heilind.com/pannmf1.html
-        notes: Seen at Heilind, Crescent ('NetManager 1-sided high capacity horizontal cable manager,
-          1RU') and Van Meter.
+        notes: 'Seen at Heilind, Crescent (''NetManager 1-sided high capacity horizontal cable manager,
+          1RU'') and Van Meter. M14: Heilind (read): ''1RU profile'', hinged front cover only (single-sided),
+          large front finger openings, 19 in W x 1.7 in H (44 mm) x 157 mm D, black.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: none
+        unit_power_w: 0
+        power_basis: assumed
+        sources:
+        - https://www.heilind.com/pannmf1.html
       mid:
         model: BR1B
         ordering_code: BR1B
         description: 1U brush-seal blanking panel with front-to-back cable pass-through, steel, black;
           closest brush-type match
         url: https://www.heilind.com/panbr1b.html
-        notes: Seen at Heilind, Crescent and MC-MC ('Blanking Panel with Brush Seal Pass-Through 1 RU,
-          Black').
+        notes: 'Seen at Heilind, Crescent and MC-MC (''Blanking Panel with Brush Seal Pass-Through 1 RU,
+          Black''). M14: Heilind (read): ''Designed for seamless installation in 1 RU spaces'', front-to-back
+          cable pass-through with integrated brush seals, 19 in W x 1.7 in H (43.2 mm), black. Material
+          not stated on the page.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: none
+        unit_power_w: 0
+        power_basis: assumed
+        sources:
+        - https://www.heilind.com/panbr1b.html
       high:
         model: NM1
         ordering_code: NM1
         description: NetManager 1U front and rear horizontal manager, high capacity
         url: https://www.mc-mc.com/Product/panduit-nm1
-        notes: Seen at MC-MC and Online Components.
+        notes: 'Seen at MC-MC and Online Components. M14: Nassau Electrical (read): ''Panduit NM1 Horizontal
+          Cable Manager High Capacity Front and Rear 1 RU Black'', front and rear dual hinged cover. The
+          page also gives 3.5 in H x 19.0 in W x 6.2 in D (88 x 482 x 157 mm); the 3.5 in height conflicts
+          with ''1 RU'' (1 RU = 1.75 in), so height_u 1 follows the RU statement. Check the Panduit drawing
+          if the space is tight.'
         verified: true
+        height_u: 1
+        mounting_kind: rack
+        supply_type: none
+        unit_power_w: 0
+        power_basis: assumed
+        sources:
+        - https://nassauelectrical.com/es/products/panduit-nm1-horizontal-cable-manager-high-capacity-front-and-rear-1-ru-black
+        - https://www.mc-mc.com/Product/panduit-nm1
+        - https://crescentelectric.com/datacomm/communication-devices-and-software/data-voice-or-multimedia-network-equipment/datacom-and-network-connectivity-installation-devices-and-equipment/network-system-equipment-rack/netmanager-hc-horizontal-dual-sided-manager-1ru-black
   sources:
   - https://www.cdw.com/shop/products/StarTech.com/3185627.aspx
   - https://www.farnell.com/datasheets/2602336.pdf

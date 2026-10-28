@@ -47,6 +47,9 @@ records:
         url: https://www.royalwholesaleelectric.com/schneider-electric/nsysf20860p-spacial-sf-enclosure-with-mounting-plate-assembled-2000x800x600-mm
         notes: Add 100 mm plinth to reach 2100 mm overall
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: Spacial SF 2000x800x800 with mounting plate
         ordering_code: NSYSF20880P
@@ -54,6 +57,9 @@ records:
         url: https://eshop.se.com/bh/spacial-sf-enclosure-with-mounting-plate-assembled-2000x800x800-mm-nsysf20880p.html
         notes: Glazed-door variant NSYSF20880T also exists; plinth ordered separately
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: Spacial SF 2000x800x1000 extendable with mounting plate
         ordering_code: NSYSF208100E
@@ -61,6 +67,9 @@ records:
         url: https://www.se.com/gr/el/product/NSYSF208100E/
         notes: Closest dimensional match to the BOM cabinet; plinth separate
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   - make: Rittal
     manufacturer: Rittal GmbH & Co. KG
     tiers:
@@ -72,6 +81,9 @@ records:
         url: https://www.digitec.ch/en/s1/product/rittal-vx-8806000-freestanding-frame-grey-server-cabinets-14163997
         notes: Plinth (100 mm) ordered separately
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: VX25 baying enclosure 800x2000x800
         ordering_code: VX 8808.000
@@ -81,12 +93,18 @@ records:
         notes: Rittal product page exists for 8808000 (seen in search results); RS 228-9462 lists the
           same VX25 2000x800x800 single-door IP55
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: VX25 800x2000x1000
         description: Exact 1000 mm depth VX25 variant
         notes: Rittal offers 1000 mm deep VX/VX IT 800x2000 frames, but the catalogue number could not
           be confirmed before the search budget ran out
         verified: false
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   sources:
   - https://www.royalwholesaleelectric.com/schneider-electric/nsysf20860p-spacial-sf-enclosure-with-mounting-plate-assembled-2000x800x600-mm
   - https://eshop.se.com/bh/spacial-sf-enclosure-with-mounting-plate-assembled-2000x800x800-mm-nsysf20880p.html
@@ -142,6 +160,9 @@ records:
         notes: Code and 'Computer Workstation Enclosure' title seen at Platt; confirm dimensions and that
           the monitor window and keyboard shelf are included
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: PROLINE-PC modular enclosure Type 12, 1600 x 800 x 600 mm
         ordering_code: PPC1686
@@ -151,6 +172,9 @@ records:
         notes: Closest like-for-like. Keyboard shelf and monitor door are ProLine PC accessories, ordered
           separately. A frame-only version is PFPC1686
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: PROLINE-PC modular enclosure Type 12, 1800 x 800 x 600 mm
         ordering_code: PPC1886
@@ -160,6 +184,9 @@ records:
         notes: Code seen at Van Meter; the 1800 x 800 x 600 size is inferred from the naming used by PPC1686
           and PPC2086. Stainless variants (SS suffix, e.g. PPC1666SS) also exist
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   - make: Schneider Electric
     manufacturer: Schneider Electric
     tiers:
@@ -171,6 +198,9 @@ records:
         url: https://rapidonline.com/nsysf16660pc-spacial-sf-pc-application-1600-x-600-x-600-32-6127
         notes: Spacial SF PC cabinets come only 600 mm wide; check that the monitor fits
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       mid:
         model: Spacial SF PC rack enclosure, assembled, 1600 x 600 x 800 mm
         ordering_code: NSYSF16680PC
@@ -178,6 +208,9 @@ records:
         url: https://eshop.se.com/bh/panelset-sf-pc-rack-enclosure-assembled-1600x600x800-mm-nsysf16680pc.html
         notes: Closest Spacial PC cabinet by internal volume
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
       high:
         model: Spacial SF PC rack enclosure, assembled, 1800 x 600 x 800 mm
         ordering_code: NSYSF18680PC
@@ -185,6 +218,9 @@ records:
         url: https://rapidonline.com/nsysf18680pc-spacial-sf-pc-application-1800-x-600-x-800-32-6163
         notes: Matching 200 mm PC-application plinth is sold separately
         verified: true
+        mounting_kind: external
+        height_u: 0
+        supply_type: none
   sources:
   - https://www.rittal.com/pdf-creator/variant/es-es/5386050
   - https://www.rittal.com/pdf-creator/variant/ca-en/5368050
@@ -242,6 +278,10 @@ records:
     mounting_kind: enclosure
     height_u: 0
     height_note: On the enclosure's 25 mm pitch profile
+    inrush_basis: not_given
+    inrush_note: Re-read in pass 2. The Rittal SZ 2500.210 variant datasheet gives rated voltage 100-230
+      V 1~ 50/60 Hz and rated power 11 W. It states no inrush or starting current, no socket current rating
+      and no fuse recommendation. The socket is Schuko (Type F, CEE 7/3).
   alternatives:
   - make: STEGO
     manufacturer: STEGO Elektrotechnik GmbH
@@ -251,25 +291,64 @@ records:
         ordering_code: 02540.0-00
         description: 351 mm LED enclosure light, 5 W, 6500 K, 110-240 V AC, magnet mount, on/off switch
           (no door switch)
-        unit_power_w: 5
+        unit_power_w: 5.0
         url: https://ph.rs-online.com/web/p/cabinet-lighting/8103176
-        notes: Lower lumen output; needs separate door switch
+        notes: 'Lower lumen output; needs separate door switch M14: 5 W read at RS in the earlier round,
+          not re-read this round (fetch budget exhausted). Needs a separate door switch.'
         verified: true
+        height_u: 0
+        mounting_kind: enclosure
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 110-240 VAC
+        supply_ok: true
+        power_supplies: 1
+        power_basis: datasheet_max
+        inrush_basis: not_given
+        sources:
+        - https://ph.rs-online.com/web/p/cabinet-lighting/8103176
       mid:
         model: LED 025 (screw mount, on/off switch)
         ordering_code: 02540.0-01
         description: Same as above with screw fixing
-        unit_power_w: 5
+        unit_power_w: 5.0
         url: https://www.distrelec.be/en/stego-varioline-led-025-series-led-enclosure-light-110-240-ac-351-mm-length-6500k-stego-02540-01/p/30489816
-        notes: Door-switch variant not verified
+        notes: 'Door-switch variant not verified M14: Figures from the earlier round, not re-read (fetch
+          budget exhausted).'
         verified: true
+        height_u: 0
+        mounting_kind: enclosure
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 110-240 VAC
+        supply_ok: true
+        power_supplies: 1
+        power_basis: datasheet_max
+        inrush_basis: not_given
+        sources:
+        - https://www.distrelec.be/en/stego-varioline-led-025-series-led-enclosure-light-110-240-ac-351-mm-length-6500k-stego-02540-01/p/30489816
       high:
         model: SL 025 LED light
         description: STEGO all-in-one LED enclosure light, 100-240 V AC, 4 W, 345 mm
-        unit_power_w: 4
+        unit_power_w: 4.0
         url: https://uk.rs-online.com/web/p/cabinet-lighting/0655411
-        notes: Article number not confirmed
-        verified: false
+        notes: 'Article number not confirmed M14 changed the ordering code from (none). M14: Pass 2: RS
+          065-5411 gives manufacturer part number 02533.1-00, 4 W, 100-240 VAC, 345 mm, 560 lm, and socket
+          type GB. The motion detector can replace a door switch. It is the only light in this list with
+          a BS 1363 (Type G) socket, which suits KSA.'
+        verified: true
+        ordering_code: 02533.1-00
+        height_u: 0
+        mounting_kind: enclosure
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 100-240 VAC
+        supply_ok: true
+        power_supplies: 1
+        power_basis: datasheet_max
+        inrush_basis: not_given
+        sources:
+        - https://uk.rs-online.com/web/p/cabinet-lighting/0655411
   - make: nVent Hoffman
     manufacturer: nVent
     tiers:
@@ -278,22 +357,75 @@ records:
         ordering_code: EL900D
         description: 900 lm LED light with door-operated switch connection, 100-240 V AC
         url: https://steinerelectric.com/Product/nVent-HOFFMAN-EL900D-EL-Enclosure-Light-With-Door-Operated-Switch-Connection100-to-240-VACPlastic-1189476
-        notes: Closest functional match without socket
+        notes: 'Closest functional match without socket M14: Pass 2: 9 W confirmed in the nVent family
+          PDF, which does not state voltage or inrush. 100-240 VAC comes from the distributor listings
+          (Gexpro, Steiner).'
         verified: true
+        height_u: 0
+        mounting_kind: enclosure
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 100-240 VAC
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 9.0
+        power_basis: datasheet_max
+        power_note: 'nVent EL family spec table: EL900D 9 W, 900 lm, 4000 K, 314 mm, no socket'
+        inrush_basis: not_given
+        sources:
+        - https://origin-nvent.nvent.com/en-pt/hoffman/products/el-led-enclosure-light-0/pdf
+        - https://www.gexpro.com/p/1748971/nvent-hoffman/led-enclosure-light-9-watt-900-lumen-4000k-100-240-volt/783510537739/el900d
+        - https://steinerelectric.com/Product/nVent-HOFFMAN-EL900D-EL-Enclosure-Light-With-Door-Operated-Switch-Connection100-to-240-VACPlastic-1189476
       mid:
         model: EL LED enclosure light with socket 1200 lm
         ordering_code: EL1200DS-BF
         description: 1200 lm LED light with integrated socket
         url: https://www.lemu.dk/en/product/led-cabin-light-el1200ds-bf-id-7857990968
-        notes: Socket-type suffix (-BF/-US) meaning not verified; -US is US NEMA socket 100-125 V
+        notes: 'Socket-type suffix (-BF/-US) meaning not verified; -US is US NEMA socket 100-125 V M14:
+          Pass 2: the nVent table maps the socket suffixes as -BF = Type E (French/Belgian), plain = Schuko
+          Type F, -CH = Type J, -GB = Type G, -US = Type B. For KSA (BS 1363) the matching code is EL1200DS-GB,
+          also 12 W. Voltage is not in the PDF and is assumed from the family''s 100-240 VAC listings.'
         verified: true
+        height_u: 0
+        mounting_kind: enclosure
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 100-240 VAC (family)
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 12.0
+        power_basis: datasheet_max
+        power_note: 'nVent EL family spec table: EL1200DS-BF 12 W, 1200 lm, 4000 K, 364 mm, socket Type
+          E'
+        inrush_basis: not_given
+        sources:
+        - https://origin-nvent.nvent.com/en-pt/hoffman/products/el-led-enclosure-light-0/pdf
+        - https://www.lemu.dk/en/product/led-cabin-light-el1200ds-bf-id-7857990968
       high:
         model: EL LED enclosure light with motion sensor 1200 lm
         ordering_code: EL1200M
         description: 1200 lm LED light with motion sensor
         url: https://mc-mc.com/Product/nvent-hoffman-el1200m
-        notes: Supply voltage of EL1200M not verified (a 24 V DC motion version also exists)
+        notes: 'Supply voltage of EL1200M not verified (a 24 V DC motion version also exists) M14: Pass
+          2: 12 W from the nVent family PDF. 100-240 VAC is confirmed by several distributor listing titles;
+          the 24 VDC version is a separate code, EL1200M24V. EL1200MS-GB is the variant with a Type G
+          socket.'
         verified: true
+        height_u: 0
+        mounting_kind: enclosure
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 100-240 VAC
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 12.0
+        power_basis: datasheet_max
+        power_note: 'nVent EL family spec table: EL1200M 12 W, 1200 lm, 315 mm, no socket'
+        inrush_basis: not_given
+        sources:
+        - https://origin-nvent.nvent.com/en-pt/hoffman/products/el-led-enclosure-light-0/pdf
+        - https://www.gexpro.com/p/1746452/nvent-hoffman/el-led-enclosure-light-with-motion-sensor-1200-lm-100-240-vac/783510478957/el1200m
+        - https://mc-mc.com/Product/nvent-hoffman-el1200m
   sources:
   - https://www.rittal.com/pdf-creator/variant/de-de/2500210
   - https://uk.rs-online.com/web/p/server-cabinet-accessories/1876745
@@ -348,6 +480,12 @@ records:
     mounting_kind: enclosure
     height_u: 0
     height_note: Wall or door cut-out
+    inrush_basis: not_given
+    inrush_note: Re-read in pass 2. The Rittal SK 3243.100 variant datasheet gives 230 V 1~ 50/60 Hz,
+      rated current max 0.37 A (50 Hz) / 0.39 A (60 Hz), and Pel 70 W (50 Hz) / 87 W (60 Hz). It states
+      no starting or inrush current. It recommends a 4 A MCB/fuse pre-fuse. Airflow is 625/716 m3/h unimpeded
+      and 405/460 m3/h with one SK 3243.200 outlet filter. The library's 87 W is the 60 Hz figure, which
+      suits KSA.
   alternatives:
   - make: Pfannenberg
     manufacturer: Pfannenberg GmbH
@@ -358,22 +496,85 @@ records:
         description: 320 x 320 mm filter fan, approx. 480-505 m3/h filtered / 831 m3/h unimpeded, 230
           V AC
         url: https://www.motorsandcontrol.com/11665104055-pfannenberg.html
-        notes: Code-to-voltage mapping from distributor listing only
+        notes: 'Code-to-voltage mapping from distributor listing only M14: Distributor lists it as IP55
+          (the 104 position in the code). Noise 54 dB. No starting current given. RS lists 480 m3/h filtered
+          for the IP54 code, against 505 m3/h at Motors & Control.'
         verified: true
+        height_u: 0
+        mounting_kind: enclosure
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 230 VAC 1~
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 65.0
+        power_basis: datasheet_max
+        power_note: 'Distributor: 65 W, 0.3 A (frequency not stated)'
+        inrush_basis: not_given
+        airflow_m3h: 505
+        ratings:
+          airflow_free_m3h: 831
+          airflow_note: 505 m3/h = 297 CFM 'w/Filter' (Motors & Control); 831 m3/h unimpeded from RS listing
+            title (RS 025-1071); 50/60 Hz split not given
+        sources:
+        - https://www.motorsandcontrol.com/11665104055-pfannenberg.html
+        - https://twen.rs-online.com/web/p/filter-fans/0251071
       mid:
         model: PF 66.000 230 V
         ordering_code: '11666102055'
         description: Filter fan 230 V AC, 445 m3/h with outlet filter, 640-653 m3/h unimpeded
         url: https://uk.rs-online.com/web/p/filter-fans/0497567
-        notes: Closest like-for-like airflow
+        notes: 'Closest like-for-like airflow M14: Pfannenberg Filterfan 4.0 datasheet. The 230 V article
+          number was matched by column order. Noise 63/64 dB(A), fuse 6 A, 3.2 kg, cut-out 292 x 292 mm.
+          No starting current given. This fan draws almost twice the Rittal''s power for less filtered
+          airflow than the 625/716 m3/h free-blowing figures suggest.'
         verified: true
+        height_u: 0
+        mounting_kind: enclosure
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 230 VAC 1~ 50/60 Hz
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 160.0
+        power_basis: datasheet_max
+        power_note: 'Pfannenberg datasheet 230 V: 120 W / 0.53 A at 50 Hz, 160 W / 0.72 A at 60 Hz; 60
+          Hz value used (KSA)'
+        inrush_basis: not_given
+        airflow_m3h: 445
+        ratings:
+          airflow_free_m3h: 653
+          airflow_note: With exhaust filter 445/445 m3/h (50/60 Hz); free-blowing 640/653 m3/h (50/60
+            Hz)
+        sources:
+        - https://static.chipdip.ru/lib/801/DOC022801495.pdf
+        - https://uk.rs-online.com/web/p/filter-fans/0497567
       high:
         model: PF 67.000 230 V
         ordering_code: '11667103055'
         description: Filter fan 230 V AC, 625 m3/h filtered, 925-950 m3/h unimpeded
         url: https://uk.rs-online.com/web/p/filter-fans/0497589
-        notes: Higher airflow
+        notes: 'Higher airflow M14: RS says ''RS will no longer stock this product'', so check with Pfannenberg.
+          Noise 69 dBA. The datasheet''s 50/60 Hz split was not seen. The 60 Hz power may be higher than
+          140 W.'
         verified: true
+        height_u: 0
+        mounting_kind: enclosure
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 230 VAC 1~
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 140.0
+        power_basis: datasheet_max
+        power_note: 'RS: 140 W, 860 mA (frequency not stated; 0.86 A x 230 V = 198 VA)'
+        inrush_basis: not_given
+        airflow_m3h: 625
+        ratings:
+          airflow_free_m3h: 950
+          airflow_note: 'RS: 625 m3/h filtered, 950 m3/h unimpeded (description says 925)'
+        sources:
+        - https://uk.rs-online.com/web/p/filter-fans/0497589
   - make: STEGO
     manufacturer: STEGO Elektrotechnik GmbH
     tiers:
@@ -382,22 +583,78 @@ records:
         ordering_code: 01873.0-30
         description: Filter fan approx. 179.5 cfm (305 m3/h) unimpeded, 230 V AC
         url: https://solutionsdirectonline.com/stego-enclosure-exhaust-filter-fan-179-5-cfm-230-vac-01873-0-30
-        notes: Smaller unit; may need two
+        notes: 'Smaller unit; may need two M14: Cut-out 8.78 x 8.78 in (223 mm), noise 64 dB(A). This
+          is smaller than the Rittal, so two would be needed to match its airflow.'
         verified: true
+        height_u: 0
+        mounting_kind: enclosure
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 230 VAC 50/60 Hz
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 64.0
+        power_basis: datasheet_max
+        inrush_basis: not_given
+        airflow_m3h: 271
+        ratings:
+          airflow_free_m3h: 305
+          airflow_note: 'Distributor: unimpeded 179.5 CFM (305 m3/h), with filter 159.5 CFM (271 m3/h)'
+        sources:
+        - https://solutionsdirectonline.com/stego-enclosure-exhaust-filter-fan-179-5-cfm-230-vac-01873-0-30
       mid:
         model: Filter Fan Plus FPI 230 V (322 mm)
         ordering_code: 01874.0-30
         description: 322 x 322 mm filter fan, approx. 373 m3/h, 95 W, 230 V AC
-        unit_power_w: 95
+        unit_power_w: 95.0
         url: https://buerklin.com/en/p/stego/panel-mount-fans/01874-0-30/80H7921
-        notes: Code confirmed at Buerklin and DirectIndustry; the 373 m3/h / 95 W figures were not re-checked
+        notes: 'Code confirmed at Buerklin and DirectIndustry; the 373 m3/h / 95 W figures were not re-checked
+          M14: IP54, noise 62 dBA, installation depth 160 mm.'
         verified: true
+        height_u: 0
+        mounting_kind: enclosure
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 230 VAC
+        supply_ok: true
+        power_supplies: 1
+        power_basis: datasheet_max
+        power_note: 'RS: 95 W, 480 mA'
+        inrush_basis: not_given
+        airflow_m3h: 373
+        ratings:
+          airflow_free_m3h: 433
+          airflow_note: 'RS: 373 m3/h filtered, 433 m3/h unimpeded'
+        sources:
+        - https://ie.rs-online.com/web/p/filter-fans/9159996
+        - https://buerklin.com/en/p/stego/panel-mount-fans/01874-0-30/80H7921
       high:
         model: FPI/FPO 018 230 V
         description: 291 x 291 mm filter fan, 599 m3/h filtered / 1010 m3/h unimpeded, 230 V AC
         url: https://ph.rs-online.com/web/p/filter-fans/1947672
-        notes: STEGO article number not confirmed (RS 194-7672)
-        verified: false
+        notes: 'STEGO article number not confirmed (RS 194-7672) M14 changed the ordering code from (none).
+          M14: STEGO article number 01884.0-01 found on RS 194-7672, where it was missing before. In STEGO''s
+          numbering 0188x is usually the FPO (outlet) range, so check the airflow direction. IP54, 70
+          dBA, depth 160 mm.'
+        verified: true
+        ordering_code: 01884.0-01
+        height_u: 0
+        mounting_kind: enclosure
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 230 VAC
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 140.0
+        power_basis: datasheet_max
+        power_note: 'RS: input power 140 W, input current 700 mA'
+        inrush_basis: not_given
+        airflow_m3h: 599
+        ratings:
+          airflow_free_m3h: 1010
+          airflow_note: 'RS: 599 m3/h filtered, 1010 m3/h unimpeded'
+        sources:
+        - https://ph.rs-online.com/web/p/filter-fans/1947672
   sources:
   - https://rittal.com/pdf-creator/variant/uk-en/3243100
   - https://uk.rs-online.com/web/p/filter-fans/0497567
@@ -449,6 +706,9 @@ records:
         url: https://uk.rs-online.com/web/p/fan-filters/0497595
         notes: Same cut-out class as SK 3238.200 (124 x 124 mm); frame 145 mm vs Rittal 148.5 mm
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
       mid:
         model: PFA 20.000 exhaust filter, IP55, 145 x 145 mm
         ordering_code: '11720003055'
@@ -457,6 +717,9 @@ records:
         notes: Distrelec lists 11720003055 as 'Exhaust filter IP55 31 mm, 145 x 145 mm, PFA20000'. Closest
           like-for-like
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
       high:
         model: Exhaust filter 145 x 145 mm (119-series)
         ordering_code: '11920001055'
@@ -465,6 +728,9 @@ records:
         notes: A sister 119-series part (11910001050) is sold as an EMC exhaust filter; that 11920001055
           is the EMC version is not confirmed. Check with Pfannenberg
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
   - make: STEGO
     manufacturer: STEGO Elektrotechnik GmbH
     tiers:
@@ -476,6 +742,9 @@ records:
         url: https://solutionsdirectonline.com/stego_exhaust_filter_3-6_x_3-6_11870-0-00
         notes: Size step down; only valid with a matching smaller fan
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
       mid:
         model: Filter Fan Plus FPI exhaust filter for 124 x 124 mm cut-out
         ordering_code: 11871.0-00
@@ -484,6 +753,9 @@ records:
         url: https://at.rs-online.com/web/p/lufterfilter/9160013
         notes: Like-for-like size. RS 916-0013 lists manufacturer part 11871.0-00
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
       high:
         model: Filter Fan Plus exhaust filter for 176 x 176 mm cut-out
         ordering_code: 11872.0-00
@@ -491,6 +763,9 @@ records:
         url: https://solutionsdirectonline.com/stego_exhaust_filter_6-9_x_6-9_11872-0-00
         notes: Size step up; only valid with a matching larger cut-out
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
   sources:
   - https://www.rittal.com/pdf-creator/variant/ca-en/3238200
   - https://rittal.com/pdf-creator/variant/uk-en/3243100
@@ -534,12 +809,17 @@ records:
     - UK declaration of conformity
     datasheet_url: https://www.rittal.com/pdf-creator/variant/ca-en/3110000
     product_url: https://www.rittal.com/pdf-creator/variant/ca-en/3110000
-    notes: The BOM "30 W" is the DC contact switching limit (max 30 W DC), NOT power consumption. The
+    notes: 'The BOM "30 W" is the DC contact switching limit (max 30 W DC), NOT power consumption. The
       thermostat is a passive bi-metal device and draws no power; it should be 0 W in power and heat budgets.
       At 125 V DC the 30 W limit means max 0.24 A switched - use the AC side or an interposing relay for
-      DC loads.
+      DC loads. M14: Library 30 W is wrong: it is the contact''s DC switching limit (''max. 30 W'' DC),
+      not consumption. The real draw is 0 W, so set supply_type none and unit_power_w 0. Contact: SPDT
+      change-over, 10 (4) A heating / 5 (4) A cooling at 24-230 VAC cos phi 0.6, DC max 30 W (24-60 VDC).
+      Source: Rittal variant datasheet read in the earlier round, not re-read this round.'
     mounting_kind: din_rail
     height_u: 0
+    inrush_basis: not_given
+    inrush_note: Passive bi-metal thermostat with no supply and no inrush.
   alternatives:
   - make: Pfannenberg
     manufacturer: Pfannenberg GmbH
@@ -550,24 +830,64 @@ records:
         description: Single thermostat, NO contact (fan/alarm), 120-240 V AC
         unit_power_w: 0
         url: https://www.distrelec.be/en/pfannenberg-flz-no-enclosure-thermostat-120-240-ac-60-pfannenberg-flz530-17121000000/p/30485681
-        notes: NO only, not change-over
-        verified: true
+        notes: 'NO only, not change-over M14: Pass 2: Pfannenberg''s own product sheet for 17121000000
+          (FLZ 530) gives NO, 0-60 degC, rated voltage AC 120 V. Distrelec''s listing title says 120-240
+          AC, and IPD lists it as 20-80 degC 120 VAC. The 230 VAC contact rating is therefore unconfirmed.
+          Check with Pfannenberg before use on the 230 V fan circuit. NO only, not change-over.'
+        verified: false
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: none
+        power_basis: assumed
+        power_note: Bimetal thermostat with no supply terminals, so it draws nothing
+        ratings:
+          contact_rating: 'NO spring contact; Pfannenberg PIM: rated voltage AC 120 V, 50/60 Hz, ''Maximum
+            Switching Capacity (W) 2'' (unit unclear); no A rating at 230 V found'
+        sources:
+        - https://media.bluestonepim.com/50098aaa-684d-40aa-945d-038656764549/04b66d2b-2706-4749-8ccc-3306966ce27c/wmiQrg6VU182QJV5US9iz5dJK/PLDB9tbTPodIK9gzvxzOR8beR.pdf
+        - https://www.distrelec.be/en/pfannenberg-flz-no-enclosure-thermostat-120-240-ac-60-pfannenberg-flz530-17121000000/p/30485681
       mid:
         model: FLZ 510 (change-over)
         ordering_code: '17103000010'
         description: Single thermostat, change-over contact, 10 A, 100-250 V
         unit_power_w: 0
         url: https://motorsandcontrol.com/pfannenberg-17103000010-change-over-contact-single-thermostat-flz-510
-        notes: Closest like-for-like
+        notes: 'Closest like-for-like M14: Closest like-for-like. In pass 2 the Motors & Control page
+          gave change-over, 0-60 degC, 100-250 VAC and ''Watts 30''. That 30 W is almost certainly the
+          DC switching limit, as with the Rittal SK 3110, not consumption, so 0 W is kept. The earlier
+          round''s ''10 A'' was not seen again.'
         verified: true
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: none
+        power_basis: assumed
+        power_note: Bimetal thermostat with no supply terminals, so it draws nothing
+        ratings:
+          contact_rating: Change-over, 100-250 VAC (distributor); A rating not stated on the page re-read
+            in pass 2
+        sources:
+        - https://motorsandcontrol.com/pfannenberg-17103000010-change-over-contact-single-thermostat-flz-510
       high:
         model: FLZ dual thermostat NO/NO
         ordering_code: '17143000010'
         description: Dual thermostat, two independent setpoints (e.g. fan + high-temp alarm)
         unit_power_w: 0
         url: https://solutionsdirectonline.com/pfannenberg-dual-enclosure-thermostat-no-no-17143000010
-        notes: Lets one device drive the fan and the alarm
+        notes: 'Lets one device drive the fan and the alarm M14: Pass 2: Solutions Direct gives ''120
+          V AC / 15 (2), DC 30 W'', NO 32-140 degF, with no 230 V rating. The sister code 17143000000
+          (FLZ 543) is listed at RS with contact 15 A / 240 V. Confirm the 250 VAC rating for this -10
+          code.'
         verified: true
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: none
+        power_basis: assumed
+        power_note: Bimetal thermostat with no supply terminals, so it draws nothing
+        ratings:
+          contact_rating: 2 x NO spring contact; 120 VAC 15 (2) A, DC 30 W (distributor)
+        sources:
+        - https://solutionsdirectonline.com/pfannenberg-dual-enclosure-thermostat-no-no-17143000010
+        - https://uk.rs-online.com/web/p/thermostats/6676776
   - make: STEGO
     manufacturer: STEGO Elektrotechnik GmbH
     tiers:
@@ -577,22 +897,65 @@ records:
         description: Mini thermostat, NO contact, 250 V AC 10 A
         unit_power_w: 0
         url: https://industrial.rubicon.tech/products/stego-thermostat-2-state-regulator-no-0-60-c-250vac-10a
-        notes: NO only
+        notes: 'NO only M14: Pass 2: rating from the STEGO KTO/KTS 011 catalogue page, where 01141.0-00
+          is the KTS 011 NO 0-60 degC. NO only.'
         verified: true
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: none
+        power_basis: assumed
+        power_note: Bimetal thermostat with no supply terminals, so it draws nothing
+        ratings:
+          contact_rating: NO; AC 250 V 10 (2) A, AC 120 V 15 (2) A, DC 30 W at 24-72 VDC
+        sources:
+        - https://static.chipdip.ru/lib/701/DOC021701217.pdf
+        - https://industrial.rubicon.tech/products/stego-thermostat-2-state-regulator-no-0-60-c-250vac-10a
       mid:
         model: ZR 011 double thermostat (NC/NO, 0-60 C)
         ordering_code: 01172.0-00
         description: Dual thermostat, NC (heater) + NO (fan/alarm)
         unit_power_w: 0
         url: https://solutionsdirectonline.com/enclosure-dual-thermostat-ncno-0-60-c--011720-00-p5996.aspx
-        notes: Covers change-over function with two setpoints
+        notes: 'Covers change-over function with two setpoints M14: Pass 2: STEGO product page lists 01172.0-00
+          as NC + NO, both 32-140 degF (0-60 degC). One rating covers both contacts.'
         verified: true
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: none
+        power_basis: assumed
+        power_note: Bimetal thermostat with no supply terminals, so it draws nothing
+        ratings:
+          contact_rating: NC + NO; AC 250 V 10 (2) A, AC 120 V 15 (2) A, DC 24-72 V 30 W (DC ohmic 1 A
+            at 30 V)
+        sources:
+        - https://www.stego-group.com/en-us/products/zr-011
+        - https://solutionsdirectonline.com/enclosure-dual-thermostat-ncno-0-60-c--011720-00-p5996.aspx
       high:
         model: ETR 011 electronic thermostat
         description: Electronic thermostat with tighter hysteresis
         url: https://dacpol.eu/en/10966-series-etr011
-        notes: Article number not confirmed
-        verified: false
+        notes: 'Article number not confirmed M14 changed the ordering code from (none). M14: Pass 2: article
+          number 01131.0-00 (230 V) is confirmed on the STEGO product page. Unlike the bimetal units,
+          it draws 1 W from the 230 VAC supply.'
+        verified: true
+        ordering_code: 01131.0-00
+        height_u: 0
+        mounting_kind: din_rail
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 01131.0-00 = 230 V operating voltage (01131.9-00 = 120 V)
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 1.0
+        power_basis: datasheet_max
+        power_note: 'STEGO product page: power consumption 1 W'
+        inrush_basis: not_given
+        ratings:
+          contact_rating: Relay change-over; 8 A ohmic / 1.6 A inductive at 240/120 VAC; 100 W DC (24
+            VDC ohmic); 4.2 A DC ohmic for 01131.0-00; min 0.3 W
+        sources:
+        - https://www.stego-group.com/en-us/products/etr-011
+        - https://dacpol.eu/en/10966-series-etr011
   sources:
   - https://www.rittal.com/pdf-creator/variant/ca-en/3110000
   - https://motorsandcontrol.com/pfannenberg-17103000010-change-over-contact-single-thermostat-flz-510
@@ -654,6 +1017,10 @@ records:
     mounting_kind: plug_in
     height_u: 0
     height_note: Plugs into the RIF-2 base
+    inrush_basis: not_given
+    inrush_note: A relay coil has no meaningful inrush for MCB sizing. The Phoenix datasheet (earlier
+      round) gives a 230 VAC coil at 6.5 mA = 1.5 VA. The 16 A / 20 ms inrush figure on that datasheet
+      is a contact rating, not coil inrush.
   alternatives:
   - make: Finder
     manufacturer: Finder S.p.A.
@@ -663,25 +1030,70 @@ records:
         ordering_code: 40.52.8.230.0000
         description: 2 CO PCB/plug-in relay, AgNi; fewer poles
         url: https://www.elektramat.nl/finder-40-52-8-230-0000-find-relais-2w-8a-230vac
-        notes: Code seen at Elektramat and RS (249-4434). Needs a 95-series socket
+        notes: 'Code seen at Elektramat and RS (249-4434). Needs a 95-series socket M14: Fewer poles than
+          the original (2 CO against 4 CO). No gold contacts.'
         verified: true
+        height_u: 0
+        mounting_kind: plug_in
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 230 VAC coil
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 1.2
+        power_basis: datasheet_max
+        power_note: RS lists coil power 1.2 W at 230 VAC (Finder catalogues give 1.2 VA for AC coils,
+          so W <= 1.2)
+        ratings:
+          coil_note: Coil resistance 28 kOhm; contacts 8 A, 2 kVA, 400 VAC max
+        sources:
+        - https://uk.rs-online.com/web/p/power-relays/0376824
       mid:
         model: 55.34 4CO 7 A, 230 V AC coil, gold contacts
         ordering_code: 55.34.8.230.5040
         description: 4 CO industrial relay, AgNi+Au, lockable test button + mechanical indicator (option
           0040)
         url: https://powermatic.net/part/finder/55.34.8.230.5040/826418
-        notes: Code seen at distributors (Powermatic, Advantage Electric). Option decode is from Finder's
-          scheme. Needs socket 94.04/94.P4 + module 99.02
-        verified: true
+        notes: 'Code seen at distributors (Powermatic, Advantage Electric). Option decode is from Finder''s
+          scheme. Needs socket 94.04/94.P4 + module 99.02 M14: The coil figure comes from the sister code
+          55.34.8.230.0050, which has the same 230 VAC coil. It was not read for 5040 itself. Bürklin
+          also lists 55.34.8.230.5050 (gold contacts + LED), which would be the closest match to the Phoenix
+          part.'
+        verified: false
+        height_u: 0
+        mounting_kind: plug_in
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 230 VAC coil
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 1.5
+        power_basis: datasheet_max
+        power_note: 1.5 VA coil (55.34 230 VAC coil, read on the 55.34.8.230.0050 page); W <= 1.5
+        sources:
+        - https://www.buerklin.com/en/p/finder/industrial-relays/55-34-8-230-0050/34G2569
+        - https://powermatic.net/part/finder/55.34.8.230.5040/826418
       high:
         model: 55.34 4CO 230 V AC with LED + test button
         ordering_code: 55.34.8.230.0050
         description: As mid with LED indicator (option 0050), AgNi contacts
         url: https://powermatic.net/part/finder/55.34.8.230.0050/826410
-        notes: Code seen at Powermatic. A gold-contact LED version (55.34.8.230.5050) is listed only by
-          a broker, so it is not given here
+        notes: 'Code seen at Powermatic. A gold-contact LED version (55.34.8.230.5050) is listed only
+          by a broker, so it is not given here M14: AgNi contacts (no gold). Use 55.34.8.230.5050 if gold
+          is needed.'
         verified: true
+        height_u: 0
+        mounting_kind: plug_in
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 230 VAC coil
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 1.5
+        power_basis: datasheet_max
+        power_note: 'Bürklin: coil 230 V AC, 1.5 VA'
+        sources:
+        - https://www.buerklin.com/en/p/finder/industrial-relays/55-34-8-230-0050/34G2569
   - make: Weidmuller
     manufacturer: Weidmuller Interface GmbH & Co. KG
     tiers:
@@ -690,22 +1102,68 @@ records:
         ordering_code: '7760056086'
         description: 4 CO industrial relay 230 V AC, no LED
         url: https://uk.misumi-ec.com/pdf/ds/WML1/7760056086_DRM570730_eng.pdf
-        notes: Order number from the Weidmuller datasheet file name at Misumi
-        verified: true
+        notes: 'Order number from the Weidmuller datasheet file name at Misumi M14: Coil figures were
+          read on the 7760056190 datasheet (same DRM570730 230 VAC coil). This code''s own datasheet was
+          not re-read.'
+        verified: false
+        height_u: 0
+        mounting_kind: plug_in
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 230 VAC coil
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 1.4
+        power_basis: computed
+        power_note: 'DRM570730 230 VAC coil: 6.1 mA at 50 Hz x 230 V = 1.40 VA (datasheet power rating
+          1.0-1.2 VA at 60 Hz); W <= VA'
+        sources:
+        - https://uk.misumi-ec.com/pdf/ds/WML1/7760056190_DRM570730LT_AU_eng.pdf
+        - https://uk.misumi-ec.com/pdf/ds/WML1/7760056086_DRM570730_eng.pdf
       mid:
         model: D-SERIES DRM570730LT
         ordering_code: '7760056104'
         description: 4 CO 230 V AC 5 A with LED + test lever
         url: https://www.distrelec.ch/en/industrial-relay-4co-ac-230v-5a-plug-in-terminal-series-drm-weidmueller-7760056104/p/30166857
-        notes: Closest like-for-like (Phoenix part has LED + test button)
-        verified: true
+        notes: 'Closest like-for-like (Phoenix part has LED + test button) M14: The coil figure comes
+          from the gold-contact sister variant''s datasheet, with the same coil.'
+        verified: false
+        height_u: 0
+        mounting_kind: plug_in
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 230 VAC coil
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 1.4
+        power_basis: computed
+        power_note: 6.1 mA (50 Hz) x 230 V = 1.40 VA; datasheet 1.0-1.2 VA at 60 Hz
+        sources:
+        - https://uk.misumi-ec.com/pdf/ds/WML1/7760056190_DRM570730LT_AU_eng.pdf
+        - https://www.distrelec.ch/en/industrial-relay-4co-ac-230v-5a-plug-in-terminal-series-drm-weidmueller-7760056104/p/30166857
       high:
         model: D-SERIES DRM570730LT AU (gold)
         ordering_code: '7760056190'
         description: As mid with gold-plated contacts, like the Phoenix 2903685
         url: https://uk.misumi-ec.com/pdf/ds/WML1/7760056190_DRM570730LT_AU_eng.pdf
-        notes: Order number from the Weidmuller datasheet file name at Misumi
+        notes: 'Order number from the Weidmuller datasheet file name at Misumi M14: Closest like-for-like
+          to the Phoenix part (4 CO, gold, LED, test button).'
         verified: true
+        height_u: 0
+        mounting_kind: plug_in
+        supply_type: VAC
+        voltage_v: 230
+        supply_option: 230 VAC coil
+        supply_ok: true
+        power_supplies: 1
+        unit_power_w: 1.4
+        power_basis: computed
+        power_note: 'Datasheet: rated current 6.1 mA (50 Hz) / 5.2 mA (60 Hz), power 1.0-1.2 VA (60 Hz);
+          6.1 mA x 230 V = 1.40 VA'
+        ratings:
+          coil_note: Pull-in 184 VAC, drop-out 69 VAC typical
+        sources:
+        - https://uk.misumi-ec.com/pdf/ds/WML1/7760056190_DRM570730LT_AU_eng.pdf
   sources:
   - https://www.phoenixcontact.com/fr/produits/2903685/pdf
   - https://shop.shortec.com/phoenix-contact/2903685-rel-ir4l-230ac4x21au/
@@ -763,6 +1221,9 @@ records:
         url: https://nz.element14.com/finder/94-04sma/socket-85-series/dp/4269081
         notes: Screw terminals, not push-in
         verified: true
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       mid:
         model: 94.P4 push-in socket
         ordering_code: 94.P4
@@ -772,6 +1233,9 @@ records:
         notes: Code and 55-series fit seen at Conrad; that 'P' = push-in follows Finder's naming (95.P5
           etc.) and is not stated in the listing
         verified: true
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       high:
         model: 94.84.3 socket, 10 A
         ordering_code: 94.84.3
@@ -779,6 +1243,9 @@ records:
         url: https://www.rapidonline.com/catalogue/product/51-0647
         notes: Terminal layout description from Finder's range, not from the listing
         verified: true
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
   - make: Weidmuller
     manufacturer: Weidmuller Interface GmbH & Co. KG
     tiers:
@@ -789,6 +1256,9 @@ records:
         url: https://www.mouser.com/datasheet/2/575/7760056264_SCM_4CO_ECO_en-2471945.pdf
         notes: Order number and type from the Weidmuller datasheet at Mouser
         verified: true
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       mid:
         model: SCM 4CO P push-in socket
         ordering_code: '7760056363'
@@ -796,6 +1266,9 @@ records:
         url: https://cdn.erply.com/files/396198/7760056363-SCM-4CO-P-en-2.pdf
         notes: Order number and type from the Weidmuller datasheet
         verified: true
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
       high:
         model: FS 4CO socket
         ordering_code: '7760056107'
@@ -803,6 +1276,9 @@ records:
         url: https://pacificautomation.com.au/electrical-components/relays-and-opto-couplers/general-purpose-relays/block-style-relays/weidmuller-7760056107-fs-4co-1018476
         notes: Listed as 'FS 4CO DRM relay socket base'; feature differences vs SCM not confirmed
         verified: true
+        mounting_kind: din_rail
+        height_u: 0
+        supply_type: none
   sources:
   - https://www.phoenixcontact.com/it/prodotti/2900934/pdf
   - https://www.phoenixcontact.com/en-sa/products/relay-base-rif-2-bpt-4x21-2900934
@@ -846,6 +1322,9 @@ records:
         notes: Code seen at Standard Electric Supply (as 9902023059); LED-only function from Finder's
           code scheme
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: 99.02 LED + varistor module 110-240 V AC/DC
         ordering_code: 99.02.0.230.98
@@ -853,6 +1332,9 @@ records:
         url: https://www.rapidonline.com/finder-99-02-0-230-98-coil-indication-and-emc-suppression-module-110-240vac-dc-51-0442
         notes: Also RS 623-9692
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: 99.02 RC module 110-240 V
         ordering_code: 99.02.0.230.09
@@ -860,6 +1342,9 @@ records:
         url: https://jp.rs-online.com/web/p/pluggable-function-modules/6239721
         notes: RS 623-9721 lists it as an RC module
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   - make: Weidmuller
     manufacturer: Weidmuller Interface GmbH & Co. KG
     tiers:
@@ -870,6 +1355,9 @@ records:
         url: https://www.mouser.lt/datasheet/3/864/1/7760056014_RIM_3_110_230VAC_en.pdf
         notes: Conrad datasheet title confirms 'RC element without LED'
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: RIM 3 110/230VAC LED
         ordering_code: '7760056045'
@@ -878,6 +1366,9 @@ records:
         notes: The type 'RIM 3 110/230VAC LED' is confirmed (van Egmond listing); 7760056045 is the Weidmuller
           datasheet returned for that name but the pairing was not read on a page
         verified: false
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: RIM 5 6/230VAC
         ordering_code: '1174670000'
@@ -886,6 +1377,9 @@ records:
         notes: Order number and type from the datasheet file name. Its function and fit in SCM/D-SERIES
           sockets were not confirmed; check before use
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   sources:
   - https://www.phoenixcontact.com/us/products/2900944/pdf
   - https://www.phoenixcontact.com/en-de/products/relay-base-rif-1-bpt-2x21-2900931
@@ -926,6 +1420,9 @@ records:
         url: https://www.standardelectricsupply.com/FINDER-09471-Retaining-Clip
         notes: Listed as Finder 09471 'Retaining Clip'; metal material from Finder's range, not the listing
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: 094.91.3 plastic retaining and release clip
         ordering_code: 094.91.3
@@ -934,6 +1431,9 @@ records:
         url: https://www.rapidonline.com/finder-094-91-3-plastic-retaining-and-release-clip-blue-for-94-series-sockets-51-0649
         notes: Also at Buerklin
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: 094.00.4 marker tag
         ordering_code: 094.00.4
@@ -942,6 +1442,9 @@ records:
         notes: Code seen (as 094004); that it is the 94-socket marker tag follows Finder's accessory naming
           and is not stated in the listing
         verified: false
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   - make: Weidmuller
     manufacturer: Weidmuller Interface GmbH & Co. KG
     tiers:
@@ -952,6 +1455,9 @@ records:
         url: https://rspsupply.com/p-212710-weidmuller-7760056108-retaining-clip.aspx
         notes: Listed only as 'retaining clip'; check which socket type (FS/SCM) it fits
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       mid:
         model: SCM CLIP P
         ordering_code: '7760056367'
@@ -959,6 +1465,9 @@ records:
         url: https://eshop.weidmueller.com/es/scm-clip-p/p/7760056367
         notes: Weidmuller e-shop listing
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
       high:
         model: SLD CLIP 4CO M
         ordering_code: '7760056235'
@@ -966,6 +1475,9 @@ records:
         url: https://mouser.com/datasheet/2/575/7760056235_SLD_CLIP_4CO_M_en-2471929.pdf
         notes: Function and socket fit not read; confirm before use
         verified: true
+        mounting_kind: plug_in
+        height_u: 0
+        supply_type: none
   sources:
   - https://www.mouser.com/datasheet/2/324/4/2900954-1468416.pdf
   - https://www.standardelectricsupply.com/FINDER-09471-Retaining-Clip
@@ -1003,6 +1515,8 @@ records:
     mounting_kind: enclosure
     height_u: 0
     height_note: BS 1363 wall-box socket fixed inside the cabinet
+    inrush_basis: not_given
+    inrush_note: Unpowered BS 1363 13 A socket outlet; inrush does not apply.
   alternatives:
   - make: Schneider Electric
     manufacturer: Schneider Electric
@@ -1012,23 +1526,53 @@ records:
         ordering_code: GGBL3020NIS
         description: Same function, bulk-pack version without instruction leaflet
         url: https://eshop.se.com/qa/lisse-switched-socket-without-instructions-13-a-230-v-2-gangs-white-ggbl3020nis.html
-        notes: Listed on the Schneider Qatar e-shop
+        notes: 'Listed on the Schneider Qatar e-shop M14: Rating is in the product title. No own consumption
+          (unit_power_w omitted). Needs a 2-gang back box.'
         verified: true
+        height_u: 0
+        mounting_kind: enclosure
+        supply_type: none
+        unit_power_w: 0
+        power_basis: assumed
+        ratings:
+          rating_a: 13
+        sources:
+        - https://eshop.se.com/qa/lisse-switched-socket-without-instructions-13-a-230-v-2-gangs-white-ggbl3020nis.html
       mid:
         model: Lisse 2 gang 13 A single pole switched socket, white
         ordering_code: GGBL3020S
         description: BS 1363 twin SP switched socket, white moulded; like-for-like
         url: https://cdn.yesss.co.uk/documents/1177896_03_GGBL3020S_Datasheet_2f24dc89370a0be3bdcae061f76203a7.pdf
-        notes: Code from the Schneider datasheet file at Yesss; Screwfix lists the 2-gang SP switched
-          Lisse socket
+        notes: 'Code from the Schneider datasheet file at Yesss; Screwfix lists the 2-gang SP switched
+          Lisse socket M14: Pass 2: Schneider datasheet gives 13 A at 250 VAC 50 Hz, 2 gangs, 1-pole switching,
+          BS 1363-2, depth 36 mm, screw fixing. Like-for-like.'
         verified: true
+        height_u: 0
+        mounting_kind: enclosure
+        supply_type: none
+        unit_power_w: 0
+        power_basis: assumed
+        ratings:
+          rating_a: 13
+        sources:
+        - https://cdn.yesss.co.uk/documents/1177896_03_GGBL3020S_Datasheet_2f24dc89370a0be3bdcae061f76203a7.pdf
       high:
         model: Lisse 2 gang 13 A double pole switched socket, white
         ordering_code: GGBL3020DS
         description: Double-pole switching (isolates L and N)
         url: https://rapidonline.com/catalogue/product/65-2728
-        notes: Rapid lists 'GGBL3020DS LWM 2 Gang 13A DP Switched Mains Socket'
+        notes: 'Rapid lists ''GGBL3020DS LWM 2 Gang 13A DP Switched Mains Socket'' M14: DP switching isolates
+          L and N.'
         verified: true
+        height_u: 0
+        mounting_kind: enclosure
+        supply_type: none
+        unit_power_w: 0
+        power_basis: assumed
+        ratings:
+          rating_a: 13
+        sources:
+        - https://rapidonline.com/catalogue/product/65-2728
   - make: MK Electric (Honeywell)
     manufacturer: Honeywell (MK Electric)
     tiers:
@@ -1037,23 +1581,53 @@ records:
         ordering_code: K2747WHI
         description: BS 1363 twin DP switched socket, white moulded
         url: https://cpcireland.farnell.com/mk/k2747whi/mk-2-gang-switched-socket/dp/PL00563
-        notes: Widely stocked in the Gulf; also RS 222-7910
+        notes: 'Widely stocked in the Gulf; also RS 222-7910 M14: Pass 2: CPC lists ''Logic Plus 13A 2
+          Gang DP Switched Socket, White'', complying with BS1363. Widely stocked in the Gulf. Needs a
+          back box.'
         verified: true
+        height_u: 0
+        mounting_kind: enclosure
+        supply_type: none
+        unit_power_w: 0
+        power_basis: assumed
+        ratings:
+          rating_a: 13
+        sources:
+        - https://cpcireland.farnell.com/mk/k2747whi/mk-2-gang-switched-socket/dp/PL00563
       mid:
         model: Logic Plus Rapid Fix 2 gang 13 A DP switched socket, white
         ordering_code: K2747STWHI
         description: As low with screwless (push) terminals for faster wiring
         url: https://sparksdirect.co.uk/2-gang-13a-dp-switched-socket-with-screwless-terminal-connectors-white-plastic-mk-logic-plus-k2747stwhi-rapid-fix
-        notes: Replaces Phoenix Contact, which has no BS 1363 socket outlet
+        notes: 'Replaces Phoenix Contact, which has no BS 1363 socket outlet M14: Screwless push terminals.'
         verified: true
+        height_u: 0
+        mounting_kind: enclosure
+        supply_type: none
+        unit_power_w: 0
+        power_basis: assumed
+        ratings:
+          rating_a: 13
+        sources:
+        - https://sparksdirect.co.uk/2-gang-13a-dp-switched-socket-with-screwless-terminal-connectors-white-plastic-mk-logic-plus-k2747stwhi-rapid-fix
       high:
         model: Metalclad Plus 2 gang 13 A DP switched socket with surface box
         ordering_code: K2946ALM
         description: Metal-clad twin DP switched socket complete with surface mounting box; robust for
           cabinet or plant-room mounting
         url: https://www.sparksdirect.co.uk/product/mk-metal-clad-2-gang-13a-switched-socket-double-pole-with-surface-mounting-box-mk-metalclad-plus-k2946alm
-        notes: No separate back box needed
+        notes: 'No separate back box needed M14: Supplied with its surface box, so no separate back box
+          is needed.'
         verified: true
+        height_u: 0
+        mounting_kind: enclosure
+        supply_type: none
+        unit_power_w: 0
+        power_basis: assumed
+        ratings:
+          rating_a: 13
+        sources:
+        - https://www.sparksdirect.co.uk/product/mk-metal-clad-2-gang-13a-switched-socket-double-pole-with-surface-mounting-box-mk-metalclad-plus-k2946alm
   sources:
   - https://legrand.co.uk/en/catalog/products/synergy-2-gang-13a-single-pole-switched-socket-outlet-white-730076
   - https://legrand.com/ecatalogue/en/catalog/products/socket-outlet-synergy-2-gang-switched-13-250-v-white-730076
@@ -1103,6 +1677,9 @@ records:
         url: https://shop.richardsonrfpd.com/Products/Product/SKND105F12
         notes: Lower current; ratings not read
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
       mid:
         model: SKND 150F12
         ordering_code: 230B1844
@@ -1110,6 +1687,9 @@ records:
         url: https://www.semikron-danfoss.com/products/p/sknd-150f12-230b1844
         notes: Direct equivalent
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
       high:
         model: SKKD 150F12
         ordering_code: 230B1837
@@ -1117,6 +1697,9 @@ records:
         url: https://www.semikron-danfoss.com/products/p/skkd-150f12-230b1837
         notes: Not a drop-in; listed because no higher-current SKND was verified
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
   - make: IXYS (Littelfuse)
     manufacturer: Littelfuse / IXYS
     tiers:
@@ -1127,6 +1710,9 @@ records:
         url: https://uk.rs-online.com/web/p/schottky-diodes-rectifiers/1258054
         notes: Half the current rating
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
       mid:
         model: DSEI2X101-12A
         ordering_code: DSEI2X101-12A
@@ -1136,6 +1722,9 @@ records:
         notes: IXYS has no 150 A common-anode TO-240 part (MEA range jumps from 75 A to 250 A). Lower
           current than the BOM part; derate or parallel
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
       high:
         model: MEA250-12DA
         ordering_code: MEA250-12DA
@@ -1143,6 +1732,9 @@ records:
         url: https://www.ozdisan.com/en/p/module-diodes-388/ixys-mea250-12da-361957
         notes: Higher current; also listed at TME
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
   sources:
   - https://www.semikron-danfoss.com/products/p/sknd-150f12-230b1844
   - https://www.tme.eu/en/katalog/diode-modules_113441/params/b227_load-current/p1440742_150a/
@@ -1186,6 +1778,9 @@ records:
         url: https://semikron-danfoss.com/products/p/skkd-105f12-07918480
         notes: Not drop-in; SKMD 105F12 not verified
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
       mid:
         model: SKMD 150F12
         ordering_code: 230B1843
@@ -1193,6 +1788,9 @@ records:
         url: https://www.semikron-danfoss.com/products/p/skmd-150f12-230b1843
         notes: Direct equivalent
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
       high:
         model: SKKE 310F12 (x2)
         ordering_code: SKKE310F12
@@ -1202,6 +1800,9 @@ records:
         notes: No SKMD above 150 A at 1200 V was found (TME SEMIPACK 2 list shows SKMD 150F12 only). Order
           qty 2 per BOM item; needs heatsink
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
   - make: IXYS (Littelfuse)
     manufacturer: Littelfuse / IXYS
     tiers:
@@ -1212,6 +1813,9 @@ records:
         url: https://uk.rs-online.com/web/p/schottky-diodes-rectifiers/7115320P
         notes: Much lower current; only for light loads
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
       mid:
         model: MEK150-04DA
         ordering_code: MEK150-04DA
@@ -1219,6 +1823,9 @@ records:
         url: https://www.tme.eu/en/katalog/diode-modules_113441/params/b227_load-current/p1440742_150a/
         notes: 400 V still ample for 125 V DC; same current
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
       high:
         model: MEK250-12DA
         ordering_code: MEK250-12DA
@@ -1226,6 +1833,9 @@ records:
         url: https://www.tme.com/th/en/details/mek250-12da/diode-modules/ixys/
         notes: Higher current; common-cathode twin of MEA250-12DA
         verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
   sources:
   - https://www.semikron-danfoss.com/products/p/skmd-150f12-230b1843
   - https://www.tme.eu/en/katalog/diode-modules_113441/params/b227_load-current/p1440742_150a/
