@@ -1168,7 +1168,8 @@ thermostat 0 W; SK 3243.100 fan 460 m³/h with the SK 3243.200 outlet filter (60
 so the per-fan airflow changes from 358. Applied when A2 next revises the library
 defaults, not to the example.
 
-**Q30 — Where a device's loose items go in the loose-material table.** The workbook
+**Q30 — Where a device's loose items go in the loose-material table.** *Resolved 2026-10-28:* Ali chose
+"Keep all the defaults": the default below stands. The workbook
 lists the GPS clock's accessories (`Aux` rows 53–57) between the software and the
 cables; nothing in the inputs says where they belong. *Default:* the project's
 `loose_material.items` in order, then each device's `loose_items` as one block in
@@ -1176,7 +1177,8 @@ panel order (ADR 0014). If the workbook order matters, `loose_material.items` wo
 need a marker naming the device whose loose items go at that position (A2's schema).
 
 **Q31 — Group A–D rules the spec states only by example** (A1 review of the M2 PR;
-defaults in ADR 0014, all in force until Ali answers):
+defaults in ADR 0014). *Resolved 2026-10-28:* Ali chose "Keep all the defaults"; items 1–4
+stand as written:
 1. The loose-material title line 2, "PSA Panels Loose Material and Auxiliary
    Equipment", is a constant; the spec only says the table has a title block.
    *Done in M1b/M3:* `loose_material.title`, with that text as the default.
