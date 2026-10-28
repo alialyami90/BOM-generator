@@ -47,28 +47,35 @@ def read_project_identity(project_file: Path) -> ProjectIdentity:
     Reads plain YAML so exporting does not depend on the input models.
     """
     try:
-        document = yaml.safe_load(project_file.read_text(encoding="utf-8"))
-    except (OSError, UnicodeDecodeError, yaml.YAMLError) as exc:
+        text = project_file.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
         raise _invalid(f"cannot read {project_file}: {exc}") from exc
+    return parse_project_identity(text, project_file.name)
+
+
+def parse_project_identity(text: str, name: str = "project.yaml") -> ProjectIdentity:
+    try:
+        document = yaml.safe_load(text)
+    except yaml.YAMLError as exc:
+        raise _invalid(f"{name} is not valid YAML: {exc}") from exc
     project = document.get("project") if isinstance(document, dict) else None
     project_id = project.get("id") if isinstance(project, dict) else None
     if not is_valid_project_id(project_id):
         raise _invalid(
-            f"{project_file.name}: project.id must be 1-64 letters, digits, '.', '_' or '-' "
-            f"(got {project_id!r})"
+            f"{name}: project.id must be 1-64 letters, digits, '.', '_' or '-' (got {project_id!r})"
         )
     library = document.get("library")
     if library is None:
         return ProjectIdentity(project_id, None, None)
-    name = library.get("name") if isinstance(library, dict) else None
+    lib_name = library.get("name") if isinstance(library, dict) else None
     version = library.get("version") if isinstance(library, dict) else None
     try:
-        if not isinstance(name, str) or not name or not isinstance(version, str):
+        if not isinstance(lib_name, str) or not lib_name or not isinstance(version, str):
             raise ValueError("library needs a name and a version")
         Version.parse(version)
     except ValueError as exc:
-        raise _invalid(f"{project_file.name}: library: {exc}") from exc
-    return ProjectIdentity(project_id, name, version)
+        raise _invalid(f"{name}: library: {exc}") from exc
+    return ProjectIdentity(project_id, lib_name, version)
 
 
 def project_files(project_dir: Path) -> dict[str, bytes]:
@@ -87,9 +94,16 @@ def export_project(
 ) -> ProjectExport:
     """Write the project folder holding `project_file` as one `.bomproj` file."""
     identity = read_project_identity(project_file)
-    files = project_files(project_file.parent)
-    manifest = _manifest(identity, files, created)
     out = out or Path.cwd() / f"{identity.id}{PROJECT_SUFFIX}"
+    return export_directory(project_file.parent, identity, out, created=created)
+
+
+def export_directory(
+    project_dir: Path, identity: ProjectIdentity, out: Path, *, created: datetime | None = None
+) -> ProjectExport:
+    """Write `project_dir` as a `.bomproj` at `out`, recording `identity` in the manifest."""
+    files = project_files(project_dir)
+    manifest = _manifest(identity, files, created)
     write_bundle(out, manifest, files)
     return ProjectExport(out, manifest)
 
