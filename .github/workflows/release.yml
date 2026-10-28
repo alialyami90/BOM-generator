@@ -287,6 +287,11 @@ jobs:
           prerelease=()
           # PEP 440 pre-releases (0.2.0rc1, 0.2.0b1, 0.2.0.dev1) carry a letter.
           [[ "$VERSION" =~ [a-z] ]] && prerelease=(--prerelease)
-          gh release create "$GITHUB_REF_NAME" "${assets[@]}" \
-            --verify-tag --title "BOM Generator $VERSION" \
-            --notes-file packaging/release-notes.md --generate-notes "${prerelease[@]}"
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            # A release made by hand in the GitHub UI for this tag: attach to it, keep its notes.
+            gh release upload "$GITHUB_REF_NAME" "${assets[@]}" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "${assets[@]}" \
+              --verify-tag --title "BOM Generator $VERSION" \
+              --notes-file packaging/release-notes.md --generate-notes "${prerelease[@]}"
+          fi

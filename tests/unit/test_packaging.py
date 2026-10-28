@@ -152,3 +152,13 @@ def test_release_workflow_proves_the_first_start_install_and_that_a_reinstall_ke
     assert "psa-devices" in workflow
     assert 'Show-Window "Second start"' in workflow
     assert "The library store changed on the second start" in workflow
+
+
+def test_release_job_attaches_to_a_release_that_already_exists_for_the_tag() -> None:
+    # v0.1.0 was published by hand in the GitHub UI first, and `gh release create` then failed.
+    workflow = (PACKAGING.parent / ".github" / "workflows" / "release.yml").read_text(
+        encoding="utf-8"
+    )
+    assert 'gh release view "$GITHUB_REF_NAME"' in workflow
+    assert 'gh release upload "$GITHUB_REF_NAME"' in workflow
+    assert "--clobber" in workflow
