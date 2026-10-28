@@ -36,6 +36,7 @@ from bomgen.models.library import (
 )
 
 CSV_FORMAT = 1
+DEFAULT_DC_ID = "default_dc"  # the mcb.csv row of `catalogues.mcb_dc`; not a valid brand id
 ENCODING = "utf-8-sig"  # UTF-8 with a byte-order mark, so Excel does not guess a code page
 LINE_END = "\r\n"
 LIST_SEPARATOR = "|"
@@ -175,6 +176,8 @@ def _catalogue_rows(library: Library, tables: dict[str, list[Row]]) -> None:
             *((b.id, b.name, b) for b in brands.housekeeping),
         ],
     }
+    if default.mcb_dc is not None:
+        sets["mcb"].insert(1, (DEFAULT_DC_ID, None, default.mcb_dc))
     for brand_id, name, mcb in sets["mcb"]:
         tables["mcb.csv"].append(_row(mcb, TABLES["mcb.csv"], catalogue_id=brand_id, name=name))
         for rating, code in (mcb.codes or {}).items():

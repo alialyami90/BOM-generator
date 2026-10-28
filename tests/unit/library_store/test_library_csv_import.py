@@ -404,7 +404,7 @@ def test_a_row_with_a_bad_cell_is_a_problem_with_table_row_and_column(
     assert [(p.table, p.row, p.column) for p in preview.problems] == [
         ("devices.csv", 4, "voltage_v")
     ]
-    assert "voltage_v" in preview.problems[0].message or "integer" in preview.problems[0].message
+    assert preview.problems[0].message == "Enter a whole number, for example 4."
     assert preview.problems[0].key == target
     assert _by_id(preview)["rows"].status is CheckStatus.FAILED
     assert not preview.can_import
@@ -743,3 +743,115 @@ def test_a_device_with_every_field_set_survives_the_round_trip(
     assert preview.problems == []
     assert preview.library == edited
     assert preview.library.get("FULL-1") == edited.get("FULL-1")
+
+
+# -- the default DC set (catalogues.mcb_dc, ADR 0023) ---------------------------------------
+
+
+def _with_default_dc_set(library: Library) -> Library:
+    mcb = library.catalogues.mcb.model_dump(mode="json", exclude_none=True)
+    dc_set = {**mcb, "make": "DC make", "dc_rating_v": 250, "codes": {"6": "DC-6", "10": "DC-10"}}
+    dc_set["ratings_a"] = [6, 10]
+    dc_set.pop("code_pattern", None)
+    result = apply_edits(library, [SetValue(path=["catalogues", "mcb_dc"], value=dc_set)]).library
+    assert result is not None
+    return result
+
+
+def test_the_default_dc_mcb_set_survives_the_round_trip(tmp_path: Path, base: Library) -> None:
+    edited = _with_default_dc_set(base)
+    other = LibraryStore(tmp_path / "other")  # its base has no DC set to fall back on
+    package = tmp_path / "plain.bomlib"
+    pack(EXAMPLE_LIBRARY, package, name="psa", version="1.0.0")
+    other.import_package(package)
+    out = tmp_path / "dc.zip"
+    export_csv(edited, out, name="psa", based_on="1.0.0")
+
+    preview = preview_csv_import(out, other, "psa")
+
+    assert preview.problems == []
+    assert preview.library == edited
+
+
+def test_the_default_dc_set_is_the_default_dc_row_of_the_mcb_tables(
+    tmp_path: Path, base: Library
+) -> None:
+    out = tmp_path / "csv"
+    export_csv(_with_default_dc_set(base), out, name="psa", based_on="1.0.0")
+
+    rows = {r["catalogue_id"]: r for r in _read(out, "mcb.csv")}
+    codes = [
+        (r["rating_a"], r["code"])
+        for r in _read(out, "mcb_codes.csv")
+        if r["catalogue_id"] == "default_dc"
+    ]
+
+    assert rows["default_dc"]["make"] == "DC make"
+    assert rows["default_dc"]["ac_rated"] == ""
+    assert codes == [("6", "DC-6"), ("10", "DC-10")]
+
+
+def test_a_mcb_table_without_the_default_dc_row_removes_the_dc_set(
+    tmp_path: Path, store: LibraryStore, base: Library
+) -> None:
+    save_local_version(store, "psa", _with_default_dc_set(base))
+    out = tmp_path / "csv"
+    export_csv(load_library(store.library_file("psa")), out, name="psa", based_on="1.0.0+local.1")
+    _write(out, "mcb.csv", [r for r in _read(out, "mcb.csv") if r["catalogue_id"] != "default_dc"])
+    _write(
+        out,
+        "mcb_codes.csv",
+        [r for r in _read(out, "mcb_codes.csv") if r["catalogue_id"] != "default_dc"],
+    )
+
+    preview = _preview(store, out)
+
+    assert preview.library is not None
+    assert preview.library.catalogues.mcb_dc is None
+    assert preview.diff is not None
+    assert "mcb_dc" in preview.diff.catalogues_changed
+
+
+# -- wording --------------------------------------------------------------------------------
+
+
+def test_a_bad_number_cell_gets_a_plain_message_with_an_example(
+    store: LibraryStore, folder: Path
+) -> None:
+    rows = _read(folder, "devices.csv")
+    target = rows[2]["part_id"]
+    _edit(folder, "devices.csv", lambda rows: _set(rows, target, unit_power_w="lots"))
+
+    preview = _preview(store, folder)
+
+    [problem] = preview.problems
+    assert problem.column == "unit_power_w"
+    assert problem.message.startswith("Enter a number, for example ")
+    assert "Input should" not in problem.message
+
+
+def test_a_bad_choice_cell_lists_the_values_it_takes(store: LibraryStore, folder: Path) -> None:
+    rows = _read(folder, "devices.csv")
+    target = rows[2]["part_id"]
+    _edit(folder, "devices.csv", lambda rows: _set(rows, target, supply_type="DC"))
+
+    preview = _preview(store, folder)
+
+    [problem] = preview.problems
+    assert problem.column == "supply_type"
+    assert problem.message.startswith("Use one of: ")
+    assert "VDC" in problem.message
+
+
+def test_the_changes_check_names_the_base_and_the_version_a_save_makes(
+    store: LibraryStore, folder: Path
+) -> None:
+    rows = _read(folder, "devices.csv")
+    target = rows[2]["part_id"]
+    _edit(folder, "devices.csv", lambda rows: _set(rows, target, make="Acme"))
+
+    detail = _by_id(_preview(store, folder))["changes"].detail
+
+    assert detail.startswith("Compared with 1.0.0: ")
+    assert detail.endswith("Saving makes 1.0.0+local.1.")
+    assert "Would be saved" not in detail

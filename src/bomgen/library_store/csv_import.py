@@ -32,6 +32,7 @@ from bomgen.library_store.csv_export import (
     _REFERENCE_COLUMN,
     CHILD_TABLES,
     CSV_FORMAT,
+    DEFAULT_DC_ID,
     HOUSEKEEPING_ROLES,
     LIST_SEPARATOR,
     TABLES,
@@ -297,8 +298,33 @@ class _Assembly:
             column = str(item["loc"][0]) if item["loc"] else None
             if column is not None and column not in columns:
                 column = None
-            message = "is required" if item["type"] == "missing" else str(item["msg"])
-            self.problem(table, row, column, message.removeprefix("Value error, "), key)
+            self.problem(table, row, column, plain_message(item), key)
+
+
+_EXAMPLES = {
+    "int_parsing": "Enter a whole number, for example 4.",
+    "int_from_float": "Enter a whole number, for example 4.",
+    "int_type": "Enter a whole number, for example 4.",
+    "float_parsing": "Enter a number, for example 12.5.",
+    "float_type": "Enter a number, for example 12.5.",
+    "bool_parsing": "Enter true or false.",
+    "bool_type": "Enter true or false.",
+    "missing": "is required",
+}
+
+
+def plain_message(error: Any) -> str:
+    """A pydantic error as a plain message, with an example of a good value where one helps."""
+    kind = error["type"]
+    if kind in _EXAMPLES:
+        return _EXAMPLES[kind]
+    if kind in ("literal_error", "enum") and "expected" in error.get("ctx", {}):
+        values = re.split(r", | or ", str(error["ctx"]["expected"]))
+        return f"Use one of: {', '.join(v.strip(chr(39)) for v in values)}."
+    message = str(error["msg"]).removeprefix("Value error, ")
+    if message.startswith("Input should be "):
+        message = "Must be " + message.removeprefix("Input should be ") + "."
+    return message
 
 
 def _text(value: object) -> str:
@@ -479,9 +505,7 @@ def _device_problems(
 ) -> None:
     for item in error.errors():
         loc = item["loc"]
-        message = ("is required" if item["type"] == "missing" else str(item["msg"])).removeprefix(
-            "Value error, "
-        )
+        message = plain_message(item)
         if loc and loc[0] in CHILD_TABLES and len(loc) > 1 and isinstance(loc[1], int):
             fld = str(loc[0])
             rows = rows_of.get(fld, [])
@@ -496,8 +520,8 @@ def _device_problems(
 
 
 def _base_entry(base: Mapping[str, Any], kind: str, cid: str) -> dict[str, Any] | None:
-    if cid == DEFAULT_BRAND:
-        value = base["catalogues"].get(kind)
+    if cid in (DEFAULT_BRAND, DEFAULT_DC_ID):
+        value = base["catalogues"].get("mcb_dc" if cid == DEFAULT_DC_ID else kind)
         return value if isinstance(value, dict) else None
     return next((b for b in base["catalogue_brands"].get(kind, []) if b.get("id") == cid), None)
 
@@ -542,6 +566,8 @@ def _file_brand(
 ) -> None:
     if cid == DEFAULT_BRAND:
         asm.defaults[kind] = dict(entry)
+    elif cid == DEFAULT_DC_ID:
+        asm.defaults["mcb_dc"] = dict(entry)
     else:
         brand = {"id": cid, **({"name": name} if name else {}), **entry}
         asm.brands.setdefault(kind, []).append(brand)
@@ -557,11 +583,13 @@ def _mcb(tables: Mapping[str, _Table], base: Mapping[str, Any], skip: bool, asm:
         for _row, cells in _unique(tables["mcb_codes.csv"], ("catalogue_id", "rating_a"), asm):
             codes[cells["catalogue_id"].strip()][cells["rating_a"].strip()] = cells.get("code", "")
     asm.brands.setdefault("mcb", [])
+    asm.defaults["mcb_dc"] = None  # a table without the default_dc row has no DC set
     for row, cells in _unique(table, ("catalogue_id",), asm):
         cid = cells["catalogue_id"].strip()
         old = _base_entry(base, "mcb", cid)
+        default = cid in (DEFAULT_BRAND, DEFAULT_DC_ID)
         fields = [n for n in McbCatalogue.model_fields if n != "codes"]
-        if cid != DEFAULT_BRAND:
+        if not default:
             fields.append("ac_rated")
         elif cells.get("ac_rated", "").strip():
             asm.problem("mcb.csv", row, "ac_rated", "applies to brands, not the default row", cid)
@@ -575,12 +603,8 @@ def _mcb(tables: Mapping[str, _Table], base: Mapping[str, Any], skip: bool, asm:
                 data["codes"] = dict(codes[cid])
         elif old is not None and old.get("codes") is not None:
             data["codes"] = old["codes"]
-        model = McbCatalogue if cid == DEFAULT_BRAND else McbBrand
-        extra = (
-            {}
-            if cid == DEFAULT_BRAND
-            else {"id": cid, **({"name": names[cid]} if cid in names else {})}
-        )
+        model = McbCatalogue if default else McbBrand
+        extra = {} if default else {"id": cid, **({"name": names[cid]} if cid in names else {})}
         try:
             entry = model.model_validate({**data, **extra}).model_dump(
                 mode="json", exclude_none=True
@@ -884,7 +908,9 @@ def preview_csv_import(
         add(
             "changes",
             CheckStatus.OK,
-            f"Would be saved as {version}. " + " ".join(diff.summary_lines()),
+            f"Compared with {base}: "
+            + " ".join(line.strip() for line in diff.summary_lines())
+            + f". Saving makes {version}.",
         )
     return CsvPreview(checks, asm.problems, rows, diff, changes, derived, library, base)
 
@@ -977,7 +1003,7 @@ def _compare(
             edits.append(SetValue(path=["devices", pid], value=device))
     removals += [Remove(path=["devices", pid]) for pid in removed]
     catalogues: list[str] = []
-    for kind in (*_CATALOGUE_FILES, "enclosure_u"):
+    for kind in (*_CATALOGUE_FILES, "mcb_dc", "enclosure_u"):
         before, after = old["catalogues"].get(kind), new["catalogues"].get(kind)
         if before != after:
             catalogues.append(kind)

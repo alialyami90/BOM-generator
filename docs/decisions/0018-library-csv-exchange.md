@@ -201,3 +201,17 @@ The device editor's Datasheet tab edits the device-database records, which live 
   rewritten file loses its YAML comments, as `library.yaml` does. The release notes count
   "N device records changed".
 - The CSV tables do not carry the records; a CSV import keeps them from its base version.
+
+## Amendment: the default DC set and plain row messages (2026-10-28)
+
+- **`catalogues.mcb_dc`** (ADR 0023) is the `mcb.csv` row with `catalogue_id` `default_dc`, and
+  its codes are the `mcb_codes.csv` rows with that id. The underscore keeps it from clashing
+  with a brand id. Like the `default` row it has no `name` or `ac_rated`. An `mcb.csv` without
+  the row removes the DC set, as a missing row removes any table row; the `changes` check
+  lists it as `mcb_dc`.
+- **Row messages** are plain, with an example where one helps: "Enter a number, for example
+  12.5.", "Enter a whole number, for example 4.", "Enter true or false.", "Use one of: VDC,
+  VAC.". Other messages lose pydantic's "Value error, " prefix, and "Input should be" becomes
+  "Must be".
+- **`changes` check** reads "Compared with 1.0.0: … Saving makes 1.0.0+local.1." The app adds
+  the rows to its pending set rather than saving, so the version is the one a save would make.
