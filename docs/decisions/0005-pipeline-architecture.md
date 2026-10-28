@@ -12,7 +12,7 @@ calculation sheets must reference BOM cells with live formulas (OUT-5), so the
 cell address of every BOM row must be known before the calculation sheets are
 laid out.
 
-## Decision (proposed)
+## Decision
 
 Three layers, each testable on its own:
 

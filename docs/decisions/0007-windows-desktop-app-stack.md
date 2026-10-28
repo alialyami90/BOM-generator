@@ -26,7 +26,7 @@ Python package (ADR 0002). impeccable designs in web terms (HTML/CSS).
 4. Local web app opened in the browser. Simplest to build, but it isn't an
    installable app in the sense Ali asked for.
 
-## Decision (proposed)
+## Decision
 
 Option 1. Freeze with PyInstaller (one-folder mode starts faster and is less
 often flagged by antivirus than one-file), and wrap in an Inno Setup per-user
