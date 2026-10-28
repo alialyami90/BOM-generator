@@ -634,14 +634,14 @@ Delivered in small PRs by A11, one screen group each (ADR 0015 for the bridge):
   workbook on the Windows runner.
 
 *Built early (ADR 0009):* the installer pipeline landed before M1, M8 and M10.
-`bomgen.app.launcher` now runs the real CLI (`bomgen.cli`) and imports a
-double-clicked `.bomlib` through `bomgen.library_store`; the window (M10) and
-`.bomproj` project files (M8b) stay placeholders, with both file associations
-already registered. The release workflow installs, checks and uninstalls the
-installer on the runner, including opening a `.bomlib` with the installed app.
-The "builds the example workbook" smoke step is added once `bomgen build` exists
-(M7), and the bundled default library once M8 writes `out/default.bomlib`. The
-app icon comes with the M9 design (`packaging/icons/bomgen.ico`).
+`bomgen.app.launcher` runs the real CLI (`bomgen.cli`), imports a double-clicked
+`.bomlib` through `bomgen.library_store`, and opens `bomgen.app.window` (M10)
+for a plain start or a `.bomproj` file; the spec bundles the UI folder and
+pywebview. The release workflow installs, checks and uninstalls the installer
+on the runner, opens a `.bomlib` with the installed app, and starts the frozen
+window. The "builds the example workbook" smoke step is added once `bomgen build`
+exists (M7), and the bundled default library once M8 writes `out/default.bomlib`.
+The app icon comes with the M9 design (`packaging/icons/bomgen.ico`).
 
 ## 5. Testing strategy
 
