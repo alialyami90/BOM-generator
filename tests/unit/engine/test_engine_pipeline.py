@@ -15,7 +15,7 @@ from bomgen.io.mirror import mirror_panel
 from bomgen.models.bom import Group
 from bomgen.models.library import Library
 from bomgen.models.panel import Panel, PanelMirror, Ventilation
-from bomgen.models.project import DesignConstants, LooseMaterial, Project, Spares
+from bomgen.models.project import DesignConstants, LooseExtra, LooseMaterial, Project, Spares
 from bomgen.models.substation import Substation
 
 GPS = powered(
@@ -144,6 +144,17 @@ def test_loose_table_lists_project_items_then_device_loose_items() -> None:
     ]
     assert [line.merge_fg for line in table.lines] == [True, False, False, True, False]
     assert table.lines[3].ordering_code == "Included with GPS"
+
+
+def test_free_text_loose_item_prints_its_description_without_make_model_or_code() -> None:
+    lib = library(*LOOSE_PARTS)
+    item = LooseExtra(description="Cable tray, 300 mm", qty="1 Lot", tag="Tray")
+    table = loose_table(LooseMaterial(host_panel="ws", items=[item]), "GIS", [], lib)
+    assert table is not None
+    line = table.lines[0]
+    assert (line.tag, line.description, line.qty) == ("Tray", "Cable tray, 300 mm", "1 Lot")
+    assert (line.make, line.model, line.ordering_code, line.part_id) == (None, None, None, None)
+    assert (line.hwio, line.merge_fg) == (0, False)
 
 
 def test_loose_table_title_comes_from_the_loose_material() -> None:

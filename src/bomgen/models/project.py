@@ -100,13 +100,26 @@ class DesignConstants(ConstantOverrides):
 
 
 class LooseExtra(InputModel):
-    """A loose-material row, optionally with kit children and a feeding panel."""
+    """A loose-material row: a library part, optionally with kit children and a feeding
+    panel, or a free-text item with only a description (ADR 0022)."""
 
-    part_id: PartId
+    part_id: PartId | None = None
+    description: str | None = None  # a free-text item's description
     qty: Quantity = 1
     tag: str | None = None
     children: list[PartId] = Field(default_factory=list)
     fed_from: str | None = None
+
+    @model_validator(mode="after")
+    def _part_or_description(self) -> "LooseExtra":
+        text = (self.description or "").strip()
+        if (self.part_id is None) == (not text):
+            raise ValueError("a loose item names a library part_id or a description, not both")
+        if self.part_id is None:
+            for key in ("children", "fed_from"):
+                if getattr(self, key):
+                    raise ValueError(f"{key} needs a library part; a free-text item has none")
+        return self
 
 
 class LooseMaterial(InputModel):

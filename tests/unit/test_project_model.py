@@ -215,6 +215,27 @@ def test_loose_extra_rejects_zero_quantity() -> None:
         LooseExtra(part_id="CABLE-1", qty=0)
 
 
+def test_free_text_loose_item_has_a_description_and_no_part() -> None:
+    item = LooseExtra(description="Cable tray, 300 mm", qty="1 Lot", tag="Tray")
+    assert item.part_id is None
+    assert item.description == "Cable tray, 300 mm"
+
+
+@pytest.mark.parametrize(
+    "fields",
+    [{}, {"part_id": "FO-1", "description": "FO patch cords"}, {"description": "  "}],
+)
+def test_loose_item_names_a_part_or_a_description_not_both(fields: dict[str, Any]) -> None:
+    with pytest.raises(ValidationError, match="part_id or a description"):
+        LooseExtra.model_validate(fields)
+
+
+@pytest.mark.parametrize(("key", "value"), [("children", ["LPA37-696"]), ("fed_from", "psa3")])
+def test_free_text_loose_item_brings_no_children_and_is_not_fed(key: str, value: Any) -> None:
+    with pytest.raises(ValidationError, match=f"{key} needs a library part"):
+        LooseExtra.model_validate({"description": "Cable tray", key: value})
+
+
 @pytest.mark.parametrize("bad", ["../x", "a/b", "", ".hidden"])
 def test_library_name_is_a_plain_folder_name(bad: str) -> None:
     with pytest.raises(ValidationError, match="name"):

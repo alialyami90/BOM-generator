@@ -192,7 +192,7 @@ def substation_issues(
             issues.append(_issue(source, ("loose_material", "host_panel"), message))
         for index, item in enumerate(loose.items):
             base: Loc = ("loose_material", "items", index)
-            if item.part_id not in known_parts:
+            if item.part_id is not None and item.part_id not in known_parts:
                 issues.append(_unknown_part(source, (*base, "part_id"), item.part_id, library_name))
             for k, child in enumerate(item.children):
                 if child not in known_parts:

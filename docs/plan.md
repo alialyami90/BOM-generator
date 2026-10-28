@@ -210,6 +210,7 @@ loose_material:                        # extras not tied to a device
   items:
     - { part_id: NAP-K55, children: [LPA37-696], fed_from: psa3 }   # Q13
     - { part_id: FO-PATCH-CORDS, qty: "1 Lot" }
+    - { description: "Cable tray, 300 mm", qty: "1 Lot", tag: Tray }   # free text (ADR 0022)
 equipment:                             # what the layout places (design 3.2)
   - { id: l2, part_id: RST2228-L2, role: l2_switch, redundant: true }       # exactly one
   - { id: l1, part_id: RST2228-L1-24MM, role: l1_switch, redundant: true }  # exactly one; no qty
@@ -884,6 +885,10 @@ writes its section's details when the work starts.
     header, and its header and footer come from `host_panel`'s document. External Equipment
     references follow it. Revision comparison reads the new sheet and falls back to the
     host sheet's second table for older issues.
+  - Model side (A2, ADR 0022): a loose item is a library part or free text (`description`
+    in place of `part_id`, with no `children` or `fed_from`). A free-text row prints its
+    description with make, model and ordering code left empty. `io/loose_edit.py` adds,
+    replaces, removes and moves items, sets `host_panel`, and validates an item by field.
 
 ## 5. Testing strategy
 

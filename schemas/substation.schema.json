@@ -573,7 +573,7 @@
     },
     "LooseExtra": {
       "additionalProperties": false,
-      "description": "A loose-material row, optionally with kit children and a feeding panel.",
+      "description": "A loose-material row: a library part, optionally with kit children and a feeding\npanel, or a free-text item with only a description (ADR 0022).",
       "properties": {
         "children": {
           "items": {
@@ -582,6 +582,18 @@
           },
           "title": "Children",
           "type": "array"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
         },
         "fed_from": {
           "anyOf": [
@@ -596,9 +608,17 @@
           "title": "Fed From"
         },
         "part_id": {
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
-          "title": "Part Id",
-          "type": "string"
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Part Id"
         },
         "qty": {
           "anyOf": [
@@ -626,9 +646,6 @@
           "title": "Tag"
         }
       },
-      "required": [
-        "part_id"
-      ],
       "title": "LooseExtra",
       "type": "object"
     },

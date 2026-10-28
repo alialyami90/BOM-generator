@@ -56,7 +56,11 @@ def single_fed_loads(
 ) -> list[FedLoad]:
     """Group B units with one supply, then loose items fed from this panel."""
     devices = [row.device for row in rows for _ in range(row.instance.qty)]
-    devices += [lookup(library, item.part_id) for item in loose if item.fed_from == panel.id]
+    devices += [
+        lookup(library, item.part_id)
+        for item in loose
+        if item.part_id is not None and item.fed_from == panel.id
+    ]
     return [FedLoad(_load_name(d), d) for d in devices if d.power_supplies == 1]
 
 

@@ -91,7 +91,8 @@ def _draft(
     annunciators = [
         item
         for item in loose
-        if item.fed_from == panel.id
+        if item.part_id is not None
+        and item.fed_from == panel.id
         and lookup(library, item.part_id).category is Category.ANNUNCIATOR
     ]
     items = [
