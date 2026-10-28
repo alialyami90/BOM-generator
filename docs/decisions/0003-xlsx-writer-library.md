@@ -1,6 +1,6 @@
 # 0003. Write .xlsx with XlsxWriter, read back with openpyxl
 
-- Status: Proposed (deviation from the brief; needs Ali's approval)
+- Status: Accepted (Ali, 2026-10-28)
 - Date: 2026-10-28
 - Spec sections: Output requirements (page header, OUT-1, OUT-5, OUT-7); Formatting
 
@@ -30,7 +30,7 @@ write-only.
    (OUT-1) breaks.
 3. openpyxl without a logo. Fails the spec.
 
-## Decision (proposed)
+## Decision
 
 Option 1. The writer module is the only place that imports XlsxWriter; it
 consumes library-agnostic sheet models (ADR 0005). Writer tests reopen the file

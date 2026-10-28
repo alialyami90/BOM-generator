@@ -21,7 +21,7 @@ YAML ──load/validate──▶ input models ──engine (steps 1–11, 15)�
 Python computes every value (so rules and golden numbers are tested without
 Excel), and the sheet layer emits the same values as live formulas (OUT-5).
 
-Stack: as briefed (ADR 0002), with one proposed deviation: write the file with
+Stack: as briefed (ADR 0002), with one agreed deviation: write the file with
 **XlsxWriter** because openpyxl cannot put the logo picture in the page header
 (ADR 0003). openpyxl stays for reading files back in tests.
 
@@ -466,6 +466,5 @@ as described above, a local web app for editing inputs, validating, previewing
 and downloading. Tell me if you meant something else (e.g. only the Excel
 output's visual design, or a hosted multi-user tool).
 
-**Q17 — Writer library (ADR 0003).** openpyxl can't write the header logo.
-*Default:* XlsxWriter for writing, openpyxl for reading back. Needs your OK
-since it deviates from the brief.
+**Q17 — Writer library (ADR 0003).** *Resolved 2026-10-28:* Ali chose
+XlsxWriter for writing and openpyxl for reading back in tests.
