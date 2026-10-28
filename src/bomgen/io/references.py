@@ -10,7 +10,14 @@ from collections.abc import Mapping, Sequence
 
 from bomgen.io.errors import Issue, Loc, format_location
 from bomgen.io.yaml_source import YamlSource
-from bomgen.models.library import Category, ChangeOverDiodes, Housekeeping, Library
+from bomgen.models.library import (
+    Category,
+    ChangeOverDiodes,
+    DeviceType,
+    Housekeeping,
+    Library,
+    PurdueLevel,
+)
 from bomgen.models.panel import Panel, PanelMirror
 from bomgen.models.project import Project, RegisterEntry
 from bomgen.models.substation import EquipmentRole, Substation
@@ -229,6 +236,14 @@ def equipment_issues(
     """Equipment parts exist, have a rack height, and the switch roles are switches."""
     issues: list[Issue] = []
     for index, item in enumerate(substation.equipment):
+        if item.part_id is None:
+            if not any(_is_l1_switch(d) and d.height_u is not None for d in library.devices):
+                message = (
+                    f"no L1 network_switch with height_u in {library_name} for the tool "
+                    "to pick; add one or set part_id"
+                )
+                issues.append(_issue(source, ("equipment", index), message))
+            continue
         loc: Loc = ("equipment", index, "part_id")
         device = library.get(item.part_id)
         if device is None:
@@ -241,4 +256,14 @@ def equipment_issues(
         if item.role in switch_roles and device.category is not Category.NETWORK_SWITCH:
             message = f"an {item.role.value} must be a network_switch part, not {device.category}"
             issues.append(_issue(source, loc, message))
+        elif item.role is EquipmentRole.L1_SWITCH and not _is_l1_switch(device):
+            level = device.purdue_level or "no purdue_level"
+            message = (
+                f"a pinned l1_switch must be an L1 network_switch part ({item.part_id} is {level})"
+            )
+            issues.append(_issue(source, loc, message))
     return issues
+
+
+def _is_l1_switch(device: DeviceType) -> bool:
+    return device.category is Category.NETWORK_SWITCH and device.purdue_level is PurdueLevel.L1

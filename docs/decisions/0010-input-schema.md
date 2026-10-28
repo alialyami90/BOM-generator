@@ -94,6 +94,11 @@ hand-written YAML.
     `unit` and, on a redundant entry, a `side` (`a` or `b`); leaving either
     out means every unit or both sides. A single-device move of a redundant
     entry must name its side; a `pair` move takes both sides.
+19. **L1 switch model.** The `l1_switch` entry may leave `part_id` out; the
+    tool then picks the model among library `network_switch` parts at
+    `purdue_level: L1` (the UI may ask the engineer to choose). A given
+    `part_id` pins the model and must be an L1 `network_switch`. Every other
+    role needs `part_id`.
 
 ## Consequences
 

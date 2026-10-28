@@ -50,7 +50,7 @@ def where(issues: list[Issue]) -> list[tuple[str, str, str]]:
 def with_equipment(substation: dict[str, Any]) -> dict[str, Any]:
     substation["equipment"] = [
         {"id": "l2", "part_id": "RST2228-L2", "role": "l2_switch", "redundant": True},
-        {"id": "l1", "part_id": "RST2228-L2", "role": "l1_switch", "redundant": True},
+        {"id": "l1", "role": "l1_switch", "redundant": True},
     ]
     substation["generated_panels"] = {
         "id": "p{n}",
@@ -67,6 +67,8 @@ def with_equipment(substation: dict[str, Any]) -> dict[str, Any]:
 def library_with_heights() -> dict[str, Any]:
     library = default_library()
     library["devices"][0]["height_u"] = 1
+    l1_switch = {**library["devices"][0], "part_id": "RST2228-L1", "purdue_level": "L1"}
+    library["devices"].append(l1_switch)
     return library
 
 
@@ -211,16 +213,39 @@ def test_calculation_document_key_must_exist(tmp_path: Path) -> None:
 
 def test_equipment_part_needs_height_u(tmp_path: Path) -> None:
     substation = with_equipment(default_substation())
+    substation["equipment"][1]["part_id"] = "RST2228-L2"
     issues = issues_for(write_project(tmp_path, substation=substation))
     message = "height_u is needed for the panel layout ('RST2228-L2' has none)"
     assert where(issues) == [
         ("substation.yaml", "equipment[0].part_id", message),
         ("substation.yaml", "equipment[1].part_id", message),
+        (
+            "substation.yaml",
+            "equipment[1].part_id",
+            "a pinned l1_switch must be an L1 network_switch part (RST2228-L2 is L2)",
+        ),
     ]
+    del substation["equipment"][1]["part_id"]
     loaded = load_project(
         write_project(tmp_path, library=library_with_heights(), substation=substation)
     )
     assert loaded.substations[0].substation.equipment[0].role == "l2_switch"
+
+
+def test_unpinned_l1_switch_needs_a_library_candidate(tmp_path: Path) -> None:
+    substation = with_equipment(default_substation())
+    library = default_library()
+    library["devices"][0]["height_u"] = 1
+    issues = issues_for(write_project(tmp_path, library=library, substation=substation))
+    message = (
+        "no L1 network_switch with height_u in library.yaml for the tool to pick; "
+        "add one or set part_id"
+    )
+    assert where(issues) == [("substation.yaml", "equipment[1]", message)]
+    library = library_with_heights()
+    library["devices"][-1]["height_u"] = None
+    issues = issues_for(write_project(tmp_path, library=library, substation=substation))
+    assert where(issues) == [("substation.yaml", "equipment[1]", message)]
 
 
 def test_equipment_unknown_part_and_non_switch_role(tmp_path: Path) -> None:

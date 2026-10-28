@@ -284,9 +284,17 @@
           "default": "1G"
         },
         "part_id": {
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
-          "title": "Part Id",
-          "type": "string"
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Part Id"
         },
         "qty": {
           "default": 1,
@@ -309,7 +317,6 @@
       },
       "required": [
         "id",
-        "part_id",
         "role"
       ],
       "title": "Equipment",

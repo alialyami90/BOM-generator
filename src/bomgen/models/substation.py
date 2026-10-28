@@ -63,7 +63,7 @@ class Equipment(InputModel):
     """A device the substation needs, before any panel exists (ADR 0013)."""
 
     id: PanelId  # what layout overrides and the UI name, never a tag
-    part_id: PartId
+    part_id: PartId | None = None  # an l1_switch without one is picked from the library
     role: EquipmentRole
     redundant: bool = False
     side: Side = Side.NONE
@@ -74,6 +74,8 @@ class Equipment(InputModel):
 
     @model_validator(mode="after")
     def _consistent(self) -> "Equipment":
+        if self.part_id is None and self.role is not EquipmentRole.L1_SWITCH:
+            raise ValueError(f"part_id is needed for a {self.role.value}")
         if self.redundant and self.side is not Side.NONE:
             raise ValueError("a redundant device has one unit per side; leave side out")
         if self.role is EquipmentRole.L1_SWITCH and "qty" in self.model_fields_set:

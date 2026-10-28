@@ -207,6 +207,8 @@ loose_material:                        # extras not tied to a device
 equipment:                             # what the layout places (design 3.2)
   - { id: l2, part_id: RST2228-L2, role: l2_switch, redundant: true }       # exactly one
   - { id: l1, part_id: RST2228-L1-24MM, role: l1_switch, redundant: true }  # exactly one; no qty
+  # l1_switch part_id is optional: left out, the tool picks an L1 network_switch
+  # from the library; given, the engineer pinned it (must be L1 network_switch)
   - { id: ext-fw, part_id: FGR-60F, role: firewall, redundant: true, l2_ports: 1 }
   - { id: gps, part_id: SEL-2488, role: other, l2_ports: 1, l2_speed: 100M } # side: none
   # id: unique; overrides and the UI name ids, never tags

@@ -103,6 +103,13 @@ def test_redundant_equipment_cannot_name_a_side() -> None:
     assert Equipment.model_validate(other).side == "b"
 
 
+def test_l1_switch_model_is_picked_by_the_tool_unless_pinned() -> None:
+    picked = Equipment.model_validate({"id": "l1", "role": "l1_switch", "redundant": True})
+    assert picked.part_id is None
+    with pytest.raises(ValidationError, match="part_id is needed for a firewall"):
+        Equipment.model_validate({"id": "fw", "role": "firewall"})
+
+
 def test_l1_switch_count_is_not_an_input() -> None:
     with pytest.raises(ValidationError, match="leave qty out"):
         Equipment.model_validate({"id": "l1", "part_id": "X", "role": "l1_switch", "qty": 2})

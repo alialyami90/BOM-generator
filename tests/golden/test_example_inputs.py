@@ -225,6 +225,7 @@ def test_example_substation_layout_inputs(loaded: LoadedSubstation) -> None:
     assert sum(g.count for g in l1.ports) == 28
     assert [g.usable_for for g in l1.ports] == ["ied", "uplink"]
     for equipment in loaded.substation.equipment:
+        assert equipment.part_id is not None  # the example pins every model
         assert part(loaded, equipment.part_id).height_u is not None, equipment.part_id
 
 
