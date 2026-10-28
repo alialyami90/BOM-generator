@@ -3,6 +3,7 @@
 (function () {
   const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, pageHead, toast, go, $ } = App;
   const example = SCREENS.preview;
+  const LOOSE = 'loose-material';  // not a panel id: those name panel files
   const real = () => S.backend === 'yes' && S.project && S.project.real && S.sub;
   const GROUPS = DB.groupNames;  // the spec's group names, labels only
   const fmt = (n, d = 1) => Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -36,15 +37,17 @@
         ${banner('bad', `<b>Nothing to preview.</b> ${esc(d.reason)}${errors ? ' must be fixed first' : ''}.`, '<a class="btn btn--secondary btn--sm" href="#/checks">Open checks</a>')}</div>`;
     }
     // short labels keep all tabs in view; the cabinet is the tooltip and the sheet's title block
+    // the workbook's order: panel sheets, the loose material sheet, then the calculations (ADR 0020)
     const sheets = [...d.panels.map((x) => [x.panel_id, `Sheet ${x.sheet}`, '', x.cabinet]),
+      ...(d.loose ? [[LOOSE, `${d.loose.sheet} (${d.loose.rows.length})`, '', 'Shipped loose, not in a panel']] : []),
       ['power', 'Power', '', d.calc_sheets.power], ['heatdiss', 'Heat dissipation', '', d.calc_sheets.heat_dissipation],
       ['heatcalc', 'Heat calculations', '', d.calc_sheets.heat_calculations]];
     const { b } = App.route();
     let t = b || S.tab.preview;
     if (!sheets.some(([k]) => k === t)) t = sheets[0][0];
     S.tab.preview = t;
-    const panel = d.panels.find((x) => x.panel_id === t);
-    const body = panel ? bomView(panel) : t === 'power' ? powerView(d) : t === 'heatdiss' ? heatDissView(d) : heatCalcView(d);
+    const panel = t === LOOSE ? d.loose : d.panels.find((x) => x.panel_id === t);
+    const body = panel ? bomView(panel, t === LOOSE) : t === 'power' ? powerView(d) : t === 'heatdiss' ? heatDissView(d) : heatCalcView(d);
     return `<div class="page">${pageHead('Preview', 'What the workbook will contain. Values are calculated by the engine; nothing here is editable.',
       `<a class="btn btn--primary" href="#/build">${icon('build')}Continue to Build</a>`)}
       ${tabs('preview', sheets, t, 'Workbook sheets')}
@@ -69,12 +72,10 @@
     return out;
   }
   const head = () => `<thead><tr><th title="Group (preview only)">Grp</th><th class="num">SR.NO</th><th>Item designation</th><th>Description</th><th class="num">Quantity</th><th>Make</th><th>Model</th><th>Ordering code</th>${showHwio ? '<th class="num">HWIO</th>' : ''}</tr></thead>`;
-  function bomView(p) {
+  function bomView(p, loose) {
     const counts = {}; p.rows.forEach((r) => { counts[r.group] = (counts[r.group] || 0) + 1; });
     const filtering = grp !== 'all' || !!q;
     const out = bomRows(p.rows, filtering);
-    const loose = p.loose && !filtering ? `<div class="sheet-title" style="margin-top:var(--space-5)">${esc(p.loose.title[0])}<small>${esc(p.loose.title[1])}</small></div>
-      <div class="table-wrap"><table class="table">${head()}<tbody>${bomRows(p.loose.rows, false)}</tbody></table></div>` : '';
     return `<div class="toolbar">
       <label class="sr-only" for="bom-grp">Show group</label>
       <select class="select" id="bom-grp" data-action="pv-grp" style="width:260px"><option value="all">All groups</option>${Object.keys(GROUPS).filter((g) => counts[g]).map((g) => `<option value="${g}" ${grp === g ? 'selected' : ''}>${g}  ${esc(GROUPS[g])} (${counts[g]})</option>`).join('')}</select>
@@ -83,8 +84,7 @@
       <label class="switch"><input type="checkbox" data-action="pv-hwio" ${showHwio ? 'checked' : ''}>HWIO column</label></div>
       <div class="sheet-title">${esc(p.title[0])}<small>${esc(p.title[1])}</small></div>
       <div class="table-wrap" style="max-height:calc(100vh - 380px)"><table class="table">${head()}<tbody>${out || `<tr class="empty-row"><td colspan="9">No rows match. Clear the filter to see all ${p.rows.length} rows.</td></tr>`}</tbody></table></div>
-      ${loose}
-      <div class="row" style="justify-content:space-between;margin-top:var(--space-2)"><span class="muted small">${plural(p.rows.length, 'row')} · Groups (A to H) and the HWIO column are for review. The issued sheet shows neither, and the HWIO column is hidden in the workbook.</span><span class="muted small">Panel HWIO total: <b>${p.hwio_total}</b></span></div>`;
+      <div class="row" style="justify-content:space-between;margin-top:var(--space-2)"><span class="muted small">${plural(p.rows.length, 'row')} · Groups (A to H) and the HWIO column are for review. The issued sheet shows neither, and the HWIO column is hidden in the workbook.</span><span class="muted small">${loose ? 'HWIO total' : 'Panel HWIO total'}: <b>${p.hwio_total}</b></span></div>`;
   }
   ACTIONS['pv-grp'] = (el) => { grp = el.value; App.render(); };
   ACTIONS['pv-hwio'] = (el) => { showHwio = el.checked; App.render(); };

@@ -90,9 +90,22 @@ def test_heat_sheets_carry_the_engine_results(page: Any) -> None:
     assert all(isinstance(c["forced"]["passes"], bool) for c in calc["cabinets"])
 
 
-def test_loose_material_sits_under_its_host_panel(page: Any) -> None:
-    hosts = [p["panel_id"] for p in page["panels"] if p["loose"]]
-    assert hosts == ["ws"]
+def test_loose_material_is_its_own_sheet(page: Any) -> None:
+    loose = page["loose"]
+    assert loose["sheet"] == "Loose Material"  # ADR 0020 default name
+    assert loose["rows"]
+    assert loose["title"]
+    assert loose["hwio_total"] == sum(r["hwio"] for r in loose["rows"])
+    assert all("loose" not in p for p in page["panels"])
+
+
+def test_the_tabs_follow_the_workbooks_sheet_order(app: api.Api, project: Path, page: Any) -> None:
+    target = ok(app.build_target(str(project), "gis01"))
+
+    calc = page["calc_sheets"]
+    tabs = [p["sheet"] for p in page["panels"]] + [page["loose"]["sheet"]]
+    tabs += [calc["power"], calc["heat_dissipation"], calc["heat_calculations"]]
+    assert tabs == [s["name"] for s in target["sheets"]]
 
 
 def test_a_substation_with_errors_has_no_sheets(app: api.Api, project: Path) -> None:
