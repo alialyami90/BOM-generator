@@ -39,7 +39,7 @@ def test_r10_example_substation_layout_matches_golden(result: LayoutResult) -> N
         {
             "id": panel.id,
             "used_u": fill.used_u(result.rules),
-            "devices": [[d.part_id, d.qty, d.lan] for d in panel.devices],
+            "devices": [[d.part_id, d.qty, d.lan, d.purpose] for d in panel.devices],
         }
         for panel, fill in zip(result.panels, result.fills, strict=True)
     ]

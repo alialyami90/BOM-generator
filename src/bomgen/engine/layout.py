@@ -451,16 +451,14 @@ def _rows(panel: PanelFill, loaded: LoadedSubstation) -> list[DeviceInstance]:
     for run in runs:
         first = run[0]
         entry = entries[first.device]
-        purpose: str | None = getattr(entry, "purpose", None)
-        hwio: int | None = getattr(entry, "hwio_points", None)
         start = first_number(devices[first.part_id]) + first.n - 1 if first.n > 1 else None
         rows.append(
             DeviceInstance(
                 part_id=first.part_id,
                 qty=len(run),
-                purpose=purpose,
+                purpose=entry.purpose,
                 lan=_LAN[first.side],
-                hwio_points=hwio,  # a row total, as on DeviceInstance
+                hwio_points=entry.hwio_points,  # a row total, as on DeviceInstance
                 first_nn=start,
             )
         )
@@ -514,7 +512,7 @@ def _port_plans(
             PortPlan(uplinks_l3=uplinks, downlinks=downlinks)
         )
     for unit in panel.units:
-        extra: PortPlan | None = getattr(entries[unit.device], "port_plan", None)
+        extra = entries[unit.device].port_plan
         if extra is not None:
             plans.setdefault(unit.part_id, []).append(extra)
     return {

@@ -18,16 +18,18 @@ l2_demand_per_side: 8
 panels:
   - id: psa1
     used_u: 29
-    devices:  # [part_id, qty, lan]
-      - [RST2228-L2, 1, A]
-      - [RST2228-L1-24MM, 3, A]  # A11 to A13
-      - [SEL-2730M-EXT, 1, A]
-      - [FGR-60F, 1, A]
-      - [FOPP-96SM, 1, A]
-      - [SEL-3555-GW, 1, A]
-      - [SEL-2488, 1, null]
-      - [SEL-2240, 1, null]
+    devices:  # [part_id, qty, lan, purpose], in the equipment's group B order
+      - [FOPP-96SM, 1, A, L2-L3 Interface]
+      - [RST2228-L2, 1, A, null]
+      - [RST2228-L1-24MM, 3, A, null]  # A11 to A13
+      - [SEL-2730M-EXT, 1, A, null]
+      - [SEL-3555-GW, 1, A, for Dhahran PCC connection]
+      - [FGR-60F, 1, A, null]
+      - [SEL-2488, 1, null, null]
+      - [SEL-2240, 1, null, null]
     port_plans:
+      FGR-60F:  # the ext-fw entry's own port plan
+        downlinks: [{count: 2, speed: 1G, media: MM}]
       RST2228-L1-24MM:  # R3: 3 switches x (uplink + A-B interlink), + 3 spare per row
         uplinks: [{count: 6, speed: 1G, media: MM, spare: 3}]
       RST2228-L2:  # R3: L3 uplinks SM; L1 links and equipment by speed and media
@@ -38,14 +40,18 @@ panels:
   - id: psa2
     used_u: 25
     devices:
-      - [RST2228-L2, 1, B]
-      - [RST2228-L1-24MM, 3, B]  # B11 to B13
-      - [SEL-2730M-EXT, 1, B]
-      - [FGR-60F, 1, B]
-      - [FOPP-96SM, 1, B]
-      - [SEL-3555-GW, 1, B]
-      - [SEL-3555-RTAC, 1, null]
+      - [FOPP-96SM, 1, B, L2-L3 Interface]
+      - [RST2228-L2, 1, B, null]
+      - [RST2228-L1-24MM, 3, B, null]  # B11 to B13
+      - [SEL-2730M-EXT, 1, B, null]
+      - [SEL-3555-GW, 1, B, for Dhahran PCC connection]
+      - [FGR-60F, 1, B, null]
+      - [SEL-3555-RTAC, 1, null, null]
     port_plans:
+      FGR-60F:  # the ext-fw entry's own port plan
+        downlinks: [{count: 2, speed: 1G, media: MM}]
+      SEL-3555-RTAC:  # the rtac entry's own port plan
+        serial_ports: 6
       RST2228-L1-24MM:
         uplinks: [{count: 6, speed: 1G, media: MM, spare: 3}]
       RST2228-L2:
