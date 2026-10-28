@@ -1,0 +1,175 @@
+/* App state, shared components, shell rendering and routing. */
+(function () {
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const esc = (v) => String(v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  const S = {
+    theme: 'light',            // light | dark | system
+    project: 'loaded',         // loaded | empty (first run, no library)
+    checks: 'errors',          // errors | clean
+    dirty: false,
+    importScenario: 'ok',
+    importStep: 'choose',      // choose | review | importing | done
+    libTab: 'import',
+    build: 'ready',            // ready | building | success | locked
+    buildStep: 0,
+    tab: { project: 'general', panel: 'devices', lib: 'overview', preview: 'psa1', libdetail: 'overview', panelsel: 'psa1' },
+    selectedDevice: 'RST2228-L1-24MM',
+    yamlError: true,
+    density: 'default'
+  };
+  const ACTIONS = {};
+  const SCREENS = {};
+  const counts = () => ({ errors: S.checks === 'errors' ? 2 : 0, warnings: 5 });
+
+  /* ---------- components ---------- */
+  const badge = (kind, text, ic) => `<span class="badge badge--${kind}">${ic ? icon(ic) : ''}${esc(text)}</span>`;
+  const verified = (v) => ({ verified: badge('ok', 'Verified', 'check'), partial: badge('warn', 'Partly verified', 'info'), unverified: badge('plain', 'Unverified', 'info') }[v]);
+  const banner = (kind, body, actions = '') => `<div class="banner banner--${kind}" role="${kind === 'bad' ? 'alert' : 'status'}">${icon({ bad: 'error', warn: 'warn', ok: 'check', info: 'info' }[kind])}<div class="grow">${body}</div>${actions}</div>`;
+  const tabs = (group, items, active, label) =>
+    `<div class="tabs" role="tablist" aria-label="${esc(label)}">${items.map(([id, text, extra]) =>
+      `<button role="tab" id="tab-${group}-${id}" aria-selected="${id === active}" tabindex="${id === active ? 0 : -1}" data-action="tab" data-group="${group}" data-value="${id}">${esc(text)}${extra || ''}</button>`).join('')}</div>`;
+  const field = (label, control, help = '', err = '') =>
+    `<div class="field"><label>${label}</label>${control}${help ? `<span class="help">${help}</span>` : ''}${err ? `<span class="err">${icon('error')}<span>${err}</span></span>` : ''}</div>`;
+  const input = (id, value, o = {}) => `<input class="input ${o.mono ? 'input--mono' : ''} ${o.num ? 'input--num' : ''}" id="${id}" value="${esc(value)}" ${o.readonly ? 'readonly' : ''} ${o.invalid ? 'aria-invalid="true"' : ''} ${o.placeholder ? `placeholder="${esc(o.placeholder)}"` : ''} data-dirty="1">`;
+  const select = (id, opts, value, o = {}) => `<select class="select ${o.cls || ''}" id="${id}" ${o.invalid ? 'aria-invalid="true"' : ''} data-dirty="1">${opts.map((x) => { const [v, t] = Array.isArray(x) ? x : [x, x]; return `<option value="${esc(v)}" ${v === value ? 'selected' : ''}>${esc(t)}</option>`; }).join('')}</select>`;
+  const pageHead = (title, lede = '', actions = '', crumbs = '') => `<div class="page-head"><div>${crumbs ? `<div class="crumbs">${crumbs}</div>` : ''}<h1>${title}</h1>${lede ? `<p class="lede">${lede}</p>` : ''}</div>${actions ? `<div class="actions">${actions}</div>` : ''}</div>`;
+  const illus = () => `<span class="illus">${icon('info')}Illustrative data for the design prototype</span>`;
+
+  /* ---------- overlay: dialog, toast ---------- */
+  let lastFocus = null;
+  function dialog({ title, body, actions }) {
+    lastFocus = document.activeElement;
+    const ov = $('#overlay');
+    ov.innerHTML = `<div class="scrim" data-action="scrim"><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-title"><h2 id="dlg-title">${title}</h2><div class="body">${body}</div><div class="foot">${actions}</div></div></div>`;
+    const first = $('.dialog .btn--primary, .dialog .btn', ov);
+    first && first.focus();
+  }
+  function closeDialog() { $('#overlay').innerHTML = ''; if (lastFocus && lastFocus.focus) lastFocus.focus(); }
+  function toast(text, ic = 'check') {
+    const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = `${icon(ic)}<span>${esc(text)}</span>`;
+    $('#toasts').appendChild(t); setTimeout(() => t.remove(), 3600);
+  }
+
+  /* ---------- shell ---------- */
+  const route = () => {
+    const [, a = 'home', b = '', c = ''] = location.hash.split('/');
+    return { a, b, c };
+  };
+  const go = (hash) => { if (location.hash === hash) render(); else location.hash = hash; };
+  const hasProject = () => S.project === 'loaded';
+
+  function renderBar() {
+    const p = DB.project;
+    $('#bar').innerHTML = `
+      <div class="brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>BOM Generator</div>
+      ${hasProject() ? `<span class="bar-divider"></span><div class="bar-project"><b>${esc(p.name)}</b><span>${esc(p.docNo)} · Rev ${esc(p.rev)}</span></div>` : ''}
+      <div class="bar-spacer"></div>
+      <a class="bar-btn" href="#/library" style="text-decoration:none" aria-label="Device library ${S.project === 'empty' ? 'not installed' : DB.library.name + ' ' + DB.library.version}">
+        <span class="dot ${S.project === 'empty' ? 'dot--bad' : 'dot--ok'}" aria-hidden="true"></span>${S.project === 'empty' ? 'No library installed' : `${esc(DB.library.name)} ${esc(DB.library.version)}`}</a>
+      <button class="bar-btn bar-btn--icon" data-action="theme" aria-label="Theme: ${S.theme}. Change theme" title="Theme: ${S.theme}">${icon(S.theme === 'dark' ? 'moon' : 'sun')}</button>
+      <button class="bar-btn bar-btn--icon" data-action="help" aria-label="Help" title="Help">${icon('help')}</button>`;
+  }
+  function navItem(href, ic, label, tail = '', tailCls = '', disabled = false, cur = false) {
+    return `<a href="${disabled ? '#' : href}" ${cur ? 'aria-current="page"' : ''} ${disabled ? 'aria-disabled="true" tabindex="-1" style="opacity:.45;pointer-events:none"' : ''}>${icon(ic)}<span>${label}</span>${tail ? `<span class="tail ${tailCls}">${tail}</span>` : ''}</a>`;
+  }
+  function renderNav() {
+    const r = route().a, c = counts(), np = hasProject();
+    const buildTail = !np ? '' : c.errors ? `${icon('error')}Blocked` : `${icon('check')}Ready`;
+    $('#nav').innerHTML = `
+      ${navItem('#/home', 'home', 'Home', '', '', false, r === 'home')}
+      <div class="nav-group">Prepare</div>
+      ${navItem('#/project', 'project', 'Project', np ? icon('check') : '', 'ok', !np, r === 'project')}
+      ${navItem('#/panels', 'panels', 'Panels', np ? '4' : '', '', !np, r === 'panels')}
+      ${navItem('#/library', 'library', 'Library', S.project === 'empty' ? '' : DB.library.version, '', false, r === 'library')}
+      <div class="nav-group">Verify and issue</div>
+      ${navItem('#/checks', 'checks', 'Checks', np ? (c.errors ? `${icon('error')}${c.errors} errors` : `${icon('check')}Clear`) : '', c.errors ? 'bad' : 'ok', !np, r === 'checks')}
+      ${navItem('#/preview', 'preview', 'Preview', '', '', !np, r === 'preview')}
+      ${navItem('#/build', 'build', 'Build', buildTail, c.errors ? 'bad' : 'ok', !np, r === 'build')}
+      <div class="nav-foot">App 0.2.0<br>Works offline. Nothing leaves this PC.</div>`;
+  }
+  function renderStatus() {
+    const c = counts(), np = hasProject();
+    $('#status').innerHTML = np ? `
+      <span>${S.dirty ? `<b style="color:var(--color-warning)">Unsaved changes</b>` : `Project saved ${esc(DB.project.savedAt)}`}</span>
+      <span class="mono" style="font-size:12px">${esc(DB.project.path)}</span>
+      <span class="sp"></span>
+      <button data-action="goto" data-to="#/checks" aria-label="${c.errors} errors, ${c.warnings} warnings. Open checks">
+        ${c.errors ? `<span class="bad">${icon('error')} ${c.errors} errors</span>` : `<span class="ok">${icon('check')} No errors</span>`}
+        <span>${icon('warn')} ${c.warnings} warnings</span></button>`
+      : `<span>No project open</span><span class="sp"></span><span>${S.project === 'empty' ? 'Library: none installed' : ''}</span>`;
+  }
+  function renderMain() {
+    const { a } = route();
+    const key = ({ home: 'home', project: 'project', panels: 'panels', library: 'library', checks: 'checks', preview: 'preview', build: 'build' })[a] || 'home';
+    const needsProject = ['project', 'panels', 'checks', 'preview', 'build'].includes(key);
+    const m = $('#main');
+    m.innerHTML = needsProject && !hasProject() ? SCREENS.home() : SCREENS[key]();
+    if (SCREENS[key + 'After']) SCREENS[key + 'After']();
+    document.title = 'BOM Generator — design prototype';
+  }
+  function renderProto() {
+    const open = $('#proto-panel') !== null;
+    $('#proto').innerHTML = `<button data-action="proto" aria-expanded="${open}">Prototype states</button>${open ? protoPanel() : ''}`;
+  }
+  function protoPanel() {
+    const sel = (id, label, opts, v) => `<div class="field"><label for="${id}">${label}</label><select class="select" id="${id}" data-action="proto-set" data-key="${id}">${opts.map(([val, t]) => `<option value="${val}" ${val === v ? 'selected' : ''}>${t}</option>`).join('')}</select></div>`;
+    return `<div class="proto-panel" id="proto-panel">
+      <h4>Prototype controls (not part of the app)</h4>
+      ${sel('project', 'Project', [['loaded', 'Project open'], ['empty', 'First run: nothing installed']], S.project)}
+      ${sel('checks', 'Validation', [['errors', '2 errors, 5 warnings'], ['clean', 'No errors, 5 warnings']], S.checks)}
+      ${sel('importScenario', 'Library package', Object.entries(DB.importScenarios).map(([k, v]) => [k, v.label]), S.importScenario)}
+      ${sel('build', 'Build result', [['ready', 'Ready'], ['building', 'Building'], ['success', 'Success'], ['locked', 'Failed: file open in Excel']], S.build)}
+      ${sel('density', 'Table density', [['default', 'Default (28 px rows)'], ['comfort', 'Comfortable (36 px rows)']], S.density)}
+    </div>`;
+  }
+  function render() {
+    document.documentElement.dataset.theme = S.theme === 'system' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : S.theme;
+    document.documentElement.classList.toggle('comfort', S.density === 'comfort');
+    renderBar(); renderNav(); renderStatus(); renderMain(); renderProto();
+    document.title = 'BOM Generator — design prototype';
+  }
+
+  /* ---------- events ---------- */
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-action]'); if (!el) return;
+    const name = el.dataset.action;
+    if (name === 'scrim' && e.target !== el) return;
+    if (ACTIONS[name]) { ACTIONS[name](el, e); }
+  });
+  document.addEventListener('input', (e) => { if (e.target.dataset && e.target.dataset.dirty && !S.dirty) { S.dirty = true; renderStatus(); } });
+  document.addEventListener('change', (e) => { const el = e.target.closest('[data-action="proto-set"]'); if (el) ACTIONS['proto-set'](el, e); const g = e.target.closest('select[data-action="grp"]'); if (g) ACTIONS.grp(g); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && $('#overlay').innerHTML) { e.preventDefault(); closeDialog(); }
+    if (e.key === 'Tab' && $('#overlay .dialog')) {
+      const f = $$('#overlay button, #overlay input, #overlay select, #overlay a[href]').filter((x) => !x.disabled);
+      if (!f.length) return; const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+    const t = e.target.closest && e.target.closest('[role="tab"]');
+    if (t && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
+      const list = $$('[role="tab"]', t.parentElement); const i = list.indexOf(t);
+      const n = list[(i + (e.key === 'ArrowRight' ? 1 : list.length - 1)) % list.length]; n.click(); setTimeout(() => { const nn = document.getElementById(n.id); nn && nn.focus(); }, 0);
+    }
+  });
+
+  ACTIONS.tab = (el) => { S.tab[el.dataset.group] = el.dataset.value; const keep = $('#main').scrollTop; renderMain(); $('#main').scrollTop = keep; const nt = document.getElementById(el.id); nt && nt.focus(); };
+  ACTIONS.goto = (el) => go(el.dataset.to);
+  ACTIONS.theme = () => { S.theme = { light: 'dark', dark: 'system', system: 'light' }[S.theme]; render(); toast(`Theme: ${S.theme}`, 'info'); };
+  ACTIONS.help = () => dialog({ title: 'Help', body: '<p>Prototype only. In the app this opens the user guide.</p>', actions: '<button class="btn btn--primary" data-action="close">Close</button>' });
+  ACTIONS.close = () => closeDialog();
+  ACTIONS.scrim = () => closeDialog();
+  ACTIONS.proto = () => { const p = $('#proto-panel'); if (p) $('#proto').innerHTML = `<button data-action="proto" aria-expanded="false">Prototype states</button>`; else $('#proto').innerHTML = `<button data-action="proto" aria-expanded="true">Prototype states</button>${protoPanel()}`; };
+  ACTIONS['proto-set'] = (el) => {
+    const k = el.dataset.key; S[k] = el.value;
+    if (k === 'importScenario') { S.importStep = 'review'; S.libTab = 'import'; go('#/library/import'); }
+    if (k === 'build') { S.buildStep = S.build === 'building' ? 2 : 0; go('#/build'); }
+    if (k === 'project' && S.project === 'empty') go('#/home');
+    render(); const p = $('#proto-panel'); if (!p) ACTIONS.proto();
+  };
+  window.addEventListener('hashchange', () => { render(); $('#main').scrollTop = 0; });
+
+  window.App = { $, $$, esc, S, ACTIONS, SCREENS, counts, badge, verified, banner, tabs, field, input, select, pageHead, illus, dialog, closeDialog, toast, go, render, route, hasProject };
+})();

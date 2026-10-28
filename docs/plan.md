@@ -374,6 +374,10 @@ and the check report, build and save the .xlsx. Deliverables in `docs/ui/`:
   prototype is the starting point of the real UI, not a throwaway.
 Finish with an impeccable critique pass and Ali's review.
 
+Status: design delivered in `docs/ui/` (start with `docs/ui/README.md`), ADR 0011
+proposed, critique pass done (results in the README). Waiting for Ali's review of
+the prototype before M10 starts.
+
 ### M10 — Windows desktop app
 Build the approved design as a Windows desktop app (ADR 0007): the M9 HTML/CSS
 UI rendered in a native window with `pywebview` (Microsoft Edge WebView2),
