@@ -153,3 +153,10 @@ def test_in_use_rows_are_named_as_the_screens_show_them() -> None:
     assert "the equipment row ${m(x.name)} (Network)" in edit
     assert "on panel ${m(p)} (Panels)" in edit
     assert "Fixed once created: projects refer to it." in edit
+
+
+def test_the_device_editor_has_a_datasheet_tab_on_the_record() -> None:
+    edit = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
+    assert "datasheet: ['Datasheet'" in edit
+    assert "Bridge.call('set_library_record_fields'" in edit
+    assert "Bridge.call('check_library_record'" in edit

@@ -81,8 +81,21 @@
       ['min_branch_mcb_a', 'Minimum branch MCB', 'int', '', 0, 'A'], ['hwio_points', 'HWIO points', 'int', 'Hardwired points one unit gives.'], ['di_inputs', 'Digital inputs', 'int'],
       ['alarm_on_branch_mcb', 'Alarm on the branch MCB', 'bool'], ['excluded_from_power', 'Leave out of the power total', 'bool']]],
     ports: ['Ports and mounting', [['height_u', 'Height', 'int', '0 for a DIN-rail part; empty if not known yet.', 0, 'U'], ['cores', 'Fibre cores', 'int', 'For patch panels.']]],
-    parts: ['Parts it brings', []]
+    parts: ['Parts it brings', []],
+    /* The device-database record (rec__ keys: the record path with __ for each dot). */
+    datasheet: ['Datasheet', [['rec__verified', 'Research status', 'choice', 'Confirmed once every figure is checked against the datasheet.'], ['rec__datasheet__mounting_kind', 'Mounting', 'choice'],
+      ['rec__datasheet__summary', 'Summary', 'area', '', 2],
+      ['rec__datasheet__height_u', 'Height', 'int', 'Above 0 exactly when the mounting is rack.', 0, 'U'], ['rec__datasheet__weight_kg', 'Weight', 'num', '', 0, 'kg'],
+      ['rec__datasheet__power__input', 'Power input', 'text', 'As the datasheet gives it, e.g. 125 VDC.'], ['rec__datasheet__power__typical_w', 'Typical power', 'num', '', 0, 'W'], ['rec__datasheet__power__max_w', 'Maximum power', 'num', '', 0, 'W'],
+      ['rec__datasheet__operating_temp_c__min', 'Lowest operating temperature', 'snum', '', 0, '°C'], ['rec__datasheet__operating_temp_c__max', 'Highest operating temperature', 'snum', '', 0, '°C'],
+      ['rec__datasheet__dimensions_mm__h', 'Case height', 'num', '', 0, 'mm'], ['rec__datasheet__dimensions_mm__w', 'Case width', 'num', '', 0, 'mm'], ['rec__datasheet__dimensions_mm__d', 'Case depth', 'num', '', 0, 'mm'],
+      ['rec__datasheet__certifications', 'Certifications', 'csv', 'Separated by commas.', 2],
+      ['rec__datasheet__datasheet_url', 'Datasheet link', 'mono', '', 2], ['rec__datasheet__product_url', 'Product page', 'mono', '', 2],
+      ['rec__sources', 'Sources', 'lines', 'One per line: where each figure was found.', 2]]]
   };
+  const isRec = (key) => key.startsWith('rec__');
+  const recPath = (key) => key.slice(5).split('__');
+  const recKey = (path) => 'rec__' + path.replace(/\./g, '__');
   /* List fields are edited as a whole list: [title, tab, columns [key, label, kind], a new row]. Kinds: int, choice, part, qty, mono, text. */
   const LISTS = {
     ports: ['Port groups', 'ports', [['count', 'Count', 'int'], ['speed', 'Speed', 'choice'], ['media', 'Media', 'choice'], ['kind', 'Kind', 'choice'], ['usable_for', 'Used for', 'choice']], { count: 1, speed: '100M', media: 'RJ45', kind: 'fixed', usable_for: 'any' }],
@@ -92,8 +105,10 @@
   };
   const FIELDS = Object.values(TABS).flatMap(([, f]) => f);
   const kindOf = (key) => (FIELDS.find((f) => f[0] === key) || [])[2];
-  const labelOf = (key) => (LISTS[key] ? LISTS[key][0] : (FIELDS.find((f) => f[0] === key) || [key, key])[1]);
-  const withUnit = (key, v) => { const u = (FIELDS.find((f) => f[0] === key) || [])[5]; return v ? (u ? `${v} ${u}` : v) : 'empty'; };
+  /* Review entries name a device field, or a record path such as datasheet.weight_kg. */
+  const fieldOf = (key) => FIELDS.find((f) => f[0] === key) || FIELDS.find((f) => f[0] === recKey(key));
+  const labelOf = (key) => (LISTS[key] ? LISTS[key][0] : (fieldOf(key) || [key, key])[1]);
+  const withUnit = (key, v) => { const u = (fieldOf(key) || [])[5]; return v ? (u ? `${v} ${u}` : v) : 'empty'; };
 
   function loadDevice(id) {
     Object.assign(ED, { key: id, state: 'loading', reply: null, error: null, draft: {}, errors: {}, refusal: '', users: null });
@@ -103,7 +118,10 @@
     Bridge.call('library_device', id).then((r) => { if (ED.key === id) ED.reply = r; }).catch((e) => { if (ED.key === id) ED.error = e; })
       .then(() => { if (ED.key === id) { ED.state = 'loaded'; App.render(); } });
   }
-  const value = (key) => (key in ED.draft ? ED.draft[key] : ED.reply.device[key]);
+  /* The value as it now stands (pending edits applied): a device field or a record path. */
+  const current = (key) => (isRec(key) ? recPath(key).reduce((o, k) => (o == null ? null : o[k]), ED.reply.record) : ED.reply.device[key]);
+  const value = (key) => (key in ED.draft ? ED.draft[key] : current(key));
+  const same = (a, b) => (a == null && b == null) || JSON.stringify(a) === JSON.stringify(b);
   const changes = () => Object.keys(ED.draft).length;
   const invalid = () => Object.keys(ED.errors).length;
   const dirty = () => !!ED.reply && changes() > 0;
@@ -115,19 +133,23 @@
     if (!t) return [null, null];
     if (kind === 'int') return /^\d+$/.test(t) ? [Number(t), null] : [t, 'Enter a whole number, for example 2.'];
     if (kind === 'num') return /^\d+(\.\d+)?$/.test(t) ? [Number(t), null] : [t, 'Enter a number, for example 25 or 12.5.'];
+    if (kind === 'snum') return /^-?\d+(\.\d+)?$/.test(t) ? [Number(t), null] : [t, 'Enter a number, for example -40 or 70.'];
+    if (kind === 'csv') return [t.split(',').map((x) => x.trim()).filter(Boolean), null];
+    if (kind === 'lines') return [t.split('\n').map((x) => x.trim()).filter(Boolean), null];
     return [t, null];
   }
   function control(f) {
-    const [key, label, kind, help = '', , unit] = f, v = value(key), id = 'de-' + key, err = ED.errors[key];
+    const [key, label, kind, help = '', , unit] = f, id = 'de-' + key, err = ED.errors[key];
+    const raw = value(key), v = Array.isArray(raw) ? raw.join(kind === 'csv' ? ', ' : '\n') : raw;
     const changed = key in ED.draft, o = { invalid: !!err };
-    const choices = (ED.reply.choices || {})[key] || [];
+    const choices = (ED.reply.choices || {})[isRec(key) ? recPath(key).pop() : key] || [];
     let html;
     if (kind === 'fixed') html = input(id, v, { mono: true, readonly: true });
     else if (kind === 'bool') return `<div class="field${changed ? ' changed' : ''}"><label class="switch"><input type="checkbox" id="${id}" ${v ? 'checked' : ''}>${esc(label)}</label>${err ? `<span class="err" id="${id}-err">${icon('error')}<span>${esc(err)}</span></span>` : ''}</div>`;
     else if (kind === 'choice') html = select(id, [['', 'Not set'], ...choices.map((c) => [c, key === 'category' ? catName(c) : c])], v == null ? '' : String(v), o);
     else if (kind === 'feeds') html = select(id, [['0', 'None'], ['1', 'Single feed'], ['2', 'Dual feed (2 supplies)']], String(v || 0), o);
-    else if (kind === 'area') html = `<textarea class="input input--mono" id="${id}" rows="3" ${err ? 'aria-invalid="true"' : ''} style="height:auto;padding:8px 10px">${esc(v == null ? '' : v)}</textarea>`;
-    else html = input(id, v == null ? '' : String(v), { ...o, mono: kind !== 'text', num: kind === 'int' || kind === 'num' });
+    else if (kind === 'area' || kind === 'lines') html = `<textarea class="input input--mono" id="${id}" rows="3" ${err ? 'aria-invalid="true"' : ''} style="height:auto;padding:8px 10px">${esc(v == null ? '' : v)}</textarea>`;
+    else html = input(id, v == null ? '' : String(v), { ...o, mono: kind !== 'text' && kind !== 'csv', num: kind === 'int' || kind === 'num' || kind === 'snum' });
     if (unit) html = `<div class="input-affix">${html}<span class="affix">${unit}</span></div>`;
     const out = field(esc(label), html, help, err ? esc(err) : '');
     return changed ? out.replace('<div class="field">', '<div class="field changed">') : out;
@@ -138,9 +160,12 @@
     if (ED.state !== 'loaded') return `<div class="page">${pageHead(esc(id), 'Reading the device…', '', crumbs)}</div>`;
     if (!ED.reply) return `<div class="page">${pageHead('Device not found', esc(ED.error ? ED.error.message : ''), '<a class="btn btn--secondary" href="#/library">Back to the library</a>', crumbs)}</div>`;
     const d = ED.reply.device, t = TABS[S.tab.devEdit] ? S.tab.devEdit : 'identity';
-    const fields = TABS[t][1], spans = (f) => (f[4] === 2 ? `<div class="span-2">${control(f)}</div>` : control(f));
+    const noRecord = t === 'datasheet' && !ED.reply.record;
+    const fields = noRecord ? [] : TABS[t][1], spans = (f) => (f[4] === 2 ? `<div class="span-2">${control(f)}</div>` : control(f));
     const lists = Object.entries(LISTS).filter(([, l]) => l[1] === t).map(([key]) => listTable(key)).join('');
-    const lede = t === 'parts' ? '<p class="muted small" style="max-width:68ch;margin-bottom:var(--space-3)">Parts that come with each unit of this device. They appear as extra rows in the BOM.</p>' : '';
+    const ledeText = { parts: 'Parts that come with each unit of this device. They appear as extra rows in the BOM.',
+      datasheet: noRecord ? 'This part has no record in the library\'s device database, so there are no datasheet figures to edit.' : 'What the datasheet confirms. These figures are for reference; the BOM uses the Electrical and Ports values.' }[t];
+    const lede = ledeText ? `<p class="muted small" style="max-width:68ch;margin-bottom:var(--space-3)">${ledeText}</p>` : '';
     const pend = ED.reply.pending_fields.length && ED.reply.saved ? `<div style="margin-bottom:var(--space-4)">${banner('info', `<b>This device has pending changes</b> (${ED.reply.pending_fields.map(esc).join(', ')}). The fields show them; the library keeps the saved values until you apply.`)}</div>` : '';
     const inUse = usesText();
     const used = inUse ? `<div style="margin-bottom:var(--space-4)">${banner('info', `<b>This device is in use.</b> ${inUse} Projects keep the library version they record, so an edit reaches a project only when it records the version you apply.`)}</div>` : '';
@@ -223,14 +248,14 @@
     const key = m[1], kind = kindOf(key);
     if (!kind || kind === 'fixed') return;
     const [v, local] = parse(kind, kind === 'bool' ? e.target.checked : e.target.value);
-    const was = ED.reply.device[key];
-    if (v === was || (v == null && was == null)) { delete ED.draft[key]; delete ED.errors[key]; queueMicrotask(App.render); return; }
+    const was = current(key);
+    if (same(v, was) || (Array.isArray(v) && !v.length && was == null)) { delete ED.draft[key]; delete ED.errors[key]; queueMicrotask(App.render); return; }
     ED.draft[key] = v;
     if (local) { ED.errors[key] = local; queueMicrotask(App.render); return; }
     delete ED.errors[key];
     queueMicrotask(App.render);
     const id = ED.key;
-    Bridge.call('check_library_field', id, key, v).then((msg) => {
+    (isRec(key) ? Bridge.call('check_library_record', id, recPath(key).join('.'), v) : Bridge.call('check_library_field', id, key, v)).then((msg) => {
       if (ED.key !== id || ED.draft[key] !== v) return;
       if (msg) ED.errors[key] = msg; else delete ED.errors[key];
       App.render();
@@ -240,9 +265,15 @@
   function save() {  // resolves true once the edits are in the pending set
     if (ED.saving || !dirty() || invalid()) return Promise.resolve(false);
     const id = ED.key;
-    const edits = Object.entries(ED.draft).map(([k, v]) => (v == null ? { op: 'remove', path: ['devices', id, k] } : { op: 'set', path: ['devices', id, k], value: v }));
+    const draft = Object.entries(ED.draft), rec = draft.filter(([k]) => isRec(k));
+    const edits = draft.filter(([k]) => !isRec(k)).map(([k, v]) => (v == null ? { op: 'remove', path: ['devices', id, k] } : { op: 'set', path: ['devices', id, k], value: v }));
+    const fields = Object.fromEntries(rec.map(([k, v]) => [recPath(k).join('.'), Array.isArray(v) && !v.length ? null : v]));
     ED.saving = true; ED.refusal = ''; App.render();
-    return Bridge.call('add_library_edits', edits).then((p) => {
+    /* Device fields first, then the record's; a refused record keeps its fields in the form. */
+    return (edits.length ? Bridge.call('add_library_edits', edits) : Promise.resolve(null)).then((p) => {
+      if (p) { PEND.page = p; PEND.state = 'loaded'; draft.filter(([k]) => !isRec(k)).forEach(([k]) => delete ED.draft[k]); }
+      return rec.length ? Bridge.call('set_library_record_fields', id, fields) : p;
+    }).then((p) => {
       PEND.page = p; PEND.state = 'loaded'; ED.key = ''; toast(`${id} saved to pending changes`, 'check'); return true;
     }).catch((e) => { ED.refusal = /[.!?]$/.test(e.message) ? e.message : e.message + '.'; return false; })
       .then((ok) => { ED.saving = false; App.render(); return ok; });

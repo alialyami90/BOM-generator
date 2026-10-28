@@ -397,3 +397,20 @@ def test_discarded_datasheet_edits_come_back_on_undo(app_db: api.Api) -> None:
     assert ok(app_db.library_pending())["count"] == 0
     page = ok(app_db.add_library_edits(gone["discarded"], gone["discarded_records"]))
     assert page["count"] == 1
+
+
+def test_the_record_choices_come_from_the_model(app_db: api.Api) -> None:
+    choices = ok(app_db.library_device(PART))["choices"]
+    assert choices["verified"] == ["confirmed", "partial", "unverified"]
+    assert "din_rail" in choices["mounting_kind"]
+
+
+def test_a_record_message_reads_as_the_rule(app_db: api.Api) -> None:
+    message = ok(app_db.check_library_record(PART, "datasheet.mounting_kind", "din_rail"))
+    assert message.startswith("height_u is above 0")
+
+
+def test_a_list_of_words_is_reviewed_as_words(app_db: api.Api) -> None:
+    fields = {"datasheet.certifications": ["IEC 61850-3", "IEEE 1613"]}
+    entries = ok(app_db.set_library_record_fields(PART, fields))["entries"]
+    assert entries[0]["to"] == "IEC 61850-3, IEEE 1613"

@@ -14,11 +14,11 @@ import os
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, get_args
 
 from bomgen.io.errors import InputError
 from bomgen.io.loader import load_library
-from bomgen.library_store.device_db import load_device_records
+from bomgen.library_store.device_db import DeviceRecord, MountingKind, load_device_records
 from bomgen.library_store.edit import apply_edits, check_field, parse_edits
 from bomgen.library_store.errors import LibraryPackageError, RefusalKind
 from bomgen.library_store.local import next_local_version, save_edits
@@ -49,6 +49,9 @@ CHOICES = {
     "kind": [c.value for c in PortKind],
     "usable_for": [c.value for c in PortUse],
     "per": ["unit", "serial_port"],
+    # the datasheet record's
+    "verified": list(get_args(DeviceRecord.model_fields["verified"].annotation)),
+    "mounting_kind": list(get_args(MountingKind)),
 }
 # What a copy leaves behind: it is a new part, not a member of the source's alternative group.
 _NOT_COPIED = ("alt_group", "tier")
@@ -152,7 +155,9 @@ class LibraryEditor:
             return records
         result = apply_record_edits(records, parse_edits(edits))
         if result.records is None:
-            listed = "; ".join(f"{p.location}: {p.message}" for p in result.problems)
+            listed = "; ".join(
+                f"{p.location}: {p.message.removeprefix('Value error, ')}" for p in result.problems
+            )
             raise EditRefusedError(listed)
         return result.records
 
@@ -231,7 +236,8 @@ class LibraryEditor:
             raise KeyError(part_id)
         record = records[part_id].model_dump(mode="json", exclude_none=True)
         key, new = _with_field(record, path.split("."), value)
-        return check_record_field(records, [part_id, key], new)
+        message = check_record_field(records, [part_id, key], new)
+        return message.removeprefix("Value error, ") if message else None
 
     def set_record_fields(self, part_id: str, fields: Mapping[str, object]) -> dict[str, Any]:
         """Set fields of a device's record (dotted paths; None empties one) in the pending set.
@@ -467,6 +473,8 @@ def _text(value: object) -> str:
         return str(int(value))
     if isinstance(value, str | int | float):
         return str(value)
+    if isinstance(value, list) and all(isinstance(item, str) for item in value):
+        return ", ".join(value)
     if isinstance(value, list) and all(isinstance(item, dict) for item in value):
         return "; ".join(_item_text(item) for item in value)
     return json.dumps(value, ensure_ascii=False)
