@@ -24,6 +24,9 @@
                 <span class="help">${n.topology === 'star' ? 'Each L1 switch has one uplink to its L2 switch plus an A–B interlink.' : 'L1 switches are joined in rings. Two ports close each ring.'}</span></div>
               ${n.topology === 'ring' ? field('Switches per ring', input('n-ring', n.ringMax, { num: true, mono: true }), 'Most L1 switches in one ring.') : ''}
             </div></section>
+          <section><h3>L1 switch model</h3>
+            <p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">The engine ranks the library's L1 switches for ${draftSub() ? 'the IED count' : n.iedCount + ' IEDs'}, fewest switches first. The best is used unless you pin another.</p>
+            ${draftSub() ? `<div class="empty"><b>No ranking yet.</b><div class="muted small">It appears once the IED count is set.</div></div>` : rankTable()}</section>
           <section><div class="row" style="justify-content:space-between"><h3>Equipment</h3><div class="popwrap" style="position:relative"><button class="btn btn--secondary btn--sm" data-action="pick-open" aria-haspopup="listbox">${icon('plus')}Add device</button></div></div>
             <p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">What the substation has, before any panel exists. Redundant devices come as an A and a B unit.</p>
             <div id="picker-slot"></div>
@@ -46,6 +49,13 @@
         <aside class="net-result" id="net-result" aria-live="polite">${resultCard()}</aside>
       </div></div>`;
   };
+  const pinned = () => net().pin || '';
+  const rankTable = () => `<div class="table-wrap"><table class="table"><caption class="sr-only">L1 switch models ranked by the engine</caption><thead><tr><th class="num" style="width:44px">Rank</th><th>Model</th><th class="num" style="width:56px">Ports</th><th class="num" style="width:76px">Per side</th><th class="num" style="width:96px">Spare ports</th><th style="width:200px">Use</th></tr></thead><tbody>
+    ${DB.l1Ranking.map((r, i) => { const used = pinned() ? pinned() === r.part : i === 0; return `<tr${used ? ' aria-current="true"' : ''}><td class="num">${i + 1}</td><td class="nowrap" title="${esc(r.note)}"><span class="mono">${esc(r.part)}</span><span class="cell-sub">${esc(r.model)}</span></td><td class="num">${r.ports}</td><td class="num">${r.perSide}</td><td class="num">${r.spare}</td>
+      <td>${used ? (pinned() ? `${badge('info', 'Pinned by you', 'check')} <button class="btn btn--ghost btn--sm" data-action="unpin-l1">Unpin</button>` : badge('ok', 'Tool\'s pick', 'check')) : `<button class="btn btn--secondary btn--sm" data-action="pin-l1" data-part="${esc(r.part)}">Use this one</button>${i === 0 ? ' <span class="muted small">Tool\'s pick</span>' : ''}`}</td></tr>`; }).join('')}</tbody></table>
+    <div class="table-foot"><span>${pinned() ? 'Pinned: the engine sizes the network with this model until you unpin it.' : 'Nothing pinned: the engine uses the top row.'}</span><span>${illus()}</span></div></div>`;
+  ACTIONS['pin-l1'] = (el) => { net().pin = el.dataset.part; S.dirty = true; App.render(); recalc(); };
+  ACTIONS['unpin-l1'] = () => { net().pin = ''; S.dirty = true; App.render(); recalc(); };
   function resultCard() {
     if (draftSub()) return `<div class="card"><h3>Result</h3><p class="muted small" style="margin-top:var(--space-2)">Appears when the IED count and the equipment are set.</p></div>`;
     if (S.netPending) return `<div class="card"><h3>Result</h3><p class="row" style="margin-top:var(--space-3)"><span class="spinner"></span>Calculating…</p></div>`;
@@ -56,7 +66,8 @@
         <tr><td>L2 switches</td><td class="num"><b>${A.l2}</b></td><td class="num"><b>${B.l2}</b></td></tr>
         <tr><td>L2 ports in use</td><td class="num">${A.l2Demand} of ${A.l2Usable}</td><td class="num">${B.l2Demand} of ${B.l2Usable}</td></tr>
         <tr><td>L1 to L2 links</td><td class="num">${A.links}</td><td class="num">${B.links}</td></tr></tbody></table>
-      <p class="small" style="margin-top:var(--space-3)">${net().iedCount || 0} field IEDs need ${A.l1} L1 switches on each side, ${A.l1Usable} usable ports each.</p>
+      <p class="small" style="margin-top:var(--space-3)">L1 model: <span class="mono">${esc(pinned() || DB.l1Ranking[0].part)}</span>${pinned() ? ' (pinned)' : ''}.</p>
+      <p class="small" style="margin-top:var(--space-2)">${net().iedCount || 0} field IEDs need ${A.l1} L1 switches on each side, ${A.l1Usable} usable ports each.</p>
       <p class="muted small" style="margin-top:var(--space-2)">${ring ? 'Rings: two ports close each ring.' : esc(p.note)}</p>
       <p class="muted small" style="margin-top:var(--space-2)">In the app this updates as you type. ${illus()}</p>
       <a class="btn btn--secondary btn--sm" href="#/panels" style="margin-top:var(--space-3)">${icon('panels')}See the panels</a></div>`;
@@ -109,10 +120,10 @@
     return `<div class="board-wrap">
       <div class="board-bar" role="status" aria-live="polite">
         ${L().error ? banner('bad', `<b>Not moved.</b> ${esc(L().error)}`, '<button class="btn btn--secondary btn--sm" data-action="dismiss-layout-error">Dismiss</button>') : ''}
-        ${selInfo ? `<div class="sel-bar"><span><b>${esc(selInfo.d.name)}</b> <span class="mono muted">${esc(selInfo.d.tag)}</span> · ${selInfo.d.side ? 'Side ' + selInfo.d.side : 'Common'} · ${selInfo.d.h} U</span><span class="sp"></span>
+        ${selInfo ? `<div class="sel-bar"><span><b>${esc(selInfo.d.name)}</b> <span class="mono muted">${esc(selInfo.d.tag)}</span> · ${selInfo.d.side ? 'Side ' + selInfo.d.side : 'Common'} · ${selInfo.d.dev} U${selInfo.d.cm ? ' + 1 U cable manager' : ''}</span><span class="sp"></span>
           ${selInfo.d.redundant ? `<button class="btn btn--secondary btn--sm" data-action="move-dialog" data-mode="pair">${icon('move')}Move pair…</button><button class="btn btn--ghost btn--sm" data-action="move-dialog" data-mode="unit">Move this unit only…</button>` : `<button class="btn btn--secondary btn--sm" data-action="move-dialog" data-mode="unit">${icon('move')}Move…</button>`}
           <button class="btn btn--ghost btn--sm" data-action="delete-dev">${icon('trash')}${selInfo.d.redundant ? 'Delete pair' : 'Delete'}</button><button class="btn btn--ghost btn--icon btn--sm" data-action="clear-sel" aria-label="Clear selection">${icon('x')}</button></div>`
-          : `<div class="row board-hint"><span class="muted small">Select a device to see its tag, or drag it. ${icon('grip')} Blank plates between devices are shown as gaps and are not in the BOM.</span><span class="sp"></span>
+          : `<div class="row board-hint"><span class="muted small">Select a device to see its tag, or drag it. ${icon('grip')} Blank plates are shown as gaps and are not in the BOM. A switch, firewall or patch panel counts with its 1 U cable manager.</span><span class="sp"></span>
           <button class="btn btn--ghost btn--sm" data-action="toggle-changes" aria-expanded="${L().openOverrides}">${nChanges ? `${nChanges} manual change${nChanges > 1 ? 's' : ''}` : 'No manual changes'}${icon('chevd')}</button></div>`}
         ${L().openOverrides && !selInfo ? changesList() : ''}
       </div>
@@ -133,9 +144,9 @@
     p.devices.forEach((d, i) => {
       if (i) cards.push(`<div class="plate" style="height:${U}px" title="Blank plate (not in the BOM)"></div>`);
       const isSel = d.id === sel, isPartner = partner && partner.id === d.id;
-      cards.push(`<div class="dev ${isSel ? 'is-sel' : ''} ${isPartner ? 'is-partner' : ''} ${d.moved ? 'is-moved' : ''}" draggable="true" tabindex="0" role="button" aria-pressed="${isSel}" data-action="select-dev" data-dev="${d.id}" data-pair="${d.pair}" style="height:${d.h * U}px"
-        aria-label="${esc(d.name)}${d.side ? ', side ' + d.side : ', common'}, ${d.h} U, tag ${esc(d.tag)}${d.moved ? ', moved by you' : ''}" title="${esc(d.tag)}">
-        <span class="dev-grip">${icon('grip')}</span><span class="dev-main"><b>${esc(d.name)}</b>${d.h >= 2 ? `<span class="mono">${esc(d.tag)}</span>` : ''}</span>${d.moved ? `<span class="dev-flag" title="Moved by you">${icon('move')}</span>` : ''}<span class="dev-u">${d.h} U</span></div>`);
+      cards.push(`<div class="dev ${d.cm ? 'has-cm' : ''} ${isSel ? 'is-sel' : ''} ${isPartner ? 'is-partner' : ''} ${d.moved ? 'is-moved' : ''}" draggable="true" tabindex="0" role="button" aria-pressed="${isSel}" data-action="select-dev" data-dev="${d.id}" data-pair="${d.pair}" style="height:${d.h * U}px"
+        aria-label="${esc(d.name)}${d.side ? ', side ' + d.side : ', common'}, ${d.h} U${d.cm ? ` including a 1 U cable manager` : ''}, tag ${esc(d.tag)}${d.moved ? ', moved by you' : ''}" title="${esc(d.tag)}">
+        <span class="dev-row" style="height:${d.dev * U - 2}px"><span class="dev-grip">${icon('grip')}</span><span class="dev-main"><b>${esc(d.name)}</b>${d.dev >= 2 ? `<span class="mono">${esc(d.tag)}</span>` : ''}</span>${d.moved ? `<span class="dev-flag" title="Moved by you">${icon('move')}</span>` : ''}<span class="dev-u">${d.dev} U</span></span>${d.cm ? '<span class="dev-cm">Cable manager<span class="dev-u">1 U</span></span>' : ''}</div>`);
     });
     return `<section class="bcol" data-panel="${p.n}" aria-label="${esc(p.name)}, side ${p.side}, ${p.used} of ${p.capacity} U used">
       <header><a href="#/panels/${p.id}"><b>${esc(p.name)}</b></a><span class="badge badge--plain">Side ${p.side}</span></header>
