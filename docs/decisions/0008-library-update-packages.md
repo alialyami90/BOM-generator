@@ -94,7 +94,10 @@ reach an installed copy. A package may now carry them.
   database-local id. A damaged installed folder raises `LibraryPackageError`
   (`STORE_DAMAGED`).
 - The record model is strict (unknown keys are errors) except for the
-  free-form `ratings`, `ports` and `ordering_code_decoded`. A new key in the
-  README needs a matching change in `bomgen.library_store.device_db`; a test
-  loads all of `data/device-db/` to catch drift.
+  free-form `ratings`, `ports` and `ordering_code_decoded`. Port-group speed,
+  kind and use reuse the library's own enums, figures are numbers (a bool is
+  not one), `height_u` is above 0 exactly for rack parts, and `notes` is
+  optional. A new key in the README needs a matching change in
+  `bomgen.library_store.device_db`; a test loads all of `data/device-db/` to
+  catch drift.
 - The generator still never reads these records.

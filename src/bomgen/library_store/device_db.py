@@ -11,12 +11,22 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from pathlib import PurePosixPath
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Annotated, Any, Literal, Self
 
 import yaml
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    PositiveInt,
+    StrictFloat,
+    StrictInt,
+    ValidationError,
+    model_validator,
+)
 
 from bomgen.library_store.errors import LibraryPackageError, RefusalKind
+from bomgen.models.library import PortKind, PortSpeed, PortUse
 
 if TYPE_CHECKING:
     from bomgen.library_store.store import LibraryStore
@@ -24,7 +34,9 @@ if TYPE_CHECKING:
 DEVICE_DB_DIR = "device-db"
 DEVICE_DB_SCHEMA_VERSION = 1
 
-Scalar = str | int | float | bool
+# Figures are numbers (a bool is not one); anything uncertain goes in `notes`.
+Number = StrictInt | StrictFloat
+WholeNumber = Annotated[int, Field(strict=True, ge=0)]
 
 
 class _Model(BaseModel):
@@ -33,29 +45,29 @@ class _Model(BaseModel):
 
 class Power(_Model):
     input: str | None = None
-    redundant_psu: Scalar | None = None
-    typical_w: Scalar | None = None
-    max_w: Scalar | None = None
+    redundant_psu: bool | None = None
+    typical_w: Number | None = None
+    max_w: Number | None = None
 
 
 class Dimensions(_Model):
-    h: Scalar | None = None
-    w: Scalar | None = None
-    d: Scalar | None = None
+    h: Number | None = None
+    w: Number | None = None
+    d: Number | None = None
 
 
 class TemperatureRange(_Model):
-    min: Scalar | None = None
-    max: Scalar | None = None
+    min: Number | None = None
+    max: Number | None = None
 
 
 class PortGroup(_Model):
     ports: str
-    count: int
-    speed: str
-    media: str
-    kind: str
-    usable_for: Literal["ied", "uplink", "any"]
+    count: PositiveInt
+    speed: PortSpeed
+    media: str  # the library's Media lacks the SFP and SFP+ the database writes on slots
+    kind: PortKind
+    usable_for: PortUse
     note: str | None = None
 
 
@@ -65,13 +77,13 @@ class Datasheet(_Model):
     full_name: str | None = None
     manufacturer: str | None = None
     summary: str
-    notes: str
+    notes: str | None = None
     power: Power | None = None
     ratings: dict[str, Any] | None = None
     ports: list[Any] | None = None
     dimensions_mm: Dimensions | None = None
-    rack_units: Scalar | None = None
-    weight_kg: Scalar | None = None
+    rack_units: Number | None = None
+    weight_kg: Number | None = None
     mounting: str | None = None
     operating_temp_c: TemperatureRange | None = None
     certifications: list[str] | None = None
@@ -79,16 +91,22 @@ class Datasheet(_Model):
     datasheet_url: str | None = None
     product_url: str | None = None
     mounting_kind: Literal["rack", "din_rail", "plug_in", "enclosure", "external"]
-    height_u: int
+    height_u: WholeNumber
     height_note: str | None = None
     port_groups: list[PortGroup] | None = None
+
+    @model_validator(mode="after")
+    def _height_belongs_to_rack_parts(self) -> Self:
+        if (self.height_u > 0) != (self.mounting_kind == "rack"):
+            raise ValueError("height_u is above 0 exactly when mounting_kind is rack")
+        return self
 
 
 class Tier(_Model):
     model: str
     description: str
     ordering_code: str | None = None
-    unit_power_w: Scalar | None = None
+    unit_power_w: Number | None = None
     url: str | None = None
     notes: str | None = None
     verified: bool

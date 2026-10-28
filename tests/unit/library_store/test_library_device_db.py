@@ -182,3 +182,44 @@ def test_the_loader_is_a_public_entry_point() -> None:
 
     assert library_store.load_device_records is load_device_records
     assert library_store.DeviceRecord is DeviceRecord
+
+
+def _bad(text: str) -> dict[str, bytes]:
+    return {f"{DEVICE_DB_DIR}/bad.yaml": text.encode()}
+
+
+def test_notes_are_optional() -> None:
+    parse_device_records(_bad(MINIMAL.replace("      notes: n\n", "")))
+
+
+def test_height_is_above_zero_exactly_for_rack_parts() -> None:
+    with pytest.raises(LibraryPackageError, match="height_u is above 0 exactly when"):
+        parse_device_records(
+            _bad(MINIMAL.replace("mounting_kind: rack", "mounting_kind: din_rail"))
+        )
+    with pytest.raises(LibraryPackageError, match="height_u is above 0 exactly when"):
+        parse_device_records(_bad(MINIMAL.replace("height_u: 1", "height_u: 0")))
+
+
+def test_a_boolean_is_not_a_height_or_a_figure() -> None:
+    with pytest.raises(LibraryPackageError, match=r"datasheet\.height_u"):
+        parse_device_records(_bad(MINIMAL.replace("height_u: 1", "height_u: true")))
+    with pytest.raises(LibraryPackageError, match=r"datasheet\.weight_kg"):
+        parse_device_records(
+            _bad(
+                MINIMAL.replace("      height_u: 1\n", "      height_u: 1\n      weight_kg: true\n")
+            )
+        )
+
+
+def test_port_groups_use_the_library_vocabulary() -> None:
+    group = (
+        "      port_groups:\n"
+        "        - {ports: p, count: 4, speed: 5G, media: SFP,"
+        " kind: sfp_slot, usable_for: uplink}\n"
+    )
+    text = MINIMAL.replace("      height_u: 1\n", "      height_u: 1\n" + group)
+
+    with pytest.raises(LibraryPackageError, match=r"port_groups\[0\]\.speed"):
+        parse_device_records(_bad(text))
+    parse_device_records(_bad(text.replace("5G", "10G")))
