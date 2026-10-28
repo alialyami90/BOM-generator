@@ -160,3 +160,12 @@ def test_the_device_editor_has_a_datasheet_tab_on_the_record() -> None:
     assert "datasheet: ['Datasheet'" in edit
     assert "Bridge.call('set_library_record_fields'" in edit
     assert "Bridge.call('check_library_record'" in edit
+
+
+def test_csv_import_screen_loads_before_the_editor_so_the_pending_bar_wraps_it() -> None:
+    html = (UI_DIR / "index.html").read_text(encoding="utf-8")
+    assert html.index("screens-libcsv.js") < html.index("screens-libedit.js")
+    js = (UI_DIR / "screens-libcsv.js").read_text(encoding="utf-8")
+    assert "Bridge.call('preview_library_csv'" in js
+    assert "Bridge.call('add_library_csv'" in js
+    assert "goes to pending changes, not straight into the library" in js
