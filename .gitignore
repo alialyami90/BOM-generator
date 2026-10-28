@@ -27,3 +27,7 @@ htmlcov/
 
 # Library update packages are build outputs
 *.bomlib
+
+# Project packages and backups are build outputs too
+*.bomproj
+Backups/
