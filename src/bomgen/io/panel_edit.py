@@ -63,6 +63,13 @@ def _hand_written(listed: _Listed) -> CommentedMap:
     return panel
 
 
+def panel_file(project_file: Path, substation_id: str, panel_id: str) -> Path:
+    """The file of hand-written panel ``panel_id``."""
+    listed = _listed(project_file, substation_id, panel_id)
+    _hand_written(listed)
+    return listed.file
+
+
 def write_panel(
     project_file: Path,
     substation_id: str,

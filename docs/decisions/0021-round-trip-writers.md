@@ -46,6 +46,20 @@ lists the first writers, and each one returns the new layout preview and its pro
    - Generated panels are refused.
 
    `pending_texts` takes `None` for a file the edit deletes.
+
+   *M17c:* `io/fields.py` gives the forms field-level access. A field is a path in the
+   project file, a substation file or a hand-written panel file:
+   - `set_field` and `remove_field`. A mapping that a removal leaves empty is removed
+     too.
+   - `insert_item`, `remove_item` and `move_item`, for equipment rows, panel devices,
+     register rows and other lists.
+   - `validate_field(path, value)`: a dry run of `set_field` that returns the engine's
+     message for that field, or nothing. A rule that spans several keys (for example
+     `t_max_c > t_int_c`) counts as the field's message.
+   - `document_users(key)`: what uses a register document.
+   - `assumed_fields` and `confirm_field`: values whose comment says `ASSUMED`, and
+     dropping that mark when the person confirms one. The rest of the comment stays.
+   - `file_fingerprint`: a hash, so the app can tell when a file changed on disk.
 2. **Check before writing** (`io/edit.py`). The writer loads the whole project with the
    edited text in place of the file (`yaml_source.pending_texts`), so the edit passes
    through the same loader checks as a build would.

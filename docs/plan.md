@@ -867,8 +867,10 @@ writes its section's details when the work starts.
   - M17a covers the generated-panel editor and the board: enclosure, document, options
     for every panel or one panel, port plans, and `layout.overrides` and `removed`.
   - M17b covers hand-written panel files.
-  - M17c covers project and substation settings, per-field validation, and create,
-    rename and delete.
+  - M17c covers field writers for project and substation settings, list rows, the
+    register's used-by list, per-field validation, confirming `ASSUMED` values and file
+    fingerprints.
+  - M17d covers create, rename and delete of projects and substations.
 - **M18 — Loose material (A2 model; A9 engine; A10 sheet; A11 editor).** Backlog point 6.
   Each substation has its own editable loose-material list, on its own "Loose Material"
   sheet (Q36, ADR 0020) and in Preview.

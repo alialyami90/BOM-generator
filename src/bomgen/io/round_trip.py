@@ -124,6 +124,51 @@ def remove_entry(parent: Node, key: Any) -> None:
         parent.fa.set_flow_style()  # a key comment then follows the [] or {}
 
 
+def insert_entry(seq: CommentedSeq, index: int, value: Any) -> None:
+    """Insert ``value`` at ``index`` (``len(seq)`` appends), before the list's tail."""
+    if index >= len(seq):
+        set_entry(seq, len(seq), value)
+        return
+    seq.insert(index, merge_value(None, value))
+
+
+def move_entry(seq: CommentedSeq, source: int, target: int) -> None:
+    """Move item ``source`` to ``target``; the item keeps its comment and the list's tail
+    stays at the list's end."""
+    tail = _take_tail(seq, len(seq) - 1)
+    comment = seq.ca.items.pop(source, None)
+    item = seq[source]
+    del seq[source]
+    seq.insert(target, item)
+    if comment is not None:
+        seq.ca.items[target] = comment
+    _put_tail(seq, len(seq) - 1, tail)
+
+
+def comment_of(parent: Node, key: Any) -> str:
+    """The end-of-line comment of ``parent[key]`` without its ``#``, or ``""``."""
+    entry = parent.ca.items.get(key)
+    token = entry[_slot(parent)] if entry else None
+    if token is None:
+        return ""
+    head = str(token.value).partition("\n")[0].strip()
+    return head.removeprefix("#").strip()
+
+
+def set_comment(parent: Node, key: Any, text: str) -> None:
+    """Set (``""``: remove) the end-of-line comment of ``parent[key]``, keeping the lines
+    after it."""
+    entry = parent.ca.items.setdefault(key, [None, None, None, None])
+    token = entry[_slot(parent)]
+    rest = token.value.partition("\n")[2] if token is not None else ""
+    if not text:
+        entry[_slot(parent)] = CommentToken("\n" + rest, CommentMark(0), None) if rest else None
+    elif token is None:
+        parent.yaml_add_eol_comment(f"# {text}", key)
+    else:
+        token.value = f"# {text}\n{rest}"
+
+
 def edit_document(data: CommentedMap, change: Callable[[CommentedMap], None]) -> None:
     """Run ``change`` on a parsed file and keep each top-level entry's tail (the blank
     line before the next key) at that entry's end, wherever the change leaves it."""

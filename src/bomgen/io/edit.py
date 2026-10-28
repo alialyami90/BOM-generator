@@ -66,29 +66,49 @@ def edit_substation(
     change: Change,
     *,
     store: LibraryStore | None = None,
+    dry_run: bool = False,
 ) -> EditResult:
     """Apply ``change`` to the substation file's parsed YAML and write it if it is sound."""
     file = substation_file(project_file, substation_id)
+    return edit_file(project_file, file, change, substation_id, store=store, dry_run=dry_run)
+
+
+def edit_file(
+    project_file: Path,
+    file: Path,
+    change: Change,
+    substation_id: str | None,
+    *,
+    store: LibraryStore | None = None,
+    dry_run: bool = False,
+) -> EditResult:
+    """Apply ``change`` to ``file`` (the project file, a substation or a panel file of the
+    project) and write it if it is sound; ``substation_id`` names the preview to return."""
     data = load_text(file.read_text(encoding="utf-8-sig"))
     edit_document(data, change)
-    return commit(project_file, substation_id, {file: dump_text(data)}, store=store)
+    texts = {file: dump_text(data)}
+    return commit(project_file, substation_id, texts, store=store, dry_run=dry_run)
 
 
 def commit(
     project_file: Path,
-    substation_id: str,
+    substation_id: str | None,
     texts: Mapping[Path, str | None],
     *,
     store: LibraryStore | None = None,
+    dry_run: bool = False,
 ) -> EditResult:
     """Write ``texts`` (``None`` deletes the file) if, loaded together, they cause no new
-    problem. Changed and new files are written before the deletions."""
+    problem. Changed and new files are written before the deletions. ``dry_run`` only
+    checks: ``written`` then says whether the edit would be."""
     before, _ = _load(project_file, store, {})
     after, loaded = _load(project_file, store, texts)
     known = {_key(issue) for issue in before}
     caused = tuple(issue for issue in after if _key(issue) not in known)
     if caused:
         return EditResult(False, caused)
+    if dry_run:
+        return EditResult(True, tuple(after))
     for path, text in texts.items():
         if text is not None:
             write_atomic(path, text)
@@ -112,8 +132,10 @@ def _key(issue: Issue) -> tuple[Path, str, str]:
     return (issue.file.resolve(), issue.location, issue.message)  # lines move with edits
 
 
-def _preview(loaded: LoadedProject | None, substation_id: str) -> LayoutResult | None:
-    target = _substation(loaded, substation_id) if loaded is not None else None
+def _preview(loaded: LoadedProject | None, substation_id: str | None) -> LayoutResult | None:
+    if loaded is None or substation_id is None:
+        return None
+    target = _substation(loaded, substation_id)
     if target is None or not target.substation.equipment:
         return None
     return layout_preview(target)
