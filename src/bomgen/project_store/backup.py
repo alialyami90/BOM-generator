@@ -6,13 +6,14 @@ import json
 import os
 import re
 import zipfile
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from pydantic import ValidationError
 
+from bomgen.bundle.checks import Check, CheckStatus
 from bomgen.bundle.container import MANIFEST_NAME
 from bomgen.bundle.errors import LibraryPackageError, RefusalKind
 from bomgen.library_store.store import LibraryStore
@@ -52,6 +53,7 @@ def backup_directory(
 
 if TYPE_CHECKING:
     from bomgen.project_store.importer import ProjectImportResult
+    from bomgen.project_store.preview import ProjectImportPreview
 
 
 @dataclass(frozen=True)
@@ -117,33 +119,79 @@ def _describe(path: Path) -> BackupInfo:
     )
 
 
+def _location_error(backup: Path) -> LibraryPackageError | None:
+    if backup.parent.name == BACKUPS_DIR:
+        return None
+    return LibraryPackageError(
+        f"{backup.name} is not in a project's {BACKUPS_DIR} folder",
+        RefusalKind.INVALID_PROJECT,
+        hint="import it with 'bomgen project import' instead",
+    )
+
+
+def _folder_error(backup: Path, project_id: str) -> LibraryPackageError | None:
+    folder = backup.parent.parent.name
+    if project_id == folder:
+        return None
+    return LibraryPackageError(
+        f"{backup.name} belongs to project {project_id!r}, not to the folder {folder!r}",
+        RefusalKind.INVALID_PROJECT,
+    )
+
+
+def _as_check(check_id: str, label: str, error: LibraryPackageError | None) -> Check:
+    if error is None:
+        return Check(check_id, label, CheckStatus.OK)
+    return Check(check_id, label, CheckStatus.FAILED, str(error), error.kind)
+
+
+def preview_backup_restore(
+    backup: Path, *, store: LibraryStore | None = None
+) -> ProjectImportPreview:
+    """What `restore_backup` would do: its two refusals as checks, then the import checks.
+
+    `location` (the file is in `<project>/Backups/`) and `folder` (its manifest names
+    that project) come first; a failure skips every check after it. Nothing is written.
+    """
+    from bomgen.project_store.preview import preview_project_import
+
+    backup = Path(os.path.abspath(backup))
+    preview = preview_project_import(backup, workspace=backup.parent.parent.parent, store=store)
+    location = _as_check(
+        "location", "Backup is in the project's Backups folder", _location_error(backup)
+    )
+    folder_label = "Backup belongs to this project"
+    if location.status is CheckStatus.FAILED or preview.project_id is None:
+        folder = Check("folder", folder_label, CheckStatus.SKIPPED)
+    else:
+        folder = _as_check("folder", folder_label, _folder_error(backup, preview.project_id))
+    checks = [location, folder, *preview.checks]
+    if location.status is CheckStatus.FAILED or folder.status is CheckStatus.FAILED:
+        skipped = [Check(c.id, c.label, CheckStatus.SKIPPED) for c in preview.checks]
+        return replace(preview, checks=[location, folder, *skipped], files=[])
+    return replace(preview, checks=checks)
+
+
 def restore_backup(
     backup: Path, *, store: LibraryStore | None = None, now: datetime | None = None
 ) -> ProjectImportResult:
     """Put a backup back as its project, backing the current state up first.
 
-    The backup must sit in `<project>/Backups/` of the project it was made from.
-    For the review dialog use `preview_project_import(backup, workspace=<project>.parent)`.
+    The backup must sit in `<project>/Backups/` of the project it was made from;
+    `preview_backup_restore` reports the same refusals as checks.
     """
     # imported here: the importer itself takes a safety backup through this module
     from bomgen.project_store.importer import import_project
 
     backup = Path(os.path.abspath(backup))
-    project_dir = backup.parent.parent
-    if backup.parent.name != BACKUPS_DIR:
-        raise LibraryPackageError(
-            f"{backup.name} is not in a project's {BACKUPS_DIR} folder",
-            RefusalKind.INVALID_PROJECT,
-            hint="import it with 'bomgen project import' instead",
-        )
+    if error := _location_error(backup):
+        raise error
     try:
         recorded = read_backup_manifest(backup).project_id
     except (zipfile.BadZipFile, KeyError, ValueError, ValidationError, OSError):
         recorded = None  # the import below reports what is wrong with the file
-    if recorded is not None and recorded != project_dir.name:
-        raise LibraryPackageError(
-            f"{backup.name} belongs to project {recorded!r}, "
-            f"not to the folder {project_dir.name!r}",
-            RefusalKind.INVALID_PROJECT,
-        )
-    return import_project(backup, workspace=project_dir.parent, force=True, store=store, now=now)
+    if recorded is not None and (error := _folder_error(backup, recorded)):
+        raise error
+    return import_project(
+        backup, workspace=backup.parent.parent.parent, force=True, store=store, now=now
+    )

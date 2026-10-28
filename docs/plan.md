@@ -615,8 +615,11 @@ update package (ADR 0008).
     as `BackupInfo(path, saved, size, project_id, library_name, library_version,
     file_count, problem)`, reading manifests only. A damaged file is listed with
     `problem` set. `restore_backup(backup)` is the forced import into the backup's
-    own project, with the safety backup of the current state; review it first with
-    `preview_project_import(backup, workspace=<project folder>.parent)`.
+    own project, with the safety backup of the current state. Review it first with
+    `preview_backup_restore(backup)`: a `ProjectImportPreview` whose first two checks,
+    `location` (the file is in `<project>/Backups/`) and `folder` (its manifest names
+    that project), are `restore_backup`'s two refusals, followed by the normal import
+    checks; a failure skips every check after it.
   - Still open: "projects built with it" has no data source until M1b records the
     library on the project, and `InstalledLibrary.problem` needs wording from A4.
 
