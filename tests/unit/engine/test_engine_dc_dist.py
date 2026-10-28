@@ -92,6 +92,13 @@ def test_branch_mcb_clears_inrush_on_c_curve() -> None:
     assert sizing.inrush_need_a == pytest.approx(2.4)
 
 
+def test_without_an_inrush_figure_running_current_and_floor_decide() -> None:
+    # Few datasheets publish inrush; condition (b) is then skipped, not a warning.
+    sizing = sized(C_CURVE, unit_power_w=200)
+    assert (sizing.rating_a, sizing.set_by) == (6, ("running",))
+    assert (sizing.inrush_a, sizing.trip_multiple, sizing.inrush_need_a) == (None, None, None)
+
+
 def test_inrush_divides_by_the_catalogues_trip_multiple() -> None:
     # A D-curve set (10 x In) clears the same 12 A inrush at 2 A.
     sizing = sized({"trip_curve": "D", "magnetic_trip_multiple": 10}, inrush_a=12)
