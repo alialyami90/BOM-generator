@@ -7,6 +7,7 @@ from engine_factories import device, library, panel, powered, switch
 
 from bomgen.checks import (
     branch_mcb_checks,
+    dc_float_checks,
     dc_main_checks,
     di_capacity_check,
     library_check,
@@ -28,6 +29,7 @@ from bomgen.models.calc import (
     NaturalConvCheck,
 )
 from bomgen.models.panel import Ventilation
+from bomgen.models.project import DesignConstants
 from bomgen.models.report import CheckItem, CheckReport, CheckStatus
 
 SLOTTED = switch(
@@ -184,6 +186,57 @@ def test_inrush_the_catalogue_cannot_check_is_a_warning() -> None:
     (item,) = branch_mcb_checks([branch(2, ("floor",), inrush_a=12)])
     assert item.status is CheckStatus.WARN
     assert "inrush 12 A, but the MCB catalogue has no trip curve" in item.message
+
+
+def float_items(
+    mcb: dict[str, object] | None = None, *parts: dict[str, object], dc: bool = True
+) -> list[CheckItem]:
+    lib = library(*parts, mcb=mcb)
+    lines = [
+        BomLine(
+            group=Group.B, description=str(part["part_id"]), qty=1, part_id=str(part["part_id"])
+        )
+        for part in parts
+    ]
+    mains = [DcMains(panel_id="p1", design_current_a=1.0, rating_a=6 if dc else 0, rule_rating_a=6)]
+    return dc_float_checks([bom(*lines)], mains, lib, DesignConstants())
+
+
+def test_mcbs_rated_below_the_float_voltage_warn() -> None:
+    # iC60N 2P: 125 V DC against the 140 V battery float, one item for the catalogue.
+    (item,) = float_items({"dc_rating_v": 125})
+    assert (item.check, item.status, item.subject) == ("dc_float", CheckStatus.WARN, "Acti9 2P")
+    assert item.values == {"dc_rating_v": 125, "dc_float_v": 140}
+    assert "125 V DC" in item.message
+    assert "140 V float" in item.message
+
+
+def test_mcbs_rated_for_the_float_voltage_pass() -> None:
+    (item,) = float_items({"dc_rating_v": 250})
+    assert item.status is CheckStatus.PASS
+
+
+def test_mcbs_without_a_dc_rating_cannot_be_checked() -> None:
+    (item,) = float_items(None)
+    assert item.status is CheckStatus.WARN
+    assert "no dc_rating_v" in item.message
+
+
+def test_no_dc_feeds_no_mcb_float_check() -> None:
+    assert float_items({"dc_rating_v": 125}, dc=False) == []
+
+
+def test_dc_fed_devices_below_the_float_voltage_warn() -> None:
+    low = powered("LOW", "rtac", input_v_min=88, input_v_max=137)
+    wide = powered("WIDE", "rtac", input_v_min=88, input_v_max=300)
+    unknown = powered("UNK", "rtac")
+    ac = powered("AC", "rtac", supply_type="VAC", voltage_v=230, input_v_max=100, power_supplies=0)
+    items = float_items({"dc_rating_v": 250}, low, wide, unknown, ac)[1:]
+    assert [(i.subject, i.status) for i in items] == [
+        ("LOW", CheckStatus.WARN),
+        ("WIDE", CheckStatus.PASS),
+    ]
+    assert items[0].values == {"input_v_max": 137, "dc_float_v": 140}
 
 
 def thermal(

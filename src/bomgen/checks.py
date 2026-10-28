@@ -2,7 +2,8 @@
 order, step 15; plan M7, Q3).
 
 Checks SFPs against the hosts' slots, DC mains against ΣQ, each branch MCB's sizing
-(plan Q35), fans and natural
+(plan Q35), the DC MCBs and DC-fed devices against the battery float voltage, fans
+and natural
 convection against the heat, DI capacity against the HWIO total, and the library
 version a project recorded. The CLI
 renders the report as text or JSON and exits non-zero when a check fails.
@@ -16,10 +17,11 @@ from bomgen.engine.network import port_plan
 from bomgen.engine.units import DeviceRow, expand_devices
 from bomgen.io.loader import LoadedSubstation
 from bomgen.library_store.store import LibraryRef, library_mismatch
-from bomgen.models.bom import BuildResult, PanelBom, QtySum
+from bomgen.models.bom import BomTable, BuildResult, PanelBom, QtySum
 from bomgen.models.calc import BranchMcb, DcMains, HeatResult
-from bomgen.models.library import Library, Media, PortKind, PortSpeed
+from bomgen.models.library import Library, Media, PortKind, PortSpeed, SupplyType
 from bomgen.models.panel import Panel, Ventilation
+from bomgen.models.project import DesignConstants
 from bomgen.models.report import CheckItem, CheckReport, CheckStatus
 
 SPEED_ORDER = (PortSpeed.M10, PortSpeed.M100, PortSpeed.G1, PortSpeed.G10)
@@ -32,6 +34,8 @@ def check_report(loaded: LoadedSubstation, result: BuildResult) -> CheckReport:
         items += sfp_slot_checks(panel, expand_devices(panel, loaded.library))
     items += dc_main_checks(result.mains)
     items += branch_mcb_checks(result.branch_mcbs)
+    tables: list[BomTable] = [*result.panels, *([result.loose] if result.loose else [])]
+    items += dc_float_checks(tables, result.mains, loaded.library, loaded.constants)
     if result.heat is not None:
         items += ventilation_checks(result.heat)
     di = di_capacity_check(result.panels, loaded.library)
@@ -186,6 +190,61 @@ def branch_mcb_checks(branches: Iterable[BranchMcb]) -> list[CheckItem]:
                 values=values,
             )
         )
+    return items
+
+
+def dc_float_checks(
+    tables: Sequence[BomTable],
+    mains: Iterable[DcMains],
+    library: Library,
+    constants: DesignConstants,
+) -> list[CheckItem]:
+    """The MCB catalogue's DC rating, once, when any panel has DC feeds, and each DC-fed
+    device type's highest input voltage, where the library gives one, against the
+    battery float voltage."""
+    float_v = constants.dc_float_v
+    items = []
+    if any(main.rating_a for main in mains):
+        mcb = library.catalogues.mcb
+        if mcb.dc_rating_v is None:
+            status = CheckStatus.WARN
+            message = (
+                f"{mcb.make} {mcb.family}: the catalogue gives no dc_rating_v, so the DC "
+                f"MCBs cannot be checked against the {float_v:g} V float"
+            )
+        else:
+            status = CheckStatus.PASS if mcb.dc_rating_v >= float_v else CheckStatus.WARN
+            message = (
+                f"{mcb.make} {mcb.family} rated {mcb.dc_rating_v:g} V DC for the "
+                f"{float_v:g} V float"
+            )
+        values: dict[str, int | float | str] = {"dc_float_v": float_v}
+        if mcb.dc_rating_v is not None:
+            values = {"dc_rating_v": mcb.dc_rating_v, **values}
+        items.append(
+            CheckItem(
+                check="dc_float", status=status, subject=mcb.family, message=message, values=values
+            )
+        )
+    seen: set[str] = set()
+    for table in tables:
+        for line in table.lines:
+            device = library.get(line.part_id) if line.part_id else None
+            if device is None or device.part_id in seen or device.input_v_max is None:
+                continue
+            if device.supply_type is not SupplyType.VDC:
+                continue
+            seen.add(device.part_id)
+            ok = device.input_v_max >= float_v
+            items.append(
+                CheckItem(
+                    check="dc_float",
+                    status=CheckStatus.PASS if ok else CheckStatus.WARN,
+                    subject=device.part_id,
+                    message=f"input up to {device.input_v_max:g} V DC for the {float_v:g} V float",
+                    values={"input_v_max": device.input_v_max, "dc_float_v": float_v},
+                )
+            )
     return items
 
 
