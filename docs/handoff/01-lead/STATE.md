@@ -3,64 +3,65 @@
 - Name: A1 - Lead developer, handing over to B1. Date: 2026-10-28.
 - Branch: per-topic branches `claude/project-thread-2fnqi0-<topic>`; this checkpoint is on
   `claude/project-thread-2fnqi0-checkpoint-b1`.
-- origin/main at checkpoint: ded5fe4. Release tags: v0.1.0 (2064227), v0.1.1 (9313db1, run
-  cancelled before publish; see "Waiting on").
+- origin/main at checkpoint: see the "Verification" table. Releases: v0.1.0 (2064227) and v0.1.1
+  (135d7ee, published with the installer and default.bomlib). Since #153 a merged version bump with
+  its CHANGELOG section builds, tags and publishes itself (ADR 0009, amended); no one pushes tags.
 
 ## Where v0.2 stands
 
 Ali's ten v0.2 points are tracked in [`docs/backlog.md`](../../backlog.md), and the milestones
 M12–M18 are in [`docs/plan.md`](../../plan.md) → "M12–M18 (v0.2)".
 
-- Back end merged: M12 layout (#90, #100, #101), M13 library model (#97), M15 MCB sizing
-  (#103, #109), M16 store side (#105, #113, #114, #116, #118, #120, #127), M17 writers and
-  lifecycle (#106, #112, #115, #119), M18 loose model and sheet (#96, #108, #122, #123, #124),
-  M14 research data (#121).
-- App merged: catalogue tabs (#93), edit endpoints (#117), board drag/drop, keyboard and Move…
-  (#126, #129; point 9 done).
-- Decisions this session (plan §6): Q35 (computed sizing, 2 A floor, spikes under 10 ms
-  ignored), Q36 (own sheet), Q37 (keep iC60N; DC ranges as brand sets; float-voltage warning),
-  Q38 (datasheet data in the shipped library only). ADRs 0017–0022 numbered; next free ADR
-  0023, next free question Q39 ([`docs/agents.md`](../../agents.md) numbering table).
+- Back end merged: M12 layout, M13 library model, M14 data in the example (#130), M15 MCB sizing,
+  M16 store side, M17 writers, M18 loose model and sheet (#88–#129, #130).
+- Q39 (Ali, 2026-10-28): DC MCB brand chosen apart from AC. Model #151 (ADR 0023, Proposed),
+  engine #154 (group F and `dc_float` use `catalogues.dc_mcb`; CINC stays AC). #145 refuses a
+  DC-only brand (`ac_rated: false`) as `mcb`.
+- Other merges after the v0.1.1 tag: #149 YAML parse cache (suite 2 min → about 1 min), #152
+  `output.power_footnotes` model.
+- App merged: catalogue tabs, edit endpoints, board drag/drop and keyboard (point 9), Loose
+  material page (#146, replaced #131).
+- Numbering: next free ADR 0024, next free question Q40 ([`docs/agents.md`](../../agents.md)).
 
-## Open PRs (2026-10-28 20:50)
+## Open PRs (2026-10-28 22:00)
 
 | PR | Owner | State |
 | --- | --- | --- |
-| #130 M14 library entries | A3 | Gate and CI green; A2 reviewed (notes in NEXT §3); waiting on B5; held for v0.1.1 |
-| #131 Loose material page | A11/B11 | Not reviewed; needs Windows build; held for v0.1.1 |
-| #140 B7 checkpoint | A7 | ROSTER conflict; A7 asked to merge main |
-| (coming) v0.1.1 CHANGELOG | A7 | Requested 20:47 |
-| (coming) roles 3 and 9 checkpoints | A3, A9 | Not yet opened |
+| #155 Library device editor (M16 app, PR a) | B11 | CI, Windows build and B4's screen review pending |
+| #157 Power footnote rows on the sheet | B10 | Code fine; held for Ali's print-area card |
+| (coming) Q38 shipped library `data/library/` | A3 | Asked 21:50; also sets `ac_rated: false` on C60H-DC |
+| (coming) README/CHANGELOG pass for #130–#154 | B7 | Asked 21:55 |
 
 ## Waiting on
 
-- Ali: card "Should projects choose the DC MCB brand separately from the AC one?" (20:43,
-  recommended "Separate AC and DC choices").
-- Ali: re-tag v0.1.1 at the commit that has A7's changelog. Ali said "Dont release with a
-  missing changlog" (to A6). A6 cancelled run 40765665083 before publish.
-- A7: CHANGELOG 0.1.1 covering #88–#129. A3: the Q38 follow-up after #130.
-  B2: the `McbBrand.ac_rated` guard.
-- Ali, standing: 13 ADRs still "Proposed" (0004, 0005, 0007–0011, 0015–0019, 0021, 0022).
-  Not urgent; offer him a batch-accept card when he has time.
+- Ali: card "Should the printer footnote print on the Power Consumption sheet?" (21:53,
+  recommended "Print it"; the spec says print area A1:L97). Decides #157.
+- Ali, standing: Proposed ADRs 0004, 0005, 0007–0011, 0015–0019, 0021–0023. Offer one batch-accept
+  card when he has time. Also B10's header-fit Print Preview check needs a card.
+- Checkpoint refreshes asked of A3 (after Q38), B6 (after #153), B9 (after #154).
 
-## Threads (route work here; old A2, A4, A8, A10, A11 threads are retired)
+## Threads (route work here)
 
 B2 `cmsg_01CGuLumA5u5e7gSGbisWmMi6PZvzPso7corbrGkzwhE7j`,
+A3 `cmsg_01CGuLumA5u5e7gSGbisWmMiMn4Ay5kTA4wLV22n9mEuru`,
 B4 `cmsg_01CGuLumA5u5e7gSGbisWmMi9aAhgzZ2TPaUfJEPHXE2iF`,
+B5 `cmsg_01CGuLumA5u5e7gSGbisWmMiTNDc3q6MynAdyRny37PKC3`,
+B6 `cmsg_01CGuLumA5u5e7gSGbisWmMi9TL26SYzpQs1CWS9qSpPPv`,
+B7 `cmsg_01CGuLumA5u5e7gSGbisWmMi1Z9DLRFEw35bgfG7ruFWKo`,
 B8 `cmsg_01CGuLumA5u5e7gSGbisWmMiWrgyedtbG3UzCXSmJ5mdJm`,
+B9 `cmsg_01CGuLumA5u5e7gSGbisWmMiEVdwRwy2F5RdK8ptK2QkGn`,
 B10 `cmsg_01CGuLumA5u5e7gSGbisWmMi5oJH7cuxNZWDrjADGPLnRU`,
 B11 `cmsg_01CGuLumA5u5e7gSGbisWmMiSRmFy8hwGpYU6cXpyyR56y`.
-A3, A5→B5, A6, A7 and A9 are in their current threads; `list_threads` shows the latest.
-The coordinator starts B threads as checkpoints merge; tell it each merge.
+`list_threads` shows the latest; the coordinator starts new threads as checkpoints merge.
 
 ## Verification
 
-| Command (on origin/main ded5fe4) | Result | Date |
+| Command | Result | Date |
 | --- | --- | --- |
-| `ruff check . && ruff format --check .` | All checks passed; 296 files formatted | 2026-10-28 |
-| `PYTHONPATH=src python3 -m mypy` | no issues in 210 source files | 2026-10-28 |
-| `PYTHONPATH=src python3 -m pytest -q -p no:cacheprovider` | 2414 passed, 0 failed, 0 skipped (147 s) | 2026-10-28 |
-| `pytest tests/golden` | 94 passed | 2026-10-28 |
+| `ruff check . && ruff format --check .` | GATE_RUFF | 2026-10-28 |
+| `PYTHONPATH=src python3 -m mypy` | GATE_MYPY | 2026-10-28 |
+| `PYTHONPATH=src python3 -m pytest -q -p no:cacheprovider` | GATE_PYTEST | 2026-10-28 |
+| `pytest tests/golden` | GATE_GOLDEN | 2026-10-28 |
 
 Not run here: the Windows installer and GUI (Windows only). The CI "Build Windows installer"
 job is the check for those.
@@ -68,6 +69,8 @@ job is the check for those.
 ## Risks and spec disagreements
 
 - The spec master is a Claude Doc. ADR 0020 (loose material on its own sheet) and the other v0.2
-  overrides (Q35, Q37, Q38, ADR 0022) are not yet written into the spec. That needs Ali, through
-  the spec update process in [`docs/spec/`](../../spec/).
-- The test suite gets slower with #130 (NEXT §3).
+  overrides (Q35, Q37, Q38, Q39, ADR 0022, ADR 0023) are not yet in the spec. That needs Ali,
+  through the spec update process in [`docs/spec/`](../../spec/).
+- `resolve_catalogues` stores the unset `mcb_dc` fallback via `model_copy`, skipping its
+  validator (B2's NEXT task 1, not urgent).
+- The app's settings forms and the library CSV don't show `mcb_dc` yet (ADR 0023 consequences).

@@ -13,7 +13,8 @@ Append-only. Mark replaced entries "superseded by …"; move old ones to `archiv
   `request_decision` card with one option recommended. Record his answer as a plan §6 question
   (next free number in agents.md) in a docs PR.
 - Brief agents specifically: the files, the rule, the tests, and what not to touch.
-- Ali pushes release tags himself; this session's tag pushes get a 403.
+- Ali pushes release tags himself; this session's tag pushes get a 403. *Superseded by #153:*
+  releases start from main when a version bump merges; a hand tag still works.
 
 ## Review procedure (what works)
 
@@ -47,3 +48,17 @@ Append-only. Mark replaced entries "superseded by …"; move old ones to `archiv
   using `edit_message`.
 - Merging while the head was still changing gave a 409. Always merge with the head sha just
   reviewed.
+- Checking a tag only on Ali's word: v0.1.1 stayed on the old commit after "Retag is done"
+  (the push was refused). Always confirm with `git ls-remote origin refs/tags/<tag>`; Ali finally
+  redid it in the GitHub UI (delete tag, publish a release on the commit).
+- A `message_thread` with a placeholder text went to the wrong thread. Write the real text first,
+  and send a one-line correction at once if it happens.
+
+## More small decisions (2026-10-28, after the re-tag)
+
+- Agents whose session can push to one branch only: after their PR merges, they restart that
+  branch from main for the next PR (B2 did #145 → #149 → #151 → #152 → #156 this way).
+- A spec disagreement found in review (#157's print area) goes to Ali on a card before merging,
+  even when the code is right.
+- Code merges were held while a release tag was pending, so the tag matched its changelog.
+  With release-from-main (#153) that is no longer needed.
