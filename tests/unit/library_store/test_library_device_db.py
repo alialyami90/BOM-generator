@@ -223,3 +223,125 @@ def test_port_groups_use_the_library_vocabulary() -> None:
     with pytest.raises(LibraryPackageError, match=r"port_groups\[0\]\.speed"):
         parse_device_records(_bad(text))
     parse_device_records(_bad(text.replace("5G", "10G")))
+
+
+LOW = "low: {model: A, description: a, verified: true}"
+
+
+def _tier(extra: str) -> dict[str, bytes]:
+    """MINIMAL with `extra` keys added to the low tier."""
+    return _bad(MINIMAL.replace(LOW, LOW[:-1] + ", " + extra + "}"))
+
+
+def _datasheet(extra: str) -> dict[str, bytes]:
+    """MINIMAL with `extra` keys added to the original part's datasheet."""
+    return _bad(MINIMAL.replace("      height_u: 1\n", f"      height_u: 1\n      {extra}\n"))
+
+
+def _refused(files: dict[str, bytes], field: str) -> None:
+    """The records fail on `field` itself, not because the key is unknown."""
+    with pytest.raises(LibraryPackageError) as caught:
+        parse_device_records(files)
+    assert field in str(caught.value)
+    assert f"{field}: unknown key" not in str(caught.value)
+
+
+def test_a_tier_may_carry_its_own_mounting_and_height() -> None:
+    parse_device_records(_tier("mounting_kind: rack, height_u: 2"))
+    parse_device_records(_tier("mounting_kind: din_rail, height_u: 0"))
+    parse_device_records(_tier("height_u: 1"))
+
+
+def test_a_tier_height_is_above_zero_exactly_for_rack_parts() -> None:
+    with pytest.raises(LibraryPackageError, match="height_u is above 0 exactly when"):
+        parse_device_records(_tier("mounting_kind: din_rail, height_u: 1"))
+    with pytest.raises(LibraryPackageError, match="height_u is above 0 exactly when"):
+        parse_device_records(_tier("mounting_kind: rack, height_u: 0"))
+
+
+def test_a_tier_mounting_kind_and_height_use_the_datasheet_vocabulary() -> None:
+    _refused(_tier("mounting_kind: shelf"), "low.mounting_kind")
+    _refused(_tier("height_u: true"), "low.height_u")
+    _refused(_tier("height_u: -1"), "low.height_u")
+
+
+def test_a_tier_may_describe_its_supply() -> None:
+    parse_device_records(
+        _tier(
+            "supply_type: VDC, voltage_v: 125, supply_option: HV, supply_ok: true,"
+            " power_supplies: 2, power_basis: datasheet_max, power_note: n"
+        )
+    )
+    parse_device_records(_tier("supply_type: none, supply_ok: false, power_basis: assumed"))
+    parse_device_records(_tier("supply_type: VAC, voltage_v: 230.5, power_supplies: 1"))
+
+
+@pytest.mark.parametrize(
+    ("extra", "field"),
+    [
+        ("supply_type: AC", "supply_type"),
+        ("voltage_v: '125'", "voltage_v"),
+        ("voltage_v: true", "voltage_v"),
+        ("supply_ok: 'yes'", "supply_ok"),
+        ("power_supplies: 3", "power_supplies"),
+        ("power_supplies: 0", "power_supplies"),
+        ("power_supplies: true", "power_supplies"),
+        ("power_basis: guessed", "power_basis"),
+    ],
+)
+def test_a_tier_supply_value_outside_its_rule_is_refused(extra: str, field: str) -> None:
+    _refused(_tier(extra), f"low.{field}")
+
+
+def test_a_tier_may_carry_inrush_figures() -> None:
+    parse_device_records(
+        _tier("inrush_a: 12.5, inrush_ms: 3, inrush_basis: datasheet, inrush_note: n")
+    )
+    parse_device_records(_tier("inrush_basis: not_given"))
+    parse_device_records(_tier("inrush_basis: assumed"))
+
+
+@pytest.mark.parametrize(
+    ("extra", "field"),
+    [
+        ("inrush_a: '12'", "inrush_a"),
+        ("inrush_a: true", "inrush_a"),
+        ("inrush_ms: '3'", "inrush_ms"),
+        ("inrush_basis: measured", "inrush_basis"),
+    ],
+)
+def test_a_tier_inrush_value_outside_its_rule_is_refused(extra: str, field: str) -> None:
+    _refused(_tier(extra), f"low.{field}")
+
+
+def test_the_original_part_may_carry_inrush_figures() -> None:
+    text = MINIMAL.replace(
+        "      height_u: 1\n",
+        "      height_u: 1\n      inrush_a: 30\n      inrush_ms: 2.5\n"
+        "      inrush_basis: datasheet\n      inrush_note: n\n",
+    )
+    parse_device_records(_bad(text))
+
+
+def test_the_original_part_inrush_follows_the_same_rules() -> None:
+    _refused(_datasheet("inrush_a: '30'"), "datasheet.inrush_a")
+    _refused(_datasheet("inrush_basis: measured"), "datasheet.inrush_basis")
+
+
+def test_a_tier_may_list_port_groups() -> None:
+    group = "{ports: p, count: 4, speed: 10G, media: SFP, kind: sfp_slot, usable_for: uplink}"
+    parse_device_records(_tier(f"port_groups: [{group}]"))
+    _refused(_tier(f"port_groups: [{group.replace('10G', '5G')}]"), "low.port_groups[0].speed")
+
+
+def test_a_tier_may_carry_fan_airflow_ratings_and_sources() -> None:
+    parse_device_records(
+        _tier("airflow_m3h: 120, ratings: {trip_curve: C, dc_v: 125}, sources: [https://x.test]")
+    )
+    _refused(_tier("airflow_m3h: '120'"), "low.airflow_m3h")
+    _refused(_tier("sources: https://x.test"), "low.sources")
+
+
+def test_a_tier_still_refuses_an_unknown_key() -> None:
+    with pytest.raises(LibraryPackageError, match=r"low\.colour: unknown key"):
+        parse_device_records(_tier("colour: red"))
