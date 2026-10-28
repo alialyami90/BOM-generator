@@ -151,8 +151,8 @@ the same one. Ask A1 before you add one.
 
 | Kind | Taken | Next free |
 | --- | --- | --- |
-| ADR | 0009 installer layout (A6), 0010 input models (A2), 0011 UI design language and bundled fonts (A4), 0012 projects/substations/.bomproj (A1, accepted), 0013 network sizing and panel layout (A1, accepted), 0014 engine data model (A9, accepted), 0015 desktop app bridge (A11, accepted), 0016 check report and revision comparison (A9, proposed); reserved: 0017 library alternatives and catalogue brands (A2), 0018 library CSV exchange (A5), 0019 branch MCB sizing (A9) | 0020 |
-| Open question | Q22 workbook corrections, Q23 issued sheets vs masters (A2), Q24–Q28 substations/layout (resolved), Q29 thermostat and fan library defaults (A3), Q30 loose-table order (A9), Q31 M2 engine rules bundle (A9), Q32 cable managers vs 32U (resolved), Q33 FOPP-96SM height (resolved), Q34 M3 group E–H rules (resolved), Q35 branch MCB sizing rule, Q36 loose-material placement | Q37 |
+| ADR | 0009 installer layout (A6), 0010 input models (A2), 0011 UI design language and bundled fonts (A4), 0012 projects/substations/.bomproj (A1, accepted), 0013 network sizing and panel layout (A1, accepted), 0014 engine data model (A9, accepted), 0015 desktop app bridge (A11, accepted), 0016 check report and revision comparison (A9, proposed); reserved: 0017 library alternatives and catalogue brands (A2), 0018 library CSV exchange (A5), 0019 branch MCB sizing (A9), 0020 loose-material sheet (A10) | 0021 |
+| Open question | Q22 workbook corrections, Q23 issued sheets vs masters (A2), Q24–Q28 substations/layout (resolved), Q29 thermostat and fan library defaults (A3), Q30 loose-table order (A9), Q31 M2 engine rules bundle (A9), Q32 cable managers vs 32U (resolved), Q33 FOPP-96SM height (resolved), Q34 M3 group E–H rules (resolved), Q35 branch MCB sizing rule (resolved), Q36 loose-material placement (resolved) | Q37 |
 
 ## Review and merge
 
