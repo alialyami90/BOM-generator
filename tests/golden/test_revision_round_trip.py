@@ -33,9 +33,10 @@ def issued(loaded: LoadedSubstation, tmp_path_factory: pytest.TempPathFactory) -
 
 def test_the_issue_reads_back_as_its_build(loaded: LoadedSubstation, issued: Path) -> None:
     previous = read_previous_issue(issued)
-    assert list(previous.sheets) == ["1", "2", "3", "4"]
+    assert list(previous.sheets) == ["1", "2", "3", "4", "Loose Material"]
     tables = {sheet: [len(t.rows) for t in found] for sheet, found in previous.sheets.items()}
-    assert tables == {"1": [71], "2": [74], "3": [62], "4": [39, 14]}  # the console hosts loose
+    # ADR 0020: the loose material has its own sheet; the console's sheet holds one table.
+    assert tables == {"1": [71], "2": [74], "3": [62], "4": [39], "Loose Material": [14]}
     result = build(loaded)
     marked, report = compare_with_previous(result, previous)
     assert report.changes == ()

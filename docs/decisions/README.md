@@ -23,3 +23,4 @@ An ADR stays "Proposed" until Ali accepts it in review.
 | 0015 | [Desktop app: how the UI calls the engine](0015-desktop-app-bridge.md) | Proposed |
 | 0016 | [Check report and revision comparison](0016-check-report-and-revision-comparison.md) | Proposed |
 | 0018 | [Library CSV exchange](0018-library-csv-exchange.md) | Proposed |
+| 0020 | [Loose material on its own sheet](0020-loose-material-sheet.md) | Accepted |

@@ -34,6 +34,7 @@ manual_panels:  # never touched by the layout; follow the panels above
 output:  # the defaults, written out
   file_name: "{doc_no}_PSA_BOM_Rev{rev}.xlsx"
   sheet_names:
+    loose_material: "Loose Material"
     power_consumption: "Power Consumption"
     heat_dissipation: "Heat Dissipation"
     heat_calculations: "Heat Calculations"

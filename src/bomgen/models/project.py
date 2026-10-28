@@ -35,13 +35,14 @@ _FILE_NAME_FORBIDDEN = set('<>:"/\\|?*')
 
 
 class SheetNames(InputModel):
+    loose_material: ExcelSheetName = "Loose Material"  # ADR 0020
     power_consumption: ExcelSheetName = "Power Consumption"
     heat_dissipation: ExcelSheetName = "Heat Dissipation"
     heat_calculations: ExcelSheetName = "Heat Calculations"
 
 
 class OutputSettings(InputModel):
-    """Workbook file name template and calculation sheet names."""
+    """Workbook file name template and the names of the generated sheets."""
 
     file_name: str = "{doc_no}_PSA_BOM_Rev{rev}.xlsx"
     sheet_names: SheetNames = Field(default_factory=SheetNames)
@@ -106,7 +107,7 @@ class LooseExtra(InputModel):
 
 class LooseMaterial(InputModel):
     title: str = "PSA Panels Loose Material and Auxiliary Equipment"  # the table's title row
-    host_panel: str
+    host_panel: str  # the panel whose document the Loose Material sheet is issued under
     items: list[LooseExtra] = Field(default_factory=list)
 
 
