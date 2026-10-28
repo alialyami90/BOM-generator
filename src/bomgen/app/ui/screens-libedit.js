@@ -67,7 +67,7 @@
   };
 
   /* ---------- Device editor ---------- */
-  const ED = { key: '', state: 'idle', reply: null, error: null, draft: {}, errors: {}, refusal: '', saving: false };
+  const ED = { key: '', state: 'idle', reply: null, error: null, draft: {}, errors: {}, refusal: '', saving: false, users: null };
   const CAT = { io: 'IO', gps: 'GPS', rtac: 'RTAC', sfp: 'SFP' };
   const catName = (c) => c.split('_').map((w) => CAT[w] || w).join(' ').replace(/^./, (m) => m.toUpperCase());
   /* [key, label, kind, help]; kinds: text, mono, area, int, num, choice, feeds, bool. The model checks every value. */
@@ -96,7 +96,10 @@
   const withUnit = (key, v) => { const u = (FIELDS.find((f) => f[0] === key) || [])[5]; return v ? (u ? `${v} ${u}` : v) : 'empty'; };
 
   function loadDevice(id) {
-    Object.assign(ED, { key: id, state: 'loading', reply: null, error: null, draft: {}, errors: {}, refusal: '' });
+    Object.assign(ED, { key: id, state: 'loading', reply: null, error: null, draft: {}, errors: {}, refusal: '', users: null });
+    if (S.project && S.project.real && S.sub) {  /* who uses it in the open substation: the In use banner and the delete warning */
+      Bridge.call('library_part_users', id, S.project.file, S.sub).then((u) => { if (ED.key === id) { ED.users = u; App.render(); } }).catch(() => {});
+    }
     Bridge.call('library_device', id).then((r) => { if (ED.key === id) ED.reply = r; }).catch((e) => { if (ED.key === id) ED.error = e; })
       .then(() => { if (ED.key === id) { ED.state = 'loaded'; App.render(); } });
   }
@@ -139,11 +142,22 @@
     const lists = Object.entries(LISTS).filter(([, l]) => l[1] === t).map(([key]) => listTable(key)).join('');
     const lede = t === 'parts' ? '<p class="muted small" style="max-width:68ch;margin-bottom:var(--space-3)">Parts that come with each unit of this device. They appear as extra rows in the BOM.</p>' : '';
     const pend = ED.reply.pending_fields.length && ED.reply.saved ? `<div style="margin-bottom:var(--space-4)">${banner('info', `<b>This device has pending changes</b> (${ED.reply.pending_fields.map(esc).join(', ')}). The fields show them; the library keeps the saved values until you apply.`)}</div>` : '';
+    const inUse = usesText();
+    const used = inUse ? `<div style="margin-bottom:var(--space-4)">${banner('info', `<b>This device is in use.</b> ${inUse} Projects keep the library version they record, so an edit reaches a project only when it records the version you apply.`)}</div>` : '';
     const notice = ED.refusal ? `<div style="margin-bottom:var(--space-4)">${banner('bad', `<b>Not saved.</b> ${esc(ED.refusal)}`)}</div>` : '';
     const isNew = !ED.reply.saved;
-    return `<div class="page">${pageHead(esc(d.part_id), esc([d.make, d.model, isNew ? 'new device, not applied yet' : ''].filter(Boolean).join(' · ')), `<button class="btn btn--danger" data-action="delete-device" data-id="${esc(d.part_id)}">${icon('trash')}Delete…</button>`, crumbs)}${notice}${pend}
+    return `<div class="page">${pageHead(esc(d.part_id), esc([d.make, d.model, isNew ? 'new device, not applied yet' : ''].filter(Boolean).join(' · ')), `<button class="btn btn--danger" data-action="delete-device" data-id="${esc(d.part_id)}">${icon('trash')}Delete…</button>`, crumbs)}${notice}${used}${pend}
       ${tabs('devEdit', Object.entries(TABS).map(([k, [label]]) => [k, label]), t, 'Device sections')}
       <div role="tabpanel" aria-labelledby="tab-devEdit-${t}" style="margin-top:var(--space-4)">${t === 'parts' ? `<datalist id="dl-parts">${(ED.reply.part_ids || []).map((p) => `<option value="${esc(p)}">`).join('')}</datalist>` : ''}${lede}${fields.length ? `<div class="form ${t === 'identity' ? 'form--2' : 'form--3'}">${fields.map(spans).join('')}</div>` : ''}${lists}</div>${saveBar()}</div>`;
+  }
+  /* "GIS Substation uses it in 2 rows: equipment PSA3-RTAC; panel psa3: PSA3-RTAC." Library rows that bring it are named apart. */
+  function usesText() {
+    const u = ED.users;
+    if (!u || !u.uses || !u.uses.length) return '';
+    const rows = u.uses.filter((x) => x.where !== 'library'), lib = u.uses.filter((x) => x.where === 'library');
+    const list = (xs) => xs.map((x) => `${esc(x.where)} <span class="mono">${esc(x.name)}</span>`).join('; ');
+    return [rows.length ? `${esc(u.substation)} uses it in ${plural(rows.length, 'row')}: ${list(rows)}.` : '',
+      lib.length ? `In the library it comes with ${lib.map((x) => `<span class="mono">${esc(x.name)}</span>`).join(', ')}.` : ''].filter(Boolean).join(' ');
   }
   function listTable(key) {
     const [title, , cols] = LISTS[key], rows = value(key) || [], err = ED.errors[key], changed = key in ED.draft;
@@ -256,7 +270,7 @@
       toast(`${id} added to pending changes. It joins the library when you apply them.`, 'plus'); go('#/library/device/' + encodeURIComponent(id));
     }).catch((e) => { $('#ad-err').innerHTML = banner('bad', esc(e.message)); });
   };
-  ACTIONS['delete-device'] = (el) => dialog({ title: `Delete ${esc(el.dataset.id)}?`, body: `<div class="stack"><p>The device is removed from the library when you apply the pending changes. You can still discard it before then.</p><p class="muted small">A project that uses it reports an error once it records the new version, until another part is picked.</p><div id="dd-err"></div></div>`,
+  ACTIONS['delete-device'] = (el) => dialog({ title: `Delete ${esc(el.dataset.id)}?`, body: `<div class="stack"><p>The device is removed from the library when you apply the pending changes. You can still discard it before then.</p>${usesText() ? banner('bad', `<b>It is still used.</b> ${usesText()} After you apply this change, a project that records the new version reports an error until another part is picked.`) : '<p class="muted small">A project that uses it reports an error once it records the new version, until another part is picked.</p>'}<div id="dd-err"></div></div>`,
     actions: `<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--danger" data-action="delete-device-do" data-id="${esc(el.dataset.id)}">${icon('trash')}Delete device</button>` });
   ACTIONS['delete-device-do'] = (el) => {
     const id = el.dataset.id;

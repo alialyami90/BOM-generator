@@ -6,6 +6,7 @@ the bridge replies.
 """
 
 import json
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -294,3 +295,22 @@ def test_a_deleted_device_is_listed_as_removed(app: api.Api) -> None:
     ok(app.add_library_edits([{"op": "remove", "path": ["devices", "SEL-2488"]}]))
     entries = ok(app.library_pending())["entries"]
     assert ("SEL-2488", "removed") in {(e["label"], e["kind"]) for e in entries}
+
+
+# -- who uses a part (the In use banner and the delete warning) --------------------------------
+
+
+def test_part_users_lists_the_open_substations_rows(app: api.Api, tmp_path: Path) -> None:
+    project = Path(shutil.copytree(EXAMPLES, tmp_path / "workspace" / "jfgp2-pkg3"))
+    reply = ok(app.library_part_users(PART, str(project / "project.yaml"), "gis01"))
+    assert reply["substation"]
+    wheres = {u["where"] for u in reply["uses"]}
+    assert "equipment" in wheres
+    assert all(set(u) == {"where", "name"} for u in reply["uses"])
+
+
+def test_an_unused_part_has_no_users(app: api.Api, tmp_path: Path) -> None:
+    project = Path(shutil.copytree(EXAMPLES, tmp_path / "workspace" / "jfgp2-pkg3"))
+    assert (
+        ok(app.library_part_users("NOPE-1", str(project / "project.yaml"), "gis01"))["uses"] == []
+    )

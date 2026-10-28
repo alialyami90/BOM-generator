@@ -45,12 +45,14 @@ from bomgen.app.projects import RecentProjects, project_files, summarize
 from bomgen.app.substations import (
     ProjectInvalidError,
     SubstationNotFoundError,
+    resolve,
     substation_page,
 )
 from bomgen.bundle.errors import LibraryPackageError, RefusalKind
 from bomgen.io import edit, loose_edit
 from bomgen.io.edit import EditError, EditResult
 from bomgen.io.errors import InputError
+from bomgen.io.fields import part_users
 from bomgen.io.loader import PROJECT_FILE, load_library
 from bomgen.library_store.device_db import DeviceRecord, load_device_records
 from bomgen.library_store.manifest import Manifest
@@ -410,6 +412,22 @@ class Api:
             raise AppError("not_found", f"There is no part {copy_of} in the library.") from exc
         except (EditRefusedError, ValidationError) as exc:
             raise AppError("invalid_edit", f"The library cannot take this change: {exc}") from exc
+
+    @endpoint
+    def library_part_users(
+        self, part_id: str, project_file: str, substation_id: str
+    ) -> dict[str, Any]:
+        """The rows of the open substation, and of its library, that use ``part_id``; ``uses`` is
+        None when the substation cannot be read (its problems are on Checks)."""
+        with self._substation(substation_id):
+            found = resolve(Path(project_file), substation_id, self._library_store())
+        if found.loaded is None:
+            return {"substation": substation_id, "uses": None}
+        uses = part_users(found.loaded, part_id)
+        return {
+            "substation": found.loaded.substation.substation.name or substation_id,
+            "uses": [{"where": u.where, "name": u.name} for u in uses],
+        }
 
     @endpoint
     def discard_library_edits(self) -> dict[str, Any]:
