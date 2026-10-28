@@ -11,7 +11,7 @@ editing behaviour, `editing.md` is newer.
 
 ```
 Home (all projects) ─ Project ─┬─ Overview · Substations · Documents · Backup and share
-                               └─ Substation ─ Settings · Network · Panels (board, list, panel editor)
+                               └─ Substation ─ Settings · Network · Panels (board, list, panel editor) · Loose material
 Library (import, versions)         └─ Checks ─ Preview ─ Build        (each per substation)
 ```
 
@@ -23,17 +23,18 @@ panels, checks and workbook. The first substation can be copied to start the nex
 | --- | --- | --- |
 | `#/home` | Home | All projects on this PC; first-run guidance when no library is installed |
 | `#/project/<tab>` | Project | `info`, `substations`, `documents`, `share` |
-| `#/settings/<tab>` | Substation settings | Substation-only settings (general, documents used, output, constants, loose material, YAML) |
+| `#/settings/<tab>` | Substation settings | Substation-only settings (general, documents used, output, constants, YAML) |
 | `#/network` | Network | IED count, topology, equipment, spares, the engine's sizing result |
 | `#/panels` | Panels | The Board and List views of the generated panels |
-| `#/panels/<id>/<tab>` | Panel editor | One cabinet; generated panels are read-only, hand-written ones are editable |
+| `#/panels/<id>/<tab>` | Panel editor | One cabinet; generated panels have editable enclosure, port plans, options and document, hand-written ones are fully editable |
+| `#/loose` | Loose material | The substation's own list of items not mounted in a cabinet, printed on its own sheet |
 | `#/library`, `#/library/import` | Library, Import and versions | Browse the installed devices; review and install a `.bomlib` |
 | `#/checks`, `#/preview/<sheet>`, `#/build` | Verify and issue | For the open substation |
 
 The rail has three groups. Top: Home and Library, always reachable. **Project**:
 one item that opens the project page, with its status. **Substation**: a
-switcher (a select that lists the project's substations) over Settings, Network
-and Panels, then **Verify and issue** (Checks, Preview, Build). The substation
+switcher (a select that lists the project's substations) over Settings, Network,
+Panels and Loose material, then **Verify and issue** (Checks, Preview, Build). The substation
 items are disabled until a substation is open.
 
 ## Primary flows
@@ -118,11 +119,23 @@ Only what belongs to this substation: *General* (name, title line, and a
 read-only "From the project" block with a link to the project page), *Documents*
 (which register entry each calculation sheet prints; cabinet BOMs choose theirs on
 each panel), *Output* (main document, file-name pattern with the resulting name,
-calculation sheet names), *Design constants* (the ten spec constants with unit,
+sheet names, including Loose Material), *Design constants* (the ten spec constants with unit,
 default, a "Changed from …" mark and a Reset per row, and "Reset all to defaults"; defaults
-come from the project), *Loose
-material* and *YAML* (`substation.yaml`). Project-wide values are not repeated
+come from the project) and *YAML* (`substation.yaml`). *General* also holds **Catalogue brands**: the
+substation uses the project's choice unless it sets its own. Loose material has its own page. Project-wide values are not repeated
 here.
+
+### Loose material
+- **Layout:** title and lede; header actions *Add free text…* and *Add from library…* (primary). The
+  table (No., Part or description, Designation, Qty, Fed from, remove) across the page, with a foot that counts
+  the items and says what a quantity may be. Below it, two cards side by side: *On the workbook* (sheet name,
+  position, "written only while there are items", link to Preview) and *Issued under* (the document the sheet
+  header takes).
+- **Behaviour:** a form; every cell is editable in place; add and remove are held until saved (Undo toast on
+  remove, Discard restores). A free-text item shows a *Free text* badge. Details, field rules and back-end
+  needs are in [`editing.md`](editing.md), "Loose material (v0.2)".
+- **States:** empty (explains that no sheet is written, offers both add actions); a library part that is not
+  in the active library is shown as "Library part" without make and model; invalid quantity marks the cell.
 
 ### Network
 - **Layout:** two columns. Left: **Field network** (IED count, Star or Ring, ring
@@ -276,7 +289,7 @@ too and their "Go to field" opens the project page.
 
 ### Preview
 - **Layout:** title, a banner when the last load had errors, sheet tabs (one
-  Sheet per panel, then Power Consumption, Heat Dissipation, Heat Calculations),
+  Sheet per panel, then **Loose Material (n)** when the substation has loose material, then Power Consumption, Heat Dissipation, Heat Calculations),
   then the sheet.
 - **BOM sheet:** group chips A to H with counts, a row filter, a switch for the
   hidden HWIO column (the revised-cells switch was dropped, see *Departures in
@@ -286,6 +299,9 @@ too and their "Go to field" opens the project page.
   span their child rows and the empty separator rows between groups E to H are
   shown, as in the workbook. A footer gives the row count and the panel HWIO
   total.
+- **Loose Material sheet:** the panel BOM layout without group chips: the grey title block, then SR.NO, tag,
+  description, quantity, make, model and ordering code; an item's children follow it. A line says which
+  document the header comes from, with *Edit the list*.
 - **Calculation sheets:** Power: headline metrics and block tables with totals
   including the 25% margin. Heat Dissipation: per-device W and BTU/h. Heat
   Calculations: forced-ventilation table with line-up check, natural-convection
@@ -296,7 +312,7 @@ too and their "Go to field" opens the project page.
 - **Layout:** two columns. Left: file name (from the pattern), save folder,
   options (highlight changes since the previous issue with a file picker, open
   when written), the Build button and the result area. Right: what the
-  workbook contains, library, project revision and warning count.
+  workbook contains (the Loose Material sheet only when it will be written), library, project revision and warning count.
 - **States:** blocked (errors: red banner, disabled button with a reason);
   ready; building (button busy, four named steps with a progress bar);
   success (path, size, sheet count, Open workbook primary, Show in folder, and

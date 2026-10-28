@@ -77,7 +77,7 @@
     </div>
     <div class="span-2 section" style="margin:0">
       <h3>Catalogue brands</h3>
-      <p class="lede">Which make the engine takes ordering codes from for the breakers, contacts and terminal blocks. Every substation of the project uses these; the library default is the starting choice.</p>
+      <p class="lede">Which make the engine takes ordering codes from for the breakers, contacts and terminal blocks. Every substation of the project uses these unless it sets its own under Substation › Settings. The library default is the starting choice.</p>
       <div class="form form--3" style="margin-top:var(--space-3)">${[['mcb', 'MCBs'], ['aux', 'Aux contacts'], ['tb', 'Terminal blocks']].map(([k, t]) => { const c = DB.catalogues[k]; return field(t, select('br-' + k, c.brands.map((b) => [b.id, b.name + (b.id === c.active ? ' (library default)' : '')]), (p.brands && p.brands[k]) || c.active)); }).join('')}</div>
       <p class="muted small" style="margin-top:var(--space-2)">Changing a brand changes the codes on the next build. Ratings and sizes stay as they are. Edit the codes under Library › Catalogues.</p>
     </div>

@@ -15,7 +15,7 @@ Network screen and the Panels board from A1's design
 | `design-language.md` | Principles, the readiness rail, the panels board, colour, type, layout, motion, voice |
 | `tokens.json` | Design tokens (W3C format): colour light/dark, type, space, size, radius, motion |
 | `components.md` | Every component with sizes, states and accessibility notes |
-| `editing.md` | v0.2 editing model: save bar, validation, create and delete rules, every editable field, library editing, back-end needs |
+| `editing.md` | v0.2 editing model: save bar, validation, create and delete rules, every editable field, library editing, loose material, back-end needs |
 | `screens.md` | Screen map, flows, per-screen layout and states, what the app needs from the engine |
 | `prototype/` | Clickable prototype (vanilla HTML/CSS/JS) |
 | `fonts/` | Hanken Grotesk and JetBrains Mono (variable, SIL OFL 1.1, licences included) |

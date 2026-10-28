@@ -13,7 +13,8 @@
       { label: 'Heat Calculations', key: 'gis01-heatcalc' }
     ],
     mainDoc: 'gis01-bom-1',
-    output: { pattern: '{doc_no}_PSA_BOM_Rev{rev}.xlsx', fileName: 'DOC-0001-GIS01-001_PSA_BOM_Rev02.xlsx', sheets: ['Power Consumption', 'Heat Dissipation', 'Heat Calculations'] },
+    output: { pattern: '{doc_no}_PSA_BOM_Rev{rev}.xlsx', fileName: 'DOC-0001-GIS01-001_PSA_BOM_Rev02.xlsx', sheets: ['Loose Material', 'Power Consumption', 'Heat Dissipation', 'Heat Calculations'] },
+    hostPanel: 'ws',
     constants: [
       { key: 'dc_voltage_v', label: 'DC supply voltage', value: '125', def: '125', unit: 'V' },
       { key: 'ac_voltage_v', label: 'AC supply voltage', value: '230', def: '230', unit: 'V' },

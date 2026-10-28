@@ -102,7 +102,7 @@ network or equipment changes. It is the user-facing word for a layout override.
 - **Pin here** pins a device where it already is, without moving it. A pin that equals the automatic place is
   kept (engine need below).
 - **Unpin** hands the device back to the layout; it is placed again automatically.
-- Pinned units are placed first; the rest of the layout fills around them.
+- A pin holds. The layout still fills first and the overrides are applied after it (R7, A8's #100), so a pinned unit is where it was pinned and the layout does not move it.
 - A pair is pinned and unpinned together; "Move this unit only…" pins one unit.
 - The header link reads "2 pinned · 1 deleted" (or "Nothing pinned or deleted") and opens the list:
   each row says what is pinned ("L1 switch 2 (pair) to panels 3 and 4, position 2") with **Unpin**, and each
@@ -162,7 +162,7 @@ Delete removes a device from the BOM (`layout.removed`). It is not a pin. The to
 - An override may carry a **position** (index among the panel's rack devices): `DeviceMove.position`,
   `PairMove.position`, optional.
 - An override that equals the automatic place must be **kept**, not dropped, so that "Pin here" holds.
-- Overrides are applied before the automatic fill: pinned units are placed first.
+- Overrides are applied after the automatic fill (R7, #100). A pin holds the unit where it was pinned; a pin that cannot fit is a reported error, never a silent reflow.
 - `layout_preview` keeps returning, per device, whether it is pinned and its position in the panel.
 - The writers (A2) write `layout.overrides` and `layout.removed` for each action and return the new
   `layout_preview`.
@@ -205,7 +205,7 @@ shows what a new record starts with. Labels are the user-facing words; model nam
 | Client | Text | Empty reads "Not set" when the field is read-only |
 | Logo | File chooser (PNG) with a preview and **Remove** | The file is copied into the project; a missing logo shows the warning |
 | Device library | Read-only facts, **Record 1.4.0 in this project** | Library version stamp; never edited by hand |
-| Catalogue brands | One select each for MCBs, aux contacts and terminal blocks, listing the library's brands with the default marked | Starts as the library default; changes the ordering codes on the next build, not ratings or sizes. See "Library editing" |
+| Catalogue brands | One select each for MCBs, aux contacts and terminal blocks, listing the library's brands with the default marked | Starts as the library default; changes the ordering codes on the next build, not ratings or sizes. A substation can override it (Substation › Settings). See "Library editing" |
 | Shared defaults | Number fields with units: power margin, spare ports, rack space kept free, spare DC branches per feed, spare AC branches | A substation starts from these |
 | Delete project | Danger button | See "Deleting" |
 
@@ -224,11 +224,11 @@ shows what a new record starts with. Labels are the user-facing words; model nam
 
 | Tab | Fields |
 | --- | --- |
-| General | Substation name (editable), substation id (read-only: "Names the substation in the register and in tags"), title line, the read-only **From the project** block with a link to the overview |
+| General | Substation name (editable), substation id (read-only: "Names the substation in the register and in tags"), title line, **Catalogue brands** (one select each for MCBs, aux contacts and terminal blocks; the first option is "Same as the project (ABB S200)"), the read-only **From the project** block with a link to the overview |
 | Documents | One select per calculation sheet (Power, Heat dissipation, Heat calculations) from the register, with its number, revision and date shown |
-| Output | Main document (select), file name pattern with the resulting name shown, the three calculation sheet names |
+| Output | Main document (select), file name pattern with the resulting name shown, the sheet names (Loose Material, Power, Heat dissipation, Heat calculations) |
 | Design constants | The ten constants as number fields with unit and default; changed ones are marked **Changed from 125** with **Reset**; **Reset all to defaults** in the table foot |
-| Loose material | Moves to its own page (see the Loose material design) |
+| Loose material | Moved to its own page, **Loose material** in the sidebar (see "Loose material (v0.2)") |
 | YAML | Advanced view of the file |
 
 ### Substation › Network
@@ -287,8 +287,9 @@ catalogues: **MCBs, Aux contacts, Terminal blocks, Busbars, Housekeeping**.
 - **Brand per catalogue:** MCBs, aux contacts and terminal blocks each have one tab per brand (Schneider
   Acti9, ABB S200, Siemens 5SL6 for MCBs). One brand carries the *Default* badge. *Make X the default brand*
   changes it. *Add brand…* creates one, optionally as a copy of the current brand's rows so only the codes
-  need typing. The project chooses its brand on Project › Overview ("Catalogue brands"); a new project starts
-  with the library default.
+  need typing. The project chooses its brands on Project › Overview ("Catalogue brands"); a new project starts
+  with the library default. A substation may choose its own on Substation › Settings › General, where the
+  first option is "Same as the project (ABB S200)"; the substation's choice wins.
 - **Rows are cells:** each row is editable in place (rating and ordering code for MCBs; model and code for aux
   contacts; type and code for terminal blocks; description and tag for busbars). *Add rating* / *Add row* and a
   per-row remove. Edits are pending entries, never writes. A removed row is listed under *Removed* on review.
@@ -361,16 +362,57 @@ part's alternatives first under "Alternatives to X".
   changes* adds them to the pending set (rows with problems are skipped and listed, and the sentence says how
   to include them); (4) done: banner with *Review and apply…*. A CSV import never writes the library directly.
 
-### Engine needs for the library (for A2 and A11)
+### Engine needs for the library (for A5, A2 and A11)
 
-- Per-field validation for every device and catalogue field (path and value in, message or nothing out).
-- Write a local library version from a diff and the version it starts from, keeping the previous one.
-- CSV export (UTF-8 with BOM) and a CSV **dry run** that returns checks, row problems with table, row,
+- **A2:** per-field validation for every device and catalogue field (path and value in, message or nothing out).
+- **A5 (ADR 0018):** write a local library version from a diff and the version it starts from, keeping the previous one.
+- **A5 (ADR 0018):** CSV export (UTF-8 with BOM) and a CSV **dry run** that returns checks, row problems with table, row,
   column and message, and the added, changed and removed lists, without writing.
-- Alternatives as parts with a group key, returning the comparison fields (tier, make, power, inrush, ports,
+- **A2:** alternatives as parts with a group key, returning the comparison fields (tier, make, power, inrush, ports,
   height, data quality) for a device.
-- Per-project catalogue brand choice, recorded in the project file, defaulting to the library's default.
-- List the equipment rows of a substation that use a part, for *Use this instead* and the delete warning.
+- **A2:** catalogue brand choice per project and per substation (M13, #97): the substation's choice wins, otherwise the project's, otherwise the library default.
+- **A2:** list the equipment rows of a substation that use a part, for *Use this instead* and the delete warning.
+
+## Loose material (v0.2)
+
+Loose material is the substation's own list of items that are not mounted in any cabinet. Since ADR 0020 (Ali's
+answer to Q36) it is printed on its **own sheet**, so it has its own page, its own tab in Preview and its own
+sheet name; it is no longer a Settings tab and no longer sits under the WS console.
+
+- **Page:** *Loose material* in the sidebar under Panels, with the item count. It is a **form** (save bar,
+  Ctrl+S, leave dialog); adding and removing rows are edits held until saved. Discard brings the rows back.
+- **Header actions:** *Add from library…* (primary) and *Add free text…*.
+- **Table:** No., Part or description, Designation, Qty, Fed from, remove.
+  - *Part or description:* a library part shows its part id with make and model and, when the part brings
+    something with it, "comes with LPA37-696". A free-text item shows an editable description and a *Free text*
+    badge.
+  - *Designation:* the text printed in the Tag column. Library items start with make and model.
+  - *Qty:* a number, or a number with a unit (`1 Lot`).
+  - *Fed from:* Not fed, or a generated cabinet. An item that needs power names the cabinet that feeds it, and the
+    engine adds the load there.
+- **Add from library (dialog):** search, a radio list of library parts with their data-quality badge, Quantity,
+  Designation and Fed from. Parts the library brings with the item are added by the library, not typed.
+- **Add free text (dialog):** Description (required), Quantity (required), Designation, Fed from, and an info
+  banner saying a free-text item has no ordering code, make or model on the sheet and that adding the part to the
+  library gives it them.
+- **Empty state:** "No loose material. With no items the workbook has no Loose Material sheet." with both add
+  actions.
+- **Beside the table:** an *On the workbook* card (sheet name, position "after the cabinet sheets, before Power
+  Consumption", "written only while there are items", a link to Preview) and an *Issued under* card: **Document
+  of** (select of the panels), which is `loose_material.host_panel`. It names the document whose number, revision
+  and date print in the sheet header; it no longer names the sheet the table is printed on.
+- **Elsewhere:** Preview gets a *Loose Material (n)* tab between the cabinet sheets and Power Consumption, shown
+  only when there are items, with an *Edit the list* link. Settings › Output gets a fourth sheet name, *Loose
+  material* (`output.sheet_names.loose_material`). Build lists the sheet under "This workbook contains" only when
+  it will be written.
+- **Back-end needs (A2, A10, A11):**
+  - A loose item needs a **free-text form**: `part_id` optional and a `description` (and `designation`) used when
+    it is empty. Today a loose item must name a library part.
+  - Read and write `loose_material.items` (`part_id` or `description`, `qty` as number or text, `tag`,
+    `fed_from`) and `loose_material.host_panel`, with per-field validation; `fed_from` must name a generated
+    panel.
+  - The engine returns, per library item, what comes with it (children) so the page can show "comes with".
+  - Preview needs the Loose Material sheet model (`SheetModel`) from the engine, like the other sheets.
 
 ## YAML tabs
 

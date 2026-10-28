@@ -33,16 +33,17 @@
 
   /* ---------- Preview ---------- */
   let grp = 'all'; let q = ''; let showHwio = false; let showRev = false;
-  const sheetTabs = [...DB.panels.map((p) => [p.id, p.sheet]), ['power', 'Power Consumption'], ['heatdiss', 'Heat Dissipation'], ['heatcalc', 'Heat Calculations']];
+  const sheetTabs = () => [...DB.panels.map((p) => [p.id, p.sheet]), ...((DB.sub.loose || []).length ? [['loose', DB.sub.output.sheets[0]]] : []), ['power', 'Power Consumption'], ['heatdiss', 'Heat Dissipation'], ['heatcalc', 'Heat Calculations']];
   SCREENS.preview = () => {
     const { b } = App.route(); if (b) S.tab.preview = b;
+    if (S.tab.preview === 'loose' && !(DB.sub.loose || []).length) S.tab.preview = DB.panels[0].id;
     const t = S.tab.preview;
     const panel = DB.panels.find((p) => p.id === t);
-    const body = panel ? bomView(panel) : { power: powerView, heatdiss: heatDissView, heatcalc: heatCalcView }[t]();
+    const body = panel ? bomView(panel) : { loose: App.looseSheet, power: powerView, heatdiss: heatDissView, heatcalc: heatCalcView }[t]();
     return `<div class="page">${pageHead('Preview', 'What the workbook will contain. Values are calculated by the engine; nothing here is editable.',
       S.checks === 'errors' ? `<a class="btn btn--secondary" href="#/build">${icon('build')}Build (blocked)</a>` : `<button class="btn btn--primary" data-action="goto" data-to="#/build">${icon('build')}Continue to Build</button>`)}
       ${S.checks === 'errors' ? `<div style="margin-bottom:var(--space-4)">${banner('warn', '<b>Preview is from the last successful load.</b> 2 errors in the input files mean some values may be out of date.', '<a class="btn btn--primary btn--sm" href="#/checks">Open checks</a>')}</div>` : ''}
-      ${tabs('preview', sheetTabs.map(([i, l]) => [i, DB.panels.some((p) => p.id === i) ? `Sheet ${l}` : l]), t, 'Workbook sheets')}
+      ${tabs('preview', sheetTabs().map(([i, l]) => [i, DB.panels.some((p) => p.id === i) ? `Sheet ${l}` : i === 'loose' ? `${l} (${(DB.sub.loose || []).length})` : l]), t, 'Workbook sheets')}
       <div role="tabpanel" aria-labelledby="tab-preview-${t}">${body}</div></div>`;
   };
   ACTIONS.tab = ((prev) => (el) => {
@@ -134,7 +135,7 @@
         <div style="margin-top:var(--space-5)" class="row"><button class="btn btn--primary" data-action="build" ${blocked || st === 'building' ? 'disabled' : ''} ${st === 'building' ? 'aria-busy="true"' : ''}>${st === 'building' ? '<span class="spinner"></span>Building…' : icon('build') + 'Build workbook'}</button>${blocked ? '<span class="muted small">Unavailable until the 2 errors are fixed.</span>' : ''}</div>
         <div style="margin-top:var(--space-5)">${status}</div>
       </div>
-      <aside><h3>This workbook contains</h3><ul class="checklist" style="margin-top:var(--space-3)">${DB.panels.map((p) => `<li>${icon('preview')}<span>Sheet ${p.sheet}: ${esc(p.name)}</span></li>`).join('')}${P.output.sheets.map((s) => `<li>${icon('preview')}<span>${esc(s)}</span></li>`).join('')}</ul>
+      <aside><h3>This workbook contains</h3><ul class="checklist" style="margin-top:var(--space-3)">${DB.panels.map((p) => `<li>${icon('preview')}<span>Sheet ${p.sheet}: ${esc(p.name)}</span></li>`).join('')}${P.output.sheets.filter((s, i) => i > 0 || (P.loose || []).length).map((s) => `<li>${icon('preview')}<span>${esc(s)}</span></li>`).join('')}</ul>
         <dl class="kv" style="margin-top:var(--space-4);grid-template-columns:120px 1fr"><dt>Library</dt><dd>${esc(DB.library.name)} ${esc(DB.library.version)}</dd><dt>Revision</dt><dd>${esc(mainDoc().rev)}</dd><dt>Warnings</dt><dd>${c.warnings} (do not block)</dd></dl></aside></div></div>`;
   };
   ACTIONS.build = () => {

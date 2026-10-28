@@ -52,7 +52,7 @@
 
   /* The save bar: appears at the foot of a form page while it has unsaved changes. It names what will be written. */
   /* A form route saves with the save bar. Lists, the board and read-only pages do not. */
-  const isFormRoute = () => { const { a, b } = route(); if (a === 'library') return b === 'device'; if (a === 'panels') return !!b; if (a === 'project') return !['substations', 'share'].includes(S.tab.project); return ['settings', 'network'].includes(a); };
+  const isFormRoute = () => { const { a, b } = route(); if (a === 'library') return b === 'device'; if (a === 'panels') return !!b; if (a === 'project') return !['substations', 'share'].includes(S.tab.project); return ['settings', 'network', 'loose'].includes(a); };
   function saveBar() {
     if (!S.dirty) return '';
     const n = Math.max(S.changed.size, 1), bad = S.invalid.size;
@@ -120,6 +120,7 @@
       ${navItem('#/settings', 'file', 'Settings', ns ? icon('check') : '', 'ok', !ns, r === 'settings')}
       ${navItem('#/network', 'network', 'Network', ns ? (isBlank() ? `${icon('warn')}Not set up` : icon('check')) : '', isBlank() ? 'warn' : 'ok', !ns, r === 'network')}
       ${navItem('#/panels', 'panels', 'Panels', ns ? String(isBlank() ? 0 : DB.panels.length) : '', '', !ns, r === 'panels')}
+      ${navItem('#/loose', 'pkg', 'Loose material', ns ? String(isBlank() ? 0 : (DB.sub.loose || []).length) : '', '', !ns, r === 'loose')}
       <div class="nav-group">Verify and issue</div>
       ${navItem('#/checks', 'checks', 'Checks', ns ? (c.errors ? `${icon('error')}${c.errors} errors` : `${icon('check')}Clear`) : '', c.errors ? 'bad' : 'ok', !ns, r === 'checks')}
       ${navItem('#/preview', 'preview', 'Preview', '', '', !ns, r === 'preview')}
@@ -140,8 +141,8 @@
   }
   function renderMain() {
     const { a } = route();
-    const key = ({ home: 'home', project: 'project', settings: 'settings', network: 'network', panels: 'panels', library: 'library', checks: 'checks', preview: 'preview', build: 'build' })[a] || 'home';
-    const needsProject = key === 'project', needsSub = ['settings', 'network', 'panels', 'checks', 'preview', 'build'].includes(key);
+    const key = ({ home: 'home', project: 'project', settings: 'settings', network: 'network', panels: 'panels', loose: 'loose', library: 'library', checks: 'checks', preview: 'preview', build: 'build' })[a] || 'home';
+    const needsProject = key === 'project', needsSub = ['settings', 'network', 'panels', 'loose', 'checks', 'preview', 'build'].includes(key);
     const m = $('#main');
     m.innerHTML = (needsProject && !hasProject()) || (needsSub && !hasSub()) ? SCREENS.home() : SCREENS[key]();
     if (isFormRoute()) m.insertAdjacentHTML('beforeend', saveBar());
