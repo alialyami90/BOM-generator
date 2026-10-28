@@ -10,8 +10,31 @@ tagged release.
 
 ### Added
 
+- Network sizing and automatic panel layout: `bomgen layout` sizes the L1 and
+  L2 switches from the IED count and spares, fills the 32U panels and writes
+  generated panel files; `bomgen build` lays out again a substation whose
+  panels were generated, unless `--no-layout`, and stops on layout errors;
+  after a layout the annunciator is fed from panel 001 (side A); the example
+  substation gives 3 L1 switches per side; golden test of the generated panels
+  (milestone M1c, #19).
+- Desktop app Checks and Build screens: the substation's problems and the
+  check report, and a build that refuses with `has_errors`, `file_exists`
+  (asks before replacing), `file_open`, `bad_name` or `bad_folder` (milestone
+  M10d, #65).
+- `bomgen build` prints the check report, writes it as `<name>.checks.json`
+  and exits 1 when a check fails (`--no-checks` skips it); `--compare` marks
+  the cells changed since a previous issue; the FGR-60F gets its 2 SFP slots
+  (milestone M7, #62).
+- Check report and revision comparison in the engine: SFPs against slots, DC
+  mains against ΣQ, airflow and natural convection, DI capacity against HWIO,
+  and the changed cells since a previous issue; ADR 0016 (milestone M7, #58).
+- Desktop app Substation settings and Network inputs, read-only (milestone
+  M10c, #60).
+- Desktop app Keep both on a clashing import, and the restore review on
+  `preview_backup_restore` (#63), which checks a restore's refusals before
+  the import checks (#59).
 - `bomgen build`: one workbook per substation of a project, or for one
-  `substation.yaml`, into `--out` (default `out/`), named by OUT-2; `--substation`
+  `substation.yaml`, into `--out` (default `out/`), named per OUT-2; `--substation`
   builds one; a golden test builds the example (first part of milestone M7,
   #51).
 - `bomgen project import --rename-to ID` imports a `.bomproj` under a new
@@ -102,6 +125,17 @@ tagged release.
 
 ### Changed
 
+- The frozen CLI writes UTF-8 to the console; the release smoke tests read the
+  workbook path from the first line of `bomgen build` and check its report
+  (#70).
+- The CLI prints the check report correctly on a Windows console (#68).
+- Workbooks are replaced atomically, so a failed replace never deletes the
+  workbook already at that path (#69).
+- Q34 resolved by Ali; ADR 0014 accepted (#66, #67).
+- The import clash banner leads the review dialog (#64).
+- `docs/agents.md`: A9 owns the check report and revision modules; ADR 0016
+  taken (#61).
+- The release workflow's installed-build step parses on PowerShell (#57).
 - The release workflow builds the example workbook with the frozen and the
   installed CLI (#55).
 - Desktop app: `show_in_folder` opens only files the app listed; the
