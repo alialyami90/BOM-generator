@@ -111,7 +111,7 @@
       <div style="display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:var(--space-6);align-items:start;margin-top:${blocked ? 'var(--space-5)' : '0'}">
       <div>
         <div class="form" style="max-width:640px">
-          ${field('File name', editable(input('b-name', B.name, { mono: true })), t.file_name ? `From the pattern in Settings → Output: <span class="mono">${esc(t.file_name)}</span>.` : 'The pattern in Settings → Output gives the name once the files load.')}
+          ${field('File name', editable(input('b-name', B.name, { mono: true })), t.file_name ? (B.name === t.file_name ? 'From the pattern in Settings → Output.' : `The pattern in Settings → Output gives <span class="mono">${esc(t.file_name)}</span>.`) : 'The pattern in Settings → Output gives the name once the files load.')}
           ${field('Save in', `<div class="row" style="flex-wrap:nowrap">${editable(input('b-dir', B.folder, { mono: true }))}<button class="btn btn--secondary" data-action="build-folder">Browse…</button></div>`)}
           <div class="field"><span class="label">Options</span><div class="stack"><label class="switch"><input type="checkbox" id="b-compare" data-action="build-compare" data-dirty="0" ${B.compare ? 'checked' : ''}>Highlight cells changed since the previous issue</label>
             <div class="row" style="margin-left:44px"><input class="input input--mono" id="b-previous" style="width:320px" placeholder="Choose the previous issue (.xlsx)" value="${esc(B.previous.split(/[\\/]/).pop())}" title="${esc(B.previous)}" readonly ${B.compare ? '' : 'disabled'}><button class="btn btn--secondary btn--sm" data-action="build-previous" ${B.compare ? '' : 'disabled'}>Browse…</button></div>

@@ -31,8 +31,8 @@
     const d = l.data, plan = d.plan;
     if (!plan || !d.l1_ranking.length) return `<div class="empty" style="margin-top:var(--space-3)"><b>No ranking yet.</b><div class="muted small">${esc(d.reason || 'It appears once the IED count and the equipment are set.')}</div></div>`;
     return `<p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">The engine ranks the library's L1 switches for ${plan.ied_count} IEDs, fewest switches first. The best is used unless <span class="mono">substation.yaml</span> pins another.</p>
-      <div class="table-wrap"><table class="table"><caption class="sr-only">L1 switch models ranked by the engine</caption><thead><tr><th class="num" style="width:44px">Rank</th><th>Model</th><th class="num" style="width:56px">Ports</th><th class="num" style="width:76px">Per side</th><th class="num" style="width:96px">Usable ports</th><th style="width:170px">Use</th></tr></thead><tbody>
-      ${d.l1_ranking.map((r, i) => { const used = r.part_id === plan.l1_part_id; return `<tr${used ? ' aria-current="true"' : ''}><td class="num">${i + 1}</td><td class="nowrap"><span class="mono">${esc(r.part_id)}</span><span class="cell-sub">${esc([r.make, r.model].filter(Boolean).join(' '))}</span></td><td class="num">${r.ports}</td><td class="num">${r.per_side}</td><td class="num">${r.usable_ports}</td>
+      <div class="table-wrap"><table class="table"><caption class="sr-only">L1 switch models ranked by the engine</caption><thead><tr><th style="width:48px;text-align:center">Rank</th><th>Model</th><th class="num" style="width:56px">Ports</th><th class="num" style="width:76px">Per side</th><th class="num" style="width:96px">Usable ports</th><th style="width:170px">Use</th></tr></thead><tbody>
+      ${d.l1_ranking.map((r, i) => { const used = r.part_id === plan.l1_part_id; return `<tr${used ? ' aria-current="true"' : ''}><td style="text-align:center">${i + 1}</td><td class="nowrap"><span class="mono">${esc(r.part_id)}</span><span class="cell-sub">${esc([r.make, r.model].filter(Boolean).join(' '))}</span></td><td class="num">${r.ports}</td><td class="num">${r.per_side}</td><td class="num">${r.usable_ports}</td>
         <td>${used ? (plan.l1_pinned ? badge('info', 'Pinned', 'check') : badge('ok', 'Tool\'s pick', 'check')) : i === 0 ? '<span class="muted small">Tool\'s pick</span>' : ''}</td></tr>`; }).join('')}</tbody></table>
       <div class="table-foot"><span>${plan.l1_pinned ? `Pinned in substation.yaml: the engine sizes the network with ${esc(plan.l1_part_id)}.` : 'Nothing pinned: the engine uses the top row.'}</span></div></div>`;
   }
@@ -61,12 +61,13 @@
   const name = (u) => (ROLES[u.role] ? `${ROLES[u.role]}${u.of > 1 ? ' ' + u.n : ''}` : u.label);
   const uid = (p, u) => `${p.number}:${u.key}:${u.side || ''}`;
   let showIssues = false;
+  const HELP = 'Blank plates are the gaps between devices and are not in the BOM. A switch, firewall or patch panel counts with its 1 U cable manager.';
   const issueList = (xs) => `<ul style="margin:6px 0 0;padding-left:18px">${xs.slice(0, 8).map((i) => `<li><span class="mono small">${esc(i.subject)}</span> ${esc(i.message)}</li>`).join('')}</ul>`;
   const issuesBanner = (d) => {
     if (!d.generated) {  // one banner: what the board is, and what the layout would report
       const n = d.issues.length;
-      return `<div style="margin-bottom:var(--space-3)">${banner('info', `<b>These panels are hand-written.</b> The board shows what <span class="mono">bomgen layout</span> would write; Build uses the hand-written panel files.${n ? ` Running it would report ${plural(n, 'problem')}.` : ''}${n && showIssues ? issueList(d.issues) : ''}`,
-        n ? `<button class="btn btn--secondary btn--sm" data-action="pv-issues" aria-expanded="${showIssues}">${showIssues ? 'Hide' : 'Show'}</button>` : '')}</div>`;
+      return `<div style="margin-bottom:var(--space-3)">${banner('info', `<b>Hand-written panels.</b> The board shows what <span class="mono">bomgen layout</span> would write; Build uses your panel files.${n && showIssues ? `<div style="margin-top:6px">Running it would report ${plural(n, 'problem')}:</div>${issueList(d.issues)}` : ''}`,
+        n ? `<button class="btn btn--secondary btn--sm" data-action="pv-issues" aria-expanded="${showIssues}">${showIssues ? 'Hide' : `Show ${plural(n, 'problem')}`}</button>` : '')}</div>`;
     }
     const errors = d.issues.filter((i) => i.level === 'error'), warnings = d.issues.filter((i) => i.level === 'warning');
     return (errors.length ? `<div style="margin-bottom:var(--space-3)">${banner('bad', `<b>${plural(errors.length, 'layout error')}.</b> Build is blocked until they are fixed.${issueList(errors)}`, '<a class="btn btn--secondary btn--sm" href="#/checks">Open checks</a>')}</div>` : '')
@@ -98,7 +99,7 @@
       ${issuesBanner(d)}
       <div class="board-bar" role="status" aria-live="polite">
         ${sel ? `<div class="sel-bar"><span><b>${esc(name(sel.u))}</b> <span class="mono muted">${esc(sel.u.part_id)}</span> ${esc(sel.u.label)} · ${sel.u.side ? 'Side ' + sel.u.side : 'Common'} · ${sel.u.height_u} U${sel.u.cable_manager_u ? ` + ${sel.u.cable_manager_u} U cable manager` : ''} · ${esc(sel.p.cabinet_name)}${sel.u.moved ? ' · moved by an override' : ''}</span><span class="sp"></span><button class="btn btn--ghost btn--icon btn--sm" data-action="pv-clear-sel" aria-label="Clear selection">${icon('x')}</button></div>`
-          : `<div class="row board-hint"><span class="muted small">Select a device to see its part and size. Blank plates are shown as gaps and are not in the BOM. A switch, firewall or patch panel counts with its 1 U cable manager.</span><span class="sp"></span><span class="muted small">${changes ? `${plural(changes, 'manual change')} in substation.yaml` : 'No manual changes'}</span></div>`}
+          : `<div class="row board-hint"><span class="muted small">Select a device to see its part and size.</span><span class="board-help" tabindex="0" role="img" aria-label="${esc(HELP)}" title="${esc(HELP)}">${icon('help')}</span><span class="sp"></span><span class="muted small">${changes ? `${plural(changes, 'manual change')} in substation.yaml` : 'No manual changes'}</span></div>`}
       </div>
       <div class="board" role="group" aria-label="Panels">${pairs.map((k) => { const cols = d.panels.filter((p) => p.pair === k); return `<div class="pair"><div class="pair-head">Pair ${k} <span class="muted">· panels ${cols.map((p) => p.number).join(' and ')}</span></div><div class="pair-cols">${cols.map((p) => column(p, d.reserved_u, sel)).join('')}</div></div>`; }).join('')}</div>
       <p class="muted small" style="margin-top:var(--space-3)">${plural(d.panels.length, 'panel')} from the layout${d.list.some((p) => p.manual) ? `, ${d.list.filter((p) => p.manual).length} hand-written (${d.list.filter((p) => p.manual).map((p) => esc(p.cabinet_name)).join(', ')})` : ''}.</p></div>`;
@@ -118,7 +119,7 @@
     });
     const din = p.units.filter((u) => u.block_u === 0);
     return `<section class="bcol" aria-label="${esc(p.cabinet_name)}, side ${esc(p.side || '')}, ${p.used_u} of ${p.capacity_u} U used">
-      <header><b>${esc(p.cabinet_name)}</b>${p.side ? `<span class="badge badge--plain">Side ${esc(p.side)}</span>` : ''}</header>
+      <header><b title="${esc(p.cabinet_name)}">${esc(p.cabinet_name)}</b>${p.side ? `<span class="badge badge--plain">Side ${esc(p.side)}</span>` : ''}</header>
       <div class="umeter ${p.free_u < 3 ? 'is-full' : ''}" role="img" aria-label="${p.used_u} of ${p.capacity_u} U used"><i style="width:${Math.min(100, pct)}%"></i></div>
       <div class="ulabel"><b>${p.used_u}</b> of ${p.capacity_u} U used · ${p.free_u} U free</div>
       <div class="rack">${cards.join('')}${p.free_u > 0 ? `<div class="freeu" style="height:${p.free_u * U}px">${p.free_u} U free</div>` : ''}${reserved ? `<div class="reserve" style="height:${reserved * U}px"><span>${reserved} U kept free for expansion</span></div>` : ''}</div>

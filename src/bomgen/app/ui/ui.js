@@ -46,7 +46,7 @@
 
   /* ---------- components ---------- */
   const badge = (kind, text, ic) => `<span class="badge badge--${kind}">${ic ? icon(ic) : ''}${esc(text)}</span>`;
-  const verified = (v) => ({ confirmed: badge('ok', 'Confirmed', 'check'), partial: badge('warn', 'Partial', 'info'), unverified: badge('plain', 'Unverified', 'info') }[v]);
+  const verified = (v) => ({ confirmed: badge('ok', 'Confirmed', 'check'), partial: badge('plain', 'Partial', 'info'), unverified: badge('plain', 'Unverified', 'info') }[v]);
   const banner = (kind, body, actions = '') => `<div class="banner banner--${kind}" role="${kind === 'bad' ? 'alert' : 'status'}">${icon({ bad: 'error', warn: 'warn', ok: 'check', info: 'info' }[kind])}<div class="grow">${body}</div>${actions}</div>`;
   const tabs = (group, items, active, label) =>
     `<div class="tabs" role="tablist" aria-label="${esc(label)}">${items.map(([id, text, extra, tip]) =>
@@ -59,7 +59,8 @@
   };
   const input = (id, value, o = {}) => `<input class="input ${o.mono ? 'input--mono' : ''} ${o.num ? 'input--num' : ''}" id="${id}" value="${esc(value)}" ${o.readonly ? 'readonly' : ''} ${o.invalid ? 'aria-invalid="true"' : ''} ${o.placeholder ? `placeholder="${esc(o.placeholder)}"` : ''} data-dirty="1">`;
   const select = (id, opts, value, o = {}) => `<select class="select ${o.cls || ''}" id="${id}" ${o.invalid ? 'aria-invalid="true"' : ''} data-dirty="1">${opts.map((x) => { const [v, t] = Array.isArray(x) ? x : [x, x]; return `<option value="${esc(v)}" ${v === value ? 'selected' : ''}>${esc(t)}</option>`; }).join('')}</select>`;
-  const pageHead = (title, lede = '', actions = '', crumbs = '') => `<div class="page-head"><div>${crumbs ? `<div class="crumbs">${crumbs}</div>` : ''}<h1>${title}</h1>${lede ? `<p class="lede">${lede}</p>` : ''}</div>${actions ? `<div class="actions">${actions}</div>` : ''}</div>`;
+  /* `note`: one muted line under the lede, the same place on every page (what the app cannot do yet). */
+  const pageHead = (title, lede = '', actions = '', crumbs = '', note = '') => `<div class="page-head"><div class="page-head-main">${crumbs ? `<div class="crumbs">${crumbs}</div>` : ''}<h1>${title}</h1>${lede ? `<p class="lede">${lede}</p>` : ''}${note ? `<p class="page-note" title="${esc(note)}">${icon('info')}<span>${esc(note)}</span></p>` : ''}</div>${actions ? `<div class="actions">${actions}</div>` : ''}</div>`;
   const illus = () => `<span class="illus">${icon('info')}Illustrative data: not connected yet</span>`;
 
   /* Import reviews (library and project): every check; after a failure the later ones collapse to one line. */
@@ -107,7 +108,7 @@
     const p = curProject(), s = curSub();
     $('#bar').innerHTML = `
       <div class="brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>BOM Generator</div>
-      ${hasProject() ? `<span class="bar-divider"></span><div class="bar-project"><b>${esc(p.name)}</b><span>${s ? esc(s.name) : 'No substation open'}</span></div>` : ''}
+      ${hasProject() ? `<span class="bar-divider"></span><div class="bar-project"><b title="${esc(p.name)}">${esc(p.name)}</b><span>${s ? esc(s.name) : 'No substation open'}</span></div>` : ''}
       <div class="bar-spacer"></div>
       <a class="bar-btn" href="#/library" style="text-decoration:none" aria-label="Device library ${S.firstRun ? 'not installed' : noActive() ? 'needs attention' : esc(lib().name + ' ' + lib().version)}">
         <span class="dot ${S.firstRun || noActive() ? 'dot--bad' : 'dot--ok'}" aria-hidden="true"></span>${S.firstRun ? 'No library installed' : noActive() ? 'No active library' : `${esc(lib().name)} ${esc(lib().version)}`}</a>

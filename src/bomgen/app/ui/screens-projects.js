@@ -72,8 +72,7 @@
     const loading = !offline() && !PROJECTS.once;
     return `<div class="page">
       ${pageHead('Projects', 'Every project on this PC. A project holds several substations, each with its own panels and workbook.',
-        `<button class="btn btn--secondary" data-action="import-project">${icon('download')}Import project file…</button><button class="btn btn--secondary" data-action="open-project">${icon('folder')}Open folder…</button><button class="btn btn--primary" data-action="new-project" ${later()}>${icon('plus')}New project…</button>`)}
-      <p class="muted small" style="margin:calc(-1 * var(--space-3)) 0 var(--space-4);text-align:right">${esc(LATER)}</p>
+        `<button class="btn btn--secondary" data-action="import-project">${icon('download')}Import project file…</button><button class="btn btn--secondary" data-action="open-project">${icon('folder')}Open folder…</button><button class="btn btn--primary" data-action="new-project" ${later()}>${icon('plus')}New project…</button>`, '', LATER)}
       ${S.launch === 'bomproj' ? `<div style="margin-bottom:var(--space-4)">${banner('info', `<b>You opened a project file.</b> <span class="mono">${esc(S.launchFile)}</span> is not added yet. Review what it contains before it is imported.`, `<button class="btn btn--primary btn--sm" data-action="import-launched">Review import…</button>`)}</div>` : ''}
       ${loading ? '<p class="muted">Reading the projects on this PC…</p>' : rows.length ? `<div class="table-wrap"><table class="table table--comfort">
         <thead><tr><th>Project</th><th>Client</th><th class="num">Substations</th><th>Library</th><th>Last changed</th><th>Status</th></tr></thead>
@@ -81,7 +80,7 @@
           <td><b style="font-weight:500">${esc(r.name)}</b><span class="cell-sub mono">${esc(r.path)}</span></td>
           <td>${esc(r.client || '—')}</td><td class="num">${r.substations.length}</td><td>${esc(r.library.name)} ${esc(r.library.builtWith)}</td><td>${esc(r.opened)}</td>
           <td>${badge(r.status, r.statusText, statusIcon[r.status])}</td></tr>`).join('')}</tbody></table>
-        <div class="table-foot"><span>Select a project to open it</span>${offline() ? `<span>${illus()}</span>` : ''}</div></div>`
+        <div class="table-foot table-foot--plain"><span>Select a project to open it</span>${offline() ? `<span>${illus()}</span>` : ''}</div></div>`
         : `<div class="empty"><h3>No projects yet</h3><p class="muted">Import a project file from a colleague, or open a folder that holds a <span class="mono">project.yaml</span>.${S.app ? ` New projects go in <span class="mono">${esc(S.app.workspace)}</span>.` : ''}</p></div>`}
       <div class="section" style="margin-top:var(--space-5);border:0;padding-top:0">
         <div class="banner banner--info">${icon('info')}<div class="grow"><b>Got a device library update?</b><div class="small">Update packages are .bomlib files. Import one to review what it changes before it is installed.</div></div><a class="btn btn--secondary" href="#/library/import">Import update…</a></div>
@@ -110,17 +109,16 @@
       share: `<button class="btn btn--primary" data-action="export-project">${icon('upload')}Export project…</button>` }[t] || '';
     const body = { info: projectInfo, substations: projectSubs, documents: projectDocs, share: projectShare }[t](p);
     const problems = p.problems && p.problems.length ? `<div style="margin-bottom:var(--space-4)">${banner('bad', `<b>${p.problems.length} ${p.problems.length === 1 ? 'problem' : 'problems'} in the project files.</b> ${problemList(p.problems)}`)}</div>` : '';
-    return `<div class="page">${pageHead(esc(p.name), `${p.client ? esc(p.client) + ' · ' : ''}<span class="mono" style="font-size:13px">${esc(p.path)}</span>`, actions, `<a href="#/home">Projects</a>${icon('chevr')}<span>${esc(p.name)}</span>`)}
+    return `<div class="page">${pageHead(esc(p.name), `${p.client ? esc(p.client) + ' · ' : ''}<span class="mono" style="font-size:13px">${esc(p.path)}</span>`, actions, `<a href="#/home">Projects</a>${icon('chevr')}<span>${esc((tabList.find(([k]) => k === t) || [, ''])[1])}</span>`, p.real ? LATER : '')}
       ${problems}${tabs('project', tabList, t, 'Project sections')}
       <div role="tabpanel" aria-labelledby="tab-project-${t}">${body}</div></div>`;
   };
   const MAX_PROBLEMS = 8;
   const problemList = (list) => `<ul style="margin:6px 0 0;padding-left:18px">${list.slice(0, MAX_PROBLEMS).map((x) => `<li><span class="mono small">${esc(x.file.split(/[\\/]/).slice(-2).join('/'))}${x.line ? ':' + x.line : ''}</span>${x.location ? ` <span class="mono small">${esc(x.location)}</span>` : ''}: ${esc(x.message)}</li>`).join('')}</ul>${list.length > MAX_PROBLEMS ? `<div class="small">and ${list.length - MAX_PROBLEMS} more; the Checks screen lists them all.</div>` : ''}`;
-  const editNote = (p) => (p.real ? `<p class="muted small" style="margin-bottom:var(--space-4);max-width:68ch">${esc(LATER)}</p>` : '');
 
-  const projectInfo = (p) => `${editNote(p)}<div class="form form--2">
+  const projectInfo = (p) => `<div class="form form--2">
     <div class="span-2">${field('Project name', ro(input('p-name', p.name)), 'Printed in bold at the top of every sheet header, for every substation.')}</div>
-    ${field('Client', ro(input('p-client', p.client)))}
+    ${field('Client', ro(input('p-client', p.client, { placeholder: 'Not set' })))}
     ${field('Logo', ro(input('p-logo', p.logo, { mono: true, placeholder: 'No logo chosen' })), p.logo ? 'PNG. Appears in the left of the page header.' : 'PNG. Appears in the left of the page header. <span style="color:var(--color-warning)">Not set: the header will have no picture.</span>')}
     <div class="span-2 section" style="margin:0">
       <h3>Device library</h3>
@@ -135,12 +133,12 @@
       <div class="form form--3" style="margin-top:var(--space-3)">${p.defaults.map((x, i) => field(x.label, `<div class="input-affix">${ro(input('df' + i, x.value, { num: true, mono: true }))}${x.unit ? `<span class="affix">${esc(x.unit)}</span>` : ''}</div>`)).join('') || '<p class="muted">No shared defaults are set.</p>'}</div>
     </div></div>`;
 
-  const projectSubs = (p) => `<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">Each substation has its own network, panels, checks and workbook. To start a new one from an existing one, use “Create from this”.</p>${editNote(p)}
+  const projectSubs = (p) => `<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">Each substation has its own network, panels, checks and workbook. To start a new one from an existing one, use “Create from this”.</p>
     <div class="table-wrap"><table class="table table--comfort"><thead><tr><th>Substation</th><th class="num">Panels</th><th>Last changed</th><th>Status</th><th style="width:300px"><span class="sr-only">Actions</span></th></tr></thead>
       <tbody>${p.substations.map((s) => `<tr class="clickable" tabindex="0" data-action="open-sub" data-id="${esc(s.id)}">
         <td><b style="font-weight:500">${esc(s.name)}</b><span class="cell-sub mono">${esc(s.folder)}</span>${s.from ? `<span class="cell-sub">Created from ${esc(s.from)}</span>` : ''}</td>
         <td class="num">${esc(s.panels)}</td><td>${esc(s.changed)}</td><td>${badge(s.status, s.statusText, statusIcon[s.status])}</td>
-        <td style="text-align:right"><button class="btn btn--secondary btn--sm" data-action="open-sub" data-id="${esc(s.id)}">Open</button> <button class="btn btn--ghost btn--sm" data-action="new-substation" data-from="${esc(s.id)}" ${later()}>${icon('copy')}Create from this…</button></td></tr>`).join('')}</tbody></table>
+        <td><div class="row-actions"><button class="btn btn--secondary btn--sm" data-action="open-sub" data-id="${esc(s.id)}">Open</button><button class="btn btn--ghost btn--sm" data-action="new-substation" data-from="${esc(s.id)}" ${later()}>${icon('copy')}Create from this…</button></div></td></tr>`).join('')}</tbody></table>
       <div class="table-foot"><span>${count(p.substations.length, 'substation')}</span>${p.real ? '' : `<span>${illus()}</span>`}</div></div>`;
   ACTIONS['open-sub'] = (el) => { S.sub = el.dataset.id; S.dirty = false; S.layout = { overrides: [], removed: [], history: [], selected: '', openOverrides: false }; go('#/panels'); };
 
@@ -149,7 +147,7 @@
     const groups = ids.map((id) => ({ s: p.substations.find((x) => x.id === id) || { id, name: id }, rows: p.documents.filter((d) => d.sub === id) })).filter((g) => g.rows.length);
     const assumed = p.documents.filter((d) => d.assumed).length;
     return `<p class="lede muted" style="max-width:68ch;margin-bottom:var(--space-4)">One register for the whole project. Each panel and calculation sheet picks a document from it, so a single transmittal list drives every header.</p>
-      ${editNote(p)}${assumed ? banner('warn', `<b>The issue date of ${assumed} documents is assumed.</b> Confirm the dates before issuing.`) : ''}
+      ${assumed ? banner('warn', `<b>The issue date of ${assumed} documents is assumed.</b> Confirm the dates before issuing.`) : ''}
       ${groups.length ? `<div class="table-wrap" style="margin-top:var(--space-4)"><table class="table"><thead><tr><th>Document</th><th>Document no.</th><th style="width:70px">Rev</th><th style="width:150px">Issue date</th>${p.real ? '' : '<th>Used by</th><th style="width:110px">State</th>'}</tr></thead>
       <tbody>${groups.map((g) => `<tr class="band"><td colspan="${p.real ? 4 : 6}"><b>${esc(g.s.name)}</b> <span class="muted">· ${count(g.rows.length, 'document')}</span></td></tr>
         ${g.rows.map((d) => `<tr><td>${esc(d.label)}${d.label !== d.key ? `<span class="cell-sub mono">${esc(d.key)}</span>` : ''}</td><td>${ro(input('dn-' + d.key, d.docNo, { mono: true }))}</td><td>${ro(input('dr-' + d.key, d.rev, { mono: true }))}</td><td>${ro(input('di-' + d.key, d.issue, { mono: true }))}</td>${p.real ? '' : `<td>${esc(d.usedBy)}</td><td>${d.assumed ? badge('warn', 'Assumed date', 'warn') : '<span class="muted small">Confirmed</span>'}</td>`}</tr>`).join('')}`).join('')}</tbody></table>
