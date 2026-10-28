@@ -51,15 +51,16 @@ Done:
   backup, import (Keep both on a clash) and restore; the Library screens
   browse the installed library with its device-database records, review and
   run a `.bomlib` import, and switch versions.
-- The first part of M10c, a substation's Settings and Network inputs,
-  read-only, and M10d: the Checks, Preview and Build screens, which show the
-  check report, every sheet as the engine computes it, and write the workbook.
+- M10c, read-only until the substation writers exist: a substation's
+  Settings, its Network inputs and result with the L1 ranking, and the Panels
+  board of the generated panels.
+- M10d: the Checks, Preview and Build screens, which show the check report,
+  every sheet as the engine computes it, and write the workbook.
 - M11, built early (ADR 0009): the Windows installer and tag-driven releases.
   The installed app opens the desktop window, double-clicking a `.bomlib`
   imports it, and a `.bomproj` opens the app on that project.
 
-Next: the rest of M10 (the L1 ranking and the Panels board, then the polish
-pass). Who builds what is in
+Next: M10e, the polish pass on the desktop app. Who builds what is in
 [`docs/agents.md`](docs/agents.md); the terms project, substation, side and
 stream are defined in `docs/plan.md` → "Glossary".
 
