@@ -710,7 +710,12 @@ Delivered in small PRs by A11, one screen group each (ADR 0015 for the bridge):
   the workbook and its `.checks.json`) and refuses `has_errors`, `file_exists` (the page
   asks before replacing), `file_open` (another program holds the file) and `bad_name`.
   `open_file` opens a workbook the app wrote. The build is one call, so the page shows
-  one busy state rather than four named stages. Preview follows.
+  one busy state rather than four named stages. Then Preview (`bomgen.app.preview`):
+  `preview_substation` gives each panel sheet's rows (SR numbers, tag spans, separator
+  rows, `24+3` quantities, HWIO, loose material under its host panel) and the Power
+  Consumption, Heat Dissipation and Heat Calculations values from the engine's build
+  result, or the reason there is nothing to show. The "Show revised cells" toggle is
+  left out: cells are marked only by Build's comparison with a previous issue.
 - **M10e:** A4's impeccable polish pass.
 
 ### M11 — Windows installer and releases

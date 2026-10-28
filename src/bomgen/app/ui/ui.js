@@ -160,7 +160,7 @@
     const needsProject = key === 'project', needsSub = ['settings', 'network', 'panels', 'checks', 'preview', 'build'].includes(key);
     const m = $('#main');
     m.innerHTML = (needsProject && !hasProject()) || (needsSub && !hasSub()) ? SCREENS.home() : SCREENS[key]();
-    if (needsSub && hasSub() && S.backend === 'yes' && !['settings', 'network', 'checks', 'build'].includes(key)) {  // M10c and M10d connect the rest
+    if (needsSub && hasSub() && S.backend === 'yes' && !['settings', 'network', 'checks', 'preview', 'build'].includes(key)) {  // M10c part 2 connects the panels
       m.insertAdjacentHTML('afterbegin', `<div class="not-connected"><div class="page" style="padding-bottom:var(--space-3)">${banner('info', '<b>Not connected yet.</b> This screen still shows the example substation from the design, not your project.')}</div></div>`);
     }
     if (SCREENS[key + 'After']) SCREENS[key + 'After']();
