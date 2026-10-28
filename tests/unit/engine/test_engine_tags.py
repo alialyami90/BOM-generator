@@ -43,6 +43,14 @@ def test_numbering_continues_across_rows_of_the_same_level() -> None:
     assert second.tag == "PSA1-L1-ESW-A13"
 
 
+def test_first_nn_continues_a_range_from_another_panel() -> None:
+    first, second = rows(
+        {"part_id": "L1", "qty": 2, "first_nn": 13}, {"part_id": "L1"}, lib_devices=SWITCHES
+    )
+    assert first.tag == "PSA1-L1-ESW-A13 to A14"
+    assert second.tag == "PSA1-L1-ESW-A15"
+
+
 def test_ext_switch_and_firewall_take_lan_letter_only() -> None:
     ext, fw = rows({"part_id": "EXT"}, {"part_id": "FW"}, lib_devices=SWITCHES)
     assert ext.tag == "PSA1-EXT-ESW-A"
