@@ -214,9 +214,10 @@ table.table { width: 100%; border-collapse: separate; border-spacing: 0; font-si
 
 /* ---------- dialogs, popovers, toast ---------- */
 .scrim { position: fixed; inset: 0; background: rgba(5, 20, 33, 0.5); display: grid; place-items: center; z-index: 50; animation: fade var(--duration-base) var(--ease-out); }
-.dialog { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-dialog); width: min(520px, calc(100vw - 48px)); display: flex; flex-direction: column; animation: rise var(--duration-slow) var(--ease-out); }
+.dialog { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-dialog); width: min(520px, calc(100vw - 48px)); max-height: calc(100vh - 48px); display: flex; flex-direction: column; animation: rise var(--duration-slow) var(--ease-out); }
 .dialog h2 { padding: var(--space-5) var(--space-5) var(--space-2); font-size: 18px; }
-.dialog .body { padding: 0 var(--space-5) var(--space-4); color: var(--color-text); }
+.dialog .body { padding: 0 var(--space-5) var(--space-4); color: var(--color-text); flex: 1 1 auto; min-height: 0; overflow: auto; }
+.dialog h2, .dialog .foot { flex: none; }
 .dialog .foot { display: flex; justify-content: flex-end; gap: var(--space-2); padding: var(--space-3) var(--space-5); border-top: 1px solid var(--color-border); background: var(--color-surface-sunken); border-radius: 0 0 var(--radius-md) var(--radius-md); }
 @keyframes fade { from { opacity: 0; } }
 @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
@@ -304,6 +305,7 @@ fieldset.readonly .btn, fieldset.readonly .grip { opacity: .5; cursor: default; 
 .toast-btn { all: unset; cursor: pointer; margin-left: var(--space-2); font-weight: var(--weight-semibold); text-decoration: underline; text-underline-offset: 2px; }
 .toast-btn:focus-visible { outline: var(--size-focus-ring) solid var(--color-on-bar); outline-offset: 2px; }
 .page--wide { max-width: none; }
+.not-connected { position: sticky; top: 0; z-index: 5; background: var(--color-ground); }  /* stays above the screen while it scrolls (M10c, M10d) */
 .popwrap { position: relative; }
 .card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-4); }
 .table--plain { width: 100%; }

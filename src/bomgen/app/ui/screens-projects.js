@@ -10,10 +10,11 @@
   const kb = (b) => (b == null ? '—' : b < 1024 ? `${b} bytes` : `${Math.round(b / 1024)} KB`);
   const inside = (file, folder) => (file.startsWith(folder) ? file.slice(folder.length).replace(/^[\\/]/, '') : file);
   const count = (n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`;
-  const LATER = 'Creating and editing projects in the app comes in a later step. For now, edit the YAML files, then open the project again.';
+  const LATER = 'Creating and editing projects in the app is not available yet. Edit the YAML files, then open the project again.';
+  const later = () => `disabled title="${esc(LATER)}"`;
 
   /* ---------- the screens' view of a project (the prototype's shape) ---------- */
-  const PROJECTS = { state: 'idle', rows: [] };
+  const PROJECTS = { state: 'idle', rows: [], once: false };  // once: the list has been read at least once
   function view(row) {
     const active = S.library && row.library && S.library.name === row.library.name ? S.library.version : '';
     return {
@@ -38,7 +39,7 @@
   function loadProjects() {
     PROJECTS.state = 'loading';
     return Bridge.call('list_projects').then((rows) => { PROJECTS.rows = rows; }).catch(fail)
-      .then(() => { PROJECTS.state = 'loaded'; App.render(); });
+      .then(() => { PROJECTS.state = 'loaded'; PROJECTS.once = true; App.render(); });
   }
   function openProject(file, tab = 'substations') {
     return Bridge.call('open_project', file).then((page) => {
@@ -68,16 +69,17 @@
     }
     if (!offline() && S.backend === 'yes' && PROJECTS.state === 'idle') loadProjects();
     const rows = projects();
-    const loading = !offline() && PROJECTS.state !== 'loaded';
+    const loading = !offline() && !PROJECTS.once;
     return `<div class="page">
       ${pageHead('Projects', 'Every project on this PC. A project holds several substations, each with its own panels and workbook.',
-        `<button class="btn btn--secondary" data-action="import-project">${icon('download')}Import project file…</button><button class="btn btn--secondary" data-action="open-project">${icon('folder')}Open folder…</button><button class="btn btn--primary" data-action="new-project">${icon('plus')}New project…</button>`)}
+        `<button class="btn btn--secondary" data-action="import-project">${icon('download')}Import project file…</button><button class="btn btn--secondary" data-action="open-project">${icon('folder')}Open folder…</button><button class="btn btn--primary" data-action="new-project" ${later()}>${icon('plus')}New project…</button>`)}
+      <p class="muted small" style="margin:calc(-1 * var(--space-3)) 0 var(--space-4);text-align:right">${esc(LATER)}</p>
       ${S.launch === 'bomproj' ? `<div style="margin-bottom:var(--space-4)">${banner('info', `<b>You opened a project file.</b> <span class="mono">${esc(S.launchFile)}</span> is not added yet. Review what it contains before it is imported.`, `<button class="btn btn--primary btn--sm" data-action="import-launched">Review import…</button>`)}</div>` : ''}
       ${loading ? '<p class="muted">Reading the projects on this PC…</p>' : rows.length ? `<div class="table-wrap"><table class="table table--comfort">
         <thead><tr><th>Project</th><th>Client</th><th class="num">Substations</th><th>Library</th><th>Last changed</th><th>Status</th></tr></thead>
         <tbody>${rows.map((r) => `<tr class="clickable" data-action="open-proj" data-id="${esc(r.id)}" data-file="${esc(r.file || '')}" tabindex="0">
           <td><b style="font-weight:500">${esc(r.name)}</b><span class="cell-sub mono">${esc(r.path)}</span></td>
-          <td>${esc(r.client)}</td><td class="num">${r.substations.length}</td><td>${esc(r.library.name)} ${esc(r.library.builtWith)}</td><td>${esc(r.opened)}</td>
+          <td>${esc(r.client || '—')}</td><td class="num">${r.substations.length}</td><td>${esc(r.library.name)} ${esc(r.library.builtWith)}</td><td>${esc(r.opened)}</td>
           <td>${badge(r.status, r.statusText, statusIcon[r.status])}</td></tr>`).join('')}</tbody></table>
         <div class="table-foot"><span>Select a project to open it</span>${offline() ? `<span>${illus()}</span>` : ''}</div></div>`
         : `<div class="empty"><h3>No projects yet</h3><p class="muted">Import a project file from a colleague, or open a folder that holds a <span class="mono">project.yaml</span>.${S.app ? ` New projects go in <span class="mono">${esc(S.app.workspace)}</span>.` : ''}</p></div>`}
@@ -94,7 +96,7 @@
   ACTIONS['open-project'] = () => {
     Bridge.call('choose_project_folder').then((file) => file && openProject(file)).catch(fail);
   };
-  ACTIONS['new-project'] = () => dialog({ title: 'New project', body: `<p>${esc(LATER)}</p>`, actions: '<button class="btn btn--primary" data-action="close">Close</button>' });
+  window.addEventListener('hashchange', () => { if (App.route().a !== 'home' && PROJECTS.state === 'loaded') PROJECTS.state = 'idle'; });  // re-read on the next visit
   document.addEventListener('keydown', (e) => { const r = e.target.closest && e.target.closest('tr.clickable[data-action]'); if (r && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); r.click(); } });
 
   /* ---------- Project page ---------- */
@@ -104,7 +106,7 @@
     const rb = App.route().b; if (tabList.some(([k]) => k === rb)) S.tab.project = rb;
     const t = S.tab.project;
     const actions = {
-      substations: `<button class="btn btn--primary" data-action="new-substation">${icon('plus')}New substation…</button>`,
+      substations: `<button class="btn btn--primary" data-action="new-substation" ${later()}>${icon('plus')}New substation…</button>`,
       share: `<button class="btn btn--primary" data-action="export-project">${icon('upload')}Export project…</button>` }[t] || '';
     const body = { info: projectInfo, substations: projectSubs, documents: projectDocs, share: projectShare }[t](p);
     const problems = p.problems && p.problems.length ? `<div style="margin-bottom:var(--space-4)">${banner('bad', `<b>${p.problems.length} ${p.problems.length === 1 ? 'problem' : 'problems'} in the project files.</b> ${problemList(p.problems)}`)}</div>` : '';
@@ -133,15 +135,14 @@
       <div class="form form--3" style="margin-top:var(--space-3)">${p.defaults.map((x, i) => field(x.label, `<div class="input-affix">${ro(input('df' + i, x.value, { num: true, mono: true }))}${x.unit ? `<span class="affix">${esc(x.unit)}</span>` : ''}</div>`)).join('') || '<p class="muted">No shared defaults are set.</p>'}</div>
     </div></div>`;
 
-  const projectSubs = (p) => `<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">Each substation has its own network, panels, checks and workbook. To start a new one from an existing one, use “Create from this”.</p>
+  const projectSubs = (p) => `<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">Each substation has its own network, panels, checks and workbook. To start a new one from an existing one, use “Create from this”.</p>${editNote(p)}
     <div class="table-wrap"><table class="table table--comfort"><thead><tr><th>Substation</th><th class="num">Panels</th><th>Last changed</th><th>Status</th><th style="width:300px"><span class="sr-only">Actions</span></th></tr></thead>
       <tbody>${p.substations.map((s) => `<tr class="clickable" tabindex="0" data-action="open-sub" data-id="${esc(s.id)}">
         <td><b style="font-weight:500">${esc(s.name)}</b><span class="cell-sub mono">${esc(s.folder)}</span>${s.from ? `<span class="cell-sub">Created from ${esc(s.from)}</span>` : ''}</td>
         <td class="num">${esc(s.panels)}</td><td>${esc(s.changed)}</td><td>${badge(s.status, s.statusText, statusIcon[s.status])}</td>
-        <td style="text-align:right"><button class="btn btn--secondary btn--sm" data-action="open-sub" data-id="${esc(s.id)}">Open</button> <button class="btn btn--ghost btn--sm" data-action="new-substation" data-from="${esc(s.id)}">${icon('copy')}Create from this…</button></td></tr>`).join('')}</tbody></table>
+        <td style="text-align:right"><button class="btn btn--secondary btn--sm" data-action="open-sub" data-id="${esc(s.id)}">Open</button> <button class="btn btn--ghost btn--sm" data-action="new-substation" data-from="${esc(s.id)}" ${later()}>${icon('copy')}Create from this…</button></td></tr>`).join('')}</tbody></table>
       <div class="table-foot"><span>${count(p.substations.length, 'substation')}</span>${p.real ? '' : `<span>${illus()}</span>`}</div></div>`;
   ACTIONS['open-sub'] = (el) => { S.sub = el.dataset.id; S.dirty = false; S.layout = { overrides: [], removed: [], history: [], selected: '', openOverrides: false }; go('#/panels'); };
-  ACTIONS['new-substation'] = () => dialog({ title: 'New substation', body: `<p>${esc(LATER)}</p>`, actions: '<button class="btn btn--primary" data-action="close">Close</button>' });
 
   const projectDocs = (p) => {
     const ids = [...new Set([...p.substations.map((s) => s.id), ...p.documents.map((d) => d.sub)])];
