@@ -3,6 +3,9 @@
 Layouts and behaviour for every screen in the desktop app, in the prototype's
 route form (`prototype/index.html#/…`). Components are in
 [`components.md`](components.md); the approved scope is in [`brief.md`](brief.md).
+**v0.2:** every value is editable; how values are saved, validated, created and deleted is in
+[`editing.md`](editing.md), which also lists every field. Where this file and `editing.md` differ on
+editing behaviour, `editing.md` is newer.
 
 ## Map
 
@@ -82,6 +85,9 @@ line. "Apply to form" is available only when the YAML is valid.
   Import project file secondary); a table of projects (name and path, client,
   substations, library used, last opened, status); an info banner about library
   updates. A `.bomproj` launch adds a banner above the table.
+- **New project:** a dialog with name, client, device library (default: the active one) and an
+  optional first substation; the folder is shown, not asked for. Creating opens the new
+  substation's Network page.
 - **Behaviour:** a row opens the project page on Substations. Status uses the
   same words as Checks (`Ready`, `2 errors`, `Library out of date`).
 - **States:** first run (steps list, "Install a library…" primary, the project
@@ -96,13 +102,15 @@ line. "Apply to form" is available only when the YAML is valid.
   branches). A substation starts from these; the values it changes are marked
   in its own screens.
 - **Substations:** a table (name and folder, panels, last changed, status) with
-  Open, "Create from this…", and a primary "New substation…". Substations created
+  Open and a row menu (Rename…, Create from this…, Delete…), and a primary "New substation…". Substations created
   from another say so under their name.
 - **Documents:** the **register**, one per project, grouped by substation with a
   band row and an "Add" button for each. Columns: document, document number,
-  revision, issue date, used by, state (assumed dates are flagged).
+  revision, issue date, used by, state (assumed dates are flagged, with a Confirm button),
+  and a remove button that is disabled while the document is used. All cells are editable.
 - **Backup and share:** Export and Import actions, and a Backups table (file,
   saved, size, library, Restore…, Show in folder) with "Back up now".
+- **Delete project:** a danger section at the foot of Overview; the project name must be typed.
 - **States:** unsaved; invalid field; library older than active.
 
 ### Substation settings
@@ -111,7 +119,8 @@ read-only "From the project" block with a link to the project page), *Documents*
 (which register entry each calculation sheet prints; cabinet BOMs choose theirs on
 each panel), *Output* (main document, file-name pattern with the resulting name,
 calculation sheet names), *Design constants* (the ten spec constants with unit,
-default and a "Changed from …" mark; defaults come from the project), *Loose
+default, a "Changed from …" mark and a Reset per row, and "Reset all to defaults"; defaults
+come from the project), *Loose
 material* and *YAML* (`substation.yaml`). Project-wide values are not repeated
 here.
 
@@ -134,7 +143,11 @@ here.
   shows an inline error with a suggestion. In a star, each L1 has one uplink to
   its L2 plus an A–B interlink. The equipment table sits here because the panels
   are generated from it (approved by A1).
-- **States:** substation with no network yet (warning banner, IED count marked
+- **New substation:** the **setup card** (see `components.md`) sits above Field network and lists
+  the steps left: IEDs, equipment, panels. The IED count is marked required until entered.
+- **Equipment rows:** part (with "Change part…"), role, A and B, quantity (L1 rows read "Sized"),
+  L2 ports and remove, all editable; the Result card recalculates after each change.
+- **States:** substation with no network yet (setup card, IED count marked
   required, empty equipment, empty result); IED count assumed; unknown device.
 
 ### Panels
@@ -311,9 +324,9 @@ reviewed by the design owner and is the intended behaviour; the prototype in
 
 ## Cross-cutting behaviour
 
-- **Unsaved changes:** the status bar shows the state; leaving the project or
-  closing the app with unsaved changes opens a dialog with Save, Discard and
-  Cancel.
+- **Unsaved changes:** form pages show a save bar and the status bar says "Unsaved changes";
+  leaving the page, switching project or substation, or closing the app opens a dialog with
+  Keep editing, Discard changes and Save and leave. Details in [`editing.md`](editing.md).
 - **Validation:** runs on save and on "Run checks again"; the counts in the
   navigation and status bar update after each run.
 - **Library version:** opening a project whose recorded library differs from

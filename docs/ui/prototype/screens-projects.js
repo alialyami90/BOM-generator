@@ -54,9 +54,9 @@
     const tabList = [['info', 'Overview'], ['substations', 'Substations', `<span class="count">${p.substations.length}</span>`], ['documents', 'Documents'], ['share', 'Backup and share']];
     const rb = App.route().b; if (tabList.some(([k]) => k === rb)) S.tab.project = rb;
     const t = S.tab.project;
-    const actions = { info: `<button class="btn btn--primary" data-action="save-project" ${S.dirty ? '' : 'disabled'}>${icon('save')}Save</button>`,
+    const actions = { info: '',
       substations: `<button class="btn btn--primary" data-action="new-substation">${icon('plus')}New substation…</button>`,
-      documents: `<button class="btn btn--primary" data-action="save-project" ${S.dirty ? '' : 'disabled'}>${icon('save')}Save</button>`,
+      documents: `<button class="btn btn--secondary" data-action="add-doc">${icon('plus')}Add document…</button>`,
       share: `<button class="btn btn--primary" data-action="export-project">${icon('upload')}Export project…</button>` }[t];
     const body = { info: projectInfo, substations: projectSubs, documents: projectDocs, share: projectShare }[t](p);
     return `<div class="page">${pageHead(esc(p.name), `${esc(p.client)} · <span class="mono" style="font-size:13px">${esc(p.path)}</span>`, actions, `<a href="#/home">Projects</a>${icon('chevr')}<span>${esc(p.name)}</span>`)}
@@ -79,15 +79,20 @@
       <h3>Shared defaults</h3>
       <p class="lede">Every substation starts from these values. A substation can set its own; the ones it changes are marked there.</p>
       <div class="form form--3" style="margin-top:var(--space-3)">${p.defaults.map((x, i) => field(x.label, `<div class="input-affix">${input('df' + i, x.value, { num: true, mono: true })}${x.unit ? `<span class="affix">${esc(x.unit)}</span>` : ''}</div>`)).join('') || '<p class="muted">No shared defaults are set.</p>'}</div>
+    </div>
+    <div class="span-2 section" style="margin:0">
+      <h3>Delete this project</h3>
+      <p class="lede">Removes the project and all its substations from this PC. A backup is saved first, so it can be restored.</p>
+      <div class="row" style="margin-top:var(--space-3)"><button class="btn btn--danger" data-action="delete-project">${icon('trash')}Delete project…</button></div>
     </div></div>`;
   ACTIONS.stamp = () => { const p = curProject(); p.library.builtWith = p.library.active; S.dirty = true; App.render(); toast(`Project now records ${p.library.name} ${p.library.active}`); };
 
-  const projectSubs = (p) => `<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">Each substation has its own network, panels, checks and workbook. To start a new one from an existing one, use “Create from this”.</p>
-    <div class="table-wrap"><table class="table table--comfort"><thead><tr><th>Substation</th><th class="num">Panels</th><th>Last changed</th><th>Status</th><th style="width:300px"><span class="sr-only">Actions</span></th></tr></thead>
+  const projectSubs = (p) => `<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">Each substation has its own network, panels, checks and workbook. The menu on a row renames it, starts a new one from it, or deletes it.</p>
+    <div class="table-wrap"><table class="table table--comfort"><thead><tr><th>Substation</th><th class="num">Panels</th><th>Last changed</th><th>Status</th><th style="width:130px"><span class="sr-only">Actions</span></th></tr></thead>
       <tbody>${p.substations.map((s) => `<tr class="clickable" tabindex="0" data-action="open-sub" data-id="${s.id}">
         <td><b style="font-weight:500">${esc(s.name)}</b><span class="cell-sub mono">${esc(s.folder)}</span>${s.from ? `<span class="cell-sub">Created from ${esc(s.from)}</span>` : ''}</td>
         <td class="num">${s.panels}</td><td>${esc(s.changed)}</td><td>${badge(s.status, s.statusText, statusIcon[s.status])}</td>
-        <td style="text-align:right"><button class="btn btn--secondary btn--sm" data-action="open-sub" data-id="${s.id}">Open</button> <button class="btn btn--ghost btn--sm" data-action="new-substation" data-from="${s.id}">${icon('copy')}Create from this…</button></td></tr>`).join('')}</tbody></table>
+        <td style="text-align:right"><button class="btn btn--secondary btn--sm" data-action="open-sub" data-id="${s.id}">Open</button> <button class="btn btn--ghost btn--icon btn--sm" data-action="sub-menu" data-id="${s.id}" aria-haspopup="menu" aria-label="More actions for ${esc(s.name)}">${icon('dots')}</button></td></tr>`).join('')}</tbody></table>
       <div class="table-foot"><span>${p.substations.length} substations</span><span>${illus()}</span></div></div>`;
   ACTIONS['open-sub'] = (el) => { S.sub = el.dataset.id; S.dirty = false; S.layout = { overrides: [], removed: [], history: [], selected: '', openOverrides: false }; go('#/panels'); };
 
@@ -107,10 +112,11 @@
   const projectDocs = (p) => {
     const groups = p.substations.map((s) => ({ s, rows: p.documents.filter((d) => d.sub === s.id) })).filter((g) => g.rows.length);
     return `<p class="lede muted" style="max-width:68ch;margin-bottom:var(--space-4)">One register for the whole project. Each panel and calculation sheet picks a document from it, so a single transmittal list drives every header.</p>
-      ${banner('warn', '<b>The issue date of 2 documents is assumed.</b> Confirm the dates before issuing.')}
-      <div class="table-wrap" style="margin-top:var(--space-4)"><table class="table"><thead><tr><th>Document</th><th>Document no.</th><th style="width:70px">Rev</th><th style="width:150px">Issue date</th><th>Used by</th><th style="width:110px">State</th></tr></thead>
-      <tbody>${groups.map((g) => `<tr class="band"><td colspan="5"><b>${esc(g.s.name)}</b> <span class="muted">· ${g.rows.length} documents</span></td><td style="text-align:right"><button class="btn btn--ghost btn--sm">${icon('plus')}Add</button></td></tr>
-        ${g.rows.map((d, i) => `<tr><td>${esc(d.label)}<span class="cell-sub mono">${esc(d.key)}</span></td><td>${ctl(input('dn-' + d.key, d.docNo, { mono: true }))}</td><td>${ctl(input('dr-' + d.key, d.rev, { mono: true }))}</td><td>${ctl(input('di-' + d.key, d.issue, { mono: true }))}</td><td>${esc(d.usedBy)}</td><td>${d.assumed ? badge('warn', 'Assumed date', 'warn') : '<span class="muted small">Confirmed</span>'}</td></tr>`).join('')}`).join('')}</tbody></table>
+      ${p.documents.some((d) => d.assumed) ? banner('warn', `<b>The issue date of ${p.documents.filter((d) => d.assumed).length} documents is assumed.</b> Confirm each date once you know it, before issuing.`) : ''}
+      <div class="table-wrap" style="margin-top:var(--space-4)"><table class="table"><thead><tr><th>Document</th><th>Document no.</th><th style="width:70px">Rev</th><th style="width:150px">Issue date</th><th>Used by</th><th style="width:200px">State</th><th style="width:40px"><span class="sr-only">Actions</span></th></tr></thead>
+      <tbody>${groups.map((g) => `<tr class="band"><td colspan="5"><b>${esc(g.s.name)}</b> <span class="muted">· ${g.rows.length} documents</span></td><td colspan="2" style="text-align:right"><button class="btn btn--ghost btn--sm" data-action="add-doc" data-sub="${g.s.id}">${icon('plus')}Add</button></td></tr>
+        ${g.rows.map((d, i) => `<tr><td>${esc(d.label)}<span class="cell-sub mono">${esc(d.key)}</span></td><td>${ctl(input('dn-' + d.key, d.docNo, { mono: true }))}</td><td>${ctl(input('dr-' + d.key, d.rev, { mono: true }))}</td><td>${ctl(input('di-' + d.key, d.issue, { mono: true }))}</td><td>${esc(d.usedBy)}</td><td>${d.assumed ? `${badge('warn', 'Assumed date', 'warn')} <button class="btn btn--ghost btn--sm" data-action="confirm-date" data-key="${d.key}">Confirm</button>` : '<span class="muted small">Confirmed</span>'}</td>
+        <td><button class="btn btn--ghost btn--icon btn--sm" data-action="remove-doc" data-key="${d.key}" ${d.usedBy ? 'aria-disabled="true" title="Used by ' + esc(d.usedBy) + '. Pick another document there first."' : ''} aria-label="Remove ${esc(d.label)}">${icon('trash')}</button></td></tr>`).join('')}`).join('')}</tbody></table>
       <div class="table-foot"><span>${p.documents.length} documents in ${groups.length} substations</span><span>${illus()}</span></div></div>`;
   };
 

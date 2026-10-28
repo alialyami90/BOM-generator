@@ -232,7 +232,7 @@ inside a card.
 
 ### Toast
 Bottom right, navy, 3.6 s, for confirmations of a completed action ("Saved
-project.yaml"). Not used for errors or anything the user must act on. Announced
+project.yaml", "Deleted GIS Substation 02. Backup saved."). Not used for errors or anything the user must act on. Announced
 politely in a live region. A toast for an undoable action carries an **Undo** link
 button and stays 8 s ("Moved Gateway (pair) to panels 3 and 4").
 
@@ -245,6 +245,28 @@ a secondary "Cancel" and a primary action named for what it does. Focus moves
 to the first button on open, is trapped inside, Esc cancels, focus returns to
 the trigger. A dialog never holds a form longer than five fields; use a screen
 for more.
+
+### Save bar
+Fixed to the foot of the content area while a form page has unsaved changes; it has a
+1 px top rule and a soft upward shadow, and spans the content width. Left: a
+warning dot and "3 unsaved changes · saved to substation.yaml". Right: Discard
+(secondary) and Save changes (primary, with `Ctrl+S` as a keycap). While a field is
+invalid the text turns red with the error icon ("1 field needs fixing before you
+can save."), Save is disabled and the text moves focus to the first invalid field.
+`role="region"`, labelled "Unsaved changes". Rules in [`editing.md`](editing.md).
+
+### Row menu
+A "⋯" icon button at the end of a table row (`aria-haspopup="menu"`,
+`aria-expanded`) opens a 200 px menu: Rename…, Create from this…, a rule, then
+Delete… in danger colour. `role="menu"` with `menuitem` buttons; ↑ ↓ move, Enter
+activates, Esc closes and returns focus to the button. The row's main action (Open)
+stays visible beside it; the menu holds the rest.
+
+### Setup card
+A bordered box on a new substation's Network page: "Set up GIS Substation 01" and a list
+of steps. Each step has a status icon (done: green tick, current: cobalt info,
+waiting: muted), a title, one muted sentence and an action when there is one. A step
+is done when its data exists; the card disappears when all are done.
 
 ### Progress
 Determinate bar (6 px) with `role="progressbar"` and a step list beneath: done

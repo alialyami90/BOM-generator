@@ -90,7 +90,7 @@
       substations: [
         { id: 'gis01', name: 'GIS Substation 01', folder: 'substations\\gis01', panels: 5, changed: 'Today 10:02', status: 'bad', statusText: '2 errors', from: '' },
         { id: 'gis02', name: 'GIS Substation 02', folder: 'substations\\gis02', panels: 4, changed: 'Yesterday', status: 'ok', statusText: 'Ready', from: 'GIS Substation 01' },
-        { id: 'cb03', name: 'Control Building 03', folder: 'substations\\cb03', panels: 0, changed: '12 Oct', status: 'warn', statusText: 'Network not set up', from: '' }
+        { id: 'cb03', blank: true, name: 'Control Building 03', folder: 'substations\\cb03', panels: 0, changed: '12 Oct', status: 'warn', statusText: 'Network not set up', from: '' }
       ],
       documents: [
         { key: 'gis01-bom-1', sub: 'gis01', label: 'PSA Cabinet - 001 BOM', docNo: 'DOC-0001-GIS01-001', rev: '02', issue: '2026-10-28', assumed: true, usedBy: 'Sheet 1' },
@@ -101,6 +101,7 @@
         { key: 'gis01-power', sub: 'gis01', label: 'Power Consumption', docNo: 'DOC-0001-GIS01-020', rev: '00', issue: '2026-10-28', assumed: false, usedBy: 'Power sheet' },
         { key: 'gis01-heat', sub: 'gis01', label: 'Heat Dissipation', docNo: 'DOC-0001-GIS01-021', rev: '00', issue: '2026-10-28', assumed: false, usedBy: 'Heat sheet' },
         { key: 'gis01-heatcalc', sub: 'gis01', label: 'Heat Calculations', docNo: 'DOC-0001-GIS01-022', rev: '00', issue: '2026-10-28', assumed: false, usedBy: 'Heat calculations sheet' },
+        { key: 'gis01-spare', sub: 'gis01', label: 'Panel 5 BOM (not used yet)', docNo: 'DOC-0001-GIS01-005', rev: '00', issue: '2026-10-28', assumed: false, usedBy: '' },
         { key: 'gis02-bom-1', sub: 'gis02', label: 'PSA Cabinet - 001 BOM', docNo: 'DOC-0001-GIS02-001', rev: '00', issue: '2026-10-21', assumed: false, usedBy: 'Sheet 1' },
         { key: 'gis02-bom-2', sub: 'gis02', label: 'PSA Cabinet - 002 BOM', docNo: 'DOC-0001-GIS02-002', rev: '00', issue: '2026-10-21', assumed: false, usedBy: 'Sheet 2' },
         { key: 'gis02-power', sub: 'gis02', label: 'Power Consumption', docNo: 'DOC-0001-GIS02-020', rev: '00', issue: '2026-10-21', assumed: false, usedBy: 'Power sheet' }

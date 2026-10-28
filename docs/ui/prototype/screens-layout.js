@@ -3,7 +3,7 @@
 (function () {
   const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, field, input, select, pageHead, illus, dialog, closeDialog, toast, go, $, $$ } = App;
   const U = 18; // px per rack unit on the board
-  const draftSub = () => S.sub === 'cb03';
+  const draftSub = () => App.isBlank();
 
   /* ---------- Network ---------- */
   const net = () => (S.net = S.net || JSON.parse(JSON.stringify(DB.sub.network)));
@@ -12,14 +12,13 @@
     const n = draftSub() ? { iedCount: '', topology: 'star', ringMax: '6', spares: net().spares } : net();
     const bad = S.checks === 'errors' && !draftSub();
     const eq = draftSub() ? [] : DB.equipment;
-    return `<div class="page">${pageHead('Network', 'What the substation contains and how the network is sized. The panels are laid out from this.',
-      `<button class="btn btn--primary" data-action="save" ${S.dirty ? '' : 'disabled'}>${icon('save')}Save</button>`)}
-      ${draftSub() ? `<div style="margin-bottom:var(--space-4)">${banner('warn', '<b>The network is not set up yet.</b> Enter the number of field IEDs and add the equipment. The panels appear when there is something to place.')}</div>` : ''}
+    return `<div class="page">${pageHead('Network', 'What the substation contains and how the network is sized. The panels are laid out from this.')}
+      ${draftSub() ? setupCard() : ''}
       <div class="net-grid">
         <div class="stack" style="gap:var(--space-6)">
           <section><h3>Field network</h3>
             <div class="form form--2" style="margin-top:var(--space-3)">
-              ${field('Field IEDs', `<div class="input-affix">${input('n-ied', n.iedCount, { num: true, mono: true, invalid: draftSub(), placeholder: 'Required' })}<span class="affix">IEDs</span></div>`, draftSub() ? '' : 'Never listed in the BOM. Only used to size the L1 switches. <span style="color:var(--color-warning)">Assumed: confirm from the single-line diagram.</span>', draftSub() ? 'Enter the number of field IEDs, for example 40.' : '')}
+              ${field('Field IEDs', `<div class="input-affix">${input('n-ied', n.iedCount, { num: true, mono: true, invalid: draftSub() && !(+n.iedCount > 0), placeholder: 'Required' })}<span class="affix">IEDs</span></div>`, draftSub() ? 'Never listed in the BOM. Only used to size the L1 switches.' : 'Never listed in the BOM. Only used to size the L1 switches. <span style="color:var(--color-warning)">Assumed: confirm from the single-line diagram.</span>', draftSub() && !(+n.iedCount > 0) ? 'Enter the number of field IEDs, for example 40.' : '')}
               <div class="field"><span class="label" id="topo-l">Topology</span><div class="segmented" role="radiogroup" aria-labelledby="topo-l"><label><input type="radio" name="topo" value="star" data-action="net-topo" ${n.topology === 'star' ? 'checked' : ''}><span>Star</span></label><label><input type="radio" name="topo" value="ring" data-action="net-topo" ${n.topology === 'ring' ? 'checked' : ''}><span>Ring</span></label></div>
                 <span class="help">${n.topology === 'star' ? 'Each L1 switch has one uplink to its L2 switch plus an A–B interlink.' : 'L1 switches are joined in rings. Two ports close each ring.'}</span></div>
               ${n.topology === 'ring' ? field('Switches per ring', input('n-ring', n.ringMax, { num: true, mono: true }), 'Most L1 switches in one ring.') : ''}
@@ -30,10 +29,10 @@
           <section><div class="row" style="justify-content:space-between"><h3>Equipment</h3><div class="popwrap" style="position:relative"><button class="btn btn--secondary btn--sm" data-action="pick-open" aria-haspopup="listbox">${icon('plus')}Add device</button></div></div>
             <p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">What the substation has, before any panel exists. Redundant devices come as an A and a B unit.</p>
             <div id="picker-slot"></div>
-            ${eq.length ? `<div class="table-wrap"><table class="table"><thead><tr><th>Device</th><th style="width:150px">Role</th><th style="width:90px">A and B</th><th class="num" style="width:90px">L2 ports</th><th class="num" style="width:56px">Height</th><th style="width:40px"><span class="sr-only">Actions</span></th></tr></thead><tbody>
-              ${eq.map((e, i) => { const isBad = bad && e.id === 'ext'; return `<tr><td>${isBad ? `<div class="field"><input class="ctl input input--mono" aria-label="Part id, row ${i + 1}" aria-invalid="true" aria-describedby="derr" value="SEL-2730M-EXT2"><span id="derr" class="err small">${icon('error')}<span>Not in psa-devices ${esc(DB.library.version)}. Did you mean SEL-2730M-EXT?</span></span></div>` : `<span class="mono">${esc(e.part)}</span><span class="cell-sub">${esc(e.label)}${e.count > 1 ? ` · ${e.count} per side, from the sizing` : ''}</span>`}</td>
+            ${eq.length ? `<div class="table-wrap"><table class="table"><thead><tr><th>Device</th><th style="width:150px">Role</th><th style="width:90px">A and B</th><th class="num" style="width:70px">Qty</th><th class="num" style="width:90px">L2 ports</th><th class="num" style="width:56px">Height</th><th style="width:40px"><span class="sr-only">Actions</span></th></tr></thead><tbody>
+              ${eq.map((e, i) => { const isBad = bad && e.id === 'ext'; return `<tr><td>${isBad ? `<div class="field"><input class="ctl input input--mono" aria-label="Part id, row ${i + 1}" aria-invalid="true" aria-describedby="derr" value="SEL-2730M-EXT2"><span id="derr" class="err small">${icon('error')}<span>Not in psa-devices ${esc(DB.library.version)}. Did you mean SEL-2730M-EXT?</span></span></div>` : `<span class="mono">${esc(e.part)}</span><span class="cell-sub">${esc(e.label)}${e.count > 1 ? ` · ${e.count} per side, from the sizing` : ''} · <button class="link-btn" data-action="pick-open" data-replace="${i}">Change part…</button></span>`}</td>
                 <td>${select('rl' + i, roles, e.role, { cls: 'ctl' })}</td><td><label class="check"><input type="checkbox" ${e.redundant ? 'checked' : ''} data-dirty="1" aria-label="Redundant: ${esc(e.label)}"> A + B</label></td>
-                <td>${input('lp' + i, e.l2Ports, { num: true, mono: true, placeholder: '0' }).replace('class="input', 'class="ctl input')}</td><td class="num">${e.h} U</td>
+                <td>${e.role === 'l1_switch' ? '<span class="muted small" title="From the sizing">Sized</span>' : input('qt' + i, e.qty || 1, { num: true, mono: true }).replace('class="input', 'class="ctl input')}</td><td>${input('lp' + i, e.l2Ports, { num: true, mono: true, placeholder: '0' }).replace('class="input', 'class="ctl input')}</td><td class="num">${e.h} U</td>
                 <td><button class="btn btn--ghost btn--icon btn--sm" data-action="toast" data-m="Removed ${esc(e.label)}" aria-label="Remove ${esc(e.label)}">${icon('trash')}</button></td></tr>`; }).join('')}</tbody></table>
               <div class="table-foot"><span>${eq.length} items · height and mounting come from the library</span><span>${illus()}</span></div></div>` : `<div class="empty"><b>No equipment yet.</b><div class="muted small">Add the switches, gateways and other devices this substation needs.</div></div>`}</section>
           <section><h3>Spares</h3>
@@ -49,6 +48,16 @@
         <aside class="net-result" id="net-result" aria-live="polite">${resultCard()}</aside>
       </div></div>`;
   };
+  /* A new substation: what is left to do, in the order that works. Each step is done when its data exists. */
+  function setupCard() {
+    const n = net(); const hasIed = +n.iedCount > 0, hasEq = (S.eqAdded || 0) > 0;
+    const step = (done, now, title, text, act) => `<li class="${done ? 'done' : now ? 'now' : ''}">${icon(done ? 'check' : 'info')}<div><b>${title}</b><div class="muted small">${text}</div></div>${act || ''}</li>`;
+    return `<div class="setup" style="margin-bottom:var(--space-5)"><h3>Set up ${esc(App.curSub().name)}</h3><p class="muted small" style="margin-top:var(--space-1)">The panels appear on their own once the network and equipment are entered.</p>
+      <ol>${step(true, false, 'Substation created', 'Its settings and three calculation documents are in the register with blank numbers.', `<button class="btn btn--ghost btn--sm" data-action="goto" data-to="#/project/documents">Fill in numbers</button>`)}
+      ${step(hasIed, !hasIed, 'Enter the number of field IEDs', 'It sizes the L1 switches. It is never listed in the BOM.', '')}
+      ${step(hasEq, hasIed && !hasEq, 'Add the equipment', 'Switches, patch panel, gateway, firewall and the rest. Redundant devices come as an A and a B unit.', `<button class="btn btn--secondary btn--sm" data-action="pick-open">${icon('plus')}Add device</button>`)}
+      ${step(false, hasIed && hasEq, 'Look at the panels', 'Check the layout, then run Checks and build.', hasIed && hasEq ? '<a class="btn btn--primary btn--sm" href="#/panels">See the panels</a>' : '')}</ol></div>`;
+  }
   const pinned = () => net().pin || '';
   const rankTable = () => `<div class="table-wrap"><table class="table"><caption class="sr-only">L1 switch models ranked by the engine</caption><thead><tr><th class="num" style="width:44px">Rank</th><th>Model</th><th class="num" style="width:56px">Ports</th><th class="num" style="width:76px">Per side</th><th class="num" style="width:96px">Spare ports</th><th style="width:200px">Use</th></tr></thead><tbody>
     ${DB.l1Ranking.map((r, i) => { const used = pinned() ? pinned() === r.part : i === 0; return `<tr${used ? ' aria-current="true"' : ''}><td class="num">${i + 1}</td><td class="nowrap" title="${esc(r.note)}"><span class="mono">${esc(r.part)}</span><span class="cell-sub">${esc(r.model)}</span></td><td class="num">${r.ports}</td><td class="num">${r.perSide}</td><td class="num">${r.spare}</td>
