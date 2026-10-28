@@ -21,7 +21,7 @@ agent; the milestones are in [`plan.md`](plan.md) → "Milestones".
 | A6 | Windows installer and release | M11 | `packaging/`, `.github/workflows/release.yml`, `docs/install.md`, `src/bomgen/app/launcher.py`, ADR 0009, the M11 section |
 | A7 | Lead developer assistant | Documentation and small tasks A1 hands out | `README.md`, `tests/unit/README.md`, `tests/golden/README.md`; other files only when A1 assigns them |
 | A8 | Sizing and layout engine | M1c | `src/bomgen/engine/sizing.py`, `src/bomgen/engine/layout.py`, `tests/golden/layout/`, the M1c section |
-| A9 | BOM rule engine | M2, M3, M4 | the rest of `src/bomgen/engine/`, `src/bomgen/models/bom.py`, `src/bomgen/models/calc.py`, `tests/golden/` (except `layout/`), the M2–M4 sections |
+| A9 | BOM rule engine | M2, M3, M4, M7 (engine) | the rest of `src/bomgen/engine/`, `src/bomgen/checks.py`, `src/bomgen/revision.py`, `src/bomgen/models/bom.py`, `src/bomgen/models/calc.py`, `src/bomgen/models/output.py`, `src/bomgen/models/report.py`, `tests/golden/` (except `layout/`), `tests/unit/test_revision.py`, the M2–M4 sections and the M7 engine note |
 | A10 | Excel workbook writer | M6, then M5 | `src/bomgen/sheets/`, `src/bomgen/writer/`, `src/bomgen/models/sheet.py`, the M5–M6 sections |
 | A11 | Desktop app | M10 | `src/bomgen/app/` except `launcher.py` (A6), `src/bomgen/app/ui/`, `tests/unit/app/`, the M10 section |
 
@@ -148,7 +148,7 @@ the same one. Ask A1 before you add one.
 
 | Kind | Taken | Next free |
 | --- | --- | --- |
-| ADR | 0009 installer layout (A6), 0010 input models (A2), 0011 UI design language and bundled fonts (A4), 0012 projects/substations/.bomproj (A1, accepted), 0013 network sizing and panel layout (A1, accepted), 0014 engine data model (A9, proposed), 0015 desktop app bridge (A11, accepted) | 0016 |
+| ADR | 0009 installer layout (A6), 0010 input models (A2), 0011 UI design language and bundled fonts (A4), 0012 projects/substations/.bomproj (A1, accepted), 0013 network sizing and panel layout (A1, accepted), 0014 engine data model (A9, proposed), 0015 desktop app bridge (A11, accepted), 0016 check report and revision comparison (A9, proposed) | 0017 |
 | Open question | Q22 workbook corrections, Q23 issued sheets vs masters (A2), Q24–Q28 substations/layout (resolved), Q29 thermostat and fan library defaults (A3), Q30 loose-table order (A9), Q31 M2 engine rules bundle (A9), Q32 cable managers vs 32U (resolved), Q33 FOPP-96SM height (resolved), Q34 M3 group E–H rules (A9, with Ali) | Q35 |
 
 ## Review and merge
