@@ -7,7 +7,7 @@ import openpyxl
 import pytest
 from typer.testing import CliRunner
 
-from bomgen import cli
+from bomgen import build as build_module
 from bomgen.cli import app
 from bomgen.models.report import CheckItem, CheckReport, CheckStatus
 
@@ -63,7 +63,7 @@ def test_a_failed_check_exits_1_after_writing(
     failing = CheckReport(
         items=(CheckItem(check="di_capacity", status=CheckStatus.FAIL, message="too few"),)
     )
-    monkeypatch.setattr(cli, "check_report", lambda loaded, result: failing)
+    monkeypatch.setattr(build_module, "check_report", lambda loaded, result: failing)
     result = runner.invoke(app, ["build", str(EXAMPLES / "project.yaml"), "-o", str(tmp_path)])
     assert result.exit_code == 1
     assert (tmp_path / FILE_NAME).is_file()
