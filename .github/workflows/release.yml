@@ -119,6 +119,18 @@ jobs:
           if ($out -ne "bomgen $env:VERSION") { Fail "Installed bomgen.exe --version gave '$out'" }
           $app = Start-Process $exe -ArgumentList "--self-test" -Wait -PassThru
           if ($app.ExitCode) { Fail "Installed BOM Generator.exe --self-test exited $($app.ExitCode)" }
+          # The double-click path: open a .bomlib with the installed app (as Explorer does),
+          # then read it back with the installed CLI. Unattended, so no message box.
+          $env:BOMGEN_LIBRARY_HOME = Join-Path $env:RUNNER_TEMP "bomlib-home"
+          $env:BOMGEN_NO_DIALOGS = "1"
+          $package = Join-Path $env:RUNNER_TEMP "ci-library.bomlib"
+          & "$dir\bomgen.exe" library pack examples\library.yaml --name ci-library --version 1.0.0 --out $package
+          if ($LASTEXITCODE) { Fail "bomgen.exe library pack exited $LASTEXITCODE" }
+          $import = Start-Process $exe -ArgumentList "`"$package`"" -Wait -PassThru
+          if ($import.ExitCode) { Fail "Opening a .bomlib with the app exited $($import.ExitCode)" }
+          $listing = (& "$dir\bomgen.exe" library list) -join "`n"
+          if ($listing -notmatch "ci-library") { Fail "Imported library missing from: $listing" }
+          Remove-Item Env:BOMGEN_LIBRARY_HOME, Env:BOMGEN_NO_DIALOGS
           $shortcut = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\BOM Generator.lnk"
           if (-not (Test-Path $shortcut)) { Fail "Missing Start-menu shortcut $shortcut" }
 
@@ -127,6 +139,10 @@ jobs:
           if ($progId -ne "bomgen.library") { Fail ".bomlib maps to '$progId'" }
           $command = (Get-ItemProperty "$classes\bomgen.library\shell\open\command").'(default)'
           if ($command -ne "`"$exe`" `"%1`"") { Fail "Open command is '$command'" }
+          $projId = (Get-ItemProperty "$classes\.bomproj").'(default)'
+          if ($projId -ne "bomgen.project") { Fail ".bomproj maps to '$projId'" }
+          $projCommand = (Get-ItemProperty "$classes\bomgen.project\shell\open\command").'(default)'
+          if ($projCommand -ne "`"$exe`" `"%1`"") { Fail ".bomproj open command is '$projCommand'" }
 
           Start-Process "$dir\unins000.exe" -ArgumentList $silent -Wait
           # The uninstaller re-launches itself from %TEMP%; wait for it to finish.
@@ -136,8 +152,12 @@ jobs:
           if (Test-Path $exe) { Fail "Uninstall left $exe" }
           if (Test-Path "$classes\bomgen.library") { Fail "Uninstall left the bomgen.library ProgID" }
           if (Test-Path "$classes\.bomlib") { Fail "Uninstall left the .bomlib key" }
+          foreach ($left in "bomgen.project", ".bomproj") {
+            if (Test-Path "$classes\$left") { Fail "Uninstall left the $left key" }
+          }
           if (Test-Path $shortcut) { Fail "Uninstall left the Start-menu shortcut" }
           Write-Output "Installed, verified and uninstalled bomgen-setup-$env:VERSION.exe"
+          exit 0
 
       - uses: actions/upload-artifact@v4
         with:
