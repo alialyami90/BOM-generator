@@ -11,7 +11,7 @@ A milestone with several modules may group them in a subfolder,
 | `test_library_model.py`, `test_panel_model.py`, `test_project_model.py` | M1 | input models: accepted and rejected values, defaults, cross-field rules |
 | `test_yaml_source.py`, `test_loader.py`, `test_mirror.py`, `test_errors.py` | M1 | YAML loading, relative file references, panel mirroring, readable errors with file and path |
 | `test_schema.py` | M1 | JSON Schema export, and that `schemas/` matches the models |
-| `test_cli.py` | M1 | `bomgen validate`, `bomgen schema`, `--version` |
+| `test_cli.py` | M1, M7 | `bomgen validate`, `bomgen build` (input problems, unknown substation), `bomgen schema`, `--version` |
 | `test_device_db.py` | device DB | `data/device-db/` covers every example-library part both ways, cites sources, gives two alternative brands with low/mid/high parts, repeats no library fields |
 | `library_store/test_library_manifest.py`, `test_library_package.py` | M8 | `.bomlib` manifest and versions; packing, checksums, tampered or mismatched packages rejected |
 | `library_store/test_library_store.py`, `test_library_diff.py` | M8 | per-user store: install, activate, downgrade refusal, rollback, safe failed imports; part diff |
@@ -33,6 +33,7 @@ A milestone with several modules may group them in a subfolder,
 | `test_substation_loader.py` | M1b | loading a project with substations: key-by-key defaults, document register keys, equipment, library |
 | `library_store/test_library_preview.py` | M8b | library import dry-run: every check listed, nothing written |
 | `project_store/test_project_preview.py`, `test_project_backups.py` | M8b | project import dry-run; listing and restoring the backups in `Backups/` |
+| `project_store/test_project_rename.py` | M8b | importing under a new id (keep both): only `project.id` changes, taken and unsafe ids refused, the suggested free id |
 | `app/test_app_window.py`, `test_app_api.py` | M10a | the pywebview window and its refusals (missing UI files or WebView2), the Python API the UI calls (ADR 0015) |
 | `app/test_app_ui_assets.py` | M10a | the app's UI files are complete, offline and in step with the M9 design |
 | `engine/test_engine_ac_dist.py` | M3 | group E AC distribution: branches in load order with spares, CINC, breaker catalogue codes, MCB count |
@@ -50,6 +51,7 @@ A milestone with several modules may group them in a subfolder,
 | `sheets/test_heat_sheets.py` | M5 | Heat Dissipation and Heat Calculations sheets: blocks, formulas, notes, frames, print setup |
 | `sheets/test_header_footer.py` | M5 | page header and footer per sheet, logo, calculation-sheet header size |
 | `app/test_app_library_api.py` | M10b | the Library screens' API: browse with device-database records, import review, import, versions |
+| `app/test_app_projects_api.py` | M10b | the Home and Project page API: the project list and status, recent folders in the app home, open, export, backup, import and restore, `show_in_folder` limited to listed files |
 
 `builders.py`, `engine/engine_factories.py`, `project_store/project_builders.py`
 and `writer/writer_helpers.py` hold the small builders those tests share.

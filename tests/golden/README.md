@@ -13,5 +13,6 @@ or the example workbook cell it was transcribed from. All tests here carry the
 | `test_engine_groups_e_h.py` | M3 | every group E–H row of the example cabinets, separators, SR.NO 1…71 on cabinet 001, DC branches, incoming and main ratings, aux contacts, HWIO totals 17/17/6; expected rows in `expected_groups_e_h.py` |
 | `test_engine_power_heat.py` | M4 | power totals and blocks per cabinet and for the external equipment, required airflow, the line-up check, the WS console's natural convection |
 | `test_workbook.py` | M5 | the written workbook: sheet order, BOM merges, every formula recalculated with pycel to the value the writer cached (Q15), power totals and airflow from the recalculated sheets |
+| `test_cli_build.py` | M7 | `bomgen build` on the project, one substation of it and its `substation.yaml` writes the OUT-2 file name with every sheet |
 
 The generated panel layout arrives in `layout/` with M1c; see `docs/plan.md`.

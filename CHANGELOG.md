@@ -10,6 +10,19 @@ tagged release.
 
 ### Added
 
+- `bomgen build`: one workbook per substation of a project, or for one
+  `substation.yaml`, into `--out` (default `out/`), named by OUT-2; `--substation`
+  builds one; a golden test builds the example (first part of milestone M7,
+  #51).
+- `bomgen project import --rename-to ID` imports a `.bomproj` under a new
+  project id and keeps the existing project; the dry-run suggests a free id;
+  ADR 0012 amendment (#53).
+- Library parts carry `di_inputs`, the hardwired digital inputs one unit
+  provides, for the check report's DI capacity check (#52).
+- Desktop app Home, Project page and Backup and share on the project store:
+  the workspace's projects and recently opened folders with their status,
+  export, backup, import and restore reviews; the Project page is read-only
+  until project writers exist (milestone M10b, #49).
 - Sheet models filled from the engine: one BOM sheet per cabinet with the
   loose-material table under its host, and the Power Consumption, Heat
   Dissipation and Heat Calculations sheets, every computed cell a live formula
@@ -89,6 +102,14 @@ tagged release.
 
 ### Changed
 
+- The release workflow builds the example workbook with the frozen and the
+  installed CLI (#55).
+- Desktop app: `show_in_folder` opens only files the app listed; the
+  recent-projects list lives in its own app home (`BOMGEN_APP_HOME`); the
+  import review reads `can_import` (#54).
+- Library and project store messages state the situation; the command to run
+  moves to `LibraryPackageError.hint` (#50).
+- Changelog, README and test READMEs for #42–#48 (#56).
 - The release workflow validates the example project with the frozen and the
   installed CLI (#47).
 - `data/device-db/README.md` explains how to ship the records in a `.bomlib`
