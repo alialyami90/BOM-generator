@@ -7,6 +7,7 @@ import pytest
 from pydantic import ValidationError
 
 from bomgen.models.library import (
+    Busbar,
     DeviceType,
     Library,
     McbCatalogue,
@@ -354,3 +355,28 @@ def test_port_group_usable_for_defaults_to_any_and_rejects_other() -> None:
 
 def test_catalogue_enclosure_u_defaults_to_42() -> None:
     assert Library.model_validate(minimal_library_dict()).catalogues.enclosure_u == 42
+
+
+def test_terminal_rule_description_uses_strip_placeholders() -> None:
+    rule = TerminalRule.model_validate(
+        {
+            "strip": "XDIP{slot}",
+            "block": "UT-2.5-MT",
+            "count": 58,
+            "first_slot": "D",
+            "description": 'Knife Disconnect Terminal Blocks For Axion "{slot} Slot" (DI)',
+        }
+    )
+    assert rule.description is not None
+    assert rule.description.format(slot="D") == (
+        'Knife Disconnect Terminal Blocks For Axion "D Slot" (DI)'
+    )
+    plain = {"strip": "X1", "block": "UT-16", "count": 4}
+    assert TerminalRule.model_validate(plain).description is None
+    with pytest.raises(ValidationError, match="description"):
+        TerminalRule.model_validate(plain | {"description": "Blocks {colour}"})
+
+
+def test_busbar_tag_is_optional() -> None:
+    assert Busbar(description="PE").tag is None
+    assert Busbar(description="PE", tag="AC SAFETY POWER-GROUND").tag == "AC SAFETY POWER-GROUND"

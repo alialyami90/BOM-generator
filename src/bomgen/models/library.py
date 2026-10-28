@@ -136,11 +136,12 @@ class TerminalRule(InputModel):
     count: PositiveInt
     per: Literal["unit", "serial_port"] = "unit"
     first_slot: Annotated[str, Field(pattern=r"^[A-Z]$")] | None = None
+    description: str | None = None  # column C of the strip's rows; same placeholders
 
-    @field_validator("strip")
+    @field_validator("strip", "description")
     @classmethod
-    def _strip_placeholders(cls, value: str) -> str:
-        return check_template(value, STRIP_PLACEHOLDERS)
+    def _strip_placeholders(cls, value: str | None) -> str | None:
+        return None if value is None else check_template(value, STRIP_PLACEHOLDERS)
 
     @model_validator(mode="after")
     def _slot_matches_first_slot(self) -> "TerminalRule":
@@ -288,6 +289,7 @@ class Busbar(InputModel):
     """Busbar entry (spec: Inputs, commodity catalogues)."""
 
     description: str
+    tag: str | None = None  # column B of the grounding row
 
 
 class HousekeepingRef(InputModel):

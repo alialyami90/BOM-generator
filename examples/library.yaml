@@ -208,7 +208,11 @@ devices:
     power_supplies: 2
     min_branch_mcb_a: 2
     terminals:  # PSA3-XRTAC-C1 ... C6, 5 each ('Panel 3' rows 60-61, 65-68)
-      - { strip: "XRTAC-C{n}", block: UT-2.5-MT, count: 5, per: serial_port }
+      - strip: "XRTAC-C{n}"
+        block: UT-2.5-MT
+        count: 5
+        per: serial_port
+        description: "Terminal Blocks for RTAC COM Port"  # 'Panel 3'!C60
 
   - part_id: SEL-2240  # 'Panel 3' row 6: PSA3-HWIO
     category: io_chassis
@@ -262,7 +266,12 @@ devices:
     ordering_code: "22442424X0"
     description_template: "Digital Input Module-24DI (125V DC)"
     terminals:  # PSA3-XDIPD ... XDIPG, 58 each ('Panel 3' rows 55-58)
-      - { strip: "XDIP{slot}", block: UT-2.5-MT, count: 58, first_slot: D }
+      - strip: "XDIP{slot}"
+        block: UT-2.5-MT
+        count: 58
+        first_slot: D
+        # 'Panel 3'!C55:C58 (trailing space trimmed)
+        description: 'Knife Disconnect Terminal Blocks For Axion "{slot} Slot" (DI)'
 
   # --- Group B: WS console (example workbook, 'Aux'!B4:G6) -----------------------------
 
@@ -598,20 +607,21 @@ catalogues:
     UT-2.5-MTD: { make: Phoenix, ordering_code: "3064085" }
     UT-2.5-MT: { make: Phoenix, ordering_code: "3046362" }
 
-  # NOTE: the busbar rows' column-B labels ("AC SAFETY POWER-GROUND",
-  # "INSTRUMENT-GROUND", "POWER-GROUND") have no field in the busbar model.
-  busbars:
-    ac_safety_ground:  # 'Panel 1'!C76
+  busbars:  # tag = column B of the grounding row
+    ac_safety_ground:  # 'Panel 1'!B76:C76
+      tag: "AC SAFETY POWER-GROUND"
       description: |-
         POWER/AC SAFETY GROUNDING BUSBAR - TINNED COPPER
         For all exposed metal surfaces of cabinets, racks, chassis ground.
         Wire type: 14AWG, Green with yellow tracer insulation
-    instrument_ground:  # 'Panel 1'!C77 (trailing space after line 1 trimmed)
+    instrument_ground:  # 'Panel 1'!B77:C77 (trailing space after line 1 trimmed)
+      tag: "INSTRUMENT-GROUND"
       description: |-
         INSTRUMENT GROUNDING BUSBAR - TINNED COPPER
         For all wire shields and DC common
         Wire type: 14AWG, Green insulation
-    power_ground:  # 'Aux'!C45 (WS console)
+    power_ground:  # 'Aux'!B45:C45 (WS console)
+      tag: "POWER-GROUND"
       description: |-
         Power Safety Grounding Busbar-Tinned Copper
         Interface: For all exposed metal surfaces of cabinets, racks, and chassis ground.

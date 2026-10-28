@@ -32,6 +32,18 @@
         "description": {
           "title": "Description",
           "type": "string"
+        },
+        "tag": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tag"
         }
       },
       "required": [
@@ -730,6 +742,18 @@
           "exclusiveMinimum": 0,
           "title": "Count",
           "type": "integer"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
         },
         "first_slot": {
           "anyOf": [

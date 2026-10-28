@@ -275,7 +275,8 @@ devices:
     cores: null                        # fibre cores, for children with qty "cores"
     children: []                       # [{ part_id, qty: <per parent unit> | "cores" }]
     terminals: []                      # [{ strip: "XDIP{slot}", block: UT-2.5-MT, count: 58,
-                                       #    per: unit | serial_port, first_slot: D }]
+                                       #    per: unit | serial_port, first_slot: D,
+                                       #    description: "... {slot} ..." }]  # column C
     loose_items: []                    # [{ part_id, qty }]
     excluded_from_power: false
 
@@ -289,8 +290,8 @@ catalogues:
     UT-2.5-MTD: { make: Phoenix Contact, ordering_code: "3064085" }
     UT-2.5-MT:  { make: Phoenix Contact, ordering_code: "3046362" }
   busbars:
-    ac_safety_ground:  { description: "AC SAFETY POWER-GROUND ..." }
-    instrument_ground: { description: "INSTRUMENT-GROUND ..." }
+    ac_safety_ground:  { tag: "AC SAFETY POWER-GROUND", description: "..." }  # tag = column B
+    instrument_ground: { tag: "INSTRUMENT-GROUND", description: "..." }
   housekeeping:                        # part_ids of device records (ADR 0010)
     lamp:        { part_id: ... }
     door_switch: { part_id: ... }        # optional; omit when the lamp part includes it

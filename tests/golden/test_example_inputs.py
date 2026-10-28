@@ -226,3 +226,21 @@ def test_example_substation_layout_inputs(loaded: LoadedSubstation) -> None:
     assert [g.usable_for for g in l1.ports] == ["ied", "uplink"]
     for equipment in loaded.substation.equipment:
         assert part(loaded, equipment.part_id).height_u is not None, equipment.part_id
+
+
+def test_terminal_strip_descriptions_and_busbar_tags(loaded: LoadedSubstation) -> None:
+    # Example workbook, 'Panel 3'!C55:C61 (strip descriptions) and 'Panel 1'!B76:B77,
+    # 'Aux'!B45 (grounding row labels).
+    rtac = part(loaded, "SEL-3555-RTAC").terminals[0]
+    assert rtac.description == "Terminal Blocks for RTAC COM Port"
+    di = part(loaded, "SEL-2244-2").terminals[0]
+    assert di.description is not None
+    assert di.description.format(slot="E") == (
+        'Knife Disconnect Terminal Blocks For Axion "E Slot" (DI)'
+    )
+    tags = {key: bar.tag for key, bar in loaded.library.catalogues.busbars.items()}
+    assert tags == {
+        "ac_safety_ground": "AC SAFETY POWER-GROUND",
+        "instrument_ground": "INSTRUMENT-GROUND",
+        "power_ground": "POWER-GROUND",
+    }
