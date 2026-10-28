@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from typing import Annotated, NoReturn
 
@@ -199,5 +200,15 @@ def schema(
         typer.echo(str(path))
 
 
+def _utf8_console() -> None:
+    """Write UTF-8 even where the console is not (the frozen exe on Windows gets cp1252)."""
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        encoding = (getattr(stream, "encoding", None) or "").lower().replace("_", "-")
+        if reconfigure is not None and encoding not in ("utf-8", "utf8"):
+            reconfigure(encoding="utf-8", errors="replace")
+
+
 def main() -> None:
+    _utf8_console()
     app()

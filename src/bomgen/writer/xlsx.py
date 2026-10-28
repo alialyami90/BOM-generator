@@ -6,6 +6,9 @@ writes ``fullCalcOnLoad`` into every workbook, so Excel recalculates the live
 formulas when the file opens (OUT-5).
 """
 
+import contextlib
+import os
+import secrets
 import struct
 from pathlib import Path
 from typing import Any
@@ -234,12 +237,29 @@ def _check_images(workbook: WorkbookModel) -> None:
 def write_workbook(workbook: WorkbookModel, path: Path) -> Path:
     """Write ``workbook`` to ``path`` (parent directories are created) and return ``path``.
 
-    Raises ``WriterError`` when the workbook cannot be written as modelled; no
-    file is left at ``path`` in that case.
+    The file is written beside ``path`` and then moved onto it, so a workbook
+    already at ``path`` is replaced only by a complete one. Raises ``WriterError``
+    when the workbook cannot be written as modelled or cannot replace ``path``
+    (its ``__cause__`` tells a file open in Excel, a ``PermissionError``, from
+    other errors); ``path`` is then left as it was.
     """
     _check_images(workbook)
     path.parent.mkdir(parents=True, exist_ok=True)
-    book = Workbook(str(path), _WORKBOOK_OPTIONS)
+    temp = path.with_name(f"{path.stem}.tmp-{secrets.token_hex(8)}{path.suffix}")
+    try:
+        _write(workbook, temp, path)
+        os.replace(temp, path)
+    except OSError as exc:
+        raise WriterError(f"could not write {path}: {exc}") from exc
+    finally:
+        with contextlib.suppress(OSError):
+            temp.unlink(missing_ok=True)  # a half-written file must not linger
+    return path
+
+
+def _write(workbook: WorkbookModel, temp: Path, path: Path) -> None:
+    """Write ``workbook`` to ``temp``; errors name ``path``, the file the user asked for."""
+    book = Workbook(str(temp), _WORKBOOK_OPTIONS)
     try:
         formats = _Formats(book)
         for sheet in workbook.sheets:
@@ -254,6 +274,4 @@ def write_workbook(workbook: WorkbookModel, path: Path) -> Path:
     try:
         book.close()
     except _XLSXWRITER_ERRORS as exc:
-        path.unlink(missing_ok=True)  # a half-written file must not look like a result
         raise WriterError(f"could not write {path}: {exc}") from exc
-    return path

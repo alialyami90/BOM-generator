@@ -933,8 +933,9 @@ assumed 2U from Hubbell's 48-fibre 1U unit (`data/device-db/`, PR #18).
 *Resolved 2026-10-28:* Ali: 1U. A3 and A2 update the device database and the example
 library (done in #33: FOPP-96SM `height_u: 1`).
 
-**Q34 — Group E–H rules the spec states only by example** (M3; defaults in ADR
-0014, all in force until Ali answers):
+**Q34 — Group E–H rules the spec states only by example** (M3; ADR 0014).
+*Resolved 2026-10-28:* Ali accepted all four defaults below, including no XDIN row
+when the HWIO total is 0 and no override is set:
 1. Strips follow the order of the example's group G rows ('Panel 1', 'Panel 3'): the
    fixed strips, then the device strips (library `terminals`) after X-ANN and before
    XIP: the per-unit strips (Axion DI slots XDIPD–XDIPG) in group B order, then
@@ -950,8 +951,7 @@ library (done in #33: FOPP-96SM `height_u: 1`).
    (the spec's example reads "2A,2P", the workbook mixes both), spares "SPARE",
    one text per terminal strip, the console's CINC "Main Auxiliary AC Supply"
    (`Aux` reads "Non-UPS AC Supply"), and a branch load named by its tag without the
-   prefix ("SRV/OAS/EAS PS1"; `Aux` reads "OAS PS1"). *Alternative:* per-panel
-   description overrides.
+   prefix ("SRV/OAS/EAS PS1"; `Aux` reads "OAS PS1").
 
 **Q29 — Thermostat load and fan airflow in the library defaults.** The device
 research (`docs/device-db-findings.md`, items 1 and 2) found that the SK 3110.000
