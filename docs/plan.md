@@ -367,6 +367,16 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
 - Tests reopen the file with openpyxl and assert formulas, styles, merges, print
   settings, header/footer strings; check the zip holds the header image; check
   no `.xlsx` lands in the repo.
+- Delivered in M6: `bomgen.models.sheet` (`WorkbookModel` → `SheetModel` with
+  `Cell` value or `Formula`, `CellStyle`, `Merge`, column/row formats,
+  `PrintSetup`, `HeaderFooter` zones of runs plus an optional picture) and
+  `bomgen.writer.write_workbook(model, path)`. Styles are concrete `CellStyle`
+  values; the named styles of "Formatting" (the plan's style tokens) are M5's
+  `sheets/styles.py`. Model units follow the spec: widths as Excel shows them,
+  heights in points, margins in cm, 1-based rows and columns. Problems XlsxWriter
+  would only warn about (header over 255 characters, truncated text, missing or
+  unreadable logo) raise `WriterError` and leave no file. Plan:
+  `docs/superpowers/plans/2026-10-28-m6-excel-writer.md`.
 
 ### M7 — Check report, revision highlighting, CLI polish, docs
 - Step 15 check report (SFPs vs port plans, mains vs ΣQ, airflow vs required,
