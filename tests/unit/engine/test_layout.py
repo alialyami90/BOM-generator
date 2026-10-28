@@ -1,15 +1,29 @@
 """Panel layout: rules R5-R8 of the substations and auto-layout design (ADR 0013)."""
 
+from dataclasses import replace
+from pathlib import Path
+from typing import Any
+
+import pytest
+import yaml
+
 from bomgen.engine.layout import (
     Layout,
+    LayoutResult,
     LayoutRules,
     Unit,
     auto_layout,
     fill,
     fill_lines,
+    layout_preview,
+    layout_substation,
+    render_panel_yaml,
     used_u,
 )
-from bomgen.models.substation import DeviceMove, PairMove, Side, UnitRef
+from bomgen.io.loader import LoadedSubstation, load_substation
+from bomgen.models.panel import Panel, PortAllocation
+from bomgen.models.substation import DeviceMove, EquipmentRole, PairMove, Side, UnitRef
+from bomgen.models.substation import Layout as LayoutInputs
 
 RULES = LayoutRules(capacity_u=32, blank_plate_u=1)
 A, B, NONE = Side.A, Side.B, Side.NONE
@@ -213,3 +227,122 @@ def test_r7_overrides_survive_a_rerun() -> None:
 def test_r8_fill_lines_count_the_gaps() -> None:
     layout = fill([u("a", 1, A), u("b", 1, A, h=2, rank=1), u("c", 1, A, rank=2)], RULES)
     assert fill_lines(layout, RULES) == ["Panel 1: 6 U / 32 U"]
+
+
+# --- The substation adapter (R3, R4, R9) on the example substation ---------------------
+
+EXAMPLE = Path(__file__).parents[3] / "examples" / "substations" / "gis01" / "substation.yaml"
+
+
+@pytest.fixture(scope="module")
+def example() -> LoadedSubstation:
+    return load_substation(EXAMPLE)
+
+
+def with_changes(loaded: LoadedSubstation, **changes: Any) -> LoadedSubstation:
+    """The loaded substation with top-level ``Substation`` fields replaced."""
+    return replace(loaded, substation=loaded.substation.model_copy(update=changes))
+
+
+def rows(panel: Panel) -> list[tuple[str, int, str | None, int | None]]:
+    return [(d.part_id, d.qty, d.lan, d.first_nn) for d in panel.devices]
+
+
+def test_r9_b_panels_are_written_in_full(example: LoadedSubstation) -> None:
+    result = layout_substation(example)
+    assert [p.id for p in result.panels] == ["psa1", "psa2"]
+    first, second = result.panels
+    assert all(p.generated for p in result.panels)
+    assert (first.lan, second.lan) == ("A", "B")
+    assert {d.lan for d in second.devices} <= {"B", None}
+    assert [r[:2] for r in rows(first) if r[2]] == [r[:2] for r in rows(second) if r[2]]
+    assert second.options.aux_socket_a == 10  # options_by_panel
+    assert first.cabinet_number == "861-GIS01-PSA-0001"
+
+
+def test_r9_l1_numbering_continues_across_panels(example: LoadedSubstation) -> None:
+    many = with_changes(
+        example, network=example.substation.network.model_copy(update={"ied_count": 19 * 14})
+    )  # 14 L1 switches per side: they cannot all fit in panels 1 and 2
+    result = layout_substation(many)
+    l1 = [
+        (p.number, r)
+        for p in result.fills
+        for r in rows(_panel_of(result, p.number))
+        if r[0] == "RST2228-L1-24MM"
+    ]
+    in_first = next(r[1] for n, r in l1 if n == 1)
+    later = next(r for n, r in l1 if n == 3)
+    assert later[3] == 11 + in_first
+    assert in_first + later[1] == 14
+
+
+def _panel_of(result: LayoutResult, number: int) -> Panel:
+    return result.panels[number - 1]
+
+
+def test_r3_port_plans_sit_with_their_switches(example: LoadedSubstation) -> None:
+    first, second = layout_substation(example).panels
+    for panel in (first, second):
+        l1 = panel.port_plans["RST2228-L1-24MM"]
+        assert l1.uplinks == [PortAllocation(count=6, speed="1G", media="MM", spare=3)]
+        l2 = panel.port_plans["RST2228-L2"]
+        assert l2.uplinks_l3 == [PortAllocation(count=2, speed="1G", media="SM")]
+        # 3 L1 links + ext-fw 1 + gw 1 + rtac 2 as 1G MM; the GPS on 100M MM
+        assert l2.downlinks == [
+            PortAllocation(count=7, speed="1G", media="MM"),
+            PortAllocation(count=1, speed="100M", media="MM"),
+        ]
+
+
+def test_r4_generated_files_never_mention_ieds(example: LoadedSubstation) -> None:
+    odd = with_changes(
+        example, network=example.substation.network.model_copy(update={"ied_count": 37})
+    )
+    result = layout_substation(odd)
+    for panel in result.panels:
+        text = render_panel_yaml(panel).lower()
+        assert "37" not in text
+        assert "ied" not in text
+    assert result.report.lines()[0] == "IED count: 37"
+
+
+def test_r9_rendered_yaml_loads_back_as_the_same_panel(example: LoadedSubstation) -> None:
+    for panel in layout_substation(example).panels:
+        assert Panel.model_validate(yaml.safe_load(render_panel_yaml(panel))) == panel
+
+
+def test_r7_manual_panels_are_left_alone(example: LoadedSubstation) -> None:
+    result = layout_substation(example)
+    assert "ws" not in {p.id for p in result.panels}
+    assert "ws" in example.manual_panel_ids
+
+
+def test_r7_preview_overrides_replace_the_files_overrides(example: LoadedSubstation) -> None:
+    inputs = LayoutInputs(overrides=[PairMove(pair="gw", panel=(3, 4))])
+    result = layout_preview(example, inputs)
+    assert [p.id for p in result.panels] == ["psa1", "psa2", "psa3", "psa4"]
+    assert rows(result.panels[2]) == [("SEL-3555-GW", 1, "A", None)]
+    assert example.substation.layout.overrides == []
+
+
+def test_r1_tool_picks_the_l1_model_unless_pinned(example: LoadedSubstation) -> None:
+    equipment = [
+        e.model_copy(update={"part_id": None}) if e.role is EquipmentRole.L1_SWITCH else e
+        for e in example.substation.equipment
+    ]
+    result = layout_substation(with_changes(example, equipment=equipment))
+    assert result.plan.l1_part_id == "RST2228-L1-24MM"
+    assert [c.ports.part_id for c in result.l1_candidates] == ["RST2228-L1-24MM"]
+
+
+def test_r5_missing_height_is_reported(example: LoadedSubstation) -> None:
+    devices = [
+        d.model_copy(update={"height_u": None}) if d.part_id == "SEL-2488" else d
+        for d in example.library.devices
+    ]
+    library = example.library.model_copy(update={"devices": devices})
+    result = layout_substation(replace(example, library=library))
+    issue = next(i for i in result.report.issues if i.kind == "missing-height")
+    assert "SEL-2488" in issue.message
+    assert result.report.has_errors
