@@ -2,6 +2,7 @@
 
 import ast
 import importlib
+import io
 import sys
 import types
 from pathlib import Path
@@ -203,10 +204,32 @@ def test_cli_delegates_to_typer_app_when_present(monkeypatch: pytest.MonkeyPatch
 
     fake_cli = types.ModuleType("bomgen.cli")
     fake_cli.app = fake_app  # type: ignore[attr-defined]
+    fake_cli.utf8_console = lambda: None  # type: ignore[attr-defined]
     monkeypatch.setitem(sys.modules, "bomgen.cli", fake_cli)
 
     assert launcher.cli_main(["validate", "--project", "p.yaml"]) == 3
     assert calls == [(["validate", "--project", "p.yaml"], "bomgen")]
+
+
+def test_cli_writes_utf8_to_a_cp1252_console(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    # The frozen bomgen.exe gets a cp1252 console on Windows and goes through cli_main,
+    # not bomgen.cli.main(), so the launcher must switch the streams itself.
+    streams = {}
+    for name in ("stdout", "stderr"):
+        raw = io.BytesIO()
+        streams[name] = raw
+        monkeypatch.setattr(sys, name, io.TextIOWrapper(raw, encoding="cp1252"))
+    project = Path(__file__).resolve().parents[2] / "examples" / "project.yaml"
+
+    code = launcher.cli_main(["build", str(project), "-o", str(tmp_path)])
+
+    sys.stdout.flush()
+    sys.stderr.flush()
+    written = (streams["stdout"].getvalue() + streams["stderr"].getvalue()).decode("utf-8")
+    assert code == 0
+    assert "\u03a3Q" in written
 
 
 def test_cli_without_cli_module_reports_it_is_pending(
@@ -271,6 +294,7 @@ def test_cli_prints_a_string_exit_code_and_fails(
 
     fake_cli = types.ModuleType("bomgen.cli")
     fake_cli.app = fake_app  # type: ignore[attr-defined]
+    fake_cli.utf8_console = lambda: None  # type: ignore[attr-defined]
     monkeypatch.setitem(sys.modules, "bomgen.cli", fake_cli)
 
     assert launcher.cli_main(["validate"]) == 1
