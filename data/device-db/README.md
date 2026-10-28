@@ -65,6 +65,28 @@ records:
     sources: [https://...]
 ```
 
+### Field rules
+
+Readers (the tests, and the app's loader) can rely on these:
+
+- **Always given:** `part_id`, `kind`, `description`, `verified`, `datasheet`,
+  `alternatives`, `sources`; in `datasheet`, `summary`, `mounting_kind` and `height_u`;
+  on each tier, `model`, `description` and `verified`.
+- **Optional:** everything else, left out when unknown (never `null`). `library_refs` is
+  only on catalogue records, `port_groups` only on library switches, `same_as` only on a
+  tier that repeats a lower one (`low` or `mid`).
+- **No other keys.** A new field is added here first, then to the files.
+- **Free-form:** only `ratings`, `ports` (a list of strings) and `ordering_code_decoded`.
+- **Numbers are numbers:** `power.typical_w`, `power.max_w`, `dimensions_mm.*`,
+  `operating_temp_c.*`, `rack_units`, `weight_kg` and a tier's `unit_power_w` are int or
+  float; `power.redundant_psu` and a tier's `verified` are booleans. Anything uncertain
+  about a figure goes in `notes`, not in the value.
+- **Port groups:** `ports` (label), `count` (positive int), `speed` (`100M | 1G | 10G`),
+  `media`, `kind` (`fixed | sfp_slot`) and `usable_for` (`ied | uplink | any`) are all
+  given; `note` is optional. `media` is `MM`, `SM` or `RJ45` on fixed ports and the cage
+  type (`SFP`, `SFP+`) on SFP slots.
+- `height_u` is a whole number, at least 1 for `rack` and 0 for every other mounting.
+
 The model and ordering code the BOM uses are not repeated here; the record's
 `datasheet.ordering_code_decoded` explains them where they could be decoded.
 

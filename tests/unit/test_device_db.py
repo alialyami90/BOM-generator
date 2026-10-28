@@ -18,6 +18,8 @@ KINDS = {"device", "catalogue"}
 MOUNTING_KINDS = {"rack", "din_rail", "plug_in", "enclosure", "external"}
 PORT_ROLES = {"ied", "uplink", "any"}
 PORT_GROUP_KEYS = {"ports", "count", "speed", "media", "kind", "usable_for"}
+PORT_SPEEDS = {"100M", "1G", "10G"}
+PORT_KINDS = {"fixed", "sfp_slot"}
 
 REPO = Path(__file__).resolve().parents[2]
 DB_DIR = REPO / "data" / "device-db"
@@ -167,6 +169,8 @@ def test_switch_lists_port_groups_with_a_role_for_the_sizer(part_id: str) -> Non
     for group in groups:
         assert group.keys() >= PORT_GROUP_KEYS, group
         assert group["usable_for"] in PORT_ROLES
+        assert group["speed"] in PORT_SPEEDS
+        assert group["kind"] in PORT_KINDS
         assert type(group["count"]) is int
         assert group["count"] > 0
     assert any(g["usable_for"] in {"ied", "any"} for g in groups)
@@ -176,3 +180,36 @@ def test_switch_lists_port_groups_with_a_role_for_the_sizer(part_id: str) -> Non
 def test_only_switches_carry_port_groups() -> None:
     with_groups = {r["part_id"] for r in RECORDS if "port_groups" in r["datasheet"]}
     assert with_groups == set(_library_switches())
+
+
+def _is_number(value: object) -> bool:
+    return isinstance(value, int | float) and not isinstance(value, bool)
+
+
+@pytest.mark.parametrize("record", RECORDS, ids=_ids(RECORDS))
+def test_datasheet_figures_are_numbers_and_flags_are_booleans(record: dict[str, Any]) -> None:
+    datasheet = record["datasheet"]
+    assert datasheet["summary"]
+    power = datasheet.get("power", {})
+    figures = [power.get("typical_w"), power.get("max_w")]
+    figures += [datasheet.get("rack_units"), datasheet.get("weight_kg")]
+    figures += list(datasheet.get("dimensions_mm", {}).values())
+    figures += list(datasheet.get("operating_temp_c", {}).values())
+    for alt in record["alternatives"]:
+        figures += [part.get("unit_power_w") for part in alt["tiers"].values()]
+    assert all(_is_number(v) for v in figures if v is not None)
+    assert isinstance(power.get("redundant_psu", False), bool)
+
+
+@pytest.mark.parametrize("record", RECORDS, ids=_ids(RECORDS))
+def test_record_writes_no_null_values(record: dict[str, Any]) -> None:
+    def nulls(node: object, path: str) -> list[str]:
+        if node is None:
+            return [path]
+        if isinstance(node, dict):
+            return [p for k, v in node.items() for p in nulls(v, f"{path}.{k}")]
+        if isinstance(node, list):
+            return [p for i, v in enumerate(node) for p in nulls(v, f"{path}[{i}]")]
+        return []
+
+    assert nulls(record, record["part_id"]) == []
