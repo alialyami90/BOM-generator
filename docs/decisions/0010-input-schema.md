@@ -18,7 +18,10 @@ hand-written YAML.
    fan, vent filter, thermostat, IPR kit, change-over diodes, socket) refer to
    device records by `part_id`. Make, model, code and wattage live only on the
    device record; the catalogue adds only what is specific to the role (fan
-   `airflow_m3h` per fan, socket `rating_a`).
+   `airflow_m3h` per fan, socket `rating_a`). `door_switch` is optional: leave
+   it out when the lamp part includes the switch, so no second row is written.
+   `change_over_diodes` names both parts, `negative` (COD-1) and `positive`
+   (COD-2), so the engine looks nothing up implicitly.
 2. **Port allocations are lists.** `uplinks_l3`, `uplinks` and `downlinks` in a
    port plan are always lists of `{count, speed, media, spare}`. RTAC serial
    ports used in a panel are `port_plans.<rtac>.serial_ports`.
