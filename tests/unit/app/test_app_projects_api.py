@@ -40,6 +40,7 @@ def app(tmp_path: Path, workspace: Path, window: FakeWindow) -> api.Api:
         env={
             "BOMGEN_LIBRARY_HOME": str(tmp_path / "libraries"),
             "BOMGEN_WORKSPACE": str(workspace),
+            "BOMGEN_APP_HOME": str(tmp_path / "app"),
         }
     )
     instance._set_window(window)
@@ -288,17 +289,71 @@ def test_show_in_folder_opens_the_folder_elsewhere(
     assert ran == [[opener, str(tmp_path)]]
 
 
-def test_show_in_folder_endpoint_refuses_a_missing_file(app: api.Api, tmp_path: Path) -> None:
+def test_show_in_folder_refuses_a_backup_deleted_since_it_was_listed(
+    app: api.Api, example: Path
+) -> None:
     ran: list[Path] = []
     app._reveal = ran.append
-    envelope = app.show_in_folder(str(tmp_path / "gone.bomproj"))
+    saved = ok(app.backup_project(str(example)))
+    Path(saved["path"]).unlink()
+
+    envelope = app.show_in_folder(saved["path"])
+
     assert envelope["ok"] is False
     assert envelope["error"]["kind"] == "io"  # type: ignore[index]
     assert ran == []
 
 
-def test_show_in_folder_endpoint_reveals_an_existing_file(app: api.Api, example: Path) -> None:
+def test_show_in_folder_reveals_the_files_the_app_listed(app: api.Api, example: Path) -> None:
     ran: list[Path] = []
     app._reveal = ran.append
-    ok(app.show_in_folder(str(example)))
-    assert ran == [example]
+    saved = ok(app.backup_project(str(example)))
+    (listed,) = ok(app.list_backups(str(example)))
+    ok(app.list_projects())
+
+    for path in (saved["path"], listed["path"], str(example)):
+        ok(app.show_in_folder(path))
+
+    assert ran == [Path(saved["path"]), Path(listed["path"]), example]
+
+
+def test_show_in_folder_refuses_a_path_the_app_did_not_list(app: api.Api, tmp_path: Path) -> None:
+    ran: list[Path] = []
+    app._reveal = ran.append
+    other = tmp_path / "anything.exe"
+    other.write_bytes(b"x")
+
+    envelope = app.show_in_folder(str(other))
+
+    assert envelope["ok"] is False
+    assert envelope["error"]["kind"] == "not_listed"  # type: ignore[index]
+    assert ran == []
+
+
+def test_recent_projects_live_in_the_app_home(app: api.Api, tmp_path: Path) -> None:
+    elsewhere = copy_example(tmp_path / "elsewhere")
+
+    ok(app.open_project(str(elsewhere)))
+
+    assert (tmp_path / "app" / "recent-projects.json").is_file()
+
+
+def test_app_home_defaults_next_to_the_libraries_not_beside_an_overridden_one() -> None:
+    windows = {"LOCALAPPDATA": r"C:\Users\ali\AppData\Local", "BOMGEN_LIBRARY_HOME": r"D:\libs"}
+
+    assert api.default_app_home(windows, platform="win32") == Path(
+        windows["LOCALAPPDATA"], "bomgen", "app"
+    )
+    assert api.default_app_home({"BOMGEN_APP_HOME": "/x"}) == Path("/x")
+    assert api.default_app_home({"XDG_DATA_HOME": "/d"}, platform="linux") == Path("/d/bomgen/app")
+
+
+def test_a_project_opens_when_the_recent_list_cannot_be_written(
+    app: api.Api, tmp_path: Path
+) -> None:
+    (tmp_path / "app").write_text("a file where the folder should be", "utf-8")
+    elsewhere = copy_example(tmp_path / "elsewhere")
+
+    page = ok(app.open_project(str(elsewhere)))
+
+    assert page["id"] == EXAMPLE_ID
