@@ -215,6 +215,8 @@ equipment:                             # what the layout places (design 3.2)
   # role: l1_switch | l2_switch | ext_switch | firewall | fopp | other
   # redundant (one unit per side) or side: none | a | b; qty (not on l1_switch);
   # l2_ports, l2_speed (default 1G), l2_media (default MM)
+  # purpose, hwio_points: copied onto each row the layout writes (as on a panel row)
+  # port_plan: per unit, scaled by the row's qty; not on l1_switch or l2_switch (sized)
 network:
   ied_count: 40                        # never a BOM row (R4)
   topology: star                       # star | ring

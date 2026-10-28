@@ -264,6 +264,19 @@
       "additionalProperties": false,
       "description": "A device the substation needs, before any panel exists (ADR 0013).",
       "properties": {
+        "hwio_points": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Hwio Points"
+        },
         "id": {
           "pattern": "^[a-z0-9][a-z0-9_-]*$",
           "title": "Id",
@@ -295,6 +308,29 @@
           ],
           "default": null,
           "title": "Part Id"
+        },
+        "port_plan": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PortPlan"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "purpose": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Purpose"
         },
         "qty": {
           "default": 1,
@@ -637,6 +673,71 @@
       ],
       "title": "PanelKind",
       "type": "string"
+    },
+    "PortAllocation": {
+      "additionalProperties": false,
+      "description": "A count of ports of one speed and media used for one purpose, plus spares.",
+      "properties": {
+        "count": {
+          "exclusiveMinimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "media": {
+          "$ref": "#/$defs/Media"
+        },
+        "spare": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Spare",
+          "type": "integer"
+        },
+        "speed": {
+          "$ref": "#/$defs/PortSpeed"
+        }
+      },
+      "required": [
+        "count",
+        "speed",
+        "media"
+      ],
+      "title": "PortAllocation",
+      "type": "object"
+    },
+    "PortPlan": {
+      "additionalProperties": false,
+      "description": "How one device's ports are allocated (keyed by part id or tag in the panel).",
+      "properties": {
+        "downlinks": {
+          "items": {
+            "$ref": "#/$defs/PortAllocation"
+          },
+          "title": "Downlinks",
+          "type": "array"
+        },
+        "serial_ports": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Serial Ports",
+          "type": "integer"
+        },
+        "uplinks": {
+          "items": {
+            "$ref": "#/$defs/PortAllocation"
+          },
+          "title": "Uplinks",
+          "type": "array"
+        },
+        "uplinks_l3": {
+          "items": {
+            "$ref": "#/$defs/PortAllocation"
+          },
+          "title": "Uplinks L3",
+          "type": "array"
+        }
+      },
+      "title": "PortPlan",
+      "type": "object"
     },
     "PortSpeed": {
       "enum": [
