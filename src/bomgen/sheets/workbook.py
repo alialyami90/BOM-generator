@@ -1,18 +1,19 @@
-"""Assemble every sheet of one substation's workbook (spec: OUT-3; plan M5).
+"""Assemble every sheet of one substation's workbook (spec: OUT-3; plan M5; ADR 0020).
 
-Sheet order: one BOM sheet per panel in panel order (the loose-material table under
-its host), then Power Consumption, Heat Dissipation and Heat Calculations.
+Sheet order: one BOM sheet per panel in panel order, the Loose Material sheet when the
+substation has loose material, then Power Consumption, Heat Dissipation and Heat
+Calculations.
 """
 
 from pathlib import Path
 
 from bomgen.io.loader import LoadedSubstation
-from bomgen.models.bom import BuildResult
+from bomgen.models.bom import BomTable, BuildResult
 from bomgen.models.calc import LineRef
 from bomgen.models.sheet import SheetModel, WorkbookModel
 from bomgen.sheets import heat_calc_sheet, heat_diss_sheet, styles
 from bomgen.sheets import power_sheet as power_module
-from bomgen.sheets.bom_sheet import bom_sheet
+from bomgen.sheets.bom_sheet import BomSheet, bom_sheet, loose_sheet
 from bomgen.sheets.header_footer import bom_header_footer, calc_header_footer, fitting_size
 from bomgen.sheets.power_sheet import BomSource
 
@@ -25,28 +26,33 @@ def build_workbook(
     panels = {panel.id: panel for panel in loaded.panels}
     cabinet_names = {panel.id: panel.cabinet_name for panel in loaded.panels}
     loose = result.loose
-    if loose is not None and loose.host_panel not in {p.panel_id for p in result.panels}:
-        raise ValueError(f"loose material host panel {loose.host_panel!r} has no BOM sheet")
+    if loose is not None and loose.host_panel not in panels:
+        # The host panel's document heads the Loose Material sheet (ADR 0020).
+        raise ValueError(f"loose material host panel {loose.host_panel!r} is not a panel")
 
+    names = loaded.substation.output.sheet_names
     sheets: list[SheetModel] = []
     sources: dict[LineRef, BomSource] = {}
+
+    def add(sheet: BomSheet, table: BomTable) -> None:
+        sheets.append(sheet.model)
+        for line_ref, row in sheet.rows.items():
+            sources[line_ref] = BomSource(sheet.model.name, row, table.lines[line_ref.line])
+
     for table in result.panels:
         panel = panels[table.panel_id]
-        hosted = loose if loose is not None and loose.host_panel == table.panel_id else None
         header_footer = bom_header_footer(
             project_name, panel.cabinet_number, loaded.documents[panel.document], logo
         )
-        sheet = bom_sheet(table, hosted, header_footer)
-        sheets.append(sheet.model)
-        for line_ref, row in sheet.rows.items():
-            owner = table if line_ref.panel_id is not None else hosted
-            assert owner is not None
-            sources[line_ref] = BomSource(table.sheet_name, row, owner.lines[line_ref.line])
+        add(bom_sheet(table, header_footer), table)
+    if loose is not None:
+        document = loaded.documents[panels[loose.host_panel].document]
+        header_footer = bom_header_footer(project_name, names.loose_material, document, logo)
+        add(loose_sheet(names.loose_material, loose, header_footer), loose)
 
     if result.power is None or result.heat is None:
         return WorkbookModel(sheets=tuple(sheets))
 
-    names = loaded.substation.output.sheet_names
     calcs = loaded.substation.calculations
     constants = loaded.constants
 

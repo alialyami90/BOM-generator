@@ -169,6 +169,9 @@ defaults:                              # inherited key by key by every substatio
     air_constant_m3k_per_wh: 4.1
     steel_coefficient_w_per_m2c: 5.5
     min_main_mcb_a: 6
+    min_branch_mcb_a: 2                # ADR 0017, used by M15
+    inrush_min_ms: 10                  # ADR 0017, used by M15
+  catalogue_choice: { mcb: default }   # brand set per catalogue (ADR 0017); unset = default
   spares:                              # ADR 0013; every spare is an input
     port_fraction: 0.20
     sfp_per_l1: 3                      # today's "=24+3"
@@ -195,13 +198,14 @@ panels:                                # sheet order (OUT-3); the layout (M1c) r
 manual_panels: [panels/ws.yaml]        # never touched by the layout; after `panels`
 output:
   file_name: "{doc_no}_PSA_BOM_Rev{rev}.xlsx"   # OUT-2
-  sheet_names: { power_consumption: "Power Consumption", heat_dissipation: "Heat Dissipation",
-                 heat_calculations: "Heat Calculations" }
+  sheet_names: { loose_material: "Loose Material", power_consumption: "Power Consumption",
+                 heat_dissipation: "Heat Dissipation", heat_calculations: "Heat Calculations" }
 constants: { t_max_c: 40 }             # optional overrides of the project defaults
 spares: { port_fraction: 0.25 }        # optional overrides of the project defaults
+catalogue_choice: { mcb: abb-s200m }   # optional; overrides the project's key by key
 loose_material:                        # extras not tied to a device
   title: "PSA Panels Loose Material and Auxiliary Equipment"   # the table's title row
-  host_panel: ws                       # table sits under this panel's BOM
+  host_panel: ws                       # its document heads the Loose Material sheet (ADR 0020)
   items:
     - { part_id: NAP-K55, children: [LPA37-696], fed_from: psa3 }   # Q13
     - { part_id: FO-PATCH-CORDS, qty: "1 Lot" }
@@ -246,7 +250,7 @@ generated_panels:                      # needed when equipment is given; {n} = p
   options_by_panel: { 2: { aux_socket_a: 10 } }
 ```
 
-**Loading rules.** Substation `constants` and `spares` replace only the keys
+**Loading rules.** Substation `constants`, `spares` and `catalogue_choice` replace only the keys
 they write; the merged constants are checked again (`t_max_c > t_int_c`). Every
 document key a substation, its calculation sheets, `generated_panels` and its
 panels name must be one of that substation's register entries. Equipment parts
@@ -289,11 +293,17 @@ devices:
                                        #    description: "... {slot} ..." }]  # column C
     loose_items: []                    # [{ part_id, qty }]
     excluded_from_power: false
+    alt_group: L1-SWITCH-24P           # optional; same key = interchangeable parts (ADR 0017)
+    tier: mid                          # optional: low | mid | high
+    inrush_a: 20                       # optional peak inrush current (M15)
+    inrush_ms: 5                       # optional inrush duration (M15)
 
-catalogues:
+catalogues:                            # the brand set named default
   enclosure_u: 42                      # rack units of the enclosure (ADR 0013)
   mcb:          { family: "Acti9 2P", make: Schneider, ratings_a: [1, 2, 6, 10, 16],
-                  code_pattern: "A9F742{rating:02d}" }
+                  code_pattern: "A9F742{rating:02d}",   # or codes: {1: ..., 2: ...}
+                  trip_curve: C, magnetic_trip_multiple: 5,      # optional (ADR 0017)
+                  magnetic_trip_multiple_dc: 7, dc_rating_v: 125 }
   aux_contact:  { make: Schneider, model: A9A26924, ordering_code: A9A26924 }
   terminal_blocks:
     UT-16:      { make: Phoenix Contact, ordering_code: "3044199" }
@@ -311,6 +321,13 @@ catalogues:
     ipr_kit:     { part_id: ... }        # its device record lists relay, base, suppression, bracket
     change_over_diodes: { negative: ..., positive: ... }   # COD-1, COD-2
     socket:      { part_id: ..., rating_a: 10 }
+
+catalogue_brands:                      # optional further brand sets (ADR 0017)
+  mcb:             [{ id: abb-s200m, name: ABB S200M, family: ..., make: ABB, ... }]
+  aux_contact:     [{ id: abb, make: ABB, model: ..., ordering_code: ... }]
+  terminal_blocks: [{ id: weidmuller, name: ..., types: { UT-16: {...}, ... } }]  # all keys
+  busbars:         [{ id: copper, entries: { ac_safety_ground: {...}, ... } }]      # all keys
+  housekeeping:    [{ id: rittal, lamp: {...}, fan: {...}, ... }]                   # all roles
 ```
 
 ### 3.4 `panels/<id>.yaml` (spec: Inputs → 2. Panel definition)
@@ -804,28 +821,51 @@ writes its section's details when the work starts.
   same treatment, so a project can pick another brand. Devices gain the electrical fields
   that M15's MCB sizing needs, such as inrush current, and MCB catalogues gain their trip
   curve.
+  *Details:*
+  - Devices gain `alt_group`, `tier`, `inrush_a` and `inrush_ms`.
+  - The MCB catalogue gains `trip_curve`, the AC and DC magnetic multiples, `dc_rating_v`,
+    and `codes` as an alternative to `code_pattern`.
+  - `catalogue_brands` holds further brand sets, and `catalogue_choice` on the project
+    defaults or a substation picks one. The loader resolves each substation's
+    catalogues, so the engine is unchanged.
+  - New constants are `min_branch_mcb_a` and `inrush_min_ms`.
+  - The example builds byte-identical apart from the workbook's timestamps.
+  - Sections 3.1–3.3 show the keys.
 - **M14 — Library data (A3).** Backlog points 2–3. Every alternative in `data/device-db/`
   becomes a full library part with its datasheet electrical data, and the catalogues get
   their alternative brands. The default library becomes psa-devices 1.1.0.
-- **M15 — Branch MCB sizing from device data (A9, ADR 0019).** Backlog point 3; the rule is
-  Ali's answer to Q35. `dc_dist.branch_sizing` sizes every Q1.n, Q2.n and QCOD-n from the
-  running current with margin, an inrush of at least `inrush_min_ms` over the MCB set's
-  magnetic trip multiple (DC where given), and the `min_branch_mcb_a` design constant; the device field of that name is deprecated.
-  `BuildResult.branch_mcbs` carries each sizing and the check report prints one
-  `branch_mcb` line per MCB. Builds on M13's fields (ADR 0017).
+- **M15 — Branch MCB sizing from device data (A9, ADR 0019).** Backlog point 3. Ali's rule (Q35): the
+  smallest catalogue MCB ≥ 1.3 × running current, ≥ inrush ÷ magnetic trip multiple, and ≥ 2 A.
+  `dc_dist.branch_sizing` sizes every Q1.n, Q2.n and QCOD-n by it; an inrush counts when it
+  lasts at least `inrush_min_ms` or its duration is unknown, and DC loads divide by the
+  set's DC multiple where given. The device field `min_branch_mcb_a` is deprecated in
+  favour of the design constant. `BuildResult.branch_mcbs` carries each sizing and the
+  check report prints one `branch_mcb` line per MCB.
 - **M16 — Library editing and CSV exchange (A5 store and CSV, ADR 0018; A11 app; A4
   design).** Backlog points 1 and 10. Add and edit devices and catalogue entries, saved as
   a new local library version. Export and import the library as CSV, with alternatives
   linked by their group key. The Library screen gets catalogue tabs and an alternatives
-  list for comparing devices.
+  list for comparing devices. Store side (`library_store`, after M13 is on main): the
+  `export_csv`, `preview_csv_import` and `import_csv` functions with the dry-run checks of
+  ADR 0018; an edit service (add, edit or delete a device or catalogue entry, validated
+  against the model) that saves a new local version and keeps the old one for rollback; and
+  the `.bomlib` export of an edited library as the backup. Import and edit share one
+  save-a-new-local-version function. The tests include the round trip
+  (library, CSV, library is equal).
 - **M17 — Project and substation editing (A2 writers; A11 app; A4 design).** Backlog points
   4, 7 and 9. Writers round-trip projects, substations and panels. The app creates projects
   and substations from scratch, every settings field is editable, and the Panels board gets
   drag and drop, pins and the panel editor. YAML and `.bomproj` files are then for import,
   export and backup only.
 - **M18 — Loose material (A2 model; A9 engine; A10 sheet; A11 editor).** Backlog point 6.
-  Each substation has its own editable loose-material list, shown where Ali's answer to Q36
-  puts it and in Preview.
+  Each substation has its own editable loose-material list, on its own "Loose Material"
+  sheet (Q36, ADR 0020) and in Preview.
+  - Sheet side (A10, ADR 0020): the table moves off the WS console sheet onto its own
+    "Loose Material" sheet (`output.sheet_names.loose_material`), placed after the cabinet
+    BOMs and before Power Consumption. It uses the panel BOM layout, print setup and
+    header, and its header and footer come from `host_panel`'s document. External Equipment
+    references follow it. Revision comparison reads the new sheet and falls back to the
+    host sheet's second table for older issues.
 
 ## 5. Testing strategy
 
@@ -853,14 +893,16 @@ writes its section's details when the work starts.
 
 Each has a proposed default that the plan assumes until Ali answers.
 
-**Q35 — Branch MCB sizing rule** (M15; backlog point 3). Asked on a card on 2026-10-28.
-The proposal is the smallest catalogue MCB that meets three conditions: it carries 1.3 × the
-running current, its C-curve magnetic trip (5 × rating) clears the inrush current, and it is
-at least 2 A. The alternative is the same rule without the 2 A floor.
+**Q35 — Branch MCB sizing rule** (M15; backlog point 3). *Resolved 2026-10-28:* Ali chose
+"Computed, 2 A floor". A branch MCB is the smallest catalogue rating that meets all three:
+at least 1.3 × the running current, at least the inrush current divided by the MCB set's
+magnetic trip multiple (C curve: 5) when the device has an inrush figure, and at least 2 A.
+This replaces the per-device `min_branch_mcb_a` as the floor (ADR 0019, A9).
 
-**Q36 — Where loose material goes** (M18; backlog point 6). Asked on a card on 2026-10-28.
-The proposal is its own "Loose Material" sheet. The alternative is the spec's table under the
-WS console sheet.
+**Q36 — Where loose material goes** (M18; backlog point 6). *Resolved 2026-10-28:* Ali chose
+"Its own sheet". Loose material moves off the WS console sheet onto a "Loose Material" sheet,
+placed after the cabinet BOM sheets and before Power Consumption. This overrides the spec's
+OUT-3 and its loose-material table on sheet 4 (ADR 0020, A10).
 
 **Q1 — Example data is not in the spec (blocks M1 and the golden tests).**
 *Resolved 2026-10-28:* Ali uploaded the example workbook; `examples/` is transcribed

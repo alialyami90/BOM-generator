@@ -22,14 +22,15 @@
 
   const cost = (list, extra) => { const all = extra ? list.concat([extra]) : list; return all.reduce((a, u) => a + u.h, 0) + Math.max(0, all.length - 1); };
 
-  /* overrides: [{ pair: 'l1.2', pairIndex: 2 } | { unit: 'l1.2.A', panel: 3 }], removed: [unit or pair ids] */
+  /* overrides (pins): [{ pair: 'l1.2', pairIndex: 2, pos?: 1 } | { unit: 'l1.2.A', panel: 3, pos?: 0 }], removed: [unit or pair ids].
+     A pin that equals the automatic place is kept: it holds the unit there when the network changes. */
   function layoutPreview(overrides = [], removed = []) {
     const all = units().filter((u) => !removed.includes(u.id) && !removed.includes(u.pair || u.id));
     const placed = {}; // unit id -> panel n
     const load = {};   // panel n -> unit list
     const errors = [];
     const put = (u, n) => { placed[u.id] = n; (load[n] = load[n] || []).push(u); };
-    const moved = new Set();
+    const moved = new Set(); const pinPos = {}; // pinned units; and the position a pin asks for in its panel
     all.sort((a, b) => a.order - b.order).forEach((u) => {
       for (let pi = 1; pi < 20; pi++) {
         const a = 2 * pi - 1, b = 2 * pi;
@@ -43,21 +44,22 @@
     /* Overrides are applied after the automatic fill. A move that does not fit is an error, never a silent reflow. */
     const relocate = (u, n) => { load[placed[u.id]] = load[placed[u.id]].filter((x) => x.id !== u.id); put(u, n); moved.add(u.id); };
     overrides.forEach((o) => {
-      if (o.pair) all.filter((u) => u.pair === o.pair).forEach((u) => relocate(u, 2 * o.pairIndex - (u.side === 'A' ? 1 : 0)));
-      else if (o.unit) { const u = all.find((x) => x.id === o.unit); if (u) relocate(u, o.panel); }
+      if (o.pair) all.filter((u) => u.pair === o.pair).forEach((u) => { relocate(u, 2 * o.pairIndex - (u.side === 'A' ? 1 : 0)); if (o.pos != null) pinPos[u.id] = o.pos; });
+      else if (o.unit) { const u = all.find((x) => x.id === o.unit); if (u) { relocate(u, o.panel); if (o.pos != null) pinPos[u.id] = o.pos; } }
     });
     const maxN = Math.max(4, ...Object.keys(load).map(Number));
     const count = maxN % 2 ? maxN + 1 : maxN;
     const panels = [];
     for (let n = 1; n <= count; n++) {
       const list = (load[n] || []).sort((a, b) => a.order - b.order || (a.side < b.side ? -1 : 1));
+      Object.entries(pinPos).filter(([id]) => list.some((u) => u.id === id)).sort((a, b) => a[1] - b[1]).forEach(([id, pos]) => { const [u] = list.splice(list.findIndex((x) => x.id === id), 1); list.splice(Math.min(pos, list.length), 0, u); });
       const used = list.length ? cost(list) : 0;
       if (used > CAPACITY) errors.push(`Panel ${n} needs ${used} U, only ${CAPACITY} U may be used.`);
       const meta = DB.panels.find((p) => p.n === n);
       panels.push({
         n, id: meta ? meta.id : 'psa' + n, name: meta ? meta.name : `PSA Cabinet - ${String(n).padStart(3, '0')}`, prefix: meta ? meta.prefix : 'PSA' + n,
         side: n % 2 ? 'A' : 'B', pair: Math.ceil(n / 2), capacity: CAPACITY, reserved: RESERVED, used, free: CAPACITY - used, plates: Math.max(0, list.length - 1), din: DB.dinParts[n] || 0,
-        devices: list.map((u) => ({ id: u.id, pair: u.pair, name: u.name, model: u.model, part: u.part, h: u.h, dev: u.dev, cm: u.cm, side: u.side, redundant: u.redundant, moved: moved.has(u.id),
+        devices: list.map((u) => ({ id: u.id, pair: u.pair, name: u.name, model: u.model, part: u.part, h: u.h, dev: u.dev, cm: u.cm, side: u.side, redundant: u.redundant, moved: moved.has(u.id), pinned: moved.has(u.id), pos: list.indexOf(u),
           tag: `${(meta ? meta.prefix : 'PSA' + n)}-${u.stem}${u.redundant ? '-' + u.side : '-'}${String(u.num).padStart(2, '0')}` }))
       });
     }

@@ -17,6 +17,7 @@ from openpyxl.utils.exceptions import InvalidFileException
 
 from bomgen.io.errors import InputError, Issue
 from bomgen.models.bom import BomLine, BomTable, BuildResult, Column, QtySum
+from bomgen.models.project import SheetNames
 from bomgen.models.report import (
     PreviousIssue,
     PreviousTable,
@@ -36,6 +37,7 @@ BOM_HEADERS = (
     "ORDERING CODE",
 )
 COLUMNS: tuple[Column, ...] = ("B", "C", "D", "E", "F", "G", "H")
+LOOSE_SHEET = SheetNames().loose_material
 
 Cells = dict[Column, str]
 _Key = Callable[[Cells, str], tuple[str, ...] | None]
@@ -83,9 +85,13 @@ def _text(value: object) -> str:
 
 
 def compare_with_previous(
-    result: BuildResult, previous: PreviousIssue
+    result: BuildResult, previous: PreviousIssue, *, loose_sheet: str = LOOSE_SHEET
 ) -> tuple[BuildResult, RevisionReport]:
-    """``result`` with changed and added cells marked, and the list of changes."""
+    """``result`` with changed and added cells marked, and the list of changes.
+
+    The loose-material table is compared with the previous issue's ``loose_sheet``; an
+    issue from before ADR 0020 has none, so it is the second table on the host's sheet.
+    """
     sheets = {panel.panel_id: panel.sheet_name for panel in result.panels}
     changes: list[RevisionChange] = []
     used: set[tuple[str, int]] = set()
@@ -104,7 +110,11 @@ def compare_with_previous(
     )
     loose = result.loose
     if loose is not None:
-        loose = loose.model_copy(update={"lines": against(loose, sheets[loose.host_panel], 1)})
+        if loose_sheet in previous.sheets:
+            lines = against(loose, loose_sheet, 0)
+        else:
+            lines = against(loose, sheets[loose.host_panel], 1)
+        loose = loose.model_copy(update={"lines": lines})
     for sheet, tables in previous.sheets.items():
         for index, table in enumerate(tables):
             if (sheet, index) not in used:

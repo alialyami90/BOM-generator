@@ -12,11 +12,14 @@
   };
 
   function browse() {
-    const t = S.tab.libtab || 'devices';
-    return `<div class="page">${pageHead('Device library', `${esc(L.name)} ${esc(L.version)}, installed ${esc(L.installed)}. This list is read-only. It changes only when you import an update package.`,
-      `<button class="btn btn--secondary" data-action="goto" data-to="#/library/import">${icon('upload')}Import update…</button>`)}
-      ${S.firstRun ? banner('warn', '<b>No library is installed.</b> Import a <span class="mono">.bomlib</span> file to see devices here.', '<a class="btn btn--primary btn--sm" href="#/library/import">Import…</a>') : devicesView()}</div>`;
+    const t = S.tab.libmain || 'devices';
+    const head = pageHead('Device library', `${esc(L.name)} ${esc(L.version)}, installed ${esc(L.installed)}. Edit devices and catalogues here; your edits are kept as pending changes until you review and apply them as a new local version.`,
+      `<button class="btn btn--primary" data-action="add-device">${icon('plus')}Add device…</button><button class="btn btn--secondary" data-action="lib-export">${icon('download')}Export…</button><button class="btn btn--secondary" data-action="lib-import-menu" aria-haspopup="menu">${icon('upload')}Import…</button>`);
+    const body = S.firstRun ? banner('warn', '<b>No library is installed.</b> Import a <span class="mono">.bomlib</span> file to see devices here.', '<a class="btn btn--primary btn--sm" href="#/library/import">Import…</a>')
+      : `${tabs('libmain', [['devices', 'Devices', `<span class="count">${DB.devices.length}</span>`], ['catalogues', 'Catalogues']], t, 'Library sections')}<div role="tabpanel" aria-labelledby="tab-libmain-${t}" style="margin-top:var(--space-4)">${t === 'catalogues' ? App.catalogues() : devicesView()}</div>`;
+    return `<div class="page">${head}${body}</div>${App.pendingBar()}`;
   }
+  ACTIONS['tab-libmain'] = null;
 
   function filtered() {
     return DB.devices.filter((d) => (!F.q || (d.id + d.make + d.model).toLowerCase().includes(F.q.toLowerCase()))
@@ -45,12 +48,11 @@
     if (t === 'overview') body = `<dl class="kv"><dt>Part ID</dt><dd class="mono">${esc(d.id)}</dd><dt>Make</dt><dd>${esc(d.make)}</dd><dt>Model</dt><dd>${esc(d.model)}</dd><dt>Ordering code</dt><dd class="mono">${esc(d.code || '—')}</dd><dt>Category</dt><dd>${esc(catName(d.cat))}</dd><dt>Tag</dt><dd class="mono">${d.tagType ? esc(d.tagType) + (d.level ? ' · ' + esc(d.level) : '') : '—'}</dd><dt>Supply</dt><dd>${esc(d.supply)}</dd><dt>Power</dt><dd>${esc(d.power || '—')}</dd><dt>Rated power</dt><dd class="num" style="text-align:left">${d.w ? d.w + ' W' : '—'}</dd><dt>Branch MCB</dt><dd>${esc(d.mcb || '—')}</dd></dl>`;
     else if (t === 'datasheet') body = d.ds ? `<dl class="kv"><dt>Supply range</dt><dd>${esc(d.ds.supply)}</dd><dt>Typical power</dt><dd>${esc(d.ds.typical)}</dd><dt>Maximum power</dt><dd>${esc(d.ds.max)}</dd><dt>Ports</dt><dd>${esc(d.ds.ports)}</dd><dt>Dimensions</dt><dd>${esc(d.ds.dims)}</dd><dt>Weight</dt><dd>${esc(d.ds.weight)}</dd><dt>Operating temperature</dt><dd>${esc(d.ds.temp)}</dd><dt>Certifications</dt><dd>${esc(d.ds.certs)}</dd><dt>Datasheet</dt><dd><a href="#" data-action="noop">${icon('ext')} ${esc(d.ds.url)}</a></dd></dl>
       <div class="section" style="margin-top:var(--space-4);padding-bottom:0"><h3>Sources</h3><ul style="margin:var(--space-2) 0 0;padding-left:18px">${(d.src || []).map((s) => `<li>${esc(s)}</li>`).join('')}</ul></div>` : `<p class="muted">No datasheet details are recorded for this device yet.</p>`;
-    else body = d.alt ? `${banner('info', 'Alternatives are for reference. Swapping a device inside a panel is not available yet.')}
-      ${d.alt.map((a) => `<h3 style="margin-top:var(--space-4)">${esc(a.brand)}</h3><div class="table-wrap" style="margin-top:6px"><table class="table"><thead><tr><th style="width:56px">Tier</th><th>Model</th><th>Data</th><th style="width:40px"><span class="sr-only">Copy</span></th></tr></thead><tbody>${a.rows.map((r) => `<tr><td>${esc(r.tier)}</td><td class="mono">${esc(r.model)}${r.same_as ? `<span class="cell-sub" style="font-family:var(--font-sans)">Same as ${esc(r.same_as)}</span>` : ''}</td><td>${verified(r.verified)}</td><td><button class="btn btn--ghost btn--icon btn--sm" data-action="copy" data-v="${esc(r.model)}" aria-label="Copy ${esc(r.model)}">${icon('copy')}</button></td></tr>`).join('')}</tbody></table></div>`).join('')}`
-      : `<p class="muted">No alternatives are recorded for this device yet.</p>`;
-    return `<aside class="detail" aria-label="Device detail"><h2 class="mono" style="font-size:18px;font-family:var(--font-mono)">${esc(d.id)}</h2><p class="muted" style="margin-bottom:var(--space-3)">${esc(d.make)} ${esc(d.model)}</p>
+    else body = d.alt ? App.altTable(d, true) : '<p class="muted">No alternatives are recorded for this device yet. Add one under Edit device › Alternatives.</p>';
+    return `<aside class="detail" aria-label="Device detail"><div class="row" style="justify-content:space-between;align-items:flex-start"><div><h2 class="mono" style="font-size:18px;font-family:var(--font-mono)">${esc(d.id)}</h2><p class="muted" style="margin-bottom:var(--space-3)">${esc(d.make)} ${esc(d.model)}</p></div><a class="btn btn--secondary btn--sm" href="#/library/device/${esc(d.id)}">${icon('edit')}Edit device</a></div>
       ${tabs('libdetail', tabsList, t, 'Device detail')}<div role="tabpanel" aria-labelledby="tab-libdetail-${t}">${body}</div></aside>`;
   }
+  App.libParts = { catName, F };
   ACTIONS['lib-select'] = (el) => { S.selectedDevice = el.dataset.id; S.tab.libdetail = 'overview'; App.render(); };
   document.addEventListener('keydown', (e) => { const r = e.target.closest && e.target.closest('tr.clickable[data-action="lib-select"]'); if (r && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); r.click(); } });
   document.addEventListener('change', (e) => { if (e.target.id === 'lib-cat') { F.cat = e.target.value; App.render(); } if (e.target.id === 'lib-ver') { F.ver = e.target.value; App.render(); } });

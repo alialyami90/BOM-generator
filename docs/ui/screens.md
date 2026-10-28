@@ -3,6 +3,9 @@
 Layouts and behaviour for every screen in the desktop app, in the prototype's
 route form (`prototype/index.html#/…`). Components are in
 [`components.md`](components.md); the approved scope is in [`brief.md`](brief.md).
+**v0.2:** every value is editable; how values are saved, validated, created and deleted is in
+[`editing.md`](editing.md), which also lists every field. Where this file and `editing.md` differ on
+editing behaviour, `editing.md` is newer.
 
 ## Map
 
@@ -82,6 +85,9 @@ line. "Apply to form" is available only when the YAML is valid.
   Import project file secondary); a table of projects (name and path, client,
   substations, library used, last opened, status); an info banner about library
   updates. A `.bomproj` launch adds a banner above the table.
+- **New project:** a dialog with name, client, device library (default: the active one) and an
+  optional first substation; the folder is shown, not asked for. Creating opens the new
+  substation's Network page.
 - **Behaviour:** a row opens the project page on Substations. Status uses the
   same words as Checks (`Ready`, `2 errors`, `Library out of date`).
 - **States:** first run (steps list, "Install a library…" primary, the project
@@ -96,13 +102,15 @@ line. "Apply to form" is available only when the YAML is valid.
   branches). A substation starts from these; the values it changes are marked
   in its own screens.
 - **Substations:** a table (name and folder, panels, last changed, status) with
-  Open, "Create from this…", and a primary "New substation…". Substations created
+  Open and a row menu (Rename…, Create from this…, Delete…), and a primary "New substation…". Substations created
   from another say so under their name.
 - **Documents:** the **register**, one per project, grouped by substation with a
   band row and an "Add" button for each. Columns: document, document number,
-  revision, issue date, used by, state (assumed dates are flagged).
+  revision, issue date, used by, state (assumed dates are flagged, with a Confirm button),
+  and a remove button that is disabled while the document is used. All cells are editable.
 - **Backup and share:** Export and Import actions, and a Backups table (file,
   saved, size, library, Restore…, Show in folder) with "Back up now".
+- **Delete project:** a danger section at the foot of Overview; the project name must be typed.
 - **States:** unsaved; invalid field; library older than active.
 
 ### Substation settings
@@ -111,7 +119,8 @@ read-only "From the project" block with a link to the project page), *Documents*
 (which register entry each calculation sheet prints; cabinet BOMs choose theirs on
 each panel), *Output* (main document, file-name pattern with the resulting name,
 calculation sheet names), *Design constants* (the ten spec constants with unit,
-default and a "Changed from …" mark; defaults come from the project), *Loose
+default, a "Changed from …" mark and a Reset per row, and "Reset all to defaults"; defaults
+come from the project), *Loose
 material* and *YAML* (`substation.yaml`). Project-wide values are not repeated
 here.
 
@@ -134,7 +143,11 @@ here.
   shows an inline error with a suggestion. In a star, each L1 has one uplink to
   its L2 plus an A–B interlink. The equipment table sits here because the panels
   are generated from it (approved by A1).
-- **States:** substation with no network yet (warning banner, IED count marked
+- **New substation:** the **setup card** (see `components.md`) sits above Field network and lists
+  the steps left: IEDs, equipment, panels. The IED count is marked required until entered.
+- **Equipment rows:** part (with "Change part…"), role, A and B, quantity (L1 rows read "Sized"),
+  L2 ports and remove, all editable; the Result card recalculates after each change.
+- **States:** substation with no network yet (setup card, IED count marked
   required, empty equipment, empty result); IED count assumed; unknown device.
 
 ### Panels
@@ -150,13 +163,14 @@ here.
   are counted under the column and take no rack space. Common devices (GPS,
   RTAC, I/O) sit in the same panels as the A and B units; there is no common
   column.
-- **Select, move, delete:** selecting a device shows its tag and an action bar:
-  "Move pair…", "Move this unit only…", "Delete pair". A device that has no
+- **Select, move, pin, delete:** selecting a device shows its tag and an action bar:
+  "Move pair…", "Move this unit only…", **Pin here** or **Unpin**, "Delete pair". A device that has no
   partner shows "Move…" and "Delete". The partner of the selection is outlined.
-  Dragging does the same as "Move pair…"; Alt+drag moves only the unit. A pair
+  Dragging does the same as "Move pair…" and also sets the position; Alt+drag moves only the unit. A pair
   moves to panels (2n−1, 2n); a single A unit moves only to odd panels and a
-  single B unit only to even ones. Moved devices carry a small marker, and
-  "N manual changes" opens the list of overrides with Revert and Restore.
+  single B unit only to even ones. Pinned devices carry a pin icon, and
+  "N pinned · M deleted" opens the list with Unpin and Restore. Full rules, the drag states and the
+  keyboard are in [`editing.md`](editing.md) ("Panels board").
 - **Not allowed:** while dragging, a column that cannot take the move shows a
   red border; on drop, a banner says why ("Panel 1 needs 34 U, only 32 U may be
   used. Nothing was changed."). A move never silently re-flows other devices.
@@ -178,11 +192,10 @@ here.
 ### Panel editor
 - **Header:** breadcrumb, cabinet name, cabinet number · kind · side, "Preview
   BOM" and Save.
-- **Generated panel:** a banner says the layout writes it. Enclosure, Devices
-  (with an Origin column that marks moved devices), Port plans and Options show
-  the result read-only, and the YAML tab is labelled Generated. Only *Document*
-  (which register entry the sheet prints) is editable. Changes are made on
-  Network or by moving devices on the board; the banner links to both.
+- **Generated panel:** a banner says the layout writes the devices. Devices (with an Origin
+  column that marks pinned devices) is read-only; Enclosure, Port plans, Options and Document are
+  editable, with their scope stated (shared by all generated panels, or this panel only).
+  The YAML tab is labelled Generated and read-only. The banner links to Network and the board.
 - **Hand-written panel** (`manual_panels`, for example the WS console): the full
   editor, as in the first design. Devices: reorder handle, device, quantity,
   purpose, HWIO override, generated tag, remove; "Add device" opens the picker.
@@ -193,19 +206,42 @@ here.
   overrides, each override with a warning line), Document, `panels/<id>.yaml`.
 
 ### Library
-- **Layout:** title with the library name, version and install date, "Import
-  update…" secondary; a toolbar (search, category, data quality, "Has
-  alternatives", count); a table (part id, make and model, category, supply
-  and rated power, data-quality badge) beside a 420 px detail pane.
-- **Detail pane:** tabs *Overview* (library fields), *Datasheet* (supply range,
-  typical and maximum power, ports, dimensions, weight, operating temperature,
-  certifications, datasheet link, sources), *Alternatives* (two brands, each
-  with Low, Mid and High models and a data-quality badge, copy buttons, and a
-  note that swapping is not available yet).
-- **Behaviour:** read-only. Selecting a row fills the pane; the arrow keys move
-  the selection when the table has focus.
-- **States:** no library installed (banner with an "Import…" action); no match
-  (empty row); no datasheet or alternatives recorded (sentence in the pane).
+- **Layout:** title with the library name, version and install date; header actions *Add device…* (primary),
+  *Export…* and *Import…* (a menu: update package or CSV). Two tabs, *Devices* and *Catalogues*. A
+  **pending bar** at the foot while there are unapplied edits (see [`editing.md`](editing.md), "Library
+  editing").
+- **Devices tab:** a toolbar (search, category, data quality, "Has alternatives", count); a table (part id,
+  make and model, supply and rated power, data-quality badge) beside a 400 px detail pane.
+- **Detail pane:** tabs *Overview*, *Datasheet*, *Alternatives* (the compact comparison list with *Use…* and
+  *Compare in full*), and *Edit device* in the pane header.
+- **Catalogues tab:** a segmented switch (MCBs, Aux contacts, Terminal blocks, Busbars, Housekeeping); brand
+  tabs with a *Default* badge, *Make default*, *Add brand…*; an editable table with *Add row* and per-row
+  remove. Housekeeping is a role table with *Change…*.
+- **Behaviour:** selecting a row fills the pane; the arrow keys move the selection when the table has focus.
+  Every edit becomes a pending entry. Nothing is written to the installed version.
+- **States:** no library installed (banner with an "Import…" action); no match (empty row); no datasheet or
+  alternatives recorded (sentence in the pane); pending set empty (no bar).
+
+### Device editor
+- **Route:** `#/library/device/<part id>`, or the same page for a new device. Breadcrumb Library › part id.
+- **Layout:** title (part id), make and model, header actions *Copy as alternative…* and *Delete…*; an
+  "in use" banner; tabs *Identity*, *Electrical*, *Ports and mounting*, *Parts it brings*, *Datasheet*,
+  *Alternatives*. Field list in `editing.md`. It is a form: save bar "Save device", Ctrl+S, leave dialog.
+- **Alternatives tab:** the alternative group key and the full comparison list (tier, part, make, power,
+  inrush, ports, height, data quality, *Use…*) with delta chips; *Add alternative…*; empty state when none.
+- **States:** new device (part id editable, "new device" subtitle), device in use, device not found,
+  duplicate part id on creation (toast and the field marked).
+
+### Review library changes
+- **Route:** `#/library/review`. Counts (added, changed, removed), the diff list grouped by kind, the new
+  version it creates and the one it replaces, a note, and *Apply and activate 1.4.0+local.1*. Empty state
+  when nothing is pending. After applying: toast, the top bar and sidebar show the new version, and
+  Installed versions lists it as a local version.
+
+### Import a spreadsheet (CSV)
+- **Route:** `#/library/csv`; steps choose, review, done as in `editing.md`. The review shows file facts,
+  checks, rows with a problem (table, row, column, message), what changes, and a sticky action bar
+  "Add N valid rows to pending changes" and "Choose a different file".
 
 ### Import update and installed versions
 - **Tabs:** *Import package* and *Installed versions*.
@@ -311,9 +347,9 @@ reviewed by the design owner and is the intended behaviour; the prototype in
 
 ## Cross-cutting behaviour
 
-- **Unsaved changes:** the status bar shows the state; leaving the project or
-  closing the app with unsaved changes opens a dialog with Save, Discard and
-  Cancel.
+- **Unsaved changes:** form pages show a save bar and the status bar says "Unsaved changes";
+  leaving the page, switching project or substation, or closing the app opens a dialog with
+  Keep editing, Discard changes and Save and leave. Details in [`editing.md`](editing.md).
 - **Validation:** runs on save and on "Run checks again"; the counts in the
   navigation and status bar update after each run.
 - **Library version:** opening a project whose recorded library differs from

@@ -55,6 +55,14 @@ R1–R10 are in the design document named in ADR 0012.
   does not fit is a check-report error. Generated panels are written as
   today's `panels/*.yaml` with a `generated` header; B panels in full, not as
   `mirror_of`.
+
+  *Amended (Ali, 2026-10-28, backlog point 8):* a cable manager is a passive
+  plate, so it may touch the device below it. The blank plate goes only between
+  two rack neighbours whose upper block ends in an active device; a block that
+  ends in its cable manager needs none. A panel holds `Σ block_u + p ×
+  blank_plate_u ≤ panel_capacity_u`, where `p` counts the rack blocks, except
+  the lowest, that carry no cable manager. The example's generated panels drop
+  from 29U and 25U to 23U and 19U; the BOM is unchanged (Q25).
 - **Pipeline**: a step 0 (`engine/sizing.py`, `engine/layout.py`,
   `bomgen layout`) runs before the existing steps 1–15; `bomgen build
   --no-layout` keeps hand-written panels working.

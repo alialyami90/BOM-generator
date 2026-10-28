@@ -28,6 +28,7 @@ from bomgen.models._base import (
     Quantity,
     check_template,
 )
+from bomgen.models.library import CatalogueChoice
 from bomgen.models.panel import DocumentInfo, PanelId
 
 FILE_NAME_PLACEHOLDERS = {"doc_no", "rev"}
@@ -35,13 +36,14 @@ _FILE_NAME_FORBIDDEN = set('<>:"/\\|?*')
 
 
 class SheetNames(InputModel):
+    loose_material: ExcelSheetName = "Loose Material"  # ADR 0020
     power_consumption: ExcelSheetName = "Power Consumption"
     heat_dissipation: ExcelSheetName = "Heat Dissipation"
     heat_calculations: ExcelSheetName = "Heat Calculations"
 
 
 class OutputSettings(InputModel):
-    """Workbook file name template and calculation sheet names."""
+    """Workbook file name template and the names of the generated sheets."""
 
     file_name: str = "{doc_no}_PSA_BOM_Rev{rev}.xlsx"
     sheet_names: SheetNames = Field(default_factory=SheetNames)
@@ -82,6 +84,8 @@ class ConstantOverrides(InputModel):
     air_constant_m3k_per_wh: PositiveFloat = 4.1
     steel_coefficient_w_per_m2c: PositiveFloat = 5.5
     min_main_mcb_a: PositiveInt = 6
+    min_branch_mcb_a: PositiveInt = 2  # the smallest branch MCB (ADR 0017)
+    inrush_min_ms: PositiveFloat = 10  # shorter inrush does not size the branch MCB
 
 
 class DesignConstants(ConstantOverrides):
@@ -106,7 +110,7 @@ class LooseExtra(InputModel):
 
 class LooseMaterial(InputModel):
     title: str = "PSA Panels Loose Material and Auxiliary Equipment"  # the table's title row
-    host_panel: str
+    host_panel: str  # the panel whose document the Loose Material sheet is issued under
     items: list[LooseExtra] = Field(default_factory=list)
 
 
@@ -161,6 +165,7 @@ class Defaults(InputModel):
 
     constants: DesignConstants = Field(default_factory=DesignConstants)
     spares: Spares = Field(default_factory=Spares)
+    catalogue_choice: CatalogueChoice = Field(default_factory=CatalogueChoice)
 
 
 class Project(InputModel):
