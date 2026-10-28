@@ -7,6 +7,7 @@ from typing import Annotated
 
 import typer
 
+from bomgen.library_store.csv_export import GROUPS, export_installed_csv
 from bomgen.library_store.errors import LibraryPackageError, RefusalKind
 from bomgen.library_store.package import PACKAGE_SUFFIX, pack
 from bomgen.library_store.service import import_library, validate_library
@@ -124,6 +125,34 @@ def export_command(
     except (LibraryPackageError, OSError) as exc:
         raise _fail(exc) from exc
     typer.echo(f"Wrote {out} ({manifest.name} {manifest.version}, {len(manifest.files)} files)")
+
+
+@library_app.command("export-csv")
+def export_csv_command(
+    name: Annotated[str, typer.Argument(help="Library name.")],
+    out: Annotated[
+        Path | None,
+        typer.Option(help="A .zip file, or a folder (default: <name>-<version>-csv.zip)."),
+    ] = None,
+    version: Annotated[
+        str | None, typer.Option(help="Version to export (default: the active one).")
+    ] = None,
+    tables: Annotated[
+        list[str] | None,
+        typer.Option(help="Table group: devices or catalogues (repeatable; default: both)."),
+    ] = None,
+) -> None:
+    """Write a library as CSV tables to edit in Excel (UTF-8 with a BOM)."""
+    store = _store()
+    try:
+        version = version or store.active_version(name)
+        out = out or Path(f"{name}-{version}-csv.zip")
+        files = export_installed_csv(
+            store, name, out, version=version, include=tables or tuple(GROUPS)
+        )
+    except (LibraryPackageError, OSError, ValueError) as exc:
+        raise _fail(exc) from exc
+    typer.echo(f"Wrote {out} ({len(files)} tables)")
 
 
 @library_app.command("rollback")

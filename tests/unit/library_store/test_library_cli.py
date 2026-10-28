@@ -177,3 +177,36 @@ def test_cli_export_defaults_the_file_name_and_names_a_missing_version(
     missing = runner.invoke(library_app, ["export", "psa-devices", "--version", "9.9.9"])
     assert missing.exit_code == 1
     assert "9.9.9 is not installed" in missing.output
+
+
+def test_cli_export_csv_writes_the_tables_as_a_zip_or_a_folder(
+    runner: CliRunner, tmp_path: Path
+) -> None:
+    runner.invoke(library_app, ["import", str(_pack(runner, tmp_path, "1.0.0", V1))])
+    zipped = tmp_path / "tables.zip"
+    folder = tmp_path / "tables"
+
+    first = runner.invoke(library_app, ["export-csv", "psa-devices", "--out", str(zipped)])
+    second = runner.invoke(
+        library_app,
+        ["export-csv", "psa-devices", "--out", str(folder), "--tables", "catalogues"],
+    )
+
+    assert first.exit_code == 0, first.output
+    with zipfile.ZipFile(zipped) as archive:
+        assert "devices.csv" in archive.namelist()
+    assert second.exit_code == 0, second.output
+    assert (folder / "mcb.csv").is_file()
+    assert not (folder / "devices.csv").exists()
+
+
+def test_cli_export_csv_names_a_bad_table_group(runner: CliRunner, tmp_path: Path) -> None:
+    runner.invoke(library_app, ["import", str(_pack(runner, tmp_path, "1.0.0", V1))])
+
+    result = runner.invoke(
+        library_app,
+        ["export-csv", "psa-devices", "--out", str(tmp_path / "x"), "--tables", "nonsense"],
+    )
+
+    assert result.exit_code == 1
+    assert "unknown table group nonsense" in result.output
