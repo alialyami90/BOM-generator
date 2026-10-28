@@ -47,7 +47,7 @@ def test_rev_rejects_empty_string() -> None:
 
 
 def test_quantity_accepts_int_and_one_lot() -> None:
-    adapter = TypeAdapter(Quantity)
+    adapter: TypeAdapter[Quantity] = TypeAdapter(Quantity)
     assert adapter.validate_python(3) == 3
     assert adapter.validate_python("1 Lot") == "1 Lot"
 
@@ -67,7 +67,7 @@ def test_quantity_rejects_bool_and_zero(bad: Any) -> None:
 
 
 def test_child_quantity_accepts_int_and_cores_only() -> None:
-    adapter = TypeAdapter(ChildQuantity)
+    adapter: TypeAdapter[ChildQuantity] = TypeAdapter(ChildQuantity)
     assert adapter.validate_python(2) == 2
     assert adapter.validate_python("cores") == "cores"
     with pytest.raises(ValidationError) as excinfo:
@@ -78,7 +78,7 @@ def test_child_quantity_accepts_int_and_cores_only() -> None:
 
 
 def test_auto_bool_accepts_true_false_auto() -> None:
-    adapter = TypeAdapter(AutoBool)
+    adapter: TypeAdapter[AutoBool] = TypeAdapter(AutoBool)
     assert adapter.validate_python(True) is True
     assert adapter.validate_python(False) is False
     assert adapter.validate_python("auto") == "auto"
