@@ -1,0 +1,1015 @@
+# Device database: WS console peripherals, annunciator, software and loose cables.
+# Researched datasheet facts and alternative brands for the example project's parts.
+# Keys match examples/library.yaml part ids; library fields live there, not here.
+# Format and field meanings: data/device-db/README.md
+schema_version: 1
+area: workstation-loose
+title: WS console peripherals, annunciator, software and loose cables
+records:
+- part_id: NAP-F23
+  kind: device
+  description: 23" Desktop Monitor
+  make: Ultraview
+  model: NAP-F23
+  ordering_code: NAP-F23-125VDC
+  verified: partial
+  datasheet:
+    full_name: Austin Hughes UltraView NAP-F23 - Professional and Versatile 23in FHD LED Monitor, NEMA
+      4 / IP65 front, 125VDC power option
+    manufacturer: Austin Hughes Electronics Ltd (UltraView brand, Hong Kong / UK)
+    summary: 23in 1920x1080 fanless industrial LCD monitor, 6 mm aluminium bezel with NEMA 4 / IP65 front,
+      optional 125 VDC input module
+    power:
+      input: '100-240 VAC 50/60 Hz (std adapter); 125VDC option: 66-160 VDC input, 92 % eff.'
+      redundant_psu: false
+    ratings:
+      screen: 23in, 1920 x 1080 @ 60 Hz, 10-bit, 310 cd/m2
+      power_consumption_listed: 55 W and 90 W appear in the FHD datasheet against F23 / H-F23 (typical
+        vs max not labelled); BOM uses 52 W
+      dc_option_125vdc: input 66-160 V, efficiency 92 %, input current 40 mA no-load / 993 mA full-load,
+        4.16 A output rating
+      front_protection: NEMA 4 / IP65 (NAP variant)
+      mtbf_h: 30000
+      warranty: 2 yr std, extendable to 5 yr
+    ports:
+    - HDMI 1.4 (std)
+    - VGA (std)
+    - DP / HDMI 2.0 / DVI-D / BNC (options)
+    - USB touch interface when touch option fitted (TPC10 PCAP 10-pt or TRB 5-wire resistive)
+    dimensions_mm:
+      h: 360.6
+      w: 581.4
+      d: 65.3
+    weight_kg: 10.4
+    mounting: VESA, universal mount, overhead tilted wall mount or desktop stand (kits)
+    operating_temp_c:
+      min: 0
+      max: 55
+    certifications:
+    - CE
+    - UKCA
+    - FCC
+    - REACH
+    - RoHS3
+    - WEEE
+    - TAA compliant
+    - ISO 9001 / ISO 14001 (factory)
+    ordering_code_decoded:
+      NAP: 6 mm aluminium front bezel + NEMA 4 / IP65 front protection (AP = bezel only, DP = aluminium
+        front cover, OP = open frame, H- prefix = high brightness)
+      F: FHD (1920 x 1080) family (K = 4K family)
+      '23': 23 inch
+      125VDC: DC input power option, 66-160 VDC (other DC options 12/24/48 V)
+    datasheet_url: https://www.austin-hughes.com/wp-content/uploads/2020/07/CA-UV-FHD-L.pdf
+    product_url: https://austin-hughes.com/?p=14180
+    notes: 'Make "Ultraview" is Austin Hughes UltraView (not a Middle-East vendor); NAP-F23 confirmed
+      on the manufacturer page. Standard video inputs are HDMI 1.4 + VGA only: the BOM''s 3 m DVI cable
+      needs the DVI-D input option ordered (or use HDMI). Not IEC 61850-3 / IEEE 1613 rated; 0-55 degC
+      operating. Per-model power values in the datasheet table could not be mapped with certainty (55
+      W likely F23). Manual: https://www.austin-hughes.com/wp-content/uploads/2021/03/UM-UV-F23.pdf ;
+      drawing: https://www.austin-hughes.com/wp-content/uploads/2023/03/PD-UV-F23.pdf'
+  alternatives:
+  - make: Advantech
+    manufacturer: Advantech Co., Ltd.
+    tiers:
+      low:
+        model: FPM-221W
+        ordering_code: FPM-221W-P4AE
+        description: 21.5in FHD industrial monitor, 10-pt P-CAP touch, IP66 front, HDMI input only, 12
+          VDC lockable DC jack, 0..50 degC
+        url: https://www.advantech.com/en/products/1-2mlc1h/fpm-221w/mod_0243f1c1-4b75-41e7-a45b-db6bafb04500
+        notes: Smaller than 23in. 12 VDC only - needs a 125/12 VDC converter. Code seen on PB Tech listing
+          (FPM-221W-P4AE); power consumption not published on product page
+        verified: true
+      mid:
+        model: FPM-7211W
+        ordering_code: FPM-7211W-P3AE
+        description: 21.5in FHD industrial monitor, P-CAP 10-pt touch, IP66 magnesium-alloy front, VGA
+          + DVI-D inputs (suits the BOM's DVI cable), 24 VDC, 0..55 degC, UL/CE/FCC A
+        url: https://digikey.cn/en/products/detail/advantech-corporation/FPM-7211W-P3AE/9857627
+        notes: Specs from Advantech FPM-7211W product page; 24 VDC only - needs 125/24 VDC converter
+        verified: true
+      high:
+        model: FPM-724W
+        ordering_code: FPM-724W-P9AE
+        description: 23.8in FHD industrial monitor (closest size), P-CAP 10-pt touch, IP66 front, HDMI
+          + DP + VGA, 24 VDC, 0..50 degC
+        url: https://www.advantech.com/en/products/1-2mlc1h/fpm-724w/mod_50895519-12b6-42d7-ac9e-3f54e4582765
+        notes: Code seen at Advantech iotmart and distributors; no DVI input (use HDMI/DP); bracket adapter
+          FPM-7000G-ADKE; 24 VDC - needs 125/24 VDC converter
+        verified: true
+  - make: Siemens
+    manufacturer: Siemens AG
+    tiers:
+      low:
+        model: SIMATIC IFP2400 V2
+        ordering_code: 6AV7863-7MA00-2AA0
+        description: 23.8in (24in class) 1920x1080 multi-touch Industrial Flat Panel monitor for front/panel
+          mounting, 24 VDC
+        url: https://buerklin.com/en/p/siemens/hmi/6av7863-7ma00-2aa0/70P4279
+        notes: -2NA0 suffix (6AV7863-7MA00-2NA0) = neutral design without Siemens branding. Siemens IFP
+          family is 24 VDC; 125 VDC needs an external DC-DC converter. Interfaces and power draw not read
+        verified: true
+      mid:
+        model: SIMATIC IFP2400 V2 extended
+        ordering_code: 6AV7863-7MA10-2AA0
+        description: IFP2400 V2 'extended' variant, 24in 1920x1080 multi-touch, for remote (long-distance)
+          connection to the PC
+        url: https://www.electricautomationnetwork.com/pt/siemens/6av7863-7ma10-2aa0-siemens-simatic-ifp2400-v2-extended-24-multi-touch-display-16-9-with-1920x1080-pixel-r
+        notes: Exact extended-link interface not read; 24 VDC; neutral-design variant 6AV7863-7MA10-2NA0
+        verified: true
+      high:
+        model: SIMATIC IFP2400 V2 PRO
+        ordering_code: 6AV7863-7MA14-2NA0
+        description: IFP2400 V2 PRO 24in 1920x1080 multi-touch, fully enclosed PRO housing for stand/support-arm
+          mounting, DisplayPort + HDBaseT (up to 100 m), rear USB, 24 VDC, neutral design
+        url: https://mall.industry.siemens.com/mall/en/en/Catalog/Product/6AV78637MA142NA0
+        notes: Read on Siemens Industry Mall; other PRO variants 6AV7863-7MA14-2AA0 / -7MA15 / -7MA16
+          / -7MA17 differ by mounting/design (not decoded)
+        verified: true
+  sources:
+  - https://austin-hughes.com/?p=14180
+  - https://www.austin-hughes.com/wp-content/uploads/2020/07/CA-UV-FHD-L.pdf
+  - https://www.advantech.com/en/products/1-2mlc1h/fpm-221w/mod_0243f1c1-4b75-41e7-a45b-db6bafb04500
+  - https://www.advantech.com/en/products/1-2mlc1h/fpm-7211w/mod_51968101-9e7c-4d35-8f05-e80312b4ff2d
+  - https://www.advantech.com/en/products/1-2mlc1h/fpm-724w/mod_50895519-12b6-42d7-ac9e-3f54e4582765
+  - https://iotmart.advantech.com.tw/Peripherals/Displays-Industrial-Monitor/model-FPM-724W-P9AE.htm
+  - https://www.pbtech.com/pacific/product/IPCAVH220707/Advantech-FPM-221W-P4AE-215-Full-HD-Industrial-Mon
+  - https://mall.industry.siemens.com/mall/en/en/Catalog/Product/6AV78637MA142NA0
+  - https://ph.rs-online.com/web/p/hmi-displays/2527321
+- part_id: NAP-K55
+  kind: device
+  description: 55" LCD Alarm Annunciator (Touch) - Wall Mounted
+  make: Ultraview
+  model: NAP-K55
+  ordering_code: NAP-K55
+  verified: partial
+  datasheet:
+    full_name: Austin Hughes UltraView NAP-K55 - Professional and Versatile 55in 4K LED Monitor, NEMA
+      4 / IP65 front
+    manufacturer: Austin Hughes Electronics Ltd (UltraView brand)
+    summary: 55in 3840x2160 fanless professional LCD, 8 mm aluminium bezel with NEMA 4 / IP65 front; touch
+      and 125 VDC are options
+    power:
+      input: '100-240 VAC 50/60 Hz auto-sensing; 125VDC option: 43-160 VDC input (K55 brochure), 89 %
+        eff.'
+      redundant_psu: false
+      typical_w: 100
+      max_w: 335
+    ratings:
+      screen: 55in, 3840 x 2160 @ 60 Hz, 10-bit, 450 cd/m2 (H- variants 700 cd/m2)
+      power_saving_w: 9
+      power_off_w: 2
+      dc_option_125vdc: input 43-160 V, 89 % eff., 10 mA no-load / 1540 mA full-load, module rated 150
+        W (24 V / 6.25 A out)
+      front_protection: NEMA 4 / IP65 (NAP variant)
+      vesa_mm: 600 x 400
+      touch_option: Projected capacitive 10-point (product page) / IR 10-point K55-IR10 (42U brochure),
+        USB
+      mtbf_h: 30000
+    ports:
+    - DisplayPort 1.2 (HDCP 1.3)
+    - HDMI 2.0 (HDCP 2.2)
+    - HDMI 1.4 (HDCP 1.4)
+    - 3.5 mm audio, dual 10 W speakers
+    - USB (touch, when touch option fitted)
+    dimensions_mm:
+      h: 773
+      w: 1292
+      d: 81.3
+    weight_kg: 48.6
+    mounting: VESA 600x400; universal mount, overhead tilted wall mount, desktop stand kits
+    operating_temp_c:
+      min: 0
+      max: 55
+    certifications:
+    - CE
+    - UKCA
+    - FCC
+    - CE/LVD
+    - REACH
+    - RoHS3
+    - WEEE
+    - TAA compliant
+    ordering_code_decoded:
+      NAP: 8 mm aluminium front bezel + NEMA 4 / IP65 front protection (HNAP = high-brightness 700 cd/m2)
+      K: 4K UHD family
+      '55': 55 inch
+      options: 125VDC DC input, TPC10 / IR10 touch, glass, portrait, SDI modules are ordered as options
+    datasheet_url: https://www.austin-hughes.com/wp-content/uploads/2020/07/CA-UV-4K-L.pdf
+    product_url: https://www.austin-hughes.com/product/k55/
+    notes: NAP-K55 confirmed on the manufacturer page. BOM 100 W matches the 100 W screen-on figure; the
+      datasheet also lists 335 W max (column mapping in the PDF is ambiguous) while the 125 VDC module
+      is rated 150 W, so confirm the DC-fed consumption with Austin Hughes. Weight for the NAP variant
+      is 48.6 kg in the 4K-L datasheet but 45 kg in the 42U K55 brochure. The BOM's "touch" requires the
+      touch option to be specified (PCAP or IR). Package includes 6 ft DP cable. Not IEC 61850-3 rated.
+      Manual https://www.austin-hughes.com/wp-content/uploads/2020/07/UM-UV-K55.pdf ; drawing https://www.austin-hughes.com/wp-content/uploads/2023/03/PD-UV-K55.pdf
+  alternatives:
+  - make: Advantech
+    manufacturer: Advantech Co., Ltd.
+    tiers:
+      low:
+        model: DSD-3055N
+        ordering_code: DSD-3055N-40FHA1E
+        description: 55in Full HD digital signage display, non-touch, 100-240 VAC
+        url: https://buy.advantech.com/Displays/Digital-Signage-Displays/model-DSD-3055N-40FHA1E.htm
+        notes: No touch - fails the BOM 'touch' requirement; AC only (feed from inverter/UPS). FHD power
+          not read
+        verified: true
+      mid:
+        model: DSD-3055T
+        ordering_code: DSD-3055T-40FHA1E
+        description: 55in Full HD digital signage display with touch screen, 100-240 VAC
+        url: https://buy.advantech.com/full+HD+digital+signage+touch+sc/DSD+3055T+40FHA1E/model-DSD-3055T-40FHA1E.htm
+        notes: FHD (K55 is 4K). AC only; power/VESA for FHD variant not read
+        verified: true
+      high:
+        model: DSD-3055T (UHD)
+        ordering_code: DSD-3055T-50UHA1
+        description: 55in 4K UHD 500 cd/m2, optical 2-point touch over USB 2.0, VGA/HDMI/DP, 100-240 VAC,
+          102 W, 50 kg net, 5..45 degC
+        unit_power_w: 102
+        url: https://advdownload.advantech.com/productfile/PIS/DSD-3055/file/DSD-3055_DS(102122)20231127002352.pdf
+        notes: VESA 400x400 (not 600x400 - check the wall mount); non-touch sibling DSD-3055N-50UHA1 is
+          100 W, 31 kg
+        verified: true
+  - make: Samsung
+    manufacturer: Samsung Electronics
+    tiers:
+      low:
+        model: QB55C
+        ordering_code: LH55QBCEBGCXEN
+        description: 55in 4K UHD 350 cd/m2 smart signage, 16/7 duty, Tizen SoC, no touch
+        url: https://screenmoove.com/products/samsung-qb55c-lh55qbcebgcxen-55-professional-smart-signage-display
+        notes: No touch; 16 h/day rating; AC only - needs inverter or 125 VDC/230 VAC supply
+        verified: true
+      mid:
+        model: QM55C
+        ordering_code: LH55QMCEBGCXEN
+        description: 55in 4K UHD smart signage, 24/7 duty, 500 cd/m2 (reseller listing), no touch
+        url: https://screenmoove.com/products/samsung-qm55c-lh55qmcebgcxen-55-4k-ultra-hd-smart-digital-signage-display
+        notes: No touch (add overlay or pick QM55B-T); AC only
+        verified: true
+      high:
+        model: QM55B-T
+        ordering_code: LH55QMBTBGCXEN
+        description: 55in 4K UHD interactive touch display, 24/7, 500 cd/m2, HDMI/DP/RS-232C/RJ45
+        url: https://www.scan.co.uk/products/55-samsung-qm55b-t-4k-uhd-interactive-touch-display-hdmi-dp-rs232c-rj45-500nit-24-7
+        notes: Code from Samsung support page https://www.samsung.com/lt/support/model/LH55QMBTBGCXEN
+          ; predecessor QM55R-T = LH55QMRTBGCXEN. AC only
+        verified: true
+  sources:
+  - https://www.austin-hughes.com/product/k55/
+  - https://www.austin-hughes.com/wp-content/uploads/2020/07/CA-UV-4K-L.pdf
+  - https://www.42u.com/pdf/Brochure_UltraView_K55.pdf
+  - https://www.austin-hughes.com/solutions/ultraview/4k-professional-lcd/
+  - https://advdownload.advantech.com/productfile/PIS/DSD-3055/file/DSD-3055_DS(102122)20231127002352.pdf
+  - https://buy.advantech.com/Displays/Digital-Signage-Displays/model-DSD-3055N-40FHA1E.htm
+  - https://www.samsung.com/lt/support/model/LH55QMBTBGCXEN
+  - https://www.samsung.com/ch/business/smart-signage/interactive-display/interactive-display-qmr-t-series-lh55qmrtbgcxen/
+- part_id: LPA37-696
+  kind: device
+  description: Wall Mount Kit
+  make: Lumi (Lumi Legend)
+  model: LPA37-696
+  ordering_code: LPA37-696
+  verified: confirmed
+  datasheet:
+    full_name: LUMI LPA37-696 X-Large Heavy-Duty Full Motion Curved & Flat Panel TV Wall Mount
+    manufacturer: Lumi Legend Corporation (LUMI, Ningbo, China)
+    summary: Double-arm full-motion wall mount for 60-100in flat/curved displays, 80 kg max
+    ratings:
+      screen_size_in: 60-100
+      max_load_kg: 80
+      safety_factor: tested to 4x rated load
+      vesa_mm: 200x200, 400x200, 300x300, 400x400, 600x400, 800x400, 800x600, 900x600 (max 900x600)
+      tilt_deg: +5 / -15
+      swivel_deg: +45 / -45
+      level_adjust_deg: +3 / -3
+      profile_mm: 70-625
+      material: Aluminium, steel, plastic; 2.5 mm cold-rolled steel wall plate
+      wall: solid wall or dual stud 406 / 450 mm spacing
+    dimensions_mm:
+      h: 630
+      w: 1050
+      d: 625
+    mounting: wall
+    certifications:
+    - UL
+    datasheet_url: https://www.lumi.cn/en/lumi-home/tv-mounts/full-motion-tv-wall-mount/lpa37-696
+    product_url: https://www.lumi.cn/en/lumi-home/tv-mounts/full-motion-tv-wall-mount/lpa37-696
+    notes: Manufacturer rates it for 60-100in screens; the NAP-K55 is 55in (below the stated minimum)
+      though its VESA 600x400 and 45-48.6 kg weight are within the mount's limits - check arm span fits
+      the 1292 mm-wide chassis. Dimensions above are as published (625 x 1050 x 630 mm), axis order assumed.
+      Mount weight not published.
+  alternatives:
+  - make: Chief (Legrand AV)
+    manufacturer: Legrand AV
+    tiers:
+      low:
+        model: Fusion Large Fixed Wall Mount
+        ordering_code: LSA1U
+        description: Fixed (static) large flat-panel wall mount, Fusion series
+        url: https://www.markertek.com/product/chf-lsa1u/chief-fusion-large-fixed-tv-wall-mount-black
+        notes: Load rating and VESA range not read; micro-adjust variant LSM1U also listed
+        verified: true
+      mid:
+        model: Fusion Large Tilt Wall Mount
+        ordering_code: LTA1U
+        description: Tilting large flat-panel wall mount, VESA 100x100 to 878x500 mm (covers 600x400)
+        url: https://www.markertek.com/product/chf-lta1u/chief-lta1u-large-fusion-tilt-wall-mount-vesa-100x100-878x500-mm-black
+        notes: Load rating not read; micro-adjust tilt variant LTM1U also listed
+        verified: true
+      high:
+        model: THINSTALL Dual Swing-Arm Wall Mount
+        ordering_code: TS325TU
+        description: Articulating dual swing-arm wall mount for large displays (closest to the LPA37-696
+          full-motion arm)
+        url: https://www.bhphotovideo.com/c/product/840964-REG/Chief_TS325TU_TS325TU_THINSTALL_Dual_Swing.html
+        notes: Load, extension and VESA range not read - check 48.6 kg NAP-K55 and 600x400; in-wall box
+          accessory TA500
+        verified: true
+  - make: Peerless-AV
+    manufacturer: Peerless Industries
+    tiers:
+      low:
+        model: SmartMount Universal Flat Wall Mount
+        ordering_code: SF660P
+        description: Fixed universal flat wall mount for 39-80in displays (standard hardware)
+        url: https://peerless-av.com/products/SF660P
+        notes: SF660 = same mount with security hardware. Load/VESA not read
+        verified: true
+      mid:
+        model: SmartMount Universal Tilt Wall Mount
+        ordering_code: ST660P
+        description: Tilting universal wall mount for 39-80in displays (standard hardware)
+        url: https://www.adiglobaldistribution.pr/product/qp-st660p
+        notes: ST660 = security-hardware version. Load/VESA not read
+        verified: true
+      high:
+        model: SmartMount Articulating Wall Mount
+        ordering_code: SA771PU
+        description: Articulating arm for 50-90in, 200 lb (90.7 kg), VESA 200x100 to 800x400, extends
+          774 mm, tilt +15/-5, swivel +/-90
+        url: https://peerless-av.com/products/SA771PU
+        notes: Read on Peerless page; mount weight 16.5 kg; wood stud / concrete / block walls
+        verified: true
+  sources:
+  - https://www.lumi.cn/en/lumi-home/tv-mounts/full-motion-tv-wall-mount/lpa37-696
+  - https://www.av-iq.com/avcat/ctl9959/index.cfm?manufacturer=lumi-legend-corporation&product=lpa37-696&dl=en-gb
+  - https://peerless-av.com/products/SA771PU
+  - https://peerless-av.com/products/SF660P
+  - https://www.markertek.com/product/chf-lta1u/chief-lta1u-large-fusion-tilt-wall-mount-vesa-100x100-878x500-mm-black
+  - https://www.bhphotovideo.com/c/product/840964-REG/Chief_TS325TU_TS325TU_THINSTALL_Dual_Swing.html
+- part_id: KEYTEK-KBM
+  kind: device
+  description: Industrial Keyboard & Mouse
+  make: Key-Tek (KEYTEK industrial)
+  model: K-TEK-A420TP-KP-FN-MDT
+  ordering_code: K-TEK-A420TP-KP-FN-MDT
+  verified: partial
+  datasheet:
+    full_name: K-TEK-A420TP-KP-FN-MDT stainless steel industrial keyboard with touchpad, metal desktop
+      housing
+    manufacturer: Key Technology (China) Limited (KEYTEK / K-TEK)
+    summary: Stainless-steel vandal-resistant keyboard with sealed touchpad, numeric pad and F-keys, desktop
+      metal housing
+    power:
+      input: 5 VDC via USB (or PS/2)
+      redundant_psu: false
+    ratings:
+      keys: 97 (Innova listing; the panel-mount DWP version is listed as 103-key)
+      key_material: brushed SUS304 stainless keys, 1.2 mm stainless housing
+      switch: carbon-on-gold PCB, 1.5 mm travel, >10 million cycles
+      ip_rating: IP65 front
+      vandal: IK09
+      pointing: sealed touchpad with 2 mouse buttons
+    ports:
+    - USB or PS/2 (cable dependent)
+    dimensions_mm:
+      h: 37
+      w: 420
+      d: 175
+    weight_kg: 2.3
+    mounting: desktop
+    operating_temp_c:
+      min: -20
+      max: 60
+    certifications:
+    - CE
+    - FCC
+    - RoHS
+    - EN 55022
+    - EN 55024
+    - IEC 61000-4-2/3/4
+    ordering_code_decoded:
+      A420: stainless 420 mm series
+      TP: integrated touchpad
+      KP: numeric keypad
+      FN: F1-F12 function row
+      MDT: metal desktop housing (inferred from distributor category 'Metall Desktop'; DWP = top-panel
+        mount, waterproof)
+    product_url: https://innova.se/product/k-tek-a420tp-kp-fn-mdt/
+    notes: Data from distributor Innova (SE) and DirectIndustry page for the panel-mount sibling K-TEK-A420TP-KP-FN-DWP;
+      no manufacturer datasheet seen. Weight 2.3 kg is gross weight.
+  alternatives:
+  - make: iKey
+    manufacturer: iKey Ltd (USA)
+    tiers:
+      low:
+        model: SK-97-TP
+        ordering_code: SK-97-TP-USB
+        description: Sealed silicone keyboard with integrated touchpad, NEMA 4X, -40..+70 degC, 366.8x137.2x22.6
+          mm, 0.68 kg
+        url: https://ikey.com/products/sealed-keyboard-integrated-touchpad-sk-97-tp
+        notes: CE, UL60950, FCC Class B; also SK-97-TP-PS2
+        verified: true
+      mid:
+        model: SLK-97-TP
+        ordering_code: SLK-97-TP-USB-BLK
+        description: Sealed keyboard with integrated touchpad and backlighting, black
+        url: https://ikey.com/products/sealed-keyboard-integrated-touchpad-backlighting-black
+        notes: white version SLK-97-TP-USB; specs not read in detail
+        verified: true
+      high:
+        model: PM-65-TP-SS
+        ordering_code: PM-65-TP-SS-USB
+        description: Stainless-steel keyboard with touchpad, panel-mount (not desktop)
+        url: https://ikey.com/products/panel-mount-stainless-steel-keyboard-with-touchpad-pm-65-tp-ss
+        notes: Panel-mount - needs a console cut-out; model confirmed on iKey product page and CDW (5847133);
+          USB suffix per iKey model list, detailed specs not read
+        verified: true
+  - make: GETT (formerly InduKey)
+    manufacturer: GETT Geraetetechnik GmbH
+    tiers:
+      low:
+        model: TKS-105c-TOUCH-KGEH
+        ordering_code: KS18241 (TKS-105c-TOUCH-KGEH-USB-US)
+        description: 105-key foil-covered desktop keyboard with touchpad, IP65, plastic housing, 0..+70
+          degC
+        url: https://gett-group.com/images/Products/Keyboards/TKS_Folie/105c-TOUCH/Desktop/Documentations/GETT_TKS-105c-TOUCH-KGEH_Datasheet_Rev-10-2025.pdf
+        notes: 482.6x184.6x34.9 mm, ~1.3 kg, CE/FCC; DE layout KS18240
+        verified: true
+      mid:
+        model: TKV-084-FIT-TOUCH-IP65-MGEH
+        ordering_code: KV23204 (TKV-084-FIT-TOUCH-IP65-MGEH-USB-US)
+        description: Compact stainless-steel desktop keyboard with capacitive touchpad, IP65
+        url: https://gett-group.com/en/keyboards/stainless-steel-keyboards/tkv-084-fit-touch-ip65-mgeh-usb-de
+        notes: 392x154x26 mm, 1.76 kg, -10..+50 degC, USB 5 V 80 mA; US/Arab layout KV23222
+        verified: true
+      high:
+        model: TKG-104-TOUCH-IP68
+        ordering_code: TKG-104-TOUCH-IP68
+        description: InduProof silicone keyboard with touchpad, IP68 fully washable
+        url: https://www.elvac.eu/ipc/download/gett/datasheet/TKG-104-TOUCH-IP68-VESA.pdf
+        notes: Model name seen on GETT datasheet; numeric GETT order number (KG...) still not confirmed
+          (gap-fill pass could not open the datasheet); full-size stainless desktop KV21237 (TKV-105-FIT-TOUCH)
+          is EOL
+        verified: false
+  sources:
+  - https://innova.se/product/k-tek-a420tp-kp-fn-mdt/
+  - https://www.directindustry.com/prod/key-technology-china-limited/product-68381-1648099.html
+  - https://ikey.com/products/sealed-keyboard-integrated-touchpad-sk-97-tp
+  - https://www.ikey.com/products/keyboards/
+  - https://gett-group.com/images/Products/Keyboards/TKS_Folie/105c-TOUCH/Desktop/Documentations/GETT_TKS-105c-TOUCH-KGEH_Datasheet_Rev-10-2025.pdf
+  - https://gett-group.com/en/keyboards/stainless-steel-keyboards/tkv-084-fit-touch-ip65-mgeh-usb-xx
+  - https://consteel-electronics.com/KV21237-EN
+- part_id: ZENON-V12
+  kind: device
+  description: Zenon Energy Edition Sever/Client with Editor Studio
+  make: COPA-DATA
+  model: zenon Energy Edition V12
+  ordering_code: zenon Energy Edition V12
+  verified: partial
+  datasheet:
+    full_name: COPA-DATA zenon Software Platform 12 - Energy Edition (Engineering Studio + Service Engine)
+    manufacturer: Ing. Punzenberger COPA-DATA GmbH (Salzburg, Austria)
+    summary: HMI/SCADA software for substation automation; Engineering Studio = editor, Service Engine
+      = runtime (server/client)
+    ratings:
+      components: Engineering Studio (project editor), Service Engine (runtime server/client), web/HTML5
+        clients optional
+      licensing: per-node licences sized by variable (tag) count and client count; codes issued by COPA-DATA/partner,
+        not public
+      iec_61850: COPA-DATA reports IEC 61850 Edition 2 certification of zenon (press coverage)
+    product_url: https://www.copadata.com/en/industries/energy-infrastructure/energy-solutions/zenon-energy-automated-substations
+    datasheet_url: https://www.copadata.com/hubfs/Downloads/Solution%20Leaflets/zenon_for_Substation_Automation_SL_EN.pdf
+    notes: zenon 12 was released in 2023 (COPA-DATA press release); zenon 15 has since been launched (2025),
+      so confirm with the client whether V12 is still mandated. Protocol list, redundancy and OS support
+      could not be read in this session (fetch budget exhausted). Licence BOM normally lists separate
+      Editor and Runtime/Client licences with tag-count size - confirm sizing with the COPA-DATA partner.
+  alternatives:
+  - make: Siemens
+    manufacturer: Siemens AG (Smart Infrastructure)
+    tiers:
+      low:
+        model: SICAM SCC runtime (small station)
+        description: Station HMI/SCADA for SICAM PAS (6MD55 family)
+        url: https://assets.new.siemens.com/siemens/assets/api/uuid:cd38cc6d-96c0-45f2-a9b3-43cac24aa425/SICAM-SCC-brochure-EN.pdf
+        notes: Ordering codes 6MD55xx not verified in this session
+        verified: false
+      mid:
+        model: SICAM SCC server + engineering
+        description: Closest like-for-like substation HMI
+        url: https://assets.new.siemens.com/siemens/assets/api/uuid:ca8b3364-c780-4d13-a3c2-26ade2cdb86a/SICAM-SCC-Profile-EN.pdf
+        notes: not verified
+        verified: false
+      high:
+        model: SIMATIC WinCC Open Architecture
+        description: Scalable/redundant SCADA platform
+        notes: not verified
+        verified: false
+  - make: Hitachi Energy
+    manufacturer: Hitachi Energy Ltd
+    tiers:
+      low:
+        model: MicroSCADA X SYS600C
+        description: Compact station HMI on pre-installed hardware
+        url: https://www.hitachienergy.com/products-and-solutions/substation-automation-protection-and-control/products/microscada-x/microscada-x-sys600c-the-compact-system
+        notes: Model on Hitachi Energy page; no public ordering code
+        verified: false
+      mid:
+        model: MicroSCADA X SYS600
+        description: Substation HMI/SCADA, IEC 61850 native
+        url: https://hitachienergy.com/products-and-solutions/scada/microscada-x/scada--microscada-x-sys600
+        notes: Licence sized by objects; codes not verified
+        verified: false
+      high:
+        model: MicroSCADA X SYS600 hot-standby
+        description: Redundant SYS600 server pair
+        notes: not verified
+        verified: false
+  sources:
+  - https://www.copadata.com/en/industries/energy-infrastructure/energy-solutions/zenon-energy-automated-substations
+  - https://www.copadata.com/hubfs/Downloads/PR%20-%20News/PR_Downloads/2023/PR_zenon_12_release_EN.docx
+  - https://electronicspecifier.com/news/analysis/copa-data-receives-iec-61850-edition-2-certification
+- part_id: MS-OFFICE-2021
+  kind: device
+  description: Microsoft Office 2021
+  make: Microsoft
+  model: Office 2021
+  ordering_code: Office 2021
+  verified: partial
+  datasheet:
+    full_name: Microsoft Office LTSC Professional Plus 2021 (commercial, perpetual) / Office Home & Business
+      2021
+    manufacturer: Microsoft Corporation
+    summary: Perpetual Office licence for one workstation
+    ratings:
+      sku_ltsc_pro_plus_2021_csp: DG7GMGF0D7FX (CSP perpetual; commercial SKU 0002)
+      sku_ltsc_pro_plus_2021_volume: 79P-xxxxx family (e.g. 79P-05845, 79P-05863 seen at resellers; exact
+        meaning not verified)
+      sku_home_business_2021: T5D-03485 (multilingual, 1 licence)
+      successor_home_business_2024: EP2-06606 (Office Home & Business 2024, 1 licence)
+      support_end: 13 October 2026 (Office 2021 / LTSC 2021)
+    product_url: https://www.znetlive.com/store/products/dg7gmgf0d7fx-office-ltsc-professional-plus-2021
+    notes: Office 2021 / LTSC 2021 support ENDED on 13 Oct 2026 (before today's date) - no further security
+      updates; for a new substation workstation specify Office LTSC 2024 (or Home & Business 2024, EP2-06606)
+      unless the client mandates 2021. Home & Business is a retail/consumer-channel licence; LTSC Pro
+      Plus is the commercial perpetual offer (offline-capable). SKU descriptions above come from reseller
+      listings, not Microsoft.
+  alternatives:
+  - make: SoftMaker
+    manufacturer: SoftMaker Software GmbH
+    tiers:
+      low:
+        model: SoftMaker FreeOffice
+        ordering_code: FreeOffice (free download, no SKU)
+        description: Free office suite from SoftMaker, no licence cost, reduced feature set vs SoftMaker
+          Office
+        url: https://freeoffice.com/en/features/freeoffice-comparison
+        notes: No ordering code exists (free download); check client policy on unsupported freeware
+        verified: true
+      mid:
+        model: SoftMaker Office Standard 2024
+        ordering_code: BN-0015-E
+        description: Perpetual licence, 5 devices, download
+        url: https://www.bhphotovideo.com/c/product/1791561-REG/softmaker_bn_0015_e_office_standard_2024_for.html
+        notes: 'Volume licences: https://www.softmaker.com/en/shop/softmaker-office/volume-licenses'
+        verified: true
+      high:
+        model: SoftMaker Office Professional 2024
+        ordering_code: BN-0016-E
+        description: Perpetual licence, 5 devices, adds Professional features
+        url: https://www.staples.com/softmaker-office-professional-2024-for-5-devices-windows-macos-linux-download-bn-0016-e/product_24585778
+        notes: Code confirmed on Staples and Quill listings (also Adorama smrbn0016e)
+        verified: true
+  - make: Corel WordPerfect Office
+    manufacturer: Alludo (Corel Corporation)
+    tiers:
+      low:
+        model: WordPerfect Office 2021 Standard (ESD)
+        ordering_code: ESDWP2021STDEF
+        description: Perpetual licence, 1 user, Windows download, English/French
+        url: https://www.staples.com/corel-wordperfect-office-standard-2021-for-1-user-windows-download-esdwp2021stdef/product_24577266
+        notes: Replaces Collabora (no public SKUs). Home & Student ESDWP2021HSEF is non-commercial - do
+          not use
+        verified: true
+      mid:
+        model: WordPerfect Office 2021 Standard (volume licence)
+        ordering_code: LCWP2021ML1
+        description: Corporate volume licence, 1 user, multilingual
+        url: https://store.datek.co.uk/corel-wordperfect-office-2021-standard-office-suite-volume-licence-1-license-s-multilingual-lcwp2021ml1
+        notes: Closest to Office LTSC (commercial perpetual, offline)
+        verified: true
+      high:
+        model: WordPerfect Office 2021 Professional (volume licence)
+        ordering_code: LCWP2021PRML1
+        description: Professional edition corporate licence, 1 user, multilingual
+        url: https://www.connection.com/product/corel-corp.-wordperfect-office-2021-pro-license-multi-lingual-1-user/lcwp2021prml1/41417075
+        notes: ESD single-user Professional = ESDWP2021PREF. WordPerfect file formats differ from MS Office
+          - check document exchange needs
+        verified: true
+  sources:
+  - https://www.znetlive.com/store/products/dg7gmgf0d7fx-office-ltsc-professional-plus-2021
+  - https://www.senetic.co.uk/product/DG7GMGF0D7FX-0002
+  - https://logicstechnology.com/products/microsoft-office-ltsc-2021-professional-plus-buy-out-fee-1-pc
+  - https://www.lambda-tek.com/Microsoft-T5D-03485~sh/B45919173
+  - https://www.comms-express.com/products/microsoft-ep2-06606-home-business-2024-office-suite-1-full-license/
+  - https://mc.merill.net/message/MC1509797
+  - https://www.staples.com/softmaker-office-professional-2024-for-5-devices-windows-macos-linux-download-bn-0016-e/product_24585778
+  - https://www.staples.com/corel-wordperfect-office-standard-2021-for-1-user-windows-download-esdwp2021stdef/product_24577266
+  - https://store.datek.co.uk/corel-wordperfect-office-2021-standard-office-suite-volume-licence-1-license-s-multilingual-lcwp2021ml1
+  - https://www.connection.com/product/corel-corp.-wordperfect-office-2021-pro-license-multi-lingual-1-user/lcwp2021prml1/41417075
+- part_id: ANN-DISPLAY-CABLE-10M
+  kind: device
+  description: Display Cable for Annunciator
+  make: (no make)
+  model: 10 m display cable
+  verified: partial
+  datasheet:
+    full_name: 'Reference part: StarTech.com HD2MM10MA 10 m active HDMI 2.0 cable, 4K60, CL2'
+    manufacturer: StarTech.com (reference only)
+    summary: 10 m active HDMI 2.0 cable for the 55in annunciator (4K 60 Hz, 18 Gbps, HDR, CL2 in-wall
+      rated)
+    ratings:
+      standard: HDMI 2.0, 18 Gbps, 4K 60 Hz, HDR10
+      jacket: CL2
+    ports:
+    - HDMI-A male
+    - HDMI-A male
+    product_url: https://uk.rs-online.com/web/p/hdmi-cables/1765693
+    notes: NAP-K55 inputs are DP 1.2 and HDMI 2.0 - use an active HDMI 2.0 (or DP 1.2) cable for 4K60
+      at 10 m. Active cables are directional (source end marked). StarTech DISPL10MA (10 m active DP)
+      is listed by RS as 4K @ 30 Hz only, so it is not recommended for 4K60.
+  alternatives:
+  - make: Lindy
+    manufacturer: LINDY-Elektronik GmbH
+    tiers:
+      low:
+        model: 10m Active HDMI 18G Cable
+        ordering_code: '41071'
+        description: Active HDMI 2.0 18G, 4K60
+        url: https://store.midwich.com/products/details/LINDY41071
+        notes: ''
+        verified: true
+      mid:
+        model: 10m Active DisplayPort 1.2 Cable
+        ordering_code: '41078'
+        description: Active DP 1.2 - native DP input of the K55
+        url: https://shop.wearesync.co.uk/lindy-10m-active-displayport-1-2-cable-41078.html
+        notes: GPU must have DP out
+        verified: true
+      high:
+        model: 10m Fibre Optic Hybrid HDMI 8K60 Cable
+        ordering_code: '38510'
+        description: Fibre/copper hybrid AOC, EMI-immune, 8K60/4K120
+        url: https://www.comms-express.com/products/lindy-38510-10m-fibre-optic-hybrid-hdmi-8k60-cable/
+        notes: Best choice near switchgear EMI
+        verified: true
+  - make: Kramer
+    manufacturer: Kramer Electronics Ltd
+    tiers:
+      low:
+        model: C-HM/HM/PRO-35
+        ordering_code: C-HM/HM/PRO-35
+        description: 10.7 m (35 ft) passive high-speed HDMI cable, PRO series
+        url: https://www.thomann.co.uk/kramer_c_hm_hm_pro_35_cable_10.7m.htm
+        notes: Passive copper - 4K60 18 Gbps over 10.7 m not confirmed (fine for 1080p); prefer the active
+          optical tiers for the 4K annunciator
+        verified: true
+      mid:
+        model: CLS-AOCH/60-33
+        ordering_code: CLS-AOCH/60-33
+        description: 10 m (33 ft) active optical HDMI, 4K60 4:4:4, LSZH jacket
+        url: https://www.hdtvsupply.com/kramer-cls-aoch-60-33-4k60-active-optical-hdmi-cable.html
+        notes: LSZH suits control buildings
+        verified: true
+      high:
+        model: CP-AOCH/60-33
+        ordering_code: CP-AOCH/60-33
+        description: 10 m active optical HDMI 4K60, plenum (CP) jacket
+        url: https://www.shi.com/product/34070345/Kramer-CP-AOCH60-Series-CP-AOCH60-33
+        notes: Details not read
+        verified: true
+  sources:
+  - https://uk.rs-online.com/web/p/hdmi-cables/1765693
+  - https://au.element14.com/startech/hd2mm10ma/cable-assy-hdmi-plug-plug-10m/dp/4339118
+  - https://uk.rs-online.com/web/p/displayport-cables/1765645
+  - https://store.midwich.com/products/details/LINDY41071
+  - https://shop.wearesync.co.uk/lindy-10m-active-displayport-1-2-cable-41078.html
+  - https://www.comms-express.com/products/lindy-38510-10m-fibre-optic-hybrid-hdmi-8k60-cable/
+  - https://www.kramerav.com/product/CLS-AOCH/60
+  - https://www.thomann.co.uk/kramer_c_hm_hm_pro_35_cable_10.7m.htm
+- part_id: ANN-USB-CABLE-10M
+  kind: device
+  description: USB cable for Annunciator
+  make: (no make)
+  model: 10 m USB cable
+  verified: partial
+  datasheet:
+    full_name: 'Reference part: StarTech.com USB2AAEXT10M 10 m USB 2.0 active extension cable, M/F'
+    manufacturer: StarTech.com (reference only)
+    summary: 10 m active USB 2.0 A-male to A-female extension for the annunciator touch interface
+    ratings:
+      standard: USB 2.0, 480 Mbps
+      type: active repeater (bus powered)
+    ports:
+    - USB-A male
+    - USB-A female
+    product_url: https://rapidonline.com/startech-usb2aaext10m-10m-usb-2-0-active-extension-cable-m-f-19-8919
+    notes: Use with the display's own short touch cable, or use an active A-to-B cable direct (Lindy 42761).
+      The K55 brochure lists the touch connector as USB Type-A on the IR touch option - confirm the connector
+      on the ordered touch option.
+  alternatives:
+  - make: Lindy
+    manufacturer: LINDY-Elektronik GmbH
+    tiers:
+      low:
+        model: 10m USB 2.0 Active Extension Hub
+        ordering_code: '42635'
+        description: 10 m active USB 2.0 extension ending in a small USB-A hub (plug the display's own
+          touch cable in at the far end)
+        url: https://shop.avoira.com/lindy-10m-usb-2-0-active-extension-hub-42635.html
+        notes: Lindy 42817 is the 5 m slim extension and 42631 the 20 m extension - no plain 10 m A-A
+          active extension code confirmed; hub port count not read
+        verified: true
+      mid:
+        model: 10m USB 2.0 Type A to B Active Cable
+        ordering_code: '42761'
+        description: Active A-to-B 10 m, direct PC-to-display
+        url: https://www.comms-express.com/products/lindy-42761-10m-usb-2-0-active-cable-type-a-to-b/
+        notes: ''
+        verified: true
+      high:
+        model: 100m USB 2.0 Cat.6 Extender
+        ordering_code: '42674'
+        description: USB 2.0 extender over Cat.6 cable up to 100 m (local + remote units)
+        url: https://store.digital-origin.co.uk/lindy-100m-usb-2-0-cat-6-extender-42674.html
+        notes: For long or EMI-exposed routes; 4-port versions 42679 (60 m) / 42681 (50 m) also listed.
+          PSU/power not read
+        verified: true
+  - make: Icron
+    manufacturer: Icron Technologies (Analog Devices)
+    tiers:
+      low:
+        model: USB 2.0 Ranger 2311
+        ordering_code: 00-00403
+        description: 1-port USB 2.0 extender over Cat5e/6/7, up to 100 m
+        url: https://screenmoove.com/products/icron-single-port-usb-2-0-extender-up-to-100-meters-over-catx-cabling-00-00403
+        notes: LEX + REX pair; power data not read
+        verified: true
+      mid:
+        model: USB 2.0 Ranger 2312
+        ordering_code: 00-00408
+        description: 2-port USB 2.0 extender over Cat5e/6/7, up to 100 m, flexible power
+        url: https://screenmoove.com/collections/kvm-extender/products/icron-2-port-usb-2-0-extender-up-to-100-meters-over-catx-cabling-00-00408
+        notes: Midwich also lists Icron 00-00407 for the 2312 (probably a regional PSU variant) - confirm
+          the code for the Saudi/UK plug
+        verified: true
+      high:
+        model: USB 2.0 Ranger 2324
+        ordering_code: Ranger 2324
+        description: 4-port USB 2.0 extender over multimode fibre, duplex LC, up to 500 m - immune to
+          switchgear EMI
+        url: https://www.icron.com/?p=325
+        notes: Icron 00-00xxx order code for the 2324 not confirmed (2344 UK-power = 00-00418 seen); order
+          by model
+        verified: true
+  sources:
+  - https://rapidonline.com/startech-usb2aaext10m-10m-usb-2-0-active-extension-cable-m-f-19-8919
+  - https://uk.rs-online.com/web/p/usb-cables/1863178
+  - https://www.comms-express.com/products/lindy-42761-10m-usb-2-0-active-cable-type-a-to-b/
+  - https://shop.avoira.com/lindy-10m-usb-2-0-active-extension-hub-42635.html
+  - https://store.digital-origin.co.uk/lindy-100m-usb-2-0-cat-6-extender-42674.html
+  - https://icron.com/product/ranger-2311
+  - https://screenmoove.com/products/icron-single-port-usb-2-0-extender-up-to-100-meters-over-catx-cabling-00-00403
+  - https://www.meilhaus.de/en/ranger-2312.htm?b2b=1
+  - https://meilhaus.de/en/ranger-2324.htm
+- part_id: MON-DVI-CABLE-3M
+  kind: device
+  description: DVI Cable for Monitor
+  make: (no make)
+  model: 3 m DVI cable
+  verified: partial
+  datasheet:
+    summary: 3 m DVI-D cable, workstation to 23in monitor
+    notes: Not verified - search budget ran out before a 3 m DVI-D part could be confirmed. The NAP-F23
+      has HDMI 1.4 + VGA as standard; DVI-D is an input option, so either order the DVI-D option or replace
+      this line with a 3 m HDMI (or DVI-to-HDMI) cable. Single-link DVI-D is enough for 1920x1080.
+  alternatives:
+  - make: StarTech.com
+    tiers:
+      low:
+        model: 3m HDMI to DVI-D Cable M/M
+        ordering_code: HDDVIMM3M
+        description: 3 m HDMI-to-DVI-D single-link cable, 1920x1200 - lets a DVI PC output feed the NAP-F23's
+          standard HDMI input
+        url: https://rapidonline.com/startech-hddvimm3m-3m-hdmi-to-dvi-d-cable-m-m-19-9401
+        notes: RS stock no. 1765677
+        verified: true
+      mid:
+        model: 3m DVI-D Single Link Cable M/M
+        ordering_code: DVIDSMM3M
+        description: 3 m DVI-D single-link M/M - like-for-like (needs DVI-D input option on the monitor)
+        url: https://boxxe.com/shop/boxxe-shop-by-brand/startech-com/dvidsmm3m-startech-com-3m-dvi-d-single-link-cable-m-m
+        notes: 'RS stock no. 1765740 appears to be this cable (title: DVI-D single link, 3 m)'
+        verified: true
+      high:
+        model: 3m DVI-D Dual Link Cable M/M
+        ordering_code: DVIDDMM3M
+        description: 3 m DVI-D dual-link M/M, up to 2560x1600
+        url: https://www.lambda-tek.com/StarTech-com-DVIDDMM3M-sh/B732097
+        notes: Dual link not needed for 1080p; RS stock no. 1765722
+        verified: true
+  - make: Lindy
+    tiers:
+      low:
+        model: 3m DVI-D Single Link Cable Black Line
+        ordering_code: '36257'
+        description: 3 m DVI-D single-link M/M, Black Line
+        url: https://store.digital-origin.co.uk/lindy-3m-dvi-d-single-link-cable-black-line-36257.html
+        notes: ''
+        verified: true
+      mid:
+        model: 3m HDMI to DVI-D Single Link Cable Black Line
+        ordering_code: '36273'
+        description: 3 m HDMI male to DVI-D single-link male, Black Line - fits the monitor's standard
+          HDMI input
+        url: https://www.huss-licht-ton.de/product_info.php/Lindy-36273-Video-Adapterkabel-30m-Black-Line-HDMI-DVI-D/info/34720.html
+        notes: ''
+        verified: true
+      high:
+        model: 3m DVI-D Dual Link Cable Black Line
+        ordering_code: '36253'
+        description: 3 m DVI-D dual-link M/M, Black Line
+        url: https://store.digital-origin.co.uk/lindy-3m-dvi-d-dual-link-cable-black-line-36253.html
+        notes: ''
+        verified: true
+  sources:
+  - https://austin-hughes.com/?p=14180
+  - https://rapidonline.com/startech-hddvimm3m-3m-hdmi-to-dvi-d-cable-m-m-19-9401
+  - https://uk.rs-online.com/web/p/hdmi-cables/1765677
+  - https://www.lambda-tek.com/StarTech-com-DVIDDMM3M-sh/B732097
+  - https://store.digital-origin.co.uk/lindy-3m-dvi-d-single-link-cable-black-line-36257.html
+  - https://store.digital-origin.co.uk/lindy-3m-dvi-d-dual-link-cable-black-line-36253.html
+- part_id: MON-USB-CABLE-3M
+  kind: device
+  description: USB Cable for Monitor
+  make: (no make)
+  model: 3 m USB cable
+  verified: partial
+  datasheet:
+    full_name: 'Reference part: StarTech.com USB2HAB3M 3 m USB 2.0 A to B cable, M/M'
+    manufacturer: StarTech.com (reference only)
+    summary: 3 m USB 2.0 A-to-B cable (touch / USB link to the 23in monitor)
+    ratings:
+      standard: USB 2.0, 480 Mbps
+      type: passive
+    ports:
+    - USB-A male
+    - USB-B male
+    product_url: https://uk.rs-online.com/web/p/usb-cables/1862797
+    notes: Check connector on the monitor's touch option (TPC10/TRB = USB); passive 3 m is within USB
+      2.0 limits.
+  alternatives:
+  - make: Lindy
+    tiers:
+      low:
+        model: 3m USB 2.0 Cable Type A to B Transparent
+        ordering_code: '41754'
+        description: 3 m USB 2.0 A-to-B, transparent jacket, basic
+        url: https://store.bsl-it.com/lindy-3m-usb-2-0-cable-type-a-to-b-transparent-41754.html
+        notes: ''
+        verified: true
+      mid:
+        model: 3m USB 2.0 Type A to B Cable Anthra Line
+        ordering_code: '36674'
+        description: 3 m USB 2.0 A-to-B, Anthra Line (gold-plated contacts, robust PVC)
+        url: https://shop.wearesync.co.uk/lindy-3m-usb-2-0-type-a-to-b-cable-anthra-line-36674.html
+        notes: ''
+        verified: true
+      high:
+        model: 3m USB 2.0 Type A to B Cable Cromo Line
+        ordering_code: '36643'
+        description: 3 m USB 2.0 A-to-B, Cromo Line premium (gold-plated, metal-shell connectors)
+        url: https://shop.teqex.co.uk/lindy-3m-usb-2-0-type-a-to-b-cable-cromo-line-36643.html
+        notes: ''
+        verified: true
+  - make: Belkin
+    tiers:
+      low:
+        model: USB 2.0 A-B Cable 3m
+        ordering_code: F3U154bt3M
+        description: 3 m USB 2.0 A-to-B 'premium printer cable', grey
+        url: https://store.digital-origin.co.uk/belkin-usb-2-0-a-usb-2-0-b-3m-usb-cable-usb-a-usb-b-grey-f3u154bt3m.html
+        notes: ''
+        verified: true
+      mid:
+        model: Pro Series USB 2.0 A-B Device Cable 10 ft
+        ordering_code: F3U133B10
+        description: 10 ft (3 m) Pro Series USB 2.0 A-to-B, double-shielded, gold contacts
+        url: https://ibselectronics.com/products/belkin/f3u133b10
+        notes: Shielding/plating per Belkin Pro Series family, not read on this listing
+        verified: true
+      high:
+        model: Pro Series USB 2.0 A-B Device Cable 16 ft
+        ordering_code: F3U133B16
+        description: 16 ft (4.8 m) Pro Series USB 2.0 A-to-B - extra reach for desk-to-monitor routing
+        url: https://www.aztekc.com/cableusbdstpusba-usbb16device-belkin/p
+        notes: Belkin offers no premium 3 m A-B variant beyond the Pro Series; longer length is the only
+          step up
+        verified: true
+  sources:
+  - https://uk.rs-online.com/web/p/usb-cables/1862797
+  - https://store.digital-origin.co.uk/startech-com-3m-usb-2-0-a-to-b-cable-m-m-usb2hab3m.html
+  - https://store.bsl-it.com/lindy-3m-usb-2-0-cable-type-a-to-b-transparent-41754.html
+  - https://shop.wearesync.co.uk/lindy-3m-usb-2-0-type-a-to-b-cable-anthra-line-36674.html
+  - https://shop.teqex.co.uk/lindy-3m-usb-2-0-type-a-to-b-cable-cromo-line-36643.html
+  - https://store.digital-origin.co.uk/belkin-usb-2-0-a-usb-2-0-b-3m-usb-cable-usb-a-usb-b-grey-f3u154bt3m.html
+- part_id: FO-PATCH-CORDS
+  kind: device
+  description: Fiber Optic Patch Cords
+  make: (no make)
+  model: Fibre optic patch cords (1 Lot)
+  verified: partial
+  datasheet:
+    summary: 'Lot of duplex LC-LC patch cords: multimode OM3/OM4 50/125 and singlemode OS2 9/125'
+    notes: 'Not verified - search budget ran out before vendor part-number families could be confirmed.
+      Candidate families to check: Panduit Opti-Core (OM3/OM4) and Opti-Jack/singlemode patch cords, Corning
+      ClearCurve / Pretium patch cords, CommScope SYSTIMAX LazrSPEED (OM4) and TeraSPEED (OS2). Specify
+      per cord: fibre type, connector LC/UPC duplex, length, jacket (LSZH), colour (aqua/erika violet
+      for OM3/OM4, yellow for OS2), and match the switch SFP type (MM 850 nm vs SM 1310 nm).'
+  alternatives:
+  - make: Panduit
+    manufacturer: Panduit Corp.
+    tiers:
+      low:
+        model: Opti-Core OM3 LC-LC duplex patch cord 3 m LSZH
+        ordering_code: FX2ELLNLNSNM003
+        description: OM3 50/125, 2-fibre 1.6 mm zipcord, LC duplex to LC duplex, LSZH, 3 m, aqua
+        url: https://elektrobode.nl/products/panduit-om3-2f-1-6mm-pc-lszh-lc-dup-lc-dup-std-polarity-std-il-3m-07498392215
+        notes: 'Riser (OFNR) version FX2ERLNLNSNM003. Code pattern inferred from listing titles: X=OM3
+          / Z=OM4 / 9=OS2, 2=2-fibre, E=1.6 mm, L=LSZH / R=riser, LN LN=LC duplex both ends, NM003=3 m'
+        verified: true
+      mid:
+        model: Opti-Core OM4 LC-LC duplex patch cord 3 m LSZH
+        ordering_code: FZ2ELLNLNSNM003
+        description: OM4 50/125, 2-fibre 1.6 mm, LC duplex to LC duplex, LSZH, 3 m
+        url: https://elektrobode.nl/products/panduit-om4-patch-cord-50-125-duplex-lc-lc-lszh-3m-07498379333
+        notes: Riser version FZ2ERLNLNSNM003
+        verified: true
+      high:
+        model: Opti-Core OS2 singlemode LC-LC duplex patch cord 3 m LSZH
+        ordering_code: F92ELLNLNSNM003
+        description: OS1/OS2 9/125 singlemode, 2-fibre 1.6 mm, LC duplex to LC duplex, LSZH, 3 m, yellow
+        url: https://www.regard.ru/product/205255/patc-kord-panduit-f92ellnlnsnm003-3m
+        notes: Riser version F92ERLNLNSNM003 (Master Electronics, Stoneway). Use only where the switch
+          SFPs are singlemode 1310 nm
+        verified: true
+  - make: Corning
+    manufacturer: Corning Optical Communications
+    tiers:
+      low:
+        model: Fiber Optic Jumper, 2 F, LC Duplex to LC Duplex, zipcord, riser, 2.0 mm, OM3, 3 m
+        ordering_code: 050502T5120003M
+        description: OM3 50/125 LC-LC duplex jumper, riser, 2.0 mm legs, 3 m
+        url: https://specialized.net/corning-050502t5120002m-lc-lc-duplex-mm-patch-cord-om3-50um-2m.html
+        notes: '3 m code built from Corning''s length field: the 2 m sibling 050502T5120002M (OM3) is
+          confirmed at Specialized and 050502T5120007M/-008M on Corning eCatalog; exact 3 m code not seen
+          - confirm with Corning'
+        verified: false
+      mid:
+        model: Fiber Optic Jumper, 2 F, LC Duplex to LC Duplex, zipcord, riser, 2.0 mm, OM4, 3 m
+        ordering_code: 050502Q5120003M
+        description: OM4 50/125 LC-LC duplex jumper, riser, 2.0 mm legs, 3 m
+        url: https://ecatalog.corning.com/optical-communications/US/en/Fiber-Optic-Cable-Assemblies/Indoor-Cable-Assemblies/Two-Fiber-Indoor-Cable-Assemblies/Fiber-Optic-Jumper%2C-2-F%2C-LC-Duplex-to-LC-Duplex%2C-Zipcord-Cable%2C-Riser%2C-2-0-mm-legs/p/050502Q5120001M
+        notes: 1 m sibling 050502Q5120001M is on Corning eCatalog and Q=OM4 is confirmed by 055702Q5120003M
+          (LC-SC OM4 3 m); exact LC-LC 3 m code not seen - confirm with Corning
+        verified: false
+      high:
+        model: LC/UPC-LC/UPC duplex singlemode jumper, 2.0 mm, 3 m
+        ordering_code: 040402G5120003M
+        description: OS2 singlemode LC-LC duplex jumper, 2.0 mm, 3 m
+        url: https://specialized.net/corning-040402g5120005m-lc-u-lc-u-duplex-sm-patch-cord-2mm-5m.html
+        notes: Code shown in distributor listing title (3 m); jacket rating not read
+        verified: true
+  sources:
+  - https://elektrobode.nl/products/panduit-om3-2f-1-6mm-pc-lszh-lc-dup-lc-dup-std-polarity-std-il-3m-07498392215
+  - https://elektrobode.nl/products/panduit-om4-patch-cord-50-125-duplex-lc-lc-lszh-3m-07498379333
+  - https://www.regard.ru/product/205255/patc-kord-panduit-f92ellnlnsnm003-3m
+  - https://lumen.ca/en/products/28-wire-cords-cables/03-datacom-low-voltage-cable/05-voice-data-video-cables/09-fiber-optic-patch-cords/p-UEFORlgyRVJMTkxOU05NMDAz-panfx2erlnlnsnm003-panduit-fx2erlnlnsnm003-opti-core-fiber-optic-patch-cord-om3-10-gbe-lc-duplex-aqua-3-m-l
+  - https://masterelectronics.com/en/panduit/fz2erlnlnsnm003-44578583.html
+  - https://masterelectronics.com/en/panduit/f92erlnlnsnm003-44578525.html
+  - https://specialized.net/corning-050502t5120002m-lc-lc-duplex-mm-patch-cord-om3-50um-2m.html
+  - https://specialized.net/corning-040402g5120005m-lc-u-lc-u-duplex-sm-patch-cord-2mm-5m.html
