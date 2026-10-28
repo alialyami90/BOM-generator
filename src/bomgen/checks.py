@@ -141,7 +141,11 @@ def branch_mcb_checks(branches: Iterable[BranchMcb]) -> list[CheckItem]:
     for branch in branches:
         status = CheckStatus.PASS
         needs = [f"running {branch.running_a:.2f} A"]
-        if branch.inrush_a is not None:
+        if branch.inrush_a is not None and not branch.inrush_counted:
+            needs.append(
+                f"inrush {branch.inrush_a:g} A for {branch.inrush_ms:g} ms, too short to trip"
+            )
+        elif branch.inrush_a is not None:
             if branch.trip_multiple is None or branch.inrush_need_a is None:
                 status = CheckStatus.WARN
                 needs.append(
@@ -167,7 +171,7 @@ def branch_mcb_checks(branches: Iterable[BranchMcb]) -> list[CheckItem]:
             "rating_a": branch.rating_a,
             "running_a": round(branch.running_a, 3),
         }
-        for key in ("inrush_a", "trip_multiple", "inrush_need_a"):
+        for key in ("inrush_a", "inrush_ms", "trip_multiple", "inrush_need_a"):
             value = getattr(branch, key)
             if value is not None:
                 values[key] = round(value, 3)

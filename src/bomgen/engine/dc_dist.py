@@ -16,7 +16,7 @@ from bomgen.engine.tags import without_prefix
 from bomgen.engine.units import DeviceRow, lookup
 from bomgen.models.bom import BomLine, Group
 from bomgen.models.calc import BranchCondition, BranchMcb, BranchSizing
-from bomgen.models.library import DeviceType, Library
+from bomgen.models.library import DeviceType, Library, McbCatalogue, SupplyType
 from bomgen.models.panel import Panel
 from bomgen.models.project import DesignConstants, LooseExtra
 
@@ -72,10 +72,14 @@ def unit_current(device: DeviceType, constants: DesignConstants) -> float:
 
 def branch_sizing(device: DeviceType, library: Library, constants: DesignConstants) -> BranchSizing:
     """The smallest catalogue MCB that carries the running current with margin, whose
-    magnetic trip clears the inrush, and that is at least the floor (plan Q35, ADR 0019)."""
+    magnetic trip clears an inrush lasting at least ``inrush_min_ms``, and that is at
+    least the floor (plan Q35, ADR 0019)."""
     running = unit_current(device, constants)
-    multiple = library.catalogues.mcb.magnetic_multiple if device.inrush_a else None
-    inrush_need = device.inrush_a / multiple if device.inrush_a and multiple else None
+    multiple = _trip_multiple(library.catalogues.mcb, device) if device.inrush_a else None
+    counted = device.inrush_ms is None or device.inrush_ms >= constants.inrush_min_ms
+    inrush_need = None
+    if device.inrush_a and multiple and counted:
+        inrush_need = device.inrush_a / multiple
     floor = constants.min_branch_mcb_a
     needs: dict[BranchCondition, float | None] = {
         "running": running,
@@ -92,12 +96,22 @@ def branch_sizing(device: DeviceType, library: Library, constants: DesignConstan
         rating_a=rating,
         running_a=running,
         inrush_a=device.inrush_a,
+        inrush_ms=device.inrush_ms,
+        inrush_counted=counted,
         trip_multiple=multiple,
         inrush_need_a=inrush_need,
         floor_a=floor,
         set_by=set_by,
         library_min_a=device.min_branch_mcb_a,
     )
+
+
+def _trip_multiple(mcb: McbCatalogue, device: DeviceType) -> float | None:
+    """The set's magnetic trip multiple for the device's supply: the DC value for a DC
+    load when the set gives one, otherwise the AC value or its curve's lower bound."""
+    if device.supply_type is SupplyType.VDC and mcb.magnetic_trip_multiple_dc is not None:
+        return mcb.magnetic_trip_multiple_dc
+    return mcb.magnetic_multiple
 
 
 def dc_distribution(

@@ -165,6 +165,15 @@ def test_a_higher_library_min_branch_mcb_a_is_a_warning() -> None:
     assert "inrush" not in item.message  # no inrush figure: condition (b) does not apply
 
 
+def test_a_short_inrush_is_reported_as_too_short_to_trip() -> None:
+    (item,) = branch_mcb_checks(
+        [branch(2, ("floor",), inrush_a=40, inrush_ms=2, trip_multiple=5, inrush_counted=False)]
+    )
+    assert item.status is CheckStatus.PASS
+    assert "inrush 40 A for 2 ms, too short to trip" in item.message
+    assert item.values["inrush_ms"] == 2
+
+
 def test_inrush_the_catalogue_cannot_check_is_a_warning() -> None:
     (item,) = branch_mcb_checks([branch(2, ("floor",), inrush_a=12)])
     assert item.status is CheckStatus.WARN

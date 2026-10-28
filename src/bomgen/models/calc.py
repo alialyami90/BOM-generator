@@ -221,8 +221,10 @@ class BranchSizing(OutputModel):
     rating_a: PositiveInt
     running_a: NonNegativeFloat  # current factor x W / V of one unit
     inrush_a: PositiveFloat | None = None
+    inrush_ms: PositiveFloat | None = None
+    inrush_counted: bool = True  # False: shorter than inrush_min_ms, too short to trip
     trip_multiple: PositiveFloat | None = None  # None: the catalogue has no trip curve
-    inrush_need_a: NonNegativeFloat | None = None  # inrush / trip multiple
+    inrush_need_a: NonNegativeFloat | None = None  # inrush / trip multiple, when counted
     floor_a: PositiveInt
     set_by: tuple[BranchCondition, ...]  # every condition that alone gives the rating
     library_min_a: PositiveInt | None = None  # the deprecated min_branch_mcb_a

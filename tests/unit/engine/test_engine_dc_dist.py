@@ -103,10 +103,28 @@ def test_trip_multiple_defaults_to_the_curves_lower_bound() -> None:
     assert sized({"trip_curve": "C"}, inrush_a=12).trip_multiple == 5
 
 
-def test_dc_trip_multiple_is_not_used() -> None:
-    # Ali's rule divides by the set's (AC) multiple, C = 5, even on 125 V DC (ADR 0019).
+def test_dc_loads_use_the_sets_dc_trip_multiple() -> None:
+    # The DC magnetic threshold is higher: 12 A / 7 = 1.71 A -> the 2 A floor.
     sizing = sized(C_CURVE | {"magnetic_trip_multiple_dc": 7}, inrush_a=12)
-    assert (sizing.trip_multiple, sizing.rating_a) == (5, 6)
+    assert (sizing.trip_multiple, sizing.rating_a) == (7, 2)
+
+
+def test_inrush_shorter_than_the_minimum_duration_does_not_count() -> None:
+    # A 2 ms peak is too short to trip the magnetic release (inrush_min_ms 10).
+    sizing = sized(C_CURVE, inrush_a=40, inrush_ms=2)
+    assert (sizing.rating_a, sizing.inrush_counted, sizing.inrush_need_a) == (2, False, None)
+
+
+def test_inrush_of_the_minimum_duration_or_unknown_duration_counts() -> None:
+    assert sized(C_CURVE, inrush_a=40, inrush_ms=10).rating_a == 10
+    assert sized(C_CURVE, inrush_a=40).rating_a == 10
+
+
+def test_inrush_minimum_duration_is_a_design_constant() -> None:
+    part = powered("DEV", "rtac", inrush_a=40, inrush_ms=2)
+    lib = library(part, mcb=C_CURVE)
+    sizing = branch_sizing(get(lib, "DEV"), lib, DesignConstants(inrush_min_ms=1))
+    assert sizing.rating_a == 10
 
 
 def test_inrush_without_a_trip_curve_is_not_sized_for() -> None:
