@@ -215,3 +215,11 @@ def test_library_device_shows_the_saved_value_beside_the_pending_one(app: api.Ap
     reply = ok(app.library_device(PART))
     assert reply["saved"]["unit_power_w"] == saved
     assert reply["pending_fields"] == ["unit_power_w"]
+
+
+def test_library_device_lists_the_models_choices(app: api.Api) -> None:
+    choices = ok(app.library_device(PART))["choices"]
+    assert "rtac" in choices["category"]
+    assert choices["supply_type"] == ["VDC", "VAC"]
+    assert "CONTINUOUS" in choices["load_type"]
+    assert "L2" in choices["purdue_level"]

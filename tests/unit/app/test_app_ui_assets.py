@@ -125,3 +125,10 @@ def test_loose_leave_dialog_offers_keep_discard_and_save() -> None:
     for label in (">Keep editing<", ">Discard changes<", "Save and leave<"):
         assert label in js
     assert "Discard and leave" not in js
+
+
+def test_library_pending_bar_says_nothing_is_applied_yet() -> None:
+    js = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
+    assert "not applied yet. Projects keep using" in js
+    assert "Review and apply…" in js
+    assert ">Keep editing<" in js

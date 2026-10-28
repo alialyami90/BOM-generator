@@ -22,9 +22,16 @@ from bomgen.library_store.errors import LibraryPackageError, RefusalKind
 from bomgen.library_store.local import next_local_version, save_edits
 from bomgen.library_store.store import LibraryStore
 from bomgen.library_store.versions import Version
-from bomgen.models.library import Library
+from bomgen.models.library import Category, Library, LoadType, PurdueLevel, SupplyType
 
 PENDING_DIR = "library-pending"
+# The values the model takes for the editor's choice fields, so the page never lists its own.
+CHOICES = {
+    "category": [c.value for c in Category],
+    "supply_type": [c.value for c in SupplyType],
+    "load_type": [c.value for c in LoadType],
+    "purdue_level": [c.value for c in PurdueLevel],
+}
 _MISSING = object()
 
 
@@ -151,6 +158,7 @@ class LibraryEditor:
             "saved": was,
             "pending_fields": [k for k, v in now.items() if was is None or was.get(k) != v],
             "used_by": [],
+            "choices": CHOICES,
         }
 
     def check(self, part_id: str, key: str, value: object) -> str | None:

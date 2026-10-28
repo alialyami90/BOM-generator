@@ -53,7 +53,7 @@ Not possible yet: the **Datasheet** tab edits device records (`device-db/`), whi
 
 **Interfaces — Produces (all `@endpoint`):**
 - `library_pending() -> {name, base, active, entries, count, next_version, problem}`; `next_version` from `library_store.local.next_local_version`.
-- `library_device(part_id) -> {device, saved, pending_fields, used_by}`: `device` is the pending-applied device JSON, `saved` the base one, `used_by` `[]` until role 2's "rows that use a part" lands.
+- `library_device(part_id) -> {device, saved, pending_fields, used_by, choices}` (`choices`: the model's enum values for category, supply_type, load_type, purdue_level): `device` is the pending-applied device JSON, `saved` the base one, `used_by` `[]` until role 2's "rows that use a part" lands.
 - `check_library_field(part_id, field, value) -> str | None` on the pending-applied library.
 - `add_library_edits(edits: list[dict]) -> library_pending()`; refuses (`AppError("invalid_edit", …)` listing `location: message`) when `apply_edits` reports problems; nothing stored then.
 - `discard_library_edits() -> {discarded: list[dict], page}`; Undo re-sends `discarded` through `add_library_edits`.
