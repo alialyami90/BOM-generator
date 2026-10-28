@@ -33,8 +33,8 @@ Done:
   through a Python bridge (ADR 0015); its screens still show the prototype's
   example data.
 - M11, built early (ADR 0009): the Windows installer and tag-driven releases.
-  Double-clicking a `.bomlib` imports it; the installed app does not open the
-  window or a `.bomproj` yet.
+  The installed app opens the desktop window, double-clicking a `.bomlib`
+  imports it, and a `.bomproj` opens the app on that project.
 
 Next: M1c (switch sizing and automatic panel layout, `bomgen layout`), M3–M4
 (groups E–H, HWIO, power and heat), M5 (sheet models filled from the engine)
@@ -90,7 +90,7 @@ manifest with checksums and the library version it was built with.
 ```bash
 bomgen project export examples/project.yaml    # writes jfgp2-pkg3.bomproj (the project id)
 bomgen project import jfgp2-pkg3.bomproj       # unpacks into the workspace
-bomgen project backup my-project/project.yaml  # saves into my-project/Backups/
+bomgen project backup examples/project.yaml    # saves into examples/Backups/ (git-ignored)
 ```
 
 Export leaves out `out/` and `Backups/`. The workspace is `BOMGEN_WORKSPACE`,

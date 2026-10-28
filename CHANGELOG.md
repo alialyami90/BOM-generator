@@ -70,6 +70,11 @@ tagged release.
 
 ### Changed
 
+- The installed app opens the desktop window and a double-clicked
+  `.bomproj`; the frozen bundle carries the UI files (M10a and M11, #38).
+- `*.bomproj` packages and `Backups/` folders are git-ignored; Q34 taken
+  (#39).
+- Changelog, README and test READMEs for #17 and #24–#35 (#37).
 - The `l1_switch` role takes an optional part: the tool ranks the library's
   L1 switches and picks one unless the engineer pins it; layout checks report
   every problem with its location; FOPP-96SM is 1U, NAP-F23 and KEYTEK-KBM 0U
