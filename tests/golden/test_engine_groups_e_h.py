@@ -167,7 +167,8 @@ def test_xip_on_the_console_is_mtd(result: BuildResult) -> None:
 
 def test_hwio_panel_totals_cover_xdin(result: BuildResult) -> None:
     # HWIO points: panel totals 17, 17 and 6; summed, the DI count the Axion modules
-    # in cabinet 003 cover (XDIN 40).
+    # in cabinet 003 cover (XDIN 40). psa3.yaml also sets XDIN: 40 as an override, so
+    # this checks the two agree; the default itself is covered in test_engine_pipeline.
     totals = [sum(x.hwio for x in p.lines) for p in result.panels]
     assert totals == [17, 17, 6, 0]
     assert qty(result, "psa3", "PSA3-XDIN") == sum(totals)

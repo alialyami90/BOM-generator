@@ -72,7 +72,8 @@ class _Strip:
 def terminal_strips(
     panel: Panel, library: Library, rows: Sequence[DeviceRow], inputs: StripInputs
 ) -> list[BomItem]:
-    """One row per strip, in the order of the spec's terminal table."""
+    """One row per strip, in the order of the example's group G rows ('Panel 1' and
+    'Panel 3'; plan Q34)."""
     defaults = KIND_DEFAULTS[panel.kind]
     options = panel.options
     strips = [

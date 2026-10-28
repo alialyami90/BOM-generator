@@ -5,6 +5,7 @@ from typing import Any
 import pytest
 from engine_factories import device, library, panel, powered, switch
 
+from bomgen.engine.errors import EngineError
 from bomgen.engine.units import DeviceRow, describe, expand_devices
 
 
@@ -49,6 +50,11 @@ def test_first_nn_continues_a_range_from_another_panel() -> None:
     )
     assert first.tag == "PSA1-L1-ESW-A13 to A14"
     assert second.tag == "PSA1-L1-ESW-A15"
+
+
+def test_first_nn_below_the_running_count_is_an_error() -> None:
+    with pytest.raises(EngineError, match="first_nn 12"):
+        rows({"part_id": "L1", "qty": 2}, {"part_id": "L1", "first_nn": 12}, lib_devices=SWITCHES)
 
 
 def test_ext_switch_and_firewall_take_lan_letter_only() -> None:

@@ -67,7 +67,7 @@ that reproduce them):
    spares repeat the largest branch rating on that feed.
 9. Terminal strips the spec gives no rule for take values by panel kind (plan Q6).
    Device strips come from the library `terminals` of each row and its kit children,
-   placed after X-ANN in the spec's table order.
+   placed after X-ANN in the order of the example's group G rows.
 10. Group H lists `options.grounding_busbars` from the busbar catalogue, tag and
     description only.
 

@@ -854,14 +854,15 @@ library (done in #33: FOPP-96SM `height_u: 1`).
 
 **Q34 — Group E–H rules the spec states only by example** (M3; defaults in ADR
 0014, all in force until Ali answers):
-1. Device strips (library `terminals`) follow X-ANN and precede XIP, in the order of
-   the spec's terminal table: the per-unit strips (Axion DI slots XDIPD–XDIPG) in
-   group B order, then XDIN, then the per-serial-port strips (XRTAC-C1…C6). A rule
-   without `{n}` or `{slot}` gives one strip of count × units.
+1. Strips follow the order of the example's group G rows ('Panel 1', 'Panel 3'): the
+   fixed strips, then the device strips (library `terminals`) after X-ANN and before
+   XIP: the per-unit strips (Axion DI slots XDIPD–XDIPG) in group B order, then
+   XDIN, then the per-serial-port strips (XRTAC-C1…C6). A rule without `{n}` or
+   `{slot}` gives one strip of count × units.
 2. XDIN appears with the DI slot strips. *Default:* its quantity is the
    substation's HWIO total (17 + 17 + 6 = 40, the spec's "hardwired DI count");
    `terminal_overrides` wins. Its text is fixed: "Knife Disconnect Terminal Blocks
-   For DI Negative".
+   For DI Negative". With an HWIO total of 0 and no override, no XDIN row is written.
 3. The console's aux contacts carry HWIO 0 (`Aux`!H21 and H31 are blank); other
    kinds count 1 per AC aux contact and 2 for the DC mains.
 4. Descriptions are written one way in every cabinet: MCBs "2A, 2P MCB For …"
