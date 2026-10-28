@@ -8,6 +8,7 @@ from engine_factories import library, panel, powered
 from bomgen.engine.ac_dist import ac_distribution
 from bomgen.engine.items import flatten
 from bomgen.models.bom import Group
+from bomgen.models.library import CatalogueChoice, resolve_catalogues
 from bomgen.models.panel import Ventilation
 
 SWITCH = powered("SW", "network_switch", tag_type="ESW", purdue_level="L2")
@@ -66,3 +67,23 @@ def test_spare_count_is_a_panel_input() -> None:
 def test_mcb_count_includes_cinc() -> None:
     p = panel([{"part_id": "SW"}], options={"aux_socket_a": 10})
     assert ac_distribution(p, library(SWITCH), Ventilation.FORCED).mcbs == 7
+
+
+def test_ac_branches_use_the_ac_mcb_choice_not_mcb_dc() -> None:
+    # ADR 0023: mcb sizes the AC branches and CINC; mcb_dc only the DC ones.
+    dc_set = {
+        "id": "dc-only",
+        "family": "C60H-DC 2P",
+        "make": "Other",
+        "ratings_a": [1, 2, 6, 10, 16],
+        "code_pattern": "DC{rating:03d}",
+        "dc_rating_v": 250,
+        "ac_rated": False,
+    }
+    lib = resolve_catalogues(
+        library(SWITCH, mcb_brands=[dc_set]), CatalogueChoice(mcb_dc="dc-only")
+    )
+    circuits = ac_distribution(panel([{"part_id": "SW"}]), lib, Ventilation.FORCED)
+    breakers = [line for line in flatten(circuits.items) if line.tag]
+    assert {line.make for line in breakers} == {"Schneider"}
+    assert breakers[0].model == "A9F74206"

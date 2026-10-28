@@ -74,10 +74,13 @@ HOUSEKEEPING_DEVICES = [
 
 
 def library(
-    *devices: dict[str, Any], mcb: dict[str, Any] | None = None, **housekeeping: Any
+    *devices: dict[str, Any],
+    mcb: dict[str, Any] | None = None,
+    mcb_brands: list[dict[str, Any]] | None = None,
+    **housekeeping: Any,
 ) -> Library:
     """A library holding ``devices`` plus one record per housekeeping role; ``mcb``
-    overrides fields of the MCB catalogue."""
+    overrides fields of the MCB catalogue and ``mcb_brands`` lists ``catalogue_brands.mcb``."""
     roles: dict[str, Any] = {
         "lamp": {"part_id": "LAMP"},
         "fan": {"part_id": "FAN", "airflow_m3h": 358},
@@ -116,6 +119,7 @@ def library(
                 },
                 "housekeeping": roles,
             },
+            "catalogue_brands": {"mcb": mcb_brands or []},
         }
     )
 

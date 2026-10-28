@@ -17,6 +17,7 @@ from bomgen.engine.items import flatten
 from bomgen.engine.units import expand_devices
 from bomgen.models.bom import Group
 from bomgen.models.calc import BranchSizing
+from bomgen.models.library import CatalogueChoice, resolve_catalogues
 from bomgen.models.project import DesignConstants
 
 PARTS = (
@@ -251,3 +252,78 @@ def test_console_aux_contacts_carry_no_hwio() -> None:
 
 def test_no_dc_loads_no_group_f() -> None:
     assert build([{"part_id": "FOPP"}]).items == []
+
+
+# ADR 0023: the AC brand is ABB S200M; the library's default set (iC60N) stays the DC default.
+S200M = {
+    "id": "abb-s200m",
+    "family": "S200M 2P",
+    "make": "ABB",
+    "ratings_a": [1, 2, 6, 10, 16],
+    "code_pattern": "2CDS272{rating:03d}R0014",
+}
+C60H_DC = {
+    "id": "schneider-c60h-dc",
+    "family": "C60H-DC 2P",
+    "make": "Schneider",
+    "ratings_a": [2, 4, 10, 16],
+    "code_pattern": "MGN61{rating:03d}",
+    "dc_rating_v": 250,
+    "ac_rated": False,
+}
+
+
+def dc_codes(**choice: str) -> list[tuple[Any, ...]]:
+    lib = resolve_catalogues(
+        library(*PARTS, mcb_brands=[S200M, C60H_DC]), CatalogueChoice(**choice)
+    )
+    p = panel([{"part_id": "L2"}, {"part_id": "MON"}])
+    rows = expand_devices(p, lib)
+    fed = single_fed_loads(p, rows, lib, [])
+    lines = flatten(dc_distribution(p, lib, DesignConstants(), rows, fed, True).items)
+    return [(line.tag, line.description, line.make, line.model) for line in lines if line.tag]
+
+
+def test_dc_branches_follow_the_ac_mcb_choice_when_mcb_dc_is_unset() -> None:
+    rows = dc_codes(mcb="abb-s200m")
+    assert {row[2] for row in rows} == {"ABB"}
+    assert rows[0] == ("PSA1-Q1", "6A, 2P MCB For Main DC supply-1", "ABB", "2CDS272006R0014")
+
+
+def test_dc_branches_with_mcb_dc_default_use_the_librarys_default_set() -> None:
+    rows = dc_codes(mcb="abb-s200m", mcb_dc="default")
+    assert {row[2] for row in rows} == {"Schneider"}
+    assert rows[:2] == [
+        ("PSA1-Q1", "6A, 2P MCB For Main DC supply-1", "Schneider", "A9F74206"),
+        ("PSA1-Q1.1", "2A, 2P MCB For L2_ESW_A01 PS1", "Schneider", "A9F74202"),
+    ]
+
+
+def test_dc_mains_branches_and_qcods_use_the_mcb_dc_choice() -> None:
+    # The C60H-DC set has no 1 A or 6 A: the 2 A floor stays 2 A, the 6 A main becomes 10 A.
+    rows = dc_codes(mcb="abb-s200m", mcb_dc="schneider-c60h-dc")
+    assert {row[2] for row in rows} == {"Schneider"}
+    assert rows[0] == ("PSA1-Q1", "10A, 2P MCB For Main DC supply-1", "Schneider", "MGN61010")
+    assert rows[1] == ("PSA1-Q1.1", "2A, 2P MCB For L2_ESW_A01 PS1", "Schneider", "MGN61002")
+    qcod = [row for row in rows if "QCOD" in row[0]]
+    assert qcod[0] == ("PSA1-QCOD-1", "2A, 2P MCB For Monitor", "Schneider", "MGN61002")
+
+
+def sized_dc(**fields: Any) -> BranchSizing:
+    part = powered("DEV", "rtac", **fields)
+    dc_set = C60H_DC | {"trip_curve": "C", "magnetic_trip_multiple_dc": 7}
+    lib = resolve_catalogues(
+        library(part, mcb_brands=[dc_set]), CatalogueChoice(mcb_dc="schneider-c60h-dc")
+    )
+    return branch_sizing(get(lib, "DEV"), lib, DesignConstants())
+
+
+def test_branch_sizing_uses_the_dc_sets_ratings() -> None:
+    # 1.3 x 400 W / 125 V = 4.16 A: 6 A from the AC set, 10 A from the DC set's 2/4/10/16.
+    assert sized_dc(unit_power_w=400).rating_a == 10
+
+
+def test_branch_sizing_uses_the_dc_sets_trip_multiple() -> None:
+    # The AC set has no trip curve; the DC set trips from 7 x In: 21 A / 7 = 3 A -> 4 A.
+    sizing = sized_dc(inrush_a=21)
+    assert (sizing.trip_multiple, sizing.rating_a) == (7, 4)
