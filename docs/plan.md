@@ -580,3 +580,12 @@ branch MCBs are 2 A, A9F74202 (the workbook text says 2A but uses the 1 A code).
 switch as a Ruggedcom RST-2228 and the L2 1G/100M MM SFPs as 18/6; the masters list a
 SEL-2730M and 15/2. *Default:* the masters, because Power Consumption reads them and
 they reproduce the spec's totals. Waiting for Ali.
+
+**Q29 — Thermostat load and fan airflow in the library defaults.** The device
+research (`docs/device-db-findings.md`, items 1 and 2) found that the SK 3110.000
+thermostat's "30 W" is a contact switching rating, not a load, and that 716 m³/h is the
+SK 3243.100 fan's free-blowing 60 Hz figure. *Resolved 2026-10-28:* Ali: the example
+and golden values stay as the issued workbook. Future library default: SK 3110
+thermostat 0 W; SK 3243.100 fan 460 m³/h with the SK 3243.200 outlet filter (60 Hz),
+so the per-fan airflow changes from 358. Applied when A2 next revises the library
+defaults, not to the example.

@@ -3,7 +3,7 @@
 The datasheet research turned up places where the example workbook (and so the spec's
 example values) disagrees with the manufacturer's data, or where a part could not be
 found. None of these is changed anywhere: the library and golden values still follow
-the workbook. Each item is a question for Ali. Details and source links are in the
+the workbook. Each item is a question for Ali unless marked resolved. Details and source links are in the
 matching record in `data/device-db/`.
 
 ## Could change the power, heat or airflow results
@@ -12,10 +12,16 @@ matching record in `data/device-db/`.
    30 W as the maximum DC switching capacity of the bimetal contact. The thermostat
    draws nothing itself. The workbook counts 3 × 30 W per PSA cabinet and 30 W in the
    console as AC load and heat. (`SK3110-TH`)
+   *Resolved 2026-10-28:* Ali: the example keeps the workbook's 30 W so the golden test
+   still reproduces the issued document; library defaults for new projects use 0 W
+   (future plan fix).
 2. **Fan SK 3243.100 airflow depends on frequency and filters.** Free-blowing it moves
    625 m³/h at 50 Hz and 716 m³/h at 60 Hz, drawing 70 W and 87 W. With one outlet filter
    (SK 3243.200) it moves 405 m³/h at 50 Hz and 460 m³/h at 60 Hz. The heat check compares
    against 716 m³/h, which is the free-blowing 60 Hz figure. (`SK3243-FAN`)
+   *Resolved 2026-10-28:* Ali: the example keeps 716 m³/h; library defaults for new
+   projects use the with-filter 60 Hz figure, 460 m³/h per fan-and-filter unit, and do not
+   add an inlet/exhaust pair together (future plan fix).
 3. **Several device wattages are not published.** SEL gives no typical power for the
    SEL-3555 (62 W and 73 W in the workbook) or the Axion system (31 W). For the SEL-2488
    it gives under 45 W per power supply, not 50 W total. For the SEL-3355 it gives only the
