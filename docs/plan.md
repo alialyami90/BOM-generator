@@ -470,6 +470,36 @@ update package (ADR 0008).
 - Open item for M1b: once the `project.yaml` model is on main, read the id and
   library through it instead of plain YAML.
 
+### M8c — What the UI needs from the packages (A5, no new ADR)
+Answers the "What the app needs from the engine" rows for A5. Nothing here changes
+how a package is built or installed.
+- Each dry-run returns a list of `Check(id, label, status, detail, kind)` in
+  `bomgen.bundle.checks`; `status` is `ok`, `warning`, `failed` or `skipped`, and
+  `kind` is the `RefusalKind` of a failed check. A failed check skips the checks
+  after it, and the preview never raises for a bad package and writes nothing.
+  `can_import` is true when no check failed.
+- `bomgen.library_store.preview_library_import(package, *, force=False, store=None)`
+  returns `LibraryImportPreview(checks, manifest, files, previous, diff, can_import)`.
+  Checks in order: `package`, `paths`, `size`, `manifest` (format, schema and
+  app version; `INCOMPATIBLE` on failure), `files`, `checksums`, `library`,
+  `validation` (the build's loader), `version` (`DOWNGRADE` or
+  `ALREADY_INSTALLED` fail, and become warnings with `force`), `signature`
+  (always `skipped`: packages carry checksums only, plan Q18).
+- `bomgen.project_store.preview_project_import(package, *, workspace=None,
+  store=None)` returns `ProjectImportPreview(checks, manifest, files, project_id,
+  target_dir, exists, library_note, can_import)`. Checks: the six above, then
+  `identity` (manifest and `project.yaml` agree), `contents` (no build output),
+  `name` (a warning when the project exists: import replaces it after a backup)
+  and `library` (a warning carrying the `library_note`).
+- `bomgen.project_store.list_backups(project_file)` lists `Backups/` newest first
+  as `BackupInfo(path, saved, size, project_id, library_name, library_version,
+  file_count, problem)`, reading manifests only. A damaged file is listed with
+  `problem` set. `restore_backup(backup)` is the forced import into the backup's
+  own project, with the safety backup of the current state; review it first with
+  `preview_project_import(backup, workspace=<project folder>.parent)`.
+- Still open: "projects built with it" has no data source until M1b records the
+  library on the project, and `InstalledLibrary.problem` needs wording from A4.
+
 ### M9 — UI design with impeccable
 Use the `impeccable` skill to design the screens and elements: open or create a
 project, edit panels and project settings, browse the installed device library

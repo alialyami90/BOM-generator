@@ -86,7 +86,7 @@ def pack(
     return manifest
 
 
-def _parse_manifest(raw: object, app_version: str) -> Manifest:
+def parse_manifest(raw: object, app_version: str) -> Manifest:
     if isinstance(raw, dict) and "project_id" in raw:
         raise LibraryPackageError(
             "this is a .bomproj project, not a .bomlib library; "
@@ -122,6 +122,6 @@ def _parse_manifest(raw: object, app_version: str) -> Manifest:
 def read_package(path: Path, *, app_version: str = bomgen.__version__) -> PackageContents:
     """Open and fully verify a package; raise `LibraryPackageError` on any problem."""
     manifest, files = read_bundle(
-        path, lambda raw: _parse_manifest(raw, app_version), ".bomlib package"
+        path, lambda raw: parse_manifest(raw, app_version), ".bomlib package"
     )
     return PackageContents(manifest, files, parse_library(files[LIBRARY_FILE]))
