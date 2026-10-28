@@ -1,7 +1,7 @@
 """Writer: print setup and sheet view per OUT-7."""
 
 import pytest
-from conftest import WriteAndOpen
+from writer_helpers import WriteAndOpen
 
 from bomgen.models.sheet import CellRange, Margins, PrintSetup, SheetModel
 

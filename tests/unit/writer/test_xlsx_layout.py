@@ -1,7 +1,7 @@
 """Writer: merges, column widths, row heights and hidden columns (OUT-4, OUT-6)."""
 
 import pytest
-from conftest import WriteAndOpen
+from writer_helpers import WriteAndOpen
 
 from bomgen.models.sheet import (
     Borders,

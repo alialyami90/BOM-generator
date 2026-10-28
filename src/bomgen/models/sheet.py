@@ -82,6 +82,8 @@ class Formula(SheetBase):
     def _starts_with_equals(cls, value: str) -> str:
         if not value.startswith("="):
             raise ValueError("formula text must start with '='")
+        if not value[1:].strip():
+            raise ValueError("formula text needs an expression after '='")
         return value
 
 
@@ -90,7 +92,7 @@ CellValue = StrictStr | Number | Formula | None
 
 class Font(SheetBase):
     name: str = "Calibri"
-    size: Annotated[float, Field(gt=0, le=409)] = 11.0
+    size: Annotated[StrictInt, Field(ge=1, le=409)] = 11  # whole points: Excel reads "&10.5" as 10
     bold: bool = False
     underline: Literal["none", "single"] = "none"
     color: Color = "#000000"
@@ -231,7 +233,7 @@ class HFRun(SheetBase):
     field: Literal["page", "pages"] | None = None
     font: str = "Calibri"
     bold: bool = False
-    size: Annotated[float, Field(gt=0, le=409)] = 11.0
+    size: Annotated[StrictInt, Field(ge=1, le=409)] = 11  # whole points: Excel reads "&10.5" as 10
 
 
 HFLine = tuple[HFRun, ...]

@@ -4,8 +4,9 @@ import zipfile
 from pathlib import Path
 
 import pytest
-from conftest import WriteAndOpen, tiny_png
 from openpyxl.workbook.workbook import Workbook
+from pydantic import ValidationError
+from writer_helpers import WriteAndOpen, tiny_png
 
 from bomgen.models.sheet import HeaderFooter, HFRun, HFZone, SheetModel, WorkbookModel
 from bomgen.writer import WriterError, write_workbook
@@ -109,6 +110,12 @@ def test_text_starting_with_a_digit_is_not_read_as_font_size(write_and_open: Wri
     assert zone_text(book, "oddFooter", "left") == "861-GIS01-PSA-0001"
 
 
+def test_fractional_font_size_is_rejected() -> None:
+    # "&10.5" would be read by Excel as size 10 followed by the text ".5".
+    with pytest.raises(ValidationError):
+        HFRun.model_validate({"text": "x", "size": 10.5})
+
+
 def test_ampersand_in_text_is_escaped(write_and_open: WriteAndOpen) -> None:
     hf = bom_header_footer(name="R&D Substation")
     book = write_and_open(SheetModel(name="1", header_footer=hf))
@@ -129,9 +136,18 @@ def test_missing_logo_raises_and_writes_no_file(tmp_path: Path, out_path: Path) 
     assert not out_path.exists()
 
 
-def test_unreadable_picture_raises_and_writes_no_file(tmp_path: Path, out_path: Path) -> None:
+@pytest.mark.parametrize(
+    "content",
+    [
+        "not a picture",  # truncated: XlsxWriter 3.2 raises struct.error, not its own exception
+        "not a picture" * 4,  # long enough to reach the unsupported-format check
+    ],
+)
+def test_unreadable_picture_raises_and_writes_no_file(
+    tmp_path: Path, out_path: Path, content: str
+) -> None:
     bad = tmp_path / "logo.png"
-    bad.write_text("not a picture")
+    bad.write_text(content)
     sheet = SheetModel(name="1", header_footer=bom_header_footer(bad))
     with pytest.raises(WriterError, match="could not write"):
         write_workbook(WorkbookModel(sheets=(sheet,)), out_path)

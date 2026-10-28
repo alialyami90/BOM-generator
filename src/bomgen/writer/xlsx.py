@@ -6,6 +6,7 @@ writes ``fullCalcOnLoad`` into every workbook, so Excel recalculates the live
 formulas when the file opens (OUT-5).
 """
 
+import struct
 from pathlib import Path
 from typing import Any
 
@@ -42,6 +43,8 @@ _MAX_HEADER_FOOTER_CHARS = 255  # Excel's limit; XlsxWriter only warns and drops
 _FIELD_CODES = {"page": "&P", "pages": "&N"}
 _ZONE_CODES = ("&L", "&C", "&R")
 _IMAGE_OPTIONS = ("image_left", "image_center", "image_right")
+# XlsxWriter 3.2 raises struct.error on a truncated picture instead of its own exception.
+_XLSXWRITER_ERRORS = (XlsxWriterException, struct.error)
 
 
 class WriterError(Exception):
@@ -161,7 +164,7 @@ def _render_zone(code: str, zone: HFZone) -> str:
     if zone.image is None and not zone.lines:
         return ""
     parts = [code, "&G" if zone.image is not None else ""]
-    state: tuple[str, bool, float] | None = None
+    state: tuple[str, bool, int] | None = None
     for i, line in enumerate(zone.lines):
         if i:
             parts.append("\n")
@@ -177,7 +180,7 @@ def _font_codes(run: HFRun) -> str:
     # Size before font name: a size code directly followed by text starting with a digit
     # ("&11861-GIS01") would be read as one larger size.
     weight = "Bold" if run.bold else "Regular"
-    return f'&{run.size:g}&"{run.font},{weight}"'
+    return f'&{run.size}&"{run.font},{weight}"'
 
 
 def _render(
@@ -242,13 +245,15 @@ def write_workbook(workbook: WorkbookModel, path: Path) -> Path:
         for sheet in workbook.sheets:
             _write_sheet(book.add_worksheet(sheet.name), sheet, formats)
     except BaseException as exc:
-        book.fileclosed = True  # nothing is on disk yet; skip XlsxWriter's close-on-delete
-        if isinstance(exc, XlsxWriterException):
+        # Nothing is on disk yet; skip XlsxWriter's close-on-delete. ``fileclosed`` is
+        # undocumented; checked against XlsxWriter 3.2.9 and 3.3.0.
+        book.fileclosed = True
+        if isinstance(exc, _XLSXWRITER_ERRORS):
             raise WriterError(f"could not write {path}: {exc}") from exc
         raise
     try:
         book.close()
-    except XlsxWriterException as exc:
+    except _XLSXWRITER_ERRORS as exc:
         path.unlink(missing_ok=True)  # a half-written file must not look like a result
         raise WriterError(f"could not write {path}: {exc}") from exc
     return path

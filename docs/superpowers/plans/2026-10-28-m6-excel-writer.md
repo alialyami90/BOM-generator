@@ -50,7 +50,7 @@
   - `CellRange(first_row, first_col, last_row, last_col)` (print area)
   - `PrintSetup(paper: Literal["A4"]="A4", orientation: Literal["portrait","landscape"]="portrait", scale: int | None = None, fit_to_width: int | None = None, fit_to_height: int | None = None, margins: Margins = Margins(), center_horizontally=False, print_area: CellRange | None = None, repeat_rows: tuple[int, int] | None = None, page_break_preview=True, zoom: int | None = None)`; scale and fit-to-page exclusive; scale and zoom 10–400.
   - `Margins(left_cm=1.0, right_cm=1.0, top_cm=3.0, bottom_cm=2.0, header_cm=0.8, footer_cm=0.8)`
-  - `HFRun(text="", field: Literal["page","pages"] | None = None, bold=False, size: float | None = None)`; `HFZone(lines: tuple[tuple[HFRun, ...], ...] = (), image: Path | None = None)`; `HeaderFooter(header_left/center/right, footer_left/center/right: HFZone)`.
+  - `HFRun(text="", field: Literal["page","pages"] | None = None, font="Calibri", bold=False, size: int = 11)` (whole points, 1–409); `HFZone(lines: tuple[tuple[HFRun, ...], ...] = (), image: Path | None = None)`; `HeaderFooter(header_left/center/right, footer_left/center/right: HFZone)`.
   - `SheetModel(name: ExcelSheetName, cells: dict[tuple[int, int], Cell], merges: tuple[Merge, ...], columns: dict[int, ColumnFormat], rows: dict[int, RowFormat], print_setup: PrintSetup, header_footer: HeaderFooter | None)`
   - `WorkbookModel(sheets: tuple[SheetModel, ...])`, at least one sheet.
 

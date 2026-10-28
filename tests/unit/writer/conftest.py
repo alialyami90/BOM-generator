@@ -1,33 +1,14 @@
-"""Shared helpers for writer tests: write a model to tmp_path and reopen it with openpyxl."""
+"""Writer test fixtures: write a model to tmp_path and reopen it with openpyxl."""
 
-import struct
-import zlib
-from collections.abc import Callable
 from pathlib import Path
 
 import openpyxl
 import pytest
 from openpyxl.workbook.workbook import Workbook
+from writer_helpers import WriteAndOpen
 
 from bomgen.models.sheet import SheetModel, WorkbookModel
 from bomgen.writer import write_workbook
-
-WriteAndOpen = Callable[..., Workbook]
-
-
-def tiny_png(path: Path) -> Path:
-    """Write a valid 1 x 1 pixel PNG to ``path``."""
-
-    def chunk(kind: bytes, data: bytes) -> bytes:
-        crc = zlib.crc32(kind + data) & 0xFFFFFFFF
-        return struct.pack(">I", len(data)) + kind + data + struct.pack(">I", crc)
-
-    header = struct.pack(">IIBBBBB", 1, 1, 8, 2, 0, 0, 0)
-    pixels = zlib.compress(b"\x00\xff\x00\x00")
-    path.write_bytes(
-        b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", header) + chunk(b"IDAT", pixels) + chunk(b"IEND", b"")
-    )
-    return path
 
 
 @pytest.fixture

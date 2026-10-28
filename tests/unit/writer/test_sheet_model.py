@@ -49,6 +49,11 @@ def test_formula_must_start_with_equals() -> None:
         Formula(text="A3+1")
 
 
+def test_formula_needs_an_expression_after_equals() -> None:
+    with pytest.raises(ValidationError, match="expression after '='"):
+        Formula(text="=")
+
+
 @pytest.mark.parametrize("value", [True, float("nan"), float("inf")])
 def test_cell_rejects_bool_and_non_finite_numbers(value: object) -> None:
     with pytest.raises(ValidationError):

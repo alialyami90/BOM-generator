@@ -4,7 +4,7 @@ import zipfile
 from pathlib import Path
 
 import pytest
-from conftest import WriteAndOpen
+from writer_helpers import WriteAndOpen
 
 from bomgen.models.sheet import (
     Alignment,
