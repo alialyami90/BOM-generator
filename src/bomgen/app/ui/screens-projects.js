@@ -1,7 +1,7 @@
 /* Screens: Home (all projects) and the Project page (overview, substations, documents, backup and share),
    on bomgen.app.api (plan M10b). Opened in a plain browser they show the prototype's illustrative projects. */
 (function () {
-  const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, field, input, pageHead, illus, dialog, closeDialog, toast, go, $, curProject } = App;
+  const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, field, input, select, pageHead, illus, dialog, closeDialog, toast, go, $, curProject } = App;
   const statusIcon = { ok: 'check', bad: 'error', warn: 'warn' };
   const ro = (html) => html.replace('data-dirty="1"', 'readonly').replace('class="input', 'class="ctl input');
   const offline = () => S.backend === 'no';
@@ -10,8 +10,9 @@
   const kb = (b) => (b == null ? '—' : b < 1024 ? `${b} bytes` : `${Math.round(b / 1024)} KB`);
   const inside = (file, folder) => (file.startsWith(folder) ? file.slice(folder.length).replace(/^[\\/]/, '') : file);
   const count = (n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`;
-  const LATER = 'Creating and editing projects in the app is not available yet. Edit the YAML files, then open the project again.';
-  const later = () => `disabled title="${esc(LATER)}"`;
+  /* What the app cannot edit yet (plan M17c): the project's own settings. */
+  const LATER = 'Client, logo and shared defaults cannot be edited in the app yet. Edit project.yaml, then open the project again.';
+  const live = () => (offline() ? `disabled title="${esc('This works in the app, not in a browser.')}"` : '');
 
   /* ---------- the screens' view of a project (the prototype's shape) ---------- */
   const PROJECTS = { state: 'idle', rows: [], once: false };  // once: the list has been read at least once
@@ -72,7 +73,7 @@
     const loading = !offline() && !PROJECTS.once;
     return `<div class="page">
       ${pageHead('Projects', 'Every project on this PC. A project holds several substations, each with its own panels and workbook.',
-        `<button class="btn btn--secondary" data-action="import-project">${icon('download')}Import project file…</button><button class="btn btn--secondary" data-action="open-project">${icon('folder')}Open folder…</button><button class="btn btn--primary" data-action="new-project" ${later()}>${icon('plus')}New project…</button>`, '', LATER)}
+        `<button class="btn btn--secondary" data-action="import-project">${icon('download')}Import project file…</button><button class="btn btn--secondary" data-action="open-project">${icon('folder')}Open folder…</button><button class="btn btn--primary" data-action="new-project" ${live()}>${icon('plus')}New project…</button>`)}
       ${S.launch === 'bomproj' ? `<div style="margin-bottom:var(--space-4)">${banner('info', `<b>You opened a project file.</b> <span class="mono">${esc(S.launchFile)}</span> is not added yet. Review what it contains before it is imported.`, `<button class="btn btn--primary btn--sm" data-action="import-launched">Review import…</button>`)}</div>` : ''}
       ${loading ? '<p class="muted">Reading the projects on this PC…</p>' : rows.length ? `<div class="table-wrap"><table class="table table--comfort">
         <thead><tr><th>Project</th><th>Client</th><th class="num">Substations</th><th>Library</th><th>Last changed</th><th>Status</th></tr></thead>
@@ -105,7 +106,7 @@
     const rb = App.route().b; if (tabList.some(([k]) => k === rb)) S.tab.project = rb;
     const t = S.tab.project;
     const actions = {
-      substations: `<button class="btn btn--primary" data-action="new-substation" ${later()}>${icon('plus')}New substation…</button>`,
+      substations: `<button class="btn btn--primary" data-action="new-substation" ${live()}>${icon('plus')}New substation…</button>`,
       share: `<button class="btn btn--primary" data-action="export-project">${icon('upload')}Export project…</button>` }[t] || '';
     const body = { info: projectInfo, substations: projectSubs, documents: projectDocs, share: projectShare }[t](p);
     const problems = p.problems && p.problems.length ? `<div style="margin-bottom:var(--space-4)">${banner('bad', `<b>${p.problems.length} ${p.problems.length === 1 ? 'problem' : 'problems'} in the project files.</b> ${problemList(p.problems)}`)}</div>` : '';
@@ -117,7 +118,7 @@
   const problemList = (list) => `<ul style="margin:6px 0 0;padding-left:18px">${list.slice(0, MAX_PROBLEMS).map((x) => `<li><span class="mono small">${esc(x.file.split(/[\\/]/).slice(-2).join('/'))}${x.line ? ':' + x.line : ''}</span>${x.location ? ` <span class="mono small">${esc(x.location)}</span>` : ''}: ${esc(x.message)}</li>`).join('')}</ul>${list.length > MAX_PROBLEMS ? `<div class="small">and ${list.length - MAX_PROBLEMS} more; the Checks screen lists them all.</div>` : ''}`;
 
   const projectInfo = (p) => `<div class="form form--2">
-    <div class="span-2">${field('Project name', ro(input('p-name', p.name)), 'Printed in bold at the top of every sheet header, for every substation.')}</div>
+    <div class="span-2">${field('Project name', `<div class="row" style="flex-wrap:nowrap">${ro(input('p-name', p.name))}<button class="btn btn--secondary" data-action="rename-project" ${live()}>Rename…</button></div>`, 'Printed in bold at the top of every sheet header, for every substation. The folder keeps its name.')}</div>
     ${field('Client', ro(input('p-client', p.client, { placeholder: 'Not set' })))}
     ${field('Logo', ro(input('p-logo', p.logo, { mono: true, placeholder: 'No logo chosen' })), p.logo ? 'PNG. Appears in the left of the page header.' : 'PNG. Appears in the left of the page header. <span style="color:var(--color-warning)">Not set: the header will have no picture.</span>')}
     <div class="span-2 section" style="margin:0">
@@ -131,16 +132,21 @@
       <h3>Shared defaults</h3>
       <p class="lede">Every substation starts from these values. A substation can set its own; the ones it changes are marked there.</p>
       <div class="form form--3" style="margin-top:var(--space-3)">${p.defaults.map((x, i) => field(x.label, `<div class="input-affix">${ro(input('df' + i, x.value, { num: true, mono: true }))}${x.unit ? `<span class="affix">${esc(x.unit)}</span>` : ''}</div>`)).join('') || '<p class="muted">No shared defaults are set.</p>'}</div>
+    </div>
+    <div class="span-2 section" style="margin:0">
+      <h3>Delete project</h3>
+      <p class="lede">Removes the project folder with all its substations. A copy is saved first as a <span class="mono">.bomproj</span> file, which Import project file brings back.</p>
+      <button class="btn btn--danger" data-action="delete-project" ${live()}>${icon('trash')}Delete project…</button>
     </div></div>`;
 
   const projectSubs = (p) => `<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">Each substation has its own network, panels, checks and workbook. To start a new one from an existing one, use “Create from this”.</p>
-    <div class="table-wrap"><table class="table table--comfort"><thead><tr><th>Substation</th><th class="num">Panels</th><th>Last changed</th><th>Status</th><th style="width:300px"><span class="sr-only">Actions</span></th></tr></thead>
+    <div class="table-wrap"><table class="table table--comfort"><thead><tr><th>Substation</th><th class="num">Panels</th><th>Last changed</th><th>Status</th><th style="width:430px"><span class="sr-only">Actions</span></th></tr></thead>
       <tbody>${p.substations.map((s) => `<tr class="clickable" tabindex="0" data-action="open-sub" data-id="${esc(s.id)}">
         <td><b style="font-weight:500">${esc(s.name)}</b><span class="cell-sub mono">${esc(s.folder)}</span>${s.from ? `<span class="cell-sub">Created from ${esc(s.from)}</span>` : ''}</td>
         <td class="num">${esc(s.panels)}</td><td>${esc(s.changed)}</td><td>${badge(s.status, s.statusText, statusIcon[s.status])}</td>
-        <td><div class="row-actions"><button class="btn btn--secondary btn--sm" data-action="open-sub" data-id="${esc(s.id)}">Open</button><button class="btn btn--ghost btn--sm" data-action="new-substation" data-from="${esc(s.id)}" ${later()}>${icon('copy')}Create from this…</button></div></td></tr>`).join('')}</tbody></table>
+        <td><div class="row-actions"><button class="btn btn--secondary btn--sm" data-action="open-sub" data-id="${esc(s.id)}">Open</button><button class="btn btn--ghost btn--sm" data-action="new-substation" data-from="${esc(s.id)}" ${live()}>${icon('copy')}Create from this…</button><button class="btn btn--ghost btn--sm" data-action="rename-substation" data-id="${esc(s.id)}" ${live()}>Rename…</button><button class="btn btn--ghost btn--sm" data-action="delete-substation" data-id="${esc(s.id)}" ${live()}>${icon('trash')}Delete…</button></div></td></tr>`).join('')}</tbody></table>
       <div class="table-foot"><span>${count(p.substations.length, 'substation')}</span>${p.real ? '' : `<span>${illus()}</span>`}</div></div>`;
-  ACTIONS['open-sub'] = (el) => { S.sub = el.dataset.id; S.dirty = false; S.layout = { overrides: [], removed: [], history: [], selected: '', openOverrides: false }; go('#/panels'); };
+  ACTIONS['open-sub'] = (el, e) => { if (e && e.target.closest('button') && e.target.closest('button') !== el) return; S.sub = el.dataset.id; S.dirty = false; S.layout = { overrides: [], removed: [], history: [], selected: '', openOverrides: false }; go('#/panels'); };
 
   const projectDocs = (p) => {
     const ids = [...new Set([...p.substations.map((s) => s.id), ...p.documents.map((d) => d.sub)])];
@@ -152,6 +158,90 @@
       <tbody>${groups.map((g) => `<tr class="band"><td colspan="${p.real ? 4 : 6}"><b>${esc(g.s.name)}</b> <span class="muted">· ${count(g.rows.length, 'document')}</span></td></tr>
         ${g.rows.map((d) => `<tr><td>${esc(d.label)}${d.label !== d.key ? `<span class="cell-sub mono">${esc(d.key)}</span>` : ''}</td><td>${ro(input('dn-' + d.key, d.docNo, { mono: true }))}</td><td>${ro(input('dr-' + d.key, d.rev, { mono: true }))}</td><td>${ro(input('di-' + d.key, d.issue, { mono: true }))}</td>${p.real ? '' : `<td>${esc(d.usedBy)}</td><td>${d.assumed ? badge('warn', 'Assumed date', 'warn') : '<span class="muted small">Confirmed</span>'}</td>`}</tr>`).join('')}`).join('')}</tbody></table>
       <div class="table-foot"><span>${count(p.documents.length, 'document')} in ${count(groups.length, 'substation')}</span>${p.real ? '' : `<span>${illus()}</span>`}</div></div>` : '<div class="empty"><b>No documents in the register.</b></div>'}`;
+  };
+
+  /* ---------- Create, rename and delete (docs/ui/editing.md "Creating", plan M17d) ---------- */
+  const err = (id, e) => { const el = $('#' + id); if (el) el.innerHTML = banner('bad', esc(e.message)); };
+  const settle = () => { S.dirty = false; };  // dialog inputs are not unsaved page edits
+  const openSub = (id) => { S.sub = id; S.layout = { overrides: [], removed: [], history: [], selected: '', openOverrides: false }; go('#/network'); };
+  ACTIONS['new-project'] = () => Bridge.call('new_project_form', '').then((f) => {
+    dialog({ title: 'New project', body: `<div class="stack">
+      ${field('Project name', input('np-name', '', { placeholder: 'e.g. North Gas Plant' }), `<span id="np-folder">The folder is made from the name in <span class="mono">${esc(f.workspace)}</span>.</span>`)}
+      ${field('Client', input('np-client', '', { placeholder: 'Optional' }))}
+      ${field('Device library', select('np-lib', f.versions.map((v) => [v, `${f.library.name} ${v}${v === f.library.version ? ' (active)' : ''}`]), f.library.version), 'All the substations of a project use this version.')}
+      <label class="check"><input type="checkbox" id="np-first" checked> Add a first substation now</label>
+      <div id="np-first-box">${field('Substation name', input('np-sub', '', { placeholder: 'e.g. GIS Substation 01' }), 'You can add more later, or copy one.')}</div>
+      <div id="np-err"></div></div>`,
+      actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="new-project-do">Create project</button>' });
+  }).catch(fail);
+  document.addEventListener('input', (e) => {
+    if (e.target.id !== 'np-name') return;
+    const name = e.target.value;
+    Bridge.call('new_project_form', name).then((f) => { const el = $('#np-folder'); if (el && $('#np-name') && $('#np-name').value === name) el.innerHTML = f.folder ? `Saved in <span class="mono">${esc(f.folder)}</span>.` : `The folder is made from the name in <span class="mono">${esc(f.workspace)}</span>.`; }).catch(() => {});
+  });
+  document.addEventListener('change', (e) => { if (e.target.id === 'np-first') { const b = $('#np-first-box'); if (b) b.hidden = !e.target.checked; } });
+  ACTIONS['new-project-do'] = (el) => {
+    const name = $('#np-name').value.trim(), first = $('#np-first').checked ? $('#np-sub').value.trim() : '';
+    if (!name) { $('#np-name').setAttribute('aria-invalid', 'true'); $('#np-name').focus(); return; }
+    if ($('#np-first').checked && !first) { $('#np-sub').setAttribute('aria-invalid', 'true'); $('#np-sub').focus(); return; }
+    el.disabled = true;
+    Bridge.call('create_project', name, $('#np-client').value, $('#np-lib').value, first || null).then((made) => {
+      closeDialog(); settle(); toast(`${name} created`, 'check');
+      return openProject(made.project_file).then(() => { if (made.substation) openSub(made.substation); });
+    }).catch((e) => { el.disabled = false; err('np-err', e); });
+  };
+  ACTIONS['new-substation'] = (el) => {
+    const p = curProject(), from = el.dataset.from || '';
+    dialog({ title: from ? 'Create a substation from this one' : 'New substation', body: `<div class="stack">
+      ${field('Start from', select('ns-from', [['', 'A blank substation'], ...p.substations.map((s) => [s.id, `A copy of ${s.name}`])], from), 'A copy keeps the network, equipment, panels and settings, and gets its own documents in the register.')}
+      ${field('Name', input('ns-name', '', { placeholder: 'e.g. GIS Substation 02' }), 'The folder is made from the name and stays the same if you rename it later.')}
+      <div id="ns-err"></div></div>`,
+      actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="new-substation-do">Create substation</button>' });
+  };
+  ACTIONS['new-substation-do'] = (el) => {
+    const p = curProject(), name = $('#ns-name').value.trim();
+    if (!name) { $('#ns-name').setAttribute('aria-invalid', 'true'); $('#ns-name').focus(); return; }
+    el.disabled = true;
+    Bridge.call('create_substation', p.file, name, $('#ns-from').value || null).then((made) => {
+      closeDialog(); settle(); toast(`${name} created`, 'check');
+      return openProject(p.file).then(() => openSub(made.id));
+    }).catch((e) => { el.disabled = false; err('ns-err', e); });
+  };
+  function renameDialog(title, value, action, id) {
+    dialog({ title, body: `<div class="stack">${field('Name', input('rn-name', value))}<p class="muted small">Only the name changes. The folder and the files keep theirs, so shared copies still match.</p><div id="rn-err"></div></div>`,
+      actions: `<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="${action}" data-id="${esc(id || '')}">Rename</button>` });
+  }
+  ACTIONS['rename-project'] = () => renameDialog('Rename the project', curProject().name, 'rename-project-do');
+  ACTIONS['rename-substation'] = (el) => renameDialog('Rename the substation', (curProject().substations.find((s) => s.id === el.dataset.id) || {}).name || '', 'rename-substation-do', el.dataset.id);
+  const renamed = (call, tab) => call.then((r) => { closeDialog(); settle(); toast(`Renamed to ${r.name}`, 'check'); return openProject(curProject().file, tab); }).catch((e) => err('rn-err', e));
+  ACTIONS['rename-project-do'] = () => renamed(Bridge.call('rename_project', curProject().file, $('#rn-name').value), 'info');
+  ACTIONS['rename-substation-do'] = (el) => renamed(Bridge.call('rename_substation', curProject().file, el.dataset.id, $('#rn-name').value), 'substations');
+  ACTIONS['delete-substation'] = (el) => {
+    const s = curProject().substations.find((x) => x.id === el.dataset.id) || { id: el.dataset.id, name: el.dataset.id };
+    dialog({ title: `Delete ${esc(s.name)}?`, body: `<div class="stack"><p>The substation's folder and its documents in the register are removed. A backup of the whole project is saved first, under Backup and share.</p><div id="ds-err"></div></div>`,
+      actions: `<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--danger" data-action="delete-substation-do" data-id="${esc(s.id)}">${icon('trash')}Delete substation</button>` });
+  };
+  ACTIONS['delete-substation-do'] = (el) => {
+    const p = curProject();
+    Bridge.call('delete_substation', p.file, el.dataset.id).then((r) => {
+      closeDialog(); if (S.sub === el.dataset.id) S.sub = null;
+      toast(`Substation deleted. Backup saved: ${String(r.backup || '').split(/[\\/]/).pop()}`, 'trash');
+      return openProject(p.file);
+    }).catch((e) => err('ds-err', e));
+  };
+  ACTIONS['delete-project'] = () => {
+    const p = curProject();
+    dialog({ title: 'Delete this project?', body: `<div class="stack"><p>The folder <span class="mono">${esc(p.path)}</span> and its ${count(p.substations.length, 'substation')} are removed from this PC. A copy is saved first as a <span class="mono">.bomproj</span> file that Import project file brings back.</p>
+      ${field('Type the project name to confirm', input('dp-name', '', { placeholder: p.name }))}<div id="dp-err"></div></div>`,
+      actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--danger" data-action="delete-project-do" disabled>Delete project</button>' });
+  };
+  document.addEventListener('input', (e) => { if (e.target.id === 'dp-name') { const b = $('[data-action="delete-project-do"]'); if (b) b.disabled = e.target.value.trim() !== curProject().name.trim(); } });
+  ACTIONS['delete-project-do'] = () => {
+    const p = curProject();
+    Bridge.call('delete_project', p.file).then((r) => {
+      closeDialog(); settle(); S.project = null; S.proj = null; S.sub = null; PROJECTS.state = 'idle'; go('#/home');
+      toast(`Project deleted. Saved as ${r.saved}`, 'trash');
+    }).catch((e) => err('dp-err', e));
   };
 
   /* ---------- Backup and share ---------- */
