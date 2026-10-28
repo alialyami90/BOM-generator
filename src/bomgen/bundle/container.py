@@ -7,6 +7,7 @@ file reaches the disk.
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
 import os
@@ -50,10 +51,15 @@ def check_file_table(files: dict[str, str]) -> dict[str, str]:
 
 
 def write_bundle(out: Path, manifest: BaseModel, files: Mapping[str, bytes]) -> None:
-    """Write `manifest.json` and `files`; equal inputs give equal bytes."""
+    """Write `manifest.json` and `files`; equal inputs give equal bytes.
+
+    Missing folders on the way to `out` are created. A folder or file that cannot be written is
+    a `LibraryPackageError` naming `out`.
+    """
     manifest_bytes = json.dumps(manifest.model_dump(mode="json"), indent=2).encode()
     partial = out.with_name(f".{out.name}.partial")
     try:
+        out.parent.mkdir(parents=True, exist_ok=True)
         with zipfile.ZipFile(partial, "w") as zf:
             for member, data in [(MANIFEST_NAME, manifest_bytes), *sorted(files.items())]:
                 info = zipfile.ZipInfo(member, date_time=_ZIP_EPOCH)
@@ -61,8 +67,11 @@ def write_bundle(out: Path, manifest: BaseModel, files: Mapping[str, bytes]) -> 
                 info.external_attr = 0o644 << 16
                 zf.writestr(info, data)
         os.replace(partial, out)
+    except OSError as exc:
+        raise LibraryPackageError(f"cannot write {out}: {exc.strerror or exc}") from exc
     finally:
-        partial.unlink(missing_ok=True)
+        with contextlib.suppress(OSError):
+            partial.unlink(missing_ok=True)
 
 
 @dataclass(frozen=True)
