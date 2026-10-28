@@ -922,6 +922,12 @@ writes its section's details when the work starts.
 
 Each has a proposed default that the plan assumes until Ali answers.
 
+**Q41 — FGR-60F below the DC float voltage** (M14, M15; #171). *Resolved 2026-10-28:* Ali
+chose "Keep it, accept the warning". The FortiGate FGR-60F's datasheet DC input stops at 125 V,
+below the 140 V float, so `dc_float` warns for it on every build that uses it, as for the iC60N
+under Q37. It stays the default firewall in the shipped library; no DC-rated alternative is
+researched.
+
 **Q40 — Power footnote in the print area** (M5–M6; #157). *Resolved 2026-10-28:* Ali chose
 "Print it". The printer footnote rows under the NOTES on the Power Consumption sheet are inside
 the print area, which now ends after the last footnote row instead of at the reference
