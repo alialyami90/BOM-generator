@@ -132,10 +132,10 @@ here.
   position, "written only while there are items", link to Preview) and *Issued under* (the document the sheet
   header takes).
 - **Behaviour:** a form; every cell is editable in place; add and remove are held until saved (Undo toast on
-  remove, Discard restores). A free-text item shows a *Free text* badge. Details, field rules and back-end
+  remove, Discard restores). A free-text item shows a *Free text* badge and "—" for Fed from (ADR 0022). Details, field rules and back-end
   needs are in [`editing.md`](editing.md), "Loose material (v0.2)".
 - **States:** empty (explains that no sheet is written, offers both add actions); a library part that is not
-  in the active library is shown as "Library part" without make and model; invalid quantity marks the cell.
+  in the active library is shown as "Library part" without make and model; invalid quantity marks the cell ("Enter a whole number, or 1 Lot.").
 
 ### Network
 - **Layout:** two columns. Left: **Field network** (IED count, Star or Ring, ring

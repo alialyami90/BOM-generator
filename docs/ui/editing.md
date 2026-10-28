@@ -385,19 +385,22 @@ sheet name; it is no longer a Settings tab and no longer sits under the WS conso
 - **Table:** No., Part or description, Designation, Qty, Fed from, remove.
   - *Part or description:* a library part shows its part id with make and model and, when the part brings
     something with it, "comes with LPA37-696". A free-text item shows an editable description and a *Free text*
-    badge.
+    badge; it never has "comes with" (ADR 0022).
   - *Designation:* the text printed in the Tag column. Library items start with make and model.
-  - *Qty:* a number, or a number with a unit (`1 Lot`).
+  - *Qty:* a whole number of at least 1, or `1 Lot`. Message: "Enter a whole number, or 1 Lot."
   - *Fed from:* Not fed, or a generated cabinet. An item that needs power names the cabinet that feeds it, and the
-    engine adds the load there.
+    engine adds the load there. A free-text item shows "—" with a screen-reader line "Not fed: a free-text item
+    has no library part"; it is not a control, because the engine refuses `fed_from` without a part (ADR 0022).
 - **Add from library (dialog):** search, a radio list of library parts with their data-quality badge, Quantity,
   Designation and Fed from. Parts the library brings with the item are added by the library, not typed.
-- **Add free text (dialog):** Description (required), Quantity (required), Designation, Fed from, and an info
-  banner saying a free-text item has no ordering code, make or model on the sheet and that adding the part to the
-  library gives it them.
+- **Add free text (dialog):** Description (required), Quantity (required) and Designation; no Fed from. An info
+  banner says a free-text item has no ordering code, make or model on the sheet and cannot be fed from a cabinet,
+  and that an item that needs power, or needs those columns, must be added to the library first (ADR 0022).
+- **Both dialogs** check the item with the engine before it joins the list, and show the engine's message by
+  field label (Part, Fed from, Comes with), never by key.
 - **Empty state:** "No loose material. With no items the workbook has no Loose Material sheet." with both add
   actions.
-- **Beside the table:** an *On the workbook* card (sheet name, position "after the cabinet sheets, before Power
+- **Below the table:** an *On the workbook* card (sheet name, position "after the cabinet sheets, before Power
   Consumption", "written only while there are items", a link to Preview) and an *Issued under* card: **Document
   of** (select of the panels), which is `loose_material.host_panel`. It names the document whose number, revision
   and date print in the sheet header; it no longer names the sheet the table is printed on.
@@ -406,11 +409,11 @@ sheet name; it is no longer a Settings tab and no longer sits under the WS conso
   material* (`output.sheet_names.loose_material`). Build lists the sheet under "This workbook contains" only when
   it will be written.
 - **Back-end needs (A2, A10, A11):**
-  - A loose item needs a **free-text form**: `part_id` optional and a `description` (and `designation`) used when
-    it is empty. Today a loose item must name a library part.
-  - Read and write `loose_material.items` (`part_id` or `description`, `qty` as number or text, `tag`,
-    `fed_from`) and `loose_material.host_panel`, with per-field validation; `fed_from` must name a generated
-    panel.
+  - Done by ADR 0022: an item has `part_id` *or* `description`; the page's Designation is `tag`; a free-text
+    item has no `fed_from` or `children`.
+  - Read and write `loose_material.items` (`part_id` or `description`, `qty` as a whole number or `1 Lot`, `tag`,
+    and for library items `fed_from`) and `loose_material.host_panel`, with per-field validation; `fed_from`
+    must name a generated panel.
   - The engine returns, per library item, what comes with it (children) so the page can show "comes with".
   - Preview needs the Loose Material sheet model (`SheetModel`) from the engine, like the other sheets.
 
