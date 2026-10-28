@@ -87,6 +87,16 @@ jobs:
           Write-Output "bomgen.exe validate exited ${validateExit}: $validated"
           if ($validateExit -ne 0 -or "$validated" -notmatch "^OK:") { Write-Error "validate failed"; exit 1 }
           $global:LASTEXITCODE = 0
+          # Builds the example substation's workbook from the frozen bundle; it prints each path.
+          $buildDir = Join-Path $env:RUNNER_TEMP "frozen-build"
+          $built = & "dist\bomgen\bomgen.exe" build examples\project.yaml --out $buildDir
+          $buildExit = $LASTEXITCODE
+          Write-Output "bomgen.exe build exited ${buildExit}: $built"
+          if ($buildExit -ne 0 -or -not $built) { Write-Error "build failed"; exit 1 }
+          foreach ($workbook in $built) {
+            if ($workbook -notlike "*.xlsx" -or -not (Test-Path $workbook)) { Write-Error "build printed '$workbook', which is not a workbook"; exit 1 }
+          }
+          $global:LASTEXITCODE = 0
           # Imports every bomgen module from the frozen bundle (bomgen.app.launcher.self_test).
           $app = Start-Process "dist\bomgen\BOM Generator.exe" -ArgumentList "--self-test" -Wait -PassThru
           Write-Output "BOM Generator.exe --self-test exited $($app.ExitCode)"
@@ -155,6 +165,12 @@ jobs:
           if ($import.ExitCode) { Fail "Opening a .bomlib with the app exited $($import.ExitCode)" }
           $validated = & "$dir\bomgen.exe" validate examples\project.yaml 2>&1
           if ($LASTEXITCODE -ne 0 -or "$validated" -notmatch "^OK:") { Fail "Installed bomgen.exe validate gave: $validated" }
+          $buildDir = Join-Path $env:RUNNER_TEMP "installed-build"
+          $built = & "$dir\bomgen.exe" build examples\project.yaml --out $buildDir
+          if ($LASTEXITCODE -ne 0 -or -not $built) { Fail "Installed bomgen.exe build exited $LASTEXITCODE: $built" }
+          foreach ($workbook in $built) {
+            if ($workbook -notlike "*.xlsx" -or -not (Test-Path $workbook)) { Fail "Installed build printed '$workbook', which is not a workbook" }
+          }
           $listing = (& "$dir\bomgen.exe" library list) -join "`n"
           if ($listing -notmatch "ci-library") { Fail "Imported library missing from: $listing" }
           Remove-Item Env:BOMGEN_LIBRARY_HOME, Env:BOMGEN_NO_DIALOGS

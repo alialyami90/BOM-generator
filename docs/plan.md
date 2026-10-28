@@ -697,10 +697,9 @@ Delivered in small PRs by A11, one screen group each (ADR 0015 for the bridge):
 for a plain start or a `.bomproj` file; the spec bundles the UI folder and
 pywebview. The release workflow installs, checks and uninstalls the installer
 on the runner, opens a `.bomlib` with the installed app, and starts the frozen
-window, and runs `bomgen validate examples/project.yaml` from the frozen and the
-installed CLI. That validate step becomes a "builds the example workbook" step
-once `bomgen build` exists (M7); the bundled default library follows once M8
-writes `out/default.bomlib`.
+window, and runs `bomgen validate` and `bomgen build` on `examples/project.yaml`
+from the frozen and the installed CLI, asserting the printed workbook exists; the
+bundled default library follows once M8 writes `out/default.bomlib`.
 The app icon comes with the M9 design (`packaging/icons/bomgen.ico`).
 
 ## 5. Testing strategy
