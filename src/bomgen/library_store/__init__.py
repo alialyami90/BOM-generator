@@ -1,7 +1,7 @@
 """Device-library update packages (`.bomlib`) and the per-user installed-library store.
 
 See ADR 0008 and plan milestone M8. Other code uses `validate_library`,
-`import_library`, `preview_library_import` (the import dry-run) and
+`import_library`, `preview_library_import` (the import dry-run),
 `load_device_records` (the device-database records of an installed version) and
 `save_local_version` (an edited library saved as `<base>+local.<n>`, ADR 0018);
 refusals are `LibraryPackageError` with a `RefusalKind`.
