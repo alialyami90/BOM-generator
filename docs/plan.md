@@ -364,8 +364,14 @@ update package (ADR 0008).
   refuses downgrades unless forced.
 - Projects record the library name and version they were built with; the
   check report warns when a project is rebuilt against a different version.
+- `pack --add <dir>` carries extra directories such as `data/device-db/`;
+  `import --dry-run` shows the diff without installing (the M10 import screen
+  previews the same way).
 - Tests: pack/import round-trip, corrupted or tampered package rejected,
   schema-version mismatch rejected, diff summary, rollback.
+- Delivered in M8: `bomgen.library_store` and the CLI. Recording the library
+  name and version in projects needs the project model and the check report,
+  so M7 wires `library_mismatch()` into the check report.
 
 ### M9 — UI design with impeccable
 Use the `impeccable` skill to design the screens and elements: open or create a

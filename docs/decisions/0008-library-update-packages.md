@@ -30,3 +30,28 @@ panels and project settings, so it can be versioned on its own.
 
 Library updates need no new installer and no admin rights. A project built on
 one PC can be reproduced on another by importing the same library version.
+
+## Implementation notes (M8)
+
+Code: `src/bomgen/library_store/`.
+
+- The `active` pointer is a text file holding the version, not a symlink:
+  symlinks need admin rights or Developer Mode on Windows.
+- `BOMGEN_LIBRARY_HOME` overrides the store root (tests, portable installs).
+  Outside Windows the root is `$XDG_DATA_HOME/bomgen/libraries`.
+- Library schema version starts at 1. Import accepts only the version this
+  build reads; a package needing a newer app (`min_app_version`) is refused.
+- Extra directories (for example `data/device-db/`) are packed with
+  `bomgen library pack --add <dir>`, stored under the directory's name and
+  checksummed like `library.yaml`. The import summary lists changed files.
+- Import checks every member path (no absolute, `..`, drive or backslash
+  paths), caps the uncompressed size at 64 MiB, and verifies all checksums
+  before writing anything. It extracts into a temporary directory, runs the
+  library validator, then moves the version into place and updates `active`;
+  a failure leaves the store unchanged. `--dry-run` shows the diff only.
+- Rollback activates the newest installed version older than the active one,
+  or the version given with `--to`. Re-importing an installed version, or an
+  older one, needs `--force`.
+- No signature yet (plan Q18 default). The manifest has `format_version` so a
+  signature field can be added later without breaking old packages' readers.
+
