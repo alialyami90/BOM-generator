@@ -7,6 +7,18 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-28
+
+### Added
+
+- The installer ships the default device library, and the app loads it into
+  an empty library store on first start (#86).
+
+### Changed
+
+- Version 0.1.1; the release workflow's publish step attaches to a release
+  that already exists (#86).
+
 ## [0.1.0] - 2026-10-28
 
 ### Added
@@ -134,6 +146,7 @@ project uses [Semantic Versioning](https://semver.org/).
 ### Changed
 
 - Version 0.1.0, the first release (#84).
+- Changelog release heading for 0.1.0 (#85).
 - Desktop app polish from A4's findings: a compact Panels board header, one
   "not available yet" line under each page's subtitle, a pulsing Build busy
   bar, a neutral "Partial" badge and smaller fixes across the screens
@@ -208,5 +221,6 @@ project uses [Semantic Versioning](https://semver.org/).
   airflow; future library defaults use 0 W for the SK 3110 thermostat and
   460 m³/h for the SK 3243.100 fan with its outlet filter (#12).
 
-[Unreleased]: https://github.com/alialyami90/BOM-generator/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/alialyami90/BOM-generator/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/alialyami90/BOM-generator/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/alialyami90/BOM-generator/releases/tag/v0.1.0
