@@ -116,3 +116,19 @@ def test_generated_panels_are_refused(project: Path) -> None:
 def test_unknown_panel(project: Path) -> None:
     with pytest.raises(EditError, match="no panel 'nope' in substation 'gis01'"):
         delete_panel(project, "gis01", "nope")
+
+
+def test_create_starts_the_panels_folder(project: Path) -> None:
+    sub = folder(project)
+    (sub / "panels").rename(sub / "cabinets")
+    text = (sub / "substation.yaml").read_text("utf-8")
+    (sub / "substation.yaml").write_text(text.replace("panels/", "cabinets/"), "utf-8")
+    new = read_yaml(sub / "cabinets" / "ws.yaml").data | {
+        "id": "ws2",
+        "cabinet_number": "861-GIS01-PSA-0011",
+        "tag_prefix": "WS2",
+        "sheet_name": "5",
+    }
+    result = create_panel(project, "gis01", new)
+    assert result.written, result.issues
+    assert (sub / "panels" / "ws2.yaml").is_file()
