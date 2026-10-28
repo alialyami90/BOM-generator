@@ -1,5 +1,10 @@
 /* One icon family: 24px grid, 1.5px stroke, round caps. Drawn here, no external library. */
 window.ICONS = {
+  network: '<circle cx="12" cy="5.5" r="2.2"/><circle cx="5.5" cy="18" r="2.2"/><circle cx="18.5" cy="18" r="2.2"/><path d="M12 7.7V12M12 12l-5 4.2M12 12l5 4.2"/>',
+  move: '<path d="M12 3.5v17M3.5 12h17"/><path d="m9 6.5 3-3 3 3M9 17.5l3 3 3-3M6.5 9l-3 3 3 3M17.5 9l3 3-3 3"/>',
+  undo: '<path d="M9 7 4.5 11.5 9 16"/><path d="M4.5 11.5H15a5 5 0 0 1 0 10h-4"/>',
+  backup: '<rect x="3.5" y="4" width="17" height="4.5" rx="1"/><path d="M5 8.5V20h14V8.5"/><path d="M10 13h4"/>',
+  download: '<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5"/><path d="M4.5 19.5h15"/>',
   home: '<path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h4.5v-5.5h4V20h4.5V9.5"/>',
   project: '<path d="M6 3h8l4.5 4.5V21H6z"/><path d="M14 3v4.5h4.5"/><path d="M9 12.5h6M9 16h6"/>',
   panels: '<rect x="4" y="3.5" width="16" height="5" rx="1"/><rect x="4" y="10" width="16" height="5" rx="1"/><rect x="4" y="16.5" width="16" height="4" rx="1"/><path d="M7 6h.01M7 12.5h.01M7 18.5h.01"/>',

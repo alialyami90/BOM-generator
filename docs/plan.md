@@ -372,6 +372,16 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
 - Tests reopen the file with openpyxl and assert formulas, styles, merges, print
   settings, header/footer strings; check the zip holds the header image; check
   no `.xlsx` lands in the repo.
+- Delivered in M6: `bomgen.models.sheet` (`WorkbookModel` → `SheetModel` with
+  `Cell` value or `Formula`, `CellStyle`, `Merge`, column/row formats,
+  `PrintSetup`, `HeaderFooter` zones of runs plus an optional picture) and
+  `bomgen.writer.write_workbook(model, path)`. Styles are concrete `CellStyle`
+  values; the named styles of "Formatting" (the plan's style tokens) are M5's
+  `sheets/styles.py`. Model units follow the spec: widths as Excel shows them,
+  heights in points, margins in cm, 1-based rows and columns. Problems XlsxWriter
+  would only warn about (header over 255 characters, truncated text, missing or
+  unreadable logo) raise `WriterError` and leave no file. Plan:
+  `docs/superpowers/plans/2026-10-28-m6-excel-writer.md`.
 
 ### M7 — Check report, revision highlighting, CLI polish, docs
 - Step 15 check report (SFPs vs port plans, mains vs ΣQ, airflow vs required,
@@ -409,11 +419,41 @@ update package (ADR 0008).
   check report. Refusals carry a `RefusalKind` for the M10 import screen.
 
 ### M8b — `.bomproj` export, import and backup (A5, ADR 0012)
-- `bomgen project export|import|backup`: zip of the project folder without
-  `out/` plus a manifest with checksums and the library version, reusing the
-  `.bomlib` package code; overwrite warning on import; library-version
-  mismatch message naming the `.bomlib` to install (resolves Q21).
-- Starts when M1b is on main.
+- `bomgen project export <project.yaml> [-o file]`, `import <file.bomproj>
+  [--workspace dir] [--force]` and `backup <project.yaml>`; public functions
+  `export_project`, `import_project`, `backup_project` and `default_workspace` in
+  `bomgen.project_store`.
+- A `.bomproj` is a zip of the project folder without any `out/` folder, the
+  top-level `Backups/` folder, `.git/` and `*.bomproj` files, plus
+  `manifest.json` (format version, project id, library name and version, app
+  version, SHA-256 per file). The project id and library are read from
+  `project.yaml` (`project.id`, `library.name`, `library.version`) as plain
+  YAML, so M8b does not wait for the M1b models. Symlinks are never followed.
+- The zip container, path and case checks, size cap and checksums are shared
+  with `.bomlib` in `bomgen.bundle`; `.bomlib` behaviour did not change.
+- Workspace: `BOMGEN_WORKSPACE`, else `Documents\BOM Generator`; a project
+  lives in `<workspace>\<id>\`.
+- Import verifies every checksum and path before writing. An existing project
+  id is refused (`RefusalKind.PROJECT_EXISTS`) unless `--force`; a forced import
+  saves the old project to its `Backups/`, keeps its `Backups/` and `out/`
+  folders, replaces everything else, and restores the old project if the swap
+  fails. Backups are `Backups/<id>-<YYYYMMDD-HHMMSS>.bomproj` and never
+  overwrite one another.
+- Import compares the manifest's library with the active one and returns a
+  `library_note` naming the `.bomlib` to install, or the `bomgen library
+  rollback --to` command when that version is already installed (resolves Q21).
+  The CLI prints it as `note: ...`.
+- Import also keeps `.git/` and `__pycache__/` folders (never packed), and
+  refuses a package that holds `out/`, `.git/` or a top-level `Backups/`.
+  A leftover `.replaced-<id>` folder in the workspace (Windows file locks) holds
+  the previous project and is safe to delete once the new one looks right.
+- Sharing the container made `pack --add` and `.bomproj` skip symlinks, where
+  the first `.bomlib` code followed them; library names now also refuse
+  Windows device names such as `con`.
+- A `.bomlib` given to `project import` (and the reverse) gets a one-line
+  explanation.
+- Open item for M1b: once the `project.yaml` model is on main, read the id and
+  library through it instead of plain YAML.
 
 ### M9 — UI design with impeccable
 Use the `impeccable` skill to design the screens and elements: open or create a
@@ -428,9 +468,8 @@ and the check report, build and save the .xlsx. Deliverables in `docs/ui/`:
   prototype is the starting point of the real UI, not a throwaway.
 Finish with an impeccable critique pass and Ali's review.
 
-Status: design delivered in `docs/ui/` (start with `docs/ui/README.md`), ADR 0011
-proposed, critique pass done (results in the README). Waiting for Ali's review of
-the prototype before M10 starts.
+Status: accepted as a prototype (#8); design rework for projects/substations and the
+panels board follows (`docs/ui/README.md`). ADR 0011 stays; critique pass results are in the README.
 
 ### M10 — Windows desktop app
 Build the approved design as a Windows desktop app (ADR 0007): the M9 HTML/CSS

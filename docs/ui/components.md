@@ -19,7 +19,7 @@ implementation. General rules for all components:
 
 ### Top bar
 Navy (`color.bar`), 48 px. Left to right: app mark and name, divider, current
-project (name and `document no. · Rev`), spacer, library chip, theme button,
+project (name, with the open substation's name under it), spacer, library chip, theme button,
 help button. The library chip is a link to the Library screen: a status dot
 (green installed, red none) plus `name version`. The theme button cycles light,
 dark and system, announces the new theme, and has the current mode in its
@@ -28,22 +28,26 @@ accessible name.
 | State | Behaviour |
 | --- | --- |
 | No project open | Project block hidden. |
+| Project open, no substation | Second line reads "No substation open". |
 | No library installed | Chip reads "No library installed", dot red. |
 
 ### Navigation rail
-216 px, `color.surface`. A flat list of links in workflow order with group
-labels ("Prepare", "Verify and issue"). Each item: icon, label, optional tail
-status at the right edge.
+216 px, `color.surface`. Home and Library, then group labels **Project**,
+**Substation** and **Verify and issue**. Each item: icon, label (one line,
+ellipsis when long), optional tail status at the right edge. Under the Substation
+label sits the **substation switcher**, a full-width select listing the project's
+substations; choosing one keeps the current screen when it exists for every
+substation, otherwise opens Panels.
 
 | State | Appearance |
 | --- | --- |
 | Default | Text colour, no fill. |
 | Hover | `surfaceSunken` fill. |
 | Current | `actionSoft` fill, semibold heading colour, cobalt icon; `aria-current="page"`. |
-| Disabled (no project) | 45% opacity, not focusable, tooltip "Open a project first". |
+| Disabled (no project, or no substation) | 45% opacity, not focusable, tooltip "Open a project first" or "Open a substation first". |
 
 Tail status types: tick (complete), count (neutral), version (neutral), error
-count (red with icon), `Blocked` (red), `Ready` (green). The status is text, so
+count (red with icon), `Not set up` (amber with icon), `Blocked` (red), `Ready` (green). The status is text, so
 it does not rely on colour.
 
 ### Status bar
@@ -84,8 +88,9 @@ weight; `aria-pressed`. Shows an optional muted count. Used for the BOM group
 and problem-level filters.
 
 ### Segmented control
-Joined buttons, 30 px, one pressed (`action` fill). For mutually exclusive view
-choices (not used on the main screens; the prototype's controls use selects).
+Joined options, 30 px, one selected (`action` fill). Built on radio inputs, so
+the arrow keys move the choice and a screen reader hears a radio group with a
+label. Used for Star or Ring on the Network screen.
 
 ## Inputs
 
@@ -228,12 +233,14 @@ inside a card.
 ### Toast
 Bottom right, navy, 3.6 s, for confirmations of a completed action ("Saved
 project.yaml"). Not used for errors or anything the user must act on. Announced
-politely in a live region.
+politely in a live region. A toast for an undoable action carries an **Undo** link
+button and stays 8 s ("Moved Gateway (pair) to panels 3 and 4").
 
 ### Dialog
 Modal, 520 px wide, 4 px radius, scrim over the window. Used only when the task
-needs protected focus: opening or creating a project, mirroring or adding a
-panel, confirming a rollback or an overwrite. Anatomy: title, body, footer with
+needs protected focus: creating a project or substation, importing or exporting
+a project file, adding a hand-written panel, choosing a move destination,
+confirming a reset, a rollback or an overwrite. Anatomy: title, body, footer with
 a secondary "Cancel" and a primary action named for what it does. Focus moves
 to the first button on open, is trapped inside, Esc cancels, focus returns to
 the trigger. A dialog never holds a form longer than five fields; use a screen
@@ -268,3 +275,52 @@ in the column headed "Generated …", so engineers can tell typed from derived.
 Any input that overrides an engine rule (main MCB, HWIO points, terminal
 quantities) shows a warning-coloured help line saying what it overrides and how
 to return to the rule, and appears as a warning in Checks.
+
+### Panel column (board)
+232 px wide, one per generated panel, `color.surface` with a hairline border and
+4 px radius; two columns of a pair sit 8 px apart, pairs 20 px apart under a
+"Pair n · panels 2n−1 and 2n" label. Header: panel name (links to the panel
+editor) and a side badge. Under it, the **U meter**: a 6 px bar, `action` fill,
+`warning` fill when fewer than 3 U remain, with the text "21 of 32 U used · 11 U
+free" (the text carries the meaning; the bar is decoration with an accessible
+name). Then the **rack**: a sunken well in which 1 U is 18 px. Footer: "38 DIN-rail
+parts · no rack space".
+
+| State | Appearance |
+| --- | --- |
+| Drop allowed | Green border and `successSoft` fill on both columns of the target pair (or the single column for a unit). |
+| Drop refused | Red border and `dangerSoft` fill; the drop still lands and the error banner gives the reason. |
+
+### Device block
+A bordered tile as tall as the device (1 U = 18 px), grip icon, name, tag in mono
+when 2 U or taller (shorter tiles keep the tag in the tooltip and the accessible
+name), height in U at the right. A button with `aria-pressed`: Enter or Space
+selects. Draggable.
+
+| State | Appearance |
+| --- | --- |
+| Default | `surface` fill, control border. |
+| Selected | `actionSoft` fill, cobalt border and a 2 px ring. |
+| Partner of the selection | Dashed cobalt border, `actionFaint` fill. |
+| Moved by you | Small move icon before the height; named in the accessible name. |
+| Dragging | 45% opacity. |
+
+### Blank plate, free space, reserve
+A blank plate is a 1 U gap with a thin rule, drawn between neighbouring devices.
+It is not a BOM row. Free space is a dashed box labelled "11 U free"; the
+**reserve** is a dotted box labelled "10 U kept free for expansion" at the
+bottom, never available for devices.
+
+### Selection bar
+Above the board when a device is selected: name, tag, side, height; actions
+"Move pair…", "Move this unit only…", "Delete pair", or "Move…" and "Delete" for a
+device without a partner; a close button. When nothing is selected the line shows
+a hint and the "N manual changes" disclosure, which lists each override with
+Revert (or Restore for a deletion).
+
+### Move dialog
+A list of radio rows, one per destination ("Panels 3 and 4", or a single panel).
+Each row shows the result ("After: 27 U and 27 U of 32 U"), or, greyed and not
+selectable, the reason it does not fit. The current location is marked "(now)".
+The text above says what moves: both units, or one unit and why it stays on its
+side.

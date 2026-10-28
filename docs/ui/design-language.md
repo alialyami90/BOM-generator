@@ -23,13 +23,25 @@ brief is [`brief.md`](brief.md).
 
 ## Signature move: the readiness rail
 
-The left navigation is the workflow (Prepare → Verify and issue), and each step
-carries its own status at the right edge: a tick on Project, a count on
-Panels, the active library version, `2 errors` in red on Checks, `Blocked` or
-`Ready` on Build. The status bar repeats the error and warning counts and
-jumps to Checks. This is the one place the world of configurators and
-relay-setting tools lends something specific: a visible "selections to
-complete" counter that follows you everywhere.
+The left navigation is the workflow, split by what each item acts on. Home and
+Library are global. **Project** is one item that opens the project page. A
+**Substation** group follows, headed by a switcher for the project's substations,
+then Settings, Network and Panels and a **Verify and issue** group. Each step
+carries its own status at the right edge: the project's status on Project, ticks
+on Settings and Network, a panel count on Panels, the active library version,
+`2 errors` in red on Checks, `Blocked` or `Ready` on Build. The status bar repeats
+the error and warning counts and jumps to Checks. This is the one place the world
+of configurators and relay-setting tools lends something specific: a visible
+"selections to complete" counter that follows you everywhere.
+
+## Signature move: the panels board
+
+Panels are shown the way they are built: one column per cabinet, as tall as the
+usable rack, devices as blocks whose height is their size in U, the blank plates as
+gaps and the space kept for expansion at the bottom. A meter above each column
+says how full it is. It is the only graphic in the app that is not a table or a
+form, and it exists because "does this fit?" is answered at a glance there and
+only with arithmetic anywhere else.
 
 ## Colour
 
