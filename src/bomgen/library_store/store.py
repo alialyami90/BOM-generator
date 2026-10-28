@@ -257,6 +257,10 @@ class LibraryStore:
 
     def _plan_import(self, path: Path, force: bool) -> tuple[PackageContents, ImportResult]:
         contents = read_package(path)
+        return contents, self.plan_import(contents, force=force)
+
+    def plan_import(self, contents: PackageContents, *, force: bool = False) -> ImportResult:
+        """What importing verified `contents` would do; refuses a downgrade or a reinstall."""
         manifest = contents.manifest
         try:
             active = self.active_version(manifest.name)
@@ -288,7 +292,7 @@ class LibraryStore:
                 # A damaged installed version must not block the import that repairs it.
                 active, old_library, old_files = None, None, {}
         diff = diff_libraries(old_library, contents.library, old_files, manifest.files)
-        return contents, ImportResult(manifest, active, diff)
+        return ImportResult(manifest, active, diff)
 
     @staticmethod
     def _extract(contents: PackageContents, directory: Path) -> None:

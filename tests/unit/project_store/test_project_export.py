@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
+import yaml
 from project_builders import FILES, PROJECT_YAML, make_project
 
 import bomgen
@@ -184,3 +185,16 @@ def test_export_refuses_an_unsafe_library_name(tmp_path: Path, library_name: str
         export_project(project_file, tmp_path / "out.bomproj")
 
     assert caught.value.kind is RefusalKind.INVALID_PROJECT
+
+
+def test_identity_read_agrees_with_the_project_model_on_the_example_project() -> None:
+    from bomgen.models.project import Project
+
+    project_file = Path(__file__).parents[3] / "examples" / "project.yaml"
+    model = Project.model_validate(yaml.safe_load(project_file.read_text(encoding="utf-8")))
+
+    identity = read_project_identity(project_file)
+
+    assert identity.id == model.project.id
+    assert identity.library_name == model.library.name
+    assert identity.library_version == model.library.version
