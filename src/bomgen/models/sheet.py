@@ -225,12 +225,13 @@ class PrintSetup(SheetBase):
 
 
 class HFRun(SheetBase):
-    """A piece of header/footer text, or a page field, with optional bold and size."""
+    """A piece of header/footer text, or a page field, in its own font."""
 
     text: str = ""
     field: Literal["page", "pages"] | None = None
+    font: str = "Calibri"
     bold: bool = False
-    size: Annotated[float, Field(gt=0, le=409)] | None = None
+    size: Annotated[float, Field(gt=0, le=409)] = 11.0
 
 
 HFLine = tuple[HFRun, ...]
