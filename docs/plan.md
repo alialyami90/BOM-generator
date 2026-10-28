@@ -124,6 +124,7 @@ project:
   name: "<project name>"               # header centre line 1
   substation: "GIS Substation"         # BOM title line 2
   doc_no: "<project doc no.>"          # OUT-2 default file name
+  rev: "0"                             # OUT-2 default file name
   logo: assets/logo.png                # header left (&G)
 library: library.yaml
 panels:                                # panel order = sheet order (OUT-3)
@@ -155,7 +156,7 @@ constants:                             # defaults = spec values; override per pr
 loose_material:                        # extras not tied to a device
   host_panel: ws                       # table sits under this panel's BOM
   items:
-    - { part_id: ANNUNCIATOR-WALL, qty: 1, children: [ANN-MOUNT-KIT] }
+    - { part_id: ANNUNCIATOR-WALL, qty: 1, children: [ANN-MOUNT-KIT], fed_from: psa3 }  # Q13
     - { part_id: HMI-SW, qty: 1 }
     - { part_id: FO-PATCH-CORDS, qty: "1 Lot" }
 ```
@@ -184,8 +185,10 @@ devices:
     ports:
       - { count: 24, speed: 100M, media: MM, kind: fixed }
       - { count: 4, speed: 1G, kind: sfp_slot }
-    children: []                       # [{ part_id, qty: 1 | "cores" | "per_unit:N" }]
-    terminals: []                      # [{ strip: "XDIP{slot}", count: 58 }]
+    cores: null                        # fibre cores, for children with qty "cores"
+    children: []                       # [{ part_id, qty: <per parent unit> | "cores" }]
+    terminals: []                      # [{ strip: "XDIP{slot}", block: UT-2.5-MT, count: 58,
+                                       #    per: unit | serial_port, first_slot: D }]
     loose_items: []                    # [{ part_id, qty }]
     excluded_from_power: false
 
@@ -200,13 +203,14 @@ catalogues:
   busbars:
     ac_safety_ground:  { description: "AC SAFETY POWER-GROUND ..." }
     instrument_ground: { description: "INSTRUMENT-GROUND ..." }
-  housekeeping:
-    lamp:        { part_id: ..., unit_power_w: ... }
-    fan:         { part_id: ..., unit_power_w: ..., airflow_m3h: 716 }
+  housekeeping:                        # part_ids of device records (ADR 0010)
+    lamp:        { part_id: ... }
+    door_switch: { part_id: ... }        # optional; omit when the lamp part includes it
+    fan:         { part_id: ..., airflow_m3h: 358 }   # per fan (Q8)
     vent_filter: { part_id: ... }
-    thermostat:  { part_id: ..., unit_power_w: ... }
-    ipr_kit:     { part_id: ..., children: [relay, base, suppression, bracket] }
-    change_over_diodes: { part_id: ... }
+    thermostat:  { part_id: ... }
+    ipr_kit:     { part_id: ... }        # its device record lists relay, base, suppression, bracket
+    change_over_diodes: { negative: ..., positive: ... }   # COD-1, COD-2
     socket:      { part_id: ..., rating_a: 10 }
 ```
 
@@ -227,7 +231,7 @@ enclosure:
   h_mm: 2100
   d_mm: 1000
   w_mm: 800
-  base_frame_mm: 100
+  base_frame: { h_mm: 100, d_mm: 950, w_mm: 750 }   # optional plinth
   cable_entry: top                     # top | side
 devices:                               # group B display order
   - { part_id: FOPP-96SM, qty: 1, purpose: "L2-L3 uplink to CCR" }
@@ -236,20 +240,21 @@ devices:                               # group B display order
   - { part_id: RST2228-EXT, qty: 1 }
   - { part_id: GW-DHPCC, qty: 1, purpose: "for Dhahran PCC connection" }
   - { part_id: FW-EXT, qty: 1 }
-port_plans:                            # per switch, by device index or tag
+port_plans:                            # per device, by part_id or tag; allocations are lists
   RST2228-L2:
-    uplinks_l3: { count: 2, speed: 1G, media: SM }
+    uplinks_l3: [{ count: 2, speed: 1G, media: SM }]
     downlinks:
       - { count: 6, speed: 1G, media: MM }
       - { count: 1, speed: 100M, media: MM }   # GPS clock
   RST2228-L1-24MM:
-    uplinks: { count: 24, speed: 1G, media: MM, spare: 3 }   # → "=24+3"
+    uplinks: [{ count: 24, speed: 1G, media: MM, spare: 3 }]   # → "=24+3"
+  # SEL-3555: { serial_ports: 6 }      # RTAC COM ports used (psa3)
 options:
   aux_socket_a: null                   # e.g. 10 in psa2
   smoke_detector: true
   change_over_diodes: auto             # auto | true | false
   ventilation: auto                    # auto | forced | natural
-  dc_spare_branches_per_feed: 3
+  dc_spare_branches_per_feed: 3        # default 1
   ac_spare_branches: 1
   main_mcb_override_a: null
   inter_panel_terminals: 40
@@ -263,12 +268,13 @@ revision:
   highlight: []                        # [{ tag: PSA1-Q1.3, columns: [D] }] → yellow (OUT-8)
 ```
 
-Mirroring (spec: "What changes by panel type", last paragraph):
+Mirroring (spec: "What changes by panel type", last paragraph; rules in ADR 0010):
 
 ```yaml
 id: psa2
 mirror_of: psa1                        # copy devices, port plans, options
 cabinet_number: 861-GIS01-PSA-0002
+cabinet_name: "PSA Cabinet - 002"
 tag_prefix: PSA2
 lan: B                                 # swaps A→B and 1→2 in tags
 sheet_name: "2"
@@ -421,6 +427,12 @@ impeccable polish/audit pass against the M9 design.
 Each has a proposed default that the plan assumes until Ali answers.
 
 **Q1 — Example data is not in the spec (blocks M1 and the golden tests).**
+*Resolved 2026-10-28:* Ali uploaded the example workbook; `examples/` is transcribed
+from it (ADR 0010). The workbook itself stays out of git.
+Still to add: `examples/assets/logo.png` (binary, not yet committed). `logo:` is
+commented out in `examples/project.yaml` until it lands; the header writer
+milestone needs it.
+
 The spec gives rules and totals but not the per-device data behind them: most
 unit wattages, full group B/C/D row lists, ordering codes, descriptions, port
 plans, the WS console and loose-material rows, the enclosure codes, document
@@ -454,6 +466,10 @@ rule, and set `ventilation: forced` on 003 in the example. Alternatively the
 rule may need a margin (e.g. ΔT ≤ 0.9 × (TMax − TInt)).
 
 **Q5 — HWIO contributions don't add up to 17.**
+*Workbook:* the rows are L2 switch 1, the six-L1-switch row 10, EXT switch 1, AC aux
+contacts 3, DC aux contacts 2 (= 17); cabinet 003 is GPS 1 + 3 + 2 (= 6). The example
+sets the L1 row's 10 as a per-row override until the rule behind it is known.
+
 The listed contributions (1 per L2/EXT switch, 3 AC aux, 2 DC aux) give 7 for
 cabinet 001, while the library example gives an L1 switch `hwio_points: 1`.
 *Default:* per-row values come from the library (`hwio_points` per unit) and
@@ -534,3 +550,17 @@ both and the installer bootstraps it if it's missing.
 records the library name and version; when sharing a project with someone on
 an older library, the app tells them which `.bomlib` to import. Alternatively
 a project can be exported as a bundle that includes its library snapshot.
+
+
+**Q22 — Mistakes in the example workbook.** *Resolved 2026-10-28:* Ali: "fix it". The
+generator writes the corrected values and the golden tests expect them: cabinet-1
+Power Consumption AC rows reference cabinet 1's own BOM (the workbook points at
+`Panel 3`); the External Equipment DC row divides by 125 V (not 230 V); `PSA2-XPS`
+uses UT-2.5-MTD code 3064085 (not 3064086); `Panel 3`'s title reads 003; the
+XRTAC-C1…C6 strips sit with the other group G strips before grounding; the WS QCOD
+branch MCBs are 2 A, A9F74202 (the workbook text says 2A but uses the 1 A code).
+
+**Q23 — Issued sheets differ from their masters.** Issued sheets `1`/`2` list the EXT
+switch as a Ruggedcom RST-2228 and the L2 1G/100M MM SFPs as 18/6; the masters list a
+SEL-2730M and 15/2. *Default:* the masters, because Power Consumption reads them and
+they reproduce the spec's totals. Waiting for Ali.
