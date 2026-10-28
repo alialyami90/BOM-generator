@@ -17,7 +17,11 @@ runner = CliRunner()
 @pytest.fixture
 def substation(tmp_path: Path) -> Path:
     shutil.copytree(EXAMPLES, tmp_path / "examples")
-    return tmp_path / "examples" / "substations" / "gis01" / "substation.yaml"
+    path = tmp_path / "examples" / "substations" / "gis01" / "substation.yaml"
+    # The example feeds the annunciator from the hand-written psa3, which the layout
+    # does not write; feed it from psa1 so the layout has no errors.
+    path.write_text(path.read_text().replace("fed_from: psa3", "fed_from: psa1"))
+    return path
 
 
 def test_cli_layout_writes_panels_and_prints_fill(substation: Path, tmp_path: Path) -> None:

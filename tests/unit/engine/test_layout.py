@@ -365,3 +365,13 @@ def test_r9_build_lays_out_generated_panels_again(example: LoadedSubstation) -> 
     assert [p.id for p in rebuilt.panels] == ["psa1", "psa2", "ws"]
     assert report is not None
     assert report.lines()[0] == "IED count: 40"
+
+
+def test_r9_loose_material_on_a_panel_the_layout_drops_is_reported(
+    example: LoadedSubstation,
+) -> None:
+    result = layout_substation(example)  # the example feeds the annunciator from psa3
+    issue = next(i for i in result.report.issues if i.kind == "missing-panel")
+    assert issue.subject == "loose_material.items[0].fed_from"
+    assert "'psa3'" in issue.message
+    assert issue.is_error

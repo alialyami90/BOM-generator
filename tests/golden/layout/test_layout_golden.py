@@ -53,5 +53,9 @@ def test_r10_example_substation_port_plans_match_golden(result: LayoutResult) ->
             assert panel.port_plans[part_id] == PortPlan.model_validate(plan), part_id
 
 
-def test_r10_example_substation_has_no_layout_errors(result: LayoutResult) -> None:
-    assert not result.report.has_errors, result.report.lines()
+def test_r10_example_substation_has_no_other_layout_issues(result: LayoutResult) -> None:
+    # The only issue: the annunciator is fed from the hand-written psa3, which the
+    # generated layout does not have (its devices move into psa1 and psa2).
+    assert [(i.kind, i.subject) for i in result.report.issues] == [
+        ("missing-panel", "loose_material.items[0].fed_from")
+    ]

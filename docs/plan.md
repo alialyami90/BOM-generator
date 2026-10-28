@@ -418,6 +418,11 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
 - `bomgen layout`; `bomgen build` runs it first unless `--no-layout`; generated
   `panels/*.yaml` with a `generated` header; check-report lines for port
   demand, panel fill, stale overrides and the IED count.
+- The layout takes over a substation's `panels` list only once one of its files
+  is `generated: true` (written by `bomgen layout`); until then `build` uses the
+  hand-written panels as they are, which keeps the spec example and its goldens.
+- The layout reports loose material whose `host_panel` or `fed_from` names a
+  panel the layout no longer writes.
 - Golden R10: the example substation's generated panels in
   `tests/golden/layout/`, confirmed by Ali.
 - Starts when M1b is on main.

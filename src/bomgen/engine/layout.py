@@ -46,6 +46,7 @@ IssueKind = Literal[
     "unknown-panel",
     "panel-empty",
     "missing-height",
+    "missing-panel",
 ]
 WARNING_KINDS: frozenset[IssueKind] = frozenset({"stale-override", "stale-removal"})
 
@@ -575,6 +576,7 @@ def layout_preview(loaded: LoadedSubstation, overrides: LayoutInputs | None = No
     units = _units(loaded, plan, issues)
     layout = auto_layout(units, rules, removed=inputs.removed, moves=inputs.overrides)
     panels = [_panel(f, layout.panels, loaded, plan, net) for f in layout.panels if f.units]
+    issues += _loose_material_issues(loaded, panels)
     report = LayoutReport(
         ied_count=plan.ied_count,
         port_lines=_port_lines(plan, net),
@@ -582,6 +584,30 @@ def layout_preview(loaded: LoadedSubstation, overrides: LayoutInputs | None = No
         issues=issues + layout.issues,
     )
     return LayoutResult(panels, layout.panels, plan, candidates, report, rules)
+
+
+def _loose_material_issues(loaded: LoadedSubstation, panels: Sequence[Panel]) -> list[LayoutIssue]:
+    """Loose material that names a panel the layout no longer writes."""
+    loose = loaded.substation.loose_material
+    if loose is None:
+        return []
+    known = {p.id for p in panels} | set(loaded.manual_panel_ids)
+    named = [("loose_material.host_panel", loose.host_panel)]
+    named += [
+        (f"loose_material.items[{i}].fed_from", item.fed_from)
+        for i, item in enumerate(loose.items)
+        if item.fed_from is not None
+    ]
+    return [
+        LayoutIssue(
+            "missing-panel",
+            where,
+            f"{where} names panel '{panel}', which the layout does not write; "
+            f"name one of {', '.join(sorted(known))}",
+        )
+        for where, panel in named
+        if panel not in known
+    ]
 
 
 def layout_substation(loaded: LoadedSubstation) -> LayoutResult:
