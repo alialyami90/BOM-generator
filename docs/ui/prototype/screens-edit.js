@@ -9,8 +9,8 @@
     closeMenu();
     const m = document.createElement('div'); m.className = 'menu'; m.id = 'menu'; m.setAttribute('role', 'menu');
     m.innerHTML = items.map((it) => it === '-' ? '<hr>' : `<button role="menuitem" class="${it.danger ? 'danger' : ''}" data-action="${it.action}" ${Object.entries(it.data || {}).map(([k, v]) => `data-${k}="${esc(v)}"`).join(' ')}>${icon(it.icon)}${esc(it.label)}</button>`).join('');
-    const r = btn.getBoundingClientRect(); const host = $('#main'); const hr = host.getBoundingClientRect();
-    host.appendChild(m); m.style.top = (r.bottom - hr.top + host.scrollTop + 4) + 'px'; m.style.left = Math.max(8, r.right - hr.left - m.offsetWidth) + 'px';
+    const r = btn.getBoundingClientRect(); const host = $('#main');
+    host.appendChild(m); m.style.position = 'fixed'; m.style.top = (r.bottom + 4) + 'px'; m.style.left = Math.max(8, r.right - m.offsetWidth) + 'px';
     btn.setAttribute('aria-expanded', 'true'); m.querySelector('[role=menuitem]').focus(); m._owner = btn;
   }
   function closeMenu(restore) { const m = $('#menu'); if (!m) return; const o = m._owner; m.remove(); if (o) { o.setAttribute('aria-expanded', 'false'); if (restore) o.focus(); } }

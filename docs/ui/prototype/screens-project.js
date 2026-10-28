@@ -143,7 +143,10 @@
     const draw = () => {
       const q = $('#pk-q').value.toLowerCase();
       const list = DB.devices.filter((d) => (d.id + d.make + d.model).toLowerCase().includes(q)).slice(0, 8);
-      $('#pk-list').innerHTML = list.map((d, i) => `<div role="option" id="pk-${i}" aria-selected="${i === 0}" data-action="pick-add" data-id="${d.id}"><span><span class="mono">${esc(d.id)}</span></span><span class="sub">${esc(d.make)} ${esc(d.model)} · ${esc(d.supply)}${d.w ? ' · ' + d.w + ' W' : ''}</span><span class="right">${App.verified(d.verified)}</span></div>`).join('') || '<div class="muted" style="padding:12px">No device matches. Check the spelling, or install a library that has it.</div>';
+      const rowsNow = App.route().a === 'network' ? DB.equipment : DB.wsDevices; const cur = S.pickReplace != null && rowsNow ? rowsNow[+S.pickReplace] : null;
+      const curDev = cur && DB.devices.find((d) => d.id === (cur.part || cur.id)); const alts = !q && curDev && curDev.alt ? DB.altList(curDev).filter((r) => !r.self).slice(0, 3) : [];
+      const altHtml = alts.length ? `<div class="group-label" role="presentation">Alternatives to <span class="mono">${esc(curDev.id)}</span></div>${alts.map((r, k) => `<div role="option" id="pk-a${k}" data-action="pick-add" data-id="${esc(r.id)}"><span><span class="mono">${esc(r.id)}</span></span><span class="sub">${esc(r.tier)} · ${esc(r.make)} · ${r.w} W</span><span class="right">${App.verified(r.verified)}</span></div>`).join('')}<div class="group-label" role="presentation">All devices</div>` : '';
+      $('#pk-list').innerHTML = altHtml + list.map((d, i) => `<div role="option" id="pk-${i}" aria-selected="${i === 0}" data-action="pick-add" data-id="${d.id}"><span><span class="mono">${esc(d.id)}</span></span><span class="sub">${esc(d.make)} ${esc(d.model)} · ${esc(d.supply)}${d.w ? ' · ' + d.w + ' W' : ''}</span><span class="right">${App.verified(d.verified)}</span></div>`).join('') || '<div class="muted" style="padding:12px">No device matches. Check the spelling, or install a library that has it.</div>';
     };
     let active = 0;
     const mark = () => $$('#pk-list [role=option]').forEach((o, i) => { o.setAttribute('aria-selected', String(i === active)); if (i === active) { $('#pk-q').setAttribute('aria-activedescendant', o.id); o.scrollIntoView({ block: 'nearest' }); } });

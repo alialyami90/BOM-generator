@@ -76,6 +76,12 @@
       <div class="row" style="margin-top:var(--space-3)"><button class="btn btn--secondary" data-action="goto" data-to="#/library">Open library</button>${p.library.builtWith !== p.library.active ? `<button class="btn btn--ghost" data-action="stamp">Record ${esc(p.library.active)} in this project</button>` : ''}</div>
     </div>
     <div class="span-2 section" style="margin:0">
+      <h3>Catalogue brands</h3>
+      <p class="lede">Which make the engine takes ordering codes from for the breakers, contacts and terminal blocks. Every substation of the project uses these; the library default is the starting choice.</p>
+      <div class="form form--3" style="margin-top:var(--space-3)">${[['mcb', 'MCBs'], ['aux', 'Aux contacts'], ['tb', 'Terminal blocks']].map(([k, t]) => { const c = DB.catalogues[k]; return field(t, select('br-' + k, c.brands.map((b) => [b.id, b.name + (b.id === c.active ? ' (library default)' : '')]), (p.brands && p.brands[k]) || c.active)); }).join('')}</div>
+      <p class="muted small" style="margin-top:var(--space-2)">Changing a brand changes the codes on the next build. Ratings and sizes stay as they are. Edit the codes under Library › Catalogues.</p>
+    </div>
+    <div class="span-2 section" style="margin:0">
       <h3>Shared defaults</h3>
       <p class="lede">Every substation starts from these values. A substation can set its own; the ones it changes are marked there.</p>
       <div class="form form--3" style="margin-top:var(--space-3)">${p.defaults.map((x, i) => field(x.label, `<div class="input-affix">${input('df' + i, x.value, { num: true, mono: true })}${x.unit ? `<span class="affix">${esc(x.unit)}</span>` : ''}</div>`)).join('') || '<p class="muted">No shared defaults are set.</p>'}</div>
