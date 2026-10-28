@@ -216,7 +216,7 @@ table.table { width: 100%; border-collapse: separate; border-spacing: 0; font-si
 .table .ctl { height: var(--size-control-height-compact); font-size: 12.5px; padding: 0 8px; }
 .table .select.ctl { padding-right: 24px; }
 .table td.pv-desc { min-width: 280px; }
-.table td.pv-code { max-width: calc(16ch + 20px); white-space: normal; overflow-wrap: anywhere; }
+.table td.pv-code { max-width: calc(18ch + 20px); white-space: normal; overflow-wrap: break-word; }
 .pv-same { font-family: var(--font-sans); }
 .table-foot.table-foot--plain { background: transparent; }
 .table-foot { display: flex; justify-content: space-between; padding: 8px 10px; font-size: 12px; color: var(--color-text-muted); border-top: 1px solid var(--color-border); background: var(--color-surface-sunken); }
