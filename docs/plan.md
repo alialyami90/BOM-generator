@@ -1,6 +1,7 @@
 # Plan: Substation SCADA BOM generator
 
-Status: implemented. M0–M11 are on main; changes go through the review flow in `docs/agents.md`.
+Status: implemented. M0–M11 are on main (v0.1.1); M12–M18 are the next version, tracked in
+[`backlog.md`](backlog.md). Changes go through the review flow in `docs/agents.md`.
 Spec: [`docs/spec/generator-spec-v2.md`](spec/generator-spec-v2.md). Sections are
 cited by name; this plan does not restate them.
 
@@ -787,6 +788,41 @@ ships it, and the first start imports it into an empty library store (smoke-test
 including that a reinstall leaves the store unchanged).
 The app icon comes with the M9 design (`packaging/icons/bomgen.ico`).
 
+### M12–M18 — Next version (v0.2)
+
+Ali's feedback on v0.1.0, point by point, is in [`backlog.md`](backlog.md). Each
+milestone below is one PR (or one PR per owner where two owners share it), and the owner
+writes its section's details when the work starts.
+
+- **M12 — Cable managers as the gap (A8).** Backlog point 8. The one-blank-plate gap is only
+  between two active devices. A cable manager is a passive plate and sits directly against
+  the next device, so a block that ends in a cable manager needs no blank plate after it.
+  This amends ADR 0013's R5. The layout goldens change as Ali directed.
+- **M13 — Library model for alternatives and catalogue brands (A2, ADR 0017).** Backlog points
+  1–3. Alternatives become library parts linked by an alternative-group key. Catalogue
+  entries (MCBs, auxiliary contact, terminal blocks, busbars, housekeeping parts) get the
+  same treatment, so a project can pick another brand. Devices gain the electrical fields
+  that M15's MCB sizing needs, such as inrush current, and MCB catalogues gain their trip
+  curve.
+- **M14 — Library data (A3).** Backlog points 2–3. Every alternative in `data/device-db/`
+  becomes a full library part with its datasheet electrical data, and the catalogues get
+  their alternative brands. The default library becomes psa-devices 1.1.0.
+- **M15 — Branch MCB sizing from device data (A9, ADR 0019).** Backlog point 3; the rule is
+  Ali's answer to Q35.
+- **M16 — Library editing and CSV exchange (A5 store and CSV, ADR 0018; A11 app; A4
+  design).** Backlog points 1 and 10. Add and edit devices and catalogue entries, saved as
+  a new local library version. Export and import the library as CSV, with alternatives
+  linked by their group key. The Library screen gets catalogue tabs and an alternatives
+  list for comparing devices.
+- **M17 — Project and substation editing (A2 writers; A11 app; A4 design).** Backlog points
+  4, 7 and 9. Writers round-trip projects, substations and panels. The app creates projects
+  and substations from scratch, every settings field is editable, and the Panels board gets
+  drag and drop, pins and the panel editor. YAML and `.bomproj` files are then for import,
+  export and backup only.
+- **M18 — Loose material (A2 model; A9 engine; A10 sheet; A11 editor).** Backlog point 6.
+  Each substation has its own editable loose-material list, shown where Ali's answer to Q36
+  puts it and in Preview.
+
 ## 5. Testing strategy
 
 - **Unit (TDD):** one test per rule, named after it, in `tests/unit/`.
@@ -812,6 +848,15 @@ The app icon comes with the M9 design (`packaging/icons/bomgen.ico`).
 ## 6. Open questions
 
 Each has a proposed default that the plan assumes until Ali answers.
+
+**Q35 — Branch MCB sizing rule** (M15; backlog point 3). Asked on a card on 2026-10-28.
+The proposal is the smallest catalogue MCB that meets three conditions: it carries 1.3 × the
+running current, its C-curve magnetic trip (5 × rating) clears the inrush current, and it is
+at least 2 A. The alternative is the same rule without the 2 A floor.
+
+**Q36 — Where loose material goes** (M18; backlog point 6). Asked on a card on 2026-10-28.
+The proposal is its own "Loose Material" sheet. The alternative is the spec's table under the
+WS console sheet.
 
 **Q1 — Example data is not in the spec (blocks M1 and the golden tests).**
 *Resolved 2026-10-28:* Ali uploaded the example workbook; `examples/` is transcribed
