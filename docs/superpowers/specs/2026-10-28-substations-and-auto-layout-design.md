@@ -157,13 +157,18 @@ before. The hand-written console panel is listed in `substation.yaml`
 
 ## 4. Rules (the spec addendum)
 
-**R1 L1 switch count.** Per side, `reserved = l1_uplinks_per_switch +
+**R1 L1 switch count.** Every IED has an A port and a B port, so `ied_count`
+ports are needed per side (Ali, 2026-10-28). Per side, `reserved = l1_uplinks_per_switch +
 (1 if l1_interlink)` in a star and `2` in a ring;
 `usable = floor((ports_total − reserved) × (1 − spares.port_fraction))`,
 `n_l1 = ceil(ied_count / usable)`. Example: RST2228 has 28 ports; 28 − 2 = 26;
 26 × 0.8 = 20.8 → 20; 40 IEDs → 2 L1 switches per side (matches Ali's example).
 Ali (Q28): in a star, L1 A has one uplink to L2 A, L1 B one uplink to L2 B,
-and the A and B switches of a pair are interconnected.
+and the A and B switches of a pair are interconnected. The L1 model is chosen
+by the tool: rank every library switch with `ied` ports by switches per side,
+then fewest ports, then part id, and take the first unless the `l1_switch`
+entry pins a `part_id` (its `part_id` is optional); `rank_l1_switches()`
+exposes the ranking to the UI. The 20 % port spare default stays.
 
 **R2 L2 port demand.** Per side, `demand = Σ equipment.l2_ports (devices on that
 side or common) + l1_links`, where `l1_links = n_l1 × l1_uplinks_per_switch` in a
@@ -186,6 +191,10 @@ lists them) into panels of `panel_capacity_u`. A device costs `height_u`, and
 every neighbour pair costs `blank_plate_u` of empty space (default 1U), so a
 panel with k rack devices uses `Σ height_u + (k − 1) × blank_plate_u`. The
 gap is space only; it never produces a BOM row (Q25). DIN-rail parts (MCBs, terminals, relays) cost 0U.
+Every rack switch, firewall or patch panel unit has a 1U cable manager directly
+under it, as one block with no blank plate inside; the block counts against the
+32U (Q32). The cable-manager BOM count comes from the layout for generated
+panels.
 When the next device does not fit, a new panel of the same stream starts.
 
 **R6 Streams and symmetry.** Two streams: A (every `redundant: true` device's
@@ -267,3 +276,8 @@ Answered by Ali on 2026-10-28; the rules above carry the answers.
   `ring_max_switches` 6, user-editable).
 - **Q28** Star uplinks: one uplink per L1 switch to its own L2 side, and the A
   and B switches of a pair interconnected (one port each).
+- **Q32** Cable managers count against the 32U, one 1U unit under each rack
+  switch, firewall or patch panel (answered 2026-10-28).
+- **Q33** FOPP-96SM is 1U (answered 2026-10-28).
+- L1 model selection: the tool picks from the library or the engineer pins one;
+  port spare stays 20 % (answered 2026-10-28).
