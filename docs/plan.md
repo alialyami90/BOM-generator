@@ -677,7 +677,7 @@ Delivered in small PRs by A11, one screen group each (ADR 0015 for the bridge):
   `api.js` builds the API stubs with `new Function`.
   Projects second (`bomgen.app.projects`): `list_projects` (the workspace's
   `*/project.yaml` plus folders opened from elsewhere, remembered in
-  `recent-projects.json` next to the library home), `open_project`,
+  `recent-projects.json` in the app home, `BOMGEN_APP_HOME` or `%LOCALAPPDATA%\bomgen\app`), `open_project`,
   `choose_project_folder`, `export_project` (native save dialog), `backup_project`,
   `list_backups`, `preview_project_import`/`import_project`,
   `preview_backup_restore`/`restore_backup` and `show_in_folder`. A project's status is
@@ -685,8 +685,8 @@ Delivered in small PRs by A11, one screen group each (ADR 0015 for the bridge):
   from the active one. The Project page is read-only: New project, New substation,
   Create from this and editing the overview, documents and defaults need project
   writers that do not exist yet, so they explain that the YAML files are edited for
-  now. An import that clashes offers Replace (backed up first) or Cancel; the
-  design's "Keep both" has no engine support. The installed-versions table counts the
+  now. An import that clashes offers Replace (backed up first) or Cancel; "Keep both"
+  arrives with `import_project(rename_to=)` and `suggested_id` (#53, ADR 0012). The installed-versions table counts the
   projects built with each version. Substation screens opened from a real project keep
   the example data under a "not connected yet" banner, without the example's badges.
 - **M10c:** Substation settings, Network and Panels after M1b and M1c.
