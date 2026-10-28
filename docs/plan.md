@@ -813,7 +813,13 @@ writes its section's details when the work starts.
   design).** Backlog points 1 and 10. Add and edit devices and catalogue entries, saved as
   a new local library version. Export and import the library as CSV, with alternatives
   linked by their group key. The Library screen gets catalogue tabs and an alternatives
-  list for comparing devices.
+  list for comparing devices. Store side (`library_store`, after M13 is on main): the
+  `export_csv`, `preview_csv_import` and `import_csv` functions with the dry-run checks of
+  ADR 0018; an edit service (add, edit or delete a device or catalogue entry, validated
+  against the model) that saves a new local version and keeps the old one for rollback; and
+  the `.bomlib` export of an edited library as the backup. Import and edit share one
+  save-a-new-local-version function. The tests include the round trip
+  (library, CSV, library is equal).
 - **M17 — Project and substation editing (A2 writers; A11 app; A4 design).** Backlog points
   4, 7 and 9. Writers round-trip projects, substations and panels. The app creates projects
   and substations from scratch, every settings field is editable, and the Panels board gets
