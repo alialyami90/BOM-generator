@@ -38,7 +38,7 @@ class OutputRefusedError(Exception):
         self.kind = kind
 
 
-def _problems(project_file: Path, found: Resolved, store: LibraryStore) -> list[dict[str, Any]]:
+def problems_of(project_file: Path, found: Resolved, store: LibraryStore) -> list[dict[str, Any]]:
     rows = [{"level": "error", **dataclasses.asdict(i)} for i in found.problems]
     note = library_note(found.project, store)
     if note is not None:
@@ -66,7 +66,7 @@ def checks_page(project_file: Path, substation_id: str, store: LibraryStore) -> 
             engine["reason"] = f"The engine stopped: {exc}"
         else:
             engine = {"run": True, "reason": None, "failed": report.failed, "items": report.items}
-    return {"problems": _problems(project_file, found, store), "engine": engine}
+    return {"problems": problems_of(project_file, found, store), "engine": engine}
 
 
 def _file_name(loaded: LoadedSubstation) -> str:
@@ -98,7 +98,7 @@ def build_target(project_file: Path, substation_id: str, store: LibraryStore) ->
         "sheets": sheets,
         "library": {"name": library.name, "version": library.version},
         "revision": revision,
-        "problems": _problems(project_file, found, store),
+        "problems": problems_of(project_file, found, store),
     }
 
 
