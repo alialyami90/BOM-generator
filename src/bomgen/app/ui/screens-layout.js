@@ -207,7 +207,7 @@
   /* ----- drag and drop ----- */
   let drag = null;
   const targetFor = (d, n) => (d.redundant && d.mode !== 'unit' ? { pair: d.pair, pairIndex: Math.ceil(n / 2) } : { unit: d.id, panel: n });
-  document.addEventListener('dragstart', (e) => { const c = e.target.closest && e.target.closest('.dev'); if (!c) return; const info = findDev(result(), c.dataset.dev); drag = { id: c.dataset.dev, pair: info.d.pair, redundant: info.d.redundant, mode: e.altKey ? 'unit' : 'pair', from: info.p.n, name: info.d.name }; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', c.dataset.dev); c.classList.add('is-dragging'); });
+  document.addEventListener('dragstart', (e) => { const c = e.target.closest && e.target.closest('.dev[data-dev]'); if (!c) return; /* the real board (screens-panels.js) has its own */ const info = findDev(result(), c.dataset.dev); drag = { id: c.dataset.dev, pair: info.d.pair, redundant: info.d.redundant, mode: e.altKey ? 'unit' : 'pair', from: info.p.n, name: info.d.name }; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', c.dataset.dev); c.classList.add('is-dragging'); });
   const clearDrop = () => $$('.bcol.drop-ok, .bcol.drop-bad').forEach((x) => x.classList.remove('drop-ok', 'drop-bad'));
   document.addEventListener('dragover', (e) => {
     const col = e.target.closest && e.target.closest('.bcol'); if (!drag || !col) return;

@@ -132,3 +132,33 @@ def test_an_edit_naming_something_that_is_not_there_is_refused(app: api.Api, pro
         "edit_refused"
     )
     assert refused(app.panel_options(str(project), "gis99", 1))["kind"] == "not_found"
+
+
+BAD_MOVE = {"pair": "gw", "panel": [9, 10]}  # panels 9 and 10 do not follow the last pair
+
+
+def test_a_move_the_layout_cannot_take_is_refused_and_not_written(
+    app: api.Api, project: Path, substation: Path
+) -> None:
+    before = substation.read_text("utf-8")
+
+    reply = ok(app.set_layout_overrides(str(project), "gis01", [BAD_MOVE]))
+
+    assert reply["written"] is False
+    assert reply["page"] is None
+    assert reply["issues"]
+    assert all(i["location"].startswith("layout: ") for i in reply["issues"])
+    assert substation.read_text("utf-8") == before
+
+
+def test_check_layout_says_whether_a_move_fits_without_writing(
+    app: api.Api, project: Path, substation: Path
+) -> None:
+    before = substation.read_text("utf-8")
+    gps = {"device": "gps", "panel": 2}
+
+    assert ok(app.check_layout(str(project), "gis01", [gps], []))["fits"] is True
+    refused_move = ok(app.check_layout(str(project), "gis01", [BAD_MOVE], []))
+    assert refused_move["fits"] is False
+    assert refused_move["issues"][0]["message"]
+    assert substation.read_text("utf-8") == before
