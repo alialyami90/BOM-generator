@@ -697,6 +697,15 @@ the A/B pairs, not in their own panel (ADR 0013, rule R6).
 switch to its own L2 side, and the A and B switches of a pair interconnected
 (ADR 0013, rule R1).
 
+**Q32 — Cable managers against the usable 32U.** Cable managers are 1U each,
+nine per network cabinet today (spec: "roughly one per rack-mounted switch/patch
+panel"). *Default:* they do not count against the 32U; only devices and the blank
+gaps between them do (ADR 0013, rule R5). Asked 2026-10-28; waiting for Ali.
+
+**Q33 — FOPP-96SM rack height.** The datasheet was not found; the device database
+assumes 2U from Hubbell's 48-fibre 1U unit (`data/device-db/`, PR #18). *Default:*
+2U until Ali confirms. Asked 2026-10-28; waiting for Ali.
+
 **Q29 — Thermostat load and fan airflow in the library defaults.** The device
 research (`docs/device-db-findings.md`, items 1 and 2) found that the SK 3110.000
 thermostat's "30 W" is a contact switching rating, not a load, and that 716 m³/h is the
