@@ -605,7 +605,7 @@
     },
     "OutputSettings": {
       "additionalProperties": false,
-      "description": "Workbook file name template and calculation sheet names.",
+      "description": "Workbook file name template and the names of the generated sheets.",
       "properties": {
         "file_name": {
           "default": "{doc_no}_PSA_BOM_Rev{rev}.xlsx",
@@ -769,6 +769,17 @@
           "minLength": 1,
           "pattern": "^(?!')(?:[^\\[\\]:*?/\\\\']|'(?!$))*$",
           "title": "Heat Dissipation",
+          "type": [
+            "string",
+            "integer"
+          ]
+        },
+        "loose_material": {
+          "default": "Loose Material",
+          "maxLength": 31,
+          "minLength": 1,
+          "pattern": "^(?!')(?:[^\\[\\]:*?/\\\\']|'(?!$))*$",
+          "title": "Loose Material",
           "type": [
             "string",
             "integer"

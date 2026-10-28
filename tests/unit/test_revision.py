@@ -142,14 +142,35 @@ def test_kit_children_compare_with_column_b_empty() -> None:
     assert revised == [frozenset(), frozenset()]
 
 
-def test_loose_table_is_the_second_table_on_its_host_sheet() -> None:
+def test_loose_table_is_compared_with_the_loose_material_sheet() -> None:
+    # ADR 0020: the loose table has its own sheet.
+    before = PreviousIssue(
+        source="rev0.xlsx",
+        sheets={
+            "1": (PreviousTable(rows=(row("Q1", "6A MCB"),)),),
+            "Loose": (PreviousTable(rows=(row("ANN", "Annunciator", "1"),)),),
+        },
+    )
+    marked, report = compare_with_previous(
+        result(line("Q1", "6A MCB"), loose=(line("ANN", "Annunciator", 2),)),
+        before,
+        loose_sheet="Loose",
+    )
+    assert marked.loose is not None
+    assert [x.revised for x in marked.loose.lines] == [frozenset({"D"})]
+    assert [(c.sheet, c.kind) for c in report.changes] == [("Loose", RevisionKind.CHANGED)]
+
+
+def test_an_issue_before_the_loose_sheet_holds_it_under_the_host_panel() -> None:
+    # An issue from before ADR 0020: the loose table is the host sheet's second table, and
+    # matching it there means it is not reported as removed.
     marked, report = compare_with_previous(
         result(line("Q1", "6A MCB"), loose=(line("ANN", "Annunciator", 2),)),
         previous(row("Q1", "6A MCB"), loose=(row("ANN", "Annunciator", "1"),)),
     )
     assert marked.loose is not None
     assert [x.revised for x in marked.loose.lines] == [frozenset({"D"})]
-    assert [c.sheet for c in report.changes] == ["1"]
+    assert [(c.sheet, c.kind) for c in report.changes] == [("1", RevisionKind.CHANGED)]
 
 
 def test_a_new_sheet_is_marked_and_a_dropped_sheet_reported() -> None:

@@ -195,13 +195,13 @@ panels:                                # sheet order (OUT-3); the layout (M1c) r
 manual_panels: [panels/ws.yaml]        # never touched by the layout; after `panels`
 output:
   file_name: "{doc_no}_PSA_BOM_Rev{rev}.xlsx"   # OUT-2
-  sheet_names: { power_consumption: "Power Consumption", heat_dissipation: "Heat Dissipation",
-                 heat_calculations: "Heat Calculations" }
+  sheet_names: { loose_material: "Loose Material", power_consumption: "Power Consumption",
+                 heat_dissipation: "Heat Dissipation", heat_calculations: "Heat Calculations" }
 constants: { t_max_c: 40 }             # optional overrides of the project defaults
 spares: { port_fraction: 0.25 }        # optional overrides of the project defaults
 loose_material:                        # extras not tied to a device
   title: "PSA Panels Loose Material and Auxiliary Equipment"   # the table's title row
-  host_panel: ws                       # table sits under this panel's BOM
+  host_panel: ws                       # its document heads the Loose Material sheet (ADR 0020)
   items:
     - { part_id: NAP-K55, children: [LPA37-696], fed_from: psa3 }   # Q13
     - { part_id: FO-PATCH-CORDS, qty: "1 Lot" }
@@ -822,6 +822,12 @@ writes its section's details when the work starts.
 - **M18 — Loose material (A2 model; A9 engine; A10 sheet; A11 editor).** Backlog point 6.
   Each substation has its own editable loose-material list, shown where Ali's answer to Q36
   puts it and in Preview.
+  - Sheet side (A10, ADR 0020): the table moves off the WS console sheet onto its own
+    "Loose Material" sheet (`output.sheet_names.loose_material`), placed after the cabinet
+    BOMs and before Power Consumption. It uses the panel BOM layout, print setup and
+    header, and its header and footer come from `host_panel`'s document. External Equipment
+    references follow it. Revision comparison reads the new sheet and falls back to the
+    host sheet's second table for older issues.
 
 ## 5. Testing strategy
 
@@ -856,7 +862,7 @@ at least 2 A. The alternative is the same rule without the 2 A floor.
 
 **Q36 — Where loose material goes** (M18; backlog point 6). Asked on a card on 2026-10-28.
 The proposal is its own "Loose Material" sheet. The alternative is the spec's table under the
-WS console sheet.
+WS console sheet. *Resolved 2026-10-28:* Ali chose its own sheet (ADR 0020).
 
 **Q1 — Example data is not in the spec (blocks M1 and the golden tests).**
 *Resolved 2026-10-28:* Ali uploaded the example workbook; `examples/` is transcribed
