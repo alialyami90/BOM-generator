@@ -10,6 +10,13 @@ tagged release.
 
 ### Added
 
+- BOM groups E–H as engine output: AC and DC distribution, terminal strips
+  (including the devices' own strips), grounding busbars and revision marks;
+  `pipeline.build` builds groups A–H in two passes; golden test over every
+  group E–H row; plan Q34 (milestone M3, #36).
+- Device-database records travel in a `.bomlib`: pack checks them, import
+  installs them with the library and `bomgen.library_store.device_db` loads
+  them (#41).
 - Desktop app shell: the approved UI in a pywebview window with a Python
   bridge (`bomgen.app.window`, `bomgen.app.api`) and the `app` extra; it
   refuses to open without its UI files or WebView2; ADR 0015 (milestone M10a,
@@ -70,6 +77,8 @@ tagged release.
 
 ### Changed
 
+- `data/device-db/README.md` states the field rules readers can rely on, with
+  tests for them (#40).
 - The installed app opens the desktop window and a double-clicked
   `.bomproj`; the frozen bundle carries the UI files (M10a and M11, #38).
 - `*.bomproj` packages and `Backups/` folders are git-ignored; Q34 taken

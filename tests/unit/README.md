@@ -24,7 +24,7 @@ A milestone with several modules may group them in a subfolder,
 | `engine/test_engine_bom_model.py` | M2 | BOM line, quantity, separator and table models (ADR 0014) |
 | `engine/test_engine_tags.py` | M2 | tag naming: range tags, LAN and level tokens, gateway numbering, FOPP tag |
 | `engine/test_engine_kits.py`, `test_engine_network.py`, `test_engine_housekeeping.py` | M2 | groups A–D: enclosure and devices with kit children, network accessories (SFPs, FOPP, cable managers, serial cables), housekeeping kit |
-| `engine/test_engine_pipeline.py` | M2 | `pipeline.build` for groups A–D and the loose-material table |
+| `engine/test_engine_pipeline.py` | M2, M3 | `pipeline.build`: groups A–H in two passes and the loose-material table |
 | `writer/test_sheet_model.py` | M6 | sheet model defaults and the inputs it rejects before writing |
 | `writer/test_xlsx_cells.py`, `test_xlsx_layout.py` | M6 | values, live formulas, styles, merges, column widths, row heights, hidden columns, read back with openpyxl |
 | `writer/test_xlsx_print.py`, `test_xlsx_header_footer.py` | M6 | print setup, sheet view, page header and footer |
@@ -35,6 +35,12 @@ A milestone with several modules may group them in a subfolder,
 | `project_store/test_project_preview.py`, `test_project_backups.py` | M8b | project import dry-run; listing and restoring the backups in `Backups/` |
 | `app/test_app_window.py`, `test_app_api.py` | M10a | the pywebview window and its refusals (missing UI files or WebView2), the Python API the UI calls (ADR 0015) |
 | `app/test_app_ui_assets.py` | M10a | the app's UI files are complete, offline and in step with the M9 design |
+| `engine/test_engine_ac_dist.py` | M3 | group E AC distribution: branches in load order with spares, CINC, breaker catalogue codes, MCB count |
+| `engine/test_engine_dc_dist.py` | M3 | group F DC distribution: branches per feed, spares, branch and main MCB ratings, overrides, aux contacts |
+| `engine/test_engine_terminals.py` | M3 | group G terminal strips: the terminal block table per panel kind, X3/X4 rules, device strips (XDIP, XDIN, XRTAC) |
+| `engine/test_engine_grounding.py` | M3 | group H grounding busbars |
+| `engine/test_engine_assemble.py` | M3 | revision marks per cell (OUT-8) |
+| `library_store/test_library_device_db.py` | M8 | device-database records packed in a `.bomlib`, checked on pack and loaded after import |
 
 `builders.py`, `engine/engine_factories.py`, `project_store/project_builders.py`
 and `writer/writer_helpers.py` hold the small builders those tests share.

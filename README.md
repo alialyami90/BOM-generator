@@ -24,6 +24,9 @@ Done:
 - M2: BOM groups A–D (enclosure, devices and tags, kit children, network
   accessories, housekeeping) and the loose-material table, as engine output;
   ADR 0014.
+- M3: BOM groups E–H (AC and DC distribution, terminal strips, grounding),
+  HWIO, assembly with separators and revision marks; the engine now builds
+  every BOM group of the example cabinets.
 - M6: sheet models and the XlsxWriter workbook writer.
 - M8 and M8b: device-library update packages (`bomgen library …`) and project
   sharing and backup as `.bomproj` files (`bomgen project …`).
@@ -36,8 +39,8 @@ Done:
   The installed app opens the desktop window, double-clicking a `.bomlib`
   imports it, and a `.bomproj` opens the app on that project.
 
-Next: M1c (switch sizing and automatic panel layout, `bomgen layout`), M3–M4
-(groups E–H, HWIO, power and heat), M5 (sheet models filled from the engine)
+Next: M1c (switch sizing and automatic panel layout, `bomgen layout`), M4
+(power and heat), M5 (sheet models filled from the engine)
 and the remaining M10 screens. `bomgen build` arrives with them. Who builds
 what is in [`docs/agents.md`](docs/agents.md); the terms project, substation,
 side and stream are defined in `docs/plan.md` → "Glossary".
@@ -80,7 +83,9 @@ bomgen library rollback psa-devices                        # back to the previou
 ```
 
 `pack --add data/device-db` includes the researched device database
-([`data/device-db/`](data/device-db/README.md)) as reference data.
+([`data/device-db/`](data/device-db/README.md)) as reference data: pack checks
+its records and import installs them with the library, for the app to show next
+to the library's parts. The generator never builds from them.
 
 ### Sharing and backing up projects
 
