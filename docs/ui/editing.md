@@ -16,7 +16,7 @@ backup. The YAML tabs stay as an advanced view (see "YAML tabs").
 | --- | --- | --- |
 | **Form** | Project, Substation settings, Network, hand-written panel | Edits are held until the person saves. A **save bar** appears at the foot of the page while there are unsaved changes. |
 | **Direct action** | Create or delete a project, substation, panel or document; board moves, pins and deletes; remove a row | Writes at once, says what it did in a toast, and offers **Undo** or has a backup behind it. Never silent. |
-| **Pending set** | Library device and catalogue edits | Edits collect in a *pending changes* list. "Review and apply…" shows the diff (the same review as importing a library update) and writes one new local library version. Specified in the Library design. |
+| **Pending set** | Library device and catalogue edits | Edits collect in a *pending changes* list. "Review and apply…" shows the diff (the same review as importing a library update) and writes one new local library version. See "Library editing (v0.2)". |
 
 Rule of thumb: a *value* is saved with the form; a *record* appears or disappears at once.
 
@@ -167,6 +167,22 @@ Delete removes a device from the BOM (`layout.removed`). It is not a pin. The to
 - The writers (A2) write `layout.overrides` and `layout.removed` for each action and return the new
   `layout_preview`.
 
+## Back-end needs for the generated-panel editor (for A2 and A8, via A1)
+
+What the panel editor writes, by model field. Most fields exist in the model; what is missing is the writer, and
+for two of them a way to go back.
+
+| Editor control | Model field | What is needed |
+| --- | --- | --- |
+| Enclosure (shared by all generated panels) | `generated_panels.enclosure` | Writer; per-field validation of the `Enclosure` fields. One value for all panels, so no per-panel enclosure is designed. |
+| Options, *All generated panels* | `generated_panels.options` | Writer; validation by `PanelOptions` for each key. |
+| Options, *This panel only* | `generated_panels.options_by_panel[n]` | Writer that sets one key for panel `n`, and one that **removes** the key again (the "Own value, use the shared one" link). The reader must report, per option, whether panel `n` has its own value, and the shared value it overrides. |
+| Port plans | `equipment[].port_plan` (`uplinks_l3`, `uplinks`, `downlinks`, `serial_ports`) | Writer per equipment row. The plan is per unit and scaled by the row's `qty`, so a change reaches every panel that holds that device and both sides of a redundant pair; the tab says so. |
+| Document | `generated_panels.document` | Writer; the document must be in the register. |
+| Hand-written panel (all tabs) | `panels/<id>.yaml` | Write, create and delete the file, and keep `manual_panels` in the substation file in step. |
+
+Each writer returns the new `layout_preview` and the problems it caused, as the board's writers do.
+
 ## Field inventory
 
 What each form shows, so every field in the models is reachable. *Check* is who validates; *Default*
@@ -189,6 +205,7 @@ shows what a new record starts with. Labels are the user-facing words; model nam
 | Client | Text | Empty reads "Not set" when the field is read-only |
 | Logo | File chooser (PNG) with a preview and **Remove** | The file is copied into the project; a missing logo shows the warning |
 | Device library | Read-only facts, **Record 1.4.0 in this project** | Library version stamp; never edited by hand |
+| Catalogue brands | One select each for MCBs, aux contacts and terminal blocks, listing the library's brands with the default marked | Starts as the library default; changes the ordering codes on the next build, not ratings or sizes. See "Library editing" |
 | Shared defaults | Number fields with units: power margin, spare ports, rack space kept free, spare DC branches per feed, spare AC branches | A substation starts from these |
 | Delete project | Danger button | See "Deleting" |
 
@@ -238,6 +255,122 @@ shows what a new record starts with. Labels are the user-facing words; model nam
 A **generated panel** shows the same tabs read-only under a banner that says what writes them and links to the
 page that does (Network, Panels board). Those fields are not disabled inputs that look editable: they are
 shown as plain values.
+
+## Library editing (v0.2)
+
+The library is edited by the person who owns it, so every value in it is editable and every edit is reversible
+before it is applied. Library edits use the **pending set**: they do not touch the installed version. Projects
+keep using the version they record until the person applies the set and a project records the result.
+
+### The pending set
+
+- **What goes in:** every saved device edit, every catalogue cell, brand or housekeeping change, every row
+  accepted from a CSV file, and every device deletion. Each entry is one line: area, what, from, to.
+- **Pending bar:** while the set is not empty, a bar at the foot of the Library page says "3 pending changes ·
+  not applied yet. Projects keep using 1.4.0 until you apply them." with *Discard all* and *Review and
+  apply…*. It looks like the save bar but is a different thing: it stays across pages and sessions of the
+  Library and is never a leave-page warning.
+- **Review and apply** (`#/library/review`): the same diff list as importing an update (added, changed,
+  removed), the version it will create (`1.4.0+local.1`), a note, and *Apply and activate*. Applying writes a
+  new **local version**, makes it active and keeps the previous version installed, so going back is *Make
+  active* on Installed versions. A local version is marked "local" and builds from `+local.N` of the version it
+  started from.
+- **Discard all** asks first and offers Undo after.
+- **Why not edit in place:** a project records its library version so a colleague can reproduce its workbook.
+  An in-place edit would silently change old projects.
+
+### Catalogues tab
+
+The Library has two tabs, *Devices* and *Catalogues*. Catalogues has a segmented switch for the five
+catalogues: **MCBs, Aux contacts, Terminal blocks, Busbars, Housekeeping**.
+
+- **Brand per catalogue:** MCBs, aux contacts and terminal blocks each have one tab per brand (Schneider
+  Acti9, ABB S200, Siemens 5SL6 for MCBs). One brand carries the *Default* badge. *Make X the default brand*
+  changes it. *Add brand…* creates one, optionally as a copy of the current brand's rows so only the codes
+  need typing. The project chooses its brand on Project › Overview ("Catalogue brands"); a new project starts
+  with the library default.
+- **Rows are cells:** each row is editable in place (rating and ordering code for MCBs; model and code for aux
+  contacts; type and code for terminal blocks; description and tag for busbars). *Add rating* / *Add row* and a
+  per-row remove. Edits are pending entries, never writes. A removed row is listed under *Removed* on review.
+- **Housekeeping** is a table of roles (lamp, door switch, fan, vent filter, thermostat, IPR kit, change-over
+  diodes, socket), each pointing to a library part, with *Change…* to pick another part.
+- **Validation** is the engine's per field (an MCB rating is a whole number, a code is unique inside a
+  brand). The inline message and the *Review* page show it; a pending entry with a problem cannot be applied.
+
+### Device editor
+
+A device opens in its own page, `#/library/device/<part id>`, from *Edit device* on the detail pane, and
+*Add device…* opens the same page for a new one. It is a **form**: save bar ("Save device", Ctrl+S), validation
+as you type, leave dialog. Saving adds one pending entry per changed field; it does not apply anything.
+
+Tabs and fields, mapped to the model's `DeviceType`:
+
+| Tab | Fields |
+| --- | --- |
+| Identity | Part ID (fixed once saved: projects refer to it), Category, Make, Model, Ordering code, Description in the BOM (with `{placeholders}`), Tag type, Purdue level |
+| Electrical | Supply type, Voltage, Power supplies, Rated power (W), Inrush current (A), Load type, Minimum branch MCB (A), HWIO points, Digital inputs, Alarm on the branch MCB, Leave out of the power total |
+| Ports and mounting | Height (U), Fibre cores, port groups (count, speed, media, kind, used for) with add and remove |
+| Parts it brings | Child parts (part, qty), Terminals (strip, block, count, per), Loose items (part, qty, tag) |
+| Datasheet | Supply range, Operating temperature, Typical and Maximum power, Ports, Dimensions, Weight, Certifications, Datasheet link, Data quality, Sources |
+| Alternatives | Alternative group key and the comparison list below, *Add alternative…* |
+
+- **In use:** a banner says how many equipment rows in the open substation use the device, and that an edit
+  reaches a project only when it records the version you apply. *Delete…* names the rows that use it and
+  warns that the substation will report an error until another part is picked.
+- **Part ID is a record, not a value:** it cannot change once saved. To rename, copy and retire.
+- **Add device** (dialog): start from a blank device or a copy of an existing one (a copy keeps electrical
+  data, ports and parts), then Part ID (unique, checked), Category, Make, Model. *Create and edit* opens the
+  editor on the new device, which exists only in the pending set until saved and applied.
+
+### Alternatives: one comparison list per device
+
+Alternatives are library parts, linked by one group key (`alt_group`), not a separate structure. The list shows
+the device itself first and then each alternative:
+
+| Column | Notes |
+| --- | --- |
+| Tier | Low, Mid, High |
+| Part | Part ID and model |
+| Make | |
+| Power (W), Inrush (A) | each with a **delta chip** against this device, warning-tinted when higher and success-tinted when lower; the chip is plain text with a sign, never colour alone |
+| Ports, Height | the first port group and the height, with a delta for height |
+| Data | the data-quality badge |
+| *Use…* | "use this instead" |
+
+The library page's detail pane shows a compact version (part, power, inrush, *Use…*); *Compare in full* opens
+the device editor on this tab.
+
+**Use this instead** opens a dialog listing the equipment rows of the open substation that use the device
+(each checked), says that only the part changes and the layout, MCB sizes and BOM are worked out again, and
+that pins stay put. Confirming goes to Network with the change held as an unsaved edit on those rows, so the
+person reviews it and saves it like any other Network edit. With no substation open, or no row using the
+device, the dialog says so and the action is disabled. The Change-part picker on Network lists the current
+part's alternatives first under "Alternatives to X".
+
+### Export and import
+
+- **Export…** (dialog): *Spreadsheet (CSV)* or *Backup package (.bomlib)*. CSV: choose tables (devices,
+  alternatives, catalogues) and a folder; one file per table, written as UTF-8 with a byte-order mark so Excel
+  shows accents and symbols. A note says to keep `part_id` and `alt_group` as they are: they link rows.
+  Backup writes a complete package of the active version that can be kept or handed on as an update.
+- **Import…** is a menu: *Update package (.bomlib)…* (the existing flow) and *Spreadsheet (CSV)…*.
+- **CSV import** (`#/library/csv`) has a review step before anything is added: (1) choose or drop a file;
+  (2) review: file facts (name, size, rows per table), **Checks** (required columns, unique part IDs, every
+  alt group has two members), **Rows with a problem** (table, row, column, plain message with an example of a
+  good value), and **What changes** (added, changed, removed with from → to); (3) *Add N valid rows to pending
+  changes* adds them to the pending set (rows with problems are skipped and listed, and the sentence says how
+  to include them); (4) done: banner with *Review and apply…*. A CSV import never writes the library directly.
+
+### Engine needs for the library (for A2 and A11)
+
+- Per-field validation for every device and catalogue field (path and value in, message or nothing out).
+- Write a local library version from a diff and the version it starts from, keeping the previous one.
+- CSV export (UTF-8 with BOM) and a CSV **dry run** that returns checks, row problems with table, row,
+  column and message, and the added, changed and removed lists, without writing.
+- Alternatives as parts with a group key, returning the comparison fields (tier, make, power, inrush, ports,
+  height, data quality) for a device.
+- Per-project catalogue brand choice, recorded in the project file, defaulting to the library's default.
+- List the equipment rows of a substation that use a part, for *Use this instead* and the delete warning.
 
 ## YAML tabs
 

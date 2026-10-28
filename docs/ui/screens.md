@@ -206,19 +206,42 @@ here.
   overrides, each override with a warning line), Document, `panels/<id>.yaml`.
 
 ### Library
-- **Layout:** title with the library name, version and install date, "Import
-  update…" secondary; a toolbar (search, category, data quality, "Has
-  alternatives", count); a table (part id, make and model, category, supply
-  and rated power, data-quality badge) beside a 420 px detail pane.
-- **Detail pane:** tabs *Overview* (library fields), *Datasheet* (supply range,
-  typical and maximum power, ports, dimensions, weight, operating temperature,
-  certifications, datasheet link, sources), *Alternatives* (two brands, each
-  with Low, Mid and High models and a data-quality badge, copy buttons, and a
-  note that swapping is not available yet).
-- **Behaviour:** read-only. Selecting a row fills the pane; the arrow keys move
-  the selection when the table has focus.
-- **States:** no library installed (banner with an "Import…" action); no match
-  (empty row); no datasheet or alternatives recorded (sentence in the pane).
+- **Layout:** title with the library name, version and install date; header actions *Add device…* (primary),
+  *Export…* and *Import…* (a menu: update package or CSV). Two tabs, *Devices* and *Catalogues*. A
+  **pending bar** at the foot while there are unapplied edits (see [`editing.md`](editing.md), "Library
+  editing").
+- **Devices tab:** a toolbar (search, category, data quality, "Has alternatives", count); a table (part id,
+  make and model, supply and rated power, data-quality badge) beside a 400 px detail pane.
+- **Detail pane:** tabs *Overview*, *Datasheet*, *Alternatives* (the compact comparison list with *Use…* and
+  *Compare in full*), and *Edit device* in the pane header.
+- **Catalogues tab:** a segmented switch (MCBs, Aux contacts, Terminal blocks, Busbars, Housekeeping); brand
+  tabs with a *Default* badge, *Make default*, *Add brand…*; an editable table with *Add row* and per-row
+  remove. Housekeeping is a role table with *Change…*.
+- **Behaviour:** selecting a row fills the pane; the arrow keys move the selection when the table has focus.
+  Every edit becomes a pending entry. Nothing is written to the installed version.
+- **States:** no library installed (banner with an "Import…" action); no match (empty row); no datasheet or
+  alternatives recorded (sentence in the pane); pending set empty (no bar).
+
+### Device editor
+- **Route:** `#/library/device/<part id>`, or the same page for a new device. Breadcrumb Library › part id.
+- **Layout:** title (part id), make and model, header actions *Copy as alternative…* and *Delete…*; an
+  "in use" banner; tabs *Identity*, *Electrical*, *Ports and mounting*, *Parts it brings*, *Datasheet*,
+  *Alternatives*. Field list in `editing.md`. It is a form: save bar "Save device", Ctrl+S, leave dialog.
+- **Alternatives tab:** the alternative group key and the full comparison list (tier, part, make, power,
+  inrush, ports, height, data quality, *Use…*) with delta chips; *Add alternative…*; empty state when none.
+- **States:** new device (part id editable, "new device" subtitle), device in use, device not found,
+  duplicate part id on creation (toast and the field marked).
+
+### Review library changes
+- **Route:** `#/library/review`. Counts (added, changed, removed), the diff list grouped by kind, the new
+  version it creates and the one it replaces, a note, and *Apply and activate 1.4.0+local.1*. Empty state
+  when nothing is pending. After applying: toast, the top bar and sidebar show the new version, and
+  Installed versions lists it as a local version.
+
+### Import a spreadsheet (CSV)
+- **Route:** `#/library/csv`; steps choose, review, done as in `editing.md`. The review shows file facts,
+  checks, rows with a problem (table, row, column, message), what changes, and a sticky action bar
+  "Add N valid rows to pending changes" and "Choose a different file".
 
 ### Import update and installed versions
 - **Tabs:** *Import package* and *Installed versions*.

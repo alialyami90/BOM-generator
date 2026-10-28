@@ -255,6 +255,25 @@ invalid the text turns red with the error icon ("1 field needs fixing before you
 can save."), Save is disabled and the text moves focus to the first invalid field.
 `role="region"`, labelled "Unsaved changes". Rules in [`editing.md`](editing.md).
 
+### Pending bar
+Like the save bar (same height, rule and shadow) with a warning dot, "3 pending changes · not applied yet.
+Projects keep using 1.4.0 until you apply them.", *Discard all* (secondary) and *Review and apply…*
+(primary link). Shown at the foot of the Library page while the pending set is not empty; it is a different
+object from the save bar because it outlives a page and is never a leave-page warning.
+`role="region"`, labelled "Pending library changes".
+
+### Comparison list (alternatives)
+A table of one device and its alternatives. The device's own row is first, tinted with the faint action
+colour and labelled "This device". Numbers right-aligned in mono; each number that differs carries a **delta
+chip** after it (`+5`, `−16`): a small mono chip with a sign, warning-tinted for higher and success-tinted for
+lower, always with the sign so colour is never the only cue, and a `title` naming the comparison. The row
+action is *Use…* with an `aria-label` that names both parts. The compact form (library pane) drops make,
+ports, height and data quality, puts tier and make under the part id, and moves the chip under the number.
+
+### Brand tabs
+A tab list with one tab per brand and a *Default* badge on the default brand; beside it, a muted detail line
+for the brand, *Make X the default brand* (secondary, hidden on the default) and *Add brand…* (ghost).
+
 ### Row menu
 A "⋯" icon button at the end of a table row (`aria-haspopup="menu"`,
 `aria-expanded`) opens a 200 px menu: Rename…, Create from this…, a rule, then

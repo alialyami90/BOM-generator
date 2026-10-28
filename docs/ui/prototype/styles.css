@@ -412,3 +412,11 @@ fieldset.readonly .btn, fieldset.readonly .grip { opacity: .5; cursor: default; 
 .dev[draggable="true"] { cursor: grab; }
 .dev.is-dragging { cursor: grabbing; }
 .bcol.drop-bad { cursor: not-allowed; }
+
+/* v0.2 Library editors */
+.alt-table tr.is-self td { background: var(--color-action-faint); }
+.delta { display: inline-block; margin-left: 4px; padding: 0 5px; border-radius: var(--radius-sm); font: 600 11.5px/1.5 var(--font-mono); white-space: nowrap; background: var(--color-surface-sunken); color: var(--color-text-muted); }
+.cell-sub .delta { margin-left: 0; }
+.delta.up { background: var(--color-warning-soft); color: var(--color-text); }
+.delta.down { background: var(--color-success-soft); color: var(--color-text); }
+.listbox .group-label { padding: 6px 8px 2px; font-size: 12px; font-weight: 600; color: var(--color-text-muted); }
