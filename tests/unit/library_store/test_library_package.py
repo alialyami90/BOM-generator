@@ -66,18 +66,21 @@ def test_pack_is_deterministic(tmp_path: Path, library_file: Path, package_file:
     assert again.read_bytes() == package_file.read_bytes()
 
 
-def test_pack_carries_extra_directories(tmp_path: Path, library_file: Path) -> None:
+def test_pack_carries_only_yaml_files_from_extra_directories(
+    tmp_path: Path, library_file: Path
+) -> None:
     device_db = tmp_path / "device-db"
     (device_db / "sub").mkdir(parents=True)
     (device_db / "network.yaml").write_text("a: 1\n")
-    (device_db / "sub" / "notes.md").write_text("x\n")
+    (device_db / "sub" / "more.yml").write_text("x\n")
+    (device_db / "FINDINGS.md").write_text("notes\n")
     out = tmp_path / "with-db.bomlib"
 
     manifest = pack(library_file, out, name="psa-devices", version="1.1.0", extra_dirs=[device_db])
 
     assert sorted(manifest.files) == [
         "device-db/network.yaml",
-        "device-db/sub/notes.md",
+        "device-db/sub/more.yml",
         "library.yaml",
     ]
     assert read_package(out).files["device-db/network.yaml"] == b"a: 1\n"

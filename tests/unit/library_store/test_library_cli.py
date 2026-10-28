@@ -4,12 +4,28 @@ import zipfile
 from pathlib import Path
 
 import pytest
+import yaml
 from typer.testing import CliRunner
 
 from bomgen.library_store.cli import library_app
 
-V1 = "devices:\n  - part_id: SW\n    unit_power_w: 77\n  - part_id: FW\n"
-V2 = "devices:\n  - part_id: SW\n    unit_power_w: 80\n  - part_id: GW\n"
+EXAMPLE = Path(__file__).parents[3] / "examples" / "library.yaml"
+
+
+def _library(extra_part: str, spool_make: str = "Hubbell") -> str:
+    """The example library plus one extra component, with the spool's make adjustable."""
+    library = yaml.safe_load(EXAMPLE.read_text())
+    for device in library["devices"]:
+        if device["part_id"] == "FOPP-SPOOL":
+            device["make"] = spool_make
+    library["devices"].append(
+        {"part_id": extra_part, "category": "component", "description_template": extra_part}
+    )
+    return yaml.safe_dump(library, sort_keys=False)
+
+
+V1 = _library("PART-OLD")
+V2 = _library("PART-NEW", spool_make="Panduit")
 
 
 @pytest.fixture
@@ -37,9 +53,9 @@ def test_cli_pack_import_list_rollback(runner: CliRunner, tmp_path: Path) -> Non
     assert imported.exit_code == 0, imported.output
     assert "psa-devices 1.1.0 (active was 1.0.0)" in imported.output
     assert "SW power corrected" in imported.output
-    assert "Added parts (1): GW" in imported.output
-    assert "Removed parts (1): FW" in imported.output
-    assert "SW: unit_power_w" in imported.output
+    assert "Added parts (1): PART-NEW" in imported.output
+    assert "Removed parts (1): PART-OLD" in imported.output
+    assert "FOPP-SPOOL: make" in imported.output
 
     listed = runner.invoke(library_app, ["list"])
     assert listed.exit_code == 0
@@ -81,7 +97,7 @@ def test_cli_import_dry_run_installs_nothing(runner: CliRunner, tmp_path: Path) 
     result = runner.invoke(library_app, ["import", str(package), "--dry-run"])
 
     assert result.exit_code == 0, result.output
-    assert "Added parts (2): FW, SW" in result.output
+    assert "Added parts (51): " in result.output
     assert "Dry run: nothing was installed." in result.output
     assert not (tmp_path / "home").exists()
 

@@ -31,7 +31,7 @@
 
 ### Task 1: Version and manifest
 
-**Files:** Create `src/bomgen/library_store/{__init__.py,errors.py,versions.py,manifest.py}`; Test `tests/unit/library_store/test_manifest.py`.
+**Files:** Create `src/bomgen/library_store/{__init__.py,errors.py,versions.py,manifest.py}`; Test `tests/unit/library_store/test_library_manifest.py`.
 
 **Produces:** `LibraryPackageError(Exception)`; `Version` (frozen, ordered, `parse(text) -> Version` accepting `MAJOR.MINOR.PATCH` only, `__str__`); `Manifest` (pydantic, `extra="forbid"`, frozen) with the constraint fields, `name` matching `^[a-z0-9][a-z0-9._-]*$`, `version`/`min_app_version` validated by `Version.parse`, `files` keys validated by `is_safe_member(path) -> bool`; constants `FORMAT_VERSION = 1`, `LIBRARY_SCHEMA_VERSION = 1`, `MANIFEST_NAME = "manifest.json"`, `LIBRARY_FILE = "library.yaml"`.
 
@@ -40,7 +40,7 @@
 
 ### Task 2: Library document and diff
 
-**Files:** Create `src/bomgen/library_store/diff.py`; Test `tests/unit/library_store/test_diff.py`.
+**Files:** Create `src/bomgen/library_store/diff.py`; Test `tests/unit/library_store/test_library_diff.py`.
 
 **Produces:** `parse_library(data: bytes) -> dict[str, Any]` (YAML mapping; `devices` a list of mappings with unique string `part_id`; raises `LibraryPackageError`); `LibraryDiff` dataclass (`added`, `removed`: sorted part ids; `changed: dict[str, list[str]]` part id → sorted changed field names; `catalogues_changed`: sorted catalogue keys; `files_added/changed/removed`: sorted extra-file paths; `is_empty`; `summary_lines() -> list[str]`); `diff_libraries(old: Mapping | None, new: Mapping, old_files: Mapping[str, str] = {}, new_files: Mapping[str, str] = {}) -> LibraryDiff` (`library.yaml` is excluded from the file lists).
 
@@ -49,7 +49,7 @@
 
 ### Task 3: Pack and verify
 
-**Files:** Create `src/bomgen/library_store/package.py`; Test `tests/unit/library_store/test_package.py`.
+**Files:** Create `src/bomgen/library_store/package.py`; Test `tests/unit/library_store/test_library_package.py`.
 
 **Consumes:** Task 1, `parse_library`.
 **Produces:** `PackageContents` (frozen dataclass: `manifest`, `files: dict[str, bytes]` incl. `library.yaml`); `pack(library: Path, out: Path, *, name: str, version: str, release_notes: str = "", extra_dirs: Sequence[Path] = (), min_app_version: str = bomgen.__version__, created: datetime | None = None) -> Manifest` (extra dir `d` stored under `d.name/`, files sorted, fixed zip timestamps so equal inputs give equal bytes; validates `library.yaml` with `parse_library`); `read_package(path: Path, *, app_version: str = bomgen.__version__) -> PackageContents` enforcing every refusal in Global Constraints except the store ones, plus `MAX_UNCOMPRESSED_BYTES = 64 * 1024**2`.
@@ -59,7 +59,7 @@
 
 ### Task 4: Installed-library store
 
-**Files:** Create `src/bomgen/library_store/store.py`; Test `tests/unit/library_store/test_store.py`.
+**Files:** Create `src/bomgen/library_store/store.py`; Test `tests/unit/library_store/test_library_store.py`.
 
 **Consumes:** `read_package`, `diff_libraries`, `parse_library`.
 **Produces:** `default_library_home(env: Mapping[str, str] = os.environ, platform: str = sys.platform) -> Path`; `InstalledLibrary(name, active: str | None, versions: list[str])`; `ImportResult(manifest, previous: str | None, diff: LibraryDiff)`; `LibraryRef(name, version)` and `library_mismatch(recorded: LibraryRef, active: LibraryRef | None) -> str | None`; `LibraryStore(root: Path)` with `list() -> list[InstalledLibrary]`, `active_version(name) -> str | None`, `library_file(name, version=None) -> Path`, `preview_import(path, *, force=False) -> ImportResult`, `import_package(path, *, force=False, validate: Callable[[Path], None] | None = None) -> ImportResult`, `rollback(name, to: str | None = None) -> str`.
@@ -71,9 +71,15 @@ Install = extract into `<root>/<name>/.incoming-<random>/`, run `validate`, `os.
 
 ### Task 5: CLI and docs
 
-**Files:** Create `src/bomgen/library_store/cli.py` (`library_app: typer.Typer`); create or modify `src/bomgen/cli.py` to `app.add_typer(library_app, name="library")`; `pyproject.toml` console script; update `docs/plan.md` M8 and ADR 0008; Test `tests/unit/library_store/test_cli.py`.
+**Files:** Create `src/bomgen/library_store/cli.py` (`library_app: typer.Typer`); create or modify `src/bomgen/cli.py` to `app.add_typer(library_app, name="library")`; `pyproject.toml` console script; update `docs/plan.md` M8 and ADR 0008; Test `tests/unit/library_store/test_library_cli.py`.
 
 Commands: `pack LIBRARY --name --version [--notes] [--add DIR]... --out FILE`; `import FILE [--force] [--dry-run]`; `list`; `rollback NAME [--to VERSION]`. Store root from `BOMGEN_LIBRARY_HOME` / default. Errors print one line to stderr and exit 1.
 
 - [ ] Tests: `test_cli_pack_import_list_rollback` round trip through `CliRunner` with `BOMGEN_LIBRARY_HOME=tmp_path`, `test_cli_import_dry_run_installs_nothing`, `test_cli_rejects_tampered_package_with_exit_1`.
 - [ ] Fail → implement → pass → ruff, mypy, pytest → commit `feat(cli): add library pack/import/list/rollback`.
+
+### Added after review and merge of M1
+
+- `LibraryPackageError.kind` (`RefusalKind`) so the UI can react to refusals; `preview_import(validate=...)`.
+- Extra directories pack only `*.yaml` / `*.yml`; Windows-unsafe member names and case collisions are refused.
+- `app.add_typer(library_app, name="library")` in `bomgen.cli`; `import` validates with `load_library` (`tests/unit/library_store/test_library_wiring.py`).

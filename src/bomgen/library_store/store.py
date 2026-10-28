@@ -15,6 +15,7 @@ import json
 import os
 import shutil
 import sys
+import tempfile
 import uuid
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
@@ -24,7 +25,7 @@ from typing import Any
 from pydantic import ValidationError
 
 from bomgen.library_store.diff import LibraryDiff, diff_libraries, parse_library
-from bomgen.library_store.errors import LibraryPackageError
+from bomgen.library_store.errors import LibraryPackageError, RefusalKind
 from bomgen.library_store.manifest import LIBRARY_FILE, MANIFEST_NAME, Manifest
 from bomgen.library_store.package import PackageContents, read_package
 from bomgen.library_store.versions import Version
@@ -131,12 +132,14 @@ class LibraryStore:
         except (UnicodeDecodeError, OSError) as exc:
             raise LibraryPackageError(
                 f"library {name}: the active version file cannot be read ({exc}); "
-                "import a package or run rollback --to <version>"
+                "import a package or run rollback --to <version>",
+                RefusalKind.STORE_DAMAGED,
             ) from exc
         if version not in self.versions(name):
             raise LibraryPackageError(
                 f"library {name}: the active version {version!r} is not installed; "
-                "import a package or run rollback --to <version>"
+                "import a package or run rollback --to <version>",
+                RefusalKind.STORE_DAMAGED,
             )
         return version
 
@@ -159,7 +162,10 @@ class LibraryStore:
         """Path of the installed `library.yaml` (the active version by default)."""
         version = version or self.active_version(name)
         if version is None or version not in self.versions(name):
-            raise LibraryPackageError(f"library {name} {version or ''} is not installed".strip())
+            raise LibraryPackageError(
+                f"library {name} {version or ''} is not installed".strip(),
+                RefusalKind.NOT_INSTALLED,
+            )
         return self.root / name / version / LIBRARY_FILE
 
     def manifest(self, name: str, version: str) -> Manifest:
@@ -168,9 +174,16 @@ class LibraryStore:
 
     # -- changing ----------------------------------------------------------------
 
-    def preview_import(self, path: Path, *, force: bool = False) -> ImportResult:
+    def preview_import(
+        self, path: Path, *, force: bool = False, validate: Validator | None = None
+    ) -> ImportResult:
         """Everything `import_package` checks and reports, without installing."""
-        _, result = self._plan_import(path, force)
+        contents, result = self._plan_import(path, force)
+        if validate is not None:
+            with tempfile.TemporaryDirectory(prefix="bomlib-preview-") as scratch:
+                library_file = Path(scratch) / LIBRARY_FILE
+                library_file.write_bytes(contents.files[LIBRARY_FILE])
+                validate(library_file)
         return result
 
     def import_package(
@@ -216,20 +229,25 @@ class LibraryStore:
         """Activate `to`, or the newest installed version older than the active one."""
         versions = self.versions(name)
         if not versions:
-            raise LibraryPackageError(f"library {name} is not installed")
+            raise LibraryPackageError(f"library {name} is not installed", RefusalKind.NOT_INSTALLED)
         if to is not None:
             if to not in versions:
                 raise LibraryPackageError(
-                    f"library {name} {to} is not installed (installed: {', '.join(versions)})"
+                    f"library {name} {to} is not installed (installed: {', '.join(versions)})",
+                    RefusalKind.NOT_INSTALLED,
                 )
             target = to
         else:
             active = self.active_version(name)
             if active is None:
-                raise LibraryPackageError(f"library {name} has no active version; use --to")
+                raise LibraryPackageError(
+                    f"library {name} has no active version; use --to", RefusalKind.NOT_INSTALLED
+                )
             older = [v for v in versions if Version.parse(v) < Version.parse(active)]
             if not older:
-                raise LibraryPackageError(f"library {name} has no older version than {active}")
+                raise LibraryPackageError(
+                    f"library {name} has no older version than {active}", RefusalKind.NOT_INSTALLED
+                )
             target = older[-1]
         _write_text_atomic(self.root / name / ACTIVE_FILE, target)
         return target
@@ -250,12 +268,14 @@ class LibraryStore:
                 else f"; run rollback --to {manifest.version} to activate it"
             )
             raise LibraryPackageError(
-                f"library {manifest.name} {manifest.version} is already installed{hint}"
+                f"library {manifest.name} {manifest.version} is already installed{hint}",
+                RefusalKind.ALREADY_INSTALLED,
             )
         if active is not None and manifest.parsed_version < Version.parse(active) and not force:
             raise LibraryPackageError(
                 f"library {manifest.name} {manifest.version} is older than the active "
-                f"{active}; use force to downgrade"
+                f"{active}; use force to downgrade",
+                RefusalKind.DOWNGRADE,
             )
         old_library: dict[str, Any] | None = None
         old_files: dict[str, str] = {}

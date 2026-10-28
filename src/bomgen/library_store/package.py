@@ -22,7 +22,7 @@ from pydantic import ValidationError
 
 import bomgen
 from bomgen.library_store.diff import parse_library
-from bomgen.library_store.errors import LibraryPackageError
+from bomgen.library_store.errors import LibraryPackageError, RefusalKind
 from bomgen.library_store.manifest import (
     FORMAT_VERSION,
     LIBRARY_FILE,
@@ -35,6 +35,7 @@ from bomgen.library_store.versions import Version
 
 PACKAGE_SUFFIX = ".bomlib"
 MAX_UNCOMPRESSED_BYTES = 64 * 1024**2
+_EXTRA_SUFFIXES = (".yaml", ".yml")
 _ZIP_EPOCH = (1980, 1, 1, 0, 0, 0)
 
 
@@ -57,7 +58,9 @@ def _collect_extra(extra_dirs: Sequence[Path], files: dict[str, bytes]) -> None:
             raise LibraryPackageError(f"{directory.name!r} is a reserved name in a package")
         if any(name.startswith(f"{directory.name}/") for name in files):
             raise LibraryPackageError(f"two extra directories are named {directory.name!r}")
-        for path in sorted(p for p in directory.rglob("*") if p.is_file()):
+        for path in sorted(
+            p for p in directory.rglob("*") if p.is_file() and p.suffix in _EXTRA_SUFFIXES
+        ):
             member = f"{directory.name}/{path.relative_to(directory).as_posix()}"
             if not is_safe_member(member):
                 raise LibraryPackageError(f"cannot package unsafe path {member!r}")
@@ -128,7 +131,8 @@ def _read_manifest(zf: zipfile.ZipFile) -> Manifest:
     if isinstance(format_version, int) and format_version > FORMAT_VERSION:
         raise LibraryPackageError(
             f"package format version {format_version} needs a newer bomgen "
-            f"(this one reads version {FORMAT_VERSION})"
+            f"(this one reads version {FORMAT_VERSION})",
+            RefusalKind.INCOMPATIBLE,
         )
     try:
         return Manifest.model_validate(raw)
@@ -147,11 +151,13 @@ def _check_compatible(manifest: Manifest, app_version: str) -> None:
     if manifest.schema_version != LIBRARY_SCHEMA_VERSION:
         raise LibraryPackageError(
             f"package uses library schema version {manifest.schema_version}; "
-            f"this bomgen reads version {LIBRARY_SCHEMA_VERSION}"
+            f"this bomgen reads version {LIBRARY_SCHEMA_VERSION}",
+            RefusalKind.INCOMPATIBLE,
         )
     if Version.parse(manifest.min_app_version) > Version.parse(app_version):
         raise LibraryPackageError(
-            f"package needs bomgen {manifest.min_app_version} or later (this is {app_version})"
+            f"package needs bomgen {manifest.min_app_version} or later (this is {app_version})",
+            RefusalKind.INCOMPATIBLE,
         )
 
 

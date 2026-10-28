@@ -1,12 +1,13 @@
 """Per-user installed-library store: import, preview, list, rollback (ADR 0008, plan M8)."""
 
 import os
+import zipfile
 from collections.abc import Callable
 from pathlib import Path
 
 import pytest
 
-from bomgen.library_store.errors import LibraryPackageError
+from bomgen.library_store.errors import LibraryPackageError, RefusalKind
 from bomgen.library_store.package import pack
 from bomgen.library_store.store import (
     LibraryRef,
@@ -365,3 +366,62 @@ def test_library_mismatch_ignores_a_different_library() -> None:
     assert library_mismatch(built, LibraryRef("other", "1.0.0")) == (
         "project was built with library psa-devices 1.0.0, which is not installed"
     )
+
+
+def _kind_of(action: Callable[[], object]) -> RefusalKind:
+    with pytest.raises(LibraryPackageError) as caught:
+        action()
+    return caught.value.kind
+
+
+def test_refusals_carry_a_machine_readable_kind(
+    store: LibraryStore, make_package: MakePackage, tmp_path: Path
+) -> None:
+    newer = make_package("2.0.0")
+    older = make_package("1.0.0")
+    store.import_package(newer)
+    junk = tmp_path / "junk.bomlib"
+    junk.write_text("no")
+
+    assert _kind_of(lambda: store.preview_import(older)) is RefusalKind.DOWNGRADE
+    assert _kind_of(lambda: store.preview_import(newer)) is RefusalKind.ALREADY_INSTALLED
+    assert _kind_of(lambda: store.preview_import(junk)) is RefusalKind.INVALID_PACKAGE
+    assert _kind_of(lambda: store.rollback("psa-devices", to="0.1.0")) is RefusalKind.NOT_INSTALLED
+    assert _kind_of(lambda: store.rollback("psa-devices")) is RefusalKind.NOT_INSTALLED
+
+
+def test_incompatible_packages_have_their_own_kind(
+    store: LibraryStore, make_package: MakePackage, tmp_path: Path
+) -> None:
+    package = make_package("1.0.0")
+    newer_schema = tmp_path / "s.bomlib"
+    with zipfile.ZipFile(package) as old, zipfile.ZipFile(newer_schema, "w") as new:
+        for name in old.namelist():
+            data = old.read(name)
+            if name == "manifest.json":
+                data = data.replace(b'"schema_version": 1', b'"schema_version": 2')
+            new.writestr(name, data)
+
+    assert _kind_of(lambda: store.preview_import(newer_schema)) is RefusalKind.INCOMPATIBLE
+
+
+def test_a_failing_validator_is_not_wrapped(store: LibraryStore, make_package: MakePackage) -> None:
+    def reject(library_file: Path) -> None:
+        raise LibraryPackageError("schema says no", kind=RefusalKind.VALIDATION_FAILED)
+
+    assert (
+        _kind_of(lambda: store.import_package(make_package("1.0.0"), validate=reject))
+        is RefusalKind.VALIDATION_FAILED
+    )
+
+
+def test_preview_runs_the_validator_too(store: LibraryStore, make_package: MakePackage) -> None:
+    seen: list[str] = []
+
+    def record(library_file: Path) -> None:
+        seen.append(library_file.read_text())
+
+    store.preview_import(make_package("1.0.0"), validate=record)
+
+    assert seen == [V1]
+    assert not store.root.exists() or list(store.root.iterdir()) == []

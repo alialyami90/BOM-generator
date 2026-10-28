@@ -369,13 +369,12 @@ update package (ADR 0008).
   previews the same way).
 - Tests: pack/import round-trip, corrupted or tampered package rejected,
   schema-version mismatch rejected, diff summary, rollback.
-- Delivered in M8: `bomgen.library_store` and its `library_app` typer group.
-  Two hooks wait for M1 and land in the follow-up after M1 merges:
-  `app.add_typer(library_app, name="library")` in `bomgen.cli`, and passing
-  `bomgen.io.loader.load_library` as the `validate` callable of `import`, so a
-  schema-invalid library is never installed. Recording the library name and
-  version in projects needs the project model and the check report, so M7 wires
-  `library_mismatch()` into the check report.
+- Delivered in M8: `bomgen.library_store`, registered as `bomgen library ...`.
+  `import` (and `import --dry-run`) validate the package's library with
+  `bomgen.io.loader.load_library`, so a schema-invalid library is never
+  installed. Recording the library name and version in projects needs the
+  project model and the check report, so M7 wires `library_mismatch()` into the
+  check report. Refusals carry a `RefusalKind` for the M10 import screen.
 
 ### M9 — UI design with impeccable
 Use the `impeccable` skill to design the screens and elements: open or create a

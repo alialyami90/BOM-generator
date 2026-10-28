@@ -43,7 +43,8 @@ Code: `src/bomgen/library_store/`.
   build reads; a package needing a newer app (`min_app_version`) is refused.
 - Extra directories (for example `data/device-db/`) are packed with
   `bomgen library pack --add <dir>`, stored under the directory's name and
-  checksummed like `library.yaml`. The import summary lists changed files.
+  checksummed like `library.yaml`. Only `*.yaml` / `*.yml` files are packed.
+  The import summary lists changed files.
 - Import checks every member path (no absolute, `..`, drive or backslash
   paths), caps the uncompressed size at 64 MiB, and verifies all checksums
   before writing anything. It extracts into a temporary directory, runs the
@@ -54,4 +55,11 @@ Code: `src/bomgen/library_store/`.
   older one, needs `--force`.
 - No signature yet (plan Q18 default). The manifest has `format_version` so a
   signature field can be added later without breaking old packages' readers.
+- `bomgen library import` validates the package's library with the same loader
+  the build uses (`bomgen.io.loader.load_library`) before anything is installed;
+  `--dry-run` runs the same check.
+- Refusals raise `LibraryPackageError` with a `kind` (`RefusalKind`: invalid
+  package, incompatible, validation failed, downgrade, already installed, not
+  installed, store damaged) so the desktop app (M10) can word them and offer
+  remedies without parsing messages. Mapping kinds to screen copy is an M10 item.
 
