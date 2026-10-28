@@ -26,7 +26,8 @@
     return err ? `<div style="margin-bottom:var(--space-4)">${banner('bad', `<b>${what}</b> ${esc(err.message)}`, key === 'overview' && LIB.versions && LIB.versions.versions.length ? '<button class="btn btn--primary btn--sm" data-action="show-versions">Installed versions…</button>' : '')}</div>` : '';
   };
   const reloadLibrary = () => { LIB.state = 'idle'; return Bridge.call('app_info').then(App.setAppInfo).catch(() => {}).then(loadLibrary); };
-  App.reloadLibrary = reloadLibrary;  // after a library edit is applied (screens-libedit.js)
+  App.reloadLibrary = reloadLibrary;
+  App.libraryDevices = () => devices();  // the Add device dialog's Start from list  // after a library edit is applied (screens-libedit.js)
   const day = (iso) => (iso ? String(iso).slice(0, 10) : '—');
   /* A +local.N version was made here from the version before the "+" (ADR 0018), so it was applied, not released. */
   const localOf = (v) => (/\+local\.\d+$/.test(v || '') ? v.split('+')[0] : null);
@@ -80,7 +81,7 @@
     const L = lib();
     const lede = L ? `${esc(L.name)} ${esc(L.version)}${released(L)}. Device edits wait as pending changes; the library changes when you apply them or import an update package.` : LIB.errors.overview && !LIB.offline ? 'Make an installed version active, or import the package again.' : 'No library is active.';
     return `<div class="page">${pageHead('Device library', lede,
-      `<button class="btn btn--secondary" data-action="goto" data-to="#/library/import">${icon('upload')}Import update…</button>`)}
+      `<button class="btn btn--secondary" data-action="goto" data-to="#/library/import">${icon('upload')}Import update…</button>${L && !LIB.offline ? `<button class="btn btn--primary" data-action="add-device">${icon('plus')}Add device…</button>` : ''}`)}
       ${loadError('overview', 'The active library could not be read.')}
       ${LIB.overview && LIB.overview.library && LIB.overview.library.problem ? `<div style="margin-bottom:var(--space-4)">${banner('warn', `<b>Part of the active library is damaged.</b> ${esc(LIB.overview.library.problem)}`)}</div>` : ''}
       ${LIB.overview && LIB.overview.records_problem ? `<div style="margin-bottom:var(--space-4)">${banner('warn', `<b>Datasheets and alternatives could not be read.</b> ${esc(LIB.overview.records_problem)}`)}</div>` : ''}

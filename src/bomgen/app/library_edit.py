@@ -155,6 +155,7 @@ class LibraryEditor:
             if base
             else None,
             "problem": problem,
+            "choices": CHOICES,
         }
 
     def device(self, part_id: str) -> dict[str, Any]:

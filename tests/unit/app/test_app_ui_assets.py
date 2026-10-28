@@ -139,5 +139,10 @@ def test_a_local_library_version_reads_as_applied_local_edits() -> None:
     assert "local edits of" in js
     assert "applied " in js
     assert "badge('info', 'Local')" in js
+
+
+def test_the_device_editor_edits_every_list_the_model_has() -> None:
     edit = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
-    assert "Port groups can't be edited here yet." in edit
+    for key in ("ports:", "children:", "terminals:", "loose_items:"):
+        assert key in edit
+    assert "can't be edited here yet" not in edit
