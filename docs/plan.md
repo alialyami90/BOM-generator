@@ -169,6 +169,9 @@ defaults:                              # inherited key by key by every substatio
     air_constant_m3k_per_wh: 4.1
     steel_coefficient_w_per_m2c: 5.5
     min_main_mcb_a: 6
+    min_branch_mcb_a: 2                # ADR 0017, used by M15
+    inrush_min_ms: 10                  # ADR 0017, used by M15
+  catalogue_choice: { mcb: default }   # brand set per catalogue (ADR 0017); unset = default
   spares:                              # ADR 0013; every spare is an input
     port_fraction: 0.20
     sfp_per_l1: 3                      # today's "=24+3"
@@ -199,6 +202,7 @@ output:
                  heat_dissipation: "Heat Dissipation", heat_calculations: "Heat Calculations" }
 constants: { t_max_c: 40 }             # optional overrides of the project defaults
 spares: { port_fraction: 0.25 }        # optional overrides of the project defaults
+catalogue_choice: { mcb: abb-s200m }   # optional; overrides the project's key by key
 loose_material:                        # extras not tied to a device
   title: "PSA Panels Loose Material and Auxiliary Equipment"   # the table's title row
   host_panel: ws                       # its document heads the Loose Material sheet (ADR 0020)
@@ -246,7 +250,7 @@ generated_panels:                      # needed when equipment is given; {n} = p
   options_by_panel: { 2: { aux_socket_a: 10 } }
 ```
 
-**Loading rules.** Substation `constants` and `spares` replace only the keys
+**Loading rules.** Substation `constants`, `spares` and `catalogue_choice` replace only the keys
 they write; the merged constants are checked again (`t_max_c > t_int_c`). Every
 document key a substation, its calculation sheets, `generated_panels` and its
 panels name must be one of that substation's register entries. Equipment parts
@@ -289,11 +293,17 @@ devices:
                                        #    description: "... {slot} ..." }]  # column C
     loose_items: []                    # [{ part_id, qty }]
     excluded_from_power: false
+    alt_group: L1-SWITCH-24P           # optional; same key = interchangeable parts (ADR 0017)
+    tier: mid                          # optional: low | mid | high
+    inrush_a: 20                       # optional peak inrush current (M15)
+    inrush_ms: 5                       # optional inrush duration (M15)
 
-catalogues:
+catalogues:                            # the brand set named default
   enclosure_u: 42                      # rack units of the enclosure (ADR 0013)
   mcb:          { family: "Acti9 2P", make: Schneider, ratings_a: [1, 2, 6, 10, 16],
-                  code_pattern: "A9F742{rating:02d}" }
+                  code_pattern: "A9F742{rating:02d}",   # or codes: {1: ..., 2: ...}
+                  trip_curve: C, magnetic_trip_multiple: 5,      # optional (ADR 0017)
+                  magnetic_trip_multiple_dc: 7, dc_rating_v: 125 }
   aux_contact:  { make: Schneider, model: A9A26924, ordering_code: A9A26924 }
   terminal_blocks:
     UT-16:      { make: Phoenix Contact, ordering_code: "3044199" }
@@ -311,6 +321,13 @@ catalogues:
     ipr_kit:     { part_id: ... }        # its device record lists relay, base, suppression, bracket
     change_over_diodes: { negative: ..., positive: ... }   # COD-1, COD-2
     socket:      { part_id: ..., rating_a: 10 }
+
+catalogue_brands:                      # optional further brand sets (ADR 0017)
+  mcb:             [{ id: abb-s200m, name: ABB S200M, family: ..., make: ABB, ... }]
+  aux_contact:     [{ id: abb, make: ABB, model: ..., ordering_code: ... }]
+  terminal_blocks: [{ id: weidmuller, name: ..., types: { UT-16: {...}, ... } }]  # all keys
+  busbars:         [{ id: copper, entries: { ac_safety_ground: {...}, ... } }]      # all keys
+  housekeeping:    [{ id: rittal, lamp: {...}, fan: {...}, ... }]                   # all roles
 ```
 
 ### 3.4 `panels/<id>.yaml` (spec: Inputs → 2. Panel definition)
@@ -804,6 +821,16 @@ writes its section's details when the work starts.
   same treatment, so a project can pick another brand. Devices gain the electrical fields
   that M15's MCB sizing needs, such as inrush current, and MCB catalogues gain their trip
   curve.
+  *Details:*
+  - Devices gain `alt_group`, `tier`, `inrush_a` and `inrush_ms`.
+  - The MCB catalogue gains `trip_curve`, the AC and DC magnetic multiples, `dc_rating_v`,
+    and `codes` as an alternative to `code_pattern`.
+  - `catalogue_brands` holds further brand sets, and `catalogue_choice` on the project
+    defaults or a substation picks one. The loader resolves each substation's
+    catalogues, so the engine is unchanged.
+  - New constants are `min_branch_mcb_a` and `inrush_min_ms`.
+  - The example builds byte-identical apart from the workbook's timestamps.
+  - Sections 3.1–3.3 show the keys.
 - **M14 — Library data (A3).** Backlog points 2–3. Every alternative in `data/device-db/`
   becomes a full library part with its datasheet electrical data, and the catalogues get
   their alternative brands. The default library becomes psa-devices 1.1.0.
