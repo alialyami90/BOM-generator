@@ -63,7 +63,7 @@
       else if (!filtering && r.tag_rows > 1) { skip = r.tag_rows - 1; tag = `<td class="merged mono" rowspan="${r.tag_rows}">${esc(r.tag || '')}</td>`; }
       else tag = `<td class="mono">${esc(r.tag || '')}</td>`;
       const rev = (c) => (r.revised.includes(c) ? 'changed' : '');
-      out += `<tr><td class="muted" style="width:34px">${r.group}</td><td class="num" style="width:56px">${r.sr}</td>${tag}<td class="wrap ${rev('D')}">${esc(r.description).replace(/\n/g, '<br>')}</td><td class="num ${rev('E')}" style="width:70px">${esc(r.qty)}</td><td class="${rev('F')}">${esc(r.make || '')}</td><td class="mono ${rev('G')}">${esc(r.model || '')}</td><td class="mono ${rev('H')}">${esc(r.ordering_code || '')}</td>${showHwio ? `<td class="num">${r.hwio || ''}</td>` : ''}</tr>`;
+      out += `<tr><td class="muted" style="width:34px">${r.group}</td><td class="num" style="width:56px">${r.sr}</td>${tag}<td class="wrap pv-desc ${rev('D')}">${esc(r.description).replace(/\n/g, '<br>')}</td><td class="num ${rev('E')}" style="width:70px">${esc(r.qty)}</td><td class="${rev('F')}">${esc(r.make || '')}</td><td class="mono pv-code ${rev('G')}">${esc(r.model || '')}</td><td class="mono pv-code ${rev('H')}">${r.ordering_code && r.ordering_code === r.model ? '<span class="muted small pv-same" title="The workbook repeats the model here">Same as model</span>' : esc(r.ordering_code || '')}</td>${showHwio ? `<td class="num">${r.hwio || ''}</td>` : ''}</tr>`;
     });
     return out;
   }

@@ -748,7 +748,11 @@ Delivered in small PRs by A11, one screen group each (ADR 0015 for the bridge):
   Checks, Build and Preview re-lay out generated panels with M1c's `with_layout`, as
   `bomgen build` does: layout errors are located problems that block Build and Preview,
   warnings show in Checks.
-- **M10e:** A4's impeccable polish pass.
+- **M10e:** A4's impeccable polish pass. First round from A4's ranked findings
+  (`m10e-polish-findings.md` in the project files): a compact Panels board header, equal
+  twin columns, one "not available yet" line under every page's subtitle, an opacity pulse
+  for the busy Build bar (the detector's marquee), a neutral "Partial" badge, and smaller
+  fixes on the project, Library, Preview, Build, Network and Home screens.
 
 ### M11 — Windows installer and releases
 - Freeze the app with PyInstaller (one folder) and wrap it in an Inno Setup

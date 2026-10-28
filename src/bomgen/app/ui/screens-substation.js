@@ -37,7 +37,6 @@
     const row = document.querySelector(`.code .src > div:nth-child(${Number(el.dataset.line)})`);
     if (row) { row.scrollIntoView({ block: 'center' }); document.querySelector('.code').focus({ preventScroll: true }); }
   };
-  const note = `<p class="muted small" style="margin-bottom:var(--space-4);max-width:68ch">${esc(LATER)}</p>`;
   const changed = (row, fmt = (v) => v) => (row.changed ? badge('info', `Changed from ${fmt(row.default)}`) : '<span class="muted small">Default</span>');
 
   /* ---------- Settings ---------- */
@@ -54,9 +53,9 @@
     const rb = App.route().b; if (tabsSettings.some(([k]) => k === rb)) S.tab.settings = rb;
     const t = p.calculations || S.tab.settings === 'yaml' ? S.tab.settings : 'yaml';
     const body = { general, documents, output, constants, loose, yaml }[t](p);
-    return `<div class="page">${pageHead('Settings', `Settings of ${esc(p.name)} only. Project-wide values are on the project page.`)}
+    return `<div class="page">${pageHead('Settings', `Settings of ${esc(p.name)} only. Project-wide values are on the project page.`, '', '', LATER)}
       ${problems(p)}${tabs('settings', tabsSettings, t, 'Substation settings')}
-      <div role="tabpanel" aria-labelledby="tab-settings-${t}">${t === 'yaml' ? '' : note}${body}</div></div>`;
+      <div role="tabpanel" aria-labelledby="tab-settings-${t}">${body}</div></div>`;
   };
   const general = (p) => `<div class="form form--2">
     ${field('Substation name', ro(input('s-name', p.name)), 'Shown in the app and in each sheet header.')}
@@ -106,14 +105,14 @@
     const p = page(); if (!p) return waiting('Network');
     if (!p.network) return `<div class="page">${pageHead('Network', 'What the substation contains and how the network is sized.')}${problems(p)}</div>`;
     const n = p.network, eq = p.equipment, unset = !n.ied_count;
-    return `<div class="page">${pageHead('Network', 'What the substation contains and how the network is sized. The panels are laid out from this.')}
-      ${problems(p)}${unset ? `<div style="margin-bottom:var(--space-4)">${banner('warn', '<b>The network is not set up yet.</b> Write the number of field IEDs and the equipment in substation.yaml.')}</div>` : ''}${note}
+    return `<div class="page">${pageHead('Network', 'What the substation contains and how the network is sized. The panels are laid out from this.', '', '', LATER)}
+      ${problems(p)}${unset ? `<div style="margin-bottom:var(--space-4)">${banner('warn', '<b>The network is not set up yet.</b> Write the number of field IEDs and the equipment in substation.yaml.')}</div>` : ''}
       <div class="net-grid">
         <div class="stack" style="gap:var(--space-6)">
           <section><h3>Field network</h3>
             <div class="form form--2" style="margin-top:var(--space-3)">
-              ${field('Field IEDs', `<div class="input-affix">${ro(input('n-ied', unset ? '' : n.ied_count, { num: true, mono: true, invalid: unset, placeholder: 'Required' }))}<span class="affix">IEDs</span></div>`, 'Never listed in the BOM. Only used to size the L1 switches.')}
-              ${field('Topology', ro(input('n-topo', n.topology === 'ring' ? 'Ring' : 'Star')), n.topology === 'star' ? 'Each L1 switch has one uplink to its L2 switch plus an A–B interlink.' : 'L1 switches are joined in rings. Two ports close each ring.')}
+              ${field('Field IEDs', `<div class="input-affix">${ro(input('n-ied', unset ? '' : n.ied_count, { num: true, mono: true, invalid: unset, placeholder: 'Required' }))}<span class="affix">IEDs</span></div>`, 'Sizes the L1 switches; never a BOM row.')}
+              ${field('Topology', ro(input('n-topo', n.topology === 'ring' ? 'Ring' : 'Star')), n.topology === 'star' ? 'One uplink per L1 switch plus an A–B interlink.' : 'L1 switches in rings; two ports close each ring.')}
               ${n.topology === 'ring' ? field('Switches per ring', ro(input('n-ring', n.ring_max_switches, { num: true, mono: true })), 'Most L1 switches in one ring.') : ''}
             </div></section>
           <section><h3>L1 switch model</h3>${App.network.rankTable()}</section>
