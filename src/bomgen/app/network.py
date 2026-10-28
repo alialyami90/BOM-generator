@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from bomgen.app.output import problems_of
-from bomgen.app.substations import resolve
+from bomgen.app.substations import layout_message, resolve
 from bomgen.engine.errors import EngineError
 from bomgen.engine.layout import LayoutResult, Unit, layout_preview
 from bomgen.io.loader import LoadedSubstation
@@ -109,7 +109,7 @@ def _network(loaded: LoadedSubstation, page: dict[str, Any]) -> None:
             {
                 "level": "error" if i.is_error else "warning",
                 "subject": i.subject,
-                "message": i.message,
+                "message": layout_message(i),
             }
             for i in result.report.issues
         ],

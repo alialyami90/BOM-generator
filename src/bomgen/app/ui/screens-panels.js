@@ -13,7 +13,7 @@
   const LAY = { key: '', state: 'idle', data: null, error: null };
   function layout() {
     const key = `${S.project.file}#${S.sub}`;
-    if (LAY.key !== key) { Object.assign(LAY, { key, state: 'idle', data: null, error: null }); selected = ''; }
+    if (LAY.key !== key) { Object.assign(LAY, { key, state: 'idle', data: null, error: null }); selected = ''; showIssues = false; }
     if (LAY.state === 'idle') {
       LAY.state = 'loading';
       const current = () => LAY.key === key;
@@ -60,13 +60,19 @@
   const ROLES = { fopp: 'Fibre patch panel', l2_switch: 'L2 switch', l1_switch: 'L1 switch', ext_switch: 'External switch', firewall: 'Firewall' };
   const name = (u) => (ROLES[u.role] ? `${ROLES[u.role]}${u.of > 1 ? ' ' + u.n : ''}` : u.label);
   const uid = (p, u) => `${p.number}:${u.key}:${u.side || ''}`;
+  let showIssues = false;
+  const issueList = (xs) => `<ul style="margin:6px 0 0;padding-left:18px">${xs.slice(0, 8).map((i) => `<li><span class="mono small">${esc(i.subject)}</span> ${esc(i.message)}</li>`).join('')}</ul>`;
   const issuesBanner = (d) => {
+    if (!d.generated) {  // one banner: what the board is, and what the layout would report
+      const n = d.issues.length;
+      return `<div style="margin-bottom:var(--space-3)">${banner('info', `<b>These panels are hand-written.</b> The board shows what <span class="mono">bomgen layout</span> would write; Build uses the hand-written panel files.${n ? ` Running it would report ${plural(n, 'problem')}.` : ''}${n && showIssues ? issueList(d.issues) : ''}`,
+        n ? `<button class="btn btn--secondary btn--sm" data-action="pv-issues" aria-expanded="${showIssues}">${showIssues ? 'Hide' : 'Show'}</button>` : '')}</div>`;
+    }
     const errors = d.issues.filter((i) => i.level === 'error'), warnings = d.issues.filter((i) => i.level === 'warning');
-    const list = (xs) => `<ul style="margin:6px 0 0;padding-left:18px">${xs.slice(0, 8).map((i) => `<li><span class="mono small">${esc(i.subject)}</span>: ${esc(i.message)}</li>`).join('')}</ul>`;
-    if (!d.generated) return d.issues.length ? `<div style="margin-bottom:var(--space-3)">${banner('warn', `<b>Running the layout would report ${plural(d.issues.length, 'problem')}.</b> They do not affect Build while the panels stay hand-written.${list(d.issues)}`)}</div>` : '';
-    return (errors.length ? `<div style="margin-bottom:var(--space-3)">${banner('bad', `<b>${plural(errors.length, 'layout error')}.</b> Build is blocked until they are fixed.${list(errors)}`, '<a class="btn btn--secondary btn--sm" href="#/checks">Open checks</a>')}</div>` : '')
-      + (warnings.length ? `<div style="margin-bottom:var(--space-3)">${banner('warn', `<b>${plural(warnings.length, 'layout warning')}.</b>${list(warnings)}`)}</div>` : '');
+    return (errors.length ? `<div style="margin-bottom:var(--space-3)">${banner('bad', `<b>${plural(errors.length, 'layout error')}.</b> Build is blocked until they are fixed.${issueList(errors)}`, '<a class="btn btn--secondary btn--sm" href="#/checks">Open checks</a>')}</div>` : '')
+      + (warnings.length ? `<div style="margin-bottom:var(--space-3)">${banner('warn', `<b>${plural(warnings.length, 'layout warning')}.</b>${issueList(warnings)}`)}</div>` : '');
   };
+  ACTIONS['pv-issues'] = () => { showIssues = !showIssues; App.render(); };
 
   SCREENS.panels = () => {
     if (!real()) return example();
@@ -89,7 +95,6 @@
     const changes = d.overrides.length + d.removed.length;
     const pairs = [...new Set(d.panels.map((p) => p.pair))];
     return `<div class="board-wrap">
-      ${d.generated ? '' : `<div style="margin-bottom:var(--space-3)">${banner('info', '<b>These panels are hand-written.</b> The board shows what <span class="mono">bomgen layout</span> would write from the equipment; Build uses the hand-written panel files until then.')}</div>`}
       ${issuesBanner(d)}
       <div class="board-bar" role="status" aria-live="polite">
         ${sel ? `<div class="sel-bar"><span><b>${esc(name(sel.u))}</b> <span class="mono muted">${esc(sel.u.part_id)}</span> ${esc(sel.u.label)} · ${sel.u.side ? 'Side ' + sel.u.side : 'Common'} · ${sel.u.height_u} U${sel.u.cable_manager_u ? ` + ${sel.u.cable_manager_u} U cable manager` : ''} · ${esc(sel.p.cabinet_name)}${sel.u.moved ? ' · moved by an override' : ''}</span><span class="sp"></span><button class="btn btn--ghost btn--icon btn--sm" data-action="pv-clear-sel" aria-label="Clear selection">${icon('x')}</button></div>`

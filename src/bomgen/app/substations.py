@@ -15,7 +15,7 @@ from pydantic import BaseModel, ValidationError
 
 from bomgen.app.projects import load_with_issues, project_only
 from bomgen.engine.errors import EngineError
-from bomgen.engine.layout import with_layout
+from bomgen.engine.layout import LayoutIssue, with_layout
 from bomgen.io.errors import InputError, Issue
 from bomgen.io.loader import LoadedSubstation, load_library
 from bomgen.io.yaml_source import read_yaml
@@ -204,6 +204,12 @@ class Resolved(NamedTuple):
     source: LoadedSubstation | None = None  # as loaded, before the layout
 
 
+def layout_message(issue: LayoutIssue) -> str:
+    """The issue's message without the subject it repeats at the start."""
+    lead = f"{issue.subject} "
+    return issue.message[len(lead) :] if issue.message.startswith(lead) else issue.message
+
+
 def _laid_out(found: Resolved) -> Resolved:
     """Generated panels re-laid out, as ``bomgen build`` does; layout errors block."""
     source = found.loaded
@@ -216,10 +222,12 @@ def _laid_out(found: Resolved) -> Resolved:
     if report is None:
         return found._replace(loaded=loaded)
     errors = [
-        Issue(found.file, f"layout: {i.subject}", i.message) for i in report.issues if i.is_error
+        Issue(found.file, f"layout: {i.subject}", layout_message(i))
+        for i in report.issues
+        if i.is_error
     ]
     warnings = [
-        Issue(found.file, f"layout: {i.subject}", i.message)
+        Issue(found.file, f"layout: {i.subject}", layout_message(i))
         for i in report.issues
         if not i.is_error
     ]

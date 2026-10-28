@@ -134,6 +134,10 @@ def test_hand_written_panels_are_listed_and_the_board_is_what_the_layout_would_w
 ) -> None:
     data = page(app, project)
 
+    # the example still feeds the annunciator from psa3, which the layout does not write
+    [issue] = data["issues"]
+    assert issue["subject"] == "loose_material.items[0].fed_from"
+    assert issue["message"].startswith("names panel 'psa3'")
     assert data["generated"] is False
     assert [(p["id"], p["generated"]) for p in data["list"]] == [
         ("psa1", False),
