@@ -9,6 +9,8 @@ or offer a remedy without parsing the message:
   format or `min_app_version`).
 - `VALIDATION_FAILED`: the library inside fails schema validation.
 - `DOWNGRADE`, `ALREADY_INSTALLED`: refused unless forced.
+- `NO_CHANGES`: an edited library equals the version it started from, so there is
+  nothing to save.
 - `NOT_INSTALLED`: the named library or version is not in the store.
 - `STORE_DAMAGED`: the installed store is unreadable (for example a corrupt
   `active` file).
@@ -29,6 +31,7 @@ class RefusalKind(StrEnum):
     VALIDATION_FAILED = "validation_failed"
     DOWNGRADE = "downgrade"
     ALREADY_INSTALLED = "already_installed"
+    NO_CHANGES = "no_changes"
     NOT_INSTALLED = "not_installed"
     STORE_DAMAGED = "store_damaged"
     INVALID_PROJECT = "invalid_project"

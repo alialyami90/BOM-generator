@@ -7,7 +7,7 @@ from typing import Annotated
 
 import typer
 
-from bomgen.library_store.errors import LibraryPackageError
+from bomgen.library_store.errors import LibraryPackageError, RefusalKind
 from bomgen.library_store.package import PACKAGE_SUFFIX, pack
 from bomgen.library_store.service import import_library, validate_library
 from bomgen.library_store.store import ImportResult, LibraryStore, default_library_home
@@ -99,6 +99,31 @@ def list_command() -> None:
         typer.echo(f"{library.name}  {active}  installed: {', '.join(library.versions)}")
         if library.problem:
             typer.echo(f"  warning: {library.problem}")
+
+
+@library_app.command("export")
+def export_command(
+    name: Annotated[str, typer.Argument(help="Library name.")],
+    version: Annotated[
+        str | None, typer.Option(help="Version to back up (default: the active one).")
+    ] = None,
+    out: Annotated[
+        Path | None, typer.Option(help="Package file (default: <name>-<version>.bomlib).")
+    ] = None,
+) -> None:
+    """Write an installed version, edited or not, as a .bomlib backup."""
+    store = _store()
+    try:
+        version = version or store.active_version(name)
+        if version is None:
+            raise LibraryPackageError(
+                f"library {name} has no active version", RefusalKind.NOT_INSTALLED
+            )
+        out = out or Path(f"{name}-{version}{PACKAGE_SUFFIX}")
+        manifest = store.export_package(name, version, out)
+    except (LibraryPackageError, OSError) as exc:
+        raise _fail(exc) from exc
+    typer.echo(f"Wrote {out} ({manifest.name} {manifest.version}, {len(manifest.files)} files)")
 
 
 @library_app.command("rollback")

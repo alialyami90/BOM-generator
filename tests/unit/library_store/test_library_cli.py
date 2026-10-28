@@ -1,4 +1,4 @@
-"""`bomgen library pack | import | list | rollback` (plan M8)."""
+"""`bomgen library pack | import | list | export | rollback` (plan M8)."""
 
 import zipfile
 from pathlib import Path
@@ -147,3 +147,33 @@ def test_cli_prints_the_remedy_for_an_inactive_reinstall(runner: CliRunner, tmp_
     assert result.exit_code == 1
     assert "error: library psa-devices 1.0.0 is installed but not active" in result.output
     assert "hint: run: bomgen library rollback psa-devices --to 1.0.0" in result.output
+
+
+def test_cli_export_writes_a_backup_of_the_active_version(
+    runner: CliRunner, tmp_path: Path
+) -> None:
+    runner.invoke(library_app, ["import", str(_pack(runner, tmp_path, "1.0.0", V1))])
+    out = tmp_path / "backup.bomlib"
+
+    result = runner.invoke(library_app, ["export", "psa-devices", "--out", str(out)])
+
+    assert result.exit_code == 0, result.output
+    assert "psa-devices 1.0.0" in result.output
+    assert out.is_file()
+    again = runner.invoke(library_app, ["import", str(out), "--dry-run", "--force"])
+    assert again.exit_code == 0, again.output
+
+
+def test_cli_export_defaults_the_file_name_and_names_a_missing_version(
+    runner: CliRunner, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    runner.invoke(library_app, ["import", str(_pack(runner, tmp_path, "1.0.0", V1))])
+    monkeypatch.chdir(tmp_path)
+
+    result = runner.invoke(library_app, ["export", "psa-devices"])
+
+    assert result.exit_code == 0, result.output
+    assert (tmp_path / "psa-devices-1.0.0.bomlib").is_file()
+    missing = runner.invoke(library_app, ["export", "psa-devices", "--version", "9.9.9"])
+    assert missing.exit_code == 1
+    assert "9.9.9 is not installed" in missing.output

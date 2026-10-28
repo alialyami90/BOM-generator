@@ -24,7 +24,7 @@ from typing import Any
 
 from pydantic import ValidationError
 
-from bomgen.bundle.container import MANIFEST_NAME
+from bomgen.bundle.container import MANIFEST_NAME, sha256, write_bundle
 from bomgen.library_store.diff import LibraryDiff, diff_libraries, parse_library
 from bomgen.library_store.errors import LibraryPackageError, RefusalKind
 from bomgen.library_store.manifest import LIBRARY_FILE, Manifest
@@ -199,6 +199,15 @@ class LibraryStore:
         if it raises, the store is left exactly as it was.
         """
         contents, result = self._plan_import(path, force)
+        self.install(contents, validate=validate)
+        return result
+
+    def install(self, contents: PackageContents, *, validate: Validator | None = None) -> None:
+        """Install verified `contents` and make it the active version (`import_package`'s commit).
+
+        `validate` gets the extracted `library.yaml` before anything is committed; if it
+        raises, the store is left exactly as it was.
+        """
         name, version = contents.manifest.name, contents.manifest.version
         library_dir = self.root / name
         created_dir = not library_dir.exists()
@@ -227,7 +236,37 @@ class LibraryStore:
                 shutil.rmtree(replaced, ignore_errors=True)
             if created_dir and not committed:
                 shutil.rmtree(library_dir, ignore_errors=True)
-        return result
+
+    def read_version(self, name: str, version: str) -> PackageContents:
+        """An installed version as a package: its manifest and files, checksums verified."""
+        if version not in self.versions(name):
+            raise LibraryPackageError(
+                f"library {name} {version} is not installed", RefusalKind.NOT_INSTALLED
+            )
+        folder = self.root / name / version
+        try:
+            manifest = self.manifest(name, version)
+            files: dict[str, bytes] = {}
+            for member, digest in manifest.files.items():
+                data = (folder / member).read_bytes()
+                if sha256(data) != digest:
+                    raise LibraryPackageError(
+                        f"library {name} {version}: {member} has changed since it was installed",
+                        RefusalKind.STORE_DAMAGED,
+                    )
+                files[member] = data
+            return PackageContents(manifest, files, parse_library(files[LIBRARY_FILE]))
+        except (OSError, ValidationError) as exc:
+            raise LibraryPackageError(
+                f"library {name} {version}: the installed files cannot be read ({exc})",
+                RefusalKind.STORE_DAMAGED,
+            ) from exc
+
+    def export_package(self, name: str, version: str, out: Path) -> Manifest:
+        """Write an installed version as a `.bomlib` backup that imports like any package."""
+        contents = self.read_version(name, version)
+        write_bundle(out, contents.manifest, contents.files)
+        return contents.manifest
 
     def rollback(self, name: str, to: str | None = None) -> str:
         """Activate `to`, or the newest installed version older than the active one."""
