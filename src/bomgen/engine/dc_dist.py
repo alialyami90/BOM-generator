@@ -78,8 +78,9 @@ def branch_sizing(device: DeviceType, library: Library, constants: DesignConstan
     """The smallest catalogue MCB that carries the running current with margin, whose
     magnetic trip clears an inrush lasting at least ``inrush_min_ms``, and that is at
     least the floor (plan Q35, ADR 0019)."""
+    mcb = library.catalogues.dc_mcb
     running = unit_current(device, constants)
-    multiple = _trip_multiple(library.catalogues.mcb, device) if device.inrush_a else None
+    multiple = _trip_multiple(mcb, device) if device.inrush_a else None
     counted = device.inrush_ms is None or device.inrush_ms >= constants.inrush_min_ms
     inrush_need = None
     if device.inrush_a and multiple and counted:
@@ -90,11 +91,11 @@ def branch_sizing(device: DeviceType, library: Library, constants: DesignConstan
         "inrush": inrush_need,
         "floor": floor,
     }
-    rating = rating_at_least(library, max(n for n in needs.values() if n is not None))
+    rating = rating_at_least(mcb, max(n for n in needs.values() if n is not None))
     set_by = tuple(
         name
         for name, need in needs.items()
-        if need is not None and rating_at_least(library, need) == rating
+        if need is not None and rating_at_least(mcb, need) == rating
     )
     return BranchSizing(
         rating_a=rating,
@@ -146,10 +147,11 @@ def dc_distribution(
     if not branches and not fed:
         return DcCircuits([], 0, 0, 0.0, 0, 0, [])
 
-    floor_a = rating_at_least(library, constants.min_branch_mcb_a)
+    mcb = library.catalogues.dc_mcb
+    floor_a = rating_at_least(mcb, constants.min_branch_mcb_a)
     spare_a = max((b.rating for b in branches), default=floor_a)
     branches += [_Branch("SPARE", spare_a, False, None)] * panel.options.dc_spare_branches_per_feed
-    rule_main_a = rating_at_least(library, max(current, constants.min_main_mcb_a))
+    rule_main_a = rating_at_least(mcb, max(current, constants.min_main_mcb_a))
     main_a = panel.options.main_mcb_override_a or rule_main_a
 
     prefix = panel.tag_prefix
@@ -157,15 +159,13 @@ def dc_distribution(
     sized: list[BranchMcb] = []
 
     def branch_line(tag: str, branch: _Branch, load: str) -> None:
-        lines.append(mcb_line(library, Group.F, tag, branch.rating, load))
+        lines.append(mcb_line(mcb, Group.F, tag, branch.rating, load))
         if branch.sizing is not None:
             fields = branch.sizing.model_dump()
             sized.append(BranchMcb(panel_id=panel.id, tag=tag, load=load, **fields))
 
     for feed in FEEDS:
-        lines.append(
-            mcb_line(library, Group.F, f"{prefix}-Q{feed}", main_a, f"Main DC supply-{feed}")
-        )
+        lines.append(mcb_line(mcb, Group.F, f"{prefix}-Q{feed}", main_a, f"Main DC supply-{feed}"))
         for n, branch in enumerate(branches, start=1):
             load = branch.load if branch.load == "SPARE" else f"{branch.load} PS{feed}"
             branch_line(f"{prefix}-Q{feed}.{n}", branch, load)

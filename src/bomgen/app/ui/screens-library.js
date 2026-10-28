@@ -26,7 +26,12 @@
     return err ? `<div style="margin-bottom:var(--space-4)">${banner('bad', `<b>${what}</b> ${esc(err.message)}`, key === 'overview' && LIB.versions && LIB.versions.versions.length ? '<button class="btn btn--primary btn--sm" data-action="show-versions">Installed versions…</button>' : '')}</div>` : '';
   };
   const reloadLibrary = () => { LIB.state = 'idle'; return Bridge.call('app_info').then(App.setAppInfo).catch(() => {}).then(loadLibrary); };
+  App.reloadLibrary = reloadLibrary;  // after a library edit is applied (screens-libedit.js)
+  App.libraryDevices = () => devices();  // the Add device dialog's Start from list
   const day = (iso) => (iso ? String(iso).slice(0, 10) : '—');
+  /* A +local.N version was made here from the version before the "+" (ADR 0018), so it was applied, not released. */
+  const localOf = (v) => (/\+local\.\d+$/.test(v || '') ? v.split('+')[0] : null);
+  const released = (L) => (localOf(L.version) ? ` ${badge('info', 'Local')}, local edits of ${esc(localOf(L.version))}${L.date !== '—' ? `, applied ${esc(L.date)}` : ''}` : L.date !== '—' ? `, released ${esc(L.date)}` : '');
   const feeds = { 1: 'Single feed', 2: 'Dual feed (2 supplies)' };
   const num = (v, unit) => (v == null ? '' : `${v} ${unit}`);
   const datasheet = (r) => {
@@ -74,9 +79,9 @@
 
   function browse() {
     const L = lib();
-    const lede = L ? `${esc(L.name)} ${esc(L.version)}${L.date !== '—' ? `, released ${esc(L.date)}` : ''}. This list is read-only. It changes only when you import an update package.` : LIB.errors.overview && !LIB.offline ? 'Make an installed version active, or import the package again.' : 'No library is active.';
+    const lede = L ? `${esc(L.name)} ${esc(L.version)}${released(L)}. Device edits wait as pending changes; the library changes when you apply them or import an update package.` : LIB.errors.overview && !LIB.offline ? 'Make an installed version active, or import the package again.' : 'No library is active.';
     return `<div class="page">${pageHead('Device library', lede,
-      `<button class="btn btn--secondary" data-action="goto" data-to="#/library/import">${icon('upload')}Import update…</button>`)}
+      `<button class="btn btn--secondary" data-action="goto" data-to="#/library/import">${icon('upload')}Import update…</button>${L && !LIB.offline ? `<button class="btn btn--primary" data-action="add-device">${icon('plus')}Add device…</button>` : ''}`)}
       ${loadError('overview', 'The active library could not be read.')}
       ${LIB.overview && LIB.overview.library && LIB.overview.library.problem ? `<div style="margin-bottom:var(--space-4)">${banner('warn', `<b>Part of the active library is damaged.</b> ${esc(LIB.overview.library.problem)}`)}</div>` : ''}
       ${LIB.overview && LIB.overview.records_problem ? `<div style="margin-bottom:var(--space-4)">${banner('warn', `<b>Datasheets and alternatives could not be read.</b> ${esc(LIB.overview.records_problem)}`)}</div>` : ''}
@@ -125,7 +130,7 @@
       ${d.alt.map((a) => `<h3 style="margin-top:var(--space-4)">${esc(a.brand)}</h3><div class="table-wrap" style="margin-top:6px"><table class="table"><thead><tr><th style="width:56px">Tier</th><th>Model</th><th>Data</th><th style="width:40px"><span class="sr-only">Copy</span></th></tr></thead><tbody>${a.rows.map((r) => `<tr><td>${esc(r.tier)}</td><td><span class="mono nowrap">${esc(r.model)}</span><span class="cell-sub">${r.same_as ? `Same as ${esc(r.same_as)}` : esc(r.sub || '')}</span></td><td>${verified(r.verified)}</td><td style="width:40px"><button class="btn btn--ghost btn--icon btn--sm" data-action="copy" data-v="${esc(r.model)}" aria-label="Copy ${esc(r.model)}">${icon('copy')}</button></td></tr>`).join('')}</tbody></table></div>`).join('')}`
       : `<p class="muted">No alternatives recorded for this device.</p>`;
     const what = o ? 'Catalogue entry detail' : 'Device detail';
-    return `<aside class="detail" aria-label="${what}"><h2 class="mono" style="font-size:18px;font-family:var(--font-mono)">${o ? o.title : esc(d.id)}</h2><p class="muted" style="margin-bottom:var(--space-3)">${o ? o.sub : makeModel(d)}</p>
+    return `<aside class="detail" aria-label="${what}"><h2 class="mono" style="font-size:18px;font-family:var(--font-mono)">${o ? o.title : esc(d.id)}</h2><p class="muted" style="margin-bottom:var(--space-3)">${o ? o.sub : makeModel(d)}</p>${o || LIB.offline ? '' : `<a class="btn btn--secondary btn--sm" style="margin-bottom:var(--space-3)" href="#/library/device/${encodeURIComponent(d.id)}">${icon('edit')}Edit device</a>`}
       ${tabs('libdetail', tabsList, t, what)}<div role="tabpanel" aria-labelledby="tab-libdetail-${t}">${body}</div></aside>`;
   }
 
@@ -280,7 +285,7 @@
     if (LIB.errors.versions && !LIB.offline) return loadError('versions', 'The installed versions could not be read.');
     if (!L && !list.length) return `<p class="muted">No library is installed yet.</p>`;
     return `<div class="table-wrap" style="max-width:980px"><table class="table table--comfort"><thead><tr><th>Version</th><th>Released</th><th>Notes</th><th class="num">Projects</th><th>State</th><th style="width:130px"><span class="sr-only">Actions</span></th></tr></thead><tbody>
-      ${list.map((v) => `<tr><td class="mono">${esc(v.version)}</td><td class="nowrap">${esc(day(v.released))}</td><td class="wrap">${esc(v.notes || '')}</td><td class="num">${v.projects}</td><td>${v.active ? badge('ok', 'Active', 'check') : ''} ${v.problem ? `${badge('bad', 'Problem', 'error')}<span class="cell-sub">${esc(v.problem)}</span>` : v.active ? '' : badge('plain', 'Installed')}</td><td>${v.active ? '' : `<button class="btn btn--secondary btn--sm" data-action="rollback" data-v="${esc(v.version)}" ${v.problem ? 'disabled' : ''}>Make active</button>`}</td></tr>`).join('')}</tbody></table></div>
+      ${list.map((v) => `<tr><td class="mono">${esc(v.version)}${localOf(v.version) ? ` ${badge('info', 'Local')}` : ''}</td><td class="nowrap">${localOf(v.version) ? `Applied ${esc(day(v.released))}` : esc(day(v.released))}</td><td class="wrap">${esc(v.notes || '')}</td><td class="num">${v.projects}</td><td>${v.active ? badge('ok', 'Active', 'check') : ''} ${v.problem ? `${badge('bad', 'Problem', 'error')}<span class="cell-sub">${esc(v.problem)}</span>` : v.active ? '' : badge('plain', 'Installed')}</td><td>${v.active ? '' : `<button class="btn btn--secondary btn--sm" data-action="rollback" data-v="${esc(v.version)}" ${v.problem ? 'disabled' : ''}>Make active</button>`}</td></tr>`).join('')}</tbody></table></div>
       <p class="muted small" style="margin-top:var(--space-3);max-width:68ch">Making an older version active does not change any project file. Projects keep the version they record, and the check report tells you when it differs from the active one.</p>`;
   }
   ACTIONS.rollback = (el) => { const L = lib(); dialog({ title: `Make ${esc(el.dataset.v)} active?`, body: `<p>The library switches to ${esc(el.dataset.v)} for every project on this PC. ${L ? `Version ${esc(L.version)} stays installed.` : ''}</p>`, actions: `<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="activate-version" data-v="${esc(el.dataset.v)}">Make ${esc(el.dataset.v)} active</button>` }); };

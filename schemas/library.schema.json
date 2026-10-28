@@ -200,6 +200,17 @@
         "mcb": {
           "$ref": "#/$defs/McbCatalogue"
         },
+        "mcb_dc": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/McbCatalogue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "terminal_blocks": {
           "additionalProperties": {
             "$ref": "#/$defs/TerminalBlockType"
@@ -832,6 +843,11 @@
     "McbBrand": {
       "additionalProperties": false,
       "properties": {
+        "ac_rated": {
+          "default": true,
+          "title": "Ac Rated",
+          "type": "boolean"
+        },
         "code_pattern": {
           "anyOf": [
             {

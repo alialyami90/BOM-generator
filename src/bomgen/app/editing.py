@@ -8,6 +8,7 @@ the file was written, the problems, and, once written, the refreshed Panels boar
 from __future__ import annotations
 
 import dataclasses
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -22,16 +23,23 @@ from bomgen.io.edit import panel_options as options_of
 from bomgen.library_store.store import LibraryStore
 from bomgen.models.substation import Layout
 
+Page = Callable[[Path, str, LibraryStore], dict[str, Any]]
+
 
 def edit_reply(
-    result: EditResult, project_file: Path, substation_id: str, store: LibraryStore
+    result: EditResult,
+    project_file: Path,
+    substation_id: str,
+    store: LibraryStore,
+    page: Page = layout_page,
 ) -> dict[str, Any]:
     """``written``, the ``issues`` (caused when not written, else still open) and the
-    board ``page`` after a write, or ``None`` when nothing was written."""
+    refreshed ``page`` (the Panels board by default) after a write, or ``None`` when
+    nothing was written."""
     return {
         "written": result.written,
         "issues": [dataclasses.asdict(issue) for issue in result.issues],
-        "page": layout_page(project_file, substation_id, store) if result.written else None,
+        "page": page(project_file, substation_id, store) if result.written else None,
     }
 
 

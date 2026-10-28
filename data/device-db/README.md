@@ -130,7 +130,11 @@ part and its branch MCB can be sized from its own data:
   ratings and the like.
 - `sources` lists the pages for that tier's figures.
 
-The original part's datasheet carries the same inrush and input-range keys. An MCB
+The original part's datasheet carries the same inrush and input-range keys. They go into
+the shipped library, `data/library/psa-devices.yaml`, which `data/library/build.py`
+generates from `examples/library.yaml` and these records (plan Q38); the example library
+leaves them out so its golden values stay those of the example workbook. Run
+`python data/library/build.py` after changing either. An MCB
 record's `datasheet.ratings.same_brand_dc_range` gives the Schneider C60H-DC code for that
 rating, the DC-rated range in the original's brand.
 

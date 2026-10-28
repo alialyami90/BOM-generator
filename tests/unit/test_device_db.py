@@ -35,9 +35,15 @@ EXPECTED_CATALOGUE_IDS = {
 }  # fmt: skip
 
 
+def _originals() -> list[dict[str, Any]]:
+    # The parts the device database describes; the alternatives made from its tiers
+    # (M14) carry a `tier` and are not records of their own.
+    return [d for d in LIBRARY["devices"] if "tier" not in d]
+
+
 def _library_device_ids() -> set[str]:
     ids: set[str] = set()
-    for device in LIBRARY["devices"]:
+    for device in _originals():
         ids.add(device["part_id"])
         ids.update(child["part_id"] for child in device.get("children", []))
         ids.update(item["part_id"] for item in device.get("loose_items", []))
@@ -47,7 +53,7 @@ def _library_device_ids() -> set[str]:
 
 
 def _library_switches() -> dict[str, dict[str, Any]]:
-    return {d["part_id"]: d for d in LIBRARY["devices"] if d["category"] == "network_switch"}
+    return {d["part_id"]: d for d in _originals() if d["category"] == "network_switch"}
 
 
 def _library_catalogue_refs() -> set[str]:

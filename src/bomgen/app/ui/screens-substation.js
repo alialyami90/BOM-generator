@@ -46,13 +46,13 @@
     btu_per_w: ['Heat conversion', 'BTU/h per W'], t_max_c: ['Maximum ambient', '°C'], t_int_c: ['Internal limit', '°C'],
     air_constant_m3k_per_wh: ['Air constant', 'm³·K/Wh'], steel_coefficient_w_per_m2c: ['Sheet-steel heat transfer', 'W/m²·°C'], min_main_mcb_a: ['Minimum main MCB', 'A']
   };
-  const tabsSettings = [['general', 'General'], ['documents', 'Documents'], ['output', 'Output'], ['constants', 'Design constants'], ['loose', 'Loose material'], ['yaml', 'YAML']];
+  const tabsSettings = [['general', 'General'], ['documents', 'Documents'], ['output', 'Output'], ['constants', 'Design constants'], ['yaml', 'YAML']];
   SCREENS.settings = () => {
     if (!real()) return example.settings();
     const p = page(); if (!p) return waiting('Settings');
     const rb = App.route().b; if (tabsSettings.some(([k]) => k === rb)) S.tab.settings = rb;
     const t = p.calculations || S.tab.settings === 'yaml' ? S.tab.settings : 'yaml';
-    const body = { general, documents, output, constants, loose, yaml }[t](p);
+    const body = { general, documents, output, constants, yaml }[t](p);
     return `<div class="page">${pageHead('Settings', `Settings of ${esc(p.name)} only. Project-wide values are on the project page.`, '', '', LATER)}
       ${problems(p)}${tabs('settings', tabsSettings, t, 'Substation settings')}
       <div role="tabpanel" aria-labelledby="tab-settings-${t}">${body}</div></div>`;
@@ -80,10 +80,6 @@
   const constants = (p) => `<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">Defaults come from the project's shared defaults. A value this substation writes itself is marked.</p>
     <div class="table-wrap" style="max-width:820px"><table class="table"><thead><tr><th>Constant</th><th class="num" style="width:130px">Value</th><th>Unit</th><th style="width:170px">Default</th></tr></thead>
     <tbody>${p.constants.map((c) => { const [label, unit] = CONSTANTS[c.key] || [c.key, '']; return `<tr><td>${esc(label)}<span class="cell-sub mono">${esc(c.key)}</span></td><td>${ro(input('c-' + c.key, c.value, { num: true, mono: true }))}</td><td class="muted">${esc(unit)}</td><td>${changed(c)}</td></tr>`; }).join('')}</tbody></table></div>`;
-  const loose = (p) => { const m = p.loose_material; return m ? `<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">Items that are not mounted in any cabinet. They appear as a second table, “${esc(m.title)}”, under the <span class="mono">${esc(m.host_panel)}</span> BOM.</p>
-    <div class="table-wrap" style="max-width:1100px"><table class="table"><thead><tr><th>Part</th><th>Designation</th><th class="num" style="width:70px">Qty</th><th style="width:130px">Fed from</th><th>Child parts</th></tr></thead>
-    <tbody>${m.items.map((l) => `<tr><td class="mono">${esc(l.part_id)}</td><td>${esc(l.tag || '—')}</td><td class="num">${esc(l.qty)}</td><td>${l.fed_from ? `<span class="mono">${esc(l.fed_from)}</span>` : '<span class="muted">—</span>'}</td><td class="mono">${esc(l.children.join(', ') || '—')}</td></tr>`).join('')}</tbody></table>
-    <div class="table-foot"><span>${plural(m.items.length, 'item')}</span></div></div>` : '<div class="empty"><b>No loose material.</b><div class="muted small">This substation lists no items outside the cabinets.</div></div>'; };
   const hl = (line) => esc(line).replace(/^(\s*)(- )?([A-Za-z_][\w]*)(:)/, '$1$2<span class="k">$3</span>$4').replace(/(#.*)$/, '<span class="c">$1</span>');
   function yaml(p) {
     const lines = p.yaml.replace(/\n$/, '').split('\n');

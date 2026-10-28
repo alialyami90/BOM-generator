@@ -29,7 +29,15 @@ from pydantic import BaseModel, ValidationError
 
 from bomgen import __version__
 from bomgen.app.catalogues import catalogues_page
-from bomgen.app.editing import edit_reply, layout_check, layout_issues, panel_options_page
+from bomgen.app.editing import (
+    Page,
+    edit_reply,
+    layout_check,
+    layout_issues,
+    panel_options_page,
+)
+from bomgen.app.library_edit import EditRefusedError, LibraryEditor, PendingEdits
+from bomgen.app.loose import loose_page
 from bomgen.app.network import layout_page
 from bomgen.app.output import OutputRefusedError, build_file, build_target, checks_page
 from bomgen.app.preview import preview_page
@@ -37,12 +45,14 @@ from bomgen.app.projects import RecentProjects, project_files, summarize
 from bomgen.app.substations import (
     ProjectInvalidError,
     SubstationNotFoundError,
+    resolve,
     substation_page,
 )
 from bomgen.bundle.errors import LibraryPackageError, RefusalKind
-from bomgen.io import edit
+from bomgen.io import edit, loose_edit
 from bomgen.io.edit import EditError, EditResult
 from bomgen.io.errors import InputError
+from bomgen.io.fields import PartUse, part_users
 from bomgen.io.loader import PROJECT_FILE, load_library
 from bomgen.library_store.device_db import DeviceRecord, load_device_records
 from bomgen.library_store.manifest import Manifest
@@ -355,6 +365,89 @@ class Api:
         """Make an installed version active again. Project files are not touched."""
         return self._library_store().rollback(name, to=version)
 
+    # -- Library editing (docs/ui/editing.md "Library editing (v0.2)", M16) --
+
+    def _editor(self) -> LibraryEditor:
+        installed = self._active_library()
+        if installed is None:
+            raise AppError("not_installed", "No library is installed.")
+        return LibraryEditor(
+            self._library_store(), PendingEdits(default_app_home(self._env)), installed.name
+        )
+
+    @endpoint
+    def library_pending(self) -> dict[str, Any]:
+        """The pending library changes: one entry per changed field, and the version they make."""
+        return self._editor().page()
+
+    @endpoint
+    def library_device(self, part_id: str) -> dict[str, Any]:
+        """One device with the pending edits applied, and its saved values."""
+        try:
+            return self._editor().device(part_id)
+        except KeyError as exc:
+            raise AppError("not_found", f"There is no part {part_id} in the library.") from exc
+
+    @endpoint
+    def check_library_field(self, part_id: str, field: str, value: object) -> str | None:
+        """The model's message for setting a device field to `value`, or None when it fits."""
+        return self._editor().check(part_id, field, value)
+
+    @endpoint
+    def add_library_edits(self, edits: list[dict[str, Any]]) -> dict[str, Any]:
+        """Add edits to the pending set; all are refused when one leaves the library invalid."""
+        try:
+            return self._editor().add(edits)
+        except (EditRefusedError, ValidationError) as exc:
+            raise AppError("invalid_edit", f"The library cannot take this change: {exc}") from exc
+
+    @endpoint
+    def add_library_device(
+        self, part_id: str, category: str, make: str, model: str, copy_of: str | None = None
+    ) -> dict[str, Any]:
+        """Add a new device to the pending set, blank or as a copy of another part."""
+        try:
+            return self._editor().add_device(part_id, category, make, model, copy_of)
+        except KeyError as exc:
+            raise AppError("not_found", f"There is no part {copy_of} in the library.") from exc
+        except (EditRefusedError, ValidationError) as exc:
+            raise AppError("invalid_edit", f"The library cannot take this change: {exc}") from exc
+
+    @endpoint
+    def library_part_users(
+        self, part_id: str, project_file: str, substation_id: str
+    ) -> dict[str, Any]:
+        """The rows of the open substation, and of its library, that use ``part_id``; ``uses`` is
+        None when the substation cannot be read (its problems are on Checks)."""
+        with self._substation(substation_id):
+            found = resolve(Path(project_file), substation_id, self._library_store())
+        if found.loaded is None:
+            return {"substation": substation_id, "uses": None}
+        uses = part_users(found.loaded, part_id)
+        panels = {file: panel for panel, file in found.loaded.panel_files.items()}
+
+        def use(u: PartUse) -> dict[str, Any]:
+            if u.where != "panel":
+                return {"where": u.where, "name": u.name, "panel": None}
+            panel = panels[u.file] if u.file is not None else None
+            # part_users names a panel row "<panel>: <tag>"
+            return {"where": u.where, "name": u.name.split(": ", 1)[-1], "panel": panel}
+
+        return {
+            "substation": found.loaded.substation.substation.name or substation_id,
+            "uses": [use(u) for u in uses],
+        }
+
+    @endpoint
+    def discard_library_edits(self) -> dict[str, Any]:
+        """Drop every pending change; returns them so the page can undo."""
+        return self._editor().discard()
+
+    @endpoint
+    def apply_library_edits(self, note: str = "") -> dict[str, Any]:
+        """Write the pending changes as a new local version and make it active."""
+        return self._editor().apply(note)
+
     # -- Projects (docs/ui/screens.md: Home, Project, Back up and share) --
 
     @endpoint
@@ -474,13 +567,19 @@ class Api:
     # -- Editing (docs/ui/editing.md; writers in bomgen.io.edit, ADR 0021) --
 
     def _edit(
-        self, project_file: str, substation_id: str, write: Callable[..., EditResult], *args: Any
+        self,
+        project_file: str,
+        substation_id: str,
+        write: Callable[..., EditResult],
+        *args: Any,
+        page: Page = layout_page,
+        **kwargs: Any,
     ) -> dict[str, Any]:
         store = self._library_store()
         project = Path(project_file)
         with self._substation(substation_id), _edit_refusals():
-            result = write(project, substation_id, *args, store=store)
-            return edit_reply(result, project, substation_id, store)
+            result = write(project, substation_id, *args, store=store, **kwargs)
+            return edit_reply(result, project, substation_id, store, page)
 
     @endpoint
     def set_layout_overrides(
@@ -592,6 +691,85 @@ class Api:
     ) -> dict[str, Any]:
         """Write (or with ``None`` remove) an equipment row's port plan."""
         return self._edit(project_file, substation_id, edit.set_port_plan, equipment_id, port_plan)
+
+    @endpoint
+    def loose_material(self, project_file: str, substation_id: str) -> dict[str, Any]:
+        """The substation's loose material, for the Loose material page."""
+        with self._substation(substation_id):
+            return loose_page(Path(project_file), substation_id, self._library_store())
+
+    @endpoint
+    def add_loose_item(
+        self,
+        project_file: str,
+        substation_id: str,
+        item: dict[str, Any],
+        index: int | None,
+        host_panel: str | None,
+    ) -> dict[str, Any]:
+        """Insert a loose item at ``index`` (``None``: at the end); the first item also
+        names ``host_panel``."""
+        return self._edit(
+            project_file,
+            substation_id,
+            loose_edit.add_loose_item,
+            item,
+            index=index,
+            host_panel=host_panel,
+            page=loose_page,
+        )
+
+    @endpoint
+    def set_loose_item(
+        self, project_file: str, substation_id: str, index: int, item: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Replace loose item ``index`` with ``item``."""
+        return self._edit(
+            project_file, substation_id, loose_edit.set_loose_item, index, item, page=loose_page
+        )
+
+    @endpoint
+    def remove_loose_item(
+        self, project_file: str, substation_id: str, index: int
+    ) -> dict[str, Any]:
+        """Remove loose item ``index``."""
+        return self._edit(
+            project_file, substation_id, loose_edit.remove_loose_item, index, page=loose_page
+        )
+
+    @endpoint
+    def move_loose_item(
+        self, project_file: str, substation_id: str, source: int, target: int
+    ) -> dict[str, Any]:
+        """Move loose item ``source`` to position ``target``, the sheet's order."""
+        return self._edit(
+            project_file,
+            substation_id,
+            loose_edit.move_loose_item,
+            source,
+            target,
+            page=loose_page,
+        )
+
+    @endpoint
+    def set_loose_host_panel(
+        self, project_file: str, substation_id: str, panel_id: str
+    ) -> dict[str, Any]:
+        """Issue the Loose Material sheet under ``panel_id``'s document."""
+        return self._edit(
+            project_file, substation_id, loose_edit.set_host_panel, panel_id, page=loose_page
+        )
+
+    @endpoint
+    def validate_loose_item(
+        self, project_file: str, substation_id: str, index: int | None, item: dict[str, Any]
+    ) -> dict[str, str]:
+        """The engine's messages for ``item`` as item ``index`` (``None``: a new last item),
+        by field; nothing is written."""
+        with self._substation(substation_id), _edit_refusals():
+            return loose_edit.validate_loose_item(
+                Path(project_file), substation_id, index, item, store=self._library_store()
+            )
 
     @endpoint
     def preview_substation(self, project_file: str, substation_id: str) -> dict[str, Any]:

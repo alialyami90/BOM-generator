@@ -15,7 +15,7 @@ agent; the milestones are in [`plan.md`](plan.md) → "Milestones".
 | --- | --- | --- | --- |
 | A1 | Lead developer | Reviews, cross-thread consistency, this file | `docs/agents.md`, `CLAUDE.md`, `.github/workflows/ci.yml`, `docs/handoff/README.md`, `docs/handoff/01-lead/`, plan sections 1, 2, 4 (intro), 5 |
 | A2 | Input models and examples | M1, M1b | `src/bomgen/models/`, `src/bomgen/io/`, `src/bomgen/cli.py`, `src/bomgen/build.py`, `examples/`, plan section 3 and the M1 section |
-| A3 | Device database researcher | Reference data, outside the milestones | `data/device-db/`, its validation test |
+| A3 | Device database researcher | Reference data, outside the milestones | `data/device-db/`, its validation test; the shipped library `data/library/` (build script, generated file, `test_shipped_library.py`; plan Q38) |
 | A4 | UI designer | M9, the M10e polish findings (done) | `docs/ui/`, the M9 section |
 | A5 | Library update packages | M8, M8b | `src/bomgen/library_store/`, ADR 0008, the M8 section |
 | A6 | Windows installer and release | M11 | `packaging/`, `.github/workflows/release.yml`, `docs/install.md`, `src/bomgen/app/launcher.py`, ADR 0009, the M11 section |
@@ -78,7 +78,8 @@ A2's loader, and registers its command group in `bomgen.cli` with one
 ### A6 — Windows installer and release (M11)
 
 PyInstaller spec, Inno Setup per-user installer, `.bomlib` file association,
-and the tag-driven release workflow. Built early with placeholders; it wires
+and the release workflow (a merged version bump with its CHANGELOG section
+builds, tags and publishes; ADR 0009). Built early with placeholders; it wires
 the real CLI, library import and window as M1, M8 and M10 land.
 
 ### A8 — Sizing and layout engine (M1c)
@@ -153,8 +154,8 @@ the same one. Ask A1 before you add one.
 
 | Kind | Taken | Next free |
 | --- | --- | --- |
-| ADR | 0009 installer layout (A6), 0010 input models (A2), 0011 UI design language and bundled fonts (A4), 0012 projects/substations/.bomproj (A1, accepted), 0013 network sizing and panel layout (A1, accepted), 0014 engine data model (A9, accepted), 0015 desktop app bridge (A11, accepted), 0016 check report and revision comparison (A9, proposed); reserved: 0017 library alternatives and catalogue brands (A2), 0018 library CSV exchange (A5), 0019 branch MCB sizing (A9), 0020 loose-material sheet (A10), 0021 project and substation file writers (A2), 0022 free-text loose items (A2) | 0023 |
-| Open question | Q22 workbook corrections, Q23 issued sheets vs masters (A2), Q24–Q28 substations/layout (resolved), Q29 thermostat and fan library defaults (A3), Q30 loose-table order (A9), Q31 M2 engine rules bundle (A9), Q32 cable managers vs 32U (resolved), Q33 FOPP-96SM height (resolved), Q34 M3 group E–H rules (resolved), Q35 branch MCB sizing rule (resolved), Q36 loose-material placement (resolved), Q37 default DC MCB set (resolved), Q38 datasheet data in the shipped library (resolved) | Q39 |
+| ADR | 0009 installer layout (A6), 0010 input models (A2), 0011 UI design language and bundled fonts (A4), 0012 projects/substations/.bomproj (A1, accepted), 0013 network sizing and panel layout (A1, accepted), 0014 engine data model (A9, accepted), 0015 desktop app bridge (A11, accepted), 0016 check report and revision comparison (A9, proposed); reserved: 0017 library alternatives and catalogue brands (A2), 0018 library CSV exchange (A5), 0019 branch MCB sizing (A9), 0020 loose-material sheet (A10), 0021 project and substation file writers (A2), 0022 free-text loose items (A2), 0023 separate AC and DC MCB brands (B2) | 0024 |
+| Open question | Q22 workbook corrections, Q23 issued sheets vs masters (A2), Q24–Q28 substations/layout (resolved), Q29 thermostat and fan library defaults (A3), Q30 loose-table order (A9), Q31 M2 engine rules bundle (A9), Q32 cable managers vs 32U (resolved), Q33 FOPP-96SM height (resolved), Q34 M3 group E–H rules (resolved), Q35 branch MCB sizing rule (resolved), Q36 loose-material placement (resolved), Q37 default DC MCB set (resolved), Q38 datasheet data in the shipped library (resolved), Q39 separate AC and DC MCB brands (resolved) | Q40 |
 
 ## Review and merge
 

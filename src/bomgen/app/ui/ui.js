@@ -136,6 +136,7 @@
       ${navItem('#/settings', 'file', 'Settings', ex ? icon('check') : '', 'ok', !ns, r === 'settings')}
       ${navItem('#/network', 'network', 'Network', ex ? (S.sub === 'cb03' ? `${icon('warn')}Not set up` : icon('check')) : '', S.sub === 'cb03' ? 'warn' : 'ok', !ns, r === 'network')}
       ${navItem('#/panels', 'panels', 'Panels', ex ? String(S.sub === 'cb03' ? 0 : DB.panels.length) : ns ? esc(curSub().panels) : '', '', !ns, r === 'panels')}
+      ${ex ? '' : navItem('#/loose', 'pkg', 'Loose material', App.looseCount && App.looseCount() != null ? String(App.looseCount()) : '', '', !ns, r === 'loose')}
       <div class="nav-group">Verify and issue</div>
       ${navItem('#/checks', 'checks', 'Checks', checksTail, bad ? 'bad' : 'ok', !ns, r === 'checks')}
       ${navItem('#/preview', 'preview', 'Preview', '', '', !ns, r === 'preview')}
@@ -157,8 +158,8 @@
   }
   function renderMain() {
     const { a } = route();
-    const key = ({ home: 'home', project: 'project', settings: 'settings', network: 'network', panels: 'panels', library: 'library', checks: 'checks', preview: 'preview', build: 'build' })[a] || 'home';
-    const needsProject = key === 'project', needsSub = ['settings', 'network', 'panels', 'checks', 'preview', 'build'].includes(key);
+    const key = ({ home: 'home', project: 'project', settings: 'settings', network: 'network', panels: 'panels', loose: 'loose', library: 'library', checks: 'checks', preview: 'preview', build: 'build' })[a] || 'home';
+    const needsProject = key === 'project', needsSub = ['settings', 'network', 'panels', 'loose', 'checks', 'preview', 'build'].includes(key);
     const m = $('#main');
     m.innerHTML = (needsProject && !hasProject()) || (needsSub && !hasSub()) ? SCREENS.home() : SCREENS[key]();
     if (SCREENS[key + 'After']) SCREENS[key + 'After']();
@@ -204,7 +205,7 @@
 
   ACTIONS.tab = (el) => { S.tab[el.dataset.group] = el.dataset.value; if (el.dataset.group === 'project') history.replaceState(null, '', '#/project/' + el.dataset.value); if (el.dataset.group === 'settings') history.replaceState(null, '', '#/settings/' + el.dataset.value); if (el.dataset.group === 'panel') history.replaceState(null, '', '#/panels/' + route().b + '/' + el.dataset.value); const keep = $('#main').scrollTop; renderMain(); $('#main').scrollTop = keep; const nt = document.getElementById(el.id); nt && nt.focus(); };
   ACTIONS.goto = (el) => go(el.dataset.to);
-  ACTIONS['sub-switch'] = (el) => { S.sub = el.value || null; S.dirty = false; S.layout = { overrides: [], removed: [], history: [], selected: '', openOverrides: false }; const { a } = route(); go(['settings', 'network', 'panels', 'checks', 'preview', 'build'].includes(a) ? '#/' + a : '#/panels'); };
+  ACTIONS['sub-switch'] = (el) => { S.sub = el.value || null; S.dirty = false; S.layout = { overrides: [], removed: [], history: [], selected: '', openOverrides: false }; const { a } = route(); go(['settings', 'network', 'panels', 'loose', 'checks', 'preview', 'build'].includes(a) ? '#/' + a : '#/panels'); };
   ACTIONS.theme = () => { S.theme = { light: 'dark', dark: 'system', system: 'light' }[S.theme]; render(); toast(`Theme: ${S.theme}`, 'info'); };
   ACTIONS.help = () => dialog({ title: 'Help', body: '<p>The user guide is not written yet.</p>', actions: '<button class="btn btn--primary" data-action="close">Close</button>' });
   ACTIONS.close = () => closeDialog();

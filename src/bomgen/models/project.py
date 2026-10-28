@@ -43,10 +43,19 @@ class SheetNames(InputModel):
 
 
 class OutputSettings(InputModel):
-    """Workbook file name template and the names of the generated sheets."""
+    """Workbook file name template, the names of the generated sheets, and the footnotes the
+    Power Consumption sheet prints after its NOTES (spec: Power Consumption sheet)."""
 
     file_name: str = "{doc_no}_PSA_BOM_Rev{rev}.xlsx"
     sheet_names: SheetNames = Field(default_factory=SheetNames)
+    power_footnotes: list[str] = Field(default_factory=list)  # one row each; "\n" breaks the line
+
+    @field_validator("power_footnotes")
+    @classmethod
+    def _footnotes_not_blank(cls, value: list[str]) -> list[str]:
+        if any(not note.strip() for note in value):
+            raise ValueError("a power footnote must not be blank")
+        return value
 
     @field_validator("file_name")
     @classmethod

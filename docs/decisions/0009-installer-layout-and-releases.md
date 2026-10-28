@@ -1,4 +1,4 @@
-# 0009. Installer layout and tag-driven releases
+# 0009. Installer layout and releases
 
 - Status: Proposed
 - Date: 2026-10-28
@@ -62,14 +62,24 @@ end to end now and let those milestones plug in without touching packaging.
 - **WebView2** is checked at install time and fetched with Microsoft's
   bootstrapper when missing; failure warns but doesn't block, since the CLI
   doesn't need it.
-- **Releases are cut by pushing a tag `v<version>`** that must equal
-  `bomgen.__version__`. `.github/workflows/release.yml` freezes, smoke-tests the
-  frozen executables, compiles the installer, installs it silently, checks
-  files, shortcut and registry, uninstalls and checks cleanup, then creates the
-  GitHub Release with `bomgen-setup-<version>.exe` and `default.bomlib`. PRs
-  touching packaging run the same build without publishing. Unsigned for now (Q19).
+- **Releases are cut by merging a version bump to main.** A push to main whose
+  `bomgen.__version__` has no `v<version>` tag yet makes
+  `.github/workflows/release.yml` freeze, smoke-test the frozen executables,
+  compile the installer, install it silently, check files, shortcut and
+  registry, uninstall and check cleanup, then create the tag on that commit and
+  the GitHub Release with `bomgen-setup-<version>.exe` and `default.bomlib`.
+  It all happens in one run with `GITHUB_TOKEN`, because a tag that token creates
+  starts no other workflow; agent sessions can't push tags, so a tag-driven
+  release needed Ali at a terminal (amended 2026-10-28, Ali's approval). The
+  run creates nothing when the tag already exists, when the build fails, when
+  `CHANGELOG.md` has no `## [<version>]` section (Ali: never release with a
+  missing changelog), or when `pyproject.toml` and `__version__` disagree. A
+  `v<version>` tag pushed by hand still releases that commit and must equal
+  `__version__`. Release runs queue rather than cancel each other. PRs touching
+  packaging run the same build without publishing. Unsigned for now (Q19).
 - **The default device library ships inside the installer.** The workflow packs
-  `examples/library.yaml` plus `data/device-db` into `out/default.bomlib` (name and
+  the shipped library `data/library/psa-devices.yaml` (plan Q38) plus `data/device-db` into
+  `out/default.bomlib` (name and
   version are the project's `library:`), and `bomgen.iss` installs it to
   `{app}\library`. When the window starts and the library store holds no library,
   the launcher imports it through `library_store`; a store with any library is
@@ -92,6 +102,9 @@ end to end now and let those milestones plug in without touching packaging.
   for packaging paths and tags, so it can't block ordinary PRs. **Never make
   `release.yml` a required check:** a path-filtered workflow reports no status on
   other PRs, so a required check would hang them.
+- Every PR that changes the version is a release once merged, so a version bump
+  goes in its own PR, with its changelog section, after A1 or Ali call the
+  release (`packaging/README.md`).
 - Each release smoke-tests the real installer on a clean per-user profile, but
   only on the runner's Windows version.
 - Until signed, users see SmartScreen on first run (`docs/install.md`).

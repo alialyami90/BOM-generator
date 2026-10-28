@@ -24,6 +24,7 @@ from bomgen.engine.layout import (
     with_layout,
 )
 from bomgen.io.loader import LoadedSubstation, load_substation
+from bomgen.models.library import Category, PurdueLevel
 from bomgen.models.panel import Panel, PortAllocation
 from bomgen.models.substation import DeviceMove, EquipmentRole, PairMove, Side, UnitRef
 from bomgen.models.substation import Layout as LayoutInputs
@@ -494,7 +495,14 @@ def test_r1_tool_picks_the_l1_model_unless_pinned(example: LoadedSubstation) -> 
     ]
     result = layout_substation(with_changes(example, equipment=equipment))
     assert result.plan.l1_part_id == "RST2228-L1-24MM"
-    assert [c.ports.part_id for c in result.l1_candidates] == ["RST2228-L1-24MM"]
+    l1_switches = [
+        d.part_id
+        for d in example.library.devices
+        if d.category is Category.NETWORK_SWITCH and d.purdue_level is PurdueLevel.L1
+    ]
+    candidates = [c.ports.part_id for c in result.l1_candidates]
+    assert candidates[0] == "RST2228-L1-24MM"
+    assert sorted(candidates) == sorted(l1_switches)
 
 
 def test_r5_missing_height_is_reported(example: LoadedSubstation) -> None:

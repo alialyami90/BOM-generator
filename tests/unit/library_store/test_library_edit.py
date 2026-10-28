@@ -145,11 +145,16 @@ def test_a_path_that_leads_nowhere_is_a_problem_not_an_exception(library: Librar
 
 def test_a_catalogue_cell_and_a_dictionary_key_are_editable(library: Library) -> None:
     block = {"make": "Phoenix Contact", "ordering_code": "3044076"}
+    every_brand = [
+        SetValue(path=["catalogue_brands", "terminal_blocks", b.id, "types", "UT-NEW"], value=block)
+        for b in library.catalogue_brands.terminal_blocks
+    ]
     result = apply_edits(
         library,
         [
             SetValue(path=["catalogues", "mcb", "make"], value="Acme"),
             SetValue(path=["catalogues", "terminal_blocks", "UT-NEW"], value=block),
+            *every_brand,
         ],
     )
 
@@ -178,9 +183,10 @@ def test_a_brand_is_added_to_a_catalogue_and_found_by_its_id(library: Library) -
         added.library, [SetValue(path=["catalogue_brands", "mcb", "abb-s200", "make"], value="X")]
     )
 
-    assert added.library.brand_ids("mcb") == ["default", "abb-s200"]
+    shipped = [b.id for b in library.catalogue_brands.mcb]
+    assert added.library.brand_ids("mcb") == ["default", *shipped, "abb-s200"]
     assert renamed.library is not None
-    assert renamed.library.catalogue_brands.mcb[0].make == "X"
+    assert renamed.library.catalogue_brands.mcb[-1].make == "X"
 
 
 def test_a_second_brand_with_the_same_id_is_a_problem(library: Library) -> None:

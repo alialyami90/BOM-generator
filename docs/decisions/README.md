@@ -14,7 +14,7 @@ An ADR stays "Proposed" until Ali accepts it in review.
 | 0006 | [CI gated by paths-filter with an always-on ci-status job](0006-ci-docs-only-gating.md) | Accepted |
 | 0007 | [Windows desktop app: pywebview + PyInstaller + Inno Setup](0007-windows-desktop-app-stack.md) | Proposed |
 | 0008 | [Device library updates as `.bomlib` packages](0008-library-update-packages.md) | Proposed |
-| 0009 | [Installer layout and tag-driven releases](0009-installer-layout-and-releases.md) | Proposed |
+| 0009 | [Installer layout and releases](0009-installer-layout-and-releases.md) | Proposed |
 | 0010 | [Input schema details and validation behaviour](0010-input-schema.md) | Proposed |
 | 0011 | [UI design language and bundled fonts](0011-ui-design-language.md) | Proposed |
 | 0012 | [Projects hold substations; sharing by `.bomproj` export](0012-projects-substations-bomproj.md) | Accepted |
@@ -28,3 +28,4 @@ An ADR stays "Proposed" until Ali accepts it in review.
 | 0020 | [Loose material on its own sheet](0020-loose-material-sheet.md) | Accepted |
 | 0021 | [Round-trip YAML writers, checked before they write](0021-round-trip-writers.md) | Proposed |
 | 0022 | [Free-text loose items](0022-free-text-loose-items.md) | Proposed |
+| 0023 | [Separate AC and DC MCB choices](0023-separate-ac-and-dc-mcb-choices.md) | Proposed |

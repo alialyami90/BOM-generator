@@ -124,7 +124,7 @@ def test_the_round_trip_keeps_every_field_and_the_order(
             ),
             Insert(
                 path=["catalogue_brands", "terminal_blocks"],
-                value={"id": "wago", "name": "Wago", "types": types},
+                value={"id": "alt-blocks", "name": "Alt", "types": types},
             ),
             Insert(
                 path=["catalogue_brands", "busbars"],
@@ -156,6 +156,71 @@ def test_the_round_trip_keeps_every_field_and_the_order(
     assert preview.library == edited
     assert preview.library is not None
     assert preview.library.part_ids() == edited.part_ids()
+
+
+def _with_dc_only_brand(library: Library) -> Library:
+    mcb = library.catalogues.mcb.model_dump(mode="json", exclude_none=True)
+    brand = {**mcb, "id": "dc-only", "name": "DC only", "ac_rated": False}
+    result = apply_edits(library, [Insert(path=["catalogue_brands", "mcb"], value=brand)]).library
+    assert result is not None
+    return result
+
+
+def test_a_dc_only_brand_stays_dc_only_through_the_round_trip(
+    tmp_path: Path, store: LibraryStore, base: Library
+) -> None:
+    edited = _with_dc_only_brand(base)
+    out = tmp_path / "dc.zip"
+    export_csv(edited, out, name="psa", based_on="1.0.0")
+
+    preview = _preview(store, out)
+
+    assert preview.problems == []
+    assert preview.library == edited
+    assert preview.library is not None
+    assert [b.ac_rated for b in preview.library.catalogue_brands.mcb if b.id == "dc-only"] == [
+        False
+    ]
+
+
+def test_a_file_without_the_ac_rated_column_keeps_the_installed_flag(
+    tmp_path: Path, store: LibraryStore, base: Library
+) -> None:
+    save_local_version(store, "psa", _with_dc_only_brand(base))
+    out = tmp_path / "old"
+    export_csv(load_library(store.library_file("psa")), out, name="psa", based_on="1.0.0+local.1")
+    columns = [c for c in TABLES["mcb.csv"] if c != "ac_rated"]
+    buffer = io.StringIO(newline="")
+    writer = csv.DictWriter(
+        buffer, fieldnames=columns, lineterminator="\r\n", extrasaction="ignore"
+    )
+    writer.writeheader()
+    writer.writerows(_read(out, "mcb.csv"))
+    (out / "mcb.csv").write_bytes(buffer.getvalue().encode("utf-8-sig"))
+
+    preview = _preview(store, out)
+
+    assert preview.diff is not None
+    assert preview.diff.is_empty
+    assert preview.library is not None
+    assert [b.ac_rated for b in preview.library.catalogue_brands.mcb if b.id == "dc-only"] == [
+        False
+    ]
+
+
+def test_ac_rated_on_the_default_mcb_row_is_a_row_problem(
+    store: LibraryStore, folder: Path
+) -> None:
+    rows = _read(folder, "mcb.csv")
+    rows[0]["ac_rated"] = "false"
+    _write(folder, "mcb.csv", rows)
+
+    preview = _preview(store, folder)
+
+    assert [(p.table, p.column, p.key) for p in preview.problems] == [
+        ("mcb.csv", "ac_rated", "default")
+    ]
+    assert not preview.can_import
 
 
 def test_a_zip_and_a_folder_read_the_same(

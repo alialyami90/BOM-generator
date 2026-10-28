@@ -2,71 +2,67 @@
 
 | | |
 | --- | --- |
-| Name | A2 (successor: B2) |
+| Name | B2 |
 | Date | 2026-10-28 |
-| Branch | `claude/project-thread-8jbxpl-handoff` (docs only, from origin/main) |
-| HEAD / origin/main | 9313db1 / 9313db1 (checkpoint commit on top) |
+| Branch | `claude/project-thread-cyo20r` (this session's only push branch; restarted on main per PR) |
+| HEAD / origin/main | checkpoint commit on 55a0fd0 / 55a0fd0 |
 
-Other roles' current names: see ROSTER.md. Where docs say A1, A3, and so on, they mean
-the role number. Owns: see `docs/agents.md` "Roles", row A2 (`src/bomgen/models/`, `src/bomgen/io/`,
-`cli.py`, `build.py`, `examples/`, `docs/plan.md` section 3 and the M1 section).
+Other roles' current names: see ROSTER.md. Owns: see `docs/agents.md` "Roles", row A2
+(`src/bomgen/models/`, `src/bomgen/io/`, `cli.py`, `build.py`, `examples/`, `docs/plan.md`
+section 3 and the M1 section).
 
-## Merged (this role, v0.2)
-- M13 library model: #97 (ADR 0017). Input voltage range, DC float: #104.
-- M17 writers (ADR 0021): M17a #106 (`io/edit.py`), M17b #112 (`io/panel_edit.py`),
-  M17c #115 (`io/fields.py`), M17d #119 (`io/lifecycle.py`).
-- M18 model: #122 free-text loose items + `io/loose_edit.py` (ADR 0022); #124 wording.
-- Reviewed and approved others: models part of #100 (A8).
+## Merged (this role)
+- v0.2, by A2: #97, #104 (M13); #106, #112, #115, #119 (M17 writers, ADR 0021); #122, #124
+  (M18 model, ADR 0022).
+- By B2, 2026-10-28:
+  - #145 `McbBrand.ac_rated` (default true). The loader refuses an `ac_rated: false` brand
+    as `catalogue_choice.mcb`.
+  - #149 `io/yaml_source.py` parses each file text once (LRU of 64 texts, deep copy out).
+    Full suite: main 2:10 → 1:04; #130's head 10:01 → 3:05.
+  - #151 `catalogue_choice.mcb_dc` (Q39, ADR 0023 Proposed). `Catalogues.mcb_dc` and the
+    `Catalogues.dc_mcb` property.
+  - #152 `output.power_footnotes` on the substation (for role 10's Power Consumption
+    sheet). The gis01 example carries the printer footnote.
 
 ## In review
-- None of this role's own PRs are open (checked with `list_pull_requests`, 2026-10-28).
-- A3's #130 (M14 library entries, psa-devices 1.1.0): A2 review posted 2026-10-28 as a
-  COMMENT, no blockers. It waits on A1 to merge. The review raised three points:
-  1. The DC-only C60H-DC brand can be chosen for AC branches. This is a model gap,
-     and the follow-up is A2's (NEXT task 1).
-  2. With the default iC60N `dc_rating_v: 125`, the example's `dc_float` check WARNs
-     against the 140 V float. A1 or Ali to confirm.
-  3. The full suite runs about 9 min on #130 against about 2 min on main.
+- None of this role's PRs are open.
 
 ## Uncommitted / in progress
-- None. The branch `claude/project-thread-8jbxpl-loose-msg` (local and remote) is merged
-  #124 and safe to delete. Earlier `-*` topic branches are all merged.
+- None. Local topic branches `b2-*` are all merged and can be deleted.
 
 ## What works (evidence: gate below)
 - Every `examples/` file round-trips byte-identical (`tests/unit/test_round_trip.py`).
-- Writers refuse an edit that adds a new located problem and keep file mode and comments.
-- Loose items: library part or `description` (exactly one). A free-text item takes no
-  `children` and no `fed_from` (`tests/unit/test_loose_edit.py`,
-  `tests/unit/test_project_model.py`).
+- Writers refuse an edit that adds a located problem (ADR 0021).
+- The MCB choice: `mcb` sizes AC and refuses a DC-only brand. `mcb_dc` (unset: follows
+  `mcb`; `default`: the library's DC default) must resolve to a set with `dc_rating_v`
+  (`tests/unit/test_catalogue_choice_loader.py`, `test_library_alternatives.py`).
 
 ## Known gaps / risks
-- **One MCB choice for AC and DC** (`CatalogueChoice.mcb`): a DC-only brand (no AC
-  multiple) would also size the AC branches through `engine/ac_dist.py`. Not reported
-  today. See NEXT task 1.
-- `fed_from` accepts any panel id in the substation. `docs/ui/editing.md` says "a
-  generated cabinet"; the UI restricts the choice (ADR 0022 point 4).
-- `bomgen layout` still writes generated panel files with PyYAML (ADR 0021,
-  Consequences).
+- **The engine still sizes DC from `catalogues.mcb`.** Role 9 switches `engine/dc_dist.py`,
+  `engine/mcb.py` and the `dc_float` check to `catalogues.dc_mcb` (A1 passes this on).
+  Until then, `mcb_dc` loads and is checked but does not change the BOM.
+- **The unset `mcb_dc` fallback is stored, not computed** (A1's note on #151). When `mcb`
+  names a brand without `dc_rating_v`, `resolve_catalogues` puts it in `Catalogues.mcb_dc`
+  via `model_copy`, which skips the `_dc_set_is_dc_rated` validator. Nothing re-validates
+  a resolved library today. See NEXT task 1.
+- #130 (role 3, M14 library) is still open. It must add `ac_rated: false` to
+  `schneider-c60h-dc` (asked 2026-10-28).
+- `fed_from` accepts any panel id (ADR 0022 point 4). `bomgen layout` writes generated
+  panels with PyYAML (ADR 0021).
 
 ## Verification
-| Command (origin/main 9313db1, `docs/handoff` worktree) | Result | Date |
+| Command (origin/main 55a0fd0) | Result | Date |
 | --- | --- | --- |
-| `ruff check . && ruff format --check .` | All checks passed; 270 files formatted | 2026-10-28 |
-| `mypy` | no issues in 210 files | 2026-10-28 |
-| `pytest` | 2414 passed, 0 failed, 0 skipped (2 min) | 2026-10-28 |
-| `pytest tests/golden` | 94 passed | 2026-10-28 |
-| `pytest` on #130 head 87eee46 | 2413 passed, 0 failed (9 min) | 2026-10-28 |
-Not run: none of this role's code needs Windows or a GUI.
+| `ruff check . && ruff format --check .` | All checks passed; 317 files formatted | 2026-10-28 |
+| `python -m mypy` | no issues in 212 files | 2026-10-28 |
+| `python -m pytest` | 2452 passed, 0 failed (1 min 12 s) | 2026-10-28 |
+| `python -m pytest tests/golden` | 94 passed | 2026-10-28 |
+Not run: nothing of this role's needs Windows or a GUI.
 
 ## Waiting on
 - Ali: **Q23** (issued sheets vs masters, plan section 6). The default is the masters.
-  Open since M1.
-- A1: merge #130, then decide on point 2 above.
-- A11: questions while it wires `loose_edit`, `panel_edit`, `fields` and `lifecycle`
-  into the app. A1 made A2 its reviewer for those APIs (A1's message in this
-  thread, 2026-10-28).
+- Role 3: `ac_rated: false` on C60H-DC in #130.
+- Role 11: questions on the writer APIs (A2 is its reviewer for them).
 
 ## Spec vs code
-- Loose material is on its own sheet. This differs from the spec's sheet 4 and OUT-3,
-  as ADR 0020 records (Ali, Q36). The spec update is not A2's to change. It is
-  tracked in ADR 0020's Consequences.
+- Loose material is on its own sheet (ADR 0020, Q36). The spec update isn't role 2's.

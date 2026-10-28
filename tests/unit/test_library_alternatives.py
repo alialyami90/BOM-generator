@@ -188,3 +188,84 @@ def test_input_voltage_range_is_optional_and_ordered() -> None:
     assert (d.input_v_min, d.input_v_max) == (12, 125)
     with pytest.raises(ValidationError, match="input_v_min must not be above input_v_max"):
         DeviceType.model_validate({**switch_dict(), "input_v_min": 150, "input_v_max": 125})
+
+
+def test_mcb_brands_are_ac_rated_by_default() -> None:
+    library = Library.model_validate(library_with_brands())
+    assert library.catalogue_brands.mcb[0].ac_rated is True
+    dc_only = McbBrand.model_validate({**ABB_MCB, "id": "dc-only", "ac_rated": False})
+    assert dc_only.ac_rated is False
+
+
+def test_a_dc_only_choice_still_resolves_to_a_plain_catalogue() -> None:
+    data = library_with_brands()
+    data["catalogue_brands"]["mcb"][0]["ac_rated"] = False
+    library = Library.model_validate(data)
+    resolved = resolve_catalogues(library, CatalogueChoice(mcb="abb-s200m"))
+    assert type(resolved.catalogues.mcb) is McbCatalogue
+
+
+DC_MCB = {
+    "id": "c60h-dc",
+    "family": "C60H-DC 2P",
+    "make": "Schneider",
+    "ratings_a": [1, 2, 6, 10, 16],
+    "code_pattern": "A9N615{rating:02d}",
+    "dc_rating_v": 440,
+}
+
+
+def library_with_a_dc_brand() -> Library:
+    data = library_with_brands()
+    data["catalogue_brands"]["mcb"].append(dict(DC_MCB))
+    return Library.model_validate(data)
+
+
+def test_without_a_dc_choice_the_dc_set_is_the_mcb_set() -> None:
+    library = library_with_a_dc_brand()
+    assert library.catalogues.dc_mcb is library.catalogues.mcb
+    resolved = resolve_catalogues(library, CatalogueChoice(mcb="abb-s200m"))
+    assert resolved.catalogues.dc_mcb.make == "ABB"
+
+
+def test_mcb_dc_picks_the_dc_set_and_mcb_keeps_the_ac_set() -> None:
+    library = library_with_a_dc_brand()
+    resolved = resolve_catalogues(library, CatalogueChoice(mcb="abb-s200m", mcb_dc="c60h-dc"))
+    assert resolved.catalogues.mcb.make == "ABB"
+    assert resolved.catalogues.dc_mcb.family == "C60H-DC 2P"
+    assert type(resolved.catalogues.dc_mcb) is McbCatalogue
+
+
+def test_mcb_dc_default_keeps_the_default_set_for_dc_when_mcb_is_a_brand() -> None:
+    library = library_with_a_dc_brand()
+    resolved = resolve_catalogues(library, CatalogueChoice(mcb="abb-s200m", mcb_dc=DEFAULT_BRAND))
+    assert resolved.catalogues.mcb.make == "ABB"
+    assert resolved.catalogues.dc_mcb == library.catalogues.mcb
+
+
+def test_mcb_dc_default_with_no_other_choice_keeps_the_library() -> None:
+    library = library_with_a_dc_brand()
+    assert resolve_catalogues(library, CatalogueChoice(mcb_dc=DEFAULT_BRAND)) is library
+
+
+def test_mcb_dc_names_an_mcb_brand() -> None:
+    library = library_with_a_dc_brand()
+    assert library.brand_ids("mcb_dc") == library.brand_ids("mcb")
+    message = r"no mcb_dc brand 'siemens' \(the library has: default, abb-s200m, c60h-dc\)"
+    with pytest.raises(ValueError, match=message):
+        resolve_catalogues(library, CatalogueChoice(mcb_dc="siemens"))
+
+
+def test_a_library_may_give_its_own_default_dc_set() -> None:
+    data = library_with_brands()
+    data["catalogues"]["mcb_dc"] = {k: v for k, v in DC_MCB.items() if k != "id"}
+    library = Library.model_validate(data)
+    assert library.catalogues.dc_mcb.family == "C60H-DC 2P"
+    assert library.catalogues.mcb.family != "C60H-DC 2P"
+
+
+def test_the_librarys_default_dc_set_needs_a_dc_rating() -> None:
+    data = library_with_brands()
+    data["catalogues"]["mcb_dc"] = {k: v for k, v in ABB_MCB.items() if k != "id"}
+    with pytest.raises(ValidationError, match=r"catalogues\.mcb_dc needs dc_rating_v"):
+        Library.model_validate(data)

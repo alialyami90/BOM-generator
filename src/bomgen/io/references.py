@@ -18,6 +18,7 @@ from bomgen.models.library import (
     DeviceType,
     Housekeeping,
     Library,
+    McbCatalogue,
     PurdueLevel,
 )
 from bomgen.models.panel import Panel, PanelMirror
@@ -84,7 +85,9 @@ def catalogue_choice_issues(
     library: Library,
     library_name: str,
 ) -> list[Issue]:
-    """Brand ids in ``choice`` that the library does not have (ADR 0017)."""
+    """Brand ids in ``choice`` that the library does not have (ADR 0017), an MCB brand not
+    rated for AC as ``mcb`` (that choice sizes the AC branches), and an ``mcb_dc`` brand with
+    no DC rating (ADR 0023)."""
     if choice is None:
         return []
     issues: list[Issue] = []
@@ -94,7 +97,34 @@ def catalogue_choice_issues(
         if brand_id is not None and brand_id != DEFAULT_BRAND and brand_id not in known:
             message = f"no {kind} brand '{brand_id}' in {library_name} (it has: {', '.join(known)})"
             issues.append(_issue(source, (*prefix, kind), message))
+        elif kind == "mcb" and brand_id in _dc_only_mcb_brands(library):
+            ac_rated = [b for b in known if b not in _dc_only_mcb_brands(library)]
+            message = (
+                f"mcb brand '{brand_id}' is not rated for AC, and this choice also sizes the AC "
+                f"branches; choose an AC-rated brand ({', '.join(ac_rated)})"
+            )
+            issues.append(_issue(source, (*prefix, kind), message))
+        elif kind == "mcb_dc" and brand_id is not None:
+            rated = [b for b in known if _dc_set(library, b).dc_rating_v is not None]
+            if brand_id not in rated:
+                choices = ", ".join(rated) or "the library has none"
+                message = (
+                    f"mcb_dc brand '{brand_id}' has no dc_rating_v, so it cannot size the DC "
+                    f"branches; choose a DC-rated brand ({choices})"
+                )
+                issues.append(_issue(source, (*prefix, kind), message))
     return issues
+
+
+def _dc_only_mcb_brands(library: Library) -> set[str]:
+    return {brand.id for brand in library.catalogue_brands.mcb if not brand.ac_rated}
+
+
+def _dc_set(library: Library, brand_id: str) -> McbCatalogue:
+    """The MCB set that ``mcb_dc: brand_id`` would size the DC branches with (ADR 0023)."""
+    if brand_id == DEFAULT_BRAND:
+        return library.catalogues.dc_mcb
+    return next(brand for brand in library.catalogue_brands.mcb if brand.id == brand_id)
 
 
 def _housekeeping_refs(base: Loc, housekeeping: Housekeeping) -> list[tuple[Loc, str]]:

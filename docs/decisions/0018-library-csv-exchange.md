@@ -36,7 +36,7 @@ hold JSON.
 | `device_children.csv` | child rule | `part_id`, `seq`, `child_part_id`, `qty` (a number, or `cores`) |
 | `device_terminals.csv` | terminal rule | `part_id`, `seq`, then `TerminalRule` fields |
 | `device_loose_items.csv` | loose item | `part_id`, `seq`, `item_part_id`, `qty`, `tag` |
-| `mcb.csv` | MCB brand | `catalogue_id`, then the MCB fields (`family`, `make`, `poles`, `ratings_a`, `code_pattern`, `trip_curve`, `magnetic_trip_multiple`, `magnetic_trip_multiple_dc`, `dc_rating_v`) |
+| `mcb.csv` | MCB brand | `catalogue_id`, then the MCB fields (`family`, `make`, `poles`, `ratings_a`, `code_pattern`, `trip_curve`, `magnetic_trip_multiple`, `magnetic_trip_multiple_dc`, `dc_rating_v`, `ac_rated`, brands only) |
 | `mcb_codes.csv` | rating of a brand that lists `codes` | `catalogue_id`, `rating_a`, `code` |
 | `aux_contacts.csv` | aux-contact brand | `catalogue_id`, `make`, `model`, `ordering_code` |
 | `terminal_blocks.csv` | block type of a brand | `catalogue_id`, `name`, `type`, `make`, `ordering_code` |
@@ -177,3 +177,27 @@ checks table above, this wins.
   "(probably an Excel formula)", because that is how a formula Excel kept as text reaches the
   file. A valid value is never flagged (`-5` is a number); a text cell that starts with `=`,
   `+` or `@` and is valid still only warns in the `cells` check.
+- **Brand flag and brand diffs.** `mcb.csv` ends with `ac_rated` (ADR 0023): `true`/`false` on a
+  brand row, blank on the default row (a value there is a row problem). A file without the
+  column keeps the installed flag. `diff_libraries` now counts catalogue brand sets, as
+  `kind:id` in `catalogues_changed`, so a change to a brand set alone is a change when saving
+  (it was refused as "nothing differs") and is named in the release notes.
+
+## Amendment: device-record edits (2026-10-28)
+
+The device editor's Datasheet tab edits the device-database records, which live in
+`device-db/` beside `library.yaml` and are not part of the `Library` model (#164).
+
+- Record edits are the same `set | insert | remove` operations, on the records keyed by
+  `part_id`: `["SW-1", "datasheet", "weight_kg"]`. Setting `["NEW-1"]` to a whole record adds
+  one; removing `["SW-1"]` deletes it. Each edited record is checked with `DeviceRecord`, and
+  its `part_id` must equal its key.
+- `apply_record_edits` previews a set and `check_record_field` gives one field's message, the
+  counterparts of `apply_edits` and `check_field`. A union field (an int-or-float figure)
+  reports one problem, not one per member.
+- `save_edits(..., record_edits=...)` saves both kinds in one `+local.<n>` version; record
+  edits alone are a change. A changed record stays in the `device-db/` file it came from and
+  a new one goes to `device-db/local.yaml`; files without a change keep their bytes, and a
+  rewritten file loses its YAML comments, as `library.yaml` does. The release notes count
+  "N device records changed".
+- The CSV tables do not carry the records; a CSV import keeps them from its base version.
