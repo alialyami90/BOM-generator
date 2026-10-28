@@ -26,7 +26,7 @@
 1. **No IEDs, or an IED count that fits exactly.** `ied_count: 0` gives no L1 switches and no L1 row, but still one L2 per side; 20 IEDs on 20 usable ports gives 1 L1, 21 gives 2. (Task 1: `test_r1_zero_ieds_needs_no_l1_switch`, `test_r1_boundary_counts`.)
 2. **Spares that leave no usable port.** `port_fraction: 1.0`, or more reserved ports than the switch has, must give a readable `SizingError` naming the switch, not a `ZeroDivisionError` or zero switches. (Task 1: `test_r1_no_usable_port_is_an_error`.)
 3. **A device taller than the usable space.** A 40U device in a 32U panel cannot be placed by any fill; it gets its own panel and a `device-too-tall` error instead of an endless loop or a silent overfill. (Task 3: `test_r5_device_taller_than_capacity_is_reported`.)
-4. **Overrides that point at nothing.** A moved or removed tag that no longer exists (fewer IEDs after an edit), or a move to panel 9 of 2, is reported and ignored; the rest of the layout still comes out. (Task 4: `test_r7_stale_override_is_reported_and_ignored`, `test_r7_move_to_unknown_panel_is_reported`.)
+4. **Overrides that point at nothing.** A moved or removed unit that no longer exists (`#3` of an equipment entry that now has 2 units, or a deleted equipment id) (fewer IEDs after an edit), or a move to panel 9 of 2, is reported and ignored; the rest of the layout still comes out. (Task 4: `test_r7_stale_override_is_reported_and_ignored`, `test_r7_move_to_unknown_panel_is_reported`.)
 5. **Layouts that leave a panel empty.** Only common devices (no redundant pair), or moves that empty panel 3, must not write an empty panel file (the `Panel` model needs one device); an empty trailing panel is dropped and an empty middle one is a `panel-empty` error. (Task 2: `test_r6_only_common_devices_opens_one_pair_and_drops_empty_b`; Task 4: `test_r7_move_that_empties_a_panel_is_reported`.)
 
 ## Decisions this plan makes (raise in review if wrong)
@@ -48,11 +48,13 @@ A2 agreed these names for M1b (`models/substation.py` unless noted); Task 5 uses
 - `io.loader.load_substation(path, *, store=None) -> LoadedSubstation` with `.substation`, `.project`, `.library`, `.documents`, `.constants`, `.spares` (merged with project defaults), `.panels`, `.panel_files`, `.manual_panel_ids`, `.panel_capacity_u`.
 - Example substation: `examples/substations/gis01/substation.yaml` (40 IEDs, star, A3's `height_u` values).
 
-Still open with A1 and Ali:
+- Equipment entries carry a stable `id` (A2 adds it). Overrides and removals name units by it, never by tag (A1): `{device: <equipment id>#<n>, side: A|B, panel: 3}` and `{pair: <equipment id>#<n>, panel: [3, 4]}`. Tags stay A9's (`engine/tags.py`) and are not needed here.
 
-- **Override and removal keys** (A1): the design writes tags (`PSA1-L1-ESW-A13`); this plan keys them by the automatic tag from A9's tag builder, and a pair by its A unit's tag (`{ pair: PSA1-EXT-FW-A, panel: [3, 4] }`). Task 5 needs A9's public tag function or waits for it.
-- **Golden R10** (Ali, via A1): with 40 IEDs R1 gives **2** L1 switches per side, not the spec example's 6, and the port plans differ from today's hand-written ones (L1 SFPs 2 × 2 + 3 = 7, not 24 + 3). The golden records the rule results; the hand-written example panels keep every BOM golden value.
-- **Cable managers** (Ali, via A1): 1U each, 9 per network cabinet today, but derived later in step 3. This plan does not count them against the 32U.
+Settled by A1:
+
+- **Golden R10:** with 40 IEDs R1 gives 2 L1 switches per side, not the spec example's 6, and the port plans differ from the hand-written ones (L1 SFPs 2 × 2 + 3 = 7, not 24 + 3). The golden records the rule results; the hand-written example panels keep every BOM golden value.
+- **UI contract** (`docs/ui/screens.md` → "What the app needs from the engine"): `layout_preview(substation, overrides) -> LayoutResult` with panels, U used, blank plates, DIN-rail counts and move errors; `NetworkPlan` read-only; stable equipment ids.
+- **Cable managers** (Q32, with Ali): default not counted against the 32U.
 
 ---
 
@@ -108,21 +110,21 @@ Still open with A1 and Ali:
 
 **Produces:**
 - `Side(StrEnum)`: `A`, `B`, `NONE = "none"`.
-- `@dataclass(frozen=True) Unit(key: str, part_id: str, rank: int, side: Side, height_u: int, pair: str | None = None)` — `rank` is the equipment's position in BOM group order; `pair` is shared by an A unit and its B unit.
+- `@dataclass(frozen=True) Unit(key: str, side: Side, part_id: str, rank: int, height_u: int)` — `key` is `<equipment id>#<n>`; a redundant unit's A and B halves share the key and differ in `side`, so `(key, side)` identifies one unit; `rank` is the equipment's position in BOM group order.
 - `@dataclass(frozen=True) LayoutRules(capacity_u: int = 32, blank_plate_u: int = 1)`.
-- `@dataclass PanelFill(number: int, units: list[Unit])` with `used_u(rules) -> int` and `free_u(rules) -> int`.
+- `@dataclass PanelFill(number: int, units: list[Unit])` with `used_u(rules) -> int`, `free_u(rules) -> int`, `blank_plates() -> int` (rack units − 1, min 0) and `din_rail_count() -> int` (units with 0U), the numbers the Panels board shows.
 - `IssueKind = Literal["device-too-tall", "move-does-not-fit", "stale-override", "stale-removal", "unknown-panel", "panel-empty", "missing-height"]`; `@dataclass(frozen=True) LayoutIssue(kind: IssueKind, subject: str, message: str)`.
 - `@dataclass Layout(panels: list[PanelFill], issues: list[LayoutIssue])`.
 - `used_u(heights: Sequence[int], blank_plate_u: int) -> int`: `Σ h + (k − 1) × blank_plate_u` over the k units with `h > 0`; 0 for k = 0.
 - `fill(units: Sequence[Unit], rules: LayoutRules) -> Layout`: A units in `rank` order into odd panels, B units into even panels, breaking at the same places (lock-step), then each `Side.NONE` unit in `rank` order into the panel with the most free U (ties → lowest number), opening the next odd/even pair when none fits. A trailing empty panel is dropped.
 
-- [ ] **Write the failing tests** (units built with a helper `u(key, h, side, rank, pair)`):
+- [ ] **Write the failing tests** (units built with a helper `u(key, h, side, rank)`):
   - `test_r5_blank_plate_between_neighbours`: `used_u([1, 2, 1], 1) == 6`; `used_u([1], 1) == 1`; `used_u([], 1) == 0`.
   - `test_r5_din_rail_parts_cost_nothing`: `used_u([1, 0, 1], 1) == 3`.
   - `test_r5_fill_stops_at_32u_and_opens_a_new_panel`: 17 A/B pairs of 1U → 1 + 16 × 2 = 33 > 32, so panels 1–2 hold 16 pairs (31U) and panels 3–4 hold 1.
   - `test_r5_exact_fit_stays_in_the_panel`: 11 pairs of 2U → 22 + 10 = 32 → one pair of panels.
   - `test_r5_device_taller_than_capacity_is_reported`: a 40U pair → its own panels and one `device-too-tall` issue per unit; the other units still placed.
-  - `test_r6_a_units_odd_panels_b_units_even`: every unit in panel 1, 3 is side A; 2, 4 side B; panel 2n holds the partners (same `pair`) of panel 2n − 1, in the same order.
+  - `test_r6_a_units_odd_panels_b_units_even`: every unit in panel 1, 3 is side A; 2, 4 side B; panel 2n holds the partners (same `key`) of panel 2n − 1, in the same order.
   - `test_r6_units_follow_group_order`: units given out of `rank` order come out sorted by `rank`, then by key.
   - `test_r6_common_devices_go_to_most_free_panel`: panels 1/2 at 13U each; GPS 1U → panel 1 (tie, lowest); RTAC 2U → panel 2; IO 1U → panel 1 (17 free vs 16).
   - `test_r6_common_device_that_fits_nowhere_opens_a_new_pair`: both panels at 31U, a 2U common unit → panel 3, panel 4 not written.
@@ -135,15 +137,15 @@ Still open with A1 and Ali:
 
 **Consumes:** Task 3.
 **Produces:**
-- `@dataclass(frozen=True) Move(key: str, panel: int)` and `@dataclass(frozen=True) PairMove(pair_key: str, panels: tuple[int, int])` — `pair_key` is the key of the pair's A unit.
-- `auto_layout(units: Sequence[Unit], rules: LayoutRules, *, removed: Sequence[str] = (), moves: Sequence[Move | PairMove] = ()) -> Layout`: drop `removed` keys, `fill`, then apply moves in order. A move to panel `count + 1` or `count + 2` opens the next pair; a higher number is `unknown-panel`. Within a panel, units stay sorted by `rank`, then key.
+- `@dataclass(frozen=True) UnitRef(key: str, side: Side)`; `@dataclass(frozen=True) Move(unit: UnitRef, panel: int)`; `@dataclass(frozen=True) PairMove(key: str, panels: tuple[int, int])` (A half to `panels[0]`, B half to `panels[1]`).
+- `auto_layout(units: Sequence[Unit], rules: LayoutRules, *, removed: Sequence[UnitRef] = (), moves: Sequence[Move | PairMove] = ()) -> Layout`: drop `removed` units, `fill`, then apply moves in order. A move to panel `count + 1` or `count + 2` opens the next pair; a higher number is `unknown-panel`. Within a panel, units stay sorted by `rank`, then key.
 - `fill_lines(layout: Layout, rules: LayoutRules) -> list[str]`: one `"Panel {n}: {used} U / {capacity} U"` line per panel, gaps included.
 
 - [ ] **Write the failing tests:**
   - `test_r7_removed_unit_is_dropped_before_the_fill`: removing a common unit changes where the next common unit goes.
-  - `test_r7_move_one_unit_to_another_panel`; `test_r7_move_a_pair_moves_both_sides` (`PairMove("FW-A", (3, 4))` opens panels 3/4).
+  - `test_r7_move_one_unit_to_another_panel`; `test_r7_move_a_pair_moves_both_sides` (`PairMove("fw#1", (3, 4))` opens panels 3/4).
   - `test_r7_move_that_does_not_fit_is_reported_not_reflowed`: unit lands in the full panel, one `move-does-not-fit` issue, every other unit where `fill` put it.
-  - `test_r7_stale_override_is_reported_and_ignored`: unknown `Move` key → `stale-override`; unknown removed key → `stale-removal`.
+  - `test_r7_stale_override_is_reported_and_ignored`: `Move(UnitRef("l1#3", A), 1)` when only `l1#1`, `l1#2` exist → `stale-override`; an unknown removed unit → `stale-removal`.
   - `test_r7_move_to_unknown_panel_is_reported`: panel 9 of 2 → `unknown-panel`, unit stays.
   - `test_r7_move_that_empties_a_panel_is_reported`: moving the only unit out of panel 3 of 4 → `panel-empty`; out of the last panel → panel dropped, no issue.
   - `test_r7_overrides_survive_a_rerun`: `auto_layout` twice with the same inputs gives equal layouts.
@@ -154,11 +156,12 @@ Still open with A1 and Ali:
 
 **Files:** Modify `src/bomgen/engine/layout.py`, `src/bomgen/cli.py` (one command, A2 told first); Test `tests/unit/engine/test_layout.py`, `tests/unit/test_cli.py` (layout cases only).
 
-**Consumes:** Tasks 1–4; `load_substation`, `Equipment`, `GeneratedPanels` (names above); A9's tag function for unit keys. An equipment part with `height_u: None` is a `missing-height` issue and is placed as 0U; an explicit 0 is a DIN-rail part.
+**Consumes:** Tasks 1–4; `load_substation`, `Equipment`, `GeneratedPanels` (names above); no tag function: units are keyed by equipment id. An equipment part with `height_u: None` is a `missing-height` issue and is placed as 0U; an explicit 0 is a DIN-rail part.
 **Produces:**
 - `@dataclass LayoutReport(ied_count: int, port_lines: list[str], fill_lines: list[str], issues: list[LayoutIssue])` with `lines() -> list[str]` (`"IED count: 40"` first; port lines `"{tag}: {demand} of {usable} usable ports"`; `has_errors`).
-- `@dataclass LayoutResult(panels: list[Panel], plan: NetworkPlan, report: LayoutReport)`.
-- `layout_substation(substation, library) -> LayoutResult`: size (Tasks 1–2), expand equipment into `Unit`s (L1 × `l1_per_side`, L2 × `l2_per_side`, others × `qty`; `redundant` → A and B units sharing `pair`), `auto_layout`, then group each panel's units back into `DeviceInstance`s (consecutive units of one part → one row with `qty` and `first_nn`), attach port plans to the panels that hold the switches, and build `Panel` models with `generated=True`. Panels with `kind: console` are not touched.
+- `@dataclass LayoutResult(panels: list[Panel], fills: list[PanelFill], plan: NetworkPlan, report: LayoutReport)` — `fills` carry the unit keys, U used, blank plates and DIN-rail counts for the Panels board.
+- `layout_preview(loaded: LoadedSubstation, overrides: LayoutOverrides | None = None) -> LayoutResult`: the UI entry point (`docs/ui/screens.md`); `overrides` (A2's model for `layout.overrides` + `removed`) replaces the file's when given, so the board previews a drag before saving.
+- `layout_substation(loaded: LoadedSubstation) -> LayoutResult` = `layout_preview(loaded)`: size (Tasks 1–2), expand equipment into `Unit`s (L1 × `l1_per_side`, L2 × `l2_per_side`, others × `qty`, keys `<id>#1…`; `redundant` → an A and a B unit with the same key), `auto_layout`, then group each panel's units back into `DeviceInstance`s (consecutive units of one part → one row with `qty` and `first_nn`), attach port plans to the panels that hold the switches, and build `Panel` models with `generated=True`. Panels with `kind: console` are not touched.
 - `render_panel_yaml(panel: Panel) -> str`: header comment `# Generated by bomgen layout. Edit layout.overrides in substation.yaml, not this file.`, then the model dump with `exclude_defaults=True`.
 - CLI: `bomgen layout --substation PATH [--out DIR]` writes `panels/<id>.yaml` next to the substation (or into `--out`), prints `report.lines()`, exits 1 when `has_errors`.
 
@@ -168,6 +171,7 @@ Still open with A1 and Ali:
   - `test_r4_generated_files_never_mention_ieds`: `render_panel_yaml` of every panel contains neither the IED count nor `ied`; `report.lines()[0] == "IED count: 40"`.
   - `test_r3_port_plans_sit_with_their_switches`: panel 1 has the L2 and L1 plans keyed by part id; panel 2 the same counts.
   - `test_r7_console_panels_are_left_alone`.
+  - `test_r7_preview_overrides_replace_the_files_overrides`: `layout_preview(loaded, LayoutOverrides(...))` moves the unit; the loaded substation is unchanged.
   - `test_r5_missing_height_is_reported`: an equipment part without `height_u` gives one `missing-height` issue naming the part.
   - `test_cli_layout_writes_panels_and_prints_fill` (`CliRunner`, `tmp_path`): exit 0, two panel files written, output contains `"32 U"`; `test_cli_layout_exits_1_on_layout_errors`.
 - [ ] Run; fail. Implement. Run; pass. Checks. Commit `feat(layout): generate panel files and add bomgen layout (R9)`.
