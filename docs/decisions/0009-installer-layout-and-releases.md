@@ -78,7 +78,8 @@ end to end now and let those milestones plug in without touching packaging.
   `__version__`. Release runs queue rather than cancel each other. PRs touching
   packaging run the same build without publishing. Unsigned for now (Q19).
 - **The default device library ships inside the installer.** The workflow packs
-  `examples/library.yaml` plus `data/device-db` into `out/default.bomlib` (name and
+  the shipped library `data/library/psa-devices.yaml` (plan Q38) plus `data/device-db` into
+  `out/default.bomlib` (name and
   version are the project's `library:`), and `bomgen.iss` installs it to
   `{app}\library`. When the window starts and the library store holds no library,
   the launcher imports it through `library_store`; a store with any library is

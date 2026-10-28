@@ -140,7 +140,7 @@ def test_release_workflow_packs_the_default_library_the_project_names_before_com
     library = project["library"]
     assert f"--name {library['name']} --version {library['version']}" in workflow
     assert "--add data\\device-db --out out\\default.bomlib" in workflow
-    assert workflow.index("library pack examples\\library.yaml") < workflow.index(
+    assert workflow.index("library pack data\\library\\psa-devices.yaml") < workflow.index(
         "Compile the installer"
     )
 

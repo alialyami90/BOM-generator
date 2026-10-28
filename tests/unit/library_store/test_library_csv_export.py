@@ -185,7 +185,8 @@ def test_a_dc_only_brand_is_marked_in_the_last_mcb_column(library: Library) -> N
     by_id = {r["catalogue_id"]: r for r in rows}
     assert by_id["default"]["ac_rated"] == ""  # the default catalogue has no such flag
     assert by_id["dc-only"]["ac_rated"] == "false"
-    assert {by_id[b.id]["ac_rated"] for b in library.catalogue_brands.mcb} == {"true"}
+    for b in library.catalogue_brands.mcb:  # the shipped C60H-DC is DC only (ADR 0023)
+        assert by_id[b.id]["ac_rated"] == str(b.ac_rated).lower(), b.id
 
 
 def test_the_zip_holds_every_table_as_utf8_with_a_byte_order_mark(
