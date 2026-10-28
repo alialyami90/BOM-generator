@@ -1,7 +1,7 @@
 # Example project
 
 YAML inputs that reproduce the example project in the spec (PSA Cabinets 001–003,
-WS Console 0010 and the loose-material list). They arrive with milestone M1:
+WS Console 0010 and the loose-material list). They were added in milestone M1:
 
 ```
 examples/

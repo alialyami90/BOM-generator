@@ -315,10 +315,14 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
 ### M1 — Input models, loaders, examples, `bomgen validate`
 - pydantic models for library, panels, project (section 3); YAML loader with
   relative paths, mirroring, readable errors; JSON Schema export.
-- `examples/` reproducing the spec's example project (needs Q1 answered).
-- Minimal typer app with `validate`.
+- `examples/` reproducing the spec's example project, transcribed from the
+  example workbook (Q1).
+- Typer app with `validate`, `schema` (writes the committed JSON Schemas in
+  `schemas/`) and `--version`.
 - Tests: schema accept/reject cases, mirroring swaps LAN and prefix, every
-  example file loads, unknown `part_id` is reported with file and path.
+  example file loads, unknown `part_id` is reported with file and path, the
+  committed schemas are current, and `tests/golden/test_example_inputs.py`
+  checks the example inputs against the workbook and spec values.
 
 ### M1b — Projects, substations and the sizing inputs (A2, ADR 0012/0013)
 - `project.yaml` (project info, library name/version, document register,
