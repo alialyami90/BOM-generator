@@ -48,7 +48,7 @@ A2 agreed these names for M1b (`models/substation.py` unless noted); Task 5 uses
 - `io.loader.load_substation(path, *, store=None) -> LoadedSubstation` with `.substation`, `.project`, `.library`, `.documents`, `.constants`, `.spares` (merged with project defaults), `.panels`, `.panel_files`, `.manual_panel_ids`, `.panel_capacity_u`.
 - Example substation: `examples/substations/gis01/substation.yaml` (40 IEDs, star, A3's `height_u` values).
 
-- Equipment entries carry a stable `id` (A2 adds it). Overrides and removals name units by it, never by tag (A1): `{device: <equipment id>#<n>, side: A|B, panel: 3}` and `{pair: <equipment id>#<n>, panel: [3, 4]}`. Tags stay A9's (`engine/tags.py`) and are not needed here.
+- Every `Equipment` has a required unique `id` (slug: `l2`, `l1`, `ext-esw`, `ext-fw`, `fopp`, `gw`, `gps`, `rtac`, `hwio` in the example). Layout inputs name ids, never tags (A1): `UnitRef(device, unit: int | None, side: "a" | "b" | None)`, `DeviceMove(UnitRef + panel)` (side required on redundant entries), `PairMove(pair, unit: int | None, panel: (a, b))`, `removed: list[UnitRef]`; `None` means every unit or both sides. The loader checks ids exist; a unit number above the computed count is this engine's `stale-override`/`stale-removal`. Task 5 maps these onto the engine's `UnitRef`, `Move`, `PairMove`. Tags stay A9's (`engine/tags.py`) and are not needed here.
 
 Settled by A1:
 
