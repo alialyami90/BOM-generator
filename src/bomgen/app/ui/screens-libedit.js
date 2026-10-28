@@ -14,6 +14,7 @@
     return Bridge.call('library_pending').then((p) => { PEND.page = p; }).catch(() => { PEND.page = null; })
       .then(() => { PEND.state = 'loaded'; App.render(); });
   }
+  App.setPending = (p) => { PEND.page = p; PEND.state = 'loaded'; };  // after a CSV import (screens-libcsv.js)
   const pending = () => { if (real() && PEND.state === 'idle') loadPending(); return PEND.page; };
   function pendingBar() {
     const p = pending();

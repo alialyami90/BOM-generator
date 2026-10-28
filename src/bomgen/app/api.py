@@ -28,6 +28,7 @@ from typing import Any, Protocol
 from pydantic import BaseModel, ValidationError
 
 from bomgen import __version__
+from bomgen.app import library_csv
 from bomgen.app.catalogues import catalogues_page
 from bomgen.app.editing import (
     Page,
@@ -54,6 +55,7 @@ from bomgen.io.edit import EditError, EditResult
 from bomgen.io.errors import InputError
 from bomgen.io.fields import PartUse, part_users
 from bomgen.io.loader import PROJECT_FILE, load_library
+from bomgen.library_store.csv_export import GROUPS as CSV_GROUPS
 from bomgen.library_store.device_db import DeviceRecord, load_device_records
 from bomgen.library_store.manifest import Manifest
 from bomgen.library_store.preview import preview_library_import
@@ -79,6 +81,7 @@ FILE_TYPES = {
     "bomlib": "Library packages (*.bomlib)",
     "bomproj": "Project files (*.bomproj)",
     "xlsx": "Excel workbooks (*.xlsx)",
+    "csv": "Spreadsheet tables (*.csv;*.zip)",
 }
 
 
@@ -458,6 +461,57 @@ class Api:
             "substation": found.loaded.substation.substation.name or substation_id,
             "uses": [use(u) for u in uses],
         }
+
+    # -- Library export and CSV import (docs/ui/editing.md: Export and import) --
+
+    @endpoint
+    def export_library_csv(
+        self, include: list[str], folder: str | None = None
+    ) -> dict[str, Any] | None:
+        """Write the active version's tables (devices, catalogues) as CSV files in a new folder
+        inside `folder`, asked for when not given; None when the person cancels."""
+        unknown = [group for group in include if group not in CSV_GROUPS]
+        if unknown or not include:
+            raise AppError("invalid_request", f"Choose tables from {', '.join(CSV_GROUPS)}.")
+        editor = self._editor()
+        chosen = folder or (
+            _first(self._window.create_file_dialog(FOLDER_DIALOG)) if self._window else None
+        )
+        if chosen is None:
+            return None
+        return library_csv.export_tables(editor.store, editor.name, Path(chosen), include)
+
+    @endpoint
+    def export_library_package(self, file: str | None = None) -> dict[str, Any] | None:
+        """Write the active version as a `.bomlib` backup; None when the person cancels."""
+        editor = self._editor()
+        version = editor.store.active_version(editor.name)
+        assert version is not None
+        target = file or self._dialog(
+            SAVE_DIALOG, "bomlib", save_filename=f"{editor.name}-{version}.bomlib"
+        )
+        if target is None:
+            return None
+        editor.store.export_package(editor.name, version, Path(target))
+        return {"file": target, "version": version}
+
+    @endpoint
+    def preview_library_csv(self, path: str) -> dict[str, Any]:
+        """The dry run of a CSV import: nothing is written or added."""
+        try:
+            return library_csv.preview(self._editor(), Path(path))
+        except FileNotFoundError as exc:
+            raise AppError("not_found", f"{path} is no longer there.") from exc
+
+    @endpoint
+    def add_library_csv(self, path: str) -> dict[str, Any]:
+        """Add the valid rows of a CSV import to the pending set."""
+        try:
+            return library_csv.add_to_pending(self._editor(), Path(path))
+        except FileNotFoundError as exc:
+            raise AppError("not_found", f"{path} is no longer there.") from exc
+        except (ValueError, EditRefusedError) as exc:
+            raise AppError("invalid_edit", f"The rows cannot be added: {exc}") from exc
 
     @endpoint
     def discard_library_edits(self) -> dict[str, Any]:

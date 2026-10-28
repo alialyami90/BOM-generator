@@ -79,9 +79,9 @@
 
   function browse() {
     const L = lib();
-    const lede = L ? `${esc(L.name)} ${esc(L.version)}${released(L)}. Device edits wait as pending changes; the library changes when you apply them or import an update package.` : LIB.errors.overview && !LIB.offline ? 'Make an installed version active, or import the package again.' : 'No library is active.';
+    const lede = L ? `${esc(L.name)} ${esc(L.version)}${released(L)}. Device edits wait as pending changes; the library changes when you apply them or import an update package. Spreadsheet imports go to pending changes too.` : LIB.errors.overview && !LIB.offline ? 'Make an installed version active, or import the package again.' : 'No library is active.';
     return `<div class="page">${pageHead('Device library', lede,
-      `<button class="btn btn--secondary" data-action="goto" data-to="#/library/import">${icon('upload')}Import update…</button>${L && !LIB.offline ? `<button class="btn btn--primary" data-action="add-device">${icon('plus')}Add device…</button>` : ''}`)}
+      `${L && !LIB.offline ? `<button class="btn btn--secondary" data-action="lib-export">${icon('download')}Export…</button><button class="btn btn--secondary" data-action="lib-import">${icon('upload')}Import…</button><button class="btn btn--primary" data-action="add-device">${icon('plus')}Add device…</button>` : `<button class="btn btn--secondary" data-action="goto" data-to="#/library/import">${icon('upload')}Import update…</button>`}`)}
       ${loadError('overview', 'The active library could not be read.')}
       ${LIB.overview && LIB.overview.library && LIB.overview.library.problem ? `<div style="margin-bottom:var(--space-4)">${banner('warn', `<b>Part of the active library is damaged.</b> ${esc(LIB.overview.library.problem)}`)}</div>` : ''}
       ${LIB.overview && LIB.overview.records_problem ? `<div style="margin-bottom:var(--space-4)">${banner('warn', `<b>Datasheets and alternatives could not be read.</b> ${esc(LIB.overview.records_problem)}`)}</div>` : ''}
