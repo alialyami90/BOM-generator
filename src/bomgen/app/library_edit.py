@@ -9,6 +9,7 @@ repeated edits of one field together and describes the result for the review.
 from __future__ import annotations
 
 import copy
+import dataclasses
 import json
 import os
 from collections.abc import Mapping, Sequence
@@ -18,6 +19,7 @@ from typing import Any, get_args
 
 from bomgen.io.errors import InputError
 from bomgen.io.loader import load_library
+from bomgen.library_store.alternatives import compare_alternatives
 from bomgen.library_store.device_db import DeviceRecord, MountingKind, load_device_records
 from bomgen.library_store.edit import apply_edits, check_field, parse_edits
 from bomgen.library_store.errors import LibraryPackageError, RefusalKind
@@ -35,6 +37,7 @@ from bomgen.models.library import (
     PortUse,
     PurdueLevel,
     SupplyType,
+    Tier,
 )
 
 PENDING_DIR = "library-pending"
@@ -49,6 +52,7 @@ CHOICES = {
     "kind": [c.value for c in PortKind],
     "usable_for": [c.value for c in PortUse],
     "per": ["unit", "serial_port"],
+    "tier": list(get_args(Tier)),
     # the datasheet record's
     "verified": list(get_args(DeviceRecord.model_fields["verified"].annotation)),
     "mounting_kind": list(get_args(MountingKind)),
@@ -228,6 +232,26 @@ class LibraryEditor:
         assert pending.base is not None
         return check_field(self._edited(pending), ["devices", part_id, key], value)
 
+    def alternatives(self, part_id: str) -> dict[str, Any]:
+        """The device and its alternatives as comparison rows, pending edits applied."""
+        pending = self._ready()
+        library = self._edited(pending)
+        rows = compare_alternatives(library, part_id, self._records(pending))
+        device = library.get(part_id)
+        assert device is not None
+        return {
+            "group": device.alt_group,
+            "rows": [
+                {
+                    **dataclasses.asdict(row),
+                    "first_port_group": row.first_port_group.model_dump(mode="json")
+                    if row.first_port_group
+                    else None,
+                }
+                for row in rows
+            ],
+        }
+
     def check_record(self, part_id: str, path: str, value: object) -> str | None:
         """The model's message for setting one record field (a dotted path), or None."""
         pending = self._ready()
@@ -306,9 +330,16 @@ class LibraryEditor:
         return self.page()
 
     def add_device(
-        self, part_id: str, category: str, make: str, model: str, copy_of: str | None
+        self,
+        part_id: str,
+        category: str,
+        make: str,
+        model: str,
+        copy_of: str | None,
+        alt_group: str | None = None,
     ) -> dict[str, Any]:
-        """Add a device to the pending set: blank, or a copy of `copy_of` under a new identity."""
+        """Add a device to the pending set: blank, or a copy of `copy_of` under a new identity;
+        with `alt_group`, as an alternative in that group."""
         pending = self._ready()
         body: dict[str, Any] = {}
         edited = self._edited(pending)
@@ -319,6 +350,7 @@ class LibraryEditor:
             body = source.model_dump(mode="json", exclude_none=True, exclude=set(_NOT_COPIED))
         name = " ".join(filter(None, (make.strip(), model.strip()))) or part_id
         body.update(part_id=part_id, category=category, make=make or None, model=model or None)
+        body["alt_group"] = alt_group
         body.setdefault("description_template", name)
         body = {k: v for k, v in body.items() if v is not None}
         if any(d.part_id == part_id for d in edited.devices):

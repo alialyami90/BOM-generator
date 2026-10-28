@@ -408,6 +408,14 @@ class Api:
             raise AppError("invalid_edit", f"The library cannot take this change: {exc}") from exc
 
     @endpoint
+    def library_alternatives(self, part_id: str) -> dict[str, Any]:
+        """The device and its alternatives (same `alt_group`) with the figures they differ in."""
+        try:
+            return self._editor().alternatives(part_id)
+        except KeyError as exc:
+            raise AppError("not_found", f"There is no part {part_id} in the library.") from exc
+
+    @endpoint
     def check_library_record(self, part_id: str, path: str, value: object) -> str | None:
         """The model's message for setting a datasheet record field (a dotted path)."""
         try:
@@ -427,11 +435,17 @@ class Api:
 
     @endpoint
     def add_library_device(
-        self, part_id: str, category: str, make: str, model: str, copy_of: str | None = None
+        self,
+        part_id: str,
+        category: str,
+        make: str,
+        model: str,
+        copy_of: str | None = None,
+        alt_group: str | None = None,
     ) -> dict[str, Any]:
         """Add a new device to the pending set, blank or as a copy of another part."""
         try:
-            return self._editor().add_device(part_id, category, make, model, copy_of)
+            return self._editor().add_device(part_id, category, make, model, copy_of, alt_group)
         except KeyError as exc:
             raise AppError("not_found", f"There is no part {copy_of} in the library.") from exc
         except (EditRefusedError, ValidationError) as exc:
