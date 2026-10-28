@@ -10,6 +10,11 @@ tagged release.
 
 ### Added
 
+- Device database in `data/device-db/`: datasheet facts and two alternative
+  brands (low, mid, high part numbers) for every part in the example library,
+  as reference data the generator does not read; findings in
+  `docs/device-db-findings.md` (#6).
+- `CHANGELOG.md`; README status and usage updated for M1 (#4).
 - Input models for the device library, panels and project; YAML loader with
   relative file references, panel mirroring and readable errors; JSON Schemas
   in `schemas/`; `bomgen validate` and `bomgen schema`; `examples/`
