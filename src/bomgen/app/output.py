@@ -20,6 +20,7 @@ from bomgen.engine.pipeline import build as build_bom
 from bomgen.io.errors import InputError
 from bomgen.io.loader import LoadedSubstation
 from bomgen.library_store.store import LibraryStore
+from bomgen.models.project import _FILE_NAME_FORBIDDEN
 from bomgen.revision import compare_with_previous, read_previous_issue
 from bomgen.sheets.workbook import build_workbook
 from bomgen.writer import WriterError, write_workbook
@@ -100,21 +101,37 @@ def build_target(project_file: Path, substation_id: str, store: LibraryStore) ->
     }
 
 
+# Windows device names, refused with or without an extension
+_RESERVED = {"CON", "PRN", "AUX", "NUL", *(f"{d}{n}" for d in ("COM", "LPT") for n in range(1, 10))}
+
+
 def _checked_name(name: str) -> str:
+    stem = name[: -len(WORKBOOK_SUFFIX)] if name.lower().endswith(WORKBOOK_SUFFIX) else ""
     if (
-        not name.strip()
-        or Path(name).name != name
-        or "\\" in name
-        or not name.lower().endswith(WORKBOOK_SUFFIX)
+        not stem.strip(" .")
+        or name != name.strip()
+        or set(name) & _FILE_NAME_FORBIDDEN
+        or "\0" in name
+        or any(ord(c) < 32 for c in name)
+        or stem.split(".")[0].upper() in _RESERVED
     ):
         raise OutputRefusedError(
-            "bad_name", f"Use a file name ending in {WORKBOOK_SUFFIX}, without a folder."
+            "bad_name",
+            f"Use a file name ending in {WORKBOOK_SUFFIX}, without a folder or any of "
+            '< > : " / \\ | ? *.',
         )
     return name
 
 
+def _checked_folder(folder: Path) -> Path:
+    if not str(folder).strip() or not folder.is_absolute():
+        raise OutputRefusedError("bad_folder", "Choose the folder to save the workbook in.")
+    return folder
+
+
 def _locked(exc: BaseException) -> bool:
-    """Whether a write failed because another program, such as Excel, holds the file."""
+    """Whether a write failed for want of permission: another program, such as Excel,
+    holds the file, or the folder is read-only."""
     seen: BaseException | None = exc
     while seen is not None:
         if isinstance(seen, PermissionError) or any(
@@ -139,7 +156,9 @@ def build_file(
     loaded = found.loaded
     if loaded is None:
         raise OutputRefusedError("has_errors", f"{_errors(found)} block the build.")
-    path = folder / _checked_name(file_name if file_name is not None else _file_name(loaded))
+    path = _checked_folder(folder) / _checked_name(
+        file_name if file_name is not None else _file_name(loaded)
+    )
     if path.exists() and not replace:
         raise OutputRefusedError("file_exists", f"{path.name} is already in {folder}.")
     previous = None
@@ -150,18 +169,20 @@ def build_file(
             raise OutputRefusedError("bad_previous", str(exc)) from None
     try:
         result = build_bom(loaded)
+        marked, revisions = compare_with_previous(result, previous) if previous else (result, None)
+        workbook = build_workbook(loaded, marked, logo=loaded.logo)
     except EngineError as exc:
         raise OutputRefusedError("engine", f"The engine stopped: {exc}") from None
-    marked, revisions = compare_with_previous(result, previous) if previous else (result, None)
-    workbook = build_workbook(loaded, marked, logo=loaded.logo)
     try:
         write_workbook(workbook, path)
-    except WriterError as exc:
+    except (WriterError, PermissionError) as exc:
         if _locked(exc):
             raise OutputRefusedError(
-                "file_open", f"{path.name} is open in another program, such as Excel."
+                "file_open",
+                f"{path.name} cannot be written: it is open in another program, such as "
+                "Excel, or the folder is read-only.",
             ) from None
-        raise
+        raise OutputRefusedError("write", f"The workbook was not written: {exc}") from None
     report = check_report(loaded, result)
     path.with_suffix(".checks.json").write_text(render_checks_json(report), encoding="utf-8")
     return {

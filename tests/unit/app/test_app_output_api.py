@@ -6,9 +6,11 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+import xlsxwriter.workbook
 
 from bomgen.app import api, output
-from bomgen.writer import WriterError
+from bomgen.engine.errors import EngineError
+from bomgen.models.report import CheckItem, CheckReport, CheckStatus
 
 EXAMPLES = Path(__file__).parents[3] / "examples"
 SUBSTATION = Path("substations") / "gis01" / "substation.yaml"
@@ -128,7 +130,23 @@ def test_build_under_another_name(app: api.Api, project: Path, tmp_path: Path) -
     assert Path(result["path"]) == tmp_path / "gis01 copy.xlsx"
 
 
-@pytest.mark.parametrize("name", ["  ", "a/b.xlsx", "..\\b.xlsx", "book.txt"])
+@pytest.mark.parametrize(
+    "name",
+    [
+        "  ",
+        ".xlsx",
+        "a/b.xlsx",
+        "..\\b.xlsx",
+        "book.txt",
+        "book.xlsx:stream",
+        "a:b.xlsx",
+        "CON.xlsx",
+        "lpt1.xlsx",
+        "nul.old.xlsx",
+        "a\x00b.xlsx",
+        " book.xlsx",
+    ],
+)
 def test_build_refuses_a_bad_file_name(
     app: api.Api, project: Path, tmp_path: Path, name: str
 ) -> None:
@@ -144,15 +162,62 @@ def test_build_is_blocked_by_input_errors(app: api.Api, project: Path, tmp_path:
 def test_a_workbook_open_in_excel_is_reported_as_open(
     app: api.Api, project: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    def locked(workbook: object, path: Path) -> Path:
-        try:
-            raise PermissionError(13, "Permission denied", str(path))
-        except PermissionError as exc:
-            raise WriterError(f"could not write {path}: {exc}") from exc
+    # Excel holds the file: the writer cannot create it, and cannot remove it either
+    def held(*args: object, **kwargs: object) -> None:
+        raise PermissionError(13, "Permission denied")
 
-    monkeypatch.setattr(output, "write_workbook", locked)
+    unlink = Path.unlink
+    monkeypatch.setattr(xlsxwriter.workbook, "ZipFile", held)
+    monkeypatch.setattr(
+        Path, "unlink", lambda p, *a, **k: held() if p.suffix == ".xlsx" else unlink(p, *a, **k)
+    )
 
     assert refused(app.build_workbook(str(project), "gis01", str(tmp_path))) == "file_open"
+
+
+@pytest.mark.parametrize("folder", ["", "relative/out"])
+def test_build_needs_a_full_folder_path(app: api.Api, project: Path, folder: str) -> None:
+    assert refused(app.build_workbook(str(project), "gis01", folder)) == "bad_folder"
+
+
+def test_a_previous_issue_that_is_not_a_workbook_is_refused(
+    app: api.Api, project: Path, tmp_path: Path
+) -> None:
+    previous = tmp_path / "old.xlsx"
+    previous.write_text("not a workbook", encoding="utf-8")
+
+    envelope = app.build_workbook(
+        str(project), "gis01", str(tmp_path / "out"), compare=str(previous)
+    )
+
+    assert refused(envelope) == "bad_previous"
+
+
+def test_an_engine_failure_is_refused_with_its_message(
+    app: api.Api, project: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def stops(loaded: object) -> object:
+        raise EngineError("no rule for this panel")
+
+    monkeypatch.setattr(output, "build_bom", stops)
+    envelope = app.build_workbook(str(project), "gis01", str(tmp_path))
+
+    assert refused(envelope) == "engine"
+    assert "no rule for this panel" in envelope["error"]["message"]  # type: ignore[index]
+
+
+def test_a_failed_check_still_writes_the_workbook(
+    app: api.Api, project: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    failed = CheckReport(
+        items=(CheckItem(check="dc_main", status=CheckStatus.FAIL, panel_id="psa1", message="x"),)
+    )
+    monkeypatch.setattr(output, "check_report", lambda loaded, result: failed)
+
+    result = ok(app.build_workbook(str(project), "gis01", str(tmp_path)))
+
+    assert Path(result["path"]).is_file()
+    assert result["checks"]["failed"] is True
 
 
 def test_build_compares_with_a_previous_issue(app: api.Api, project: Path, tmp_path: Path) -> None:
