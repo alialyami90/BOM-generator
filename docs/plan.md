@@ -560,9 +560,10 @@ update package (ADR 0008).
   fails. Backups are `Backups/<id>-<YYYYMMDD-HHMMSS>.bomproj` and never
   overwrite one another.
 - Import compares the manifest's library with the active one and returns a
-  `library_note` naming the `.bomlib` to install, or the `bomgen library
-  rollback --to` command when that version is already installed (resolves Q21).
-  The CLI prints it as `note: ...`.
+  `library_note` saying how the library differs and a `library_hint` with the
+  command: `bomgen library import <name>-<ver>.bomlib`, or `bomgen library
+  rollback --to` when that version is installed but not active (resolves Q21).
+  The CLI prints `note: ...` and `hint: ...`.
 - Import also keeps `.git/` and `__pycache__/` folders (never packed), and
   refuses a package that holds `out/`, `.git/` or a top-level `Backups/`.
   A leftover `.replaced-<id>` folder in the workspace (Windows file locks) holds
@@ -598,10 +599,14 @@ update package (ADR 0008).
     (always `skipped`: packages carry checksums only, plan Q18).
   - `bomgen.project_store.preview_project_import(package, *, workspace=None,
     store=None)` returns `ProjectImportPreview(checks, manifest, files, project_id,
-    target_dir, exists, library_note, can_import)`. Checks: the six above, then
+    target_dir, exists, library_note, library_hint, can_import)`. Checks: the six above, then
     `identity` (manifest and `project.yaml` agree), `contents` (no build output),
     `name` (a warning when the project exists: import replaces it after a backup)
-    and `library` (a warning carrying the `library_note`).
+    and `library` (a warning carrying the `library_note`; the command is in
+    `library_hint`).
+  - Messages describe the state and never give a command. A command-line
+    remedy is in `LibraryPackageError.hint` (and `library_hint`), which the CLI
+    prints as `hint: ...` and the app can ignore or word its own way.
   - `bomgen.project_store.list_backups(project_file)` lists `Backups/` newest first
     as `BackupInfo(path, saved, size, project_id, library_name, library_version,
     file_count, problem)`, reading manifests only. A damaged file is listed with

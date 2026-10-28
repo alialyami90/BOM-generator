@@ -38,6 +38,13 @@ class RefusalKind(StrEnum):
 class LibraryPackageError(Exception):
     """A package or installed library is invalid, or an operation on it was refused."""
 
-    def __init__(self, message: str, kind: RefusalKind = RefusalKind.INVALID_PACKAGE) -> None:
+    def __init__(
+        self,
+        message: str,
+        kind: RefusalKind = RefusalKind.INVALID_PACKAGE,
+        *,
+        hint: str | None = None,
+    ) -> None:
         super().__init__(message)
         self.kind = kind
+        self.hint = hint  # a command-line remedy; the message itself describes the state only

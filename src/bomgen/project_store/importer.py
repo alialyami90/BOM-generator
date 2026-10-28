@@ -38,13 +38,14 @@ class ProjectImportResult:
     replaced: bool
     backup: Path | None
     library_note: str | None
+    library_hint: str | None = None
 
 
 def parse_project_manifest(raw: object) -> ProjectManifest:
     if isinstance(raw, dict) and "project_id" not in raw and "schema_version" in raw:
         raise LibraryPackageError(
-            "this is a .bomlib library, not a .bomproj project; "
-            "use 'bomgen library import' to install it"
+            "this is a .bomlib library, not a .bomproj project",
+            hint="use 'bomgen library import' to install it",
         )
     version = raw.get("format_version") if isinstance(raw, dict) else None
     if isinstance(version, int) and version > PROJECT_FORMAT_VERSION:
@@ -62,8 +63,16 @@ def parse_project_manifest(raw: object) -> ProjectManifest:
     return manifest
 
 
-def library_note(manifest: ProjectManifest, store: LibraryStore) -> str | None:
-    """What to do when the project was built with a library other than the active one."""
+@dataclass(frozen=True)
+class LibraryNote:
+    """`text` says how the project's library differs; `hint` is the command-line remedy."""
+
+    text: str
+    hint: str
+
+
+def library_note(manifest: ProjectManifest, store: LibraryStore) -> LibraryNote | None:
+    """The note for a project built with a library other than the active one."""
     name, version = manifest.library_name, manifest.library_version
     if name is None or version is None:
         return None
@@ -76,8 +85,11 @@ def library_note(manifest: ProjectManifest, store: LibraryStore) -> str | None:
     if problem is None:
         return None
     if version in store.versions(name):
-        return f"{problem}; it is installed, so run: bomgen library rollback {name} --to {version}"
-    return f"{problem}; install it with: bomgen library import {name}-{version}.bomlib"
+        text = f"project was built with library {name} {version}, which is installed but not active"
+        if active:
+            text += f"; the active version is {active}"
+        return LibraryNote(text, f"bomgen library rollback {name} --to {version}")
+    return LibraryNote(problem, f"bomgen library import {name}-{version}.bomlib")
 
 
 def import_project(
@@ -103,9 +115,9 @@ def import_project(
     exists = target.exists()
     if exists and not force:
         raise LibraryPackageError(
-            f"project {manifest.project_id!r} already exists in {workspace}; "
-            "import with --force to replace it (it is backed up first)",
+            f"project {manifest.project_id!r} already exists in {workspace}",
             RefusalKind.PROJECT_EXISTS,
+            hint="import with --force to replace it (it is backed up first)",
         )
 
     workspace.mkdir(parents=True, exist_ok=True)
@@ -140,7 +152,8 @@ def import_project(
         target,
         replaced=exists,
         backup=target / BACKUPS_DIR / backup.name if backup else None,
-        library_note=note,
+        library_note=note.text if note else None,
+        library_hint=note.hint if note else None,
     )
 
 
@@ -164,7 +177,7 @@ def refuse_build_output(files: dict[str, bytes]) -> None:
             )
 
 
-def library_note_or_none(manifest: ProjectManifest, store: LibraryStore) -> str | None:
+def library_note_or_none(manifest: ProjectManifest, store: LibraryStore) -> LibraryNote | None:
     """The note is advice; a locked library folder must not turn a good import into an error."""
     try:
         return library_note(manifest, store)

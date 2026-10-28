@@ -104,8 +104,11 @@ def test_reimport_of_inactive_version_points_to_rollback(
     store.import_package(first)
     store.import_package(make_package("1.1.0", V2))
 
-    with pytest.raises(LibraryPackageError, match="rollback"):
+    with pytest.raises(LibraryPackageError, match="installed but not active") as caught:
         store.import_package(first)
+
+    assert "rollback" not in str(caught.value)
+    assert caught.value.hint == "run: bomgen library rollback psa-devices --to 1.0.0"
 
 
 def test_failed_validation_leaves_store_unchanged(

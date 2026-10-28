@@ -24,6 +24,8 @@ def _store() -> LibraryStore:
 
 def _fail(exc: Exception) -> typer.Exit:
     typer.echo(f"error: {exc}", err=True)
+    if isinstance(exc, LibraryPackageError) and exc.hint:
+        typer.echo(f"hint: {exc.hint}", err=True)
     return typer.Exit(1)
 
 
