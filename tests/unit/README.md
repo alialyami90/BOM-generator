@@ -61,7 +61,8 @@ A milestone with several modules may group them in a subfolder,
 | `test_revision.py` | M7 | comparison with the previous issue (OUT-8, Q10): changed, added and removed rows and sheets |
 | `app/test_app_substation_api.py` | M10c | the Settings and Network API, read-only: register documents, output file name, constants against the project defaults, equipment, located problems |
 | `app/test_app_preview_api.py` | M10d | the Preview API: each panel sheet's rows and the calculation sheets from the engine's build result, or why there is nothing to show |
-| `app/test_app_output_api.py` | M10d | the Checks and Build API: checks, build target, the workbook and its report, the `file_exists`, `bad_name`, `has_errors`, `file_open` and `bad_folder` refusals |
+| `app/test_app_output_api.py` | M10d | the Checks and Build API: checks, build target, the workbook and its report, every Build refusal (`has_errors`, `file_exists`, `file_open`, `bad_name`, `bad_folder`, `bad_previous`, `engine`) |
+| `app/test_app_layout_api.py` | M10d | Checks, Build and Preview lay out generated panels as `bomgen build` does; layout errors block, warnings show, hand-written panels are built as they are |
 
 `builders.py`, `engine/engine_factories.py`, `project_store/project_builders.py`
 and `writer/writer_helpers.py` hold the small builders those tests share.
