@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import copy
 import re
+import threading
+from collections import OrderedDict
 from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass
 from pathlib import Path
+from types import MappingProxyType
 from typing import Any
 
 import yaml
@@ -97,6 +101,33 @@ def read_yaml(path: Path) -> YamlSource:
     except UnicodeDecodeError:
         raise fail("not valid UTF-8 text") from None
 
+    with _PARSED_LOCK:  # the app reads files from more than one thread
+        parsed = _PARSED.get(text)
+        if parsed is not None:
+            _PARSED.move_to_end(text)
+    if parsed is None:
+        parsed = _parse(path, text)
+        with _PARSED_LOCK:
+            _PARSED[text] = parsed
+            if len(_PARSED) > _PARSED_MAX:
+                _PARSED.popitem(last=False)
+    data, lines = parsed
+    return YamlSource(path, copy.deepcopy(data), lines)
+
+
+# Parsed texts, most recently read last. A build and every edit check read the same files
+# again, and a large library takes seconds to parse. Keyed by the text alone, so a changed
+# file is a new key; only a text that parsed cleanly is kept, so errors name their own file.
+_PARSED: OrderedDict[str, tuple[dict[str, Any], Mapping[Loc, int]]] = OrderedDict()
+_PARSED_MAX = 64
+_PARSED_LOCK = threading.Lock()
+
+
+def _parse(path: Path, text: str) -> tuple[dict[str, Any], Mapping[Loc, int]]:
+
+    def fail(message: str, line: int | None = None) -> InputError:
+        return InputError([Issue(path, "", message, line)])
+
     try:
         root = yaml.compose(text, Loader=_InputLoader)
         if not isinstance(root, yaml.MappingNode):
@@ -106,12 +137,12 @@ def read_yaml(path: Path) -> YamlSource:
         _walk(root, (), path, lines, duplicates)
         if duplicates:
             raise InputError(duplicates)
-        data = yaml.load(text, Loader=_InputLoader)
+        data = _InputLoader("").construct_document(root)
     except yaml.YAMLError as exc:
         mark = getattr(exc, "problem_mark", None)
         problem = getattr(exc, "problem", None) or str(exc)
         raise fail(problem, mark.line + 1 if mark is not None else None) from None
-    return YamlSource(path, data, lines)
+    return data, MappingProxyType(lines)
 
 
 def _walk(

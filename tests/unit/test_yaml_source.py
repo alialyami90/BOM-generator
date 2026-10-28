@@ -1,8 +1,10 @@
 """YAML reader: line tracking, syntax and structure errors."""
 
 from pathlib import Path
+from typing import Any
 
 import pytest
+import yaml
 
 from bomgen.io.errors import InputError, Issue
 from bomgen.io.yaml_source import read_yaml
@@ -152,3 +154,60 @@ def test_directory_path_is_an_issue(tmp_path: Path) -> None:
     assert issue.file == tmp_path
     assert issue.message.startswith("cannot read file: ")
     assert issue.line is None
+
+
+def _count_composes(monkeypatch: pytest.MonkeyPatch) -> list[str]:
+    calls: list[str] = []
+    real = yaml.compose
+
+    def counting(text: str, **kwargs: Any) -> Any:
+        calls.append(text)
+        return real(text, **kwargs)
+
+    monkeypatch.setattr(yaml, "compose", counting)
+    return calls
+
+
+def test_an_unchanged_file_is_parsed_once(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    path = tmp_path / "a.yaml"
+    path.write_text("a: 1\nb: [x, y]\n", encoding="utf-8")
+    calls = _count_composes(monkeypatch)
+    first, second = read_yaml(path), read_yaml(path)
+    assert len(calls) == 1
+    assert (second.data, dict(second.lines)) == (first.data, dict(first.lines))
+
+
+def test_a_changed_file_is_read_again(tmp_path: Path) -> None:
+    path = tmp_path / "a.yaml"
+    path.write_text("a: 1\n", encoding="utf-8")
+    assert read_yaml(path).data == {"a": 1}
+    path.write_text("a: 2\n", encoding="utf-8")
+    assert read_yaml(path).data == {"a": 2}
+
+
+def test_changing_the_data_read_does_not_change_the_next_read(tmp_path: Path) -> None:
+    path = tmp_path / "a.yaml"
+    path.write_text("a: {b: [1, 2]}\n", encoding="utf-8")
+    read_yaml(path).data["a"]["b"].append(3)
+    assert read_yaml(path).data == {"a": {"b": [1, 2]}}
+
+
+def test_the_same_text_in_another_file_reports_that_file(tmp_path: Path) -> None:
+    for name in ("a.yaml", "b.yaml"):
+        (tmp_path / name).write_text("a: 1\na: 2\n", encoding="utf-8")
+    for name in ("a.yaml", "b.yaml"):
+        with pytest.raises(InputError) as error:
+            read_yaml(tmp_path / name)
+        assert {issue.file for issue in error.value.issues} == {tmp_path / name}
+
+
+def test_the_same_text_in_another_file_is_not_parsed_again(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    text = "unique_to_this_test: 1\n"
+    for name in ("a.yaml", "b.yaml"):
+        (tmp_path / name).write_text(text, encoding="utf-8")
+    calls = _count_composes(monkeypatch)
+    assert read_yaml(tmp_path / "a.yaml").path == tmp_path / "a.yaml"
+    assert read_yaml(tmp_path / "b.yaml").path == tmp_path / "b.yaml"
+    assert len(calls) == 1
