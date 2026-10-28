@@ -1,0 +1,635 @@
+{
+  "$defs": {
+    "BaseFrame": {
+      "additionalProperties": false,
+      "description": "The plinth under the enclosure (spec: Inputs, 2. Panel definition).",
+      "properties": {
+        "d_mm": {
+          "exclusiveMinimum": 0,
+          "title": "D Mm",
+          "type": "integer"
+        },
+        "h_mm": {
+          "exclusiveMinimum": 0,
+          "title": "H Mm",
+          "type": "integer"
+        },
+        "w_mm": {
+          "exclusiveMinimum": 0,
+          "title": "W Mm",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "h_mm",
+        "d_mm",
+        "w_mm"
+      ],
+      "title": "BaseFrame",
+      "type": "object"
+    },
+    "CableEntry": {
+      "enum": [
+        "top",
+        "side"
+      ],
+      "title": "CableEntry",
+      "type": "string"
+    },
+    "DeviceInstance": {
+      "additionalProperties": false,
+      "description": "A device placed in a panel, in group B display order.",
+      "properties": {
+        "hwio_points": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Hwio Points"
+        },
+        "lan": {
+          "anyOf": [
+            {
+              "enum": [
+                "A",
+                "B"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lan"
+        },
+        "part_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+          "title": "Part Id",
+          "type": "string"
+        },
+        "purpose": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Purpose"
+        },
+        "qty": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Qty",
+          "type": "integer"
+        },
+        "tag": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tag"
+        }
+      },
+      "required": [
+        "part_id"
+      ],
+      "title": "DeviceInstance",
+      "type": "object"
+    },
+    "DocumentInfo": {
+      "additionalProperties": false,
+      "description": "A BOM sheet's document header and footer values.",
+      "properties": {
+        "doc_no": {
+          "title": "Doc No",
+          "type": "string"
+        },
+        "issue_date": {
+          "format": "date",
+          "title": "Issue Date",
+          "type": "string"
+        },
+        "rev": {
+          "minLength": 1,
+          "title": "Rev",
+          "type": [
+            "string",
+            "integer"
+          ]
+        }
+      },
+      "required": [
+        "doc_no",
+        "rev",
+        "issue_date"
+      ],
+      "title": "DocumentInfo",
+      "type": "object"
+    },
+    "Enclosure": {
+      "additionalProperties": false,
+      "description": "The cabinet enclosure (spec: Inputs, 2. Panel definition).",
+      "properties": {
+        "base_frame": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BaseFrame"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "cable_entry": {
+          "$ref": "#/$defs/CableEntry"
+        },
+        "d_mm": {
+          "exclusiveMinimum": 0,
+          "title": "D Mm",
+          "type": "integer"
+        },
+        "h_mm": {
+          "exclusiveMinimum": 0,
+          "title": "H Mm",
+          "type": "integer"
+        },
+        "make": {
+          "title": "Make",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "ordering_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ordering Code"
+        },
+        "w_mm": {
+          "exclusiveMinimum": 0,
+          "title": "W Mm",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "make",
+        "model",
+        "h_mm",
+        "d_mm",
+        "w_mm",
+        "cable_entry"
+      ],
+      "title": "Enclosure",
+      "type": "object"
+    },
+    "Media": {
+      "enum": [
+        "MM",
+        "SM",
+        "RJ45"
+      ],
+      "title": "Media",
+      "type": "string"
+    },
+    "Panel": {
+      "additionalProperties": false,
+      "description": "A full panel definition (``panels/<id>.yaml``).",
+      "properties": {
+        "cabinet_name": {
+          "title": "Cabinet Name",
+          "type": "string"
+        },
+        "cabinet_number": {
+          "title": "Cabinet Number",
+          "type": "string"
+        },
+        "devices": {
+          "items": {
+            "$ref": "#/$defs/DeviceInstance"
+          },
+          "minItems": 1,
+          "title": "Devices",
+          "type": "array"
+        },
+        "document": {
+          "$ref": "#/$defs/DocumentInfo"
+        },
+        "enclosure": {
+          "$ref": "#/$defs/Enclosure"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/PanelKind"
+        },
+        "lan": {
+          "anyOf": [
+            {
+              "enum": [
+                "A",
+                "B"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lan"
+        },
+        "options": {
+          "$ref": "#/$defs/PanelOptions"
+        },
+        "port_plans": {
+          "additionalProperties": {
+            "$ref": "#/$defs/PortPlan"
+          },
+          "title": "Port Plans",
+          "type": "object"
+        },
+        "revision": {
+          "$ref": "#/$defs/Revision"
+        },
+        "sheet_name": {
+          "maxLength": 31,
+          "minLength": 1,
+          "pattern": "^(?!')(?:[^\\[\\]:*?/\\\\']|'(?!$))*$",
+          "title": "Sheet Name",
+          "type": [
+            "string",
+            "integer"
+          ]
+        },
+        "tag_prefix": {
+          "pattern": "^[A-Z][A-Z0-9]*$",
+          "title": "Tag Prefix",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "cabinet_number",
+        "cabinet_name",
+        "tag_prefix",
+        "sheet_name",
+        "kind",
+        "enclosure",
+        "devices",
+        "document"
+      ],
+      "title": "Panel",
+      "type": "object"
+    },
+    "PanelKind": {
+      "enum": [
+        "network",
+        "control",
+        "console"
+      ],
+      "title": "PanelKind",
+      "type": "string"
+    },
+    "PanelMirror": {
+      "additionalProperties": false,
+      "description": "A panel defined as a mirror of another (spec: \"What changes by panel type\").\n\n``options`` holds ``PanelOptions`` keys and is validated after the loader merges\nit over the mirrored panel's options.",
+      "properties": {
+        "cabinet_name": {
+          "title": "Cabinet Name",
+          "type": "string"
+        },
+        "cabinet_number": {
+          "title": "Cabinet Number",
+          "type": "string"
+        },
+        "document": {
+          "$ref": "#/$defs/DocumentInfo"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "lan": {
+          "anyOf": [
+            {
+              "enum": [
+                "A",
+                "B"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lan"
+        },
+        "mirror_of": {
+          "pattern": "^[a-z0-9][a-z0-9_-]*$",
+          "title": "Mirror Of",
+          "type": "string"
+        },
+        "options": {
+          "additionalProperties": true,
+          "title": "Options",
+          "type": "object"
+        },
+        "revision": {
+          "$ref": "#/$defs/Revision"
+        },
+        "sheet_name": {
+          "maxLength": 31,
+          "minLength": 1,
+          "pattern": "^(?!')(?:[^\\[\\]:*?/\\\\']|'(?!$))*$",
+          "title": "Sheet Name",
+          "type": [
+            "string",
+            "integer"
+          ]
+        },
+        "tag_prefix": {
+          "pattern": "^[A-Z][A-Z0-9]*$",
+          "title": "Tag Prefix",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "mirror_of",
+        "cabinet_number",
+        "cabinet_name",
+        "tag_prefix",
+        "sheet_name",
+        "document"
+      ],
+      "title": "PanelMirror",
+      "type": "object"
+    },
+    "PanelOptions": {
+      "additionalProperties": false,
+      "description": "Per-panel switches and overrides (spec: Inputs, 2. Panel definition).",
+      "properties": {
+        "ac_spare_branches": {
+          "default": 1,
+          "minimum": 0,
+          "title": "Ac Spare Branches",
+          "type": "integer"
+        },
+        "aux_socket_a": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Aux Socket A"
+        },
+        "change_over_diodes": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "const": "auto"
+            }
+          ],
+          "default": "auto",
+          "title": "Change Over Diodes"
+        },
+        "dc_spare_branches_per_feed": {
+          "default": 1,
+          "minimum": 0,
+          "title": "Dc Spare Branches Per Feed",
+          "type": "integer"
+        },
+        "grounding_busbars": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Grounding Busbars",
+          "type": "array"
+        },
+        "inter_panel_terminals": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Inter Panel Terminals"
+        },
+        "main_mcb_override_a": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Main Mcb Override A"
+        },
+        "smoke_detector": {
+          "default": true,
+          "title": "Smoke Detector",
+          "type": "boolean"
+        },
+        "terminal_overrides": {
+          "additionalProperties": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Terminal Overrides",
+          "type": "object"
+        },
+        "ventilation": {
+          "$ref": "#/$defs/Ventilation",
+          "default": "auto"
+        }
+      },
+      "title": "PanelOptions",
+      "type": "object"
+    },
+    "PortAllocation": {
+      "additionalProperties": false,
+      "description": "A count of ports of one speed and media used for one purpose, plus spares.",
+      "properties": {
+        "count": {
+          "exclusiveMinimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "media": {
+          "$ref": "#/$defs/Media"
+        },
+        "spare": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Spare",
+          "type": "integer"
+        },
+        "speed": {
+          "$ref": "#/$defs/PortSpeed"
+        }
+      },
+      "required": [
+        "count",
+        "speed",
+        "media"
+      ],
+      "title": "PortAllocation",
+      "type": "object"
+    },
+    "PortPlan": {
+      "additionalProperties": false,
+      "description": "How one device's ports are allocated (keyed by part id or tag in the panel).",
+      "properties": {
+        "downlinks": {
+          "items": {
+            "$ref": "#/$defs/PortAllocation"
+          },
+          "title": "Downlinks",
+          "type": "array"
+        },
+        "serial_ports": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Serial Ports",
+          "type": "integer"
+        },
+        "uplinks": {
+          "items": {
+            "$ref": "#/$defs/PortAllocation"
+          },
+          "title": "Uplinks",
+          "type": "array"
+        },
+        "uplinks_l3": {
+          "items": {
+            "$ref": "#/$defs/PortAllocation"
+          },
+          "title": "Uplinks L3",
+          "type": "array"
+        }
+      },
+      "title": "PortPlan",
+      "type": "object"
+    },
+    "PortSpeed": {
+      "enum": [
+        "10M",
+        "100M",
+        "1G",
+        "10G"
+      ],
+      "title": "PortSpeed",
+      "type": "string"
+    },
+    "Revision": {
+      "additionalProperties": false,
+      "properties": {
+        "highlight": {
+          "items": {
+            "$ref": "#/$defs/RevisionMark"
+          },
+          "title": "Highlight",
+          "type": "array"
+        }
+      },
+      "title": "Revision",
+      "type": "object"
+    },
+    "RevisionMark": {
+      "additionalProperties": false,
+      "description": "Cells of one tagged row to highlight as revised.",
+      "properties": {
+        "columns": {
+          "items": {
+            "enum": [
+              "A",
+              "B",
+              "C",
+              "D",
+              "E",
+              "F",
+              "G",
+              "H"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Columns",
+          "type": "array"
+        },
+        "tag": {
+          "title": "Tag",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tag",
+        "columns"
+      ],
+      "title": "RevisionMark",
+      "type": "object"
+    },
+    "Ventilation": {
+      "enum": [
+        "auto",
+        "forced",
+        "natural"
+      ],
+      "title": "Ventilation",
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "anyOf": [
+    {
+      "$ref": "#/$defs/Panel"
+    },
+    {
+      "$ref": "#/$defs/PanelMirror"
+    }
+  ],
+  "title": "Panel"
+}
