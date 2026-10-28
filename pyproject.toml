@@ -26,7 +26,8 @@ dev = [
     "types-openpyxl",
 ]
 
-# The `bomgen` console script is added with the CLI (see docs/plan.md, milestone M1).
+[project.scripts]
+bomgen = "bomgen.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/bomgen"]
