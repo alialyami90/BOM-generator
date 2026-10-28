@@ -164,8 +164,8 @@ PSA3_E_TO_H: list[Row] = [
 ]
 
 # 'Aux' rows 17-45. The console's DC rows follow the spec order Q1, Q1.n, Q2, Q2.n
-# (the workbook lists Q1, Q2 first, rows 23-24) and its strips the order of the spec's
-# terminal table (rows 33-43 differ); its HWIO is 0 (plan Q34).
+# (the workbook lists Q1, Q2 first, rows 23-24) and its strips the order of the PSA
+# cabinets' group G rows (rows 33-43 differ); its HWIO is 0 (plan Q34).
 WS_E_TO_H: list[Row] = [
     mcb("WS-CINC", 6, "Main Auxiliary AC Supply"),  # 17
     mcb("WS-C1", 1, "Illumination Lamp"),  # 18

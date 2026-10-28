@@ -33,7 +33,14 @@ def expand_devices(
         device = lookup(library, instance.part_id)
         lan = instance.lan or panel.lan
         key = (device.tag_type, device.purdue_level)
-        start = instance.first_nn or first_number(device) + used[key]
+        start = next_free = first_number(device) + used[key]
+        if instance.first_nn is not None:
+            if instance.first_nn < next_free:
+                raise EngineError(
+                    f"{panel.id}: {instance.part_id} first_nn {instance.first_nn} repeats "
+                    f"numbers already used in the panel (next free {next_free})"
+                )
+            start = instance.first_nn
         tags = device_tags(
             device,
             prefix=panel.tag_prefix,

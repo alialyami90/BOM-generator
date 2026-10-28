@@ -8,15 +8,12 @@ cell addresses are laid out by the sheet layer.
 from enum import StrEnum
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, NonNegativeInt, PositiveInt
+from pydantic import Field, NonNegativeInt, PositiveInt
+
+from bomgen.models.calc import HeatResult, PowerConsumption
+from bomgen.models.output import OutputModel
 
 Column = Literal["A", "B", "C", "D", "E", "F", "G", "H"]
-
-
-class OutputModel(BaseModel):
-    """Base for engine output: immutable, no unknown fields."""
-
-    model_config = ConfigDict(extra="forbid", frozen=True)
 
 
 class Group(StrEnum):
@@ -101,7 +98,10 @@ class LooseTable(BomTable):
 
 
 class BuildResult(OutputModel):
-    """Everything the engine derives from a loaded project."""
+    """Everything the engine derives from a loaded substation: the BOM tables and the
+    calculation sheets' power and heat results (``None`` only in hand-built results)."""
 
     panels: tuple[PanelBom, ...]
     loose: LooseTable | None = None
+    power: PowerConsumption | None = None
+    heat: HeatResult | None = None

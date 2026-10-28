@@ -457,6 +457,15 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
 - Tests: formulas from "Power Consumption sheet" and "Heat Dissipation and Heat
   Calculations sheets"; golden 2,177.5 W DC, 1,090.3 W AC, 3,267.8 W total;
   391/391/172 m³/h vs 716; Σ 954.8 vs 2,148 m³/h; WS A = 4.848 m², ΔT = 6.96 °C.
+- Delivered in M4: `models/calc.py` (`PowerConsumption`, `HeatResult` and their
+  parts, each power line pointing at its BOM row by `LineRef`; `OutputModel` moved
+  to `models/output.py`), `engine/power.py`, `engine/thermal.py`. `BuildResult`
+  gains `power` and `heat`. Ventilation `auto` follows the Q4 default: the natural
+  rise of every powered part except fans, filters and thermostats decides, before
+  groups D, E and G are built. The forced check compares each cabinet with the fan
+  pair (2 × `fan.airflow_m3h`, Q8); the line-up check covers the fan-ventilated
+  cabinets. Cable managers keep the M2 rule until M1c's layout gives a count for
+  generated panels (Q32).
 
 ### M5 — Sheet models with live formulas
 - Steps 12–13: BOM sheet (incl. loose-material table), Power Consumption,
@@ -850,14 +859,15 @@ library (done in #33: FOPP-96SM `height_u: 1`).
 
 **Q34 — Group E–H rules the spec states only by example** (M3; defaults in ADR
 0014, all in force until Ali answers):
-1. Device strips (library `terminals`) follow X-ANN and precede XIP, in the order of
-   the spec's terminal table: the per-unit strips (Axion DI slots XDIPD–XDIPG) in
-   group B order, then XDIN, then the per-serial-port strips (XRTAC-C1…C6). A rule
-   without `{n}` or `{slot}` gives one strip of count × units.
+1. Strips follow the order of the example's group G rows ('Panel 1', 'Panel 3'): the
+   fixed strips, then the device strips (library `terminals`) after X-ANN and before
+   XIP: the per-unit strips (Axion DI slots XDIPD–XDIPG) in group B order, then
+   XDIN, then the per-serial-port strips (XRTAC-C1…C6). A rule without `{n}` or
+   `{slot}` gives one strip of count × units.
 2. XDIN appears with the DI slot strips. *Default:* its quantity is the
    substation's HWIO total (17 + 17 + 6 = 40, the spec's "hardwired DI count");
    `terminal_overrides` wins. Its text is fixed: "Knife Disconnect Terminal Blocks
-   For DI Negative".
+   For DI Negative". With an HWIO total of 0 and no override, no XDIN row is written.
 3. The console's aux contacts carry HWIO 0 (`Aux`!H21 and H31 are blank); other
    kinds count 1 per AC aux contact and 2 for the DC mains.
 4. Descriptions are written one way in every cabinet: MCBs "2A, 2P MCB For …"

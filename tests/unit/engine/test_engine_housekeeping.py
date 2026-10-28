@@ -7,7 +7,7 @@ import pytest
 from engine_factories import device, library, loose, panel, powered
 
 from bomgen.engine.errors import EngineError
-from bomgen.engine.housekeeping import housekeeping, needs_change_over, resolve_ventilation
+from bomgen.engine.housekeeping import housekeeping, needs_change_over
 from bomgen.engine.items import flatten
 from bomgen.models.bom import Group
 from bomgen.models.panel import Ventilation
@@ -73,20 +73,6 @@ def test_socket_only_when_aux_socket_set() -> None:
 def test_socket_rating_must_match_catalogue() -> None:
     with pytest.raises(EngineError, match="16 A"):
         rows(Ventilation.FORCED, aux_socket_a=16)
-
-
-@pytest.mark.parametrize(
-    ("option", "expected"),
-    [
-        ("auto", Ventilation.FORCED),  # until the heat check arrives (plan M4)
-        ("forced", Ventilation.FORCED),
-        ("natural", Ventilation.NATURAL),
-    ],
-)
-def test_ventilation_comes_from_the_panel_option(option: str, expected: Ventilation) -> None:
-    assert (
-        resolve_ventilation(panel([{"part_id": "SW"}], options={"ventilation": option})) is expected
-    )
 
 
 def test_change_over_diodes_auto_follow_single_fed_loads() -> None:
