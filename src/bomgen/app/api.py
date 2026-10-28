@@ -36,6 +36,7 @@ from bomgen.app.editing import (
     layout_issues,
     panel_options_page,
 )
+from bomgen.app.library_edit import EditRefusedError, LibraryEditor, PendingEdits
 from bomgen.app.loose import loose_page
 from bomgen.app.network import layout_page
 from bomgen.app.output import OutputRefusedError, build_file, build_target, checks_page
@@ -361,6 +362,52 @@ class Api:
     def activate_library_version(self, name: str, version: str) -> str:
         """Make an installed version active again. Project files are not touched."""
         return self._library_store().rollback(name, to=version)
+
+    # -- Library editing (docs/ui/editing.md "Library editing (v0.2)", M16) --
+
+    def _editor(self) -> LibraryEditor:
+        installed = self._active_library()
+        if installed is None:
+            raise AppError("not_installed", "No library is installed.")
+        return LibraryEditor(
+            self._library_store(), PendingEdits(default_app_home(self._env)), installed.name
+        )
+
+    @endpoint
+    def library_pending(self) -> dict[str, Any]:
+        """The pending library changes: one entry per changed field, and the version they make."""
+        return self._editor().page()
+
+    @endpoint
+    def library_device(self, part_id: str) -> dict[str, Any]:
+        """One device with the pending edits applied, and its saved values."""
+        try:
+            return self._editor().device(part_id)
+        except KeyError as exc:
+            raise AppError("not_found", f"There is no part {part_id} in the library.") from exc
+
+    @endpoint
+    def check_library_field(self, part_id: str, field: str, value: object) -> str | None:
+        """The model's message for setting a device field to `value`, or None when it fits."""
+        return self._editor().check(part_id, field, value)
+
+    @endpoint
+    def add_library_edits(self, edits: list[dict[str, Any]]) -> dict[str, Any]:
+        """Add edits to the pending set; all are refused when one leaves the library invalid."""
+        try:
+            return self._editor().add(edits)
+        except (EditRefusedError, ValidationError) as exc:
+            raise AppError("invalid_edit", f"The library cannot take this change: {exc}") from exc
+
+    @endpoint
+    def discard_library_edits(self) -> dict[str, Any]:
+        """Drop every pending change; returns them so the page can undo."""
+        return self._editor().discard()
+
+    @endpoint
+    def apply_library_edits(self, note: str = "") -> dict[str, Any]:
+        """Write the pending changes as a new local version and make it active."""
+        return self._editor().apply(note)
 
     # -- Projects (docs/ui/screens.md: Home, Project, Back up and share) --
 

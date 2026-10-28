@@ -79,6 +79,7 @@ A milestone with several modules may group them in a subfolder,
 | `test_lifecycle.py` | M17d | create and delete projects and substations: ids, copies with panels and documents, backups before a delete |
 | `app/test_app_edit_api.py` | M17 | the app's editing endpoints: what is written, refused edits, the refreshed board, whether a move fits and the rack space it leaves (ADR 0021) |
 | `test_loose_edit.py` | M18 | loose-material writers: library and free-text items, move, remove, host panel, per-field checks (ADR 0022) |
+| `app/test_app_loose_api.py` | M18 | the Loose material page's API: the list with its library parts, add, edit, move and remove, refused edits not written, per-field messages, the host panel's document |
 
 `builders.py`, `engine/engine_factories.py`, `project_store/project_builders.py`
 and `writer/writer_helpers.py` hold the small builders those tests share.

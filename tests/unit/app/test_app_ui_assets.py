@@ -125,3 +125,19 @@ def test_loose_leave_dialog_offers_keep_discard_and_save() -> None:
     for label in (">Keep editing<", ">Discard changes<", "Save and leave<"):
         assert label in js
     assert "Discard and leave" not in js
+
+
+def test_library_pending_bar_says_nothing_is_applied_yet() -> None:
+    js = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
+    assert "not applied yet. Projects keep using" in js
+    assert "Review and apply…" in js
+    assert ">Keep editing<" in js
+
+
+def test_a_local_library_version_reads_as_applied_local_edits() -> None:
+    js = (UI_DIR / "screens-library.js").read_text(encoding="utf-8")
+    assert "local edits of" in js
+    assert "applied " in js
+    assert "badge('info', 'Local')" in js
+    edit = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
+    assert "Port groups can't be edited here yet." in edit

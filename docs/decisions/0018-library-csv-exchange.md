@@ -36,7 +36,7 @@ hold JSON.
 | `device_children.csv` | child rule | `part_id`, `seq`, `child_part_id`, `qty` (a number, or `cores`) |
 | `device_terminals.csv` | terminal rule | `part_id`, `seq`, then `TerminalRule` fields |
 | `device_loose_items.csv` | loose item | `part_id`, `seq`, `item_part_id`, `qty`, `tag` |
-| `mcb.csv` | MCB brand | `catalogue_id`, then the MCB fields (`family`, `make`, `poles`, `ratings_a`, `code_pattern`, `trip_curve`, `magnetic_trip_multiple`, `magnetic_trip_multiple_dc`, `dc_rating_v`) |
+| `mcb.csv` | MCB brand | `catalogue_id`, then the MCB fields (`family`, `make`, `poles`, `ratings_a`, `code_pattern`, `trip_curve`, `magnetic_trip_multiple`, `magnetic_trip_multiple_dc`, `dc_rating_v`, `ac_rated`, brands only) |
 | `mcb_codes.csv` | rating of a brand that lists `codes` | `catalogue_id`, `rating_a`, `code` |
 | `aux_contacts.csv` | aux-contact brand | `catalogue_id`, `make`, `model`, `ordering_code` |
 | `terminal_blocks.csv` | block type of a brand | `catalogue_id`, `name`, `type`, `make`, `ordering_code` |
@@ -177,3 +177,8 @@ checks table above, this wins.
   "(probably an Excel formula)", because that is how a formula Excel kept as text reaches the
   file. A valid value is never flagged (`-5` is a number); a text cell that starts with `=`,
   `+` or `@` and is valid still only warns in the `cells` check.
+- **Brand flag and brand diffs.** `mcb.csv` ends with `ac_rated` (ADR 0023): `true`/`false` on a
+  brand row, blank on the default row (a value there is a row problem). A file without the
+  column keeps the installed flag. `diff_libraries` now counts catalogue brand sets, as
+  `kind:id` in `catalogues_changed`, so a change to a brand set alone is a change when saving
+  (it was refused as "nothing differs") and is named in the release notes.
