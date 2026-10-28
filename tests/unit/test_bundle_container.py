@@ -8,8 +8,15 @@ import pytest
 from pydantic import BaseModel, ConfigDict
 
 from bomgen.bundle import container
-from bomgen.bundle.container import collect_tree, read_bundle, sha256, write_bundle
-from bomgen.bundle.errors import LibraryPackageError
+from bomgen.bundle.checks import CheckStatus
+from bomgen.bundle.container import (
+    collect_tree,
+    inspect_bundle,
+    read_bundle,
+    sha256,
+    write_bundle,
+)
+from bomgen.bundle.errors import LibraryPackageError, RefusalKind
 
 
 class _Manifest(BaseModel):
@@ -143,3 +150,102 @@ def test_collect_tree_refuses_names_that_differ_only_by_case(tmp_path: Path) -> 
 
     with pytest.raises(LibraryPackageError, match="differ only by case"):
         collect_tree(root)
+
+
+def _statuses(inspection: object) -> dict[str, str]:
+    return {c.id: c.status.value for c in inspection.checks}  # type: ignore[attr-defined]
+
+
+def test_inspect_lists_every_check_for_a_good_bundle(tmp_path: Path) -> None:
+    path = _write(tmp_path, {"a.yaml": b"a: 1\n", "b/c.yaml": b"c: 2\n"})
+
+    inspection = inspect_bundle(path, _parse, "test bundle")
+
+    assert [c.id for c in inspection.checks] == [
+        "package",
+        "paths",
+        "size",
+        "manifest",
+        "files",
+        "checksums",
+    ]
+    assert all(c.status is CheckStatus.OK for c in inspection.checks)
+    assert inspection.error is None
+    assert inspection.files == {"a.yaml": b"a: 1\n", "b/c.yaml": b"c: 2\n"}
+    assert inspection.sizes == {"a.yaml": 5, "b/c.yaml": 5}
+    assert "2 files" in next(c for c in inspection.checks if c.id == "checksums").detail
+
+
+def test_inspect_reports_a_changed_file_and_skips_nothing_before_it(tmp_path: Path) -> None:
+    good = _write(tmp_path, {"a.yaml": b"a: 1\n"})
+    bad = tmp_path / "bad.bundle"
+    with zipfile.ZipFile(good) as old, zipfile.ZipFile(bad, "w") as new:
+        for name in old.namelist():
+            new.writestr(name, b"changed" if name == "a.yaml" else old.read(name))
+
+    inspection = inspect_bundle(bad, _parse, "test bundle")
+
+    assert _statuses(inspection) == {
+        "package": "ok",
+        "paths": "ok",
+        "size": "ok",
+        "manifest": "ok",
+        "files": "ok",
+        "checksums": "failed",
+    }
+    failed = next(c for c in inspection.checks if c.status is CheckStatus.FAILED)
+    assert "checksum mismatch: a.yaml" in failed.detail
+    assert failed.kind is RefusalKind.INVALID_PACKAGE
+    assert inspection.files is None
+    assert isinstance(inspection.error, LibraryPackageError)
+
+
+def test_inspect_skips_the_checks_after_a_failure(tmp_path: Path) -> None:
+    junk = tmp_path / "junk"
+    junk.write_text("no")
+
+    inspection = inspect_bundle(junk, _parse, "test bundle")
+
+    assert _statuses(inspection) == {
+        "package": "failed",
+        "paths": "skipped",
+        "size": "skipped",
+        "manifest": "skipped",
+        "files": "skipped",
+        "checksums": "skipped",
+    }
+    assert inspection.manifest is None
+
+
+def test_inspect_flags_unsafe_paths_without_reading_the_files(tmp_path: Path) -> None:
+    path = tmp_path / "evil.bundle"
+    with zipfile.ZipFile(path, "w") as zf:
+        zf.writestr("../evil.yaml", b"x")
+        zf.writestr("manifest.json", b"{}")
+
+    inspection = inspect_bundle(path, _parse, "test bundle")
+
+    assert _statuses(inspection)["paths"] == "failed"
+    assert _statuses(inspection)["checksums"] == "skipped"
+
+
+def test_inspect_surfaces_an_incompatible_manifest(tmp_path: Path) -> None:
+    path = _write(tmp_path, {"a.yaml": b"a: 1\n"})
+
+    def refuse(raw: object) -> _Manifest:
+        raise LibraryPackageError("needs a newer bomgen", RefusalKind.INCOMPATIBLE)
+
+    inspection = inspect_bundle(path, refuse, "test bundle")
+
+    manifest_check = next(c for c in inspection.checks if c.id == "manifest")
+    assert manifest_check.status is CheckStatus.FAILED
+    assert manifest_check.kind is RefusalKind.INCOMPATIBLE
+    assert manifest_check.detail == "needs a newer bomgen"
+
+
+def test_read_bundle_still_raises_the_first_failure(tmp_path: Path) -> None:
+    junk = tmp_path / "junk"
+    junk.write_text("no")
+
+    with pytest.raises(LibraryPackageError, match="not a test bundle"):
+        read_bundle(junk, _parse, "test bundle")
