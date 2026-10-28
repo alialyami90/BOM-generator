@@ -167,6 +167,8 @@ devices:
     power_supplies: 2
     min_branch_mcb_a: 2
     alarm_on_branch_mcb: true  # Q1.10/Q2.10 aux contacts ('Panel 1'!C63)
+    ports:  # the 2 GE SFP/RJ45 shared WAN ports (A3 record; count not datasheet-verified)
+      - { count: 2, speed: 1G, kind: sfp_slot }
 
   # --- Group B: control cabinet (example workbook, 'Panel 3'!B4:G10) ------------------
 

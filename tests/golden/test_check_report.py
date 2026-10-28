@@ -75,5 +75,5 @@ def test_di_capacity_covers_the_hwio_total(report: CheckReport) -> None:
 def test_sfps_fit_the_switch_slots(report: CheckReport) -> None:
     sfp = [(i.panel_id, i.subject, i.status) for i in report.items if i.check == "sfp_slots"]
     assert [s for s in sfp if s[2] is CheckStatus.FAIL] == []
-    # The firewall's ports are not in the library, so its SFPs are only counted.
-    assert {s[2] for s in sfp if "FW" in (s[1] or "")} == {CheckStatus.WARN}
+    # The firewall's two SFP slots take its two downlink SFPs ('Panel 1' row 17).
+    assert {s[2] for s in sfp if "FW" in (s[1] or "")} == {CheckStatus.PASS}
