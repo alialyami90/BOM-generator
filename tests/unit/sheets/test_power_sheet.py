@@ -198,3 +198,58 @@ def test_data_rows_are_framed(sheet: PowerSheet) -> None:
     inner = sheet.model.cells[(7, 5)]
     assert inner.style is not None
     assert inner.style.borders.left is BorderStyle.THIN
+
+
+PRINTER = "*Printer: 622 W (Printing)\n31.3 W (Ready)"
+
+
+def footnoted(*footnotes: str) -> PowerSheet:
+    return power_sheet(
+        "Power Consumption",
+        POWER,
+        SOURCES,
+        {"psa1": "PSA Cabinet - 001", "ws": "WS Console"},
+        DesignConstants(),
+        footnotes=footnotes,
+    )
+
+
+def test_power_footnotes_follow_the_notes_two_rows_down() -> None:
+    # Power Consumption sheet, item 5: the footnotes (output.power_footnotes) come after the
+    # NOTES (rows 40-42 here), two blank rows down as in the reference workbook, one row each.
+    m = footnoted(PRINTER, "*Second").model
+    assert value(m, "B42") is not None
+    assert [value(m, f"B{row}") for row in (43, 44)] == [None, None]
+    assert value(m, "B45") == PRINTER
+    assert value(m, "B46") == "*Second"
+
+
+def test_power_footnote_spans_the_printed_width_and_wraps() -> None:
+    m = footnoted(PRINTER).model
+    assert "B45:L45" in [x.name for x in m.merges]
+    style = m.cells[(45, 2)].style
+    assert style is not None
+    assert style.alignment.wrap
+    assert style.alignment.horizontal == "left"
+
+
+def test_power_footnote_row_is_tall_enough_for_its_lines() -> None:
+    # Excel doesn't fit a merged cell's height, so the row gets 15 pt per line.
+    m = footnoted(PRINTER, "*One line").model
+    assert m.rows[45].height == 30
+    assert m.rows[46].height == 15
+
+
+def test_power_footnotes_are_printed() -> None:
+    setup = footnoted(PRINTER, "*Second").model.print_setup
+    assert setup.print_area is not None
+    assert setup.print_area.name == "A1:L46"
+
+
+def test_no_power_footnotes_writes_no_rows(sheet: PowerSheet) -> None:
+    assert all(row <= 42 for row, _ in sheet.model.cells)
+
+
+def test_long_power_footnote_line_counts_as_wrapped_lines() -> None:
+    # B:L hold about 255 characters, so a 300-character line wraps onto two.
+    assert footnoted("x" * 300).model.rows[45].height == 30

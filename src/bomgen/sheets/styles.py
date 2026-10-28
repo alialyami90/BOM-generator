@@ -64,6 +64,7 @@ CALC_SUMMARY_TEXT = CellStyle(
 )
 CALC_SUMMARY_TOTAL = CALC_SUMMARY.model_copy(update={"fill": GREY_LIGHT})
 NOTE = CellStyle()
+FOOTNOTE = CellStyle(alignment=_LEFT_WRAP)
 
 # Heat Calculations: plain 11 pt text
 HEAT_TEXT = CellStyle()
