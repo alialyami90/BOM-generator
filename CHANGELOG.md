@@ -10,6 +10,9 @@ tagged release.
 
 ### Added
 
+- Desktop app Preview: each panel sheet and the three calculation sheets as
+  the engine computes them, through `preview_substation` (milestone M10d,
+  #71).
 - Network sizing and automatic panel layout: `bomgen layout` sizes the L1 and
   L2 switches from the IED count and spares, fills the 32U panels and writes
   generated panel files; `bomgen build` lays out again a substation whose
@@ -19,8 +22,8 @@ tagged release.
   (milestone M1c, #19).
 - Desktop app Checks and Build screens: the substation's problems and the
   check report, and a build that refuses with `has_errors`, `file_exists`
-  (asks before replacing), `file_open`, `bad_name` or `bad_folder` (milestone
-  M10d, #65).
+  (asks before replacing), `file_open`, `bad_name`, `bad_folder`,
+  `bad_previous`, `engine` or `write` (milestone M10d, #65).
 - `bomgen build` prints the check report, writes it as `<name>.checks.json`
   and exits 1 when a check fails (`--no-checks` skips it); `--compare` marks
   the cells changed since a previous issue; the FGR-60F gets its 2 SFP slots
@@ -125,6 +128,12 @@ tagged release.
 
 ### Changed
 
+- The app's Checks, Build and Preview run the same automatic layout as
+  `bomgen build`, so generated panels give the same workbook; layout errors
+  block Build and Preview and warnings show in Checks (#73).
+- Plan: M7 is done and `--sheet-name` is dropped, since the inputs name the
+  sheets; M10d lists every Build refusal (#74).
+- Changelog, README and test READMEs for #19 and #49–#70 (#72).
 - The frozen CLI writes UTF-8 to the console; the release smoke tests read the
   workbook path from the first line of `bomgen build` and check its report
   (#70).

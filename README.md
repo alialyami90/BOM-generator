@@ -38,9 +38,9 @@ Done:
   Power Consumption, Heat Dissipation and Heat Calculations sheets, with live
   formulas that a golden test recalculates to the spec's totals.
 - M6: the XlsxWriter workbook writer.
-- M7, apart from the `--sheet-name` option the plan lists: `bomgen build`
-  writes one workbook per substation with its check report (ADR 0016), and
-  `--compare` marks the cells changed since the previous issue (OUT-8).
+- M7: `bomgen build` writes one workbook per substation with its check report
+  (ADR 0016), and `--compare` marks the cells changed since the previous issue
+  (OUT-8).
 - M8 and M8b: device-library update packages (`bomgen library …`) and project
   sharing and backup as `.bomproj` files (`bomgen project …`).
 - M9: UI design and clickable prototype in [`docs/ui/`](docs/ui/README.md),
@@ -51,15 +51,15 @@ Done:
   backup, import (Keep both on a clash) and restore; the Library screens
   browse the installed library with its device-database records, review and
   run a `.bomlib` import, and switch versions.
-- The first parts of M10c and M10d: a substation's Settings and Network inputs,
-  read-only, and the Checks and Build screens, which show the check report and
-  write the workbook.
+- The first part of M10c, a substation's Settings and Network inputs,
+  read-only, and M10d: the Checks, Preview and Build screens, which show the
+  check report, every sheet as the engine computes it, and write the workbook.
 - M11, built early (ADR 0009): the Windows installer and tag-driven releases.
   The installed app opens the desktop window, double-clicking a `.bomlib`
   imports it, and a `.bomproj` opens the app on that project.
 
-Next: the rest of M10 (the L1 ranking and the Panels board, Preview, then
-the polish pass). Who builds what is in
+Next: the rest of M10 (the L1 ranking and the Panels board, then the polish
+pass). Who builds what is in
 [`docs/agents.md`](docs/agents.md); the terms project, substation, side and
 stream are defined in `docs/plan.md` → "Glossary".
 
