@@ -55,6 +55,12 @@
           "title": "Busbars",
           "type": "object"
         },
+        "enclosure_u": {
+          "default": 42,
+          "exclusiveMinimum": 0,
+          "title": "Enclosure U",
+          "type": "integer"
+        },
         "housekeeping": {
           "$ref": "#/$defs/Housekeeping"
         },
@@ -204,6 +210,19 @@
           "description": "Defaults to true when the part has no supply_type, else false.",
           "title": "Excluded From Power",
           "type": "boolean"
+        },
+        "height_u": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Height U"
         },
         "hwio_points": {
           "default": 0,
@@ -598,6 +617,10 @@
         },
         "speed": {
           "$ref": "#/$defs/PortSpeed"
+        },
+        "usable_for": {
+          "$ref": "#/$defs/PortUse",
+          "default": "any"
         }
       },
       "required": [
@@ -624,6 +647,16 @@
         "10G"
       ],
       "title": "PortSpeed",
+      "type": "string"
+    },
+    "PortUse": {
+      "description": "What a port group may connect, for the switch sizing (ADR 0013).",
+      "enum": [
+        "ied",
+        "uplink",
+        "any"
+      ],
+      "title": "PortUse",
       "type": "string"
     },
     "PurdueLevel": {

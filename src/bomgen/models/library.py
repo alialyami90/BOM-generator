@@ -92,6 +92,14 @@ class PortKind(StrEnum):
     SFP_SLOT = "sfp_slot"
 
 
+class PortUse(StrEnum):
+    """What a port group may connect, for the switch sizing (ADR 0013)."""
+
+    IED = "ied"
+    UPLINK = "uplink"
+    ANY = "any"
+
+
 DESCRIPTION_PLACEHOLDERS = {"lan", "level", "purpose"}
 TAG_PLACEHOLDERS = {"prefix", "level", "type", "lan", "lan_index", "nn"}
 STRIP_PLACEHOLDERS = {"n", "slot"}
@@ -104,6 +112,7 @@ class PortGroup(InputModel):
     speed: PortSpeed
     media: Media | None = None
     kind: PortKind
+    usable_for: PortUse = PortUse.ANY
 
     @model_validator(mode="after")
     def _fixed_ports_have_media(self) -> "PortGroup":
@@ -173,6 +182,7 @@ class DeviceType(InputModel):
     hwio_points: NonNegativeInt = 0
     ports: list[PortGroup] = Field(default_factory=list)
     cores: PositiveInt | None = None
+    height_u: NonNegativeInt | None = None  # rack units; 0 = DIN rail, None = not given yet
     children: list[ChildRule] = Field(default_factory=list)
     terminals: list[TerminalRule] = Field(default_factory=list)
     loose_items: list[LooseItem] = Field(default_factory=list)
@@ -321,6 +331,7 @@ class Catalogues(InputModel):
     aux_contact: AuxContact
     terminal_blocks: Annotated[dict[str, TerminalBlockType], Field(min_length=1)]
     busbars: Annotated[dict[str, Busbar], Field(min_length=1)]
+    enclosure_u: PositiveInt = 42
     housekeeping: Housekeeping
 
 

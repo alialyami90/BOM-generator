@@ -331,3 +331,26 @@ def test_change_over_diodes_name_negative_and_positive_parts() -> None:
     data["catalogues"]["housekeeping"]["change_over_diodes"] = {"part_id": "COD-NEG"}
     with pytest.raises(ValidationError, match="positive"):
         Library.model_validate(data)
+
+
+def test_height_u_defaults_to_none_and_accepts_zero() -> None:
+    assert device().height_u is None
+    assert device(height_u=0).height_u == 0
+    assert device(height_u=2).height_u == 2
+
+
+def test_height_u_rejects_negative() -> None:
+    with pytest.raises(ValidationError, match="height_u"):
+        device(height_u=-1)
+
+
+def test_port_group_usable_for_defaults_to_any_and_rejects_other() -> None:
+    group = {"count": 24, "speed": "1G", "media": "RJ45", "kind": "fixed"}
+    assert PortGroup.model_validate(group).usable_for == "any"
+    assert PortGroup.model_validate({**group, "usable_for": "ied"}).usable_for == "ied"
+    with pytest.raises(ValidationError, match="usable_for"):
+        PortGroup.model_validate({**group, "usable_for": "field"})
+
+
+def test_catalogue_enclosure_u_defaults_to_42() -> None:
+    assert Library.model_validate(minimal_library_dict()).catalogues.enclosure_u == 42
