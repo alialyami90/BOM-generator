@@ -157,6 +157,137 @@ def test_app_bomlib_message_caps_a_long_change_list(
     assert "more lines" in shown[0]
 
 
+@pytest.fixture
+def bundled(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """The default library as the installer lays it out, beside the (frozen) executable."""
+    app_dir = tmp_path / "app"
+    (app_dir / "library").mkdir(parents=True)
+    default = pack_example(app_dir / "library", "1.0.0")
+    default.rename(app_dir / "library" / "default.bomlib")
+    monkeypatch.setattr(sys, "executable", str(app_dir / "BOM Generator.exe"))
+    return app_dir / "library" / "default.bomlib"
+
+
+def test_first_start_installs_the_bundled_default_library(
+    monkeypatch: pytest.MonkeyPatch, library_home: Path, bundled: Path
+) -> None:
+    fake_window(monkeypatch)
+    shown: list[str] = []
+
+    assert launcher.app_main([], notify=shown.append) == 0
+
+    assert LibraryStore(library_home).active_version("psa") == "1.0.0"
+    assert shown == []
+
+
+def test_start_with_a_project_file_installs_the_bundled_library_too(
+    monkeypatch: pytest.MonkeyPatch, library_home: Path, bundled: Path, tmp_path: Path
+) -> None:
+    fake_window(monkeypatch)
+
+    assert launcher.app_main([str(tmp_path / "plant.bomproj")], notify=print) == 0
+
+    assert LibraryStore(library_home).active_version("psa") == "1.0.0"
+
+
+def test_second_start_leaves_the_installed_library_unchanged(
+    monkeypatch: pytest.MonkeyPatch, library_home: Path, bundled: Path
+) -> None:
+    fake_window(monkeypatch)
+    shown: list[str] = []
+    launcher.app_main([], notify=shown.append)
+    installed = LibraryStore(library_home).library_file("psa", "1.0.0")
+    stamp = installed.stat().st_mtime_ns
+
+    assert launcher.app_main([], notify=shown.append) == 0
+
+    assert shown == []
+    assert LibraryStore(library_home).versions("psa") == ["1.0.0"]
+    assert installed.stat().st_mtime_ns == stamp
+
+
+def test_start_never_replaces_a_library_the_user_already_has(
+    monkeypatch: pytest.MonkeyPatch, library_home: Path, bundled: Path, tmp_path: Path
+) -> None:
+    fake_window(monkeypatch)
+    newer = tmp_path / "newer"
+    newer.mkdir()
+    LibraryStore(library_home).import_package(pack_example(newer, "2.0.0"))
+
+    assert launcher.app_main([], notify=print) == 0
+
+    store = LibraryStore(library_home)
+    assert store.versions("psa") == ["2.0.0"]
+    assert store.active_version("psa") == "2.0.0"
+
+
+def test_start_with_another_library_installed_adds_no_default(
+    monkeypatch: pytest.MonkeyPatch, library_home: Path, bundled: Path, tmp_path: Path
+) -> None:
+    fake_window(monkeypatch)
+    other = tmp_path / "other.bomlib"
+    pack(EXAMPLE_LIBRARY, other, name="plant-devices", version="3.1.0")
+    LibraryStore(library_home).import_package(other)
+
+    launcher.app_main([], notify=print)
+
+    assert [lib.name for lib in LibraryStore(library_home).list()] == ["plant-devices"]
+
+
+def test_start_without_a_bundled_library_changes_nothing(
+    monkeypatch: pytest.MonkeyPatch, library_home: Path, tmp_path: Path
+) -> None:
+    fake_window(monkeypatch)
+    monkeypatch.setattr(sys, "executable", str(tmp_path / "app" / "BOM Generator.exe"))
+    shown: list[str] = []
+
+    assert launcher.app_main([], notify=shown.append) == 0
+
+    assert shown == []
+    assert not library_home.exists()
+
+
+def test_start_reports_a_bundled_library_that_cannot_be_installed(
+    monkeypatch: pytest.MonkeyPatch, library_home: Path, bundled: Path
+) -> None:
+    calls = fake_window(monkeypatch)
+    bundled.write_text("not a zip")
+    shown: list[str] = []
+
+    assert launcher.app_main([], notify=shown.append) == 0
+
+    assert len(calls) == 1  # a broken package must not stop the window
+    assert "default device library" in shown[0]
+    assert "invalid_package" in shown[0]
+    assert not library_home.exists()
+
+
+def test_start_reports_a_library_folder_that_cannot_be_written(
+    monkeypatch: pytest.MonkeyPatch, library_home: Path, bundled: Path
+) -> None:
+    fake_window(monkeypatch)
+
+    def denied(*_: object, **__: object) -> None:
+        raise PermissionError("access denied")
+
+    monkeypatch.setattr(launcher, "import_library", denied)
+    shown: list[str] = []
+
+    assert launcher.app_main([], notify=shown.append) == 0
+    assert "access denied" in shown[0]
+
+
+def test_bomlib_double_click_does_not_install_the_bundled_library_first(
+    library_home: Path, bundled: Path, tmp_path: Path
+) -> None:
+    mine = tmp_path / "mine"
+    mine.mkdir()
+
+    assert launcher.app_main([str(pack_example(mine, "1.0.0"))], notify=lambda _: None) == 0
+
+    assert LibraryStore(library_home).versions("psa") == ["1.0.0"]
+
+
 def test_bomproj_argument_opens_project() -> None:
     assert launcher.parse_args(["site.BOMPROJ"]) == launcher.Launch(
         "open_project", Path("site.BOMPROJ")

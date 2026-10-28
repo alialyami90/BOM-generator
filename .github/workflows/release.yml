@@ -124,6 +124,17 @@ jobs:
           if ($title -ne "BOM Generator") { Write-Error "The window never showed (title '$title')"; exit 1 }
           exit 0
 
+      - name: Build the default device library
+        run: |
+          # The package the installer ships and the first start imports; name and version
+          # must match `library:` in examples/project.yaml (tests/unit/test_packaging.py).
+          New-Item -ItemType Directory -Force out | Out-Null
+          & "dist\bomgen\bomgen.exe" library pack examples\library.yaml `
+            --name psa-devices --version 1.0.0 --add data\device-db --out out\default.bomlib `
+            --notes "First library: the example project's devices with the researched device database."
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          if (-not (Test-Path out\default.bomlib)) { Write-Error "out\default.bomlib was not written"; exit 1 }
+
       - name: Compile the installer
         env:
           VERSION: ${{ steps.version.outputs.version }}
@@ -157,6 +168,38 @@ jobs:
           if ($out -ne "bomgen $env:VERSION") { Fail "Installed bomgen.exe --version gave '$out'" }
           $app = Start-Process $exe -ArgumentList "--self-test" -Wait -PassThru
           if ($app.ExitCode) { Fail "Installed BOM Generator.exe --self-test exited $($app.ExitCode)" }
+          if (-not (Test-Path "$dir\library\default.bomlib")) { Fail "The installer did not ship library\default.bomlib" }
+          function Show-Window($label) {
+            $window = Start-Process $exe -PassThru
+            $deadline = (Get-Date).AddSeconds(60)
+            $title = ""
+            while ((Get-Date) -lt $deadline) {
+              if ($window.HasExited) { Fail "${label}: the window exited with $($window.ExitCode) before showing" }
+              $window.Refresh()
+              $title = $window.MainWindowTitle
+              if ($window.MainWindowHandle -ne 0 -and $title) { break }
+              Start-Sleep -Milliseconds 500
+            }
+            taskkill /PID $window.Id /T /F | Out-Null
+            if ($title -ne "BOM Generator") { Fail "${label}: the window never showed (title '$title')" }
+          }
+          function Snapshot($path) {
+            (Get-ChildItem $path -Recurse -File | Sort-Object FullName |
+              ForEach-Object { "$($_.FullName) $($_.Length) $($_.LastWriteTimeUtc.Ticks)" }) -join "`n"
+          }
+          # First start: the default library the installer ships lands in an empty store.
+          $env:BOMGEN_LIBRARY_HOME = Join-Path $env:RUNNER_TEMP "first-start-home"
+          $env:BOMGEN_NO_DIALOGS = "1"
+          Show-Window "First start"
+          $listing = (& "$dir\bomgen.exe" library list) -join "`n"
+          if ($listing -notmatch "psa-devices\s+1\.0\.0 \(active\)") { Fail "Default library missing after the first start: $listing" }
+          $before = Snapshot $env:BOMGEN_LIBRARY_HOME
+          # Reinstall over the top and start again: the store must stay exactly as it was.
+          $again = Start-Process "out\installer\bomgen-setup-$env:VERSION.exe" -Wait -PassThru -ArgumentList $silent
+          if ($again.ExitCode) { Fail "Reinstall exited $($again.ExitCode)" }
+          Show-Window "Second start"
+          if ((Snapshot $env:BOMGEN_LIBRARY_HOME) -ne $before) { Fail "The library store changed on the second start" }
+          Remove-Item Env:BOMGEN_LIBRARY_HOME, Env:BOMGEN_NO_DIALOGS
           # The double-click path: open a .bomlib with the installed app (as Explorer does),
           # then read it back with the installed CLI. Unattended, so no message box.
           $env:BOMGEN_LIBRARY_HOME = Join-Path $env:RUNNER_TEMP "bomlib-home"

@@ -16,6 +16,10 @@ a terminal (`"%LOCALAPPDATA%\Programs\BOM Generator\bomgen.exe" --version`).
 
 ## Library update packages
 
+The installer includes the default device library (`psa-devices`). The first time
+the app starts with no library installed it installs that one; a library you
+already have is never replaced.
+
 Double-click a `.bomlib` file to import it (ADR 0008). The app installs the
 library and shows what changed, or says why it refused the package (a
 downgrade, a damaged file, a library newer than the app). A `.bomproj` project

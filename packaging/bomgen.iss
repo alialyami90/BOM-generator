@@ -41,8 +41,9 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "..\dist\bomgen\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-; The default device library package, once `bomgen library pack` exists (plan M8).
-Source: "..\out\default.bomlib"; DestDir: "{app}\library"; Flags: ignoreversion skipifsourcedoesntexist
+; The default device library package (release.yml builds it into out\ before ISCC); the first
+; start imports it into an empty library store (bomgen.app.launcher.install_bundled_library).
+Source: "..\out\default.bomlib"; DestDir: "{app}\library"; Flags: ignoreversion
 
 [Icons]
 Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExeName}"

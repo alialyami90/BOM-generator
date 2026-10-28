@@ -5,7 +5,8 @@ The installer ships two executables built from this module:
 * ``BOM Generator.exe`` (windowed) runs :func:`app_main`. The Start-menu
   shortcut opens the window with no arguments, double-clicking a ``.bomlib`` file
   imports that library (ADR 0008), and a ``.bomproj`` file opens the window on that
-  project.
+  project. Starting the window on a store with no library installs the default
+  library the installer shipped.
 * ``bomgen.exe`` (console) runs :func:`cli_main`, the typer CLI.
 
 The window itself is ``bomgen.app.window`` (M10), imported only when it is needed.
@@ -22,6 +23,7 @@ from typing import Literal
 
 from bomgen import __version__
 from bomgen.library_store import LibraryPackageError, import_library
+from bomgen.library_store.store import LibraryStore, default_library_home
 
 APP_TITLE = "BOM Generator"
 LIBRARY_SUFFIX = ".bomlib"
@@ -31,6 +33,7 @@ UI_ENTRY = "bomgen/app/ui/index.html"  # the window's start page; see bomgen.app
 NO_DIALOGS_ENV = "BOMGEN_NO_DIALOGS"  # set by unattended CI: print instead of a message box
 SELF_TEST_FLAG = "--self-test"
 MODULE_MANIFEST = "bomgen_modules.txt"  # written by packaging/bomgen.spec
+BUNDLED_LIBRARY = Path("library") / "default.bomlib"  # beside the exe; see packaging/bomgen.iss
 
 Action = Literal["window", "import_library", "open_project", "self_test"]
 
@@ -128,6 +131,27 @@ def import_library_message(package: Path) -> tuple[str, bool]:
     return "\n".join([f"{heading}.", "", *lines]), True
 
 
+def install_bundled_library() -> str | None:
+    """Install the installer's default library when the store has none; say why if it fails.
+
+    A store that already holds any library is left alone, so a reinstall or an upgrade
+    never replaces or downgrades what the user has.
+    """
+    package = Path(sys.executable).parent / BUNDLED_LIBRARY
+    if not package.is_file():
+        return None
+    try:
+        store = LibraryStore(default_library_home())
+        if store.list():
+            return None
+        import_library(package, store=store)
+    except LibraryPackageError as error:
+        return f"Could not install the default device library.\n\n{error}\n\n({error.kind.value})"
+    except OSError as error:  # e.g. the library folder isn't writable
+        return f"Could not install the default device library.\n\n{error}"
+    return None
+
+
 def app_main(
     argv: Sequence[str] | None = None, notify: Callable[[str], None] = show_message
 ) -> int:
@@ -142,6 +166,8 @@ def app_main(
         message, imported = import_library_message(launch.path)
         notify(message)
         return 0 if imported else 1
+    if problem := install_bundled_library():
+        notify(problem)
     window = importlib.import_module("bomgen.app.window")
     return int(window.run_window(launch.path, notify))
 

@@ -8,6 +8,8 @@ not drift.
 import re
 from pathlib import Path
 
+import yaml
+
 PACKAGING = Path(__file__).resolve().parents[2] / "packaging"
 ISS = (PACKAGING / "bomgen.iss").read_text(encoding="utf-8")
 SPEC = (PACKAGING / "bomgen.spec").read_text(encoding="utf-8")
@@ -121,3 +123,32 @@ def test_release_workflow_has_no_variable_followed_by_a_colon() -> None:
     )
     scoped = re.findall(r"\$(?!(?:env|global|script|local):)\w+:", workflow)
     assert scoped == []
+
+
+def test_installer_ships_the_default_library_and_fails_without_it() -> None:
+    line = next(item for item in ISS.splitlines() if "default.bomlib" in item and "Source:" in item)
+    assert 'DestDir: "{app}\\library"' in line
+    assert "skipifsourcedoesntexist" not in line  # a missing package must fail the build
+
+
+def test_release_workflow_packs_the_default_library_the_project_names_before_compiling() -> None:
+    workflow = (PACKAGING.parent / ".github" / "workflows" / "release.yml").read_text(
+        encoding="utf-8"
+    )
+    project = yaml.safe_load((PACKAGING.parent / "examples" / "project.yaml").read_text("utf-8"))
+    library = project["library"]
+    assert f"--name {library['name']} --version {library['version']}" in workflow
+    assert "--add data\\device-db --out out\\default.bomlib" in workflow
+    assert workflow.index("library pack examples\\library.yaml") < workflow.index(
+        "Compile the installer"
+    )
+
+
+def test_release_workflow_proves_the_first_start_install_and_that_a_reinstall_keeps_it() -> None:
+    workflow = (PACKAGING.parent / ".github" / "workflows" / "release.yml").read_text(
+        encoding="utf-8"
+    )
+    assert 'Show-Window "First start"' in workflow
+    assert "psa-devices" in workflow
+    assert 'Show-Window "Second start"' in workflow
+    assert "The library store changed on the second start" in workflow
