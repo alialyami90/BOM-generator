@@ -18,7 +18,10 @@ Design only: the app itself is M10. Status: ready for Ali's review.
 
 ## Open the prototype
 
-Double-click `prototype/index.html` in Edge or Chrome. No server or install.
+Double-click `prototype/index.html` in Edge or Chrome on a PC. No server or install.
+It loads its CSS, scripts and fonts from beside it, so it shows a blank page when
+opened alone from a phone or a file manager. For that, build one self-contained file:
+`node docs/ui/tools/build-standalone.mjs` writes `out/ui-prototype.html` (git-ignored).
 The "Prototype states" button in the status bar jumps between states (empty
 library, errors, clean, import outcomes, build outcomes). It is not part of the app.
 All data is illustrative.
