@@ -105,6 +105,7 @@ class LooseExtra(InputModel):
 
 
 class LooseMaterial(InputModel):
+    title: str = "PSA Panels Loose Material and Auxiliary Equipment"  # the table's title row
     host_panel: str
     items: list[LooseExtra] = Field(default_factory=list)
 

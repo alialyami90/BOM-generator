@@ -62,6 +62,7 @@ class Side(StrEnum):
 class Equipment(InputModel):
     """A device the substation needs, before any panel exists (ADR 0013)."""
 
+    id: PanelId  # what layout overrides and the UI name, never a tag
     part_id: PartId
     role: EquipmentRole
     redundant: bool = False
@@ -97,12 +98,17 @@ class Network(InputModel):
 
 
 class DeviceMove(InputModel):
-    device: str
+    """Move one equipment entry (or its ``unit``-th unit, 1-based) into a panel."""
+
+    device: PanelId
+    unit: PositiveInt | None = None
     panel: PositiveInt
 
 
 class PairMove(InputModel):
-    pair: str
+    """Move both units of a redundant equipment entry into two panels."""
+
+    pair: PanelId
     panel: tuple[PositiveInt, PositiveInt]
 
     @field_validator("panel")
@@ -118,7 +124,7 @@ class Layout(InputModel):
 
     blank_plate_u: NonNegativeInt = 1
     overrides: list[DeviceMove | PairMove] = Field(default_factory=list)
-    removed: list[str] = Field(default_factory=list)
+    removed: list[PanelId] = Field(default_factory=list)  # equipment ids left out
 
 
 def _check_number_template(value: str) -> str:
@@ -196,6 +202,20 @@ class Substation(InputModel):
         )
         if both:
             raise ValueError(f"listed in both panels and manual_panels: {', '.join(both)}")
+        by_id: dict[str, Equipment] = {}
+        for item in self.equipment:
+            if item.id in by_id:
+                raise ValueError(f"duplicate equipment id '{item.id}'")
+            by_id[item.id] = item
+        for move in self.layout.overrides:
+            name = move.device if isinstance(move, DeviceMove) else move.pair
+            if name not in by_id:
+                raise ValueError(f"layout override names no equipment id '{name}'")
+            if isinstance(move, PairMove) and not by_id[name].redundant:
+                raise ValueError(f"layout override: '{name}' is not redundant, so it has no pair")
+        for name in self.layout.removed:
+            if name not in by_id:
+                raise ValueError(f"layout.removed names no equipment id '{name}'")
         if self.equipment:
             for role in (EquipmentRole.L1_SWITCH, EquipmentRole.L2_SWITCH):
                 entries = [e for e in self.equipment if e.role is role]

@@ -10,18 +10,20 @@ import pytest
 from expected_groups_a_d import LOOSE, PSA1_A_TO_D, PSA2_A_TO_D, PSA3_A_TO_D, WS_A_TO_D, Row
 
 from bomgen.engine.pipeline import build
-from bomgen.io.loader import load_project
+from bomgen.io.loader import load_substation
 from bomgen.models.bom import BomLine, BomTable, BuildResult, Group, PanelBom, QtySum
 
 pytestmark = pytest.mark.golden
 
-PROJECT_FILE = Path(__file__).resolve().parents[2] / "examples" / "project.yaml"
+SUBSTATION_FILE = (
+    Path(__file__).resolve().parents[2] / "examples" / "substations" / "gis01" / "substation.yaml"
+)
 GROUPS_A_TO_D = {Group.A, Group.B, Group.C, Group.D}
 
 
 @pytest.fixture(scope="module")
 def result() -> BuildResult:
-    return build(load_project(PROJECT_FILE))
+    return build(load_substation(SUBSTATION_FILE))
 
 
 def panel(result: BuildResult, panel_id: str) -> PanelBom:

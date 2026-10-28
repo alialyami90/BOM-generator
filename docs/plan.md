@@ -199,15 +199,17 @@ output:
 constants: { t_max_c: 40 }             # optional overrides of the project defaults
 spares: { port_fraction: 0.25 }        # optional overrides of the project defaults
 loose_material:                        # extras not tied to a device
+  title: "PSA Panels Loose Material and Auxiliary Equipment"   # the table's title row
   host_panel: ws                       # table sits under this panel's BOM
   items:
     - { part_id: NAP-K55, children: [LPA37-696], fed_from: psa3 }   # Q13
     - { part_id: FO-PATCH-CORDS, qty: "1 Lot" }
 equipment:                             # what the layout places (design 3.2)
-  - { part_id: RST2228-L2, role: l2_switch, redundant: true }       # exactly one
-  - { part_id: RST2228-L1-24MM, role: l1_switch, redundant: true }  # exactly one; no qty
-  - { part_id: FGR-60F, role: firewall, redundant: true, l2_ports: 1 }
-  - { part_id: SEL-2488, role: other, l2_ports: 1, l2_speed: 100M } # side: none (common)
+  - { id: l2, part_id: RST2228-L2, role: l2_switch, redundant: true }       # exactly one
+  - { id: l1, part_id: RST2228-L1-24MM, role: l1_switch, redundant: true }  # exactly one; no qty
+  - { id: ext-fw, part_id: FGR-60F, role: firewall, redundant: true, l2_ports: 1 }
+  - { id: gps, part_id: SEL-2488, role: other, l2_ports: 1, l2_speed: 100M } # side: none
+  # id: unique; overrides and the UI name ids, never tags
   # role: l1_switch | l2_switch | ext_switch | firewall | fopp | other
   # redundant (one unit per side) or side: none | a | b; qty (not on l1_switch);
   # l2_ports, l2_speed (default 1G), l2_media (default MM)
@@ -220,10 +222,10 @@ network:
   l3_uplinks_per_l2: 2
 layout:                                # panel capacity = enclosure_u − rack_u_reserved
   blank_plate_u: 1                     # space only, no BOM row (Q25)
-  overrides:                           # written by the UI's Panels board
-    - { device: PSA1-L1-ESW-A13, panel: 3 }
-    - { pair: EXT-FW, panel: [3, 4] }
-  removed: [PSA1-DHPCC-GW-1]
+  overrides:                           # written by the UI's Panels board; equipment ids
+    - { device: l1, unit: 3, panel: 3 } # unit: which of the entry's units (1-based)
+    - { pair: ext-fw, panel: [3, 4] }   # a redundant entry's two units
+  removed: [gw]                        # equipment ids left out
 generated_panels:                      # needed when equipment is given; {n} = panel number
   id: "psa{n}"
   cabinet_number: "861-GIS01-PSA-{n:04d}"

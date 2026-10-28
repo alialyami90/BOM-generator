@@ -88,6 +88,10 @@ hand-written YAML.
     is computed, so it takes no `qty`. Every equipment part needs `height_u`.
     The panel's usable U is computed (`enclosure_u − rack_u_reserved`), never
     written.
+18. **Equipment ids.** Every equipment entry has a unique `id`. Layout
+    `overrides` (`device` with an optional 1-based `unit`, or `pair` for a
+    redundant entry) and `removed` name these ids, never tags, so a re-run of
+    the layout or a renumbering cannot break them.
 
 ## Consequences
 

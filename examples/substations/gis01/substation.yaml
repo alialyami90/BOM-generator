@@ -42,15 +42,15 @@ output:  # the defaults, written out
 # override it for this substation only.
 
 equipment:  # what the substation needs before panels exist (design 3.2)
-  - { part_id: RST2228-L2, role: l2_switch, redundant: true }
-  - { part_id: RST2228-L1-24MM, role: l1_switch, redundant: true }  # count from ied_count
-  - { part_id: SEL-2730M-EXT, role: ext_switch, redundant: true }
-  - { part_id: FGR-60F, role: firewall, redundant: true, l2_ports: 1 }
-  - { part_id: FOPP-96SM, role: fopp, redundant: true }
-  - { part_id: SEL-3555-GW, role: other, redundant: true, l2_ports: 1 }  # ASSUMED l2_ports
-  - { part_id: SEL-2488, role: other, l2_ports: 1, l2_speed: 100M }  # GPS clock
-  - { part_id: SEL-3555-RTAC, role: other, l2_ports: 2 }
-  - { part_id: SEL-2240, role: other }  # Axion I/O, no L2 link
+  - { id: l2, part_id: RST2228-L2, role: l2_switch, redundant: true }
+  - { id: l1, part_id: RST2228-L1-24MM, role: l1_switch, redundant: true }  # count from ied_count
+  - { id: ext-esw, part_id: SEL-2730M-EXT, role: ext_switch, redundant: true }
+  - { id: ext-fw, part_id: FGR-60F, role: firewall, redundant: true, l2_ports: 1 }
+  - { id: fopp, part_id: FOPP-96SM, role: fopp, redundant: true }
+  - { id: gw, part_id: SEL-3555-GW, role: other, redundant: true, l2_ports: 1 }  # ASSUMED l2_ports
+  - { id: gps, part_id: SEL-2488, role: other, l2_ports: 1, l2_speed: 100M }  # GPS clock
+  - { id: rtac, part_id: SEL-3555-RTAC, role: other, l2_ports: 2 }
+  - { id: hwio, part_id: SEL-2240, role: other }  # Axion I/O, no L2 link
 
 network:
   ied_count: 40  # field IEDs: sizes the L1 switches, never a BOM row (R4)
@@ -90,7 +90,8 @@ generated_panels:  # identity of the panels the layout writes; {n} is the panel 
   options_by_panel:
     2: { aux_socket_a: 10 }  # as psa2
 
-loose_material:  # 'Aux' rows 49-62, under the WS console BOM
+loose_material:  # 'Aux' rows 47-62, under the WS console BOM
+  title: "PSA Panels Loose Material and Auxiliary Equipment"  # 'Aux' row 47
   host_panel: ws
   items:
     - part_id: NAP-K55  # row 49

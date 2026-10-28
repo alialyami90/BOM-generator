@@ -1,4 +1,4 @@
-"""Run the derivation steps over a loaded project (spec: Data model and generation order).
+"""Run the derivation steps over a loaded substation (spec: Data model and generation order).
 
 Steps 1, 2, 3 and 5 so far: groups A-D per panel and the loose-material table.
 """
@@ -9,17 +9,17 @@ from bomgen.engine.items import flatten
 from bomgen.engine.kits import loose_table, main_equipment
 from bomgen.engine.network import accessories
 from bomgen.engine.units import DeviceRow, expand_devices
-from bomgen.io.loader import LoadedProject
+from bomgen.io.loader import LoadedSubstation
 from bomgen.models.bom import BuildResult, PanelBom
 from bomgen.models.panel import Panel
 
 
-def build(loaded: LoadedProject) -> BuildResult:
+def build(loaded: LoadedSubstation) -> BuildResult:
     """Every panel's BOM lines and the loose-material table."""
     library = loaded.library
-    material = loaded.project.loose_material
+    material = loaded.substation.loose_material
     loose_items = material.items if material is not None else []
-    substation = loaded.project.project.substation
+    substation = loaded.substation.substation.name
     panel_rows: list[tuple[Panel, tuple[DeviceRow, ...]]] = []
     panels = []
     for panel in loaded.panels:

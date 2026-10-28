@@ -146,8 +146,10 @@
     },
     "DeviceMove": {
       "additionalProperties": false,
+      "description": "Move one equipment entry (or its ``unit``-th unit, 1-based) into a panel.",
       "properties": {
         "device": {
+          "pattern": "^[a-z0-9][a-z0-9_-]*$",
           "title": "Device",
           "type": "string"
         },
@@ -155,6 +157,19 @@
           "exclusiveMinimum": 0,
           "title": "Panel",
           "type": "integer"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
         }
       },
       "required": [
@@ -233,6 +248,11 @@
       "additionalProperties": false,
       "description": "A device the substation needs, before any panel exists (ADR 0013).",
       "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
         "l2_media": {
           "$ref": "#/$defs/Media",
           "default": "MM"
@@ -272,6 +292,7 @@
         }
       },
       "required": [
+        "id",
         "part_id",
         "role"
       ],
@@ -378,6 +399,7 @@
         },
         "removed": {
           "items": {
+            "pattern": "^[a-z0-9][a-z0-9_-]*$",
             "type": "string"
           },
           "title": "Removed",
@@ -461,6 +483,11 @@
           },
           "title": "Items",
           "type": "array"
+        },
+        "title": {
+          "default": "PSA Panels Loose Material and Auxiliary Equipment",
+          "title": "Title",
+          "type": "string"
         }
       },
       "required": [
@@ -536,8 +563,10 @@
     },
     "PairMove": {
       "additionalProperties": false,
+      "description": "Move both units of a redundant equipment entry into two panels.",
       "properties": {
         "pair": {
+          "pattern": "^[a-z0-9][a-z0-9_-]*$",
           "title": "Pair",
           "type": "string"
         },

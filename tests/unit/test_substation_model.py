@@ -33,20 +33,32 @@ def substation_dict() -> dict[str, Any]:
         "panels": ["panels/psa1.yaml", "panels/psa2.yaml"],
         "manual_panels": ["panels/ws.yaml"],
         "equipment": [
-            {"part_id": "RST2228-L2", "role": "l2_switch", "redundant": True},
-            {"part_id": "RST2228-L1-24MM", "role": "l1_switch", "redundant": True},
-            {"part_id": "FGR-60F", "role": "firewall", "redundant": True, "l2_ports": 1},
-            {"part_id": "SEL-2488", "role": "other", "l2_ports": 1, "l2_speed": "100M"},
+            {"id": "l2", "part_id": "RST2228-L2", "role": "l2_switch", "redundant": True},
+            {"id": "l1", "part_id": "RST2228-L1-24MM", "role": "l1_switch", "redundant": True},
+            {
+                "id": "ext-fw",
+                "part_id": "FGR-60F",
+                "role": "firewall",
+                "redundant": True,
+                "l2_ports": 1,
+            },
+            {
+                "id": "gps",
+                "part_id": "SEL-2488",
+                "role": "other",
+                "l2_ports": 1,
+                "l2_speed": "100M",
+            },
         ],
         "network": {"ied_count": 40, "topology": "star"},
         "spares": {"port_fraction": 0.2},
         "layout": {
             "blank_plate_u": 1,
             "overrides": [
-                {"device": "PSA1-L1-ESW-A13", "panel": 3},
-                {"pair": "EXT-FW", "panel": [3, 4]},
+                {"device": "l1", "unit": 3, "panel": 3},
+                {"pair": "ext-fw", "panel": [3, 4]},
             ],
-            "removed": ["PSA1-DHPCC-GW-1"],
+            "removed": ["gps"],
         },
         "generated_panels": {
             "id": "psa{n}",
@@ -79,25 +91,28 @@ def test_substation_from_design_example_validates() -> None:
 def test_redundant_equipment_cannot_name_a_side() -> None:
     with pytest.raises(ValidationError, match="leave side out"):
         Equipment.model_validate(
-            {"part_id": "X", "role": "firewall", "redundant": True, "side": "a"}
+            {"id": "fw", "part_id": "X", "role": "firewall", "redundant": True, "side": "a"}
         )
-    assert Equipment.model_validate({"part_id": "X", "role": "other", "side": "b"}).side == "b"
+    other = {"id": "x", "part_id": "X", "role": "other", "side": "b"}
+    assert Equipment.model_validate(other).side == "b"
 
 
 def test_l1_switch_count_is_not_an_input() -> None:
     with pytest.raises(ValidationError, match="leave qty out"):
-        Equipment.model_validate({"part_id": "X", "role": "l1_switch", "qty": 2})
-    assert Equipment.model_validate({"part_id": "X", "role": "fopp", "qty": 2}).qty == 2
+        Equipment.model_validate({"id": "l1", "part_id": "X", "role": "l1_switch", "qty": 2})
+    fopp = {"id": "fopp", "part_id": "X", "role": "fopp", "qty": 2}
+    assert Equipment.model_validate(fopp).qty == 2
 
 
 @pytest.mark.parametrize("role", ["l1_switch", "l2_switch"])
 def test_equipment_needs_one_l1_and_one_l2_switch(role: str) -> None:
     data = substation_dict()
+    data["layout"] = {}
     data["equipment"] = [e for e in data["equipment"] if e["role"] != role]
     with pytest.raises(ValidationError, match=f"exactly one redundant {role}"):
         Substation.model_validate(data)
     data = substation_dict()
-    data["equipment"].append({"part_id": "Y", "role": role, "redundant": True})
+    data["equipment"].append({"id": "y", "part_id": "Y", "role": role, "redundant": True})
     with pytest.raises(ValidationError, match=f"exactly one redundant {role}"):
         Substation.model_validate(data)
 
@@ -108,6 +123,7 @@ def test_equipment_needs_generated_panels() -> None:
     with pytest.raises(ValidationError, match="generated_panels"):
         Substation.model_validate(data)
     data["equipment"] = []
+    data["layout"] = {}
     assert Substation.model_validate(data).generated_panels is None
 
 
@@ -121,7 +137,7 @@ def test_generated_panel_templates_need_one_number(bad: str) -> None:
 
 def test_pair_move_needs_two_different_panels() -> None:
     with pytest.raises(ValidationError, match="two different panels"):
-        PairMove.model_validate({"pair": "EXT-FW", "panel": [3, 3]})
+        PairMove.model_validate({"pair": "ext-fw", "panel": [3, 3]})
 
 
 def test_panel_file_cannot_be_both_generated_and_manual() -> None:
@@ -183,3 +199,33 @@ def test_generated_panel_templates_render_valid_values(field: str, bad: str) -> 
     data[field] = bad
     with pytest.raises(ValidationError, match=field):
         GeneratedPanels.model_validate(data)
+
+
+def test_equipment_ids_are_unique() -> None:
+    data = substation_dict()
+    data["equipment"][3]["id"] = "l1"
+    with pytest.raises(ValidationError, match="duplicate equipment id 'l1'"):
+        Substation.model_validate(data)
+
+
+@pytest.mark.parametrize(
+    ("layout", "message"),
+    [
+        ({"overrides": [{"device": "nope", "panel": 2}]}, "equipment id 'nope'"),
+        ({"overrides": [{"pair": "gps", "panel": [1, 2]}]}, "'gps' is not redundant"),
+        ({"removed": ["ghost"]}, "equipment id 'ghost'"),
+    ],
+)
+def test_layout_overrides_name_equipment_ids(layout: dict[str, Any], message: str) -> None:
+    data = substation_dict()
+    data["layout"] = layout
+    with pytest.raises(ValidationError, match=message):
+        Substation.model_validate(data)
+
+
+def test_loose_material_title_defaults_to_the_workbook_text() -> None:
+    data = substation_dict()
+    data["loose_material"] = {"host_panel": "ws"}
+    s = Substation.model_validate(data)
+    assert s.loose_material is not None
+    assert s.loose_material.title == "PSA Panels Loose Material and Auxiliary Equipment"

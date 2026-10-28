@@ -49,8 +49,8 @@ def where(issues: list[Issue]) -> list[tuple[str, str, str]]:
 
 def with_equipment(substation: dict[str, Any]) -> dict[str, Any]:
     substation["equipment"] = [
-        {"part_id": "RST2228-L2", "role": "l2_switch", "redundant": True},
-        {"part_id": "RST2228-L2", "role": "l1_switch", "redundant": True},
+        {"id": "l2", "part_id": "RST2228-L2", "role": "l2_switch", "redundant": True},
+        {"id": "l1", "part_id": "RST2228-L2", "role": "l1_switch", "redundant": True},
     ]
     substation["generated_panels"] = {
         "id": "p{n}",
@@ -226,7 +226,7 @@ def test_equipment_part_needs_height_u(tmp_path: Path) -> None:
 def test_equipment_unknown_part_and_non_switch_role(tmp_path: Path) -> None:
     substation = with_equipment(default_substation())
     substation["equipment"][1]["part_id"] = "LAMP"
-    substation["equipment"].append({"part_id": "GHOST", "role": "other"})
+    substation["equipment"].append({"id": "ghost", "part_id": "GHOST", "role": "other"})
     library = library_with_heights()
     library["devices"][2]["height_u"] = 0
     issues = issues_for(write_project(tmp_path, library=library, substation=substation))

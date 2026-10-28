@@ -129,7 +129,7 @@ def panel(devices: list[dict[str, Any]], **fields: Any) -> Panel:
             "cable_entry": "top",
         },
         "devices": devices,
-        "document": {"doc_no": "DOC-1", "rev": "0", "issue_date": "2026-10-28"},
+        "document": "p1-bom",
     }
     data.update(fields)
     return Panel.model_validate(data)
