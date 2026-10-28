@@ -15,6 +15,9 @@ import yaml
 TIERS = ("low", "mid", "high")
 VERIFIED_LEVELS = {"confirmed", "partial", "unverified"}
 KINDS = {"device", "catalogue"}
+MOUNTING_KINDS = {"rack", "din_rail", "plug_in", "enclosure", "external"}
+PORT_ROLES = {"ied", "uplink", "any"}
+PORT_GROUP_KEYS = {"ports", "count", "speed", "media", "kind", "usable_for"}
 
 REPO = Path(__file__).resolve().parents[2]
 DB_DIR = REPO / "data" / "device-db"
@@ -39,6 +42,10 @@ def _library_device_ids() -> set[str]:
     for entry in LIBRARY["catalogues"]["housekeeping"].values():
         ids.update(v for k, v in entry.items() if k in {"part_id", "negative", "positive"})
     return ids
+
+
+def _library_switches() -> dict[str, dict[str, Any]]:
+    return {d["part_id"]: d for d in LIBRARY["devices"] if d["category"] == "network_switch"}
 
 
 def _library_catalogue_refs() -> set[str]:
@@ -138,3 +145,34 @@ def test_alternative_brands_differ_from_original_and_each_other(record: dict[str
     original = str(record.get("make") or "").casefold()
     if original:
         assert not any(original in make or make in original for make in makes)
+
+
+@pytest.mark.parametrize("record", RECORDS, ids=_ids(RECORDS))
+def test_record_states_mounting_and_whole_rack_units(record: dict[str, Any]) -> None:
+    datasheet = record["datasheet"]
+    assert datasheet["mounting_kind"] in MOUNTING_KINDS
+    height = datasheet["height_u"]
+    assert type(height) is int
+    if datasheet["mounting_kind"] == "rack":
+        assert height >= 1
+    else:
+        assert height == 0
+
+
+@pytest.mark.parametrize("part_id", sorted(_library_switches()))
+def test_switch_lists_port_groups_with_a_role_for_the_sizer(part_id: str) -> None:
+    record = next(r for r in RECORDS if r["part_id"] == part_id)
+    groups = record["datasheet"]["port_groups"]
+    assert groups
+    for group in groups:
+        assert group.keys() >= PORT_GROUP_KEYS, group
+        assert group["usable_for"] in PORT_ROLES
+        assert type(group["count"]) is int
+        assert group["count"] > 0
+    assert any(g["usable_for"] in {"ied", "any"} for g in groups)
+    assert any(g["usable_for"] in {"uplink", "any"} for g in groups)
+
+
+def test_only_switches_carry_port_groups() -> None:
+    with_groups = {r["part_id"] for r in RECORDS if "port_groups" in r["datasheet"]}
+    assert with_groups == set(_library_switches())

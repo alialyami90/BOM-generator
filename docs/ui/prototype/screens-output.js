@@ -1,7 +1,8 @@
 /* Screens: Checks, Preview, Build. */
 (function () {
   const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, field, input, select, pageHead, illus, dialog, closeDialog, toast, go, counts, $ } = App;
-  const P = DB.project;
+  const P = DB.sub;
+  const mainDoc = () => { const pr = App.curProject(); return (pr && pr.documents.find((d) => d.key === P.mainDoc)) || { rev: '' }; };
   const fmt = (n, d = 1) => n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
 
   /* ---------- Checks ---------- */
@@ -27,13 +28,12 @@
   ACTIONS.rerun = () => { running = true; App.render(); setTimeout(() => { running = false; App.render(); toast('Checks finished'); }, 900); };
   ACTIONS['goto-problem'] = (el) => {
     const p = DB.problems[+el.dataset.i];
-    if (p.project) go('#/project/general');
-    else go('#/panels/' + p.panel + '/' + p.tab);
+    go(p.route);
   };
 
   /* ---------- Preview ---------- */
   let grp = 'all'; let q = ''; let showHwio = false; let showRev = false;
-  const sheetTabs = [['psa1', '1'], ['psa2', '2'], ['psa3', '3'], ['ws', '4'], ['power', 'Power Consumption'], ['heatdiss', 'Heat Dissipation'], ['heatcalc', 'Heat Calculations']];
+  const sheetTabs = [...DB.panels.map((p) => [p.id, p.sheet]), ['power', 'Power Consumption'], ['heatdiss', 'Heat Dissipation'], ['heatcalc', 'Heat Calculations']];
   SCREENS.preview = () => {
     const { b } = App.route(); if (b) S.tab.preview = b;
     const t = S.tab.preview;
@@ -42,7 +42,7 @@
     return `<div class="page">${pageHead('Preview', 'What the workbook will contain. Values are calculated by the engine; nothing here is editable.',
       S.checks === 'errors' ? `<a class="btn btn--secondary" href="#/build">${icon('build')}Build (blocked)</a>` : `<button class="btn btn--primary" data-action="goto" data-to="#/build">${icon('build')}Continue to Build</button>`)}
       ${S.checks === 'errors' ? `<div style="margin-bottom:var(--space-4)">${banner('warn', '<b>Preview is from the last successful load.</b> 2 errors in the input files mean some values may be out of date.', '<a class="btn btn--primary btn--sm" href="#/checks">Open checks</a>')}</div>` : ''}
-      ${tabs('preview', sheetTabs.map(([i, l]) => [i, i.length < 5 && i !== 'ws' || i === 'ws' ? `Sheet ${l}` : l]), t, 'Workbook sheets')}
+      ${tabs('preview', sheetTabs.map(([i, l]) => [i, DB.panels.some((p) => p.id === i) ? `Sheet ${l}` : l]), t, 'Workbook sheets')}
       <div role="tabpanel" aria-labelledby="tab-preview-${t}">${body}</div></div>`;
   };
   ACTIONS.tab = ((prev) => (el) => {
@@ -74,7 +74,7 @@
       <span class="sp"></span>
       <label class="switch"><input type="checkbox" data-action="hwio" ${showHwio ? 'checked' : ''}>HWIO column</label>
       <label class="switch"><input type="checkbox" data-action="rev" ${showRev ? 'checked' : ''}>Show revised cells</label></div>
-    <div class="sheet-title">${esc(p.cabinet)}<small>${esc(P.substation)} - ${esc(p.name)}</small></div>
+    <div class="sheet-title">${esc(p.cabinet)}<small>${esc(P.titleLine)} - ${esc(p.name)}</small></div>
     <div class="table-wrap" style="max-height:calc(100vh - 380px)"><table class="table"><thead><tr><th title="Group (preview only)">Grp</th><th class="num">SR.NO</th><th>Item designation</th><th>Description</th><th class="num">Quantity</th><th>Make</th><th>Model</th><th>Ordering code</th>${showHwio ? '<th class="num">HWIO</th>' : ''}</tr></thead><tbody>${out || `<tr class="empty-row"><td colspan="9">No rows match. Clear the filter to see all ${rows.length} rows.</td></tr>`}</tbody></table></div>
     <div class="row" style="justify-content:space-between;margin-top:var(--space-2)"><span class="muted small">${rows.length} rows · Groups (A to H) and the HWIO column are for review. The issued sheet shows neither, and the HWIO column is hidden in the workbook.</span><span class="muted small">Panel HWIO total: <b>${hw}</b> ${illus()}</span></div>`;
   }
@@ -112,21 +112,21 @@
     const blocked = S.build === 'ready' && c.errors > 0;
     const st = S.build;
     let status = '';
-    if (st === 'success') status = `${banner('ok', `<b>Workbook written.</b><div class="mono" style="margin-top:2px">D:\\Projects\\gis-substation\\out\\${esc(fileName())}</div><div class="small muted">86 KB · 7 sheets · opens in Excel 2016 or later</div>`, `<div class="row" style="flex-wrap:nowrap"><button class="btn btn--primary btn--sm" data-action="toast" data-m="Opening in Excel">${icon('ext')}Open workbook</button><button class="btn btn--secondary btn--sm" data-action="toast" data-m="Showing in folder">Show in folder</button></div>`)}
+    if (st === 'success') status = `${banner('ok', `<b>Workbook written.</b><div class="mono" style="margin-top:2px">D:\\Projects\\eastern-province\\substations\\gis01\\out\\${esc(fileName())}</div><div class="small muted">86 KB · 8 sheets · opens in Excel 2016 or later</div>`, `<div class="row" style="flex-wrap:nowrap"><button class="btn btn--primary btn--sm" data-action="toast" data-m="Opening in Excel">${icon('ext')}Open workbook</button><button class="btn btn--secondary btn--sm" data-action="toast" data-m="Showing in folder">Show in folder</button></div>`)}
       <div class="stack" style="margin-top:var(--space-4)"><h3>Check report</h3><ul class="checklist"><li class="ok">${icon('check')}<span style="color:var(--color-text)">SFPs match the port plans</span></li><li class="ok">${icon('check')}<span style="color:var(--color-text)">Airflow covers the heat load in every cabinet</span></li><li class="ok">${icon('check')}<span style="color:var(--color-text)">Digital inputs cover the 40 hardwired points</span></li><li>${icon('warn')}<span>Main MCB overrides on PSA1 and PSA2 (16 A fixed)</span></li></ul></div>`;
     if (st === 'locked') status = banner('bad', `<b>The file could not be written.</b> <span class="mono">${esc(fileName())}</span> is open in Excel. Close it there and try again, or save under a different name.`, `<div class="row" style="flex-wrap:nowrap"><button class="btn btn--primary btn--sm" data-action="build">Try again</button><button class="btn btn--secondary btn--sm" data-action="rename-build">Save as new name</button></div>`);
     if (st === 'building') {
-      const steps = ['Loading inputs and library', 'Running the engine for 4 panels', 'Building sheets and formulas', 'Writing the workbook'];
+      const steps = ['Loading inputs and library', 'Running the layout and the engine for 5 panels', 'Building sheets and formulas', 'Writing the workbook'];
       status = `<div class="stack" style="max-width:520px"><h3>Building…</h3><div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="4" aria-valuenow="${S.buildStep}" aria-label="Build progress"><i style="width:${S.buildStep * 25}%"></i></div>
         <ul class="steps">${steps.map((s, i) => `<li data-s="${i < S.buildStep ? 'done' : i === S.buildStep ? 'run' : ''}">${i < S.buildStep ? icon('check') : i === S.buildStep ? '<span class="spinner"></span>' : '<span style="width:16px"></span>'}${s}</li>`).join('')}</ul></div>`;
     }
-    return `<div class="page">${pageHead('Build', 'Write the workbook once the checks are clear.')}
+    return `<div class="page">${pageHead('Build', 'Write this substation\'s workbook once the checks are clear.')}
       ${blocked ? banner('bad', `<b>2 errors block the build.</b> Fix them under Checks, then come back.`, '<a class="btn btn--secondary btn--sm" href="#/checks">Open checks</a>') : ''}
       <div style="display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:var(--space-6);align-items:start;margin-top:${blocked ? 'var(--space-5)' : '0'}">
       <div>
         <div class="form" style="max-width:640px">
-          ${field('File name', input('b-name', fileName(), { mono: true }), 'From the pattern in Project → Output.')}
-          ${field('Save in', `<div class="row" style="flex-wrap:nowrap">${input('b-dir', 'D:\\Projects\\gis-substation\\out', { mono: true })}<button class="btn btn--secondary">Browse…</button></div>`)}
+          ${field('File name', input('b-name', fileName(), { mono: true }), 'From the pattern in Settings → Output.')}
+          ${field('Save in', `<div class="row" style="flex-wrap:nowrap">${input('b-dir', 'D:\\Projects\\eastern-province\\substations\\gis01\\out', { mono: true })}<button class="btn btn--secondary">Browse…</button></div>`)}
           <div class="field"><span class="label">Options</span><div class="stack"><label class="switch"><input type="checkbox" data-dirty="0">Highlight cells changed since the previous issue</label>
             <div class="row" style="margin-left:44px"><input class="input input--mono" style="width:320px" placeholder="Choose the previous issue (.xlsx)" disabled><button class="btn btn--secondary btn--sm" disabled>Browse…</button></div>
             <label class="switch"><input type="checkbox" checked data-dirty="0">Open the workbook when it is written</label></div></div>
@@ -135,7 +135,7 @@
         <div style="margin-top:var(--space-5)">${status}</div>
       </div>
       <aside><h3>This workbook contains</h3><ul class="checklist" style="margin-top:var(--space-3)">${DB.panels.map((p) => `<li>${icon('preview')}<span>Sheet ${p.sheet}: ${esc(p.name)}</span></li>`).join('')}${P.output.sheets.map((s) => `<li>${icon('preview')}<span>${esc(s)}</span></li>`).join('')}</ul>
-        <dl class="kv" style="margin-top:var(--space-4);grid-template-columns:120px 1fr"><dt>Library</dt><dd>${esc(DB.library.name)} ${esc(DB.library.version)}</dd><dt>Project rev</dt><dd>${esc(P.rev)}</dd><dt>Warnings</dt><dd>${c.warnings} (do not block)</dd></dl></aside></div></div>`;
+        <dl class="kv" style="margin-top:var(--space-4);grid-template-columns:120px 1fr"><dt>Library</dt><dd>${esc(DB.library.name)} ${esc(DB.library.version)}</dd><dt>Revision</dt><dd>${esc(mainDoc().rev)}</dd><dt>Warnings</dt><dd>${c.warnings} (do not block)</dd></dl></aside></div></div>`;
   };
   ACTIONS.build = () => {
     if (S.checks === 'errors' && S.build === 'ready') return;

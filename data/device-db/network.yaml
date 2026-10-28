@@ -67,6 +67,23 @@ records:
       refs). The 77 W maximum (HV AC; 76 W HV DC) comes from the installation manual and matches the BOM.
       Weight 8.0 kg is from the installation manual (via manualslib). Slot letter map: B-G = slots 1-6,
       A = service panel location.'
+    mounting_kind: rack
+    height_u: 1
+    port_groups:
+    - ports: slots 1-5
+      count: 20
+      speed: 1G
+      media: SFP
+      kind: sfp_slot
+      usable_for: any
+      note: 5 x RMM2972-4SFP; each cage takes a 100BASE-FX or 1000BASE-X SFP
+    - ports: slot 0
+      count: 4
+      speed: 10G
+      media: SFP+
+      kind: sfp_slot
+      usable_for: uplink
+      note: Fixed 1/10G SFP+ uplinks; take 1G SFPs too
   alternatives:
   - make: Moxa
     manufacturer: Moxa Inc.
@@ -213,6 +230,23 @@ records:
       or correct it to A00 (front service panel) before ordering. The 100BASE-FX ports are fixed LC optics
       (no SFP needed); the 4 x 10G uplinks need SFP/SFP+ transceivers. 77 W max is the HV AC figure from
       the installation manual and matches the BOM.'
+    mounting_kind: rack
+    height_u: 1
+    port_groups:
+    - ports: slots 1-6
+      count: 24
+      speed: 100M
+      media: MM
+      kind: fixed
+      usable_for: ied
+      note: 6 x 4-port 100BASE-FX multimode LC modules
+    - ports: slot 0
+      count: 4
+      speed: 10G
+      media: SFP+
+      kind: sfp_slot
+      usable_for: uplink
+      note: Fixed 1/10G SFP+ uplinks; the example fits 1000BASE-SX SFPs
   alternatives:
   - make: Moxa
     manufacturer: Moxa Inc.
@@ -332,6 +366,29 @@ records:
       weight and certifications are not on that page and could not be checked (fetch budget ran out).
       The 45 W unit power is the BOM value. Confirm that #2CF9 includes the 125 VDC PSU and the optional
       second (redundant) supply.'
+    mounting_kind: rack
+    height_u: 1
+    height_note: 1U, 43.7 x 482.5 x 232.1 mm, reversible ears
+    port_groups:
+    - ports: 1-4
+      count: 4
+      speed: 1G
+      media: SFP
+      kind: sfp_slot
+      usable_for: uplink
+    - ports: 5-8
+      count: 4
+      speed: 1G
+      media: RJ45
+      kind: fixed
+      usable_for: any
+    - ports: 9-24
+      count: 16
+      speed: 100M
+      media: MM
+      kind: fixed
+      usable_for: ied
+      note: 'Ordered as 4-port multimode LC groups (BOM: 16 MM ports)'
   alternatives:
   - make: Moxa
     manufacturer: Moxa Inc.
@@ -399,6 +456,8 @@ records:
   - https://selinc.com/products/2730M/specs
   - https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/
   - https://mall.industry.siemens.com/mall/en/WW/Catalog/Product/6GK6023-0AS24-4DC0-Z
+  - https://www.ien.eu/uploads/tx_etim/2730M_DS_20131204.pdf
+  - https://www.ien.eu/uploads/tx_etim/2730M_DS_20131204.pdf
 - part_id: FGR-60F
   kind: device
   description: Industrial Firewall for External Systems
@@ -431,6 +490,8 @@ records:
       works directly with the 125 VDC station supply, but check the tolerance against 125 VDC float/boost
       voltage. 21 W is the BOM value (believed to match datasheet max). Order a FortiCare/FortiGuard bundle
       (e.g. FGR-60F-BDL-950-12) for support and updates.
+    mounting_kind: din_rail
+    height_u: 0
   alternatives:
   - make: Cisco
     manufacturer: Cisco Systems
@@ -516,6 +577,9 @@ records:
     notes: Legacy RUGGEDCOM code 1FG52; third-party compatibles are sold as 1FG52-AO (AddOn) and 1FG52-C
       (ProLabs). 6GK6000-8FG53 is the 25 km variant. The -40/85 C rating is assumed from the RUGGEDCOM
       family (not verified).
+    mounting_kind: plug_in
+    height_u: 0
+    height_note: SFP cage of its host switch
   alternatives:
   - make: Cisco
     manufacturer: Cisco Systems
@@ -590,6 +654,9 @@ records:
     product_url: https://shop.electro-matic.com/6gk60008fg510aa0
     notes: Legacy RUGGEDCOM code 1FG51; compatibles are sold as 1FG51-AO (AddOn) and 1FG51-C (ProLabs).
       The -40/85 C rating is assumed from the RUGGEDCOM family (not verified).
+    mounting_kind: plug_in
+    height_u: 0
+    height_note: SFP cage of its host switch
   alternatives:
   - make: Cisco
     manufacturer: Cisco Systems
@@ -664,6 +731,9 @@ records:
     notes: No manufacturer page found for this exact code this session. Its sibling 6GK6000-8FE50-0AA0
       is listed on the Siemens Mall. The -40/85 C rating is assumed from the RUGGEDCOM family. The RMM2972-4SFP
       module accepts 100BASE-FX SFPs.
+    mounting_kind: plug_in
+    height_u: 0
+    height_note: SFP cage of its host switch
   alternatives:
   - make: Cisco
     manufacturer: Cisco Systems
@@ -744,6 +814,9 @@ records:
     notes: 'FN-TRAN-SX is the commercial-temperature equivalent. Fortinet-coded third-party compatibles
       exist: AddOn FR-TRAN-SX-AO, Axiom, ProLine. Non-Fortinet optics in a FortiGate may not be supported
       by Fortinet TAC.'
+    mounting_kind: plug_in
+    height_u: 0
+    height_note: SFP cage of the firewall
   alternatives:
   - make: Cisco
     manufacturer: Cisco Systems
@@ -816,6 +889,10 @@ records:
       panel openings). The FER family (e.g. FER48LCDSM) is the current Hubbell rack interconnect enclosure.
       Confirm the exact 96F LC SM part number with Hubbell. It may be a configured or legacy code, or
       a typo for an FER/FCR enclosure plus adapter panels.
+    mounting_kind: rack
+    height_u: 2
+    height_note: 'Not confirmed: FEUR96LCSM was not found; Hubbell''s FEUR48 is 1U for 48 fibres, so 96
+      fibres is taken as 2U. Check before relying on it.'
   alternatives:
   - make: Corning
     manufacturer: Corning Optical Communications
@@ -897,6 +974,9 @@ records:
     datasheet_url: https://hubbellcdn.com/specsheet/PREMISE_OFSPOOLPK2_spec.pdf
     notes: 'Best match found: listed under the ''FEUR Rack Mount Enclosures'' heading on Hubbell''s spec
       sheet, but FEUR compatibility and pack quantity (PK2 suggests 2) are not stated. Confirm with Hubbell.'
+    mounting_kind: plug_in
+    height_u: 0
+    height_note: Inside the FOPP enclosure
   alternatives:
   - make: Panduit
     manufacturer: Panduit Corp.
@@ -974,6 +1054,9 @@ records:
       Hubbell splice hardware: FCR350SE (2U splice panel, 6 trays), FSS01S / FSS02S (spec sheets exist,
       contents not checked).'
     datasheet_url: https://hubbellcdn.com/specsheet/PREMISE_OFSPLKT24F_spec.pdf
+    mounting_kind: plug_in
+    height_u: 0
+    height_note: Inside the FOPP enclosure
   alternatives:
   - make: Corning
     manufacturer: Corning Optical Communications
@@ -1055,6 +1138,9 @@ records:
     notes: Distributor listings describe FPLCS3SM as a 6-fibre bundled pigtail, so one unit gives 6 fibres.
       A 96 F panel needs 16 units, not 96; check the BOM quantity. FHPLCS3SM is a related part (possibly
       a single-fibre variant; not checked).
+    mounting_kind: plug_in
+    height_u: 0
+    height_note: Inside the FOPP enclosure
   alternatives:
   - make: Corning
     manufacturer: Corning Optical Communications
@@ -1124,6 +1210,9 @@ records:
     notes: Could NOT identify the brand 'Marshcom' or part number PL1U12NEBK; an exact-match search returned
       no results. Treat the make and part number as unverified and ask the supplier for a datasheet. Any
       1U brush panel is functionally equivalent.
+    mounting_kind: rack
+    height_u: 1
+    height_note: 1U by its part number; the part itself was not found online
   alternatives:
   - make: StarTech.com
     manufacturer: StarTech.com

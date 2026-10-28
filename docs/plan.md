@@ -320,6 +320,27 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
 - Tests: schema accept/reject cases, mirroring swaps LAN and prefix, every
   example file loads, unknown `part_id` is reported with file and path.
 
+### M1b — Projects, substations and the sizing inputs (A2, ADR 0012/0013)
+- `project.yaml` (project info, library name/version, document register,
+  defaults, substations) and `substation.yaml` (today's project settings plus
+  `equipment`, `network`, `spares`, `layout`); loader resolves project →
+  substations with key-by-key defaults; library `height_u`, port roles,
+  `enclosure_u`; JSON Schemas; `bomgen validate` on a project or a substation.
+- `examples/` becomes one project with one substation; the hand-written panels
+  and every golden value stay as they are.
+- Section 3 of this plan is rewritten by A2 with the new schemas.
+
+### M1c — Network sizing and automatic panel layout (A8, ADR 0013)
+- `engine/sizing.py` (rules R1–R4 of the design) and `engine/layout.py`
+  (R5–R9): L1/L2 counts from the IED count and spares, port plans, 32U fill
+  with blank space, A/B streams, common devices spread, overrides and removals.
+- `bomgen layout`; `bomgen build` runs it first unless `--no-layout`; generated
+  `panels/*.yaml` with a `generated` header; check-report lines for port
+  demand, panel fill, stale overrides and the IED count.
+- Golden R10: the example substation's generated panels in
+  `tests/golden/layout/`, confirmed by Ali.
+- Starts when M1b is on main.
+
 ### M2 — BOM groups A–D
 - Steps 1, 2, 3, 5: enclosure row, group B units and tags (range tags, LAN/level
   tokens, gateway numbering, FOPP tag), kit children and loose items, SFPs per
@@ -328,6 +349,11 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
   option (auto arrives in M4).
 - Tests: one per rule in "Tag naming conventions" and "Network accessories
   (group C)"; golden group A–D rows for all four cabinets.
+- Delivered in M2: `models/bom.py` (`BuildResult`, `PanelBom`, `LooseTable`,
+  `BomLine`, `QtySum`) and `engine/` modules `tags`, `units`, `items`, `enclosure`,
+  `kits`, `network`, `housekeeping`, `pipeline` (`build(loaded) -> BuildResult`).
+  Output model and the SFP, cable-manager and housekeeping rules: ADR 0014. Golden
+  rows in `tests/golden/expected_groups_a_d.py`.
 
 ### M3 — BOM groups E–H, HWIO, assembly
 - Steps 6–11: AC distribution, DC distribution (branch numbering in group B
@@ -361,6 +387,16 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
 - Tests reopen the file with openpyxl and assert formulas, styles, merges, print
   settings, header/footer strings; check the zip holds the header image; check
   no `.xlsx` lands in the repo.
+- Delivered in M6: `bomgen.models.sheet` (`WorkbookModel` → `SheetModel` with
+  `Cell` value or `Formula`, `CellStyle`, `Merge`, column/row formats,
+  `PrintSetup`, `HeaderFooter` zones of runs plus an optional picture) and
+  `bomgen.writer.write_workbook(model, path)`. Styles are concrete `CellStyle`
+  values; the named styles of "Formatting" (the plan's style tokens) are M5's
+  `sheets/styles.py`. Model units follow the spec: widths as Excel shows them,
+  heights in points, margins in cm, 1-based rows and columns. Problems XlsxWriter
+  would only warn about (header over 255 characters, truncated text, missing or
+  unreadable logo) raise `WriterError` and leave no file. Plan:
+  `docs/superpowers/plans/2026-10-28-m6-excel-writer.md`.
 
 ### M7 — Check report, revision highlighting, CLI polish, docs
 - Step 15 check report (SFPs vs port plans, mains vs ΣQ, airflow vs required,
@@ -397,6 +433,43 @@ update package (ADR 0008).
   project model and the check report, so M7 wires `library_mismatch()` into the
   check report. Refusals carry a `RefusalKind` for the M10 import screen.
 
+### M8b — `.bomproj` export, import and backup (A5, ADR 0012)
+- `bomgen project export <project.yaml> [-o file]`, `import <file.bomproj>
+  [--workspace dir] [--force]` and `backup <project.yaml>`; public functions
+  `export_project`, `import_project`, `backup_project` and `default_workspace` in
+  `bomgen.project_store`.
+- A `.bomproj` is a zip of the project folder without any `out/` folder, the
+  top-level `Backups/` folder, `.git/` and `*.bomproj` files, plus
+  `manifest.json` (format version, project id, library name and version, app
+  version, SHA-256 per file). The project id and library are read from
+  `project.yaml` (`project.id`, `library.name`, `library.version`) as plain
+  YAML, so M8b does not wait for the M1b models. Symlinks are never followed.
+- The zip container, path and case checks, size cap and checksums are shared
+  with `.bomlib` in `bomgen.bundle`; `.bomlib` behaviour did not change.
+- Workspace: `BOMGEN_WORKSPACE`, else `Documents\BOM Generator`; a project
+  lives in `<workspace>\<id>\`.
+- Import verifies every checksum and path before writing. An existing project
+  id is refused (`RefusalKind.PROJECT_EXISTS`) unless `--force`; a forced import
+  saves the old project to its `Backups/`, keeps its `Backups/` and `out/`
+  folders, replaces everything else, and restores the old project if the swap
+  fails. Backups are `Backups/<id>-<YYYYMMDD-HHMMSS>.bomproj` and never
+  overwrite one another.
+- Import compares the manifest's library with the active one and returns a
+  `library_note` naming the `.bomlib` to install, or the `bomgen library
+  rollback --to` command when that version is already installed (resolves Q21).
+  The CLI prints it as `note: ...`.
+- Import also keeps `.git/` and `__pycache__/` folders (never packed), and
+  refuses a package that holds `out/`, `.git/` or a top-level `Backups/`.
+  A leftover `.replaced-<id>` folder in the workspace (Windows file locks) holds
+  the previous project and is safe to delete once the new one looks right.
+- Sharing the container made `pack --add` and `.bomproj` skip symlinks, where
+  the first `.bomlib` code followed them; library names now also refuse
+  Windows device names such as `con`.
+- A `.bomlib` given to `project import` (and the reverse) gets a one-line
+  explanation.
+- Open item for M1b: once the `project.yaml` model is on main, read the id and
+  library through it instead of plain YAML.
+
 ### M9 — UI design with impeccable
 Use the `impeccable` skill to design the screens and elements: open or create a
 project, edit panels and project settings, browse the installed device library
@@ -410,9 +483,8 @@ and the check report, build and save the .xlsx. Deliverables in `docs/ui/`:
   prototype is the starting point of the real UI, not a throwaway.
 Finish with an impeccable critique pass and Ali's review.
 
-Status: design delivered in `docs/ui/` (start with `docs/ui/README.md`), ADR 0011
-proposed, critique pass done (results in the README). Waiting for Ali's review of
-the prototype before M10 starts.
+Status: accepted as a prototype (#8); design rework for projects/substations and the
+panels board follows (`docs/ui/README.md`). ADR 0011 stays; critique pass results are in the README.
 
 ### M10 — Windows desktop app
 Build the approved design as a Windows desktop app (ADR 0007): the M9 HTML/CSS
@@ -609,6 +681,22 @@ switch as a Ruggedcom RST-2228 and the L2 1G/100M MM SFPs as 18/6; the masters l
 SEL-2730M and 15/2. *Default:* the masters, because Power Consumption reads them and
 they reproduce the spec's totals. Waiting for Ali.
 
+**Q24 — Document register per project or per substation.** *Resolved 2026-10-28:*
+per project, listing the documents per substation (ADR 0012).
+
+**Q25 — Blank plates in the BOM.** *Resolved 2026-10-28:* Ali: not in the BOM; the
+blank space only counts toward the panel's usable 32U (ADR 0013).
+
+**Q26 — Where common devices go.** *Resolved 2026-10-28:* Ali: in the same panels as
+the A/B pairs, not in their own panel (ADR 0013, rule R6).
+
+**Q27 — Ring topology rule.** *Resolved 2026-10-28 by default:* two ports per ring,
+`ring_max_switches` 6, both user-editable (ADR 0013).
+
+**Q28 — L1 uplinks in a star.** *Resolved 2026-10-28:* Ali: one uplink from each L1
+switch to its own L2 side, and the A and B switches of a pair interconnected
+(ADR 0013, rule R1).
+
 **Q29 — Thermostat load and fan airflow in the library defaults.** The device
 research (`docs/device-db-findings.md`, items 1 and 2) found that the SK 3110.000
 thermostat's "30 W" is a contact switching rating, not a load, and that 716 m³/h is the
@@ -617,3 +705,25 @@ and golden values stay as the issued workbook. Future library default: SK 3110
 thermostat 0 W; SK 3243.100 fan 460 m³/h with the SK 3243.200 outlet filter (60 Hz),
 so the per-fan airflow changes from 358. Applied when A2 next revises the library
 defaults, not to the example.
+
+**Q30 — Where a device's loose items go in the loose-material table.** The workbook
+lists the GPS clock's accessories (`Aux` rows 53–57) between the software and the
+cables; nothing in the inputs says where they belong. *Default:* the project's
+`loose_material.items` in order, then each device's `loose_items` as one block in
+panel order (ADR 0014). If the workbook order matters, `loose_material.items` would
+need a marker naming the device whose loose items go at that position (A2's schema).
+
+**Q31 — Group A–D rules the spec states only by example** (A1 review of the M2 PR;
+defaults in ADR 0014, all in force until Ali answers):
+1. The loose-material title line 2, "PSA Panels Loose Material and Auxiliary
+   Equipment", is a constant; the spec only says the table has a title block.
+   *Default:* keep it; it could become a `loose_material` field (A2's schema).
+2. Which SFP part serves a port: matching speed and media, then the host's make,
+   then library order. *Alternative:* name the SFP part on each port allocation.
+   Cable managers and serial cables likewise take the first library record of
+   their category.
+3. Cable managers = one per switch and patch panel unit ("roughly one per
+   rack-mounted switch/patch panel"). *Confirm:* firewalls, gateways and RTACs get
+   none.
+4. Natural ventilation takes 2 vent filters (the workbook's WS console); the spec
+   says "vent filters" without a count.

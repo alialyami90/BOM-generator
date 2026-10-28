@@ -6,7 +6,10 @@
 
   const S = {
     theme: 'light',            // light | dark | system
-    project: 'loaded',         // loaded | empty (first run, no library)
+    firstRun: false,           // true: nothing installed yet, no projects
+    launch: 'normal',          // normal | bomproj (app was started by double-clicking a .bomproj file)
+    proj: 'ep132',             // open project id, or null
+    sub: 'gis01',              // open substation id, or null
     checks: 'errors',          // errors | clean
     dirty: false,
     importScenario: 'ok',
@@ -14,7 +17,8 @@
     libTab: 'import',
     build: 'ready',            // ready | building | success | locked
     buildStep: 0,
-    tab: { project: 'general', panel: 'devices', lib: 'overview', preview: 'psa1', libdetail: 'overview', panelsel: 'psa1' },
+    tab: { project: 'info', settings: 'general', panel: 'devices', panels: 'board', lib: 'overview', preview: 'psa1', libdetail: 'overview', panelsel: 'psa1' },
+    layout: { overrides: [], removed: [], history: [], selected: '', openOverrides: false },
     selectedDevice: 'RST2228-L1-24MM',
     yamlError: true,
     density: 'default'
@@ -51,9 +55,10 @@
     first && first.focus();
   }
   function closeDialog() { $('#overlay').innerHTML = ''; if (lastFocus && lastFocus.focus) lastFocus.focus(); }
-  function toast(text, ic = 'check') {
-    const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = `${icon(ic)}<span>${esc(text)}</span>`;
-    $('#toasts').appendChild(t); setTimeout(() => t.remove(), 3600);
+  function toast(text, ic = 'check', undo = null) {
+    const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = `${icon(ic)}<span>${esc(text)}</span>${undo ? '<button class="toast-btn" data-toast-undo>Undo</button>' : ''}`;
+    if (undo) t.querySelector('[data-toast-undo]').addEventListener('click', () => { undo(); t.remove(); });
+    $('#toasts').appendChild(t); setTimeout(() => t.remove(), undo ? 8000 : 3600);
   }
 
   /* ---------- shell ---------- */
@@ -62,16 +67,19 @@
     return { a, b, c };
   };
   const go = (hash) => { if (location.hash === hash) render(); else location.hash = hash; };
-  const hasProject = () => S.project === 'loaded';
+  const curProject = () => DB.projects.find((p) => p.id === S.proj) || null;
+  const curSub = () => { const p = curProject(); return p ? p.substations.find((s) => s.id === S.sub) || null : null; };
+  const hasProject = () => !S.firstRun && !!curProject();
+  const hasSub = () => hasProject() && !!curSub();
 
   function renderBar() {
-    const p = DB.project;
+    const p = curProject(), s = curSub();
     $('#bar').innerHTML = `
       <div class="brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>BOM Generator</div>
-      ${hasProject() ? `<span class="bar-divider"></span><div class="bar-project"><b>${esc(p.name)}</b><span>${esc(p.docNo)} · Rev ${esc(p.rev)}</span></div>` : ''}
+      ${hasProject() ? `<span class="bar-divider"></span><div class="bar-project"><b>${esc(p.name)}</b><span>${s ? esc(s.name) : 'No substation open'}</span></div>` : ''}
       <div class="bar-spacer"></div>
-      <a class="bar-btn" href="#/library" style="text-decoration:none" aria-label="Device library ${S.project === 'empty' ? 'not installed' : DB.library.name + ' ' + DB.library.version}">
-        <span class="dot ${S.project === 'empty' ? 'dot--bad' : 'dot--ok'}" aria-hidden="true"></span>${S.project === 'empty' ? 'No library installed' : `${esc(DB.library.name)} ${esc(DB.library.version)}`}</a>
+      <a class="bar-btn" href="#/library" style="text-decoration:none" aria-label="Device library ${S.firstRun ? 'not installed' : DB.library.name + ' ' + DB.library.version}">
+        <span class="dot ${S.firstRun ? 'dot--bad' : 'dot--ok'}" aria-hidden="true"></span>${S.firstRun ? 'No library installed' : `${esc(DB.library.name)} ${esc(DB.library.version)}`}</a>
       <button class="bar-btn bar-btn--icon" data-action="theme" aria-label="Theme: ${S.theme}. Change theme" title="Theme: ${S.theme}">${icon(S.theme === 'dark' ? 'moon' : 'sun')}</button>
       <button class="bar-btn bar-btn--icon" data-action="help" aria-label="Help" title="Help">${icon('help')}</button>`;
   }
@@ -79,37 +87,43 @@
     return `<a href="${disabled ? '#' : href}" ${cur ? 'aria-current="page"' : ''} ${disabled ? 'aria-disabled="true" tabindex="-1" style="opacity:.45;pointer-events:none"' : ''}>${icon(ic)}<span>${label}</span>${tail ? `<span class="tail ${tailCls}">${tail}</span>` : ''}</a>`;
   }
   function renderNav() {
-    const r = route().a, c = counts(), np = hasProject();
-    const buildTail = !np ? '' : c.errors ? `${icon('error')}Blocked` : `${icon('check')}Ready`;
+    const r = route().a, c = counts(), np = hasProject(), ns = hasSub(), p = curProject();
+    const buildTail = !ns ? '' : c.errors ? `${icon('error')}Blocked` : `${icon('check')}Ready`;
+    const projTail = !np ? '' : p.status === 'bad' ? `${icon('error')}${p.statusText}` : p.status === 'warn' ? `${icon('warn')}1` : `${icon('check')}`;
+    const switcher = np ? `<div class="nav-switch"><label class="sr-only" for="sub-switch">Substation</label><select class="select" id="sub-switch" data-action="sub-switch">${S.sub ? '' : '<option value="">Choose a substation…</option>'}${p.substations.map((x) => `<option value="${x.id}" ${x.id === S.sub ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>` : '';
     $('#nav').innerHTML = `
       ${navItem('#/home', 'home', 'Home', '', '', false, r === 'home')}
-      <div class="nav-group">Prepare</div>
-      ${navItem('#/project', 'project', 'Project', np ? icon('check') : '', 'ok', !np, r === 'project')}
-      ${navItem('#/panels', 'panels', 'Panels', np ? '4' : '', '', !np, r === 'panels')}
-      ${navItem('#/library', 'library', 'Library', S.project === 'empty' ? '' : DB.library.version, '', false, r === 'library')}
+      ${navItem('#/library', 'library', 'Library', S.firstRun ? '' : DB.library.version, '', false, r === 'library')}
+      ${np ? `<div class="nav-group">Project</div>
+      ${navItem('#/project', 'project', esc(p.name.replace(' (example)', '')), projTail, p.status === 'bad' ? 'bad' : p.status === 'warn' ? 'warn' : 'ok', false, r === 'project')}
+      <div class="nav-group">Substation</div>${switcher}
+      ${navItem('#/settings', 'file', 'Settings', ns ? icon('check') : '', 'ok', !ns, r === 'settings')}
+      ${navItem('#/network', 'network', 'Network', ns ? (S.sub === 'cb03' ? `${icon('warn')}Not set up` : icon('check')) : '', S.sub === 'cb03' ? 'warn' : 'ok', !ns, r === 'network')}
+      ${navItem('#/panels', 'panels', 'Panels', ns ? String(S.sub === 'cb03' ? 0 : DB.panels.length) : '', '', !ns, r === 'panels')}
       <div class="nav-group">Verify and issue</div>
-      ${navItem('#/checks', 'checks', 'Checks', np ? (c.errors ? `${icon('error')}${c.errors} errors` : `${icon('check')}Clear`) : '', c.errors ? 'bad' : 'ok', !np, r === 'checks')}
-      ${navItem('#/preview', 'preview', 'Preview', '', '', !np, r === 'preview')}
-      ${navItem('#/build', 'build', 'Build', buildTail, c.errors ? 'bad' : 'ok', !np, r === 'build')}
+      ${navItem('#/checks', 'checks', 'Checks', ns ? (c.errors ? `${icon('error')}${c.errors} errors` : `${icon('check')}Clear`) : '', c.errors ? 'bad' : 'ok', !ns, r === 'checks')}
+      ${navItem('#/preview', 'preview', 'Preview', '', '', !ns, r === 'preview')}
+      ${navItem('#/build', 'build', 'Build', buildTail, c.errors ? 'bad' : 'ok', !ns, r === 'build')}` : ''}
       <div class="nav-foot">App 0.2.0<br>Works offline. Nothing leaves this PC.</div>`;
   }
   function renderStatus() {
-    const c = counts(), np = hasProject();
-    $('#status').innerHTML = np ? `
-      <span>${S.dirty ? `<b style="color:var(--color-warning)">Unsaved changes</b>` : `Project saved ${esc(DB.project.savedAt)}`}</span>
-      <span class="mono" style="font-size:12px">${esc(DB.project.path)}</span>
+    const c = counts(), ns = hasSub(), np = hasProject(), p = curProject();
+    $('#status').innerHTML = ns ? `
+      <span>${S.dirty ? `<b style="color:var(--color-warning)">Unsaved changes</b>` : `Substation saved ${esc(DB.sub.savedAt)}`}</span>
+      <span class="mono" style="font-size:12px">${esc(DB.sub.path)}</span>
       <span class="sp"></span>
-      <button data-action="goto" data-to="#/checks" aria-label="${c.errors} errors, ${c.warnings} warnings. Open checks">
+      <button data-action="goto" data-to="#/checks" aria-label="${c.errors} errors, ${c.warnings} warnings in ${esc(curSub().name)}. Open checks">
         ${c.errors ? `<span class="bad">${icon('error')} ${c.errors} errors</span>` : `<span class="ok">${icon('check')} No errors</span>`}
         <span>${icon('warn')} ${c.warnings} warnings</span></button>`
-      : `<span>No project open</span><span class="sp"></span><span>${S.project === 'empty' ? 'Library: none installed' : ''}</span>`;
+      : np ? `<span>${esc(p.path)}</span><span class="sp"></span><span>${p.substations.length} substations</span>`
+      : `<span>No project open</span><span class="sp"></span><span>${S.firstRun ? 'Library: none installed' : ''}</span>`;
   }
   function renderMain() {
     const { a } = route();
-    const key = ({ home: 'home', project: 'project', panels: 'panels', library: 'library', checks: 'checks', preview: 'preview', build: 'build' })[a] || 'home';
-    const needsProject = ['project', 'panels', 'checks', 'preview', 'build'].includes(key);
+    const key = ({ home: 'home', project: 'project', settings: 'settings', network: 'network', panels: 'panels', library: 'library', checks: 'checks', preview: 'preview', build: 'build' })[a] || 'home';
+    const needsProject = key === 'project', needsSub = ['settings', 'network', 'panels', 'checks', 'preview', 'build'].includes(key);
     const m = $('#main');
-    m.innerHTML = needsProject && !hasProject() ? SCREENS.home() : SCREENS[key]();
+    m.innerHTML = (needsProject && !hasProject()) || (needsSub && !hasSub()) ? SCREENS.home() : SCREENS[key]();
     if (SCREENS[key + 'After']) SCREENS[key + 'After']();
     document.title = 'BOM Generator — design prototype';
   }
@@ -121,7 +135,8 @@
     const sel = (id, label, opts, v) => `<div class="field"><label for="${id}">${label}</label><select class="select" id="${id}" data-action="proto-set" data-key="${id}">${opts.map(([val, t]) => `<option value="${val}" ${val === v ? 'selected' : ''}>${t}</option>`).join('')}</select></div>`;
     return `<div class="proto-panel" id="proto-panel">
       <h4>Prototype controls (not part of the app)</h4>
-      ${sel('project', 'Project', [['loaded', 'Project open'], ['empty', 'First run: nothing installed']], S.project)}
+      ${sel('firstRun', 'Installation', [['false', 'Library installed, projects exist'], ['true', 'First run: nothing installed']], String(S.firstRun))}
+      ${sel('launch', 'How the app started', [['normal', 'Normally'], ['bomproj', 'By opening a .bomproj file']], S.launch)}
       ${sel('checks', 'Validation', [['errors', '2 errors, 4 warnings'], ['clean', 'No errors, 4 warnings']], S.checks)}
       ${sel('importScenario', 'Library package', Object.entries(DB.importScenarios).map(([k, v]) => [k, v.label]), S.importScenario)}
       ${sel('build', 'Build result', [['ready', 'Ready'], ['building', 'Building'], ['success', 'Success'], ['locked', 'Failed: file open in Excel']], S.build)}
@@ -143,7 +158,7 @@
     if (ACTIONS[name]) { ACTIONS[name](el, e); }
   });
   document.addEventListener('input', (e) => { if (e.target.dataset && e.target.dataset.dirty && !S.dirty) { S.dirty = true; renderStatus(); } });
-  document.addEventListener('change', (e) => { const el = e.target.closest('[data-action="proto-set"]'); if (el) ACTIONS['proto-set'](el, e); const g = e.target.closest('select[data-action="grp"]'); if (g) ACTIONS.grp(g); });
+  document.addEventListener('change', (e) => { const el = e.target.closest('[data-action="proto-set"]'); if (el) ACTIONS['proto-set'](el, e); const g = e.target.closest('select[data-action="grp"]'); if (g) ACTIONS.grp(g); const sw = e.target.closest('select[data-action="sub-switch"]'); if (sw) ACTIONS['sub-switch'](sw); });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && $('#overlay').innerHTML) { e.preventDefault(); closeDialog(); }
     if (e.key === 'Tab' && $('#overlay .dialog')) {
@@ -159,21 +174,22 @@
     }
   });
 
-  ACTIONS.tab = (el) => { S.tab[el.dataset.group] = el.dataset.value; if (el.dataset.group === 'project') history.replaceState(null, '', '#/project/' + el.dataset.value); if (el.dataset.group === 'panel') history.replaceState(null, '', '#/panels/' + route().b + '/' + el.dataset.value); const keep = $('#main').scrollTop; renderMain(); $('#main').scrollTop = keep; const nt = document.getElementById(el.id); nt && nt.focus(); };
+  ACTIONS.tab = (el) => { S.tab[el.dataset.group] = el.dataset.value; if (el.dataset.group === 'project') history.replaceState(null, '', '#/project/' + el.dataset.value); if (el.dataset.group === 'settings') history.replaceState(null, '', '#/settings/' + el.dataset.value); if (el.dataset.group === 'panel') history.replaceState(null, '', '#/panels/' + route().b + '/' + el.dataset.value); const keep = $('#main').scrollTop; renderMain(); $('#main').scrollTop = keep; const nt = document.getElementById(el.id); nt && nt.focus(); };
   ACTIONS.goto = (el) => go(el.dataset.to);
+  ACTIONS['sub-switch'] = (el) => { S.sub = el.value || null; S.dirty = false; S.layout = { overrides: [], removed: [], history: [], selected: '', openOverrides: false }; const { a } = route(); go(['settings', 'network', 'panels', 'checks', 'preview', 'build'].includes(a) ? '#/' + a : '#/panels'); };
   ACTIONS.theme = () => { S.theme = { light: 'dark', dark: 'system', system: 'light' }[S.theme]; render(); toast(`Theme: ${S.theme}`, 'info'); };
   ACTIONS.help = () => dialog({ title: 'Help', body: '<p>Prototype only. In the app this opens the user guide.</p>', actions: '<button class="btn btn--primary" data-action="close">Close</button>' });
   ACTIONS.close = () => closeDialog();
   ACTIONS.scrim = () => closeDialog();
   ACTIONS.proto = () => { const p = $('#proto-panel'); if (p) $('#proto').innerHTML = `<button data-action="proto" aria-expanded="false">Prototype states</button>`; else $('#proto').innerHTML = `<button data-action="proto" aria-expanded="true">Prototype states</button>${protoPanel()}`; };
   ACTIONS['proto-set'] = (el) => {
-    const k = el.dataset.key; S[k] = el.value;
+    const k = el.dataset.key; S[k] = k === 'firstRun' ? el.value === 'true' : el.value;
     if (k === 'importScenario') { S.importStep = 'review'; S.libTab = 'import'; go('#/library/import'); }
     if (k === 'build') { S.buildStep = S.build === 'building' ? 2 : 0; go('#/build'); }
-    if (k === 'project' && S.project === 'empty') go('#/home');
+    if (k === 'firstRun' || k === 'launch') go('#/home');
     render(); const p = $('#proto-panel'); if (!p) ACTIONS.proto();
   };
   window.addEventListener('hashchange', () => { render(); $('#main').scrollTop = 0; });
 
-  window.App = { $, $$, esc, S, ACTIONS, SCREENS, counts, badge, verified, banner, tabs, field, input, select, pageHead, illus, dialog, closeDialog, toast, go, render, route, hasProject };
+  window.App = { $, $$, esc, S, ACTIONS, SCREENS, counts, badge, verified, banner, tabs, field, input, select, pageHead, illus, dialog, closeDialog, toast, go, render, route, hasProject, hasSub, curProject, curSub, renderStatus };
 })();

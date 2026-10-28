@@ -55,6 +55,9 @@ records:
       200 W output). The flyer and catalog list no IEC 61850-3 / IEEE 1613 type tests for the SEL-3555
       (they do for SEL-3355 and SEL-2488), so certifications are left empty; ask SEL if the spec requires
       them. The 6 RJ45 serial ports are what the SEL-C607 cables in this BOM connect to.
+    mounting_kind: rack
+    height_u: 3
+    height_note: 3U rack/panel mount (SEL Automation catalog)
   alternatives:
   - make: Siemens
     manufacturer: Siemens AG (Smart Infrastructure)
@@ -160,6 +163,9 @@ records:
     notes: Same hardware platform as SEL-3555-GW but a different configuration (BOM 73 W against 62 W).
       Power draw is not published; the BOM value is unverified. See SEL-3555-GW for the certification
       caveat.
+    mounting_kind: rack
+    height_u: 3
+    height_note: 3U rack/panel mount (SEL Automation catalog)
   alternatives:
   - make: Siemens
     manufacturer: Siemens AG (Smart Infrastructure)
@@ -280,6 +286,8 @@ records:
       (100BASE-FX / LX10) ordered in pairs, not SFP cages; correct the BOM wording. For 125 VDC dual feed,
       order PSU A = A and PSU B = A. The SEL-9524B antenna, C961 cables, 915900139 surge kit and 915900043
       pipe-mount kit are separate line items in this BOM.
+    mounting_kind: rack
+    height_u: 1
   alternatives:
   - make: Meinberg
     manufacturer: Meinberg Funkuhren GmbH & Co. KG
@@ -383,6 +391,10 @@ records:
       burden. Whether this build has a redundant power coupler is not known from the BOM (one SEL-2243
       is listed, so redundant_psu is false). IEC 61850-3 is not named in the brochure fetched; IEEE 1613
       is.
+    mounting_kind: rack
+    height_u: 5
+    height_note: 'Axion system: 5U rack/panel or surface mount (10-slot, 4-slot, dual 4-slot); the height
+      belongs to the SEL-2242 chassis, counted once here'
   alternatives:
   - make: Siemens
     manufacturer: Siemens AG (Smart Infrastructure)
@@ -458,6 +470,9 @@ records:
     product_url: https://selinc.com/products/2240/axion-modules/
     notes: Passive part with no power draw. Slot count and dimensions were not confirmed; check the SEL
       configurator for the
+    mounting_kind: plug_in
+    height_u: 0
+    height_note: Chassis of the SEL-2240; its 5U is counted on SEL-2240
   alternatives:
   - make: Siemens
     manufacturer: Siemens AG (Smart Infrastructure)
@@ -541,6 +556,9 @@ records:
     notes: 'Powered from the backplane through the SEL-2243; no separate burden is published. The BOM
       says "SEL-2241"; current literature lists SEL-2241-2. Check which generation the #4D2J configuration
       is.'
+    mounting_kind: plug_in
+    height_u: 0
+    height_note: Module in the SEL-2242 chassis
   alternatives:
   - make: Siemens
     manufacturer: Siemens AG (Smart Infrastructure)
@@ -620,6 +638,9 @@ records:
     product_url: https://selinc.com/products/2240/axion-modules/
     notes: The system power for the whole Axion build is carried on SEL-2240-SYSTEM (31 W, unverified).
       Fit two couplers if the DC feed must be redundant.
+    mounting_kind: plug_in
+    height_u: 0
+    height_note: Module in the SEL-2242 chassis
   alternatives:
   - make: Siemens
     manufacturer: Siemens AG (Smart Infrastructure)
@@ -707,6 +728,9 @@ records:
     notes: The brochure lists a 24-input module and identifies the 32-input module as the SEL-2244-4;
       the 24-input one is taken to be the SEL-2244-2, which matches the BOM. Per-input burden is not published
       in the documents fetched. Wiring harnesses come in 8, 16 and 20 ft lengths.
+    mounting_kind: plug_in
+    height_u: 0
+    height_note: Module in the SEL-2242 chassis
   alternatives:
   - make: Siemens
     manufacturer: Siemens AG (Smart Infrastructure)
@@ -779,6 +803,9 @@ records:
     notes: Not verified. The SEL-C607 data/pinout page could not be fetched (fetch budget exhausted).
       Confirm the far-end connector (DB-9 M/F or wire leads), the pinout and the length in SEL's Cable
       Selector before buying a third-party equivalent; SEL RTAC RJ45 serial pinouts are SEL-specific.
+    mounting_kind: external
+    height_u: 0
+    height_note: Cable
   alternatives:
   - make: Moxa
     manufacturer: Moxa Inc.
@@ -884,6 +911,9 @@ records:
       draw; the BOM''s 91 W as a typical figure is plausible but unverified. Dimensions and weight were
       not obtained. The redundant PSU is optional; it is marked true as available, so confirm the #F5P8
       build has it.'
+    mounting_kind: rack
+    height_u: 3
+    height_note: 19-inch rack or panel mount, 3U
   alternatives:
   - make: Advantech
     manufacturer: Advantech Co., Ltd.
@@ -952,6 +982,7 @@ records:
   - https://steinerelectric.com/Catalog/Automation-And-Pneumatics/Industrial-Computer-And-Human-Machine-Interface/Industrial-Computers/Siemens-6AG41415BB170FA0-Siemens-IPC427E-1044846
   - https://mall.industry.siemens.com/mall/es/WW/Catalog/Product/6AG4112-3HR13-4BJ1
   - https://dattech.com.vn/p/6ag4114-3mr12-3bx1/
+  - https://selinc.com/products/comparisons/computing-platforms/
 - part_id: SEL-9524B
   kind: device
   description: GPS/GLONASS Antenna
@@ -987,6 +1018,9 @@ records:
     product_url: https://selinc.com/en/products/9524
     notes: max_w = 6 V x 40 mA (derived, drawn from the clock and not a separate load). w/d give the base
       diameter (82.8 mm). Weight not published.
+    mounting_kind: external
+    height_u: 0
+    height_note: Antenna on a mast
   alternatives:
   - make: Meinberg
     manufacturer: Meinberg Funkuhren GmbH & Co. KG
@@ -1053,6 +1087,9 @@ records:
     product_url: https://selinc.com/products/coaxial-cables/
     notes: SEL-C961C is the fire-retardant LMR-400-FR version; consider it for indoor cable trays if the
       project fire code requires it.
+    mounting_kind: external
+    height_u: 0
+    height_note: Cable
   alternatives:
   - make: Times Microwave Systems
     manufacturer: Times Microwave Systems (Amphenol)
@@ -1122,6 +1159,9 @@ records:
     product_url: https://selinc.com/products/coaxial-cables/
     notes: With the 50 ft C961-050 and the 915900139 surge protector this makes a two-segment antenna
       run (antenna to surge protector to clock).
+    mounting_kind: external
+    height_u: 0
+    height_note: Cable
   alternatives:
   - make: Times Microwave Systems
     manufacturer: Times Microwave Systems (Amphenol)
@@ -1188,6 +1228,9 @@ records:
     product_url: https://selinc.com/products/2488/accessories
     notes: The description is quoted from the SEL-2488 ordering sheet. Electrical ratings (clamp voltage,
       surge current) were not found. The OEM is not identified.
+    mounting_kind: external
+    height_u: 0
+    height_note: At the cable entry
   alternatives:
   - make: PolyPhaser
     manufacturer: PolyPhaser (Infinite Electronics)
@@ -1255,6 +1298,9 @@ records:
     product_url: https://selinc.com/products/2488/accessories
     notes: The description is quoted from the SEL-2488 ordering sheet ("Antenna Pipe-Mounting Kit"). Pipe
       size and material were not found. Passive part.
+    mounting_kind: external
+    height_u: 0
+    height_note: Mast
   alternatives:
   - make: Meinberg
     manufacturer: Meinberg Funkuhren GmbH & Co. KG

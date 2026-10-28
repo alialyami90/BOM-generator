@@ -12,9 +12,11 @@ from bomgen.io.errors import InputError
 from bomgen.io.loader import load_project
 from bomgen.io.schema import write_json_schemas
 from bomgen.library_store.cli import library_app
+from bomgen.project_store.cli import project_app
 
 app = typer.Typer(no_args_is_help=True, help="Substation SCADA BOM generator.")
 app.add_typer(library_app, name="library")
+app.add_typer(project_app, name="project")
 
 
 def _print_version(value: bool) -> None:
