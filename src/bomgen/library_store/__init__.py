@@ -8,6 +8,7 @@ ADR 0018), and `preview_csv_import` / `import_csv` / `export_csv` (the CSV table
 refusals are `LibraryPackageError` with a `RefusalKind`.
 """
 
+from bomgen.library_store.alternatives import AlternativeRow, compare_alternatives
 from bomgen.library_store.csv_export import export_csv
 from bomgen.library_store.csv_import import CsvPreview, import_csv, preview_csv_import
 from bomgen.library_store.device_db import DeviceRecord, load_device_records
@@ -17,12 +18,14 @@ from bomgen.library_store.preview import LibraryImportPreview, preview_library_i
 from bomgen.library_store.service import import_library, validate_library
 
 __all__ = [
+    "AlternativeRow",
     "CsvPreview",
     "DeviceRecord",
     "LibraryImportPreview",
     "LibraryPackageError",
     "LocalSave",
     "RefusalKind",
+    "compare_alternatives",
     "export_csv",
     "import_csv",
     "import_library",
