@@ -12,8 +12,7 @@
     const rb = App.route().b; if (tabsSettings.some(([k]) => k === rb)) S.tab.settings = rb;
     const t = S.tab.settings;
     const body = { general: settingsGeneral, documents: settingsDocuments, output: settingsOutput, constants: settingsConstants, loose: settingsLoose, yaml: settingsYaml }[t]();
-    return `<div class="page">${pageHead('Settings', `Settings of ${esc(App.curSub().name)} only. Project-wide values are on the project page.`,
-      `<button class="btn btn--primary" data-action="save" ${S.dirty ? '' : 'aria-disabled="true" disabled'}>${icon('save')}Save</button>`)}
+    return `<div class="page">${pageHead('Settings', `Settings of ${esc(App.curSub().name)} only. Project-wide values are on the project page.`)}
       ${tabs('settings', tabsSettings, t, 'Substation settings')}
       <div role="tabpanel" aria-labelledby="tab-settings-${t}">${body}</div></div>`;
   };
@@ -43,7 +42,10 @@
 
   const settingsConstants = () => `<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">Defaults come from the spec and the project's shared defaults. Change one only when this substation's design basis says so; changed values are marked.</p>
     <div class="table-wrap" style="max-width:820px"><table class="table"><thead><tr><th>Constant</th><th class="num" style="width:130px">Value</th><th>Unit</th><th style="width:150px">Default</th></tr></thead>
-    <tbody>${P.constants.map((c, i) => `<tr><td>${esc(c.label)}<span class="cell-sub mono">${esc(c.key)}</span></td><td>${input('c' + i, c.value, { num: true, mono: true }).replace('class="input', 'class="ctl input')}</td><td class="muted">${esc(c.unit)}</td><td>${c.value === c.def ? '<span class="muted small">Default</span>' : badge('info', 'Changed from ' + c.def)}</td></tr>`).join('')}</tbody></table></div>`;
+    <tbody>${P.constants.map((c, i) => `<tr><td>${esc(c.label)}<span class="cell-sub mono">${esc(c.key)}</span></td><td>${input('c' + i, c.value, { num: true, mono: true }).replace('class="input', 'class="ctl input')}</td><td class="muted">${esc(c.unit)}</td><td>${c.value === c.def ? '<span class="muted small">Default</span>' : `${badge('info', 'Changed from ' + c.def)} <button class="btn btn--ghost btn--sm" data-action="reset-const" data-i="${i}">Reset</button>`}</td></tr>`).join('')}</tbody></table>
+    <div class="table-foot"><span>${P.constants.filter((c) => c.value !== c.def).length} changed from the default</span><button class="btn btn--ghost btn--sm" data-action="reset-const" data-i="all" ${P.constants.some((c) => c.value !== c.def) ? '' : 'disabled'}>Reset all to defaults</button></div></div>`;
+  ACTIONS['reset-const'] = (el) => { P.constants.forEach((c, i) => { if (el.dataset.i === 'all' || +el.dataset.i === i) c.value = c.def; }); S.dirty = true; S.changed.add('constants'); App.render(); };
+  document.addEventListener('change', (e) => { const m = /^c(\d+)$/.exec(e.target.id || ''); if (m && P.constants[+m[1]] && /^\d+(\.\d+)?$/.test(e.target.value.trim())) { P.constants[+m[1]].value = e.target.value; App.render(); } });
 
   const settingsLoose = () => `<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">Items that are not mounted in any cabinet. They appear as a second table under the WS console BOM. Pick the cabinet that supplies power to an item that needs it.</p>
     <div class="toolbar"><button class="btn btn--secondary btn--sm">${icon('plus')}Add item</button></div>
@@ -84,7 +86,7 @@
     const badgeTab = (tab) => (errs && tab === 'options' ? badge('bad', '1', 'error') : '');
     const meta = gen ? `<span class="mono" style="font-size:13px">${esc(p.cabinet)}</span> · ${kindLabel[p.kind]} · Side ${p.side} · pair ${p.pair} (panels ${2 * p.pair - 1} and ${2 * p.pair})` : `<span class="mono" style="font-size:13px">${esc(p.cabinet)}</span> · ${kindLabel[p.kind]} · hand-written`;
     return `<div class="page">${pageHead(esc(p.name), meta,
-      `<button class="btn btn--secondary" data-action="goto" data-to="#/preview/${p.id}">${icon('preview')}Preview BOM</button><button class="btn btn--primary" data-action="save" ${S.dirty ? '' : 'disabled'}>${icon('save')}Save</button>`,
+      `<button class="btn btn--secondary" data-action="goto" data-to="#/preview/${p.id}">${icon('preview')}Preview BOM</button>`,
       `<a href="#/panels">Panels</a>${icon('chevr')}<span>${esc(p.name)}</span>`)}
       ${gen ? `<div style="margin-bottom:var(--space-4)">${banner('info', `<b>Written by the layout.</b> Enclosure, Devices, Port plans and Options follow from the Network page and the Panels board, so they are read-only here. The Document tab is this panel's own.`, `<a class="btn btn--secondary btn--sm" href="#/panels">Open Panels board</a><a class="btn btn--secondary btn--sm" href="#/network">Open Network</a>`)}</div>` : `<div style="margin-bottom:var(--space-4)">${banner('info', `<b>Hand-written panel.</b> The layout does not touch it. Its devices are edited here.`)}</div>`}
       ${tabs('panel', panelTabs.map(([i, l]) => [i, l, badgeTab(i)]), t, 'Panel sections')}
@@ -125,6 +127,7 @@
   }
   ACTIONS['remove-row'] = (el) => { const tr = el.closest('tr'); tr.style.display = 'none'; toast('Device removed. Not saved yet: Revert on the Save bar brings it back.', 'trash'); };
   ACTIONS['pick-open'] = (el) => {
+    S.pickReplace = el.dataset && el.dataset.replace != null ? el.dataset.replace : null;
     const slot = $('#picker-slot');
     if (slot.innerHTML) { slot.innerHTML = ''; return; }
     slot.innerHTML = `<div class="popover" style="position:relative;max-width:620px;margin-bottom:var(--space-3);padding:8px">
@@ -148,7 +151,7 @@
     });
     draw(); $('#pk-q').focus();
   };
-  ACTIONS['pick-add'] = (el) => { $('#picker-slot').innerHTML = ''; S.dirty = true; toast(`Added ${el.dataset.id}`); App.render(); };
+  ACTIONS['pick-add'] = (el) => { $('#picker-slot').innerHTML = ''; S.dirty = true; S.changed.add('pick-' + el.dataset.id); toast(S.pickReplace != null ? `Part changed to ${el.dataset.id}` : `Added ${el.dataset.id}`); if (S.pickReplace == null && App.isBlank()) S.eqAdded = (S.eqAdded || 0) + 1; App.render(); };
 
   const panelPorts = (p) => `<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">Describe the ports each switch uses. The engine works out the SFPs and shows the result beside it.</p>
     ${[['RST2228-L2', 'PSA1-L2-ESW-A01', [['Uplink to L3', 2, '1G', 'SM', 0], ['Downlink', 15, '1G', 'MM', 0], ['Downlink', 2, '100M', 'MM', 0]], '2 × 1000BASE-LX SM, 15 × 1000BASE-SX MM, 2 × 100BASE-FX MM'],

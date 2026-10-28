@@ -12,6 +12,8 @@
     sub: 'gis01',              // open substation id, or null
     checks: 'errors',          // errors | clean
     dirty: false,
+    changed: new Set(),        // ids of the fields changed since the last save
+    invalid: new Set(),        // ids of the fields that fail validation
     importScenario: 'ok',
     importStep: 'choose',      // choose | review | importing | done
     libTab: 'import',
@@ -26,6 +28,9 @@
   const ACTIONS = {};
   const SCREENS = {};
   const counts = () => ({ errors: S.checks === 'errors' ? DB.problems.filter((p) => p.sev === 'error').length : 0, warnings: DB.problems.filter((p) => p.sev === 'warning').length });
+
+  const isBlank = () => { const x = curSub(); return !!(x && x.blank); };
+  const clearEdits = () => { S.dirty = false; S.changed.clear(); S.invalid.clear(); };
 
   /* ---------- components ---------- */
   const badge = (kind, text, ic) => `<span class="badge badge--${kind}">${ic ? icon(ic) : ''}${esc(text)}</span>`;
@@ -44,6 +49,19 @@
   const select = (id, opts, value, o = {}) => `<select class="select ${o.cls || ''}" id="${id}" ${o.invalid ? 'aria-invalid="true"' : ''} data-dirty="1">${opts.map((x) => { const [v, t] = Array.isArray(x) ? x : [x, x]; return `<option value="${esc(v)}" ${v === value ? 'selected' : ''}>${esc(t)}</option>`; }).join('')}</select>`;
   const pageHead = (title, lede = '', actions = '', crumbs = '') => `<div class="page-head"><div>${crumbs ? `<div class="crumbs">${crumbs}</div>` : ''}<h1>${title}</h1>${lede ? `<p class="lede">${lede}</p>` : ''}</div>${actions ? `<div class="actions">${actions}</div>` : ''}</div>`;
   const illus = () => `<span class="illus">${icon('info')}Illustrative data for the design prototype</span>`;
+
+  /* The save bar: appears at the foot of a form page while it has unsaved changes. It names what will be written. */
+  const FORM_PAGES = ['project', 'settings', 'network', 'panels'];
+  function saveBar() {
+    if (!S.dirty) return '';
+    const n = Math.max(S.changed.size, 1), bad = S.invalid.size;
+    const file = ({ project: 'project.yaml', settings: 'substation.yaml', network: 'substation.yaml', panels: 'the panel file' })[route().a] || 'the file';
+    return `<div class="savebar${bad ? ' savebar--bad' : ''}" role="region" aria-label="Unsaved changes">
+      <span class="savebar-msg">${bad ? `${icon('error')}<b>${bad} ${bad === 1 ? 'field needs' : 'fields need'} fixing</b> before you can save.` : `<span class="dot dot--warn" aria-hidden="true"></span><b>${n} unsaved ${n === 1 ? 'change' : 'changes'}</b> · saved to ${file}`}</span>
+      <span class="sp"></span>
+      <button class="btn btn--secondary" data-action="discard">Discard</button>
+      <button class="btn btn--primary" data-action="save-all" ${bad ? 'disabled' : ''}>${icon('save')}Save changes <kbd class="kbd">Ctrl+S</kbd></button></div>`;
+  }
 
   /* ---------- overlay: dialog, toast ---------- */
   let lastFocus = null;
@@ -98,8 +116,8 @@
       ${navItem('#/project', 'project', esc(p.name.replace(' (example)', '')), projTail, p.status === 'bad' ? 'bad' : p.status === 'warn' ? 'warn' : 'ok', false, r === 'project')}
       <div class="nav-group">Substation</div>${switcher}
       ${navItem('#/settings', 'file', 'Settings', ns ? icon('check') : '', 'ok', !ns, r === 'settings')}
-      ${navItem('#/network', 'network', 'Network', ns ? (S.sub === 'cb03' ? `${icon('warn')}Not set up` : icon('check')) : '', S.sub === 'cb03' ? 'warn' : 'ok', !ns, r === 'network')}
-      ${navItem('#/panels', 'panels', 'Panels', ns ? String(S.sub === 'cb03' ? 0 : DB.panels.length) : '', '', !ns, r === 'panels')}
+      ${navItem('#/network', 'network', 'Network', ns ? (isBlank() ? `${icon('warn')}Not set up` : icon('check')) : '', isBlank() ? 'warn' : 'ok', !ns, r === 'network')}
+      ${navItem('#/panels', 'panels', 'Panels', ns ? String(isBlank() ? 0 : DB.panels.length) : '', '', !ns, r === 'panels')}
       <div class="nav-group">Verify and issue</div>
       ${navItem('#/checks', 'checks', 'Checks', ns ? (c.errors ? `${icon('error')}${c.errors} errors` : `${icon('check')}Clear`) : '', c.errors ? 'bad' : 'ok', !ns, r === 'checks')}
       ${navItem('#/preview', 'preview', 'Preview', '', '', !ns, r === 'preview')}
@@ -124,6 +142,7 @@
     const needsProject = key === 'project', needsSub = ['settings', 'network', 'panels', 'checks', 'preview', 'build'].includes(key);
     const m = $('#main');
     m.innerHTML = (needsProject && !hasProject()) || (needsSub && !hasSub()) ? SCREENS.home() : SCREENS[key]();
+    if (FORM_PAGES.includes(key) && !(key === 'panels' && !route().b) && !(key === 'project' && ['substations', 'share'].includes(S.tab.project))) m.insertAdjacentHTML('beforeend', saveBar());
     if (SCREENS[key + 'After']) SCREENS[key + 'After']();
     document.title = 'BOM Generator — design prototype';
   }
@@ -157,10 +176,35 @@
     if (name === 'scrim' && e.target !== el) return;
     if (ACTIONS[name]) { ACTIONS[name](el, e); }
   });
-  document.addEventListener('input', (e) => { if (e.target.dataset && e.target.dataset.dirty && !S.dirty) { S.dirty = true; renderStatus(); } });
+  /* Any edited field marks the page dirty. A number field that is not a number is invalid until it is fixed. */
+  const refreshBar = () => { const b = $('.savebar'), m = $('#main'); if (b) b.remove(); if (S.dirty && m && m.querySelector('.page') && FORM_PAGES.includes(route().a) && !(route().a === 'panels' && !route().b)) m.insertAdjacentHTML('beforeend', saveBar()); };
+  document.addEventListener('input', (e) => {
+    const t = e.target; if (!t.dataset || !t.dataset.dirty) return;
+    const id = t.id || t.name || 'field'; S.dirty = true; S.changed.add(id);
+    if (t.classList.contains('input--num') || t.classList.contains('ctl') && t.classList.contains('input--num')) {
+      const ok = t.value === '' || /^\d+(\.\d+)?$/.test(t.value.trim());
+      t.setAttribute('aria-invalid', String(!ok)); ok ? S.invalid.delete(id) : S.invalid.add(id);
+      const er = document.getElementById(id + '-err'); if (er) er.hidden = ok && t.value !== '';
+    }
+    renderStatus(); refreshBar();
+  });
+  document.addEventListener('change', (e) => { const t = e.target; if (t.dataset && t.dataset.dirty && (t.tagName === 'SELECT' || t.type === 'checkbox')) { S.dirty = true; S.changed.add(t.id || t.name || 'field'); renderStatus(); refreshBar(); } });
+  /* Leaving a page with unsaved changes asks first. */
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#/"]'); if (!a || !S.dirty) return;
+    const to = a.getAttribute('href'); const same = (h) => h.split('/').slice(0, 2).join('/');
+    if (same(to) === same(location.hash)) return;
+    e.preventDefault(); ACTIONS['leave-ask'](null, null, to);
+  }, true);
+  ACTIONS['leave-ask'] = (el, ev, to) => dialog({ title: 'Save your changes?', body: `<p>${Math.max(S.changed.size, 1)} ${S.changed.size > 1 ? 'changes are' : 'change is'} not saved yet. ${S.invalid.size ? 'Some fields still need fixing, so they cannot be saved.' : ''}</p>`, actions: `<button class="btn btn--ghost" data-action="close">Keep editing</button><button class="btn btn--secondary" data-action="leave-discard" data-to="${esc(to)}">Discard changes</button><button class="btn btn--primary" data-action="leave-save" data-to="${esc(to)}" ${S.invalid.size ? 'disabled' : ''}>Save and leave</button>` });
+  ACTIONS['leave-discard'] = (el) => { closeDialog(); clearEdits(); go(el.dataset.to); };
+  ACTIONS['leave-save'] = (el) => { closeDialog(); clearEdits(); toast('Saved'); go(el.dataset.to); };
+  ACTIONS.discard = () => { clearEdits(); render(); toast('Changes discarded', 'info'); };
+  ACTIONS['save-all'] = () => { if (S.invalid.size) return; const n = Math.max(S.changed.size, 1); clearEdits(); render(); toast(`Saved ${n} ${n === 1 ? 'change' : 'changes'}`); };
   document.addEventListener('change', (e) => { const el = e.target.closest('[data-action="proto-set"]'); if (el) ACTIONS['proto-set'](el, e); const g = e.target.closest('select[data-action="grp"]'); if (g) ACTIONS.grp(g); const sw = e.target.closest('select[data-action="sub-switch"]'); if (sw) ACTIONS['sub-switch'](sw); });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && $('#overlay').innerHTML) { e.preventDefault(); closeDialog(); }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); if (S.dirty) ACTIONS['save-all'](); }
     if (e.key === 'Tab' && $('#overlay .dialog')) {
       const f = $$('#overlay button, #overlay input, #overlay select, #overlay a[href]').filter((x) => !x.disabled);
       if (!f.length) return; const first = f[0], last = f[f.length - 1];
@@ -176,7 +220,7 @@
 
   ACTIONS.tab = (el) => { S.tab[el.dataset.group] = el.dataset.value; if (el.dataset.group === 'project') history.replaceState(null, '', '#/project/' + el.dataset.value); if (el.dataset.group === 'settings') history.replaceState(null, '', '#/settings/' + el.dataset.value); if (el.dataset.group === 'panel') history.replaceState(null, '', '#/panels/' + route().b + '/' + el.dataset.value); const keep = $('#main').scrollTop; renderMain(); $('#main').scrollTop = keep; const nt = document.getElementById(el.id); nt && nt.focus(); };
   ACTIONS.goto = (el) => go(el.dataset.to);
-  ACTIONS['sub-switch'] = (el) => { S.sub = el.value || null; S.dirty = false; S.layout = { overrides: [], removed: [], history: [], selected: '', openOverrides: false }; const { a } = route(); go(['settings', 'network', 'panels', 'checks', 'preview', 'build'].includes(a) ? '#/' + a : '#/panels'); };
+  ACTIONS['sub-switch'] = (el) => { S.sub = el.value || null; clearEdits(); S.layout = { overrides: [], removed: [], history: [], selected: '', openOverrides: false }; const { a } = route(); go(['settings', 'network', 'panels', 'checks', 'preview', 'build'].includes(a) ? '#/' + a : '#/panels'); };
   ACTIONS.theme = () => { S.theme = { light: 'dark', dark: 'system', system: 'light' }[S.theme]; render(); toast(`Theme: ${S.theme}`, 'info'); };
   ACTIONS.help = () => dialog({ title: 'Help', body: '<p>Prototype only. In the app this opens the user guide.</p>', actions: '<button class="btn btn--primary" data-action="close">Close</button>' });
   ACTIONS.close = () => closeDialog();
@@ -191,5 +235,5 @@
   };
   window.addEventListener('hashchange', () => { render(); $('#main').scrollTop = 0; });
 
-  window.App = { $, $$, esc, S, ACTIONS, SCREENS, counts, badge, verified, banner, tabs, field, input, select, pageHead, illus, dialog, closeDialog, toast, go, render, route, hasProject, hasSub, curProject, curSub, renderStatus };
+  window.App = { isBlank, clearEdits, saveBar, $, $$, esc, S, ACTIONS, SCREENS, counts, badge, verified, banner, tabs, field, input, select, pageHead, illus, dialog, closeDialog, toast, go, render, route, hasProject, hasSub, curProject, curSub, renderStatus };
 })();
