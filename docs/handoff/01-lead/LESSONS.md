@@ -63,3 +63,12 @@ Append-only. Mark replaced entries "superseded by …"; move old ones to `archiv
   even when the code is right.
 - Code merges were held while a release tag was pending, so the tag matched its changelog.
   With release-from-main (#153) that is no longer needed.
+
+## B1 takeover (2026-10-28)
+
+- Drift at takeover: STATE said origin/main 7d22194; #173 (A1's checkpoint) had merged on top.
+  Otherwise git, the gate and the open PRs matched STATE.
+- Cards live in the thread that posted them. When a lead thread retires, repost its open cards in
+  the new thread, or Ali's answers never reach the new lead.
+- Roles kept messaging the retired A1 thread after handover; the coordinator told them to use
+  B1's thread. Give the thread id in the first message to each role.
