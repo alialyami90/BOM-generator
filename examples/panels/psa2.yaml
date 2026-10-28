@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=../../schemas/panel.schema.json
+#
+# PSA Cabinet 002 (LAN-B network), transcribed from the example workbook, hidden
+# master sheet 'Panel 2' (issued copy: sheet '2'). It mirrors psa1: devices, port
+# plans and options come from psa1, tags swap PSA1 -> PSA2 and A -> B, 1 -> 2
+# (e.g. PSA2-L2-ESW-B01, PSA2-L1-ESW-B11 to B16, PSA2-DHPCC-GW-2). Values the workbook
+# does not give carry a trailing "# ASSUMED".
+
+id: psa2
+mirror_of: psa1
+cabinet_number: 861-GIS01-PSA-0002
+cabinet_name: "PSA Cabinet - 002"
+tag_prefix: PSA2
+lan: B
+sheet_name: "2"
+
+options:
+  aux_socket_a: 10  # PSA2-AUX PS ('Panel 2' row 26) on PSA2-C5 10A
+
+document:
+  doc_no: VD-EL0009-861GISPSA-001
+  rev: "02"
+  issue_date: 2026-10-28  # ASSUMED

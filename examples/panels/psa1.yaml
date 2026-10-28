@@ -1,0 +1,60 @@
+# yaml-language-server: $schema=../../schemas/panel.schema.json
+#
+# PSA Cabinet 001 (LAN-A network), transcribed from the example workbook, hidden
+# master sheet 'Panel 1' (issued copy: sheet '1'). Values the workbook does not give
+# carry a trailing "# ASSUMED".
+
+id: psa1
+cabinet_number: 861-GIS01-PSA-0001
+cabinet_name: "PSA Cabinet - 001"
+tag_prefix: PSA1
+lan: A
+sheet_name: "1"
+kind: network
+
+enclosure:  # 'Panel 1' row 3: PANEL
+  make: Rawabi
+  model: "Fixed Frame"
+  ordering_code: "Fixed Frame"
+  h_mm: 2100
+  d_mm: 1000
+  w_mm: 800
+  base_frame: { h_mm: 100, d_mm: 950, w_mm: 750 }
+  cable_entry: top
+
+devices:  # group B in row order ('Panel 1' rows 4-12)
+  - part_id: FOPP-96SM  # PSA1-FOPP-CCR-A01
+    purpose: "L2-L3 Interface"
+  - part_id: RST2228-L2  # PSA1-L2-ESW-A01
+  - part_id: RST2228-L1-24MM  # PSA1-L1-ESW-A11 to A16
+    qty: 6
+    hwio_points: 10  # 'Panel 1'!H9 (plan Q5)
+  - part_id: SEL-2730M-EXT  # PSA1-EXT-ESW-A
+  - part_id: SEL-3555-GW  # PSA1-DHPCC-GW-1
+    purpose: "for Dhahran PCC connection"
+  - part_id: FGR-60F  # PSA1-EXT-FW-A
+
+port_plans:  # SFP rows 'Panel 1' rows 13-17 (the issued sheet '1' shows 18 and 6 for rows 14-15)
+  RST2228-L2:
+    uplinks_l3:  # L2-ESW-A01 SFP (SM), qty 2
+      - { count: 2, speed: 1G, media: SM }
+    downlinks:
+      - { count: 15, speed: 1G, media: MM }  # L2-ESW-A01 SFP (MM) 1000BASE-X, qty 15
+      - { count: 2, speed: 100M, media: MM }  # L2-ESW-A01 SFP (MM) 100BASE-FX, qty 2
+  RST2228-L1-24MM:
+    uplinks:  # L1-ESW-A11 to A16 SFP (MM), qty =24+3
+      - { count: 24, speed: 1G, media: MM, spare: 3 }
+  FGR-60F:
+    downlinks:  # EXT-FW-A SFP (MM), qty 2
+      - { count: 2, speed: 1G, media: MM }
+
+options:
+  dc_spare_branches_per_feed: 3  # PSA1-Q1.11-Q1.13, Q2.11-Q2.13
+  ac_spare_branches: 1  # PSA1-C5
+  main_mcb_override_a: 16  # PSA1-Q1, PSA1-Q2 16A (plan Q3)
+  inter_panel_terminals: 40  # PSA1-XIP
+
+document:
+  doc_no: VD-EL0009-861GISPSA-001
+  rev: "02"
+  issue_date: 2026-10-28  # ASSUMED
