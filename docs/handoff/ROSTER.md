@@ -14,5 +14,5 @@ The letter counts context resets (A, B, C, … Z, AA).
 | 7 | [07-lead-assistant](07-lead-assistant/) | A7 - Lead developer assistant | 2026-10-28 | — |
 | 8 | [08-sizing-layout](08-sizing-layout/) | B8 - Sizing and layout engine | 2026-10-28 | [2026-10-28](08-sizing-layout/checkpoints/2026-10-28.md) |
 | 9 | [09-rule-engine](09-rule-engine/) | A9 - BOM rule engine | 2026-10-28 | — |
-| 10 | [10-workbook-writer](10-workbook-writer/) | A10 - Excel workbook writer | 2026-10-28 | — |
+| 10 | [10-workbook-writer](10-workbook-writer/) | B10 - Excel workbook writer | 2026-10-28 | [2026-10-28](10-workbook-writer/checkpoints/2026-10-28.md) |
 | 11 | [11-desktop-app](11-desktop-app/) | B11 - Desktop app | 2026-10-28 | [2026-10-28](11-desktop-app/checkpoints/2026-10-28.md) |
