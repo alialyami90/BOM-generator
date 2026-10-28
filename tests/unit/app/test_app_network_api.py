@@ -138,7 +138,7 @@ def test_a_moved_device_is_marked(app: api.Api, project: Path, substation: Path)
     assert next(p for p in panels if any(u is gps for u in p["units"]))["number"] == 2
     assert not any(u["moved"] for p in panels for u in p["units"] if u["device"] != "gps")
     assert page(app, project)["overrides"] == [
-        {"device": "gps", "unit": None, "side": None, "panel": 2}
+        {"device": "gps", "unit": None, "side": None, "panel": 2, "position": None}
     ]
 
 

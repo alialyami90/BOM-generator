@@ -382,6 +382,32 @@
           "title": "Hwio Points",
           "type": "integer"
         },
+        "input_v_max": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Input V Max"
+        },
+        "input_v_min": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Input V Min"
+        },
         "inrush_a": {
           "anyOf": [
             {

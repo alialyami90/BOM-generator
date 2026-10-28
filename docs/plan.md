@@ -171,6 +171,7 @@ defaults:                              # inherited key by key by every substatio
     min_main_mcb_a: 6
     min_branch_mcb_a: 2                # ADR 0017, used by M15
     inrush_min_ms: 10                  # ADR 0017, used by M15
+    dc_float_v: 140                    # battery float; checked against devices' input_v_max
   catalogue_choice: { mcb: default }   # brand set per catalogue (ADR 0017); unset = default
   spares:                              # ADR 0013; every spare is an input
     port_fraction: 0.20
@@ -297,6 +298,8 @@ devices:
     tier: mid                          # optional: low | mid | high
     inrush_a: 20                       # optional peak inrush current (M15)
     inrush_ms: 5                       # optional inrush duration (M15)
+    input_v_min: 88                    # optional rated input range, V (check report)
+    input_v_max: 150
 
 catalogues:                            # the brand set named default
   enclosure_u: 42                      # rack units of the enclosure (ADR 0013)
@@ -836,6 +839,11 @@ writes its section's details when the work starts.
   their alternative brands. The default library becomes psa-devices 1.1.0.
 - **M15 — Branch MCB sizing from device data (A9, ADR 0019).** Backlog point 3. Ali's rule (Q35): the
   smallest catalogue MCB ≥ 1.3 × running current, ≥ inrush ÷ magnetic trip multiple, and ≥ 2 A.
+  `dc_dist.branch_sizing` sizes every Q1.n, Q2.n and QCOD-n by it; an inrush counts when it
+  lasts at least `inrush_min_ms` or its duration is unknown, and DC loads divide by the
+  set's DC multiple where given. The device field `min_branch_mcb_a` is deprecated in
+  favour of the design constant. `BuildResult.branch_mcbs` carries each sizing and the
+  check report prints one `branch_mcb` line per MCB.
 - **M16 — Library editing and CSV exchange (A5 store and CSV, ADR 0018; A11 app; A4
   design).** Backlog points 1 and 10. Add and edit devices and catalogue entries, saved as
   a new local library version. Export and import the library as CSV, with alternatives

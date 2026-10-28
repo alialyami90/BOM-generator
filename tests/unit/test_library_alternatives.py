@@ -181,3 +181,10 @@ def test_an_unknown_choice_names_the_brands() -> None:
     message = r"no mcb brand 'siemens' \(the library has: default, abb-s200m\)"
     with pytest.raises(ValueError, match=message):
         resolve_catalogues(library, CatalogueChoice(mcb="siemens"))
+
+
+def test_input_voltage_range_is_optional_and_ordered() -> None:
+    d = DeviceType.model_validate({**switch_dict(), "input_v_min": 12, "input_v_max": 125})
+    assert (d.input_v_min, d.input_v_max) == (12, 125)
+    with pytest.raises(ValidationError, match="input_v_min must not be above input_v_max"):
+        DeviceType.model_validate({**switch_dict(), "input_v_min": 150, "input_v_max": 125})

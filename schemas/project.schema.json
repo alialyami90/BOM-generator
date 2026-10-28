@@ -118,6 +118,12 @@
           "title": "Current Factor",
           "type": "number"
         },
+        "dc_float_v": {
+          "default": 140,
+          "exclusiveMinimum": 0,
+          "title": "Dc Float V",
+          "type": "number"
+        },
         "dc_voltage_v": {
           "default": 125,
           "exclusiveMinimum": 0,

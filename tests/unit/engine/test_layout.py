@@ -260,6 +260,88 @@ def test_r7_overrides_survive_a_rerun() -> None:
     assert auto_layout(units, RULES, moves=moves) == auto_layout(units, RULES, moves=moves)
 
 
+def stack(layout: Layout, number: int) -> list[str]:
+    """``device/side`` top to bottom in a panel."""
+    return [f"{x.device}/{x.side.value}" for x in layout.panels[number - 1].units]
+
+
+def _abc() -> list[Unit]:
+    return [*pair("a", 1), *pair("b", 1, rank=1), *pair("c", 1, rank=2)]
+
+
+def test_r7_position_orders_a_unit_within_its_panel() -> None:
+    move = DeviceMove(device="c", side="a", panel=1, position=1)
+    layout = auto_layout(_abc(), RULES, moves=[move])
+    assert stack(layout, 1) == ["c/a", "a/a", "b/a"]
+    assert stack(layout, 2) == ["a/b", "b/b", "c/b"]  # the B unit keeps the automatic order
+
+
+def test_r7_pair_move_with_position_orders_both_sides() -> None:
+    layout = auto_layout(_abc(), RULES, moves=[PairMove(pair="a", panel=(1, 2), position=2)])
+    assert stack(layout, 1) == ["b/a", "a/a", "c/a"]
+    assert stack(layout, 2) == ["b/b", "a/b", "c/b"]
+
+
+def test_r7_position_counts_rack_devices_only() -> None:
+    units = [*pair("a", 1), *pair("rail", 1, h=0, rank=1), *pair("b", 1, rank=2)]
+    units += pair("c", 1, rank=3)
+    move = DeviceMove(device="c", side="a", panel=1, position=2)
+    rack = [x for x in stack(auto_layout(units, RULES, moves=[move]), 1) if x != "rail/a"]
+    assert rack == ["a/a", "c/a", "b/a"]  # the DIN-rail part between a and b does not count
+
+
+def test_r7_position_past_the_bottom_puts_it_last() -> None:
+    move = DeviceMove(device="a", side="a", panel=1, position=9)
+    layout = auto_layout(_abc(), RULES, moves=[move])
+    assert stack(layout, 1) == ["b/a", "c/a", "a/a"]
+    assert layout.issues == []
+
+
+def test_r7_position_moves_a_unit_into_another_panel() -> None:
+    units = [x for n in range(1, 17) for x in pair("sw", n)]  # 31U: panels 1 and 2
+    units += [*pair("fw", 1, rank=1), *pair("gw", 1, rank=2)]  # panels 3 and 4
+    move = DeviceMove(device="sw", unit=1, side="a", panel=3, position=1)
+    layout = auto_layout(units, RULES, moves=[move])
+    assert stack(layout, 3) == ["sw/a", "fw/a", "gw/a"]
+    assert layout.panels[2].position(units[0]) == 1
+    assert layout.panels[2].position(units[-2]) == 3
+
+
+def test_r5_blank_plates_follow_the_pinned_order() -> None:
+    # a switch with its manager above a firewall needs no plate; the other way round does
+    units = [u("sw", 1, A, cm=1), u("fw", 1, A, rank=1)]
+    assert fill(units, RULES).panels[0].used_u(RULES) == 3
+    layout = auto_layout(units, RULES, moves=[DeviceMove(device="fw", panel=1, position=1)])
+    assert stack(layout, 1) == ["fw/a", "sw/a"]
+    assert layout.panels[0].used_u(RULES) == 4
+    assert layout.panels[0].blank_plates() == 1
+
+
+def test_r7_pin_to_the_automatic_place_stays_a_pin() -> None:
+    units = [*pair("fw", 1), u("gps", 1, NONE, rank=1)]
+    assert where(fill(units, RULES))["gps#1/none"] == 1  # the tie goes to panel 1
+    pin = DeviceMove(device="gps", panel=1)
+    layout = auto_layout(units, RULES, moves=[pin])
+    assert where(layout) == where(fill(units, RULES))
+    gps = units[-1]
+    assert layout.panels[0].is_pinned(gps)
+    assert not layout.panels[0].is_pinned(units[0])
+    # A heavier A side would now send the GPS to panel 2; the pin holds it in panel 1.
+    heavier = [*units, u("io", 1, A, h=5, rank=2)]
+    assert where(fill(heavier, RULES))["gps#1/none"] == 2
+    assert where(auto_layout(heavier, RULES, moves=[pin]))["gps#1/none"] == 1
+
+
+def test_r7_a_later_move_without_position_drops_the_earlier_position() -> None:
+    moves = [
+        DeviceMove(device="c", side="a", panel=1, position=1),
+        DeviceMove(device="c", side="a", panel=1),
+    ]
+    layout = auto_layout(_abc(), RULES, moves=moves)
+    assert stack(layout, 1) == ["a/a", "b/a", "c/a"]
+    assert layout.panels[0].is_pinned(_abc()[4])
+
+
 def test_r8_fill_lines_count_the_gaps() -> None:
     layout = fill([u("a", 1, A), u("b", 1, A, h=2, rank=1), u("c", 1, A, rank=2)], RULES)
     assert fill_lines(layout, RULES) == ["Panel 1: 6 U / 32 U"]
@@ -352,6 +434,19 @@ def test_r7_manual_panels_are_left_alone(example: LoadedSubstation) -> None:
     result = layout_substation(example)
     assert "ws" not in {p.id for p in result.panels}
     assert "ws" in example.manual_panel_ids
+
+
+def test_r7_pinned_position_survives_a_rebuild(example: LoadedSubstation) -> None:
+    pin = LayoutInputs(overrides=[DeviceMove(device="gps", panel=1, position=1)])
+    first = layout_preview(example, pin)
+    assert first.fills[0].units[0].device == "gps"
+    # More IEDs give more L1 switches; the GPS stays on top of panel 1.
+    network = example.substation.network.model_copy(update={"ied_count": 60})
+    bigger = with_changes(example, network=network)
+    again = layout_preview(bigger, pin)
+    assert again.plan.l1_per_side > first.plan.l1_per_side
+    assert again.fills[0].units[0].device == "gps"
+    assert again.fills[0].is_pinned(again.fills[0].units[0])
 
 
 def test_r7_preview_overrides_replace_the_files_overrides(example: LoadedSubstation) -> None:

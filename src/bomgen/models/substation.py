@@ -121,9 +121,14 @@ class UnitRef(InputModel):
 
 
 class DeviceMove(UnitRef):
-    """Move single units into a panel; a redundant entry's move names its side."""
+    """Move single units into a panel; a redundant entry's move names its side.
+
+    ``position`` (1 = top) is the unit's place among the panel's rack devices; without
+    it the unit takes its automatic place in the panel (ADR 0013, R7).
+    """
 
     panel: PositiveInt
+    position: PositiveInt | None = None
 
 
 class PairMove(InputModel):
@@ -132,6 +137,7 @@ class PairMove(InputModel):
     pair: PanelId
     unit: PositiveInt | None = None
     panel: tuple[PositiveInt, PositiveInt]
+    position: PositiveInt | None = None  # in both panels, as on DeviceMove
 
     @field_validator("panel")
     @classmethod

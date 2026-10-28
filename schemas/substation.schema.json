@@ -179,6 +179,12 @@
           "title": "Current Factor",
           "type": "number"
         },
+        "dc_float_v": {
+          "default": 140,
+          "exclusiveMinimum": 0,
+          "title": "Dc Float V",
+          "type": "number"
+        },
         "dc_voltage_v": {
           "default": 125,
           "exclusiveMinimum": 0,
@@ -231,7 +237,7 @@
     },
     "DeviceMove": {
       "additionalProperties": false,
-      "description": "Move single units into a panel; a redundant entry's move names its side.",
+      "description": "Move single units into a panel; a redundant entry's move names its side.\n\n``position`` (1 = top) is the unit's place among the panel's rack devices; without\nit the unit takes its automatic place in the panel (ADR 0013, R7).",
       "properties": {
         "device": {
           "pattern": "^[a-z0-9][a-z0-9_-]*$",
@@ -242,6 +248,19 @@
           "exclusiveMinimum": 0,
           "title": "Panel",
           "type": "integer"
+        },
+        "position": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Position"
         },
         "side": {
           "anyOf": [
@@ -728,6 +747,19 @@
           ],
           "title": "Panel",
           "type": "array"
+        },
+        "position": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Position"
         },
         "unit": {
           "anyOf": [

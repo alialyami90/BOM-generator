@@ -239,6 +239,14 @@ def test_build_result_carries_the_dc_mains_per_panel() -> None:
     assert main.design_current_a == pytest.approx(10 * 1.3 / 125)
 
 
+def test_build_result_carries_each_branch_mcbs_sizing() -> None:
+    result = build(loaded())
+    assert [(b.panel_id, b.tag, b.rating_a) for b in result.branch_mcbs][:2] == [
+        ("p1", "PSA1-Q1.1", 2),
+        ("p1", "PSA1-Q2.1", 2),
+    ]
+
+
 def test_build_result_carries_power_and_heat_per_cabinet() -> None:
     result = build(loaded())
     assert result.power is not None

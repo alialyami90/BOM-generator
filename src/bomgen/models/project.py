@@ -86,6 +86,7 @@ class ConstantOverrides(InputModel):
     min_main_mcb_a: PositiveInt = 6
     min_branch_mcb_a: PositiveInt = 2  # the smallest branch MCB (ADR 0017)
     inrush_min_ms: PositiveFloat = 10  # shorter inrush does not size the branch MCB
+    dc_float_v: PositiveFloat = 140  # battery float voltage, checked against input_v_max
 
 
 class DesignConstants(ConstantOverrides):
