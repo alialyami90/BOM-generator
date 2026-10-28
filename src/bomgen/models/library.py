@@ -395,11 +395,24 @@ class Catalogues(InputModel):
     """Commodity catalogues held by the library (spec: Inputs, 1. Device library)."""
 
     mcb: McbCatalogue
+    mcb_dc: McbCatalogue | None = None  # the DC set when it differs from ``mcb`` (ADR 0023)
     aux_contact: AuxContact
     terminal_blocks: Annotated[dict[str, TerminalBlockType], Field(min_length=1)]
     busbars: Annotated[dict[str, Busbar], Field(min_length=1)]
     enclosure_u: PositiveInt = 42
     housekeeping: Housekeeping
+
+    @field_validator("mcb_dc")
+    @classmethod
+    def _dc_set_is_dc_rated(cls, value: McbCatalogue | None) -> McbCatalogue | None:
+        if value is not None and value.dc_rating_v is None:
+            raise ValueError("catalogues.mcb_dc needs dc_rating_v")
+        return value
+
+    @property
+    def dc_mcb(self) -> McbCatalogue:
+        """The MCB set that sizes the DC branches: ``mcb_dc``, else ``mcb`` (ADR 0023)."""
+        return self.mcb_dc if self.mcb_dc is not None else self.mcb
 
 
 DEFAULT_BRAND = "default"  # the brand id of the ``catalogues`` entries
@@ -409,6 +422,7 @@ BrandId = Annotated[str, StringConstraints(pattern=r"^[a-z0-9][a-z0-9-]*$")]
 class McbBrand(McbCatalogue):
     id: BrandId
     name: str | None = None
+    ac_rated: bool = True  # false for a DC-only family; refused as ``mcb``, valid as ``mcb_dc``
 
 
 class AuxContactBrand(AuxContact):
@@ -465,6 +479,7 @@ class CatalogueChoice(InputModel):
     """The brand set picked per catalogue; unset means ``default``."""
 
     mcb: BrandId | None = None
+    mcb_dc: BrandId | None = None  # an ``mcb`` brand for the DC branches; unset: as ``mcb``
     aux_contact: BrandId | None = None
     terminal_blocks: BrandId | None = None
     busbars: BrandId | None = None
@@ -529,7 +544,7 @@ class Library(InputModel):
 
     def brand_ids(self, kind: str) -> list[str]:
         """Return the brand ids of catalogue ``kind``: ``default`` first, then file order."""
-        brands: list[BrandSet] = getattr(self.catalogue_brands, kind)
+        brands: list[BrandSet] = getattr(self.catalogue_brands, _brand_list(kind))
         return [DEFAULT_BRAND, *(brand.id for brand in brands)]
 
 
@@ -539,18 +554,27 @@ def resolve_catalogues(library: Library, choice: CatalogueChoice) -> Library:
     update: dict[str, object] = {}
     for kind in CatalogueChoice.model_fields:
         brand_id = getattr(choice, kind)
+        if kind == "mcb_dc" and brand_id is None:
+            brand_id = choice.mcb  # the DC set follows the AC choice unless one is given
         if brand_id is None or brand_id == DEFAULT_BRAND:
             continue
-        brands = getattr(library.catalogue_brands, kind)
+        brands = getattr(library.catalogue_brands, _brand_list(kind))
         brand = next((b for b in brands if b.id == brand_id), None)
         if brand is None:
             known = ", ".join(library.brand_ids(kind))
             raise ValueError(f"no {kind} brand '{brand_id}' (the library has: {known})")
         update[kind] = _plain(kind, brand)
+    if choice.mcb_dc == DEFAULT_BRAND and "mcb" in update:
+        update["mcb_dc"] = library.catalogues.dc_mcb  # the default DC set, not the AC brand
     if not update:
         return library
     catalogues = library.catalogues.model_copy(update=update)
     return library.model_copy(update={"catalogues": catalogues})
+
+
+def _brand_list(kind: str) -> str:
+    """The ``catalogue_brands`` list a choice key picks from: ``mcb_dc`` picks an ``mcb``."""
+    return "mcb" if kind == "mcb_dc" else kind
 
 
 def _plain(kind: str, brand: BrandSet) -> object:
@@ -561,7 +585,8 @@ def _plain(kind: str, brand: BrandSet) -> object:
         return brand.entries
     plain_type: dict[str, type[InputModel]] = {
         "mcb": McbCatalogue,
+        "mcb_dc": McbCatalogue,
         "aux_contact": AuxContact,
         "housekeeping": Housekeeping,
     }
-    return plain_type[kind].model_validate(brand.model_dump(exclude={"id", "name"}))
+    return plain_type[kind].model_validate(brand.model_dump(exclude={"id", "name", "ac_rated"}))

@@ -112,7 +112,7 @@ def test_build_target_gives_the_file_name_and_default_folder(app: api.Api, proje
     assert target["sheets"][0] == {"name": "1", "cabinet": "PSA Cabinet - 001"}
     assert target["sheets"][-1] == {"name": "Heat Calculations", "cabinet": None}
     assert target["revision"] == "02"
-    assert target["library"] == {"name": "psa-devices", "version": "1.0.0"}
+    assert target["library"] == {"name": "psa-devices", "version": "1.1.0"}
     assert target["problems"] == []
 
 

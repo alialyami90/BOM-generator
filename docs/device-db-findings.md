@@ -137,3 +137,11 @@ height, ports) and the MCB brand sets. Ali chose to keep the iC60N as the defaul
     WAGO 2002-1671 carries 16 A against the UT 2,5-MT's 20 A. WAGO has no screw-clamp blocks.
 29. **The C60H-DC needs its own auxiliary contact**, A9N26924, not the iOF A9A26924. The ABB
     S2C-H6R's rating at 110–125 V DC was not found.
+30. **Eleven alternatives are not library parts yet** because no power figure was found:
+    Siemens SCALANCE XR324-4M EEC (`SEL-2730M-EXT` low); Hitachi RTU540 and 560CMG10
+    (`SEL-3555-GW` and `SEL-3555-RTAC`, low and high); Arbiter 1202B/C (`SEL-2488` mid);
+    Hitachi low and high for `SEL-2240`; Siemens SIMATIC IPC427E, IPC647E and IPC847E
+    (`SEL-3355`). They stay in `data/device-db` and join psa-devices once a figure is found.
+31. **DI-module alternatives carry no `di_inputs`.** Their input counts differ from the
+    original's and were not researched per module, so the library leaves the field out.
+    A project that swaps in one of them needs the count added first. (`SEL-2244-2`)

@@ -57,16 +57,37 @@ Done:
   - Checks, Preview and Build show the check report and every sheet as the
     engine computes it, and write the workbook.
 
-  Projects and substations are read-only in the app until the project and
-  substation writers exist: edit the YAML files, then open the project again.
+  Apart from the Panels board (M17, below), projects and substations are
+  still read-only in the app: edit the YAML files, then open the project again.
 - M11, built early (ADR 0009): the Windows installer and tag-driven releases.
   The installed app opens the desktop window, double-clicking a `.bomlib`
   imports it, and a `.bomproj` opens the app on that project.
 
-Next: the project and substation writers, so the app can create and edit
-projects and substations; not yet planned as a milestone. Who builds what is in
-[`docs/agents.md`](docs/agents.md); the terms project, substation, side and
-stream are defined in `docs/plan.md` → "Glossary".
+In progress, for v0.2 (Ali's feedback on v0.1.0, tracked in
+[`docs/backlog.md`](docs/backlog.md); milestones in `docs/plan.md` →
+"M12–M18 (v0.2)"):
+
+- M12 (done): a cable manager sits directly against the next device; the
+  blank-plate gap is only between two active devices.
+- M13 (done): alternatives are library parts (`alt_group`, `tier`), and
+  further MCB brand sets are chosen per project or substation with
+  `catalogue_choice` (ADR 0017). The Library screen shows the catalogues.
+- M14 (in review): researched datasheet data for every device and
+  alternative, for the next shipped library (psa-devices 1.1.0, plan Q38).
+- M15 (done): branch MCBs sized from each device's running and inrush current
+  (ADR 0019), with DC float-voltage checks.
+- M16: library editing as local versions (`+local.N`) with `.bomlib` backups,
+  CSV export and import for Excel (ADR 0018), and the alternatives comparison.
+  The store and CLI are done; the app's editors come next.
+- M17: create and edit projects, substations and panels in the app. The
+  writers (ADR 0021) and the Panels board's drag and drop, pins, deletes,
+  undo and keyboard moves are done; the app's other editors come next.
+- M18: loose material on its own sheet and Preview tab (ADR 0020), with
+  free-text items and writers (ADR 0022). The app's Loose material page is in
+  review.
+
+Who builds what is in [`docs/agents.md`](docs/agents.md); the terms project,
+substation, side and stream are defined in `docs/plan.md` → "Glossary".
 
 To install the Windows app, see [`docs/install.md`](docs/install.md).
 
@@ -139,12 +160,31 @@ bomgen library import psa-devices-1.0.0.bomlib --dry-run   # show the part diff 
 bomgen library import psa-devices-1.0.0.bomlib             # verify, install, activate
 bomgen library list                                        # installed versions
 bomgen library rollback psa-devices                        # back to the previous version
+bomgen library export psa-devices                          # back up the active version as a .bomlib
 ```
 
 `pack --add data/device-db` includes the researched device database
 ([`data/device-db/`](data/device-db/README.md)) as reference data: pack checks
 its records and import installs them with the library, for the app to show next
 to the library's parts. The generator never builds from them.
+
+To edit a library in Excel (ADR 0018), export it as CSV tables, edit them and
+import them again. The import is saved as a local version of the one it came
+from (for example `1.0.0+local.1`) and activated; the release version stays
+installed.
+
+```bash
+bomgen library export-csv psa-devices                      # writes psa-devices-1.0.0-csv.zip
+bomgen library export-csv psa-devices --out csv/           # or one .csv file per table
+bomgen library import-csv psa-devices csv/ --dry-run       # every check and what would change
+bomgen library import-csv psa-devices csv/ --notes "new SEL alternatives"
+```
+
+The tables are UTF-8 with a byte order mark, so Excel opens them as written;
+`--tables devices` or `--tables catalogues` exports one group. The import
+reads files Excel saved with semicolons and decimal commas, warns about a cell
+that starts like a formula, and refuses rows with a problem unless you pass
+`--skip-invalid`.
 
 ### Sharing and backing up projects
 

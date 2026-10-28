@@ -3,31 +3,31 @@ Columns of a panel BOM, DESCRIPTION)."""
 
 from bomgen.engine.errors import EngineError
 from bomgen.models.bom import BomLine, Group
-from bomgen.models.library import Library
+from bomgen.models.library import Library, McbCatalogue
 from bomgen.models.panel import Panel, PanelKind
 
 
-def rating_at_least(library: Library, amps: float) -> int:
-    """The smallest catalogue MCB rating of at least ``amps``."""
-    ratings = library.catalogues.mcb.ratings_a
+def rating_at_least(mcb: McbCatalogue, amps: float) -> int:
+    """The smallest rating of the MCB set ``mcb`` of at least ``amps``."""
+    ratings = mcb.ratings_a
     for rating in ratings:
         if rating >= amps:
             return rating
     raise EngineError(f"{amps:.2f} A is above the largest catalogue MCB ({ratings[-1]} A)")
 
 
-def rating_above(library: Library, amps: float) -> int:
-    """The smallest catalogue MCB rating strictly above ``amps``."""
-    ratings = library.catalogues.mcb.ratings_a
+def rating_above(mcb: McbCatalogue, amps: float) -> int:
+    """The smallest rating of the MCB set ``mcb`` strictly above ``amps``."""
+    ratings = mcb.ratings_a
     for rating in ratings:
         if rating > amps:
             return rating
     raise EngineError(f"no catalogue MCB above {amps:g} A (largest {ratings[-1]} A)")
 
 
-def mcb_line(library: Library, group: Group, tag: str, rating: int, load: str) -> BomLine:
-    """``<rating>A, <poles>P MCB For <load>`` with the catalogue code in F and G."""
-    mcb = library.catalogues.mcb
+def mcb_line(mcb: McbCatalogue, group: Group, tag: str, rating: int, load: str) -> BomLine:
+    """``<rating>A, <poles>P MCB For <load>`` with the set's code in F and G. The AC
+    branches take ``catalogues.mcb``, the DC ones ``catalogues.dc_mcb`` (ADR 0023)."""
     code = mcb.code_for(rating)
     return BomLine(
         group=group,

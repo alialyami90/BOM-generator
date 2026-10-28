@@ -1,56 +1,38 @@
 # NEXT — role 2
 
-**Next action:** write the failing test `test_a_brand_not_rated_for_ac_cannot_be_the_mcb_choice`, then add `McbBrand.ac_rated: bool = True` and the loader refusal (option (a), which A1 chose on 2026-10-28).
+**Next action:** none assigned. Check A1's thread and the open PRs, then take task 1.
 
 ## Tasks, in priority order
 
-### 1. A DC-only MCB brand must not size AC branches (M13 follow-up)
-- **Why:** #130 adds `schneider-c60h-dc`, which is DC only. Its
-  `magnetic_trip_multiple` is null, yet `McbCatalogue.magnetic_multiple` still returns
-  5, the lower bound of curve C. `engine/ac_dist.py` uses the same
-  `library.catalogues.mcb` for the AC branches. Nothing in the model marks a brand as
-  DC only, so no check can catch it today.
-- **Options put to A1 (2026-10-28, A1's thread):**
-  - (a) Add `McbBrand.ac_rated: bool = true`. The loader then reports a located error
-    when a substation picks an `ac_rated: false` brand for `catalogue_choice.mcb`.
-    Every panel has AC branches, so no conditional is needed. A3 sets the flag on
-    C60H-DC.
-  - (b) Split `catalogue_choice.mcb` into an AC choice and a DC choice. This changes
-    the schema and A9's engine, so it needs an ADR, and A1 assigns the number.
-  - **Decided (A1, 2026-10-28): (a) now, with no ADR needed, and a readable message.**
-    Whether (b) follows is Ali's call; A1 is asking him on a card and will pass the
-    answer on.
-- **Files for (a):** `src/bomgen/models/library.py` (`McbBrand`),
-  `src/bomgen/io/references.py` (`catalogue_choice_issues`),
-  `tests/unit/test_catalogue_choice_loader.py`, and the regenerated `schemas/`.
-- **Depends on:** nothing. The test uses a fixture brand, so #130 does not need to merge
-  first. Coordinate with A3 so it sets `ac_rated: false` on C60H-DC.
-- **Tests first:** `test_a_brand_not_rated_for_ac_cannot_be_the_mcb_choice` and
-  `test_mcb_brands_are_ac_rated_by_default`.
-- **Done:** the gate passes and a PR is open for A1. Then tell A3 to set the flag in its
-  data.
+### 1. Compute the unset `mcb_dc` fallback instead of storing it (A1's note on #151)
+- **Why:** `resolve_catalogues` copies the `mcb` brand into `Catalogues.mcb_dc` when
+  `mcb_dc` is unset. A brand without `dc_rating_v` then sits in a field whose validator
+  refuses it, and only `model_copy` keeps it from failing. If anything re-validates a
+  resolved library, a project that loads today would be refused.
+- **Fix:** store `mcb_dc` only for a written `mcb_dc`. `Catalogues.dc_mcb` falls back to
+  `mcb`. Check that a library's own `catalogues.mcb_dc` still wins when neither key is
+  written, and that `{mcb: brand}` with no `mcb_dc` still sizes DC with that brand
+  (ADR 0023 point 2). That may need the resolver to clear `mcb_dc` when `mcb` is written.
+- **Tests first:** `test_a_resolved_library_validates_again` plus the existing ADR 0023
+  examples.
+- Not urgent: A1 said not blocking. Agree timing with A1.
 
-### 2. Review A11's use of the writers (M17/M18 app side)
-- Answer questions on `io/edit.py`, `io/fields.py`, `io/panel_edit.py`,
-  `io/loose_edit.py` and `io/lifecycle.py`. Small API additions A11 needs are A2's to
-  make: one PR each, with tests and a paragraph in ADR 0021 or 0022.
+### 2. Review role 11's use of the writers (M17/M18 app side)
+- Answer questions on `io/edit.py`, `io/fields.py`, `io/panel_edit.py`, `io/loose_edit.py`
+  and `io/lifecycle.py`. Small API additions are role 2's: one PR each, with tests and a
+  paragraph in ADR 0021 or 0022.
 
 ### 3. Q23 (waiting on Ali)
-- Keep the default (the masters). Act only when Ali answers, and record the answer in
-  plan section 6.
+- Keep the default (the masters). Act only when Ali answers. Record the answer in plan §6.
 
 ## Not tasks (by design)
-- `fed_from` accepts any panel id of the substation, and the layout reports a dropped
-  one (`engine/layout.py`). See ADR 0022 point 4.
-- `bomgen layout` writes generated panel files with PyYAML. Those files carry no hand
-  comments (ADR 0021, Consequences).
-- The default iC60N's `dc_float` WARN and #130's slower suite were raised on #130 for
-  A1/A3. The data is A3's.
+- The engine's switch to `catalogues.dc_mcb` is role 9's. The writer side of
+  `power_footnotes` is role 10's.
+- `fed_from` accepts any panel id (ADR 0022 point 4). `bomgen layout` uses PyYAML (ADR 0021).
+- The plan example's brand id `c60h-dc` (should be `schneider-c60h-dc`): A1 fixes it.
 
 ## Don't do
-- Don't edit `engine/`, `sheets/` or `library_store/`; tell their owners (A9, A10, A5).
-  The `part_id is not None` guards #122 added in `dc_dist.py`, `housekeeping.py`,
-  `pipeline.py` and `kits.py` were the exception A1 agreed to.
-- Don't change `examples/library.yaml` data: it is A3's under Q38 (examples keep the
-  spec's values, and the golden values must not move).
-- Don't re-open #122/#124 or redo the empty-loose-table change (A9 did it in #123).
+- Don't edit `engine/`, `sheets/` or `library_store/`; tell their owners.
+- Don't change `examples/library.yaml` data: it is role 3's under Q38.
+- Don't force-push: it's blocked here. To reuse the one branch after a squash merge, reset it
+  on main and `git merge -s ours origin/<branch>` before pushing (LESSONS).

@@ -31,13 +31,15 @@ panels:  # panel order = sheet order (OUT-3); the layout rewrites these (M1c)
 manual_panels:  # never touched by the layout; follow the panels above
   - panels/ws.yaml
 
-output:  # the defaults, written out
+output:  # the defaults, written out, and the reference workbook's printer footnote
   file_name: "{doc_no}_PSA_BOM_Rev{rev}.xlsx"
   sheet_names:
     loose_material: "Loose Material"
     power_consumption: "Power Consumption"
     heat_dissipation: "Heat Dissipation"
     heat_calculations: "Heat Calculations"
+  power_footnotes:
+    - "*Printer Power Consumption: 622 watts (Printing), 31.3 watts (Ready), 2.4 watts (Sleep), 0.06 watts (Auto-Off/Manual On), 0.69 watts (Auto-Off/Auto-On/Wake on\nLAN);"
 
 # constants and spares: the project defaults apply (project.yaml); write a key here to
 # override it for this substation only.

@@ -81,6 +81,7 @@
       <select class="select" id="bom-grp" data-action="pv-grp" style="width:260px"><option value="all">All groups</option>${Object.keys(GROUPS).filter((g) => counts[g]).map((g) => `<option value="${g}" ${grp === g ? 'selected' : ''}>${g}  ${esc(GROUPS[g])} (${counts[g]})</option>`).join('')}</select>
       <div class="input-wrap" style="width:220px;margin-left:var(--space-2)"><label class="sr-only" for="pv-q">Filter rows</label>${icon('search')}<input class="input" id="pv-q" type="search" placeholder="Filter rows" value="${esc(q)}"></div>
       <span class="sp"></span>
+      ${loose ? `<a class="btn btn--secondary btn--sm" href="#/loose" style="margin-right:var(--space-3)">${icon('edit')}Edit the list</a>` : ''}
       <label class="switch"><input type="checkbox" data-action="pv-hwio" ${showHwio ? 'checked' : ''}>HWIO column</label></div>
       <div class="sheet-title">${esc(p.title[0])}<small>${esc(p.title[1])}</small></div>
       <div class="table-wrap" style="max-height:calc(100vh - 380px)"><table class="table">${head()}<tbody>${out || `<tr class="empty-row"><td colspan="9">No rows match. Clear the filter to see all ${p.rows.length} rows.</td></tr>`}</tbody></table></div>

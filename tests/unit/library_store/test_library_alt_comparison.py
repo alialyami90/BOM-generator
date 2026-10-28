@@ -107,7 +107,10 @@ def test_without_a_database_the_data_quality_is_not_given(base: Library) -> None
 
 
 def test_a_device_without_a_group_is_alone(base: Library) -> None:
-    rows = compare_alternatives(base, FIRST)
+    ungrouped = apply_edits(base, [SetValue(path=["devices", FIRST, "alt_group"], value=None)])
+    assert ungrouped.library is not None, ungrouped.problems
+
+    rows = compare_alternatives(ungrouped.library, FIRST)
 
     assert [r.part_id for r in rows] == [FIRST]
     assert rows[0].tier is None
