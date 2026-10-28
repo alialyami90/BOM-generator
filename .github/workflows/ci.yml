@@ -1,0 +1,115 @@
+name: CI
+
+# Runs lint, type-check and tests on pull requests and on pushes to main.
+#
+# Docs-only changes (docs/**, **/*.md, LICENSE) must not run the test jobs.
+# We do NOT use `paths-ignore` for that: a workflow skipped by `paths-ignore`
+# never reports a status, so a *required* status check would wait forever on a
+# docs-only PR. Instead:
+#
+#   1. `changes` always runs and uses dorny/paths-filter to decide whether any
+#      non-docs file changed (output `code` = 'true' / 'false').
+#   2. `lint`, `typecheck` and `test` run only when `code` is 'true'. When they
+#      are skipped by their `if:`, GitHub records them as "skipped", not pending.
+#   3. `ci-status` always runs, after everything else, and is the ONE job to mark
+#      as a required status check in branch protection. It passes when every
+#      job above succeeded or was skipped, and fails if any failed or was
+#      cancelled. So a docs-only PR gets a green `ci-status` straight away.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read # paths-filter lists PR files through the API
+
+jobs:
+  changes:
+    name: Detect code changes
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          # 'every': a file counts as code only if it matches ALL patterns below,
+          # i.e. it is anywhere in the repo AND not docs/**, not *.md, not LICENSE.
+          predicate-quantifier: every
+          filters: |
+            code:
+              - '**'
+              - '!docs/**'
+              - '!**/*.md'
+              - '!LICENSE'
+
+  lint:
+    name: Lint (ruff)
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: ruff format --check .
+
+  typecheck:
+    name: Type-check (mypy)
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - run: mypy
+
+  test:
+    name: Tests (pytest)
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - run: pytest
+
+  ci-status:
+    name: ci-status
+    # always(): run even when jobs above were skipped (docs-only) or failed,
+    # so this required check always reports instead of hanging.
+    if: always()
+    needs: [changes, lint, typecheck, test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Passed, or skipped for a docs-only change
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Job results: $RESULTS"
+          for r in $RESULTS; do
+            case "$r" in
+              success|skipped) ;;
+              *) echo "A required job ended with '$r'"; exit 1 ;;
+            esac
+          done
+          echo "All jobs passed or were skipped for a docs-only change."
