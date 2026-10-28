@@ -209,10 +209,10 @@ def test_self_test_reports_modules_that_fail_to_import() -> None:
 def test_app_self_test_fails_when_a_module_is_missing(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    monkeypatch.setattr(launcher, "self_test", lambda: ["bomgen.engine.power"])
+    monkeypatch.setattr(launcher, "self_test", lambda: ["bomgen.not_a_module"])
 
     assert launcher.app_main(["--self-test"], notify=lambda _: None) == 1
-    assert "bomgen.engine.power" in capsys.readouterr().err
+    assert "bomgen.not_a_module" in capsys.readouterr().err
 
 
 def test_cli_prints_a_string_exit_code_and_fails(
@@ -244,12 +244,12 @@ def test_frozen_self_test_checks_the_build_time_module_manifest(
     # A frozen app can only walk the modules PyInstaller kept, so a dropped module
     # would never be noticed; the spec records the source tree's modules instead.
     (tmp_path / launcher.MODULE_MANIFEST).write_text(
-        "bomgen\nbomgen.app.launcher\nbomgen.engine.power\n", encoding="utf-8"
+        "bomgen\nbomgen.app.launcher\nbomgen.not_a_module\n", encoding="utf-8"
     )
     monkeypatch.setattr(sys, "frozen", True, raising=False)
     monkeypatch.setattr(sys, "_MEIPASS", str(tmp_path), raising=False)
 
-    assert launcher.self_test() == ["bomgen.engine.power"]
+    assert launcher.self_test() == ["bomgen.not_a_module"]
 
 
 def test_frozen_self_test_fails_without_the_manifest(
