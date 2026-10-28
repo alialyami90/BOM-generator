@@ -1,10 +1,11 @@
-# 0014. Engine output model and the group A–D derivation choices
+# 0014. Engine output model and the group A–H derivation choices
 
 - Status: Proposed
 - Date: 2026-10-28
 - Spec sections: Columns of a panel BOM; Tag naming conventions; Derivation rules →
-  Network accessories (group C), Housekeeping kit (group D); Data model and
-  generation order
+  Network accessories (group C), Housekeeping kit (group D), DC and AC distribution,
+  Breaker part numbers, Terminal block quantities (group G), HWIO points; Data model
+  and generation order
 
 ## Context
 
@@ -54,6 +55,21 @@ that reproduce them):
    panel without a LAN drops the LAN part (`PSA3-EXT-ESW`, `PSA3-L2-ESW-01`). A
    `tag_pattern` without `{nn}` gives every unit the same tag, which is what
    commodity rows want (`Cable Manager` x 9, `COM-CABLE` x 6).
+
+**Group E–H choices** (M3; open points in plan Q34):
+
+7. Groups A–F of every panel are built before any panel's groups G and H, because
+   the XDIN strip defaults to the substation's HWIO total. HWIO comes from the device
+   rows and the aux contacts; the console's aux contacts carry none.
+8. MCB ratings are the smallest catalogue size at or above the need: a branch takes
+   max(`min_branch_mcb_a`, ⌈O⌉), a DC main max(ΣQ, 6 A) unless overridden, CINC 6 A or
+   the size above the socket. DC branches number per supply unit in group B order;
+   spares repeat the largest branch rating on that feed.
+9. Terminal strips the spec gives no rule for take values by panel kind (plan Q6).
+   Device strips come from the library `terminals` of each row and its kit children,
+   placed after X-ANN in the spec's table order.
+10. Group H lists `options.grounding_busbars` from the busbar catalogue, tag and
+    description only.
 
 ## Consequences
 

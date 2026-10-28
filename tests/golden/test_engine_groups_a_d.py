@@ -149,5 +149,10 @@ def test_change_over_diodes_and_socket(result: BuildResult) -> None:
 
 def test_hwio_from_group_b(result: BuildResult) -> None:
     # Columns of a panel BOM, HWIO: 1 per L2/EXT switch, the L1 row's 10 (plan Q5),
-    # 1 for the GPS clock. Aux contacts follow in M3.
-    assert [sum(x.hwio for x in p.lines) for p in result.panels] == [12, 12, 1, 0]
+    # 1 for the GPS clock. The aux contacts of groups E and F add the rest (plan M3).
+    assert [sum(x.hwio for x in p.lines if x.group in GROUPS_A_TO_D) for p in result.panels] == [
+        12,
+        12,
+        1,
+        0,
+    ]

@@ -442,6 +442,13 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
 - Tests: one per rule in "Derivation rules" (DC, AC, breaker part numbers,
   terminal block table, HWIO); golden: Q1.1–Q1.13, CINC/Q1/Q2 ratings, every
   terminal quantity in the table, HWIO totals 17/17/6, SR.NO 1…71 on cabinet 001.
+- Delivered in M3: `engine/` modules `mcb`, `ac_dist`, `dc_dist`, `terminals`
+  (fixed strips by panel kind, plan Q6, and the devices' own strips), `grounding`,
+  `assemble` (revision marks); `pipeline.build` now runs steps 1–3 and 5–11 in two
+  passes, groups A–F of every panel first, because XDIN defaults to the
+  substation's HWIO total. Tags honour `first_nn` (ADR 0013). Rules the spec states
+  only by example: plan Q34 and ADR 0014. Golden rows in
+  `tests/golden/expected_groups_e_h.py`.
 
 ### M4 — Power and heat engine
 - Step 4 in full: PowerLines (DC/AC/external blocks), sizing columns N–R,
@@ -836,6 +843,25 @@ assumed 2U from Hubbell's 48-fibre 1U unit (`data/device-db/`, PR #18).
 *Resolved 2026-10-28:* Ali: 1U. A3 and A2 update the device database and the example
 library (done in #33: FOPP-96SM `height_u: 1`).
 
+**Q34 — Group E–H rules the spec states only by example** (M3; defaults in ADR
+0014, all in force until Ali answers):
+1. Device strips (library `terminals`) follow X-ANN and precede XIP, in the order of
+   the spec's terminal table: the per-unit strips (Axion DI slots XDIPD–XDIPG) in
+   group B order, then XDIN, then the per-serial-port strips (XRTAC-C1…C6). A rule
+   without `{n}` or `{slot}` gives one strip of count × units.
+2. XDIN appears with the DI slot strips. *Default:* its quantity is the
+   substation's HWIO total (17 + 17 + 6 = 40, the spec's "hardwired DI count");
+   `terminal_overrides` wins. Its text is fixed: "Knife Disconnect Terminal Blocks
+   For DI Negative".
+3. The console's aux contacts carry HWIO 0 (`Aux`!H21 and H31 are blank); other
+   kinds count 1 per AC aux contact and 2 for the DC mains.
+4. Descriptions are written one way in every cabinet: MCBs "2A, 2P MCB For …"
+   (the spec's example reads "2A,2P", the workbook mixes both), spares "SPARE",
+   one text per terminal strip, the console's CINC "Main Auxiliary AC Supply"
+   (`Aux` reads "Non-UPS AC Supply"), and a branch load named by its tag without the
+   prefix ("SRV/OAS/EAS PS1"; `Aux` reads "OAS PS1"). *Alternative:* per-panel
+   description overrides.
+
 **Q29 — Thermostat load and fan airflow in the library defaults.** The device
 research (`docs/device-db-findings.md`, items 1 and 2) found that the SK 3110.000
 thermostat's "30 W" is a contact switching rating, not a load, and that 716 m³/h is the
@@ -856,7 +882,7 @@ need a marker naming the device whose loose items go at that position (A2's sche
 defaults in ADR 0014, all in force until Ali answers):
 1. The loose-material title line 2, "PSA Panels Loose Material and Auxiliary
    Equipment", is a constant; the spec only says the table has a title block.
-   *Default:* keep it; it could become a `loose_material` field (A2's schema).
+   *Done in M1b/M3:* `loose_material.title`, with that text as the default.
 2. Which SFP part serves a port: matching speed and media, then the host's make,
    then library order. *Alternative:* name the SFP part on each port allocation.
    Cable managers and serial cables likewise take the first library record of

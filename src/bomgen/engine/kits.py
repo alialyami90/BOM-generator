@@ -52,9 +52,6 @@ def main_equipment(rows: Iterable[DeviceRow], library: Library) -> list[BomItem]
     return [device_item(row, library, Group.B) for row in rows]
 
 
-LOOSE_TITLE = "PSA Panels Loose Material and Auxiliary Equipment"
-
-
 def loose_table(
     material: LooseMaterial | None,
     substation: str,
@@ -71,7 +68,7 @@ def loose_table(
             if row.device.loose_items:
                 items.append(_device_loose(row, library))
     return LooseTable(
-        title=(substation, LOOSE_TITLE), lines=flatten(items), host_panel=material.host_panel
+        title=(substation, material.title), lines=flatten(items), host_panel=material.host_panel
     )
 
 

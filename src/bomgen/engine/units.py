@@ -26,22 +26,23 @@ def expand_devices(
     panel: Panel, library: Library, instances: Sequence[DeviceInstance] | None = None
 ) -> tuple[DeviceRow, ...]:
     """Tag ``instances`` (default: the panel's devices) in order, numbering per type and
-    level across rows."""
+    level across rows; a row's ``first_nn`` restarts the count (ADR 0013)."""
     used: Counter[tuple[str | None, str | None]] = Counter()
     rows: list[DeviceRow] = []
     for instance in panel.devices if instances is None else instances:
         device = lookup(library, instance.part_id)
         lan = instance.lan or panel.lan
         key = (device.tag_type, device.purdue_level)
+        start = instance.first_nn or first_number(device) + used[key]
         tags = device_tags(
             device,
             prefix=panel.tag_prefix,
             lan=lan,
             qty=instance.qty,
-            start=first_number(device) + used[key],
+            start=start,
             override=instance.tag,
         )
-        used[key] += instance.qty
+        used[key] = start - first_number(device) + instance.qty
         rows.append(DeviceRow(device, instance, lan, tags.row, tags.units))
     return tuple(rows)
 

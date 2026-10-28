@@ -1,5 +1,5 @@
-"""Pipeline for groups A-D and the loose-material table (spec: Data model and
-generation order, steps 1-5; How each panel BOM groups its materials -> Loose material)."""
+"""Pipeline for groups A-H and the loose-material table (spec: Data model and
+generation order, steps 1-11; How each panel BOM groups its materials -> Loose material)."""
 
 from pathlib import Path
 from typing import Any
@@ -12,7 +12,8 @@ from bomgen.engine.units import expand_devices
 from bomgen.io.loader import LoadedSubstation
 from bomgen.io.mirror import mirror_panel
 from bomgen.models.bom import Group
-from bomgen.models.panel import PanelMirror
+from bomgen.models.library import Library
+from bomgen.models.panel import Panel, PanelMirror
 from bomgen.models.project import DesignConstants, LooseMaterial, Project, Spares
 from bomgen.models.substation import Substation
 
@@ -35,7 +36,11 @@ LOOSE_PARTS = (
 )
 
 
-def loaded(loose_material: dict[str, Any] | None = None) -> LoadedSubstation:
+def loaded(
+    loose_material: dict[str, Any] | None = None,
+    lib: Library | None = None,
+    panels: tuple[Panel, ...] | None = None,
+) -> LoadedSubstation:
     project = Project.model_validate(
         {
             "project": {"id": "gis", "name": "GIS 01"},
@@ -55,7 +60,9 @@ def loaded(loose_material: dict[str, Any] | None = None) -> LoadedSubstation:
             "loose_material": loose_material,
         }
     )
-    lib = library(switch("L2", "L2"), device("CM", "cable_manager", tag_pattern="Cable Manager"))
+    lib = lib or library(
+        switch("L2", "L2"), device("CM", "cable_manager", tag_pattern="Cable Manager")
+    )
     p1 = panel([{"part_id": "L2"}], id="p1", cabinet_number="CAB-001", cabinet_name="Cabinet 1")
     p2 = mirror_panel(
         p1,
@@ -80,21 +87,27 @@ def loaded(loose_material: dict[str, Any] | None = None) -> LoadedSubstation:
         documents={},
         constants=DesignConstants(),
         spares=Spares(),
-        panels=(p1, p2),
+        panels=panels or (p1, p2),
         panel_files={},
         manual_panel_ids=frozenset(),
     )
 
 
-def test_groups_a_to_d_in_order_with_cabinet_title() -> None:
+def test_groups_a_to_h_in_order_with_cabinet_title() -> None:
     result = build(loaded())
     p1 = result.panels[0]
     assert (p1.panel_id, p1.sheet_name) == ("p1", "1")
     assert p1.title == ("CAB-001", "Dhahran - Cabinet 1")
     groups = [line.group for line in p1.lines]
     assert groups == sorted(groups)
-    assert {Group.A, Group.B, Group.C, Group.D} <= set(groups)
+    assert set(groups) == set(Group)
     assert p1.lines[0].tag == "PANEL"
+    assert [p1.lines[i].group for i in p1.separators_before()] == [
+        Group.E,
+        Group.F,
+        Group.G,
+        Group.H,
+    ]
 
 
 def test_mirrored_panel_takes_lan_b_tags() -> None:
@@ -130,3 +143,54 @@ def test_loose_table_lists_project_items_then_device_loose_items() -> None:
     ]
     assert [line.merge_fg for line in table.lines] == [True, False, False, True, False]
     assert table.lines[3].ordering_code == "Included with GPS"
+
+
+def test_loose_table_title_comes_from_the_loose_material() -> None:
+    lib = library(*LOOSE_PARTS)
+    material = LooseMaterial(host_panel="ws", title="Loose Items", items=[loose("FO")])
+    table = loose_table(material, "GIS Substation", [], lib)
+    assert table is not None
+    assert table.title == ("GIS Substation", "Loose Items")
+
+
+AXION = (
+    powered(
+        "AXION",
+        "io_chassis",
+        tag_type="HWIO",
+        tag_pattern="{prefix}-HWIO",
+        children=[{"part_id": "DI", "qty": 2}],
+    ),
+    device(
+        "DI",
+        terminals=[{"strip": "XDIP{slot}", "block": "UT-2.5-MT", "count": 58, "first_slot": "D"}],
+    ),
+)
+
+
+def test_xdin_defaults_to_the_hwio_total_of_every_panel() -> None:
+    cable_manager = device("CM", "cable_manager", tag_pattern="Cable Manager")
+    lib = library(switch("L2", "L2", hwio_points=1), cable_manager, *AXION)
+    p1 = panel([{"part_id": "L2"}], id="p1")
+    p3 = panel([{"part_id": "AXION"}], id="p3", kind="control", tag_prefix="PSA3", lan=None)
+    result = build(loaded(lib=lib, panels=(p1, p3)))
+    total = sum(line.hwio for p in result.panels for line in p.lines)
+    xdin = [line.qty for line in result.panels[1].lines if line.tag == "PSA3-XDIN"]
+    assert total == 1 + 2 * (3 + 2)  # L2 switch, AC and DC aux contacts of both panels
+    assert xdin == [total]
+
+
+def test_revision_marks_reach_lines_of_every_group() -> None:
+    p1 = panel(
+        [{"part_id": "L2"}],
+        id="p1",
+        revision={
+            "highlight": [
+                {"tag": "PSA1-L2-ESW-A01", "columns": ["D"]},
+                {"tag": "PSA1-X-AC", "columns": ["D", "F"]},
+            ]
+        },
+    )
+    lines = build(loaded(panels=(p1,))).panels[0].lines
+    revised = {line.tag: line.revised for line in lines if line.revised}
+    assert revised == {"PSA1-L2-ESW-A01": {"D"}, "PSA1-X-AC": {"D", "F"}}
