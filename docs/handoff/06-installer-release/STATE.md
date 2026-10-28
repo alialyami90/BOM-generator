@@ -1,8 +1,8 @@
 # STATE — role 6, Windows installer and release (M11)
 
 - Outgoing: `A6 - Windows installer and release`. Successor: `B6 - Windows installer and release`.
-- Date 2026-10-28 (B6 refresh). Branch `claude/project-thread-y4aekh` (docs-only checkpoint on `origin/main` ee5b451, #153). The branch holds no unfinished work; restart it from main per LESSONS "Branch restarts".
-- Contacts: Ali's thread is this role's project thread `cmsg_01CGuLumA5u5e7gSGbisWmMi9TL26SYzpQs1CWS9qSpPPv` (reply with post_message). A1's thread: `cmsg_01CGuLumA5u5e7gSGbisWmMi3nTuZbpZkUB1t4T5nt6GfE`. A5 (library packages): `cmsg_01CGuLumA5u5e7gSGbisWmMi4GsrhHJfEnM1ZoKq6Av5HP`.
+- Date 2026-10-28 (B6 after the context reset). Branch `claude/project-thread-s79idd` (docs-only checkpoint on `origin/main` 0f4b3eb). The branch holds no unfinished work; restart it from main per LESSONS "Branch restarts".
+- Contacts: Ali's thread is this role's project thread `cmsg_01CGuLumA5u5e7gSGbisWmMiHdmiF2zR4D9rPGYUSRQDkT` (B6 after the reset; A6's was `cmsg_01CGuLumA5u5e7gSGbisWmMi9TL26SYzpQs1CWS9qSpPPv`) (reply with post_message). A1's thread: `cmsg_01CGuLumA5u5e7gSGbisWmMi3nTuZbpZkUB1t4T5nt6GfE`. A5 (library packages): `cmsg_01CGuLumA5u5e7gSGbisWmMi4GsrhHJfEnM1ZoKq6Av5HP`. B3 (device db): `cmsg_01CGuLumA5u5e7gSGbisWmMiMn4Ay5kTA4wLV22n9mEuru`.
 - Role, ownership and rules: [docs/agents.md](../../agents.md) "Roles" and "A6 — Windows installer and release (M11)"; design in [ADR 0009](../../decisions/0009-installer-layout-and-releases.md), [docs/install.md](../../install.md), [packaging/README.md](../../../packaging/README.md), plan M11.
 
 ## Owned files (agents.md)
@@ -13,6 +13,7 @@
 
 ## In review / in progress
 - No open PR of mine. Nothing uncommitted besides this checkpoint.
+- Reviewed and approved the release.yml and ADR 0009 part of B3's Q38 PR #161 on head 64a8e65 (comment 6482158290): pack `data\library\psa-devices.yaml` as psa-devices 1.1.0, `data/library/**` and `data/device-db/**` in the PR paths, ADR 0009 line updated by B3 with my OK. Windows job green (run 40778617300). A1 merged it as 159591f.
 - Release v0.1.1 is done: https://github.com/alialyami90/BOM-generator/releases/tag/v0.1.1 (tag on 135d7ee, CHANGELOG #143 covers it; run 40773272092). Ali made the release in the UI, so its title and notes are empty; Ali was told and may paste the changelog section. Since #153 the workflow fills an empty UI release itself.
 
 ## What works (evidence)
@@ -25,14 +26,15 @@
 ## Verification
 | command | result | date |
 |---|---|---|
-| `ruff check .` / `ruff format --check .` | pass (319 files) | 2026-10-28 |
-| `mypy` | pass (212 files) | 2026-10-28 |
-| `pytest -q` | 2464 passed | 2026-10-28 |
+| `ruff check .` / `ruff format --check .` | pass (322 files), main 0f4b3eb | 2026-10-28 |
+| `mypy` | pass (214 files) | 2026-10-28 |
+| `pytest -q` | 2500 passed | 2026-10-28 |
 | `pytest -q tests/golden` | 94 passed | 2026-10-28 |
 | Windows job on v0.1.0 tag run | success | 2026-10-28 |
 | Windows job on v0.1.1 tag run (40765665083, 9313db1) | build + smoke passed; cancelled by me before publish | 2026-10-28 |
 | v0.1.1 tag run on 135d7ee (40773272092) | success, published | 2026-10-28 |
 | #153 PR run (40774940276) | success | 2026-10-28 |
+| #161 Windows job on 64a8e65 (run 40778617300) | success | 2026-10-28 |
 
 Could not run here: the installer, the window and the PowerShell smoke steps (Windows only; CI is the proof), anything needing a tag push (sandbox returns HTTP 403 on tag pushes). Since #153 no one needs to push tags.
 
@@ -40,12 +42,11 @@ Could not run here: the installer, the window and the PowerShell smoke steps (Wi
 No file outside the owned list is changed by this checkpoint. Past out-of-role edits, all approved by A1 and merged: the ADR 0009 row of `docs/decisions/README.md` (#153, own-ADR row), `src/bomgen/cli.py` rename (#70), version strings in `pyproject.toml`, `src/bomgen/__init__.py`, `tests/test_package.py` (#84, #86).
 
 ## Known issues and caveats
-- ADR 0009 status is still "Proposed"; it needs A1 to accept it (my file, A1 decides status).
+- ADR 0009 status is still "Proposed"; only Ali accepts ADRs. A1 will put it on a batch-accept card with the other Proposed ADRs.
 - A broken bundled default library shows its message on every start while the store stays empty (accepted, A5 noted it).
 - The first-start message includes the raw refusal kind (e.g. `invalid_package`), same as the double-click import message; A5 called it a nit, left as is.
 - Superseded or cancelled CI runs report `ci-status` failure on the old head sha; check the newest run before reacting.
 - Releases are unsigned (plan Q19); SmartScreen warns.
 
 ## Waiting on (since 2026-10-28)
-- A3: the Q38 PR that repoints the default library pack in release.yml to the shipped 1.1.0 file. A1 asked me to review that part.
-- A1: acceptance of ADR 0009 (still "Proposed"); the two "tag-driven" lines in `README.md:62` and `docs/agents.md:81` (A1's files).
+- Ali, via A1's batch card: acceptance of ADR 0009 (still "Proposed"). A1: the two "tag-driven" lines in `README.md:62` and `docs/agents.md:81` (A1's files).
