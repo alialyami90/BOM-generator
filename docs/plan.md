@@ -807,21 +807,27 @@ writes its section's details when the work starts.
 - **M14 — Library data (A3).** Backlog points 2–3. Every alternative in `data/device-db/`
   becomes a full library part with its datasheet electrical data, and the catalogues get
   their alternative brands. The default library becomes psa-devices 1.1.0.
-- **M15 — Branch MCB sizing from device data (A9, ADR 0019).** Backlog point 3; the rule is
-  Ali's answer to Q35.
+- **M15 — Branch MCB sizing from device data (A9, ADR 0019).** Backlog point 3. Ali's rule (Q35): the
+  smallest catalogue MCB ≥ 1.3 × running current, ≥ inrush ÷ magnetic trip multiple, and ≥ 2 A.
 - **M16 — Library editing and CSV exchange (A5 store and CSV, ADR 0018; A11 app; A4
   design).** Backlog points 1 and 10. Add and edit devices and catalogue entries, saved as
   a new local library version. Export and import the library as CSV, with alternatives
   linked by their group key. The Library screen gets catalogue tabs and an alternatives
-  list for comparing devices.
+  list for comparing devices. Store side (`library_store`, after M13 is on main): the
+  `export_csv`, `preview_csv_import` and `import_csv` functions with the dry-run checks of
+  ADR 0018; an edit service (add, edit or delete a device or catalogue entry, validated
+  against the model) that saves a new local version and keeps the old one for rollback; and
+  the `.bomlib` export of an edited library as the backup. Import and edit share one
+  save-a-new-local-version function. The tests include the round trip
+  (library, CSV, library is equal).
 - **M17 — Project and substation editing (A2 writers; A11 app; A4 design).** Backlog points
   4, 7 and 9. Writers round-trip projects, substations and panels. The app creates projects
   and substations from scratch, every settings field is editable, and the Panels board gets
   drag and drop, pins and the panel editor. YAML and `.bomproj` files are then for import,
   export and backup only.
 - **M18 — Loose material (A2 model; A9 engine; A10 sheet; A11 editor).** Backlog point 6.
-  Each substation has its own editable loose-material list, shown where Ali's answer to Q36
-  puts it and in Preview.
+  Each substation has its own editable loose-material list, on its own "Loose Material"
+  sheet (Q36, ADR 0020) and in Preview.
   - Sheet side (A10, ADR 0020): the table moves off the WS console sheet onto its own
     "Loose Material" sheet (`output.sheet_names.loose_material`), placed after the cabinet
     BOMs and before Power Consumption. It uses the panel BOM layout, print setup and
@@ -855,14 +861,16 @@ writes its section's details when the work starts.
 
 Each has a proposed default that the plan assumes until Ali answers.
 
-**Q35 — Branch MCB sizing rule** (M15; backlog point 3). Asked on a card on 2026-10-28.
-The proposal is the smallest catalogue MCB that meets three conditions: it carries 1.3 × the
-running current, its C-curve magnetic trip (5 × rating) clears the inrush current, and it is
-at least 2 A. The alternative is the same rule without the 2 A floor.
+**Q35 — Branch MCB sizing rule** (M15; backlog point 3). *Resolved 2026-10-28:* Ali chose
+"Computed, 2 A floor". A branch MCB is the smallest catalogue rating that meets all three:
+at least 1.3 × the running current, at least the inrush current divided by the MCB set's
+magnetic trip multiple (C curve: 5) when the device has an inrush figure, and at least 2 A.
+This replaces the per-device `min_branch_mcb_a` as the floor (ADR 0019, A9).
 
-**Q36 — Where loose material goes** (M18; backlog point 6). Asked on a card on 2026-10-28.
-The proposal is its own "Loose Material" sheet. The alternative is the spec's table under the
-WS console sheet. *Resolved 2026-10-28:* Ali chose its own sheet (ADR 0020).
+**Q36 — Where loose material goes** (M18; backlog point 6). *Resolved 2026-10-28:* Ali chose
+"Its own sheet". Loose material moves off the WS console sheet onto a "Loose Material" sheet,
+placed after the cabinet BOM sheets and before Power Consumption. This overrides the spec's
+OUT-3 and its loose-material table on sheet 4 (ADR 0020, A10).
 
 **Q1 — Example data is not in the spec (blocks M1 and the golden tests).**
 *Resolved 2026-10-28:* Ali uploaded the example workbook; `examples/` is transcribed
