@@ -195,3 +195,51 @@ def test_a_file_that_is_not_a_package_fails_the_first_check(
     assert _statuses(preview)["package"] is CheckStatus.FAILED
     assert not preview.can_import
     assert preview.manifest is None
+
+
+def _rewrite(source: Path, target: Path, **changes: bytes) -> Path:
+    """Copy a package, replacing members and fixing their checksums in the manifest."""
+    from bomgen.bundle.container import sha256
+
+    with zipfile.ZipFile(source) as old, zipfile.ZipFile(target, "w") as new:
+        manifest = json.loads(old.read("manifest.json"))
+        members = {name: old.read(name) for name in old.namelist() if name != "manifest.json"}
+        members.update(changes)
+        manifest["files"] = {name: sha256(data) for name, data in members.items()}
+        new.writestr("manifest.json", json.dumps(manifest))
+        for name, data in members.items():
+            new.writestr(name, data)
+    return target
+
+
+def test_a_project_id_that_disagrees_with_project_yaml_skips_the_checks_after_it(
+    tmp_path: Path, workspace: Path, package: Path, store: LibraryStore
+) -> None:
+    renamed = _rewrite(
+        package, tmp_path / "renamed.bomproj", **{"project.yaml": b"project:\n  id: other\n"}
+    )
+
+    preview = preview_project_import(renamed, workspace=workspace, store=store)
+
+    statuses = _statuses(preview)
+    assert statuses["checksums"] is CheckStatus.OK
+    assert statuses["identity"] is CheckStatus.FAILED
+    assert [statuses[i] for i in ("contents", "name", "library")] == [CheckStatus.SKIPPED] * 3
+    assert preview.files == []
+    assert preview.library_note is None
+    assert not preview.can_import
+
+
+def test_build_output_in_the_package_fails_contents_and_skips_the_rest(
+    tmp_path: Path, workspace: Path, package: Path, store: LibraryStore
+) -> None:
+    sneaky = _rewrite(package, tmp_path / "sneaky.bomproj", **{"out/BOM.xlsx": b"workbook"})
+
+    preview = preview_project_import(sneaky, workspace=workspace, store=store)
+
+    statuses = _statuses(preview)
+    assert statuses["identity"] is CheckStatus.OK
+    assert statuses["contents"] is CheckStatus.FAILED
+    assert statuses["name"] is CheckStatus.SKIPPED
+    assert statuses["library"] is CheckStatus.SKIPPED
+    assert not preview.can_import

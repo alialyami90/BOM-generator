@@ -33,8 +33,8 @@ class PackageFile:
 class LibraryImportPreview:
     """What importing a `.bomlib` would do. `can_import` is False when a check failed.
 
-    `files` is empty and `diff` is None unless every check up to the version one
-    passed. `previous` is the active version the diff is against.
+    `files` is empty when a check failed, and `diff` is None unless the library and
+    version checks passed. `previous` is the active version the diff is against.
     """
 
     checks: list[Check]
@@ -75,7 +75,7 @@ def preview_library_import(
         checks.append(Check("library", _SKIPPED_LABELS["library"], CheckStatus.SKIPPED))
 
     checks.append(_validation(contents))
-    if contents is None:
+    if contents is None or checks[-1].status is CheckStatus.FAILED:
         checks.append(Check("version", _SKIPPED_LABELS["version"], CheckStatus.SKIPPED))
     else:
         version_check, previous, diff = _version(store, contents, force)
@@ -88,9 +88,10 @@ def preview_library_import(
             "packages carry checksums only; they are not signed",
         )
     )
+    can_show = files is not None and all(c.status is not CheckStatus.FAILED for c in checks)
     shown = (
         [PackageFile(name, len(data)) for name, data in sorted(files.items())]
-        if files is not None
+        if files is not None and can_show
         else []
     )
     return LibraryImportPreview(checks, manifest, shown, previous, diff)

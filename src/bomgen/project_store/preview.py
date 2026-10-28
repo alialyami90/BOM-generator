@@ -31,7 +31,7 @@ class ProjectImportPreview:
     """What importing a `.bomproj` would do. `can_import` is False when a check failed.
 
     An existing project with the same id is a warning, not a failure: the import
-    replaces it after a backup. `files` is empty unless every check passed.
+    replaces it after a backup. `files` is empty when a check failed.
     """
 
     checks: list[Check]
@@ -60,35 +60,25 @@ def preview_project_import(
     note: str | None = None
 
     verified = inspection.files
-    checks.append(
-        _run(
-            "identity",
-            "Project id matches project.yaml",
-            check_identity,
-            manifest,
-            verified,
-        )
-    )
-    checks.append(
-        _run(
-            "contents",
-            "Package holds no build output",
-            lambda _manifest, files: refuse_build_output(files),
-            manifest,
-            verified,
-        )
-    )
-    if verified is None or manifest is None or target is None:
-        checks.append(Check("name", "Project id is new in the workspace", CheckStatus.SKIPPED))
-        checks.append(Check("library", "Built with the active library", CheckStatus.SKIPPED))
-    else:
+    ready = verified is not None and manifest is not None and target is not None
+    for check_id, label, verify in (
+        ("identity", "Project id matches project.yaml", check_identity),
+        ("contents", "Package holds no build output", lambda _m, files: refuse_build_output(files)),
+    ):
+        check = _run(check_id, label, verify, manifest, verified) if ready else None
+        checks.append(check or Check(check_id, label, CheckStatus.SKIPPED))
+        ready = ready and checks[-1].status is not CheckStatus.FAILED
+    if ready and manifest is not None:
         checks.append(_name_check(manifest.project_id, workspace, exists))
         library_check, note = _library_check(manifest, store)
         checks.append(library_check)
+    else:
+        checks.append(Check("name", "Project id is new in the workspace", CheckStatus.SKIPPED))
+        checks.append(Check("library", "Built with the active library", CheckStatus.SKIPPED))
 
     files = (
         [PackageFile(name, size) for name, size in sorted(inspection.sizes.items())]
-        if verified is not None
+        if ready
         else []
     )
     return ProjectImportPreview(

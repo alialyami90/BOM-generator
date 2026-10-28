@@ -92,3 +92,51 @@ def test_restore_refuses_a_file_outside_a_backups_folder(
         restore_backup(elsewhere, store=store)
 
     assert caught.value.kind is RefusalKind.INVALID_PROJECT
+
+
+def test_restore_accepts_a_path_relative_to_the_project_folder(
+    tmp_path: Path, store: LibraryStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    project_file = make_project(tmp_path / "ws" / "jfgp2")
+    saved = backup_project(project_file, now=FIRST)
+    monkeypatch.chdir(tmp_path / "ws" / "jfgp2")
+
+    result = restore_backup(Path("Backups") / saved.name, store=store, now=SECOND)
+
+    assert result.project_dir == tmp_path / "ws" / "jfgp2"
+
+
+def test_restore_accepts_a_bare_file_name_from_inside_backups(
+    tmp_path: Path, store: LibraryStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    project_file = make_project(tmp_path / "ws" / "jfgp2")
+    saved = backup_project(project_file, now=FIRST)
+    monkeypatch.chdir(saved.parent)
+
+    result = restore_backup(Path(saved.name), store=store, now=SECOND)
+
+    assert result.project_dir == tmp_path / "ws" / "jfgp2"
+
+
+def test_restore_refuses_a_backup_of_another_project(tmp_path: Path, store: LibraryStore) -> None:
+    project_file = make_project(tmp_path / "ws" / "jfgp2")
+    saved = backup_project(project_file, now=FIRST)
+    other = make_project(tmp_path / "ws" / "other")
+    (other.parent / "Backups").mkdir()
+    foreign = other.parent / "Backups" / saved.name
+    foreign.write_bytes(saved.read_bytes())
+
+    with pytest.raises(LibraryPackageError, match="not to the folder 'other'") as caught:
+        restore_backup(foreign, store=store)
+
+    assert caught.value.kind is RefusalKind.INVALID_PROJECT
+    assert (other.parent / "project.yaml").read_text() == project_file.read_text()
+
+
+def test_backups_made_in_the_same_second_list_newest_first(tmp_path: Path) -> None:
+    project_file = make_project(tmp_path / "jfgp2")
+    made = [backup_project(project_file, now=FIRST) for _ in range(11)]
+
+    listed = [b.path for b in list_backups(project_file)]
+
+    assert listed == list(reversed(made))  # -11 before -10 before ... before the first

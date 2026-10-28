@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+import re
 import zipfile
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -66,21 +68,38 @@ class BackupInfo:
     problem: str | None
 
 
+_SEQUENCE = re.compile(r"-\d{8}-\d{6}(?:-(\d+))?$")
+
+
 def list_backups(project_file: Path) -> list[BackupInfo]:
     """The project's backups, newest first. Reads manifests only; nothing is unpacked."""
     backups = project_file.parent / BACKUPS_DIR
     if not backups.is_dir():
         return []
     found = [_describe(path) for path in backups.glob(f"*{PROJECT_SUFFIX}") if path.is_file()]
-    return sorted(found, key=lambda info: (info.saved, info.path.name), reverse=True)
+    return sorted(found, key=lambda info: (info.saved, _sequence(info.path)), reverse=True)
+
+
+def _sequence(path: Path) -> int:
+    """Backups in the same second are numbered `-2`, `-3`, ...; the unnumbered one is first."""
+    match = _SEQUENCE.search(path.stem)
+    return int(match.group(1)) if match and match.group(1) else 1
+
+
+def read_backup_manifest(path: Path) -> ProjectManifest:
+    """Read just the manifest of a `.bomproj`; raises on anything unreadable."""
+    with zipfile.ZipFile(path) as zf:
+        return ProjectManifest.model_validate(json.loads(zf.read(MANIFEST_NAME)))
 
 
 def _describe(path: Path) -> BackupInfo:
-    stat = path.stat()
+    try:
+        stat = path.stat()
+    except OSError as exc:
+        return BackupInfo(path, datetime.fromtimestamp(0, UTC), 0, None, None, None, None, str(exc))
     modified = datetime.fromtimestamp(stat.st_mtime, UTC)
     try:
-        with zipfile.ZipFile(path) as zf:
-            manifest = ProjectManifest.model_validate(json.loads(zf.read(MANIFEST_NAME)))
+        manifest = read_backup_manifest(path)
     except (zipfile.BadZipFile, KeyError, ValueError, ValidationError, OSError) as exc:
         return BackupInfo(
             path, modified, stat.st_size, None, None, None, None, f"unreadable: {exc}"
@@ -108,8 +127,8 @@ def restore_backup(
     """
     # imported here: the importer itself takes a safety backup through this module
     from bomgen.project_store.importer import import_project
-    from bomgen.project_store.preview import preview_project_import
 
+    backup = Path(os.path.abspath(backup))
     project_dir = backup.parent.parent
     if backup.parent.name != BACKUPS_DIR:
         raise LibraryPackageError(
@@ -117,10 +136,13 @@ def restore_backup(
             "import it with 'bomgen project import' instead",
             RefusalKind.INVALID_PROJECT,
         )
-    preview = preview_project_import(backup, workspace=project_dir.parent, store=store)
-    if preview.project_id is not None and preview.project_id != project_dir.name:
+    try:
+        recorded = read_backup_manifest(backup).project_id
+    except (zipfile.BadZipFile, KeyError, ValueError, ValidationError, OSError):
+        recorded = None  # the import below reports what is wrong with the file
+    if recorded is not None and recorded != project_dir.name:
         raise LibraryPackageError(
-            f"{backup.name} belongs to project {preview.project_id!r}, "
+            f"{backup.name} belongs to project {recorded!r}, "
             f"not to the folder {project_dir.name!r}",
             RefusalKind.INVALID_PROJECT,
         )

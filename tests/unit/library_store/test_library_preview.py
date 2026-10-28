@@ -1,4 +1,4 @@
-"""The library import dry-run: every check listed, nothing written (plan M8c)."""
+"""The library import dry-run: every check listed, nothing written (plan M8b)."""
 
 import zipfile
 from collections.abc import Callable
@@ -129,6 +129,8 @@ def test_a_schema_invalid_library_fails_validation(
     assert (check.status, check.kind) == (CheckStatus.FAILED, RefusalKind.VALIDATION_FAILED)
     assert "devices[0].bogus: unknown key" in check.detail
     assert _by_id(preview)["library"].status is CheckStatus.OK
+    assert _by_id(preview)["version"].status is CheckStatus.SKIPPED
+    assert preview.diff is None
     assert not preview.can_import
 
 

@@ -551,14 +551,14 @@ update package (ADR 0008).
   how a package is built or installed.
   - Each dry-run returns a list of `Check(id, label, status, detail, kind)` in
     `bomgen.bundle.checks`; `status` is `ok`, `warning`, `failed` or `skipped`, and
-    `kind` is the `RefusalKind` of a failed check. A failed check skips the checks
-    after it, and the preview never raises for a bad package and writes nothing.
+    `kind` is the `RefusalKind` of a failed check. A failed check skips every check
+    after it (`signature` always reads `skipped`), and the preview never raises for a bad package and writes nothing.
     `can_import` is true when no check failed.
   - `bomgen.library_store.preview_library_import(package, *, force=False, store=None)`
     returns `LibraryImportPreview(checks, manifest, files, previous, diff, can_import)`.
-    Checks in order: `package`, `paths`, `size`, `manifest` (format, schema and
-    app version; `INCOMPATIBLE` on failure), `files`, `checksums`, `library`,
-    `validation` (the build's loader), `version` (`DOWNGRADE` or
+    Checks in order: `package`, `paths`, `size`, `manifest` (`INCOMPATIBLE` for
+    a newer format, schema or app version, else `INVALID_PACKAGE`), `files`,
+    `checksums`, `library`, `validation` (the build's loader), `version` (`DOWNGRADE` or
     `ALREADY_INSTALLED` fail, and become warnings with `force`), `signature`
     (always `skipped`: packages carry checksums only, plan Q18).
   - `bomgen.project_store.preview_project_import(package, *, workspace=None,
