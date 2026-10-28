@@ -305,6 +305,10 @@ selects. Draggable.
 | Moved by you | Small move icon before the height; named in the accessible name. |
 | Dragging | 45% opacity. |
 
+A device with a cable manager (switch, firewall, patch panel) is one block: the
+device row on top and a 17 px "Cable manager 1 U" strip under a dashed rule, inside
+the same border. It selects, drags and moves as one, and its height is the sum.
+
 ### Blank plate, free space, reserve
 A blank plate is a 1 U gap with a thin rule, drawn between neighbouring devices.
 It is not a BOM row. Free space is a dashed box labelled "11 U free"; the

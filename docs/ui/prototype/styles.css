@@ -379,3 +379,6 @@ fieldset.readonly .btn, fieldset.readonly .grip { opacity: .5; cursor: default; 
 .nav a > span:not(.tail) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nav a .tail { flex: none; }
 .field > .segmented { align-self: flex-start; }
+.dev-row { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; }
+.dev.has-cm { flex-direction: column; align-items: stretch; gap: 0; padding: 0 6px; }
+.dev-cm { flex: none; height: 17px; display: flex; align-items: center; justify-content: space-between; gap: 6px; border-top: 1px dashed var(--color-border-control); font-size: 11.5px; color: var(--color-text-muted); margin: 0 -6px; padding: 0 6px; }

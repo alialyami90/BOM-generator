@@ -122,11 +122,17 @@ here.
   and AC branches). Right: a read-only **Result** card from the engine
   (`NetworkPlan`): L1 and L2 switches, L2 ports used of usable, links, and the
   note for the chosen topology.
+- **L1 switch model:** under Field network, a ranked table of the engine's
+  `rank_l1_switches` result (rank, model, ports, switches per side, spare ports).
+  The top row is used and marked "Tool's pick"; "Use this one" on another row
+  pins it ("Pinned by you", with Unpin, and the Result card says "(pinned)").
+  The UI never ranks; it shows the engine's order. No ranking is shown until the
+  IED count is set.
 - **Behaviour:** the Result card shows a busy state and updates after each
   change. Equipment rows are checked against the library; an unknown part id
   shows an inline error with a suggestion. In a star, each L1 has one uplink to
   its L2 plus an A–B interlink. The equipment table sits here because the panels
-  are generated from it, which was not in the first scope.
+  are generated from it (approved by A1).
 - **States:** substation with no network yet (warning banner, IED count marked
   required, empty equipment, empty result); IED count assumed; unknown device.
 
@@ -136,7 +142,10 @@ here.
   (**Pair 1: panels 1 and 2**). Column header: panel name, side badge, a U meter
   and "21 of 32 U used · 11 U free". The rack shows each device as a block whose
   height follows its size in U, a gap for each blank plate (plates are not BOM
-  rows), the free space, and the space kept free for expansion. DIN-rail parts
+  rows), the free space, and the space kept free for expansion. A switch,
+  firewall or patch panel is one block with its 1 U cable manager (Q32 default:
+  cable managers count against the 32 U), so its height reads "1 U + 1 U cable
+  manager" and the meter counts both. DIN-rail parts
   are counted under the column and take no rack space. Common devices (GPS,
   RTAC, I/O) sit in the same panels as the A and B units; there is no common
   column.
@@ -282,16 +291,17 @@ The UI is built on a small Python API (milestone M10). From the design, it needs
 | Open a project: parsed models, or located errors (`file:line`, field path, message) | Project, Substation, Checks |
 | `layout_preview(substation, overrides) -> LayoutResult`: panels with devices, U used, blank plates, DIN-rail counts, and errors for a move that does not fit | Panels board, panel editor |
 | `NetworkPlan` for a substation (read-only): L1 and L2 switches per side, ports used and usable, links | Network |
+| `rank_l1_switches`: the library's L1 models best first (model, ports, switches per side, spare ports), the tool's pick, and a way to pin another model in `substation.yaml` | Network |
 | Stable equipment ids, so overrides name a device or a pair and never a tag | Panels board |
-| Project export (`.bomproj`), and an import dry-run: contents, integrity and path checks, name clash with an existing project | Project, Home |
-| Backups: list the `Backups` folder, write a backup, restore through the same dry-run | Backup and share |
+| Project export (`.bomproj`), and `project_store.preview_project_import(package, workspace=None) -> ProjectImportPreview(checks, manifest, files, project_id, target_dir, exists, library_note, can_import)`: each `Check(id, label, status ok/warning/failed/skipped, detail, kind)`; a failed check skips the rest; a name clash is a warning | Project, Home |
+| Backups: `list_backups(project_file) -> [BackupInfo(path, saved, size, project_id, library_name, library_version, file_count, problem)]` newest first, write a backup, `restore_backup(backup)` after the same dry-run | Backup and share |
 | Whether the app was started from a `.bomproj` file | Home |
 | The JSON Schemas for project and panels, plus a label and help override file | Forms |
 | Validate and run engine checks: problem list and the four check results | Checks, status bar |
 | Generated values per panel: tags, HWIO, engine port-plan results | Panel editor |
 | Create a substation from another (copy rules above) and write `substation.yaml` | New substation |
 | The installed library: devices with datasheet, alternatives, sources and data-quality level | Library, device picker |
-| Library packages: verify and preview (the dry-run result), import, list versions, roll back | Import and versions |
+| Library packages: `library_store.preview_library_import(package, force=False) -> LibraryImportPreview(checks, manifest, files, previous, diff, can_import)` (check ids: package, paths, size, manifest, files, checksums, library, validation, version, signature; signature is always skipped, there is no signing), import, list versions, roll back | Import and versions |
 | Sheet models or computed rows for each workbook sheet | Preview |
 | Build: stage events (load, engine, sheets, write) and the result path, or a typed error such as "file is open" | Build |
 
@@ -306,8 +316,8 @@ open PRs at the time.
 
 | Area | Mismatch | Design assumption to revisit |
 | --- | --- | --- |
-| Library packages (A5) | `preview_import` raises `LibraryPackageError(str)` for downgrade, same version, schema, minimum app version and checksum. There is no signature concept. | The Import screen assumes structured refusals and a per-check verification list. Needs typed refusals or a result object that lists each check. |
-| Library packages (A5) | "Projects built with it" has no data source. `InstalledLibrary.problem` has no UI state. | The Versions table shows a project count; a library with a problem needs a state and wording. |
+| Library packages (A5) | Resolved on the engine side: previews return a list of checks with a status each (see the engine list above). | The Import screen's verification checklist maps one row to each check; `skipped` renders as a muted row, and the signature row always reads "Not signed (not used)". |
+| Library packages (A5) | "Projects built with it" has no data source until M1b records the library per project. `InstalledLibrary.problem` had no UI state. | The Versions table shows a project count. A library with a problem shows a red "Problem" badge in the state column, the problem text under it, and "Make active" disabled. |
 | Device records (A3) | Data-quality level is `confirmed`, not `verified`. A tier's `verified` is a boolean. Alternatives are `make` plus `tiers{low,mid,high}` with `ordering_code`, `url`, `notes`. Datasheet `ratings`, `ordering_code_decoded` and `product_url` exist. `make` may be absent. | The prototype uses `confirmed`/`partial`/`unverified` per tier row and shows no URL, notes or ratings. Decide whether to show them. |
 | Device records and library | Nobody owns the loader that joins device-database records to the library `part_id`s inside a `.bomlib`. | M10 dependency. The Library and the picker need it. |
 | Project model (A2) | `Project.library` is a path with no recorded name or version yet. | The "Built with" line and the Older-than-active badge need a recorded name and version. |
