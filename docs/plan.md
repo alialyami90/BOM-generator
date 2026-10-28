@@ -276,6 +276,7 @@ devices:
     min_branch_mcb_a: 2
     alarm_on_branch_mcb: false
     hwio_points: 1
+    di_inputs: 0                       # hardwired DIs one unit provides (check report)
     height_u: 1                        # rack units (ADR 0013); 0 = DIN rail; null = not given
     ports:                             # usable_for: ied | uplink | any (default any)
       - { count: 24, speed: 100M, media: MM, kind: fixed, usable_for: ied }

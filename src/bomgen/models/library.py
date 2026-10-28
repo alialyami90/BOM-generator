@@ -181,6 +181,7 @@ class DeviceType(InputModel):
     min_branch_mcb_a: PositiveInt | None = None
     alarm_on_branch_mcb: bool = False
     hwio_points: NonNegativeInt = 0
+    di_inputs: NonNegativeInt = 0  # hardwired digital inputs one unit provides
     ports: list[PortGroup] = Field(default_factory=list)
     cores: PositiveInt | None = None
     height_u: NonNegativeInt | None = None  # rack units; 0 = DIN rail, None = not given yet

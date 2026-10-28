@@ -268,6 +268,7 @@ devices:
     model: SEL-2244-2
     ordering_code: "22442424X0"
     description_template: "Digital Input Module-24DI (125V DC)"
+    di_inputs: 24  # 'Panel 3'!C10 "24DI"
     terminals:  # PSA3-XDIPD ... XDIPG, 58 each ('Panel 3' rows 55-58)
       - strip: "XDIP{slot}"
         block: UT-2.5-MT
