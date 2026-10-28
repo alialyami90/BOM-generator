@@ -125,3 +125,21 @@ def test_import_of_a_tampered_package_exits_1(runner: CliRunner, tmp_path: Path)
     assert result.exit_code == 1
     assert "error: checksum mismatch: project.yaml" in result.output
     assert not (tmp_path / "workspace").exists()
+
+
+def test_import_with_rename_to_keeps_both_projects(runner: CliRunner, tmp_path: Path) -> None:
+    package = tmp_path / "jfgp2.bomproj"
+    runner.invoke(
+        app, ["project", "export", str(make_project(tmp_path / "s" / "jfgp2")), "-o", str(package)]
+    )
+    runner.invoke(app, ["project", "import", str(package)])
+
+    clash = runner.invoke(app, ["project", "import", str(package)])
+    kept = runner.invoke(app, ["project", "import", str(package), "--rename-to", "jfgp2-2"])
+
+    assert clash.exit_code == 1
+    assert "--rename-to" in clash.output
+    assert kept.exit_code == 0, kept.output
+    assert "Imported project jfgp2-2" in kept.output
+    assert (tmp_path / "workspace" / "jfgp2-2" / "project.yaml").is_file()
+    assert (tmp_path / "workspace" / "jfgp2" / "project.yaml").is_file()

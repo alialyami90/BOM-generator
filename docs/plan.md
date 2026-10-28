@@ -600,11 +600,14 @@ update package (ADR 0008).
     (always `skipped`: packages carry checksums only, plan Q18).
   - `bomgen.project_store.preview_project_import(package, *, workspace=None,
     store=None)` returns `ProjectImportPreview(checks, manifest, files, project_id,
-    target_dir, exists, library_note, library_hint, can_import)`. Checks: the six above, then
+    target_dir, exists, library_note, library_hint, suggested_id, can_import)`. Checks: the six above, then
     `identity` (manifest and `project.yaml` agree), `contents` (no build output),
     `name` (a warning when the project exists: import replaces it after a backup)
     and `library` (a warning carrying the `library_note`; the command is in
     `library_hint`).
+  - Keep both: `import_project(..., rename_to=<id>)` imports under a new id
+    (see the ADR 0012 amendment); the preview's `suggested_id` is a free id when
+    the project exists.
   - Messages describe the state and never give a command. A command-line
     remedy is in `LibraryPackageError.hint` (and `library_hint`), which the CLI
     prints as `hint: ...` and the app can ignore or word its own way.

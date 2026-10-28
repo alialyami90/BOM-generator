@@ -48,3 +48,17 @@ need to share a project with each other and keep backups. Today's inputs
   hand-written panels and every golden value stay valid.
 - Two engineers editing the same project exchange whole files; there is no
   merge. Import overwrites after a warning, and the backup folder is the undo.
+
+## Amendment: import under a new id ("Keep both")
+
+When an imported project's id is already in the workspace, the app offers to
+keep both. `import_project(package, *, rename_to=<new id>)` unpacks the project
+under the new folder and rewrites `project.id` in `project.yaml`, changing no
+other byte (comments, quoting and line endings stay). The project id appears
+nowhere else in a project. The renamed import never replaces anything: a taken
+id is refused (`PROJECT_EXISTS`), an unsafe id or a `project.yaml` the rewrite
+cannot handle (flow style) is refused (`INVALID_PROJECT`) before anything is
+written, and `force` cannot be combined with it. The returned manifest carries
+the new id and the new `project.yaml` checksum. `preview_project_import` sets
+`suggested_id` (`<id>-2`, `<id>-3`, ... first free, at most 64 characters) when
+the project exists. The CLI is `bomgen project import --rename-to ID`.

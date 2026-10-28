@@ -11,7 +11,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from bomgen.bundle.container import MANIFEST_NAME, read_bundle
+from bomgen.bundle.container import MANIFEST_NAME, read_bundle, sha256
 from bomgen.bundle.errors import LibraryPackageError, RefusalKind
 from bomgen.library_store.store import (
     LibraryRef,
@@ -27,7 +27,13 @@ from bomgen.project_store.export import (
     parse_project_identity,
     read_project_identity,
 )
-from bomgen.project_store.manifest import PROJECT_FILE, PROJECT_FORMAT_VERSION, ProjectManifest
+from bomgen.project_store.manifest import (
+    PROJECT_FILE,
+    PROJECT_FORMAT_VERSION,
+    ProjectManifest,
+    is_valid_project_id,
+)
+from bomgen.project_store.rename import rewrite_project_id
 from bomgen.project_store.workspace import default_workspace
 
 
@@ -99,25 +105,44 @@ def import_project(
     force: bool = False,
     store: LibraryStore | None = None,
     now: datetime | None = None,
+    rename_to: str | None = None,
 ) -> ProjectImportResult:
     """Verify a `.bomproj` and unpack it into `<workspace>/<project-id>/`.
 
     An existing project with the same id is refused unless `force`; a forced
     import saves it to its `Backups/` first, keeps its `Backups/` and `out/`
     folders, and restores it if the import fails.
+
+    With `rename_to` the project is unpacked under that new id instead, with
+    `project.id` rewritten in `project.yaml`; an id that is taken is always
+    refused, so nothing is replaced and `force` does not apply.
     """
+    if rename_to is not None and force:
+        raise LibraryPackageError(
+            "a new project id and force cannot be combined: a renamed import never replaces",
+            RefusalKind.INVALID_PROJECT,
+        )
     manifest, files = read_bundle(package, parse_project_manifest, ".bomproj project file")
     check_identity(manifest, files)
     refuse_build_output(files)
     note = library_note_or_none(manifest, store or LibraryStore(default_library_home()))
+    if rename_to is not None:
+        manifest, files = _renamed(manifest, files, rename_to)
     workspace = workspace or default_workspace()
     target = workspace / manifest.project_id
     exists = target.exists()
+    if exists and rename_to is not None:
+        raise LibraryPackageError(
+            f"project {rename_to!r} already exists in {workspace}", RefusalKind.PROJECT_EXISTS
+        )
     if exists and not force:
         raise LibraryPackageError(
             f"project {manifest.project_id!r} already exists in {workspace}",
             RefusalKind.PROJECT_EXISTS,
-            hint="import with --force to replace it (it is backed up first)",
+            hint=(
+                "import with --force to replace it (it is backed up first), "
+                "or with --rename-to <new id> to keep both"
+            ),
         )
 
     workspace.mkdir(parents=True, exist_ok=True)
@@ -155,6 +180,27 @@ def import_project(
         library_note=note.text if note else None,
         library_hint=note.hint if note else None,
     )
+
+
+def _renamed(
+    manifest: ProjectManifest, files: dict[str, bytes], new_id: str
+) -> tuple[ProjectManifest, dict[str, bytes]]:
+    """The package as it would read under `new_id`; the original bytes are not changed."""
+    if not is_valid_project_id(new_id):
+        raise LibraryPackageError(
+            f"{new_id!r} is not a usable project id: 1-64 letters, digits, '.', '_' or '-', "
+            "starting with a letter or digit",
+            RefusalKind.INVALID_PROJECT,
+        )
+    text = files[PROJECT_FILE].decode("utf-8")
+    rewritten = rewrite_project_id(text, new_id).encode("utf-8")
+    renamed = manifest.model_copy(
+        update={
+            "project_id": new_id,
+            "files": {**manifest.files, PROJECT_FILE: sha256(rewritten)},
+        }
+    )
+    return renamed, {**files, PROJECT_FILE: rewritten}
 
 
 def check_identity(manifest: ProjectManifest, files: dict[str, bytes]) -> None:

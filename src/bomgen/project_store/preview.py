@@ -18,6 +18,7 @@ from bomgen.project_store.importer import (
     refuse_build_output,
 )
 from bomgen.project_store.manifest import ProjectManifest
+from bomgen.project_store.rename import suggest_project_id
 from bomgen.project_store.workspace import default_workspace
 
 
@@ -43,6 +44,7 @@ class ProjectImportPreview:
     exists: bool
     library_note: str | None
     library_hint: str | None = None
+    suggested_id: str | None = None  # a free id for "keep both", set when the project exists
 
     @property
     def can_import(self) -> bool:
@@ -92,6 +94,7 @@ def preview_project_import(
         exists,
         note.text if note else None,
         note.hint if note else None,
+        suggest_project_id(manifest.project_id, workspace) if manifest and exists else None,
     )
 
 
