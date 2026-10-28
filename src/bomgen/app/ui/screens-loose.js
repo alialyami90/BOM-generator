@@ -40,6 +40,17 @@
       + (draft.host !== LM.data.host_panel ? 1 : 0);
   };
   const dirty = () => changes() > 0;
+  /* A row's fields that cannot be saved as typed; the engine checks the rest on Save. */
+  const QTY = 'Enter a number, or 1 Lot.';  // short enough for the cell; the table foot gives the rule
+  const fieldProblems = (it) => {
+    const p = {}, q = it.qty;
+    if (!((Number.isInteger(q) && q > 0) || q === '1 Lot')) p.qty = QTY;
+    if (!it.part_id && !(it.description || '').trim()) p.description = 'Describe the item.';
+    return p;
+  };
+  const invalid = () => (draft ? draft.rows.reduce((n, r) => n + Object.keys(fieldProblems(r.item)).length, 0) : 0);
+  const described = (html, id, msg) => (msg ? html.replace('<input', `<input aria-describedby="${id}-err"`) : html);
+  const cellErr = (id, msg) => (msg ? `<span class="cell-err" id="${id}-err">${icon('error')}${esc(msg)}</span>` : '');
   App.looseCount = () => (draft && LM.key === `${S.project.file}#${S.sub}` ? draft.rows.length : null);
 
   /* ---------- page ---------- */
@@ -63,14 +74,14 @@
         <div class="row" style="justify-content:center"><button class="btn btn--primary" data-action="lm-add-lib">${icon('plus')}Add from library…</button><button class="btn btn--secondary" data-action="lm-add-free">Add free text…</button></div></div>${saveBar()}</div>`;
     }
     const rows = draft.rows.map((r, i) => {
-      const it = r.item, free = !it.part_id;
+      const it = r.item, free = !it.part_id, bad = fieldProblems(it);
       const first = free
-        ? `${ctl(input('lm-desc-' + i, it.description || '', { placeholder: 'Describe the item' }))}<span class="cell-sub">${badge('info', 'Free text')}</span>`
+        ? `${described(ctl(input('lm-desc-' + i, it.description || '', { placeholder: 'Describe the item', invalid: !!bad.description })), 'lm-desc-' + i, bad.description)}${cellErr('lm-desc-' + i, bad.description)}<span class="cell-sub">${badge('info', 'Free text')}</span>`
         : `<span class="mono">${esc(it.part_id)}</span><span class="cell-sub">${esc(makeModel(it) || 'Library part')}${it.children && it.children.length ? ` · comes with <span class="mono">${esc(it.children.join(', '))}</span>` : ''}</span>`;
       const fed = free ? '<span class="muted small" title="A free-text item has no library data, so it cannot be fed">—</span>'
         : ctl(select('lm-fed-' + i, fedOptions().concat(it.fed_from && !d.fed_options.some((p) => p.id === it.fed_from) ? [[it.fed_from, it.fed_from]] : []), it.fed_from || ''));
       return `<tr${r.orig == null || !same(it, r.base) ? ' class="is-changed"' : ''}><td class="num muted" style="width:44px">${i + 1}</td><td>${first}</td><td>${ctl(input('lm-tag-' + i, it.tag || '', { placeholder: 'Designation on the sheet' }))}</td>
-        <td>${ctl(input('lm-qty-' + i, it.qty == null ? '' : String(it.qty), { num: true, mono: true }))}</td><td>${fed}</td>
+        <td>${described(ctl(input('lm-qty-' + i, it.qty == null ? '' : String(it.qty), { num: true, mono: true, invalid: !!bad.qty })), 'lm-qty-' + i, bad.qty)}${cellErr('lm-qty-' + i, bad.qty)}</td><td>${fed}</td>
         <td><button class="btn btn--ghost btn--icon btn--sm" data-action="lm-remove" data-i="${i}" aria-label="Remove ${esc(free ? (it.description || 'item ' + (i + 1)) : it.part_id)}" ${saving ? 'disabled' : ''}>${icon('trash')}</button></td></tr>`;
     }).join('');
     const host = d.host_options.map((p) => [p.id, `${p.name} (${p.sheet})`]);
@@ -90,12 +101,12 @@
 
   function saveBar() {
     if (!dirty() && !saving) return '';
-    const n = changes();
-    return `<div class="savebar" role="region" aria-label="Unsaved changes">
-      <span class="savebar-msg">${saving ? '<span class="spinner"></span><b>Saving…</b>' : `<span class="dot dot--warn" aria-hidden="true"></span><b>${plural(n, 'unsaved change')}</b> · saved to substation.yaml`}</span>
+    const n = changes(), bad = invalid();
+    return `<div class="savebar${bad ? ' savebar--bad' : ''}" role="region" aria-label="Unsaved changes">
+      <span class="savebar-msg">${saving ? '<span class="spinner"></span><b>Saving…</b>' : bad ? `${icon('error')}<b>${bad} ${bad === 1 ? 'field needs' : 'fields need'} fixing</b> before you can save.` : `<span class="dot dot--warn" aria-hidden="true"></span><b>${plural(n, 'unsaved change')}</b> · saved to substation.yaml`}</span>
       <span class="sp"></span>
       <button class="btn btn--secondary" data-action="lm-discard" ${saving ? 'disabled' : ''}>Discard</button>
-      <button class="btn btn--primary" data-action="lm-save" ${saving ? 'disabled' : ''}>${icon('save')}Save changes <kbd class="kbd">Ctrl+S</kbd></button></div>`;
+      <button class="btn btn--primary" data-action="lm-save" ${saving || bad ? 'disabled' : ''}>${icon('save')}Save changes <kbd class="kbd">Ctrl+S</kbd></button></div>`;
   }
 
   /* Row edits change the draft; the file is written on Save. */
@@ -143,7 +154,7 @@
     return steps;
   }
   ACTIONS['lm-save'] = () => {
-    if (saving || !dirty()) return;
+    if (saving || !dirty() || invalid()) return;
     saving = true; refusal = ''; App.render();
     plan().reduce((chain, s) => chain.then(() => s()), Promise.resolve())
       .then(() => { reset(LM.data); toast('Saved substation.yaml'); })

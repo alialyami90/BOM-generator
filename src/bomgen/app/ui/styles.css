@@ -426,4 +426,8 @@ fieldset.readonly .btn, fieldset.readonly .grip { opacity: .5; cursor: default; 
 .savebar { position: sticky; bottom: 0; z-index: 20; display: flex; align-items: center; gap: var(--space-3); margin: var(--space-5) calc(-1 * var(--space-6)) 0; padding: var(--space-3) var(--space-6); background: var(--color-surface); border-top: 1px solid var(--color-border-control); box-shadow: 0 -4px 12px rgb(10 25 45 / 0.08); }
 .savebar-msg { display: inline-flex; align-items: center; gap: var(--space-2); font-size: 13.5px; }
 .savebar .sp { flex: 1; }
+.savebar--bad { border-top-color: var(--color-danger); }
+.savebar--bad .savebar-msg svg { color: var(--color-danger-text); }
+.cell-err { display: flex; align-items: flex-start; gap: 4px; margin-top: 2px; font-size: 12px; color: var(--color-danger-text); }
+.cell-err svg { flex: none; width: 13px; height: 13px; margin-top: 1px; }
 .savebar .btn .kbd { margin-left: var(--space-2); background: transparent; color: inherit; border-color: currentColor; opacity: .8; }
