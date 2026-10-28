@@ -217,6 +217,12 @@
           "title": "Description Template",
           "type": "string"
         },
+        "di_inputs": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Di Inputs",
+          "type": "integer"
+        },
         "excluded_from_power": {
           "default": false,
           "description": "Defaults to true when the part has no supply_type, else false.",

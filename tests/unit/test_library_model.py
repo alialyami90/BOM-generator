@@ -105,6 +105,13 @@ def test_l1_switch_record_from_spec_validates() -> None:
     ]
 
 
+def test_di_inputs_default_to_zero_and_are_non_negative() -> None:
+    assert device().di_inputs == 0
+    assert device(di_inputs=24).di_inputs == 24
+    with pytest.raises(ValidationError, match="di_inputs"):
+        device(di_inputs=-1)
+
+
 def test_code_falls_back_to_model_when_no_ordering_code() -> None:
     assert device(ordering_code=None).code == "RST-2228"
 

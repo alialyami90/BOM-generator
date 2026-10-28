@@ -258,6 +258,12 @@ def test_equipment_follows_psa1_group_b_row_order(loaded: LoadedSubstation) -> N
     ]
 
 
+def test_di_module_inputs(loaded: LoadedSubstation) -> None:
+    # 'Panel 3'!C10: "Digital Input Module-24DI"; the check report sums units x di_inputs.
+    assert part(loaded, "SEL-2244-2").di_inputs == 24
+    assert [d.part_id for d in loaded.library.devices if d.di_inputs] == ["SEL-2244-2"]
+
+
 def test_rack_heights_answered_by_ali(loaded: LoadedSubstation) -> None:
     # Q33: the FOPP is 1U; the workstation's monitor and keyboard sit on the desk.
     assert part(loaded, "FOPP-96SM").height_u == 1
