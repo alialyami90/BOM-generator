@@ -21,7 +21,7 @@ from pydantic import (
 )
 
 from bomgen.models._base import DocumentKey, ExcelSheetName, InputModel, PartId
-from bomgen.models.library import Media, PortSpeed
+from bomgen.models.library import CatalogueChoice, Media, PortSpeed
 from bomgen.models.panel import Enclosure, PanelId, PanelKind, PortPlan, TagPrefix
 from bomgen.models.project import ConstantOverrides, LooseMaterial, OutputSettings, Spares
 
@@ -215,6 +215,7 @@ class Substation(InputModel):
     output: OutputSettings = Field(default_factory=OutputSettings)
     constants: ConstantOverrides | None = None
     spares: Spares | None = None
+    catalogue_choice: CatalogueChoice | None = None  # brand sets; unset keys inherit
     loose_material: LooseMaterial | None = None
     equipment: list[Equipment] = Field(default_factory=list)
     network: Network = Field(default_factory=Network)

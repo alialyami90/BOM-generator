@@ -403,3 +403,20 @@ fieldset.readonly .btn, fieldset.readonly .grip { opacity: .5; cursor: default; 
 .setup li.done svg { color: var(--color-success); }
 .setup li.now svg { color: var(--color-action-text); }
 .setup li.now b { color: var(--color-action-text); }
+
+.dev.is-pinned { border-color: var(--color-action-text); }
+.dev-flag { color: var(--color-action-text); }
+.drop-line { position: absolute; left: 4px; right: 4px; height: 3px; margin-top: -2px; background: var(--color-action); border-radius: 2px; pointer-events: none; z-index: 5; }
+.drop-line::before { content: ""; position: absolute; left: -4px; top: -3px; width: 9px; height: 9px; border-radius: 50%; background: var(--color-action); }
+.rack { position: relative; }
+.dev[draggable="true"] { cursor: grab; }
+.dev.is-dragging { cursor: grabbing; }
+.bcol.drop-bad { cursor: not-allowed; }
+
+/* v0.2 Library editors */
+.alt-table tr.is-self td { background: var(--color-action-faint); }
+.delta { display: inline-block; margin-left: 4px; padding: 0 5px; border-radius: var(--radius-sm); font: 600 11.5px/1.5 var(--font-mono); white-space: nowrap; background: var(--color-surface-sunken); color: var(--color-text-muted); }
+.cell-sub .delta { margin-left: 0; }
+.delta.up { background: var(--color-warning-soft); color: var(--color-text); }
+.delta.down { background: var(--color-success-soft); color: var(--color-text); }
+.listbox .group-label { padding: 6px 8px 2px; font-size: 12px; font-weight: 600; color: var(--color-text-muted); }

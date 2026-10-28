@@ -71,6 +71,12 @@
     ...DB.equipment.map((e) => `  - { id: ${e.id}, part_id: ${S.checks === 'errors' && e.id === 'ext' ? 'SEL-2730M-EXT2' : e.part}, redundant: ${e.redundant} }`).slice(0, 4), '  # …', '', 'manual_panels: [panels/ws.yaml]'], S.checks === 'errors' ? { 18: 'SEL-2730M-EXT2 is not in library psa-devices 1.4.0.' } : {});
 
   /* ---------- Panel editor ---------- */
+  /* Generated panels: enclosure and options are shared by every generated panel; options can be set for one panel. */
+  const scopeNote = (what) => (what === 'enclosure'
+    ? `<div style="margin-bottom:var(--space-4)">${banner('info', 'The enclosure is shared by all 4 generated panels. A change here applies to each of them.')}</div>`
+    : `<div class="field" style="margin-bottom:var(--space-4)"><span class="label" id="sc-l">Apply to</span><div class="segmented" role="radiogroup" aria-labelledby="sc-l"><label><input type="radio" name="scope" value="all" data-action="opt-scope" ${S.optScope !== 'own' ? 'checked' : ''}><span>All generated panels</span></label><label><input type="radio" name="scope" value="own" data-action="opt-scope" ${S.optScope === 'own' ? 'checked' : ''}><span>This panel only</span></label></div>
+      <span class="help">${S.optScope === 'own' ? 'Values you change are kept for this panel and marked <b>Own value</b>. Use the shared value to go back.' : 'Values you change apply to every generated panel that has no value of its own.'}</span></div>`);
+  ACTIONS['opt-scope'] = (el) => { S.optScope = el.value; App.render(); };
   const kindLabel = { network: 'Network', control: 'Control', console: 'Console' };
   ACTIONS['open-panel'] = (el) => { S.tab.panel = 'devices'; go('#/panels/' + el.dataset.id + '/devices'); };
 
@@ -82,13 +88,13 @@
     const gen = p.generated;
     const errs = S.checks === 'errors' && p.id === 'ws';
     const ro = (fn) => (gen ? `<fieldset class="readonly" disabled><legend class="sr-only">Written by the layout, read-only</legend>${fn()}</fieldset>` : fn());
-    const body = { enclosure: () => ro(() => panelEnclosure(p)), devices: () => (gen ? generatedDevices(p) : panelDevices(p)), ports: () => ro(() => panelPorts(p)), options: () => ro(() => panelOptions(p)), document: () => panelDocument(p), yaml: () => panelYaml(p) }[t]();
+    const body = { enclosure: () => (gen ? scopeNote('enclosure') : '') + panelEnclosure(p), devices: () => (gen ? generatedDevices(p) : panelDevices(p)), ports: () => (gen ? '<p class="muted small" style="max-width:68ch;margin-bottom:var(--space-3)">A port plan belongs to the equipment, so a change here also applies to the other panels with the same device, on both sides.</p>' : '') + panelPorts(p), options: () => (gen ? scopeNote('options') : '') + panelOptions(p), document: () => panelDocument(p), yaml: () => panelYaml(p) }[t]();
     const badgeTab = (tab) => (errs && tab === 'options' ? badge('bad', '1', 'error') : '');
     const meta = gen ? `<span class="mono" style="font-size:13px">${esc(p.cabinet)}</span> · ${kindLabel[p.kind]} · Side ${p.side} · pair ${p.pair} (panels ${2 * p.pair - 1} and ${2 * p.pair})` : `<span class="mono" style="font-size:13px">${esc(p.cabinet)}</span> · ${kindLabel[p.kind]} · hand-written`;
     return `<div class="page">${pageHead(esc(p.name), meta,
-      `<button class="btn btn--secondary" data-action="goto" data-to="#/preview/${p.id}">${icon('preview')}Preview BOM</button>`,
+      `<button class="btn btn--secondary" data-action="goto" data-to="#/preview/${p.id}">${icon('preview')}Preview BOM</button>${gen ? '' : `<button class="btn btn--danger" data-action="delete-panel" data-id="${p.id}">${icon('trash')}Delete panel…</button>`}`,
       `<a href="#/panels">Panels</a>${icon('chevr')}<span>${esc(p.name)}</span>`)}
-      ${gen ? `<div style="margin-bottom:var(--space-4)">${banner('info', `<b>Written by the layout.</b> Enclosure, Devices, Port plans and Options follow from the Network page and the Panels board, so they are read-only here. The Document tab is this panel's own.`, `<a class="btn btn--secondary btn--sm" href="#/panels">Open Panels board</a><a class="btn btn--secondary btn--sm" href="#/network">Open Network</a>`)}</div>` : `<div style="margin-bottom:var(--space-4)">${banner('info', `<b>Hand-written panel.</b> The layout does not touch it. Its devices are edited here.`)}</div>`}
+      ${gen ? `<div style="margin-bottom:var(--space-4)">${banner('info', `<b>Written by the layout.</b> The devices follow from the Network page and the Panels board, so the Devices tab is read-only here. Enclosure, port plans, options and the document are yours to set.`, `<a class="btn btn--secondary btn--sm" href="#/panels">Open Panels board</a><a class="btn btn--secondary btn--sm" href="#/network">Open Network</a>`)}</div>` : `<div style="margin-bottom:var(--space-4)">${banner('info', `<b>Hand-written panel.</b> The layout does not touch it. Its devices are edited here.`)}</div>`}
       ${tabs('panel', panelTabs.map(([i, l]) => [i, l, badgeTab(i)]), t, 'Panel sections')}
       <div role="tabpanel" aria-labelledby="tab-panel-${t}">${body}</div></div>`;
   }
@@ -137,7 +143,10 @@
     const draw = () => {
       const q = $('#pk-q').value.toLowerCase();
       const list = DB.devices.filter((d) => (d.id + d.make + d.model).toLowerCase().includes(q)).slice(0, 8);
-      $('#pk-list').innerHTML = list.map((d, i) => `<div role="option" id="pk-${i}" aria-selected="${i === 0}" data-action="pick-add" data-id="${d.id}"><span><span class="mono">${esc(d.id)}</span></span><span class="sub">${esc(d.make)} ${esc(d.model)} · ${esc(d.supply)}${d.w ? ' · ' + d.w + ' W' : ''}</span><span class="right">${App.verified(d.verified)}</span></div>`).join('') || '<div class="muted" style="padding:12px">No device matches. Check the spelling, or install a library that has it.</div>';
+      const rowsNow = App.route().a === 'network' ? DB.equipment : DB.wsDevices; const cur = S.pickReplace != null && rowsNow ? rowsNow[+S.pickReplace] : null;
+      const curDev = cur && DB.devices.find((d) => d.id === (cur.part || cur.id)); const alts = !q && curDev && curDev.alt ? DB.altList(curDev).filter((r) => !r.self).slice(0, 3) : [];
+      const altHtml = alts.length ? `<div class="group-label" role="presentation">Alternatives to <span class="mono">${esc(curDev.id)}</span></div>${alts.map((r, k) => `<div role="option" id="pk-a${k}" data-action="pick-add" data-id="${esc(r.id)}"><span><span class="mono">${esc(r.id)}</span></span><span class="sub">${esc(r.tier)} · ${esc(r.make)} · ${r.w} W</span><span class="right">${App.verified(r.verified)}</span></div>`).join('')}<div class="group-label" role="presentation">All devices</div>` : '';
+      $('#pk-list').innerHTML = altHtml + list.map((d, i) => `<div role="option" id="pk-${i}" aria-selected="${i === 0}" data-action="pick-add" data-id="${d.id}"><span><span class="mono">${esc(d.id)}</span></span><span class="sub">${esc(d.make)} ${esc(d.model)} · ${esc(d.supply)}${d.w ? ' · ' + d.w + ' W' : ''}</span><span class="right">${App.verified(d.verified)}</span></div>`).join('') || '<div class="muted" style="padding:12px">No device matches. Check the spelling, or install a library that has it.</div>';
     };
     let active = 0;
     const mark = () => $$('#pk-list [role=option]').forEach((o, i) => { o.setAttribute('aria-selected', String(i === active)); if (i === active) { $('#pk-q').setAttribute('aria-activedescendant', o.id); o.scrollIntoView({ block: 'nearest' }); } });
@@ -164,7 +173,7 @@
 
   const panelOptions = (p) => {
     const bad = S.checks === 'errors' && p.id === 'ws';
-    return `${p.generated ? `<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">These values follow from Network → Spares and the sizing rules. Change them there.</p>` : ''}<div class="form form--2">
+    return `<div class="form form--2">
     ${field('DC spare branches per feed', input('o1', bad ? 'two' : (p.id === 'ws' ? '1' : DB.sub.network.spares.dcBranches), { num: true, mono: true, invalid: bad }), 'Spare 2 A MCBs on each of feed 1 and feed 2.', bad ? 'Must be a whole number of 0 or more. Enter a number, for example 1.' : '')}
     ${field('AC spare branches', input('o2', '1', { num: true, mono: true }))}
     ${field('Ventilation', select('o3', [['auto', 'Automatic (from heat calculation)'], ['forced', 'Fans'], ['natural', 'Filters']], 'auto'), 'Automatic follows the heat calculation.')}

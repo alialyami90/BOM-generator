@@ -1,9 +1,85 @@
 {
   "$defs": {
+    "CatalogueChoice": {
+      "additionalProperties": false,
+      "description": "The brand set picked per catalogue; unset means ``default``.",
+      "properties": {
+        "aux_contact": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Aux Contact"
+        },
+        "busbars": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Busbars"
+        },
+        "housekeeping": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Housekeeping"
+        },
+        "mcb": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mcb"
+        },
+        "terminal_blocks": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Terminal Blocks"
+        }
+      },
+      "title": "CatalogueChoice",
+      "type": "object"
+    },
     "Defaults": {
       "additionalProperties": false,
       "description": "Values every substation inherits key by key.",
       "properties": {
+        "catalogue_choice": {
+          "$ref": "#/$defs/CatalogueChoice"
+        },
         "constants": {
           "$ref": "#/$defs/DesignConstants"
         },
@@ -47,6 +123,18 @@
           "exclusiveMinimum": 0,
           "title": "Dc Voltage V",
           "type": "number"
+        },
+        "inrush_min_ms": {
+          "default": 10,
+          "exclusiveMinimum": 0,
+          "title": "Inrush Min Ms",
+          "type": "number"
+        },
+        "min_branch_mcb_a": {
+          "default": 2,
+          "exclusiveMinimum": 0,
+          "title": "Min Branch Mcb A",
+          "type": "integer"
         },
         "min_main_mcb_a": {
           "default": 6,

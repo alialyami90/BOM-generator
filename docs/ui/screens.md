@@ -163,13 +163,14 @@ here.
   are counted under the column and take no rack space. Common devices (GPS,
   RTAC, I/O) sit in the same panels as the A and B units; there is no common
   column.
-- **Select, move, delete:** selecting a device shows its tag and an action bar:
-  "Move pair…", "Move this unit only…", "Delete pair". A device that has no
+- **Select, move, pin, delete:** selecting a device shows its tag and an action bar:
+  "Move pair…", "Move this unit only…", **Pin here** or **Unpin**, "Delete pair". A device that has no
   partner shows "Move…" and "Delete". The partner of the selection is outlined.
-  Dragging does the same as "Move pair…"; Alt+drag moves only the unit. A pair
+  Dragging does the same as "Move pair…" and also sets the position; Alt+drag moves only the unit. A pair
   moves to panels (2n−1, 2n); a single A unit moves only to odd panels and a
-  single B unit only to even ones. Moved devices carry a small marker, and
-  "N manual changes" opens the list of overrides with Revert and Restore.
+  single B unit only to even ones. Pinned devices carry a pin icon, and
+  "N pinned · M deleted" opens the list with Unpin and Restore. Full rules, the drag states and the
+  keyboard are in [`editing.md`](editing.md) ("Panels board").
 - **Not allowed:** while dragging, a column that cannot take the move shows a
   red border; on drop, a banner says why ("Panel 1 needs 34 U, only 32 U may be
   used. Nothing was changed."). A move never silently re-flows other devices.
@@ -191,11 +192,10 @@ here.
 ### Panel editor
 - **Header:** breadcrumb, cabinet name, cabinet number · kind · side, "Preview
   BOM" and Save.
-- **Generated panel:** a banner says the layout writes it. Enclosure, Devices
-  (with an Origin column that marks moved devices), Port plans and Options show
-  the result read-only, and the YAML tab is labelled Generated. Only *Document*
-  (which register entry the sheet prints) is editable. Changes are made on
-  Network or by moving devices on the board; the banner links to both.
+- **Generated panel:** a banner says the layout writes the devices. Devices (with an Origin
+  column that marks pinned devices) is read-only; Enclosure, Port plans, Options and Document are
+  editable, with their scope stated (shared by all generated panels, or this panel only).
+  The YAML tab is labelled Generated and read-only. The banner links to Network and the board.
 - **Hand-written panel** (`manual_panels`, for example the WS console): the full
   editor, as in the first design. Devices: reorder handle, device, quantity,
   purpose, HWIO override, generated tag, remove; "Add device" opens the picker.
@@ -206,19 +206,42 @@ here.
   overrides, each override with a warning line), Document, `panels/<id>.yaml`.
 
 ### Library
-- **Layout:** title with the library name, version and install date, "Import
-  update…" secondary; a toolbar (search, category, data quality, "Has
-  alternatives", count); a table (part id, make and model, category, supply
-  and rated power, data-quality badge) beside a 420 px detail pane.
-- **Detail pane:** tabs *Overview* (library fields), *Datasheet* (supply range,
-  typical and maximum power, ports, dimensions, weight, operating temperature,
-  certifications, datasheet link, sources), *Alternatives* (two brands, each
-  with Low, Mid and High models and a data-quality badge, copy buttons, and a
-  note that swapping is not available yet).
-- **Behaviour:** read-only. Selecting a row fills the pane; the arrow keys move
-  the selection when the table has focus.
-- **States:** no library installed (banner with an "Import…" action); no match
-  (empty row); no datasheet or alternatives recorded (sentence in the pane).
+- **Layout:** title with the library name, version and install date; header actions *Add device…* (primary),
+  *Export…* and *Import…* (a menu: update package or CSV). Two tabs, *Devices* and *Catalogues*. A
+  **pending bar** at the foot while there are unapplied edits (see [`editing.md`](editing.md), "Library
+  editing").
+- **Devices tab:** a toolbar (search, category, data quality, "Has alternatives", count); a table (part id,
+  make and model, supply and rated power, data-quality badge) beside a 400 px detail pane.
+- **Detail pane:** tabs *Overview*, *Datasheet*, *Alternatives* (the compact comparison list with *Use…* and
+  *Compare in full*), and *Edit device* in the pane header.
+- **Catalogues tab:** a segmented switch (MCBs, Aux contacts, Terminal blocks, Busbars, Housekeeping); brand
+  tabs with a *Default* badge, *Make default*, *Add brand…*; an editable table with *Add row* and per-row
+  remove. Housekeeping is a role table with *Change…*.
+- **Behaviour:** selecting a row fills the pane; the arrow keys move the selection when the table has focus.
+  Every edit becomes a pending entry. Nothing is written to the installed version.
+- **States:** no library installed (banner with an "Import…" action); no match (empty row); no datasheet or
+  alternatives recorded (sentence in the pane); pending set empty (no bar).
+
+### Device editor
+- **Route:** `#/library/device/<part id>`, or the same page for a new device. Breadcrumb Library › part id.
+- **Layout:** title (part id), make and model, header actions *Copy as alternative…* and *Delete…*; an
+  "in use" banner; tabs *Identity*, *Electrical*, *Ports and mounting*, *Parts it brings*, *Datasheet*,
+  *Alternatives*. Field list in `editing.md`. It is a form: save bar "Save device", Ctrl+S, leave dialog.
+- **Alternatives tab:** the alternative group key and the full comparison list (tier, part, make, power,
+  inrush, ports, height, data quality, *Use…*) with delta chips; *Add alternative…*; empty state when none.
+- **States:** new device (part id editable, "new device" subtitle), device in use, device not found,
+  duplicate part id on creation (toast and the field marked).
+
+### Review library changes
+- **Route:** `#/library/review`. Counts (added, changed, removed), the diff list grouped by kind, the new
+  version it creates and the one it replaces, a note, and *Apply and activate 1.4.0+local.1*. Empty state
+  when nothing is pending. After applying: toast, the top bar and sidebar show the new version, and
+  Installed versions lists it as a local version.
+
+### Import a spreadsheet (CSV)
+- **Route:** `#/library/csv`; steps choose, review, done as in `editing.md`. The review shows file facts,
+  checks, rows with a problem (table, row, column, message), what changes, and a sticky action bar
+  "Add N valid rows to pending changes" and "Choose a different file".
 
 ### Import update and installed versions
 - **Tabs:** *Import package* and *Installed versions*.

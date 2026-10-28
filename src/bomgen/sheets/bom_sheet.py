@@ -1,8 +1,9 @@
-"""Panel BOM sheet, with the loose-material table under its host panel (plan M5, step 12).
+"""Panel BOM sheets and the Loose Material sheet (plan M5, step 12; M18).
 
 Layout per the spec sections "How each panel BOM groups its materials", "Columns of a
 panel BOM" and "Formatting → Panel BOM sheets"; one sheet per cabinet with column H
-(HWIO) hidden (ADR 0004).
+(HWIO) hidden (ADR 0004). The loose-material table has its own sheet with the same
+layout (ADR 0020).
 """
 
 from dataclasses import dataclass
@@ -32,12 +33,10 @@ SPACER_COL = 9  # I
 
 TITLE_HEIGHT = 90.0
 HEADER_HEIGHT = 26.25
-HOST_HEADER_HEIGHT = 53.1  # header row 2 on the sheet that also holds the loose table
 LINE_HEIGHT = 26.25  # per line of wrapped text
 BODY_MIN_HEIGHT = 30.0
 LONG_CODE_HEIGHT = 52.5
 LONG_CODE_CHARS = 40
-LOOSE_GAP_HEIGHT = 48.75
 ZOOM = 60
 
 _COLUMN_LETTERS = "ABCDEFG"
@@ -49,35 +48,37 @@ class BomSheet:
     rows: dict[LineRef, int]  # the row of every BOM line on this sheet
 
 
-def bom_sheet(
-    panel: PanelBom,
-    loose: LooseTable | None = None,
-    header_footer: HeaderFooter | None = None,
+def bom_sheet(panel: PanelBom, header_footer: HeaderFooter | None = None) -> BomSheet:
+    """Lay out ``panel``'s BOM on its own sheet."""
+    return _table_sheet(panel.sheet_name, panel, panel.panel_id, header_footer)
+
+
+def loose_sheet(
+    name: str, loose: LooseTable, header_footer: HeaderFooter | None = None
 ) -> BomSheet:
-    """Lay out ``panel``'s BOM, and ``loose`` under it when this panel hosts it."""
-    sheet = SheetBuilder(panel.sheet_name)
+    """Lay out the loose-material table on its own sheet ``name`` (ADR 0020)."""
+    return _table_sheet(name, loose, None, header_footer)
+
+
+def _table_sheet(
+    name: str, table: BomTable, panel_id: str | None, header_footer: HeaderFooter | None
+) -> BomSheet:
+    """``table`` with its title in row 1, header in row 2 and lines from row 3; the
+    rows map ``LineRef(panel_id, line)``."""
+    sheet = SheetBuilder(name)
     for col, width in enumerate(WIDTHS, start=1):
         sheet.width(col, width)
     sheet.width(HWIO_COL, HWIO_WIDTH, hidden=True)
     sheet.width(SPACER_COL, SPACER_WIDTH)
 
-    rows: dict[LineRef, int] = {}
-    _title(sheet, 1, panel.title)
-    _header(sheet, 2, HOST_HEADER_HEIGHT if loose is not None else HEADER_HEIGHT)
+    _title(sheet, 1, table.title)
+    _header(sheet, 2, HEADER_HEIGHT)
     sheet.set(2, HWIO_COL, HWIO_HEADER, styles.BOM_HEADER)
-    line_rows = _lines(sheet, panel, first_row=3)
-    rows.update({LineRef(panel_id=panel.panel_id, line=i): r for i, r in line_rows.items()})
+    line_rows = _lines(sheet, table, first_row=3)
+    rows = {LineRef(panel_id=panel_id, line=i): r for i, r in line_rows.items()}
     last = max(line_rows.values(), default=2)
-    hwio = sum(line.hwio for line in panel.lines)
+    hwio = sum(line.hwio for line in table.lines)
     sheet.set(1, HWIO_COL, Formula(text=f"=SUM(H3:H{last})", result=hwio), styles.BOM_HEADER)
-
-    if loose is not None:
-        sheet.height(last + 1, LOOSE_GAP_HEIGHT)
-        _title(sheet, last + 2, loose.title)
-        _header(sheet, last + 3, HEADER_HEIGHT)
-        loose_rows = _lines(sheet, loose, first_row=last + 4)
-        rows.update({LineRef(panel_id=None, line=i): r for i, r in loose_rows.items()})
-        last = max(loose_rows.values(), default=last + 3)
 
     setup = PrintSetup(
         orientation="portrait",

@@ -51,16 +51,18 @@
   const illus = () => `<span class="illus">${icon('info')}Illustrative data for the design prototype</span>`;
 
   /* The save bar: appears at the foot of a form page while it has unsaved changes. It names what will be written. */
-  const FORM_PAGES = ['project', 'settings', 'network', 'panels'];
+  /* A form route saves with the save bar. Lists, the board and read-only pages do not. */
+  const isFormRoute = () => { const { a, b } = route(); if (a === 'library') return b === 'device'; if (a === 'panels') return !!b; if (a === 'project') return !['substations', 'share'].includes(S.tab.project); return ['settings', 'network'].includes(a); };
   function saveBar() {
     if (!S.dirty) return '';
     const n = Math.max(S.changed.size, 1), bad = S.invalid.size;
+    const lib = route().a === 'library';
     const file = ({ project: 'project.yaml', settings: 'substation.yaml', network: 'substation.yaml', panels: 'the panel file' })[route().a] || 'the file';
     return `<div class="savebar${bad ? ' savebar--bad' : ''}" role="region" aria-label="Unsaved changes">
-      <span class="savebar-msg">${bad ? `${icon('error')}<b>${bad} ${bad === 1 ? 'field needs' : 'fields need'} fixing</b> before you can save.` : `<span class="dot dot--warn" aria-hidden="true"></span><b>${n} unsaved ${n === 1 ? 'change' : 'changes'}</b> · saved to ${file}`}</span>
+      <span class="savebar-msg">${bad ? `${icon('error')}<b>${bad} ${bad === 1 ? 'field needs' : 'fields need'} fixing</b> before you can save.` : `<span class="dot dot--warn" aria-hidden="true"></span><b>${n} unsaved ${n === 1 ? 'change' : 'changes'}</b> · ${lib ? 'added to the library\'s pending changes' : 'saved to ' + file}`}</span>
       <span class="sp"></span>
       <button class="btn btn--secondary" data-action="discard">Discard</button>
-      <button class="btn btn--primary" data-action="save-all" ${bad ? 'disabled' : ''}>${icon('save')}Save changes <kbd class="kbd">Ctrl+S</kbd></button></div>`;
+      <button class="btn btn--primary" data-action="save-all" ${bad ? 'disabled' : ''}>${icon('save')}${lib ? 'Save device' : 'Save changes'} <kbd class="kbd">Ctrl+S</kbd></button></div>`;
   }
 
   /* ---------- overlay: dialog, toast ---------- */
@@ -142,7 +144,7 @@
     const needsProject = key === 'project', needsSub = ['settings', 'network', 'panels', 'checks', 'preview', 'build'].includes(key);
     const m = $('#main');
     m.innerHTML = (needsProject && !hasProject()) || (needsSub && !hasSub()) ? SCREENS.home() : SCREENS[key]();
-    if (FORM_PAGES.includes(key) && !(key === 'panels' && !route().b) && !(key === 'project' && ['substations', 'share'].includes(S.tab.project))) m.insertAdjacentHTML('beforeend', saveBar());
+    if (isFormRoute()) m.insertAdjacentHTML('beforeend', saveBar());
     if (SCREENS[key + 'After']) SCREENS[key + 'After']();
     document.title = 'BOM Generator — design prototype';
   }
@@ -177,10 +179,10 @@
     if (ACTIONS[name]) { ACTIONS[name](el, e); }
   });
   /* Any edited field marks the page dirty. A number field that is not a number is invalid until it is fixed. */
-  const refreshBar = () => { const b = $('.savebar'), m = $('#main'); if (b) b.remove(); if (S.dirty && m && m.querySelector('.page') && FORM_PAGES.includes(route().a) && !(route().a === 'panels' && !route().b)) m.insertAdjacentHTML('beforeend', saveBar()); };
+  const refreshBar = () => { const b = $('.savebar'), m = $('#main'); if (b) b.remove(); if (S.dirty && m && m.querySelector('.page') && isFormRoute()) m.insertAdjacentHTML('beforeend', saveBar()); };
   document.addEventListener('input', (e) => {
     const t = e.target; if (!t.dataset || !t.dataset.dirty) return;
-    const id = t.id || t.name || 'field'; S.dirty = true; S.changed.add(id);
+    const id = t.id || t.name || 'field'; if (!t.closest('.dialog') && !t.dataset.libEdit) { S.dirty = true; S.changed.add(id); }
     if (t.classList.contains('input--num') || t.classList.contains('ctl') && t.classList.contains('input--num')) {
       const ok = t.value === '' || /^\d+(\.\d+)?$/.test(t.value.trim());
       t.setAttribute('aria-invalid', String(!ok)); ok ? S.invalid.delete(id) : S.invalid.add(id);
@@ -188,7 +190,7 @@
     }
     renderStatus(); refreshBar();
   });
-  document.addEventListener('change', (e) => { const t = e.target; if (t.dataset && t.dataset.dirty && (t.tagName === 'SELECT' || t.type === 'checkbox')) { S.dirty = true; S.changed.add(t.id || t.name || 'field'); renderStatus(); refreshBar(); } });
+  document.addEventListener('change', (e) => { const t = e.target; if (t.dataset && t.dataset.dirty && !t.closest('.dialog') && !t.dataset.libEdit && (t.tagName === 'SELECT' || t.type === 'checkbox')) { S.dirty = true; S.changed.add(t.id || t.name || 'field'); renderStatus(); refreshBar(); } });
   /* Leaving a page with unsaved changes asks first. */
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href^="#/"]'); if (!a || !S.dirty) return;

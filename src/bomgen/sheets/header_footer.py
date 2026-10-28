@@ -27,10 +27,11 @@ def fitting_size(margins: Margins, scale_percent: int, max_size: int = CALC_MAX_
 
 
 def bom_header_footer(
-    project_name: str, cabinet_number: str, document: DocumentInfo, logo: Path | None
+    project_name: str, subject: str, document: DocumentInfo, logo: Path | None
 ) -> HeaderFooter:
+    """``subject`` is the cabinet number, or the Loose Material sheet's name (ADR 0020)."""
     return _header_footer(
-        project_name, f"Bill of Materials for {cabinet_number}", document, logo, BOM_SIZE
+        project_name, f"Bill of Materials for {subject}", document, logo, BOM_SIZE
     )
 
 

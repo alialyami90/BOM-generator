@@ -95,10 +95,12 @@
   const L = () => S.layout;
   const result = () => Engine.layoutPreview(L().overrides, L().removed);
   const findDev = (res, id) => { for (const p of res.panels) { const d = p.devices.find((x) => x.id === id); if (d) return { d, p }; } return null; };
-  const snapshot = () => L().history.push({ overrides: L().overrides.slice(), removed: L().removed.slice() });
-  const normalize = (ov) => { const auto = Engine.layoutPreview([], L().removed); return ov.filter((o) => (o.pair ? Engine.units().filter((u) => u.pair === o.pair).some((u) => { const a = findDev(auto, u.id); return !a || a.p.n !== 2 * o.pairIndex - (u.side === 'A' ? 1 : 0); }) : (() => { const a = findDev(auto, o.unit); return !a || a.p.n !== o.panel; })())); };
+  const snapshot = () => { DB.sub.savedAt = 'just now'; return L().history.push({ overrides: L().overrides.slice(), removed: L().removed.slice() }); };
+  const normalize = (ov) => ov; // a pin is kept even where it equals the automatic place
   const unitName = (id) => { const u = Engine.units().find((x) => x.id === id); return u ? u.name : id; };
-  const describe = (m) => (m.pair ? `${unitName(m.pair + '.A')} (pair) to panels ${2 * m.pairIndex - 1} and ${2 * m.pairIndex}` : `${unitName(m.unit)} to panel ${m.panel}`);
+  const posText = (m) => (m.pos == null ? '' : m.pos === 0 ? ', at the top' : m.pos >= 99 ? ', at the bottom' : `, position ${m.pos + 1}`);
+  const describe = (m) => (m.pair ? `${unitName(m.pair + '.A')} (pair) to panels ${2 * m.pairIndex - 1} and ${2 * m.pairIndex}${posText(m)}` : `${unitName(m.unit)} to panel ${m.panel}${posText(m)}`);
+  const pinOf = (d) => L().overrides.find((o) => (o.pair ? o.pair === d.pair : o.unit === d.id));
 
   SCREENS.panels = () => {
     const { b } = App.route();
@@ -106,7 +108,7 @@
     const t = S.tab.panels;
     const actions = `<button class="btn btn--ghost" data-action="undo-layout" ${L().history.length ? '' : 'disabled'}>${icon('undo')}Undo</button><button class="btn btn--secondary" data-action="reset-layout" ${L().overrides.length || L().removed.length ? '' : 'disabled'}>${icon('refresh')}Reset to automatic</button><button class="btn btn--secondary" data-action="add-panel">${icon('plus')}Add hand-written panel…</button>`;
     if (draftSub()) return `<div class="page">${pageHead('Panels', 'Laid out from the equipment and network.', '')}<div class="empty" style="max-width:640px"><b>No panels yet.</b><div class="muted small" style="margin:var(--space-1) 0 var(--space-3)">Panels are placed for you once the network has an IED count and equipment.</div><a class="btn btn--primary" href="#/network">${icon('network')}Set up the network</a></div></div>`;
-    return `<div class="page page--wide">${pageHead('Panels', 'Placed by the layout from the equipment and network. Drag a device to another panel; a pair moves together.', actions)}
+    return `<div class="page page--wide">${pageHead('Panels', 'Placed by the layout from the equipment and network. Drag a device to another panel or position, or pin it where it is. A pair moves together.', actions)}
       ${tabs('panels', [['board', 'Board'], ['list', 'List']], t, 'Panels view')}
       <div role="tabpanel" aria-labelledby="tab-panels-${t}">${t === 'board' ? board() : list()}</div></div>`;
   };
@@ -131,9 +133,10 @@
         ${L().error ? banner('bad', `<b>Not moved.</b> ${esc(L().error)}`, '<button class="btn btn--secondary btn--sm" data-action="dismiss-layout-error">Dismiss</button>') : ''}
         ${selInfo ? `<div class="sel-bar"><span><b>${esc(selInfo.d.name)}</b> <span class="mono muted">${esc(selInfo.d.tag)}</span> · ${selInfo.d.side ? 'Side ' + selInfo.d.side : 'Common'} · ${selInfo.d.dev} U${selInfo.d.cm ? ' + 1 U cable manager' : ''}</span><span class="sp"></span>
           ${selInfo.d.redundant ? `<button class="btn btn--secondary btn--sm" data-action="move-dialog" data-mode="pair">${icon('move')}Move pair…</button><button class="btn btn--ghost btn--sm" data-action="move-dialog" data-mode="unit">Move this unit only…</button>` : `<button class="btn btn--secondary btn--sm" data-action="move-dialog" data-mode="unit">${icon('move')}Move…</button>`}
+          ${pinOf(selInfo.d) ? `<button class="btn btn--ghost btn--sm" data-action="unpin-dev">${icon('pin')}Unpin</button>` : `<button class="btn btn--ghost btn--sm" data-action="pin-dev">${icon('pin')}Pin here</button>`}
           <button class="btn btn--ghost btn--sm" data-action="delete-dev">${icon('trash')}${selInfo.d.redundant ? 'Delete pair' : 'Delete'}</button><button class="btn btn--ghost btn--icon btn--sm" data-action="clear-sel" aria-label="Clear selection">${icon('x')}</button></div>`
-          : `<div class="row board-hint"><span class="muted small">Select a device to see its tag, or drag it. ${icon('grip')} Blank plates are shown as gaps and are not in the BOM. A switch, firewall or patch panel counts with its 1 U cable manager.</span><span class="sp"></span>
-          <button class="btn btn--ghost btn--sm" data-action="toggle-changes" aria-expanded="${L().openOverrides}">${nChanges ? `${nChanges} manual change${nChanges > 1 ? 's' : ''}` : 'No manual changes'}${icon('chevd')}</button></div>`}
+          : `<div class="row board-hint"><span class="muted small">Select a device to see its tag, drag it to a panel or a position, or pin it. ${icon('grip')} Blank plates are shown as gaps and are not in the BOM. A switch, firewall or patch panel counts with its 1 U cable manager.</span><span class="sp"></span>
+          <button class="btn btn--ghost btn--sm" data-action="toggle-changes" aria-expanded="${L().openOverrides}">${nChanges ? [L().overrides.length ? `${L().overrides.length} pinned` : '', L().removed.length ? `${L().removed.length} deleted` : ''].filter(Boolean).join(' · ') : 'Nothing pinned or deleted'}${icon('chevd')}</button></div>`}
         ${L().openOverrides && !selInfo ? changesList() : ''}
       </div>
       <div class="board" role="group" aria-label="Panels">${Array.from({ length: pairsN }, (_, i) => i + 1).map((k) => `<div class="pair" data-pair-index="${k}"><div class="pair-head">Pair ${k} <span class="muted">· panels ${2 * k - 1} and ${2 * k}</span></div><div class="pair-cols">${r.panels.filter((p) => p.pair === k).map((p) => column(p, sel, partner)).join('')}</div></div>`).join('')}</div>
@@ -141,9 +144,9 @@
   }
 
   function changesList() {
-    const rows = [...L().overrides.map((o, i) => `<li><span>${icon('move')}Moved ${esc(describe(o))}</span><button class="btn btn--ghost btn--sm" data-action="revert-change" data-kind="o" data-i="${i}">Revert</button></li>`),
+    const rows = [...L().overrides.map((o, i) => `<li><span>${icon('pin')}Pinned ${esc(describe(o))}</span><button class="btn btn--ghost btn--sm" data-action="revert-change" data-kind="o" data-i="${i}">Unpin</button></li>`),
       ...L().removed.map((id, i) => `<li><span>${icon('trash')}Deleted ${esc(unitName(Engine.units().find((u) => u.id === id || u.pair === id) ? (Engine.units().find((u) => u.id === id || u.pair === id)).id : id))}${Engine.units().some((u) => u.pair === id) ? ' (pair)' : ''}</span><button class="btn btn--ghost btn--sm" data-action="revert-change" data-kind="r" data-i="${i}">Restore</button></li>`)];
-    return `<ul class="changes">${rows.join('') || '<li class="muted">Nothing changed by hand.</li>'}</ul>`;
+    return `<ul class="changes">${rows.join('') || '<li class="muted">Nothing is pinned or deleted. Every device is where the layout put it.</li>'}</ul>`;
   }
 
   function column(p, sel, partner) {
@@ -153,9 +156,9 @@
     p.devices.forEach((d, i) => {
       if (i) cards.push(`<div class="plate" style="height:${U}px" title="Blank plate (not in the BOM)"></div>`);
       const isSel = d.id === sel, isPartner = partner && partner.id === d.id;
-      cards.push(`<div class="dev ${d.cm ? 'has-cm' : ''} ${isSel ? 'is-sel' : ''} ${isPartner ? 'is-partner' : ''} ${d.moved ? 'is-moved' : ''}" draggable="true" tabindex="0" role="button" aria-pressed="${isSel}" data-action="select-dev" data-dev="${d.id}" data-pair="${d.pair}" style="height:${d.h * U}px"
-        aria-label="${esc(d.name)}${d.side ? ', side ' + d.side : ', common'}, ${d.h} U${d.cm ? ` including a 1 U cable manager` : ''}, tag ${esc(d.tag)}${d.moved ? ', moved by you' : ''}" title="${esc(d.tag)}">
-        <span class="dev-row" style="height:${d.dev * U - 2}px"><span class="dev-grip">${icon('grip')}</span><span class="dev-main"><b>${esc(d.name)}</b>${d.dev >= 2 ? `<span class="mono">${esc(d.tag)}</span>` : ''}</span>${d.moved ? `<span class="dev-flag" title="Moved by you">${icon('move')}</span>` : ''}<span class="dev-u">${d.dev} U</span></span>${d.cm ? '<span class="dev-cm">Cable manager<span class="dev-u">1 U</span></span>' : ''}</div>`);
+      cards.push(`<div class="dev ${d.cm ? 'has-cm' : ''} ${isSel ? 'is-sel' : ''} ${isPartner ? 'is-partner' : ''} ${d.pinned ? 'is-pinned' : ''}" draggable="true" tabindex="0" role="button" aria-pressed="${isSel}" data-action="select-dev" data-dev="${d.id}" data-pair="${d.pair}" style="height:${d.h * U}px"
+        aria-label="${esc(d.name)}${d.side ? ', side ' + d.side : ', common'}, ${d.h} U${d.cm ? ` including a 1 U cable manager` : ''}, tag ${esc(d.tag)}${d.moved ? ', pinned' : ''}" title="${esc(d.tag)}">
+        <span class="dev-row" style="height:${d.dev * U - 2}px"><span class="dev-grip">${icon('grip')}</span><span class="dev-main"><b>${esc(d.name)}</b>${d.dev >= 2 ? `<span class="mono">${esc(d.tag)}</span>` : ''}</span>${d.pinned ? `<span class="dev-flag" title="Pinned: stays here when the network changes">${icon('pin')}</span>` : ''}<span class="dev-u">${d.dev} U</span></span>${d.cm ? '<span class="dev-cm">Cable manager<span class="dev-u">1 U</span></span>' : ''}</div>`);
     });
     return `<section class="bcol" data-panel="${p.n}" aria-label="${esc(p.name)}, side ${p.side}, ${p.used} of ${p.capacity} U used">
       <header><a href="#/panels/${p.id}"><b>${esc(p.name)}</b></a><span class="badge badge--plain">Side ${p.side}</span></header>
@@ -166,11 +169,11 @@
   }
 
   /* ----- actions ----- */
-  const commit = (move, label) => {
+  const commit = (move, label, ic = 'move') => {
     const c = Engine.canMove(move, L().overrides, L().removed);
     if (!c.ok) { L().error = c.reason + ' Nothing was changed.'; App.render(); return false; }
-    snapshot(); L().overrides = normalize(c.overrides); L().error = ''; S.dirty = true; App.render();
-    toast(`Moved ${label}`, 'move', () => ACTIONS['undo-layout']());
+    snapshot(); L().overrides = normalize(c.overrides); L().error = ''; App.render();
+    toast(`Pinned ${label}`, 'pin', () => ACTIONS['undo-layout']());
     return true;
   };
   ACTIONS['select-dev'] = (el, e) => { if (e.target.closest('a')) return; L().selected = L().selected === el.dataset.dev ? '' : el.dataset.dev; App.render(); const n = $(`[data-dev="${el.dataset.dev}"]`); n && n.focus(); };
@@ -181,10 +184,20 @@
   ACTIONS['revert-change'] = (el) => { snapshot(); if (el.dataset.kind === 'o') L().overrides.splice(+el.dataset.i, 1); else L().removed.splice(+el.dataset.i, 1); App.render(); };
   ACTIONS['delete-dev'] = () => {
     const info = findDev(result(), L().selected); if (!info) return;
-    snapshot(); L().removed.push(info.d.pair || info.d.id); L().selected = ''; S.dirty = true; App.render();
+    snapshot(); L().removed.push(info.d.pair || info.d.id); L().selected = ''; App.render();
     toast(`Deleted ${info.d.name}${info.d.redundant ? ' (both units)' : ''} from the BOM`, 'trash', () => ACTIONS['undo-layout']());
   };
-  ACTIONS['reset-layout'] = () => dialog({ title: 'Reset to automatic?', body: `<p>The layout places everything again and ${L().overrides.length + L().removed.length} manual change${L().overrides.length + L().removed.length > 1 ? 's are' : ' is'} removed: ${L().overrides.length} move${L().overrides.length === 1 ? '' : 's'} and ${L().removed.length} deletion${L().removed.length === 1 ? '' : 's'}. You can undo this straight after.</p>`, actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="reset-confirm">Reset to automatic</button>' });
+  ACTIONS['pin-dev'] = () => {
+    const info = findDev(result(), L().selected); if (!info) return; const d = info.d;
+    snapshot(); L().overrides.push(d.redundant ? { pair: d.pair, pairIndex: Math.ceil(info.p.n / 2), pos: d.pos } : { unit: d.id, panel: info.p.n, pos: d.pos }); App.render();
+    toast(`Pinned ${d.name}${d.redundant ? ' (both units)' : ''} to ${info.p.name}`, 'pin', () => ACTIONS['undo-layout']());
+  };
+  ACTIONS['unpin-dev'] = () => {
+    const info = findDev(result(), L().selected); if (!info) return; const o = pinOf(info.d); if (!o) return;
+    snapshot(); L().overrides.splice(L().overrides.indexOf(o), 1); App.render();
+    toast(`Unpinned ${info.d.name}. The layout places it again.`, 'pin', () => ACTIONS['undo-layout']());
+  };
+  ACTIONS['reset-layout'] = () => dialog({ title: 'Reset to automatic?', body: `<p>The layout places everything again and ${L().overrides.length + L().removed.length} pinned or deleted ${L().overrides.length + L().removed.length > 1 ? 'devices are' : 'device is'} released: ${L().overrides.length} pin${L().overrides.length === 1 ? '' : 's'} and ${L().removed.length} deletion${L().removed.length === 1 ? '' : 's'}. You can undo this straight after.</p>`, actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="reset-confirm">Reset to automatic</button>' });
   ACTIONS['reset-confirm'] = () => { closeDialog(); snapshot(); L().overrides = []; L().removed = []; L().selected = ''; L().error = ''; App.render(); toast('Layout reset to automatic', 'refresh', () => ACTIONS['undo-layout']()); };
 
   ACTIONS['move-dialog'] = (el) => {
@@ -203,40 +216,61 @@
         rows += `<label class="check move-row ${c.ok && !cur ? '' : 'is-off'}"><input type="radio" name="mv" value="${p.n}" ${c.ok && !cur ? '' : 'disabled'}><span><b>${esc(p.name)}</b> <span class="muted">side ${p.side}</span>${cur ? ' (now)' : ''}<span class="small muted">${cur ? 'Where it is now' : c.ok ? `After: ${lp.used} of ${lp.capacity} U` : esc(c.reason)}</span></span></label>`;
       });
     }
-    dialog({ title: `Move ${esc(d.name)}${pairMode ? ' (pair)' : ''}`, body: `<p class="muted small" style="margin-bottom:var(--space-3)">${pairMode ? 'Both units move, A to the odd panel and B to the even one.' : d.redundant ? `Only this ${d.side} unit moves, and only to another side ${d.side} panel. The pair is no longer symmetric.` : 'This device has no side, so it can go in any panel.'} Choices that do not fit are greyed with the reason.</p><div class="stack" style="gap:6px">${rows}</div>`,
+    dialog({ title: `Move ${esc(d.name)}${pairMode ? ' (pair)' : ''}`, body: `<p class="muted small" style="margin-bottom:var(--space-3)">${pairMode ? 'Both units move, A to the odd panel and B to the even one.' : d.redundant ? `Only this ${d.side} unit moves, and only to another side ${d.side} panel. The pair is no longer symmetric.` : 'This device has no side, so it can go in any panel.'} Choices that do not fit are greyed with the reason.</p><div class="stack" style="gap:6px">${rows}<div style="margin-top:var(--space-3)">${field('Position in the panel', select('mv-pos', [['auto', 'Where the layout puts it'], ['top', 'At the top'], ['bottom', 'At the bottom']], 'auto'), 'Dragging on the board sets any position. Pinned units stay where you put them when the network changes.')}</div></div>`,
       actions: `<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="move-confirm" data-mode="${pairMode ? 'pair' : 'unit'}" data-id="${d.id}" data-pair="${d.pair}">Move</button>` });
   };
   ACTIONS['move-confirm'] = (el) => {
     const v = $('input[name="mv"]:checked'); if (!v) { toast('Choose a destination first', 'info'); return; }
-    closeDialog(); const k = +v.value;
-    if (el.dataset.mode === 'pair') commit({ pair: el.dataset.pair, pairIndex: k }, `${unitName(el.dataset.pair + '.A')} (pair) to panels ${2 * k - 1} and ${2 * k}`);
-    else commit({ unit: el.dataset.id, panel: k }, `${unitName(el.dataset.id)} to panel ${k}`);
+    const pv = $('#mv-pos').value; const pos = pv === 'top' ? 0 : pv === 'bottom' ? 99 : undefined; closeDialog(); const k = +v.value;
+    if (el.dataset.mode === 'pair') commit({ pair: el.dataset.pair, pairIndex: k, pos }, `${unitName(el.dataset.pair + '.A')} (pair) to panels ${2 * k - 1} and ${2 * k}`);
+    else commit({ unit: el.dataset.id, panel: k, pos }, `${unitName(el.dataset.id)} to panel ${k}`);
   };
 
   /* ----- drag and drop ----- */
   let drag = null;
-  const targetFor = (d, n) => (d.redundant && d.mode !== 'unit' ? { pair: d.pair, pairIndex: Math.ceil(n / 2) } : { unit: d.id, panel: n });
-  document.addEventListener('dragstart', (e) => { const c = e.target.closest && e.target.closest('.dev'); if (!c) return; const info = findDev(result(), c.dataset.dev); drag = { id: c.dataset.dev, pair: info.d.pair, redundant: info.d.redundant, mode: e.altKey ? 'unit' : 'pair', from: info.p.n, name: info.d.name }; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', c.dataset.dev); c.classList.add('is-dragging'); });
-  const clearDrop = () => $$('.bcol.drop-ok, .bcol.drop-bad').forEach((x) => x.classList.remove('drop-ok', 'drop-bad'));
+  const targetFor = (d, n) => (d.redundant && d.mode !== 'unit' ? { pair: d.pair, pairIndex: Math.ceil(n / 2), pos: d.pos } : { unit: d.id, panel: n, pos: d.pos });
+  const clearDrop = () => { $$('.bcol.drop-ok, .bcol.drop-bad').forEach((x) => x.classList.remove('drop-ok', 'drop-bad')); $$('.drop-line').forEach((x) => x.remove()); };
+  /* The insertion index is the number of devices whose middle is above the pointer. */
+  const indexAt = (col, y) => $$('.dev', col).filter((el) => { const r = el.getBoundingClientRect(); return r.top + r.height / 2 < y; }).length;
+  const lineAt = (col, idx) => {
+    const rack = $('.rack', col), devs = $$('.dev', rack); if (!rack) return;
+    const rr = rack.getBoundingClientRect(); const i = Math.min(idx, devs.length);
+    const y = devs.length === 0 ? 4 : i < devs.length ? devs[i].getBoundingClientRect().top - rr.top - 1 : devs[devs.length - 1].getBoundingClientRect().bottom - rr.top + 1;
+    const ln = document.createElement('div'); ln.className = 'drop-line'; ln.style.top = y + 'px'; rack.appendChild(ln);
+  };
+  document.addEventListener('dragstart', (e) => { const c = e.target.closest && e.target.closest('.dev'); if (!c) return; const info = findDev(result(), c.dataset.dev); drag = { id: c.dataset.dev, pair: info.d.pair, redundant: info.d.redundant, mode: e.altKey ? 'unit' : 'pair', from: info.p.n, fromPos: info.d.pos, name: info.d.name }; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', c.dataset.dev); c.classList.add('is-dragging'); });
   document.addEventListener('dragover', (e) => {
     const col = e.target.closest && e.target.closest('.bcol'); if (!drag || !col) return;
-    const n = +col.dataset.panel; const mv = targetFor(drag, n); const c = Engine.canMove(mv, L().overrides, L().removed);
+    const n = +col.dataset.panel; let idx = indexAt(col, e.clientY); if (n === drag.from && idx > drag.fromPos) idx -= 1; drag.pos = idx;
+    const mv = targetFor(drag, n); const c = Engine.canMove(mv, L().overrides, L().removed);
     clearDrop(); const same = $$('.bcol').filter((x) => (mv.pair ? Math.ceil(+x.dataset.panel / 2) === mv.pairIndex : +x.dataset.panel === n));
-    same.forEach((x) => x.classList.add(c.ok ? 'drop-ok' : 'drop-bad')); e.preventDefault(); e.dataTransfer.dropEffect = 'move'; /* a refused drop still lands, so the error banner can say why */
+    same.forEach((x) => x.classList.add(c.ok ? 'drop-ok' : 'drop-bad'));
+    if (c.ok) same.forEach((x) => lineAt(x, +x.dataset.panel === n ? indexAt(x, e.clientY) : Math.min(idx, $$('.dev', x).length)));
+    e.preventDefault(); e.dataTransfer.dropEffect = 'move'; /* a refused drop still lands, so the error banner can say why */
   });
   document.addEventListener('dragleave', (e) => { if (!e.relatedTarget || !e.relatedTarget.closest || !e.relatedTarget.closest('.board')) clearDrop(); });
   document.addEventListener('drop', (e) => {
     const col = e.target.closest && e.target.closest('.bcol'); if (!drag || !col) return; e.preventDefault(); clearDrop();
     const n = +col.dataset.panel, mv = targetFor(drag, n), d = drag; drag = null;
-    const cur = result(); const info = findDev(cur, d.id);
-    if ((mv.pair && Math.ceil(info.p.n / 2) === mv.pairIndex) || (mv.unit && info.p.n === mv.panel)) return;
-    commit(mv, mv.pair ? `${d.name} (pair) to panels ${2 * mv.pairIndex - 1} and ${2 * mv.pairIndex}` : `${d.name} to panel ${n}`);
+    const info = findDev(result(), d.id);
+    const samePanel = mv.pair ? Math.ceil(info.p.n / 2) === mv.pairIndex : info.p.n === mv.panel;
+    if (samePanel && mv.pos === info.d.pos) return; /* dropped where it already is */
+    commit(mv, mv.pair ? `${d.name} (pair) to panels ${2 * mv.pairIndex - 1} and ${2 * mv.pairIndex}${posText(mv)}` : `${d.name} to panel ${n}${posText(mv)}`, 'pin');
   });
   document.addEventListener('dragend', () => { drag = null; clearDrop(); $$('.dev.is-dragging').forEach((x) => x.classList.remove('is-dragging')); });
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && location.hash.startsWith('#/panels') && !e.target.closest('input, textarea, select')) { e.preventDefault(); ACTIONS['undo-layout'](); }
     const dev = e.target.closest && e.target.closest('.dev');
     if (dev && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); dev.click(); }
+    if (dev && e.altKey && /^Arrow(Up|Down|Left|Right)$/.test(e.key)) {
+      e.preventDefault(); const info = findDev(result(), dev.dataset.dev); if (!info) return; const d = info.d; L().selected = d.id;
+      const vertical = e.key === 'ArrowUp' || e.key === 'ArrowDown';
+      const pos = vertical ? Math.max(0, Math.min(info.p.devices.length - 1, d.pos + (e.key === 'ArrowUp' ? -1 : 1))) : d.pos;
+      const panel = vertical ? info.p.n : info.p.n + (e.key === 'ArrowRight' ? (d.redundant ? 2 : 1) : (d.redundant ? -2 : -1));
+      if (panel < 1 || (vertical && pos === d.pos)) return;
+      commit(d.redundant ? { pair: d.pair, pairIndex: Math.ceil(panel / 2), pos } : { unit: d.id, panel, pos }, `${d.name} ${vertical ? 'to position ' + (pos + 1) : 'to panel ' + panel}`);
+      return;
+    }
     if (dev && e.key === 'Delete') { L().selected = dev.dataset.dev; ACTIONS['delete-dev'](); }
   });
 

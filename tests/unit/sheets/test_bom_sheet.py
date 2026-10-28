@@ -7,7 +7,7 @@ import pytest
 from bomgen.models.bom import BomLine, Group, LooseTable, PanelBom, QtySum
 from bomgen.models.calc import LineRef
 from bomgen.models.sheet import Borders, BorderStyle, CellStyle, Formula, SheetModel
-from bomgen.sheets.bom_sheet import bom_sheet
+from bomgen.sheets.bom_sheet import HEADERS, BomSheet, bom_sheet, loose_sheet
 
 
 def line(group: Group, tag: str | None, **fields: Any) -> BomLine:
@@ -163,29 +163,54 @@ def test_row_map_covers_every_line() -> None:
     assert len(sheet.rows) == len(LINES)
 
 
-def test_loose_table_under_the_host_panel() -> None:
-    loose = LooseTable(
-        title=("GIS Substation", "PSA Panels Loose Material and Auxiliary Equipment"),
-        host_panel="psa1",
-        lines=(
-            line(Group.B, "ANN", merge_fg=True, model="NAP", ordering_code="NAP"),
-            line(Group.B, None, description="Mount", parent=0),
-            line(Group.B, "FO", qty="1 Lot"),
-        ),
-    )
-    sheet = bom_sheet(panel(*LINES), loose)
-    model = sheet.model
-    assert model.rows[14].height == 48.75  # gap after row 13
-    assert (
-        value(model, 15, 1) == "GIS Substation\nPSA Panels Loose Material and Auxiliary Equipment"
-    )
-    assert "A15:G15" in [m.name for m in model.merges]
-    assert value(model, 16, 2) == "ITEM DESIGNATION"
-    assert value(model, 17, 1) == 1  # numbering restarts
-    assert value(model, 18, 1) == Formula(text="=A17+1", result=2)
-    assert "B17:B18" in [m.name for m in model.merges]
-    assert sheet.rows[LineRef(panel_id=None, line=2)] == 19
-    assert model.print_setup.print_area is not None
-    assert model.print_setup.print_area.name == "A1:G19"
-    assert model.rows[2].height == 53.1  # header row on the host sheet
-    assert value(model, 1, 8) == Formula(text="=SUM(H3:H13)", result=4)
+LOOSE = LooseTable(
+    title=("GIS Substation", "PSA Panels Loose Material and Auxiliary Equipment"),
+    host_panel="psa1",
+    lines=(
+        line(Group.B, "ANN", merge_fg=True, model="NAP", ordering_code="NAP", hwio=2),
+        line(Group.B, None, description="Mount", parent=0),
+        line(Group.B, "FO", qty="1 Lot", revised=frozenset({"E"})),
+    ),
+)
+
+
+@pytest.fixture
+def loose() -> BomSheet:
+    return loose_sheet("Loose Material", LOOSE)
+
+
+def test_loose_material_is_on_its_own_sheet(loose: BomSheet) -> None:
+    # ADR 0020 (Q36): the loose-material table has its own sheet, laid out like a panel BOM.
+    model = loose.model
+    assert model.name == "Loose Material"
+    assert value(model, 1, 1) == "GIS Substation\nPSA Panels Loose Material and Auxiliary Equipment"
+    assert "A1:G1" in [m.name for m in model.merges]
+    assert model.rows[1].height == 90
+    assert [value(model, 2, col) for col in range(1, 9)] == [*HEADERS, "HWIO"]
+    assert model.rows[2].height == 26.25
+
+
+def test_loose_material_rows_and_numbering(loose: BomSheet) -> None:
+    model = loose.model
+    assert value(model, 3, 1) == 1
+    assert value(model, 4, 1) == Formula(text="=A3+1", result=2)
+    assert "B3:B4" in [m.name for m in model.merges]
+    assert value(model, 5, 4) == "1 Lot"
+    assert style(model, 5, 5).fill == "#FFFF00"
+    assert loose.rows == {LineRef(panel_id=None, line=i): 3 + i for i in range(3)}
+    assert value(model, 1, 8) == Formula(text="=SUM(H3:H5)", result=2)
+    assert model.columns[8].hidden
+
+
+def test_loose_material_print_setup_matches_the_panel_sheets(loose: BomSheet) -> None:
+    setup = loose.model.print_setup
+    assert setup.orientation == "portrait"
+    assert (setup.fit_to_width, setup.fit_to_height) == (1, 0)
+    assert setup.repeat_rows == (1, 2)
+    assert setup.print_area is not None
+    assert setup.print_area.name == "A1:G5"
+
+
+def test_panel_sheet_holds_only_its_own_table(model: SheetModel) -> None:
+    assert model.rows[2].height == 26.25
+    assert max(row for row, _ in model.cells) == 13

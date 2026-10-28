@@ -25,6 +25,48 @@
       "title": "AuxContact",
       "type": "object"
     },
+    "AuxContactBrand": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "make": {
+          "title": "Make",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "ordering_code": {
+          "title": "Ordering Code",
+          "type": "string"
+        }
+      },
+      "required": [
+        "make",
+        "model",
+        "ordering_code",
+        "id"
+      ],
+      "title": "AuxContactBrand",
+      "type": "object"
+    },
     "Busbar": {
       "additionalProperties": false,
       "description": "Busbar entry (spec: Inputs, commodity catalogues).",
@@ -50,6 +92,85 @@
         "description"
       ],
       "title": "Busbar",
+      "type": "object"
+    },
+    "BusbarBrand": {
+      "additionalProperties": false,
+      "properties": {
+        "entries": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Busbar"
+          },
+          "minProperties": 1,
+          "title": "Entries",
+          "type": "object"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        }
+      },
+      "required": [
+        "id",
+        "entries"
+      ],
+      "title": "BusbarBrand",
+      "type": "object"
+    },
+    "CatalogueBrands": {
+      "additionalProperties": false,
+      "description": "Further brand sets per catalogue; ``catalogues`` is the brand ``default`` (ADR 0017).",
+      "properties": {
+        "aux_contact": {
+          "items": {
+            "$ref": "#/$defs/AuxContactBrand"
+          },
+          "title": "Aux Contact",
+          "type": "array"
+        },
+        "busbars": {
+          "items": {
+            "$ref": "#/$defs/BusbarBrand"
+          },
+          "title": "Busbars",
+          "type": "array"
+        },
+        "housekeeping": {
+          "items": {
+            "$ref": "#/$defs/HousekeepingBrand"
+          },
+          "title": "Housekeeping",
+          "type": "array"
+        },
+        "mcb": {
+          "items": {
+            "$ref": "#/$defs/McbBrand"
+          },
+          "title": "Mcb",
+          "type": "array"
+        },
+        "terminal_blocks": {
+          "items": {
+            "$ref": "#/$defs/TerminalBlockBrand"
+          },
+          "title": "Terminal Blocks",
+          "type": "array"
+        }
+      },
+      "title": "CatalogueBrands",
       "type": "object"
     },
     "Catalogues": {
@@ -190,6 +311,19 @@
           "title": "Alarm On Branch Mcb",
           "type": "boolean"
         },
+        "alt_group": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z0-9][A-Z0-9-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alt Group"
+        },
         "category": {
           "$ref": "#/$defs/Category"
         },
@@ -247,6 +381,32 @@
           "minimum": 0,
           "title": "Hwio Points",
           "type": "integer"
+        },
+        "inrush_a": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Inrush A"
+        },
+        "inrush_ms": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Inrush Ms"
         },
         "load_type": {
           "anyOf": [
@@ -390,6 +550,23 @@
           "title": "Terminals",
           "type": "array"
         },
+        "tier": {
+          "anyOf": [
+            {
+              "enum": [
+                "low",
+                "mid",
+                "high"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tier"
+        },
         "unit_power_w": {
           "anyOf": [
             {
@@ -495,6 +672,72 @@
       "title": "Housekeeping",
       "type": "object"
     },
+    "HousekeepingBrand": {
+      "additionalProperties": false,
+      "properties": {
+        "change_over_diodes": {
+          "$ref": "#/$defs/ChangeOverDiodes"
+        },
+        "door_switch": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HousekeepingRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "fan": {
+          "$ref": "#/$defs/FanRef"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "ipr_kit": {
+          "$ref": "#/$defs/HousekeepingRef"
+        },
+        "lamp": {
+          "$ref": "#/$defs/HousekeepingRef"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "socket": {
+          "$ref": "#/$defs/SocketRef"
+        },
+        "thermostat": {
+          "$ref": "#/$defs/HousekeepingRef"
+        },
+        "vent_filter": {
+          "$ref": "#/$defs/HousekeepingRef"
+        }
+      },
+      "required": [
+        "lamp",
+        "fan",
+        "vent_filter",
+        "thermostat",
+        "ipr_kit",
+        "change_over_diodes",
+        "socket",
+        "id"
+      ],
+      "title": "HousekeepingBrand",
+      "type": "object"
+    },
     "HousekeepingRef": {
       "additionalProperties": false,
       "description": "Housekeeping role filled by a device record (ADR 0010 item 1).",
@@ -560,17 +803,217 @@
       "title": "LooseItem",
       "type": "object"
     },
-    "McbCatalogue": {
+    "McbBrand": {
       "additionalProperties": false,
-      "description": "MCB family by rating (spec: Inputs, commodity catalogues).",
       "properties": {
         "code_pattern": {
-          "title": "Code Pattern",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Code Pattern"
+        },
+        "codes": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Codes"
+        },
+        "dc_rating_v": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dc Rating V"
         },
         "family": {
           "title": "Family",
           "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "magnetic_trip_multiple": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Magnetic Trip Multiple"
+        },
+        "magnetic_trip_multiple_dc": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Magnetic Trip Multiple Dc"
+        },
+        "make": {
+          "title": "Make",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "poles": {
+          "default": 2,
+          "exclusiveMinimum": 0,
+          "title": "Poles",
+          "type": "integer"
+        },
+        "ratings_a": {
+          "items": {
+            "exclusiveMinimum": 0,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Ratings A",
+          "type": "array"
+        },
+        "trip_curve": {
+          "anyOf": [
+            {
+              "enum": [
+                "B",
+                "C",
+                "D",
+                "K",
+                "Z"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Trip Curve"
+        }
+      },
+      "required": [
+        "family",
+        "make",
+        "ratings_a",
+        "id"
+      ],
+      "title": "McbBrand",
+      "type": "object"
+    },
+    "McbCatalogue": {
+      "additionalProperties": false,
+      "description": "MCB family by rating (spec: Inputs, commodity catalogues; sizing fields ADR 0017).",
+      "properties": {
+        "code_pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Code Pattern"
+        },
+        "codes": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Codes"
+        },
+        "dc_rating_v": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dc Rating V"
+        },
+        "family": {
+          "title": "Family",
+          "type": "string"
+        },
+        "magnetic_trip_multiple": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Magnetic Trip Multiple"
+        },
+        "magnetic_trip_multiple_dc": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Magnetic Trip Multiple Dc"
         },
         "make": {
           "title": "Make",
@@ -590,13 +1033,31 @@
           "minItems": 1,
           "title": "Ratings A",
           "type": "array"
+        },
+        "trip_curve": {
+          "anyOf": [
+            {
+              "enum": [
+                "B",
+                "C",
+                "D",
+                "K",
+                "Z"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Trip Curve"
         }
       },
       "required": [
         "family",
         "make",
-        "ratings_a",
-        "code_pattern"
+        "ratings_a"
       ],
       "title": "McbCatalogue",
       "type": "object"
@@ -716,6 +1177,42 @@
       "title": "SupplyType",
       "type": "string"
     },
+    "TerminalBlockBrand": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "types": {
+          "additionalProperties": {
+            "$ref": "#/$defs/TerminalBlockType"
+          },
+          "minProperties": 1,
+          "title": "Types",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "types"
+      ],
+      "title": "TerminalBlockBrand",
+      "type": "object"
+    },
     "TerminalBlockType": {
       "additionalProperties": false,
       "description": "Terminal block by type (spec: Inputs, commodity catalogues).",
@@ -801,6 +1298,9 @@
   "additionalProperties": false,
   "description": "The device library file (spec: Inputs, 1. Device library).",
   "properties": {
+    "catalogue_brands": {
+      "$ref": "#/$defs/CatalogueBrands"
+    },
     "catalogues": {
       "$ref": "#/$defs/Catalogues"
     },
