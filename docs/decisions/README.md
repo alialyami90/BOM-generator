@@ -27,3 +27,4 @@ An ADR stays "Proposed" until Ali accepts it in review.
 | 0019 | [Branch MCBs sized from device data](0019-branch-mcb-sizing.md) | Proposed |
 | 0020 | [Loose material on its own sheet](0020-loose-material-sheet.md) | Accepted |
 | 0021 | [Round-trip YAML writers, checked before they write](0021-round-trip-writers.md) | Proposed |
+| 0022 | [Free-text loose items](0022-free-text-loose-items.md) | Proposed |

@@ -360,6 +360,18 @@ def test_loose_material_references_are_checked(tmp_path: Path) -> None:
     ]
 
 
+def test_free_text_loose_item_loads_without_a_library_part(tmp_path: Path) -> None:
+    substation = default_substation()
+    substation["loose_material"] = {
+        "host_panel": "p1",
+        "items": [{"description": "Cable tray, 300 mm", "qty": "1 Lot", "tag": "Tray"}],
+    }
+    loaded = load_project(write_project(tmp_path, substation=substation))
+    material = loaded.substations[0].substation.loose_material
+    assert material is not None
+    assert material.items[0].part_id is None
+
+
 def library_file_for(tmp_path: Path, library: dict[str, Any]) -> Path:
     path = tmp_path / "library.yaml"
     write_yaml(path, library)

@@ -87,6 +87,11 @@ def _loose_line(part_id: str, tag: str | None, qty: Qty, library: Library) -> Bo
 
 
 def _loose_extra(extra: LooseExtra, library: Library) -> BomItem:
+    if extra.part_id is None:  # free text: no make, model or ordering code (ADR 0022)
+        assert extra.description is not None  # the model requires one or the other
+        return BomItem(
+            BomLine(group=Group.B, tag=extra.tag, description=extra.description, qty=extra.qty)
+        )
     per_parent = extra.qty if isinstance(extra.qty, int) else 1
     line = _loose_line(extra.part_id, extra.tag, extra.qty, library)
     children = tuple(_loose_line(c, None, per_parent, library) for c in extra.children)

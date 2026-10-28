@@ -25,7 +25,7 @@ def needs_change_over(panel: Panel, library: Library, loose: Sequence[LooseExtra
     if option != "auto":
         return option
     part_ids = [d.part_id for d in panel.devices]
-    part_ids += [item.part_id for item in loose if item.fed_from == panel.id]
+    part_ids += [i.part_id for i in loose if i.part_id is not None and i.fed_from == panel.id]
     return any(lookup(library, part_id).power_supplies == 1 for part_id in part_ids)
 
 
