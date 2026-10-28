@@ -169,3 +169,11 @@ def test_csv_import_screen_loads_before_the_editor_so_the_pending_bar_wraps_it()
     assert "Bridge.call('preview_library_csv'" in js
     assert "Bridge.call('add_library_csv'" in js
     assert "goes to pending changes, not straight into the library" in js
+
+
+def test_alternatives_compare_with_a_signed_delta_chip_not_colour_alone() -> None:
+    edit = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
+    assert "alternatives: ['Alternatives'" in edit
+    assert "Bridge.call('library_alternatives'" in edit
+    assert "`${v > 0 ? '+' : '\u2212'}" in edit
+    assert 'data-action="add-alternative"' in edit

@@ -2,7 +2,7 @@
    Saved device edits collect in a pending set kept by the app; Review and apply writes them as a new local
    library version. The Device editor is a form over one device; the model checks every value it sends. */
 (function () {
-  const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, field, input, select, pageHead, dialog, closeDialog, toast, go, $ } = App;
+  const { esc, S, ACTIONS, SCREENS, badge, verified, banner, tabs, field, input, select, pageHead, dialog, closeDialog, toast, go, $ } = App;
   const real = () => S.backend === 'yes';
   const plural = (n, one) => `${n} ${one}${n === 1 ? '' : 's'}`;
   const onLibrary = () => App.route().a === 'library';
@@ -92,7 +92,8 @@
       ['rec__datasheet__dimensions_mm__h', 'Case height', 'num', '', 0, 'mm'], ['rec__datasheet__dimensions_mm__w', 'Case width', 'num', '', 0, 'mm'], ['rec__datasheet__dimensions_mm__d', 'Case depth', 'num', '', 0, 'mm'],
       ['rec__datasheet__certifications', 'Certifications', 'csv', 'Separated by commas.', 2],
       ['rec__datasheet__datasheet_url', 'Datasheet link', 'mono', '', 2], ['rec__datasheet__product_url', 'Product page', 'mono', '', 2],
-      ['rec__sources', 'Sources', 'lines', 'One per line: where each figure was found.', 2]]]
+      ['rec__sources', 'Sources', 'lines', 'One per line: where each figure was found.', 2]]],
+    alternatives: ['Alternatives', [['alt_group', 'Alternative group', 'mono', 'Devices with the same group key are alternatives of each other. The key links them in CSV files too.'], ['tier', 'Tier', 'choice', 'Low, mid or high, among the alternatives.']]]
   };
   const isRec = (key) => key.startsWith('rec__');
   const recPath = (key) => key.slice(5).split('__');
@@ -112,7 +113,8 @@
   const withUnit = (key, v) => { const u = (fieldOf(key) || [])[5]; return v ? (u ? `${v} ${u}` : v) : 'empty'; };
 
   function loadDevice(id) {
-    Object.assign(ED, { key: id, state: 'loading', reply: null, error: null, draft: {}, errors: {}, refusal: '', users: null });
+    Object.assign(ED, { key: id, state: 'loading', reply: null, error: null, draft: {}, errors: {}, refusal: '', users: null, alts: null });
+    Bridge.call('library_alternatives', id).then((a) => { if (ED.key === id) { ED.alts = a; App.render(); } }).catch(() => {});
     if (S.project && S.project.real && S.sub) {  /* who uses it in the open substation: the In use banner and the delete warning */
       Bridge.call('library_part_users', id, S.project.file, S.sub).then((u) => { if (ED.key === id) { ED.users = u; App.render(); } }).catch(() => {});
     }
@@ -163,7 +165,7 @@
     const d = ED.reply.device, t = TABS[S.tab.devEdit] ? S.tab.devEdit : 'identity';
     const noRecord = t === 'datasheet' && !ED.reply.record;
     const fields = noRecord ? [] : TABS[t][1], spans = (f) => (f[4] === 2 ? `<div class="span-2">${control(f)}</div>` : control(f));
-    const lists = Object.entries(LISTS).filter(([, l]) => l[1] === t).map(([key]) => listTable(key)).join('');
+    const lists = Object.entries(LISTS).filter(([, l]) => l[1] === t).map(([key]) => listTable(key)).join('') + (t === 'alternatives' ? altTable(d) : '');
     const ledeText = { parts: 'Parts that come with each unit of this device. They appear as extra rows in the BOM.',
       datasheet: noRecord ? 'This part has no record in the library\'s device database, so there are no datasheet figures to edit.' : 'What the datasheet confirms. These figures are for reference; the BOM uses the Electrical and Ports values.' }[t];
     const lede = ledeText ? `<p class="muted small" style="max-width:68ch;margin-bottom:var(--space-3)">${ledeText}</p>` : '';
@@ -176,6 +178,26 @@
       ${tabs('devEdit', Object.entries(TABS).map(([k, [label]]) => [k, label]), t, 'Device sections')}
       <div role="tabpanel" aria-labelledby="tab-devEdit-${t}" style="margin-top:var(--space-4)">${t === 'parts' ? `<datalist id="dl-parts">${(ED.reply.part_ids || []).map((p) => `<option value="${esc(p)}">`).join('')}</datalist>` : ''}${lede}${fields.length ? `<div class="form ${t === 'identity' ? 'form--2' : 'form--3'}">${fields.map(spans).join('')}</div>` : ''}${lists}</div>${saveBar()}</div>`;
   }
+  /* ---------- Alternatives: the device first, then each part with the same alt_group (ADR 0017) ---------- */
+  /* A delta chip: plain text with a sign, warning-tinted when higher, success-tinted when lower. */
+  const chip = (v, unit) => (v == null || v === 0 ? '' : ` ${badge(v > 0 ? 'warn' : 'ok', `${v > 0 ? '+' : '−'}${Math.abs(Math.round(v * 10) / 10)} ${unit}`)}`);
+  App.altChip = chip;
+  const portText = (g) => (g ? `${g.count} x ${g.speed} ${g.media || ''} ${g.kind}`.replace(/\s+/g, ' ') : '—');
+  function altTable(d) {
+    const a = ED.alts;
+    if (!a) return '<p class="muted">Reading the alternatives…</p>';
+    const head = `<div class="row" style="justify-content:space-between;margin:var(--space-5) 0 var(--space-2)"><h3>Comparison</h3>${a.group ? `<button class="btn btn--secondary btn--sm" data-action="add-alternative" data-id="${esc(d.part_id)}" data-group="${esc(a.group)}">${icon('plus')}Add alternative…</button>` : ''}</div>`;
+    if (!a.group) return `${head}<p class="muted">Not in a group. Give it an alternative group, save, and add parts to the same group to compare them here.</p>`;
+    const tier = (t) => (t ? t[0].toUpperCase() + t.slice(1) : '—');
+    const num = (v, u) => (v == null ? '—' : `${v} ${u}`);
+    return `${head}<div class="table-wrap"><table class="table"><thead><tr><th style="width:64px">Tier</th><th>Part</th><th>Make</th><th class="num">Power</th><th class="num">Inrush</th><th>Ports</th><th class="num">Height</th><th>Data</th></tr></thead><tbody>
+      ${a.rows.map((r) => `<tr${r.is_self ? ' class="is-self"' : ''}><td>${r.is_self ? '<b>This</b>' : esc(tier(r.tier))}</td><td>${r.is_self ? `<span class="mono">${esc(r.part_id)}</span>` : `<a class="mono" href="#/library/device/${encodeURIComponent(r.part_id)}">${esc(r.part_id)}</a>`}<span class="cell-sub">${esc(r.model || '')}</span></td><td>${esc(r.make || '')}</td>
+        <td class="num nowrap">${num(r.unit_power_w, 'W')}${r.is_self ? '' : chip(r.power_delta_w, 'W')}</td><td class="num nowrap">${num(r.inrush_a, 'A')}${r.is_self ? '' : chip(r.inrush_delta_a, 'A')}</td>
+        <td class="nowrap">${esc(portText(r.first_port_group))}</td><td class="num nowrap">${num(r.height_u, 'U')}${r.is_self ? '' : chip(r.height_delta_u, 'U')}</td><td>${r.data_quality ? verified(r.data_quality) : '<span class="muted">—</span>'}</td></tr>`).join('')}
+      </tbody></table><div class="table-foot"><span>${a.rows.length - 1} alternatives · group <span class="mono">${esc(a.group)}</span></span><span>Differences are against this device.</span></div></div>`;
+  }
+  ACTIONS['add-alternative'] = (el) => { ACTIONS['add-device'](); const from = $('#ad-from'); from.value = el.dataset.id; from.dispatchEvent(new Event('change', { bubbles: true })); $('#ad-group').value = el.dataset.group; $('#ad-title-note').textContent = `It joins the group ${el.dataset.group}.`; };
+
   /* "GIS Substation uses it in 2 rows: the equipment row rtac (Network) and a row on panel psa3 (Panels)." Library rows that bring it are named apart. */
   function usesText() {
     const u = ED.users;
@@ -294,7 +316,7 @@
     dialog({ title: 'Add a device', body: `<div class="stack">
       ${field('Start from', select('ad-from', [['', 'A blank device'], ...devs.map((d) => [d.id, `A copy of ${d.id}${d.model ? ` (${[d.make, d.model].filter(Boolean).join(' ')})` : ''}`])], ''), 'A copy keeps the electrical data, ports and parts, so you only change what differs.')}
       <div class="form form--2">${field('Part ID', input('ad-id', '', { mono: true, placeholder: 'e.g. SEL-2730M-EXT-B' }), 'Unique in the library. Fixed once created: projects refer to it.')}${field('Category', select('ad-cat', cats.map((c) => [c, catName(c)]), cats[0]))}
-      ${field('Make', input('ad-make', ''))}${field('Model', input('ad-model', ''))}</div><div id="ad-err"></div></div>`,
+      ${field('Make', input('ad-make', ''))}${field('Model', input('ad-model', ''))}</div><input type="hidden" id="ad-group" value=""><p class="muted small" id="ad-title-note"></p><div id="ad-err"></div></div>`,
       actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="add-device-do">Create and edit</button>' });
   };
   document.addEventListener('change', (e) => {  /* a copy starts with the source's category */
@@ -305,7 +327,7 @@
   ACTIONS['add-device-do'] = () => {
     const id = $('#ad-id').value.trim();
     if (!id) { $('#ad-id').setAttribute('aria-invalid', 'true'); $('#ad-id').focus(); return; }
-    Bridge.call('add_library_device', id, $('#ad-cat').value, $('#ad-make').value.trim(), $('#ad-model').value.trim(), $('#ad-from').value || null).then((p) => {
+    Bridge.call('add_library_device', id, $('#ad-cat').value, $('#ad-make').value.trim(), $('#ad-model').value.trim(), $('#ad-from').value || null, $('#ad-group').value || null).then((p) => {
       PEND.page = p; PEND.state = 'loaded'; closeDialog(); S.tab.devEdit = 'identity'; ED.key = '';
       toast(`${id} added to pending changes. It joins the library when you apply them.`, 'plus'); go('#/library/device/' + encodeURIComponent(id));
     }).catch((e) => { $('#ad-err').innerHTML = banner('bad', esc(e.message)); });

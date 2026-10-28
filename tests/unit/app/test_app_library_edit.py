@@ -414,3 +414,41 @@ def test_a_list_of_words_is_reviewed_as_words(app_db: api.Api) -> None:
     fields = {"datasheet.certifications": ["IEC 61850-3", "IEEE 1613"]}
     entries = ok(app_db.set_library_record_fields(PART, fields))["entries"]
     assert entries[0]["to"] == "IEC 61850-3, IEEE 1613"
+
+
+# -- alternatives (ADR 0017) -------------------------------------------------------------------
+
+SWITCH = "RST2228-L2"
+
+
+def test_alternatives_list_the_device_first_with_deltas(app: api.Api) -> None:
+    rows = ok(app.library_alternatives(SWITCH))["rows"]
+    assert rows[0]["part_id"] == SWITCH
+    assert rows[0]["is_self"] is True
+    assert {r["tier"] for r in rows[1:]} == {"low", "mid", "high"}
+    assert all("power_delta_w" in r for r in rows)
+
+
+def test_alternatives_follow_pending_edits(app: api.Api) -> None:
+    ok(app.add_library_edits([power(f"{SWITCH}.MOXA-LOW", 999)]))
+    rows = ok(app.library_alternatives(SWITCH))["rows"]
+    moxa = next(r for r in rows if r["part_id"] == f"{SWITCH}.MOXA-LOW")
+    assert moxa["unit_power_w"] == 999
+
+
+def test_a_device_without_a_group_has_only_itself(app: api.Api) -> None:
+    ok(app.add_library_edits([{"op": "remove", "path": ["devices", PART, "alt_group"]}]))
+    reply = ok(app.library_alternatives(PART))
+    assert reply["group"] is None
+    assert [r["part_id"] for r in reply["rows"]] == [PART]
+
+
+def test_an_added_alternative_joins_the_group_as_a_copy(app: api.Api) -> None:
+    ok(app.add_library_device("RST-NEW", "network_switch", "X", "Y", SWITCH, SWITCH))
+    device = ok(app.library_device("RST-NEW"))["device"]
+    assert device["alt_group"] == SWITCH
+    assert "RST-NEW" in [r["part_id"] for r in ok(app.library_alternatives(SWITCH))["rows"]]
+
+
+def test_tier_choices_come_from_the_model(app: api.Api) -> None:
+    assert ok(app.library_device(SWITCH))["choices"]["tier"] == ["low", "mid", "high"]
