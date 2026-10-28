@@ -409,6 +409,7 @@ BrandId = Annotated[str, StringConstraints(pattern=r"^[a-z0-9][a-z0-9-]*$")]
 class McbBrand(McbCatalogue):
     id: BrandId
     name: str | None = None
+    ac_rated: bool = True  # false for a DC-only family; the loader refuses it as the choice
 
 
 class AuxContactBrand(AuxContact):
@@ -564,4 +565,4 @@ def _plain(kind: str, brand: BrandSet) -> object:
         "aux_contact": AuxContact,
         "housekeeping": Housekeeping,
     }
-    return plain_type[kind].model_validate(brand.model_dump(exclude={"id", "name"}))
+    return plain_type[kind].model_validate(brand.model_dump(exclude={"id", "name", "ac_rated"}))

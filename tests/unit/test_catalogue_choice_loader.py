@@ -96,3 +96,44 @@ def test_housekeeping_brand_parts_must_be_in_the_library(tmp_path: Path) -> None
         "catalogue_brands.housekeeping[0].fan.part_id",
         "unknown part_id 'FAN-999' (not in library.yaml)",
     )
+
+
+def dc_only_library() -> dict[str, Any]:
+    library = branded_library()
+    library["catalogue_brands"]["mcb"].append(
+        {**ABB, "id": "c60h-dc", "family": "C60H-DC 2P", "ac_rated": False}
+    )
+    return library
+
+
+def test_a_brand_not_rated_for_ac_cannot_be_the_mcb_choice(tmp_path: Path) -> None:
+    substation = default_substation()
+    substation["catalogue_choice"] = {"mcb": "c60h-dc"}
+    project_file = write_project(tmp_path, substation=substation, library=dc_only_library())
+    (issue,) = issues_for(project_file)
+    substation_file = tmp_path / SUBSTATION_DIR / "substation.yaml"
+    assert (issue.file, issue.location, issue.message) == (
+        substation_file,
+        "catalogue_choice.mcb",
+        "mcb brand 'c60h-dc' is not rated for AC, and this choice also sizes the AC "
+        "branches; choose an AC-rated brand (default, abb-s200m)",
+    )
+    assert issue.line == line_of(substation_file, "c60h-dc")
+
+
+def test_a_brand_not_rated_for_ac_in_the_project_defaults_is_reported_there(
+    tmp_path: Path,
+) -> None:
+    project = default_project()
+    project["defaults"] = {"catalogue_choice": {"mcb": "c60h-dc"}}
+    project_file = write_project(tmp_path, project=project, library=dc_only_library())
+    (issue,) = issues_for(project_file)
+    assert (issue.file, issue.location) == (project_file, "defaults.catalogue_choice.mcb")
+    assert issue.message.startswith("mcb brand 'c60h-dc' is not rated for AC")
+
+
+def test_an_ac_rated_brand_beside_a_dc_only_one_loads(tmp_path: Path) -> None:
+    substation = default_substation()
+    substation["catalogue_choice"] = {"mcb": "abb-s200m"}
+    loaded = load_s1(write_project(tmp_path, substation=substation, library=dc_only_library()))
+    assert loaded.library.catalogues.mcb.make == "ABB"

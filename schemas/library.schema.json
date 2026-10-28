@@ -832,6 +832,11 @@
     "McbBrand": {
       "additionalProperties": false,
       "properties": {
+        "ac_rated": {
+          "default": true,
+          "title": "Ac Rated",
+          "type": "boolean"
+        },
         "code_pattern": {
           "anyOf": [
             {
