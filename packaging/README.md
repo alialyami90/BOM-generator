@@ -6,7 +6,7 @@ Builds the per-user Windows installer (plan M11, ADR 0007, ADR 0009).
 | --- | --- |
 | `bomgen.spec` | PyInstaller spec: one folder with `BOM Generator.exe` (windowed) and `bomgen.exe` (console); records the module list `--self-test` checks |
 | `entry_app.py`, `entry_cli.py` | entry scripts; the logic is in `bomgen.app.launcher` |
-| `bomgen.iss` | Inno Setup script: per-user install, Start menu, `.bomlib` association, WebView2 check |
+| `bomgen.iss` | Inno Setup script: per-user install, Start menu, `.bomlib` and `.bomproj` associations, WebView2 check |
 | `requirements.txt` | pinned build tools |
 | `release-notes.md` | text placed at the top of each GitHub Release |
 | `icons/bomgen.ico` | optional; used when present (comes with the M9 design) |
@@ -20,8 +20,8 @@ Bump `__version__` in `src/bomgen/__init__.py` and `version` in
 git tag v0.1.0 && git push origin v0.1.0
 ```
 
-Don't cut a release tag before M1 and M10 land: until then the installed app
-and CLI only show placeholder messages. `.github/workflows/release.yml` builds,
+Don't cut a release tag before M10 lands: until then the installed app only
+shows a placeholder instead of its window (and for `.bomproj` files). `.github/workflows/release.yml` builds,
 smoke-tests the install and uninstall,
 and publishes the GitHub Release. Run it by hand (Actions → Release → Run
 workflow) to get the installer as an artifact without releasing.
