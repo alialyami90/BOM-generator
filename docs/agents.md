@@ -14,7 +14,7 @@ agent; the milestones are in [`plan.md`](plan.md) → "Milestones".
 | Agent | Thread | Delivers | Owns (may change freely) |
 | --- | --- | --- | --- |
 | A1 | Lead developer | Reviews, cross-thread consistency, this file | `docs/agents.md`, `CLAUDE.md`, `.github/workflows/ci.yml`, plan sections 1, 2, 4 (intro), 5 |
-| A2 | Input models and examples | M1, M1b | `src/bomgen/models/`, `src/bomgen/io/`, `src/bomgen/cli.py`, `examples/`, plan section 3 and the M1 section |
+| A2 | Input models and examples | M1, M1b | `src/bomgen/models/`, `src/bomgen/io/`, `src/bomgen/cli.py`, `src/bomgen/build.py`, `examples/`, plan section 3 and the M1 section |
 | A3 | Device database researcher | Reference data, outside the milestones | `data/device-db/`, its validation test |
 | A4 | UI designer | M9 | `docs/ui/`, the M9 section |
 | A5 | Library update packages | M8, M8b | `src/bomgen/library_store/`, ADR 0008, the M8 section |
@@ -136,7 +136,8 @@ change small, and rebase on `main` before asking for review.
 | `docs/plan.md` | Edit only your milestone's section and the open questions you resolve. Structure and other sections: A1. |
 | `docs/decisions/README.md` | Add one row for your own ADR. |
 | `pyproject.toml` | Add only the dependencies, extras and entry points your milestone needs. The `bomgen` console script is A2's. |
-| `src/bomgen/cli.py` | A2's. Other command groups live in their own module and attach with one `app.add_typer(...)` line. `build` calls A8's layout, A9's pipeline and A10's writer; each owner adds its own call after telling A2. |
+| `src/bomgen/cli.py` | A2's. Other command groups live in their own module and attach with one `app.add_typer(...)` line. `build` calls `bomgen.build.build_substation`. |
+| `src/bomgen/build.py` | A2's. The one build sequence `bomgen build` and the app share: A8's layout, A9's pipeline, compare and check report, A10's sheets and writer; each owner adds its own step after telling A2. |
 | `.github/workflows/` | `ci.yml` is A1's; a new job must join `ci-status`'s `needs` (ADR 0006). Other workflows belong to the agent that adds them. |
 | `CLAUDE.md` | A1. Ask A1 for changes. |
 | `README.md` | A7, under A1's direction. |

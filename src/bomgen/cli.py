@@ -10,18 +10,17 @@ import typer
 import yaml
 
 from bomgen import __version__
-from bomgen.checks import check_report, render_text
-from bomgen.checks import render_json as render_checks_json
+from bomgen.build import build_substation, workbook_name
+from bomgen.checks import render_text
 from bomgen.engine.errors import EngineError
-from bomgen.engine.pipeline import build as build_bom
+from bomgen.engine.layout import with_layout
 from bomgen.io.errors import InputError
 from bomgen.io.loader import LoadedProject, LoadedSubstation, load_inputs, load_substation
 from bomgen.io.schema import write_json_schemas
 from bomgen.library_store.cli import library_app
 from bomgen.project_store.cli import project_app
-from bomgen.revision import compare_with_previous, read_previous_issue, render_revisions
-from bomgen.sheets.workbook import build_workbook
-from bomgen.writer import WriterError, write_workbook
+from bomgen.revision import read_previous_issue, render_revisions
+from bomgen.writer import WriterError
 
 app = typer.Typer(no_args_is_help=True, help="Substation SCADA BOM generator.")
 app.add_typer(library_app, name="library")
@@ -101,12 +100,6 @@ def validate(
         )
 
 
-def _workbook_name(substation: LoadedSubstation) -> str:
-    """The workbook file name (spec: Output requirements, OUT-2)."""
-    document = substation.documents[substation.substation.document]
-    return substation.substation.output.file_name.format(doc_no=document.doc_no, rev=document.rev)
-
-
 def _selected(
     loaded: LoadedProject | LoadedSubstation, substation_id: str | None
 ) -> list[LoadedSubstation]:
@@ -155,8 +148,6 @@ def build(
     Exits 1 when a check fails; the report is also written next to the workbook as
     <name>.checks.json.
     """
-    from bomgen.engine.layout import with_layout
-
     loaded = _load_or_exit(file)
     targets = _selected(loaded, substation)
     previous = None
@@ -182,25 +173,18 @@ def build(
                         typer.echo(f"{target.substation.substation.id}: {line}", err=True)
                     if bad:
                         raise typer.Exit(1)
-            result = build_bom(target)
-            marked = result
-            if previous is not None:
-                marked, revisions = compare_with_previous(result, previous)
-            workbook = build_workbook(target, marked, logo=target.logo)
-            path = write_workbook(workbook, out / _workbook_name(target))
+            outcome = build_substation(
+                target, out / workbook_name(target), previous=previous, checks=not no_checks
+            )
         except (EngineError, WriterError) as error:
             typer.echo(f"{target.substation.substation.id}: {error}", err=True)
             raise typer.Exit(1) from None
-        typer.echo(str(path))
-        if previous is not None:
-            typer.echo(render_revisions(revisions))
-        if not no_checks:
-            report = check_report(target, result)
-            path.with_suffix(".checks.json").write_text(
-                render_checks_json(report), encoding="utf-8"
-            )
-            typer.echo(render_text(report), nl=False)
-            failed = failed or report.failed
+        typer.echo(str(outcome.path))
+        if outcome.revisions is not None:
+            typer.echo(render_revisions(outcome.revisions))
+        if outcome.checks is not None:
+            typer.echo(render_text(outcome.checks), nl=False)
+            failed = failed or outcome.checks.failed
     if failed:
         raise typer.Exit(1)
 
