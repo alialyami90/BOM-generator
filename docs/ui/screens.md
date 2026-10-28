@@ -7,104 +7,180 @@ route form (`prototype/index.html#/…`). Components are in
 ## Map
 
 ```
-Home ─┬─ Open / New project ──▶ Project ─ Panels ─ Library ─ Checks ─ Preview ─ Build
-      └─ Install a library ──▶ Library (Import update)
+Home (all projects) ─ Project ─┬─ Overview · Substations · Documents · Backup and share
+                               └─ Substation ─ Settings · Network · Panels (board, list, panel editor)
+Library (import, versions)         └─ Checks ─ Preview ─ Build        (each per substation)
 ```
+
+A **project** holds the document register, the project information, shared
+defaults and the substations. A **substation** has one system: its network,
+panels, checks and workbook. The first substation can be copied to start the next.
 
 | Route | Screen | Purpose |
 | --- | --- | --- |
-| `#/home` | Home | Recent projects; first-run guidance when no library is installed |
-| `#/project/<tab>` | Project | Project settings in six tabs, one of them YAML |
-| `#/panels` | Panels | The cabinets of the project |
-| `#/panels/<id>/<tab>` | Panel editor | One cabinet: enclosure, devices, port plans, options, document, YAML |
-| `#/library` | Library | Browse the installed devices, datasheets and alternatives (read-only) |
-| `#/library/import` | Import and versions | Review and install a `.bomlib`; installed versions and rollback |
-| `#/checks` | Checks | Problems in the files, then the engine's checks |
-| `#/preview/<sheet>` | Preview | The seven workbook sheets as the engine computes them |
-| `#/build` | Build | Choose the name and folder, write the workbook |
+| `#/home` | Home | All projects on this PC; first-run guidance when no library is installed |
+| `#/project/<tab>` | Project | `info`, `substations`, `documents`, `share` |
+| `#/settings/<tab>` | Substation settings | Substation-only settings (general, documents used, output, constants, loose material, YAML) |
+| `#/network` | Network | IED count, topology, equipment, spares, the engine's sizing result |
+| `#/panels` | Panels | The Board and List views of the generated panels |
+| `#/panels/<id>/<tab>` | Panel editor | One cabinet; generated panels are read-only, hand-written ones are editable |
+| `#/library`, `#/library/import` | Library, Import and versions | Browse the installed devices; review and install a `.bomlib` |
+| `#/checks`, `#/preview/<sheet>`, `#/build` | Verify and issue | For the open substation |
 
-The left navigation follows the workflow. Home and Library are always
-reachable; the other items are disabled until a project is open.
+The rail has three groups. Top: Home and Library, always reachable. **Project**:
+one item that opens the project page, with its status. **Substation**: a
+switcher (a select that lists the project's substations) over Settings, Network
+and Panels, then **Verify and issue** (Checks, Preview, Build). The substation
+items are disabled until a substation is open.
 
 ## Primary flows
 
-**1. First run.** Home shows three numbered steps. "Install a library…" opens
-Library → Import update. After a successful import the navigation unlocks and
-Home becomes the recent-projects list.
+**1. First run.** Home shows four numbered steps. "Install a library…" opens
+Library → Import update. After a successful import, New project and Import
+project file become available.
 
-**2. Open, fix, build.** Open project → Project opens on General → Checks shows
-the problem list → "Go to field" opens the right panel tab with the field
-highlighted → fix → "Run checks again" → Preview → Build → "Open workbook".
-Build is disabled while errors exist and says why.
+**2. New project, first substation, next substations.** Home → New project
+(name, client, folder, first substation). The project page opens on Substations.
+"Create from this…" on a substation row opens New substation: choose to start
+blank or from a copy, then id, name, first cabinet number and tag prefix. A copy
+keeps equipment, network, spares, constants and loose material; it does not copy
+manual layout changes, build output or document numbers.
 
-**3. Update the device library.** Library → Import update… → choose the
-package → review verification and changes → "Import and activate x.y.z". The
-previous version stays installed. Projects built with the previous version
-show a warning in Checks until rebuilt.
+**3. Open, fix, build.** Open a project → open a substation (Panels) → Checks
+shows the problem list → "Go to field" opens the screen that owns the field →
+fix → "Run checks again" → Preview → Build. Build is disabled while errors exist
+and says why. The project's document register is edited once, on the project
+page, and every substation's headers read from it.
 
-**4. Mirror a panel.** Panels → Mirror a panel… → pick the original, enter the
-panel id, cabinet number, cabinet name, sheet name, tag prefix and LAN → the new
-panel opens with a banner that says it follows the original. A mirror is a small
-file (`mirror_of`, identity fields, its own `options` and `document`). Its
-Enclosure, Devices and Port plans tabs show the original's content read-only with
-an "Open PSA1" button. Options (only the filled fields are written), Document and
-YAML are editable. An error in the original's devices is reported on the original.
+**4. Adjust the panels.** Network sets the IED count, topology, equipment and
+spares; the layout engine places the devices in panels. The Panels board shows
+the result, and the engineer moves, deletes or resets (see Panels below). Each
+change is saved as an override and the layout runs again.
 
-**5. Edit as YAML.** Any record with a YAML tab (Project, Panel) offers the
-file's source. Errors show on the line. "Apply to form" is available only when
-the YAML is valid.
+**5. Back up and share.** Project → Backup and share. "Export project…" writes one
+`.bomproj` file (a zip of the project folder without `out/` and `Backups/`, with a
+manifest and checksums). "Back up now" saves the same kind of file into the
+project's `Backups` folder. "Import project file…" and "Restore…" open the same
+review dialog: contents, library version, integrity and path checks, and, when
+the project already exists, a choice between keeping both and replacing (a
+backup is made first). Double-clicking a `.bomproj` file starts the app with the
+review dialog open and a banner on Home.
+
+**6. Update the device library.** Library → Import update… → choose the package →
+review verification and changes → "Import and activate x.y.z". The previous version
+stays installed. Projects built with the previous version show a warning in
+Checks until rebuilt.
+
+**7. Edit as YAML.** Records with a YAML tab (substation settings, hand-written
+panels, generated panels read-only) offer the file's source. Errors show on the
+line. "Apply to form" is available only when the YAML is valid.
 
 ## Screens
 
 ### Home
-- **Layout:** title and two actions (Open project primary, New project
-  secondary); a table of recent projects (name and path, document number,
-  panels, library used, last opened, status); an info banner about importing a
-  library update.
-- **Behaviour:** a row opens the project. Status uses the same words as Checks
-  (`Ready`, `2 errors`, `Library out of date`).
-- **States:** first run (library missing): steps list, "Install a library…"
-  primary, "Open project…" disabled with an explanation. Empty recent list
-  (library installed): heading "No projects yet" and the two actions.
+- **Layout:** title and three actions (New project primary, Open folder and
+  Import project file secondary); a table of projects (name and path, client,
+  substations, library used, last opened, status); an info banner about library
+  updates. A `.bomproj` launch adds a banner above the table.
+- **Behaviour:** a row opens the project page on Substations. Status uses the
+  same words as Checks (`Ready`, `2 errors`, `Library out of date`).
+- **States:** first run (steps list, "Install a library…" primary, the project
+  actions disabled with an explanation); no projects yet; opened from a file.
 
 ### Project
-- **Layout:** title, Save (enabled only when changed), tab list, one form per
-  tab (720–840 px column).
-- **Tabs:** *General* (name, substation, document number, revision, logo, and a
-  read-only block for the library the project was built with and the active
-  one); *Documents* (a table for the three calculation sheets: document number,
-  revision, issue date, scope); *Output* (file-name pattern with the resulting
-  name shown, sheet names); *Design constants* (a table of the ten spec
-  constants with unit, default and a "Changed from …" badge when different);
-  *Loose material* (items not in any cabinet, with the cabinet that feeds them);
-  *YAML* (`project.yaml`).
-- **States:** unsaved (status bar shows "Unsaved changes", Save enabled);
-  invalid field (inline error); library older than active (badge and a
-  "Record 1.4.0 in this project" action).
+- **Layout:** breadcrumb (Projects), title, client and folder, tab list, one
+  form or table per tab.
+- **Overview:** name, client, logo, the device library the project was built with
+  against the active one (with "Record 1.4.0 in this project"), and **Shared
+  defaults** (power margin, spare ports, rack space kept free, spare DC and AC
+  branches). A substation starts from these; the values it changes are marked
+  in its own screens.
+- **Substations:** a table (name and folder, panels, last changed, status) with
+  Open, "Create from this…", and a primary "New substation…". Substations created
+  from another say so under their name.
+- **Documents:** the **register**, one per project, grouped by substation with a
+  band row and an "Add" button for each. Columns: document, document number,
+  revision, issue date, used by, state (assumed dates are flagged).
+- **Backup and share:** Export and Import actions, and a Backups table (file,
+  saved, size, library, Restore…, Show in folder) with "Back up now".
+- **States:** unsaved; invalid field; library older than active.
 
-### Panels (list)
-- **Layout:** table (sheet, cabinet number, name, kind, LAN, device count,
-  mirror of, status), actions "Mirror a panel…" and "Add panel".
-- **Behaviour:** order is sheet order. Mirror and Add open dialogs. Status shows
-  the panel's error count.
+### Substation settings
+Only what belongs to this substation: *General* (name, title line, and a
+read-only "From the project" block with a link to the project page), *Documents*
+(which register entry each calculation sheet prints; cabinet BOMs choose theirs on
+each panel), *Output* (main document, file-name pattern with the resulting name,
+calculation sheet names), *Design constants* (the ten spec constants with unit,
+default and a "Changed from …" mark; defaults come from the project), *Loose
+material* and *YAML* (`substation.yaml`). Project-wide values are not repeated
+here.
+
+### Network
+- **Layout:** two columns. Left: **Field network** (IED count, Star or Ring, ring
+  size when Ring), **Equipment** (device, role, A+B, L2 ports, height), and
+  **Spares** (ports kept free, spare SFPs per L1, rack space kept free, spare DC
+  and AC branches). Right: a read-only **Result** card from the engine
+  (`NetworkPlan`): L1 and L2 switches, L2 ports used of usable, links, and the
+  note for the chosen topology.
+- **Behaviour:** the Result card shows a busy state and updates after each
+  change. Equipment rows are checked against the library; an unknown part id
+  shows an inline error with a suggestion. In a star, each L1 has one uplink to
+  its L2 plus an A–B interlink. The equipment table sits here because the panels
+  are generated from it, which was not in the first scope.
+- **States:** substation with no network yet (warning banner, IED count marked
+  required, empty equipment, empty result); IED count assumed; unknown device.
+
+### Panels
+- **Header actions:** Undo, Reset to automatic, Add hand-written panel….
+- **Board tab:** one column per generated panel, grouped in pairs
+  (**Pair 1: panels 1 and 2**). Column header: panel name, side badge, a U meter
+  and "21 of 32 U used · 11 U free". The rack shows each device as a block whose
+  height follows its size in U, a gap for each blank plate (plates are not BOM
+  rows), the free space, and the space kept free for expansion. DIN-rail parts
+  are counted under the column and take no rack space. Common devices (GPS,
+  RTAC, I/O) sit in the same panels as the A and B units; there is no common
+  column.
+- **Select, move, delete:** selecting a device shows its tag and an action bar:
+  "Move pair…", "Move this unit only…", "Delete pair". A device that has no
+  partner shows "Move…" and "Delete". The partner of the selection is outlined.
+  Dragging does the same as "Move pair…"; Alt+drag moves only the unit. A pair
+  moves to panels (2n−1, 2n); a single A unit moves only to odd panels and a
+  single B unit only to even ones. Moved devices carry a small marker, and
+  "N manual changes" opens the list of overrides with Revert and Restore.
+- **Not allowed:** while dragging, a column that cannot take the move shows a
+  red border; on drop, a banner says why ("Panel 1 needs 34 U, only 32 U may be
+  used. Nothing was changed."). A move never silently re-flows other devices.
+  The move dialog lists every destination with the resulting U, and greys out
+  the ones that do not fit with the reason.
+- **Undo and reset:** every move or deletion is one undo step (toast Undo and
+  Ctrl+Z). "Reset to automatic" asks for confirmation, states how many moves and
+  deletions are removed, and can be undone.
+- **Keyboard:** Tab to a device, Enter selects, then Tab to the action bar;
+  "Move…" opens the destination list. Delete removes the focused device.
+- **List tab:** the panels as a table (sheet, cabinet, name, written by, side,
+  rack space, status), including the hand-written ones.
+- **Boundary:** the board only writes `layout.overrides` and `removed` and shows
+  the result of `layout_preview`; the placement rules live in the engine.
+  Overrides refer to equipment ids and pairs, not tags.
+- **States:** no panels yet (link to Network); errors in a panel; manual changes
+  present.
 
 ### Panel editor
-- **Header:** breadcrumb, cabinet name, cabinet number · kind · LAN · mirror,
-  "Preview BOM" and Save. A mirrored panel shows an info banner above the tabs and read-only Enclosure, Devices and Port plans.
-- **Enclosure:** make, model, ordering code, H × D × W with unit suffixes, base
-  frame height, cable entry.
-- **Devices:** the main table. Columns: reorder handle, device (id and model),
-  quantity, purpose, HWIO override, generated tag, remove. "Add device" opens
-  the device picker. Order sets BOM order and breaker numbering. An unknown part
-  id shows an inline error with a suggestion.
-- **Port plans:** one section per switch with a small table (use, ports, speed,
-  media, spare) and an "Engine result" footer.
-- **Options:** spare branches, ventilation, change-over diodes, main MCB
-  override, auxiliary socket, inter-panel terminals, smoke detector, grounding
-  busbars, terminal overrides. Overrides carry a warning help line.
-- **Document:** document number, revision, issue date, revised-cell list.
-- **YAML:** `panels/<id>.yaml`.
-- **States:** tab error badges; invalid field; mirrored panel; unsaved.
+- **Header:** breadcrumb, cabinet name, cabinet number · kind · side, "Preview
+  BOM" and Save.
+- **Generated panel:** a banner says the layout writes it. Enclosure, Devices
+  (with an Origin column that marks moved devices), Port plans and Options show
+  the result read-only, and the YAML tab is labelled Generated. Only *Document*
+  (which register entry the sheet prints) is editable. Changes are made on
+  Network or by moving devices on the board; the banner links to both.
+- **Hand-written panel** (`manual_panels`, for example the WS console): the full
+  editor, as in the first design. Devices: reorder handle, device, quantity,
+  purpose, HWIO override, generated tag, remove; "Add device" opens the picker.
+- **Tabs:** Enclosure (make,
+  model, code, H × D × W, base frame, cable entry), Port plans (a small table per
+  switch with an "Engine result" footer), Options (spares, ventilation, diodes,
+  main MCB override, socket, terminals, smoke detector, busbars, terminal
+  overrides, each override with a warning line), Document, `panels/<id>.yaml`.
 
 ### Library
 - **Layout:** title with the library name, version and install date, "Import
@@ -141,6 +217,8 @@ the YAML is valid.
   dialog. Making a version active never edits project files.
 
 ### Checks
+Per substation. Problems in the project files (register, defaults) appear here
+too and their "Go to field" opens the project page.
 - **Layout:** a status banner (red with the count, or green with "Go to
   Build"); a Problems section with level filter chips and a table (level,
   `file:line` and field path, what is wrong and what to do, "Go to field");
@@ -151,8 +229,9 @@ the YAML is valid.
   checks are "Not run" while errors exist and say why.
 
 ### Preview
-- **Layout:** title, a banner when the last load had errors, sheet tabs (Sheet 1
-  to 4, Power Consumption, Heat Dissipation, Heat Calculations), then the sheet.
+- **Layout:** title, a banner when the last load had errors, sheet tabs (one
+  Sheet per panel, then Power Consumption, Heat Dissipation, Heat Calculations),
+  then the sheet.
 - **BOM sheet:** group chips A to H with counts, a row filter, switches for the
   hidden HWIO column and revised cells; the sheet title block (cabinet number,
   substation and cabinet name); the table with a preview-only Grp column, SR.NO,
@@ -199,10 +278,18 @@ The UI is built on a small Python API (milestone M10). From the design, it needs
 
 | Need | Used by |
 | --- | --- |
-| Open a project: parsed models, or located errors (`file:line`, field path, message) | Project, Panels, Checks |
+| List the projects on this PC, with each one's substations, status and recorded library version | Home, Project |
+| Open a project: parsed models, or located errors (`file:line`, field path, message) | Project, Substation, Checks |
+| `layout_preview(substation, overrides) -> LayoutResult`: panels with devices, U used, blank plates, DIN-rail counts, and errors for a move that does not fit | Panels board, panel editor |
+| `NetworkPlan` for a substation (read-only): L1 and L2 switches per side, ports used and usable, links | Network |
+| Stable equipment ids, so overrides name a device or a pair and never a tag | Panels board |
+| Project export (`.bomproj`), and an import dry-run: contents, integrity and path checks, name clash with an existing project | Project, Home |
+| Backups: list the `Backups` folder, write a backup, restore through the same dry-run | Backup and share |
+| Whether the app was started from a `.bomproj` file | Home |
 | The JSON Schemas for project and panels, plus a label and help override file | Forms |
 | Validate and run engine checks: problem list and the four check results | Checks, status bar |
 | Generated values per panel: tags, HWIO, engine port-plan results | Panel editor |
+| Create a substation from another (copy rules above) and write `substation.yaml` | New substation |
 | The installed library: devices with datasheet, alternatives, sources and data-quality level | Library, device picker |
 | Library packages: verify and preview (the dry-run result), import, list versions, roll back | Import and versions |
 | Sheet models or computed rows for each workbook sheet | Preview |
@@ -237,13 +324,16 @@ open PRs at the time.
 - Checks: while errors exist the engine checks collapse to one sentence; the
   table appears once they have run. The Where column leads with the panel and
   tab, with `file:line` and the field path underneath.
+- Navigation rail: Project and Substation are separate groups, so it is always clear whether an item acts on the project or the substation.
 - Navigation rail: Build shows an icon with "Blocked" or "Ready" so state is never
   colour only.
 - Devices table: the drag handle is full-contrast. Keyboard reorder is
   Alt+Up/Alt+Down on the focused row. Removing a row marks the project unsaved
   and offers Undo (Ctrl+Z) until the next save. The prototype only hides the row.
-- Mirrored panels: Enclosure, Devices and Port plans are read-only and follow the
-  original, matching A2's `PanelMirror`. The sample error moved to the original.
+- Generated panels (including B panels that mirror their A panel): Enclosure,
+  Devices, Port plans and Options are read-only; only hand-written panels
+  (`manual_panels`) keep the full editor. This replaces the Mirror dialog of the
+  first design.
 - Preview, Power and Heat show figures the engine supplies. The prototype holds
   them as literal values in `data.js`; no rule is computed in the UI.
 - Still open for Ali: a read-only reviewer mode (hides Save, Add device and

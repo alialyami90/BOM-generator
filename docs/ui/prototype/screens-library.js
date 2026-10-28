@@ -15,7 +15,7 @@
     const t = S.tab.libtab || 'devices';
     return `<div class="page">${pageHead('Device library', `${esc(L.name)} ${esc(L.version)}, installed ${esc(L.installed)}. This list is read-only. It changes only when you import an update package.`,
       `<button class="btn btn--secondary" data-action="goto" data-to="#/library/import">${icon('upload')}Import update…</button>`)}
-      ${S.project === 'empty' ? banner('warn', '<b>No library is installed.</b> Import a <span class="mono">.bomlib</span> file to see devices here.', '<a class="btn btn--primary btn--sm" href="#/library/import">Import…</a>') : devicesView()}</div>`;
+      ${S.firstRun ? banner('warn', '<b>No library is installed.</b> Import a <span class="mono">.bomlib</span> file to see devices here.', '<a class="btn btn--primary btn--sm" href="#/library/import">Import…</a>') : devicesView()}</div>`;
   }
 
   function filtered() {
