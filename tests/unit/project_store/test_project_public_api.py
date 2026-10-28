@@ -13,6 +13,7 @@ def test_the_public_entry_points_are_exported() -> None:
         "ProjectImportPreview",
         "BackupInfo",
         "list_backups",
+        "preview_backup_restore",
         "preview_project_import",
         "restore_backup",
     ):
