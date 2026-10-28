@@ -1,8 +1,8 @@
-"""The ``bomgen`` command line: ``validate`` and ``schema``."""
+"""The ``bomgen`` command line: ``validate``, ``build`` and ``schema``."""
 
 from pathlib import Path
 
-from builders import SUBSTATION_DIR, default_p1, write_project
+from builders import SUBSTATION_DIR, default_p1, default_project, write_project
 from typer.testing import CliRunner
 
 from bomgen import __version__
@@ -97,3 +97,26 @@ def test_validate_directory_path_reports_located_error_without_traceback(tmp_pat
     lines = result.stderr.strip().splitlines()
     assert lines[0].startswith(f"{tmp_path.as_posix()}: cannot read file: ")
     assert lines[-1] == "1 problem(s) found."
+
+
+def test_build_reports_input_issues_and_exits_1(tmp_path: Path) -> None:
+    project = default_project()
+    project["project"]["logo"] = "missing.png"
+    result = runner.invoke(
+        app, ["build", str(write_project(tmp_path, project=project)), "-o", str(tmp_path)]
+    )
+    assert result.exit_code == 1
+    assert "project.logo: file not found" in result.stderr
+    assert "1 problem(s) found." in result.stderr
+    assert not list(tmp_path.glob("*.xlsx"))
+
+
+def test_build_unknown_substation_is_a_usage_error(tmp_path: Path) -> None:
+    project_file = write_project(tmp_path)
+    result = runner.invoke(app, ["build", str(project_file), "--substation", "s9"])
+    assert result.exit_code == 2
+    assert "no substation 's9' (the project has: s1)" in result.output
+    substation_file = tmp_path / SUBSTATION_DIR / "substation.yaml"
+    result = runner.invoke(app, ["build", str(substation_file), "-s", "s9"])
+    assert result.exit_code == 2
+    assert "no substation 's9'" in result.output
