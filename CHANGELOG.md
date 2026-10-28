@@ -10,6 +10,10 @@ tagged release.
 
 ### Added
 
+- Desktop app Network result, L1 ranking and Panels board, read-only: the
+  network plan per side, the L1 switches in the engine's order and each
+  generated panel's units, blank plates and layout issues; every substation
+  screen is now connected (milestone M10c, #78).
 - Desktop app Preview: each panel sheet and the three calculation sheets as
   the engine computes them, through `preview_substation` (milestone M10d,
   #71).
@@ -128,6 +132,11 @@ tagged release.
 
 ### Changed
 
+- The app's Build runs the shared build sequence; `BuildOutcome.sheets`
+  carries the workbook's sheet names (#79).
+- One build sequence, `bomgen.build.build_substation`, for `bomgen build` and
+  the app; the caller lays out first (#76, #77).
+- Changelog, README and test READMEs for #71–#74 (#75).
 - The app's Checks, Build and Preview run the same automatic layout as
   `bomgen build`, so generated panels give the same workbook; layout errors
   block Build and Preview and warnings show in Checks (#73).
