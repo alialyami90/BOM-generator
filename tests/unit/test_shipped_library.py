@@ -89,3 +89,11 @@ def test_the_example_project_builds_with_the_shipped_library(tmp_path: Path) -> 
     assert outcome.failed is False
     assert outcome.path is not None
     assert outcome.path.is_file()
+
+
+def test_the_c60h_dc_brand_is_dc_only_in_both_libraries(shipped: Library) -> None:
+    # Schneider C60H-DC is not rated for AC: selectable as mcb_dc only (ADR 0023).
+    for library in (shipped, load_library(EXAMPLE)):
+        brand = next(b for b in library.catalogue_brands.mcb if b.id == "schneider-c60h-dc")
+        assert brand.ac_rated is False
+        assert all(b.ac_rated for b in library.catalogue_brands.mcb if b is not brand)

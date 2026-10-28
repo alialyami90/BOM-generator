@@ -4705,6 +4705,7 @@ catalogue_brands:
   mcb:
     - id: schneider-c60h-dc
       family: Acti9 C60H-DC 2P (DC only)
+      ac_rated: false  # DC only: valid as mcb_dc, refused as mcb (ADR 0023)
       make: Schneider
       poles: 2
       ratings_a: &id001
