@@ -22,7 +22,9 @@ def powered_lines(
         device = lookup(library, line.part_id)
         if device.excluded_from_power:
             continue
-        assert device.supply_type and device.unit_power_w is not None and device.load_type
+        assert device.supply_type
+        assert device.unit_power_w is not None
+        assert device.load_type
         if not isinstance(line.qty, int):
             raise EngineError(
                 f"{line.tag or line.part_id}: a powered row needs a count, not {line.qty!r}"

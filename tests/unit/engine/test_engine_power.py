@@ -4,8 +4,8 @@ Columns, Formulas; Data model and generation order, step 4)."""
 import pytest
 from engine_factories import device, library, powered
 
-from bomgen.engine.power import cabinet_power, external_power, power_consumption
 from bomgen.engine.errors import EngineError
+from bomgen.engine.power import cabinet_power, external_power, power_consumption
 from bomgen.models.bom import BomLine, Group, LooseTable, PanelBom
 from bomgen.models.library import LoadType, SupplyType
 from bomgen.models.project import DesignConstants
@@ -41,7 +41,8 @@ def test_only_powered_rows_appear_dc_then_ac_in_bom_order() -> None:
         line("FAN-AC", Group.D, 2),
     )
     cabinet = cabinet_power(table, LIB, DesignConstants())
-    assert cabinet.dc is not None and cabinet.ac is not None
+    assert cabinet.dc is not None
+    assert cabinet.ac is not None
     assert [(p.source.line, p.qty, p.unit_w, p.voltage_v) for p in cabinet.dc.lines] == [
         (1, 6, 77, 125)
     ]
