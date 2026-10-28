@@ -39,12 +39,17 @@
 
 ## Inputs this plan needs from A2 (M1b) and A1
 
-Asked in the A2 thread; Task 5 uses whatever names A2 picks.
+A2 agreed these names for M1b (`models/substation.py` unless noted); Task 5 uses them.
 
-- Equipment entries: `part_id`, `role`, `redundant`, `side`, `l2_ports`, plus the **speed and media of the L2 link** (default 1G MM) and a `qty` for roles the sizer does not count.
-- Generated-panel identity per panel number: cabinet number, cabinet name, tag prefix, sheet name, enclosure, document key, and per-panel options (e.g. the aux socket that today only panel 002 has).
-- `Panel.generated: bool = False` and `DeviceInstance.first_nn: int | None`.
-- Library `height_u`, `ports[].usable_for`, catalogue `enclosure_u`; `load_substation(path)` returning the substation with its library.
+- `Equipment(part_id, role, redundant=False, side=none, qty=1, l2_ports=0, l2_speed="1G", l2_media="MM")`; `qty` is rejected on `l1_switch` (the sizer counts those).
+- `Substation.generated_panels: GeneratedPanels | None`: templates `id`, `cabinet_number`, `cabinet_name`, `tag_prefix`, `sheet_name` with one `{n}` placeholder and an optional format spec (`"861-GIS01-PSA-{n:04d}"`, `"PSA{n}"`, `"psa{n}"`); `kind` (default network), `enclosure`, `document` key, `options` for every generated panel and `options_by_panel: dict[int, dict]` merged over them (validated by the loader as `PanelOptions`).
+- `Panel.generated: bool = False`; `DeviceInstance.first_nn: PositiveInt | None = None`.
+- Library: `DeviceType.height_u: int | None`, `PortGroup.usable_for: PortUse` (`ied | uplink | any`, default `any`), `Catalogues.enclosure_u = 42`.
+- `io.loader.load_substation(path, *, store=None) -> LoadedSubstation` with `.substation`, `.project`, `.library`, `.documents`, `.constants`, `.spares` (merged with project defaults), `.panels`, `.panel_files`, `.manual_panel_ids`, `.panel_capacity_u`.
+- Example substation: `examples/substations/gis01/substation.yaml` (40 IEDs, star, A3's `height_u` values).
+
+Still open with A1 and Ali:
+
 - **Override and removal keys** (A1): the design writes tags (`PSA1-L1-ESW-A13`); this plan keys them by the automatic tag from A9's tag builder, and a pair by its A unit's tag (`{ pair: PSA1-EXT-FW-A, panel: [3, 4] }`). Task 5 needs A9's public tag function or waits for it.
 - **Golden R10** (Ali, via A1): with 40 IEDs R1 gives **2** L1 switches per side, not the spec example's 6, and the port plans differ from today's hand-written ones (L1 SFPs 2 × 2 + 3 = 7, not 24 + 3). The golden records the rule results; the hand-written example panels keep every BOM golden value.
 - **Cable managers** (Ali, via A1): 1U each, 9 per network cabinet today, but derived later in step 3. This plan does not count them against the 32U.
@@ -106,7 +111,7 @@ Asked in the A2 thread; Task 5 uses whatever names A2 picks.
 - `@dataclass(frozen=True) Unit(key: str, part_id: str, rank: int, side: Side, height_u: int, pair: str | None = None)` — `rank` is the equipment's position in BOM group order; `pair` is shared by an A unit and its B unit.
 - `@dataclass(frozen=True) LayoutRules(capacity_u: int = 32, blank_plate_u: int = 1)`.
 - `@dataclass PanelFill(number: int, units: list[Unit])` with `used_u(rules) -> int` and `free_u(rules) -> int`.
-- `IssueKind = Literal["device-too-tall", "move-does-not-fit", "stale-override", "stale-removal", "unknown-panel", "panel-empty"]`; `@dataclass(frozen=True) LayoutIssue(kind: IssueKind, subject: str, message: str)`.
+- `IssueKind = Literal["device-too-tall", "move-does-not-fit", "stale-override", "stale-removal", "unknown-panel", "panel-empty", "missing-height"]`; `@dataclass(frozen=True) LayoutIssue(kind: IssueKind, subject: str, message: str)`.
 - `@dataclass Layout(panels: list[PanelFill], issues: list[LayoutIssue])`.
 - `used_u(heights: Sequence[int], blank_plate_u: int) -> int`: `Σ h + (k − 1) × blank_plate_u` over the k units with `h > 0`; 0 for k = 0.
 - `fill(units: Sequence[Unit], rules: LayoutRules) -> Layout`: A units in `rank` order into odd panels, B units into even panels, breaking at the same places (lock-step), then each `Side.NONE` unit in `rank` order into the panel with the most free U (ties → lowest number), opening the next odd/even pair when none fits. A trailing empty panel is dropped.
@@ -149,7 +154,7 @@ Asked in the A2 thread; Task 5 uses whatever names A2 picks.
 
 **Files:** Modify `src/bomgen/engine/layout.py`, `src/bomgen/cli.py` (one command, A2 told first); Test `tests/unit/engine/test_layout.py`, `tests/unit/test_cli.py` (layout cases only).
 
-**Consumes:** Tasks 1–4; A2's `load_substation` and substation/library models; A9's tag function for unit keys.
+**Consumes:** Tasks 1–4; `load_substation`, `Equipment`, `GeneratedPanels` (names above); A9's tag function for unit keys. An equipment part with `height_u: None` is a `missing-height` issue and is placed as 0U; an explicit 0 is a DIN-rail part.
 **Produces:**
 - `@dataclass LayoutReport(ied_count: int, port_lines: list[str], fill_lines: list[str], issues: list[LayoutIssue])` with `lines() -> list[str]` (`"IED count: 40"` first; port lines `"{tag}: {demand} of {usable} usable ports"`; `has_errors`).
 - `@dataclass LayoutResult(panels: list[Panel], plan: NetworkPlan, report: LayoutReport)`.
@@ -163,6 +168,7 @@ Asked in the A2 thread; Task 5 uses whatever names A2 picks.
   - `test_r4_generated_files_never_mention_ieds`: `render_panel_yaml` of every panel contains neither the IED count nor `ied`; `report.lines()[0] == "IED count: 40"`.
   - `test_r3_port_plans_sit_with_their_switches`: panel 1 has the L2 and L1 plans keyed by part id; panel 2 the same counts.
   - `test_r7_console_panels_are_left_alone`.
+  - `test_r5_missing_height_is_reported`: an equipment part without `height_u` gives one `missing-height` issue naming the part.
   - `test_cli_layout_writes_panels_and_prints_fill` (`CliRunner`, `tmp_path`): exit 0, two panel files written, output contains `"32 U"`; `test_cli_layout_exits_1_on_layout_errors`.
 - [ ] Run; fail. Implement. Run; pass. Checks. Commit `feat(layout): generate panel files and add bomgen layout (R9)`.
 
@@ -170,7 +176,7 @@ Asked in the A2 thread; Task 5 uses whatever names A2 picks.
 
 **Files:** Create `tests/golden/layout/expected_panels.yaml`, `tests/golden/layout/test_layout_golden.py`; Modify `tests/golden/README.md` only through A7 (send A7 the line).
 
-**Consumes:** Task 5, A2's `examples/substation.yaml` (40 IEDs, star) and A3's `height_u` values.
+**Consumes:** Task 5, A2's `examples/substations/gis01/substation.yaml` (40 IEDs, star) and A3's `height_u` values.
 
 - [ ] Write `expected_panels.yaml`: for each generated panel, its number, used U, and rows (`part_id`, `qty`, `lan`, `first_nn`) and port plans; each value commented with the rule it comes from (R1 → 2 L1 per side, R2 → demand and 1 L2 per side, R3 → plans, R6 → where GPS, RTAC and I/O land). With 1U for every rack device except a 2U RTAC, the design reads panel 1 = A units + GPS + I/O and panel 2 = B units + RTAC; the file records whatever the confirmed heights give.
 - [ ] `test_r10_example_substation_layout_matches_golden` loads the example substation, runs `layout_substation` and compares with the YAML; `test_r10_example_substation_has_no_layout_errors`.
