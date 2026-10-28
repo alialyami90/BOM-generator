@@ -1,6 +1,7 @@
 """Python API the desktop app's UI calls (plan M10, ADR 0015)."""
 
 import inspect
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -119,9 +120,12 @@ def test_endpoint_turns_an_unexpected_exception_into_an_internal_error() -> None
 def test_endpoint_makes_results_json_ready(tmp_path: Path) -> None:
     @api.endpoint
     def paths() -> object:
-        return {"file": tmp_path / "a.bomproj", "items": (1, 2)}
+        return {"file": tmp_path / "a.bomproj", "items": (1, 2), "at": datetime(2026, 10, 28, 9, 5)}
 
-    assert paths() == {"ok": True, "data": {"file": str(tmp_path / "a.bomproj"), "items": [1, 2]}}
+    assert paths() == {
+        "ok": True,
+        "data": {"file": str(tmp_path / "a.bomproj"), "items": [1, 2], "at": "2026-10-28T09:05:00"},
+    }
 
 
 def test_only_endpoints_are_public(env: dict[str, str]) -> None:

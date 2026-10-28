@@ -108,16 +108,18 @@ def run_window(
             raise
         notify(NO_WINDOW.format(error="pywebview is not installed (pip install bomgen[app])."))
         return 1
-    webview.create_window(
+    api = Api(project_file)
+    window = webview.create_window(
         APP_TITLE,
         url=INDEX.as_uri(),  # a file:// URL: a bare path would start a local HTTP server
-        js_api=Api(project_file),
+        js_api=api,
         width=WINDOW_SIZE[0],
         height=WINDOW_SIZE[1],
         min_size=MIN_SIZE,
         maximized=True,
         text_select=True,
     )
+    api._set_window(window)
     try:
         webview.start(debug=bool(os.environ.get(DEBUG_ENV)))
     except webview.errors.WebViewException as exc:

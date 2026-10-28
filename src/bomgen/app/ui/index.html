@@ -2,6 +2,8 @@
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
+<!-- Offline by construction (ADR 0015). 'unsafe-eval': pywebview's injected api.js builds the API stubs with new Function. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BOM Generator</title>
 <link rel="stylesheet" href="tokens.css">

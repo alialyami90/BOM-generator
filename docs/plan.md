@@ -627,7 +627,17 @@ Delivered in small PRs by A11, one screen group each (ADR 0015 for the bridge):
   yet". A6's launcher wiring adds `bomgen/app/ui` to `packaging/bomgen.spec`
   (`collect_data_files("bomgen.app")`), which `collect_submodules` does not cover.
 - **M10b:** Home, Project, Library and Backup and share on `bomgen.library_store` and
-  `bomgen.project_store`.
+  `bomgen.project_store`, in two PRs. Library first: `library_overview` (the active
+  library's devices joined to the device-database records it ships, through
+  `load_device_records`; a damaged database is reported and the devices still show),
+  `library_versions`, `preview_library_import`, `import_library`,
+  `activate_library_version` and `choose_file` (the native open dialog). Refusals are
+  read from the first failed check's `RefusalKind`; downgrade and reinstall offer the
+  force checkbox, which runs the review again with `force`. The "Projects built with
+  it" column waits for the project list (second PR). `index.html` carries a
+  Content-Security-Policy (`default-src 'none'`, scripts, styles and fonts from the UI
+  folder only); `script-src` needs `'unsafe-eval'` because pywebview's injected
+  `api.js` builds the API stubs with `new Function`.
 - **M10c:** Substation settings, Network and Panels after M1b and M1c.
 - **M10d:** Checks, Preview and Build after M4, M5 and M7.
 - **M10e:** A4's impeccable polish pass.

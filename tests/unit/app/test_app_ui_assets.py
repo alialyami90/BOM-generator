@@ -67,3 +67,14 @@ def test_prototype_state_controls_are_not_in_the_app() -> None:
         text = path.read_text(encoding="utf-8")
         assert "Prototype states" not in text, path.name
         assert "proto-panel" not in text, path.name
+
+
+def test_content_security_policy_allows_nothing_from_outside_the_ui_folder() -> None:
+    html = INDEX.read_text(encoding="utf-8")
+    match = re.search(r'http-equiv="Content-Security-Policy" content="([^"]+)"', html)
+
+    assert match
+    policy = dict((d.split()[0], d.split()[1:]) for d in match.group(1).split(";") if d.strip())
+    assert policy["default-src"] == ["'none'"]
+    for directive, sources in policy.items():
+        assert all(s.startswith("'") or s == "data:" for s in sources), directive
