@@ -186,3 +186,48 @@ def test_oversized_package_is_rejected(monkeypatch: pytest.MonkeyPatch, package_
 
     with pytest.raises(LibraryPackageError, match="too large"):
         read_package(package_file)
+
+
+def test_future_format_version_asks_for_a_newer_bomgen(tmp_path: Path, package_file: Path) -> None:
+    future = _with_manifest(package_file, tmp_path / "f.bomlib", format_version=2)
+
+    with pytest.raises(LibraryPackageError, match="newer bomgen"):
+        read_package(future)
+
+
+def test_corrupt_compressed_data_is_rejected(tmp_path: Path, package_file: Path) -> None:
+    data = bytearray(package_file.read_bytes())
+    # Damage the deflate stream of the first stored member (manifest.json).
+    start = 30 + len(b"manifest.json") + 4
+    data[start : start + 8] = b"\xff" * 8
+    broken = tmp_path / "broken.bomlib"
+    broken.write_bytes(bytes(data))
+
+    with pytest.raises(LibraryPackageError):
+        read_package(broken)
+
+
+def test_directory_entries_from_other_zip_tools_are_ignored(
+    tmp_path: Path, package_file: Path
+) -> None:
+    with zipfile.ZipFile(package_file) as old, zipfile.ZipFile(tmp_path / "d.bomlib", "w") as new:
+        new.writestr("assets/", b"")
+        for name in old.namelist():
+            new.writestr(name, old.read(name))
+
+    assert read_package(tmp_path / "d.bomlib").files == {"library.yaml": LIBRARY}
+
+
+def test_members_that_differ_only_by_case_are_rejected_when_packing(
+    tmp_path: Path, library_file: Path
+) -> None:
+    extra = tmp_path / "db"
+    (extra / "A").mkdir(parents=True)
+    (extra / "a").mkdir()
+    (extra / "A" / "x.yaml").write_text("1\n")
+    (extra / "a" / "x.yaml").write_text("2\n")
+    if len({p.name for p in extra.iterdir()}) < 2:  # case-insensitive file system
+        pytest.skip("file system folds case")
+
+    with pytest.raises(LibraryPackageError, match="differ only by case"):
+        pack(library_file, tmp_path / "c.bomlib", name="a", version="1.0.0", extra_dirs=[extra])

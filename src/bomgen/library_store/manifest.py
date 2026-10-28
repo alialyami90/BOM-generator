@@ -16,14 +16,25 @@ MANIFEST_NAME = "manifest.json"
 LIBRARY_FILE = "library.yaml"
 
 _SHA256 = re.compile(r"[0-9a-f]{64}")
-_DRIVE = re.compile(r"[A-Za-z]:")
+_WINDOWS_DEVICE = re.compile(r"(con|prn|aux|nul|com[1-9]|lpt[1-9])(\..*)?", re.IGNORECASE)
 
 
 def is_safe_member(path: str) -> bool:
-    """True if `path` is a plain relative POSIX path that cannot escape its directory."""
-    if not path or "\\" in path or path.startswith("/") or _DRIVE.match(path):
+    """True if `path` is a plain relative POSIX path that is safe to extract on Windows too.
+
+    Rejects anything that escapes the directory, and names Windows cannot create
+    as ordinary files: device names, `:` (alternate data streams), trailing dots
+    or spaces.
+    """
+    if not path or "\\" in path or path.startswith("/") or ":" in path:
         return False
-    return all(part not in ("", ".", "..") for part in path.split("/"))
+    return all(_safe_part(part) for part in path.split("/"))
+
+
+def _safe_part(part: str) -> bool:
+    if part in ("", ".", "..") or part != part.rstrip(". "):
+        return False
+    return _WINDOWS_DEVICE.fullmatch(part) is None
 
 
 class Manifest(BaseModel):

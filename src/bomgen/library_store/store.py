@@ -21,6 +21,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from pydantic import ValidationError
+
 from bomgen.library_store.diff import LibraryDiff, diff_libraries, parse_library
 from bomgen.library_store.errors import LibraryPackageError
 from bomgen.library_store.manifest import LIBRARY_FILE, MANIFEST_NAME, Manifest
@@ -65,6 +67,8 @@ def library_mismatch(recorded: LibraryRef, active: LibraryRef | None) -> str | N
             f"project was built with library {recorded.name} {recorded.version}, "
             "which is not installed"
         )
+    if active.name != recorded.name:
+        return library_mismatch(recorded, None)
     if active != recorded:
         return (
             f"project was built with library {recorded.name} {recorded.version}; "
@@ -122,7 +126,13 @@ class LibraryStore:
         pointer = self.root / name / ACTIVE_FILE
         if not pointer.is_file():
             return None
-        version = pointer.read_text(encoding="utf-8").strip()
+        try:
+            version = pointer.read_text(encoding="utf-8").strip()
+        except (UnicodeDecodeError, OSError) as exc:
+            raise LibraryPackageError(
+                f"library {name}: the active version file cannot be read ({exc}); "
+                "import a package or run rollback --to <version>"
+            ) from exc
         if version not in self.versions(name):
             raise LibraryPackageError(
                 f"library {name}: the active version {version!r} is not installed; "
@@ -174,10 +184,12 @@ class LibraryStore:
         contents, result = self._plan_import(path, force)
         name, version = contents.manifest.name, contents.manifest.version
         library_dir = self.root / name
+        created_dir = not library_dir.exists()
         library_dir.mkdir(parents=True, exist_ok=True)
         incoming = library_dir / f".incoming-{uuid.uuid4().hex}"
         replaced = library_dir / f".replaced-{uuid.uuid4().hex}"
         target = library_dir / version
+        committed = False
         try:
             self._extract(contents, incoming)
             if validate is not None:
@@ -186,14 +198,18 @@ class LibraryStore:
                 os.replace(target, replaced)
             try:
                 os.replace(incoming, target)
-            except OSError:
+            except BaseException:
                 if replaced.exists():
                     os.replace(replaced, target)
                 raise
             _write_text_atomic(library_dir / ACTIVE_FILE, version)
+            committed = True
         finally:
             shutil.rmtree(incoming, ignore_errors=True)
-            shutil.rmtree(replaced, ignore_errors=True)
+            if committed:
+                shutil.rmtree(replaced, ignore_errors=True)
+            if created_dir and not committed:
+                shutil.rmtree(library_dir, ignore_errors=True)
         return result
 
     def rollback(self, name: str, to: str | None = None) -> str:
@@ -244,8 +260,12 @@ class LibraryStore:
         old_library: dict[str, Any] | None = None
         old_files: dict[str, str] = {}
         if active is not None:
-            old_library = parse_library(self.library_file(manifest.name, active).read_bytes())
-            old_files = self.manifest(manifest.name, active).files
+            try:
+                old_library = parse_library(self.library_file(manifest.name, active).read_bytes())
+                old_files = self.manifest(manifest.name, active).files
+            except (LibraryPackageError, ValidationError, OSError):
+                # A damaged installed version must not block the import that repairs it.
+                active, old_library, old_files = None, None, {}
         diff = diff_libraries(old_library, contents.library, old_files, manifest.files)
         return contents, ImportResult(manifest, active, diff)
 

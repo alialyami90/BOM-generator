@@ -77,3 +77,10 @@ def test_manifest_rejects_unsafe_file_path() -> None:
 def test_manifest_rejects_malformed_checksum() -> None:
     with pytest.raises(ValidationError):
         Manifest.model_validate(_manifest(files={"library.yaml": "abc"}))
+
+
+@pytest.mark.parametrize(
+    "path", ["con", "db/NUL.yaml", "aux.txt", "a/com1", "x:stream", "a.", "a /b", "a/b "]
+)
+def test_names_windows_cannot_extract_are_rejected(path: str) -> None:
+    assert not is_safe_member(path)

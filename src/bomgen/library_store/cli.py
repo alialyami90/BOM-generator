@@ -21,7 +21,7 @@ def _store() -> LibraryStore:
     return LibraryStore(default_library_home())
 
 
-def _fail(exc: LibraryPackageError) -> typer.Exit:
+def _fail(exc: Exception) -> typer.Exit:
     typer.echo(f"error: {exc}", err=True)
     return typer.Exit(1)
 
@@ -57,7 +57,7 @@ def pack_command(
             library, out, name=name, version=version, release_notes=notes, extra_dirs=add or []
         )
     except (LibraryPackageError, OSError) as exc:
-        raise _fail(LibraryPackageError(str(exc))) from exc
+        raise _fail(exc) from exc
     typer.echo(f"Wrote {out} ({manifest.name} {manifest.version}, {len(manifest.files)} files)")
 
 
@@ -79,7 +79,7 @@ def import_command(
             typer.echo("Dry run: nothing was installed.")
             return
         result = store.import_package(package, force=force)
-    except LibraryPackageError as exc:
+    except (LibraryPackageError, OSError) as exc:
         raise _fail(exc) from exc
     _report(result)
     typer.echo(f"Installed and activated {result.manifest.name} {result.manifest.version}.")
@@ -109,6 +109,6 @@ def rollback_command(
     """Switch back to an earlier installed version."""
     try:
         version = _store().rollback(name, to=to)
-    except LibraryPackageError as exc:
+    except (LibraryPackageError, OSError) as exc:
         raise _fail(exc) from exc
     typer.echo(f"{name} {version} is now active.")

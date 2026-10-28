@@ -1,5 +1,6 @@
 """Per-user installed-library store: import, preview, list, rollback (ADR 0008, plan M8)."""
 
+import os
 from collections.abc import Callable
 from pathlib import Path
 
@@ -267,5 +268,100 @@ def test_library_mismatch_message() -> None:
         "project was built with library psa-devices 1.0.0; the active version is 1.1.0"
     )
     assert library_mismatch(built, None) == (
+        "project was built with library psa-devices 1.0.0, which is not installed"
+    )
+
+
+def test_failed_force_reinstall_keeps_the_installed_version(
+    store: LibraryStore, make_package: MakePackage, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    package = make_package("1.0.0")
+    store.import_package(package)
+    before = _snapshot(store.root)
+    real_replace = os.replace
+
+    def locked(src: str | Path, dst: str | Path) -> None:
+        if Path(src).name.startswith(".incoming-"):
+            raise PermissionError("locked by antivirus")
+        real_replace(src, dst)
+
+    monkeypatch.setattr(os, "replace", locked)
+    with pytest.raises(PermissionError):
+        store.import_package(package, force=True)
+    monkeypatch.undo()
+
+    assert _snapshot(store.root) == before
+    assert store.active_version("psa-devices") == "1.0.0"
+
+
+def test_interrupted_force_reinstall_keeps_the_installed_version(
+    store: LibraryStore, make_package: MakePackage, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    package = make_package("1.0.0")
+    store.import_package(package)
+    before = _snapshot(store.root)
+    real_replace = os.replace
+
+    def interrupted(src: str | Path, dst: str | Path) -> None:
+        if Path(src).name.startswith(".incoming-"):
+            raise KeyboardInterrupt
+        real_replace(src, dst)
+
+    monkeypatch.setattr(os, "replace", interrupted)
+    with pytest.raises(KeyboardInterrupt):
+        store.import_package(package, force=True)
+    monkeypatch.undo()
+
+    assert _snapshot(store.root) == before
+
+
+def test_failed_validation_of_a_new_library_leaves_no_trace(
+    store: LibraryStore, make_package: MakePackage
+) -> None:
+    def reject(library_file: Path) -> None:
+        raise ValueError("no")
+
+    with pytest.raises(ValueError, match="no"):
+        store.import_package(make_package("1.0.0"), validate=reject)
+
+    assert list(store.root.iterdir()) == []
+
+
+def test_non_utf8_active_pointer_is_reported(
+    store: LibraryStore, make_package: MakePackage
+) -> None:
+    store.import_package(make_package("1.0.0"))
+    (store.root / "psa-devices" / "active").write_bytes(b"\xff\xfe1")
+
+    with pytest.raises(LibraryPackageError, match="active version"):
+        store.active_version("psa-devices")
+    [listed] = store.list()
+    assert listed.problem is not None
+    store.import_package(make_package("1.1.0", V2))
+    assert store.active_version("psa-devices") == "1.1.0"
+
+
+@pytest.mark.parametrize("damage", ["manifest", "library"])
+def test_import_replaces_a_damaged_active_version(
+    store: LibraryStore, make_package: MakePackage, damage: str
+) -> None:
+    package = make_package("1.0.0")
+    store.import_package(package)
+    version_dir = store.root / "psa-devices" / "1.0.0"
+    if damage == "manifest":
+        (version_dir / "manifest.json").write_text("{broken")
+    else:
+        (version_dir / "library.yaml").unlink()
+
+    result = store.import_package(package, force=True)
+
+    assert result.previous is None
+    assert store.library_file("psa-devices").read_text() == V1
+
+
+def test_library_mismatch_ignores_a_different_library() -> None:
+    built = LibraryRef("psa-devices", "1.0.0")
+
+    assert library_mismatch(built, LibraryRef("other", "1.0.0")) == (
         "project was built with library psa-devices 1.0.0, which is not installed"
     )

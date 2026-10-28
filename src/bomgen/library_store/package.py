@@ -11,6 +11,7 @@ import hashlib
 import json
 import os
 import zipfile
+import zlib
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -61,6 +62,17 @@ def _collect_extra(extra_dirs: Sequence[Path], files: dict[str, bytes]) -> None:
             if not is_safe_member(member):
                 raise LibraryPackageError(f"cannot package unsafe path {member!r}")
             files[member] = path.read_bytes()
+    _check_case_collisions(files)
+
+
+def _check_case_collisions(members: Sequence[str] | dict[str, bytes]) -> None:
+    seen: dict[str, str] = {}
+    for member in members:
+        other = seen.setdefault(member.casefold(), member)
+        if other != member:
+            raise LibraryPackageError(
+                f"{other!r} and {member!r} differ only by case; Windows would merge them"
+            )
 
 
 def pack(
@@ -109,10 +121,26 @@ def pack(
 
 def _read_manifest(zf: zipfile.ZipFile) -> Manifest:
     try:
-        raw = json.loads(zf.read(MANIFEST_NAME))
-        return Manifest.model_validate(raw)
-    except (ValueError, ValidationError) as exc:
+        raw = json.loads(_read_member(zf, MANIFEST_NAME))
+    except ValueError as exc:
         raise LibraryPackageError(f"{MANIFEST_NAME} is invalid: {exc}") from exc
+    format_version = raw.get("format_version") if isinstance(raw, dict) else None
+    if isinstance(format_version, int) and format_version > FORMAT_VERSION:
+        raise LibraryPackageError(
+            f"package format version {format_version} needs a newer bomgen "
+            f"(this one reads version {FORMAT_VERSION})"
+        )
+    try:
+        return Manifest.model_validate(raw)
+    except ValidationError as exc:
+        raise LibraryPackageError(f"{MANIFEST_NAME} is invalid: {exc}") from exc
+
+
+def _read_member(zf: zipfile.ZipFile, member: str) -> bytes:
+    try:
+        return zf.read(member)
+    except (zipfile.BadZipFile, zlib.error, OSError, RuntimeError, NotImplementedError) as exc:
+        raise LibraryPackageError(f"cannot read {member} from the package: {exc}") from exc
 
 
 def _check_compatible(manifest: Manifest, app_version: str) -> None:
@@ -136,13 +164,14 @@ def read_package(path: Path, *, app_version: str = bomgen.__version__) -> Packag
     except OSError as exc:
         raise LibraryPackageError(f"cannot open {path}: {exc.strerror or exc}") from exc
     with zf:
-        infos = zf.infolist()
+        infos = [info for info in zf.infolist() if not info.is_dir()]
         names = [info.filename for info in infos]
         for member in names:
             if not is_safe_member(member):
                 raise LibraryPackageError(f"package contains an unsafe path {member!r}")
         if len(set(names)) != len(names):
             raise LibraryPackageError("package contains duplicate entries")
+        _check_case_collisions(names)
         if sum(info.file_size for info in infos) > MAX_UNCOMPRESSED_BYTES:
             raise LibraryPackageError("package is too large")
         if MANIFEST_NAME not in names:
@@ -160,10 +189,7 @@ def read_package(path: Path, *, app_version: str = bomgen.__version__) -> Packag
 
         files: dict[str, bytes] = {}
         for member in sorted(members):
-            try:
-                data = zf.read(member)
-            except (zipfile.BadZipFile, OSError) as exc:
-                raise LibraryPackageError(f"cannot read {member}: {exc}") from exc
+            data = _read_member(zf, member)
             if _sha256(data) != manifest.files[member]:
                 raise LibraryPackageError(f"checksum mismatch: {member} has been changed")
             files[member] = data
