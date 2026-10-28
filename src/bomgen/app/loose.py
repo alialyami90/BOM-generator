@@ -12,9 +12,10 @@ from bomgen.library_store.store import LibraryStore
 
 
 def loose_page(project_file: Path, substation_id: str, store: LibraryStore) -> dict[str, Any]:
-    """The items in sheet order, the host panel, the sheet's name, and the panels the
-    sheet can be issued under (``host_options``) and an item can be fed from
-    (``fed_options``: the generated cabinets, or every panel when none is generated)."""
+    """The items in sheet order, the host panel, the sheet's name, the panels the sheet
+    can be issued under (``host_options``) and an item can be fed from (``fed_options``:
+    the generated cabinets, or every panel when none is generated), and the substation's
+    library ``parts`` an item can name."""
     found = resolve(project_file, substation_id, store)
     page: dict[str, Any] = {
         "reason": None,
@@ -24,6 +25,7 @@ def loose_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
         "items": [],
         "host_options": [],
         "fed_options": [],
+        "parts": [],
     }
     loaded = found.loaded or found.source
     if loaded is None:
@@ -40,6 +42,10 @@ def loose_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
         "sheet_name": substation.output.sheet_names.loose_material,
         "host_options": panels,
         "fed_options": generated or panels,
+        "parts": [
+            {"part_id": d.part_id, "make": d.make, "model": d.model, "category": d.category.value}
+            for d in loaded.library.devices
+        ],
     }
     material = substation.loose_material
     if material is None:

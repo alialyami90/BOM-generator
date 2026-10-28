@@ -69,6 +69,9 @@ def test_loose_material_lists_the_items_with_their_library_parts(
     assert page["items"][-1]["qty"] == "1 Lot"
     assert {"id": "ws"}.items() <= page["host_options"][-1].items()
     assert "psa3" in [p["id"] for p in page["fed_options"]]
+    assert {"part_id": "ZENON-V12"}.items() <= next(
+        p for p in page["parts"] if p["part_id"] == "ZENON-V12"
+    ).items()
 
 
 def test_a_free_text_item_is_added_and_the_list_comes_back(
