@@ -1,6 +1,7 @@
 """Checks and Build endpoints of the desktop app (plan M10d)."""
 
 import json
+import os
 import shutil
 from pathlib import Path
 from typing import Any
@@ -252,13 +253,49 @@ def test_only_listed_files_are_opened(app: api.Api, tmp_path: Path) -> None:
     assert refused(app.open_file(str(other))) == "not_listed"
 
 
-@pytest.mark.parametrize(
-    ("platform", "command"),
-    [("win32", ["explorer"]), ("darwin", ["open"]), ("linux", ["xdg-open"])],
-)
-def test_open_uses_the_systems_default_app(
-    tmp_path: Path, platform: str, command: list[str]
-) -> None:
+@pytest.mark.parametrize(("platform", "command"), [("darwin", "open"), ("linux", "xdg-open")])
+def test_open_uses_the_systems_default_app(tmp_path: Path, platform: str, command: str) -> None:
     ran: list[list[str]] = []
     api.open_with_default_app(tmp_path / "a.xlsx", platform=platform, run=ran.append)
-    assert ran == [[*command, str(tmp_path / "a.xlsx")]]
+    assert ran == [[command, str(tmp_path / "a.xlsx")]]
+
+
+def test_open_on_windows_uses_the_file_association(tmp_path: Path) -> None:
+    started: list[str] = []
+    target = tmp_path / "a, b.xlsx"
+    api.open_with_default_app(
+        target, platform="win32", run=lambda c: pytest.fail("ran"), start=started.append
+    )
+    assert started == [str(target)]
+
+
+def test_a_read_only_folder_is_not_reported_as_an_open_file(
+    app: api.Api, project: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def denied(*args: object, **kwargs: object) -> None:
+        raise PermissionError(13, "Permission denied")
+
+    monkeypatch.setattr(xlsxwriter.workbook, "ZipFile", denied)
+    monkeypatch.setattr(os, "access", lambda path, mode: False)
+
+    envelope = app.build_workbook(str(project), "gis01", str(tmp_path))
+
+    assert refused(envelope) == "io"
+    assert "read-only" in envelope["error"]["message"]  # type: ignore[index]
+
+
+def test_a_check_report_that_cannot_be_saved_says_the_workbook_was_written(
+    app: api.Api, project: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    write_text = Path.write_text
+
+    def refuse_json(p: Path, *a: Any, **k: Any) -> int:
+        if p.name.endswith(".checks.json"):
+            raise OSError(28, "No space left on device")
+        return write_text(p, *a, **k)
+
+    monkeypatch.setattr(Path, "write_text", refuse_json)
+    envelope = app.build_workbook(str(project), "gis01", str(tmp_path))
+
+    assert refused(envelope) == "io"
+    assert "was written" in envelope["error"]["message"]  # type: ignore[index]

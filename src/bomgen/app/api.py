@@ -124,11 +124,17 @@ def reveal(
 
 
 def open_with_default_app(
-    path: Path, platform: str = sys.platform, run: Callable[[list[str]], object] = _spawn
+    path: Path,
+    platform: str = sys.platform,
+    run: Callable[[list[str]], object] = _spawn,
+    start: Callable[[str], object] | None = None,
 ) -> None:
     """Open ``path`` in the program the system uses for it, such as Excel for a workbook."""
-    opener = {"win32": "explorer", "darwin": "open"}.get(platform, "xdg-open")
-    run([opener, str(path)])
+    if platform == "win32":
+        # no command line, so no comma parsing; startfile exists on Windows only
+        (start or getattr(os, "startfile"))(str(path))  # noqa: B009
+    else:
+        run(["open" if platform == "darwin" else "xdg-open", str(path)])
 
 
 Envelope = dict[str, object]

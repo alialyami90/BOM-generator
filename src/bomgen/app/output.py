@@ -8,6 +8,7 @@ the previous issue, then the workbook and its ``.checks.json``.
 from __future__ import annotations
 
 import dataclasses
+import os
 from pathlib import Path
 from typing import Any
 
@@ -176,15 +177,23 @@ def build_file(
     try:
         write_workbook(workbook, path)
     except (WriterError, PermissionError) as exc:
+        if _locked(exc) and folder.is_dir() and not os.access(folder, os.W_OK):
+            raise OutputRefusedError(
+                "io", f"{folder} is read-only. Choose another folder."
+            ) from None
         if _locked(exc):
             raise OutputRefusedError(
                 "file_open",
-                f"{path.name} cannot be written: it is open in another program, such as "
-                "Excel, or the folder is read-only.",
+                f"{path.name} is open in another program, such as Excel.",
             ) from None
         raise OutputRefusedError("write", f"The workbook was not written: {exc}") from None
     report = check_report(loaded, result)
-    path.with_suffix(".checks.json").write_text(render_checks_json(report), encoding="utf-8")
+    try:
+        path.with_suffix(".checks.json").write_text(render_checks_json(report), encoding="utf-8")
+    except OSError as exc:
+        raise OutputRefusedError(
+            "io", f"The workbook {path} was written, but its check report was not: {exc}"
+        ) from None
     return {
         "path": path,
         "size": path.stat().st_size,
