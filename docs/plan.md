@@ -476,6 +476,13 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
 - Tests: every OUT-5 formula present at the right cell and pointing at the right
   source row; evaluating the formulas (Q15) gives the M4 numbers; header/footer
   strings per "Output requirements".
+- Delivered in M5: `bomgen.sheets` (`build_workbook(loaded, result, logo=)`
+  returns the `WorkbookModel`; one module per sheet, shared `styles` and `grid`).
+  Layout decisions are in `docs/superpowers/plans/2026-10-28-m5-sheet-models.md`.
+  Calculation-sheet header size comes from the top margin and print scale (Q11,
+  at most 20 pt). The header logo is passed in resolved; the loader does not
+  resolve `project.logo` yet. `tests/golden/test_workbook.py` evaluates every
+  formula with pycel (Q15).
 
 ### M6 — Excel writer
 - Step 14: XlsxWriter translation of sheet models: fonts, fills, borders,
