@@ -4,6 +4,7 @@ both lay out first."""
 import json
 from pathlib import Path
 
+import openpyxl
 import pytest
 
 from bomgen.build import build_substation, workbook_name
@@ -35,6 +36,7 @@ def test_build_writes_the_workbook_and_its_check_report(
     assert outcome.revisions is None
     assert outcome.checks is not None
     assert outcome.failed is False
+    assert outcome.sheets == tuple(openpyxl.load_workbook(outcome.path).sheetnames)
     written = json.loads((tmp_path / "bom.checks.json").read_text("utf-8"))
     assert written["failed"] is False
     assert len(written["items"]) == len(outcome.checks.items)

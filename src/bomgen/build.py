@@ -28,6 +28,7 @@ class BuildOutcome:
     result: BuildResult  # the engine's result, before revision marks
     revisions: RevisionReport | None = None
     checks: CheckReport | None = None
+    sheets: tuple[str, ...] = ()  # the workbook's sheet names, in order
 
     @property
     def failed(self) -> bool:
@@ -55,9 +56,10 @@ def build_substation(
     revisions: RevisionReport | None = None
     if previous is not None:
         marked, revisions = compare_with_previous(result, previous)
-    path = write_workbook(build_workbook(target, marked, logo=target.logo), out_path)
+    workbook = build_workbook(target, marked, logo=target.logo)
+    path = write_workbook(workbook, out_path)
     report = None
     if checks:
         report = check_report(target, result)
         path.with_suffix(".checks.json").write_text(render_checks_json(report), encoding="utf-8")
-    return BuildOutcome(path, result, revisions, report)
+    return BuildOutcome(path, result, revisions, report, tuple(s.name for s in workbook.sheets))
