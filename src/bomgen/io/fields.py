@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import hashlib
 from collections.abc import Sequence
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -18,7 +19,7 @@ from ruamel.yaml.comments import CommentedMap, CommentedSeq
 
 from bomgen.io.edit import EditError, EditResult, edit_file, substation_file
 from bomgen.io.errors import Loc, format_location
-from bomgen.io.loader import LoadedProject
+from bomgen.io.loader import LoadedProject, LoadedSubstation
 from bomgen.io.panel_edit import panel_file
 from bomgen.io.round_trip import (
     Node,
@@ -31,6 +32,7 @@ from bomgen.io.round_trip import (
     set_comment,
     set_entry,
 )
+from bomgen.io.yaml_source import read_yaml
 
 if TYPE_CHECKING:
     from bomgen.library_store.store import LibraryStore
@@ -270,6 +272,58 @@ def document_users(loaded: LoadedProject, key: str) -> list[str]:
             if panel.document == key and not panel.generated:
                 users.append(f"{name}: panel {panel.id}")
     return users
+
+
+@dataclass(frozen=True)
+class PartUse:
+    """One row that names a part: ``where`` is ``equipment``, ``panel`` (a hand-written or
+    generated panel's own rows), ``loose material`` or ``library`` (a part that brings it);
+    ``path`` is the field path in ``file``, as the writers take it; ``file`` is ``None`` for
+    the library, which may live in the library store."""
+
+    where: str
+    file: Path | None
+    path: Loc
+    name: str
+
+
+def part_users(target: LoadedSubstation, part_id: str) -> list[PartUse]:
+    """Every row of ``target`` and of its library that names ``part_id``, for the device
+    editor's "In use" banner, the delete warning and *Use this instead*. A mirror panel is
+    left out: its rows are its source panel's, listed there."""
+    sub = target.substation
+    uses: list[PartUse] = []
+    for index, row in enumerate(sub.equipment):
+        if row.part_id == part_id:
+            uses.append(PartUse("equipment", target.file, ("equipment", index), row.id))
+    for panel in target.panels:
+        panel_path = target.panel_files[panel.id]
+        if "mirror_of" in read_yaml(panel_path).data:
+            continue
+        for index, device in enumerate(panel.devices):
+            if device.part_id == part_id:
+                name = f"{panel.id}: {device.tag or device.part_id}"
+                uses.append(PartUse("panel", panel_path, ("devices", index), name))
+    if sub.loose_material is not None:
+        base: Loc = ("loose_material", "items")
+        for index, item in enumerate(sub.loose_material.items):
+            name = item.tag or item.description or item.part_id or ""
+            if item.part_id == part_id:
+                uses.append(PartUse("loose material", target.file, (*base, index), name))
+            for k, child_id in enumerate(item.children):
+                if child_id == part_id:
+                    path: Loc = (*base, index, "children", k)
+                    uses.append(PartUse("loose material", target.file, path, name))
+    for index, part in enumerate(target.library.devices):
+        for k, child in enumerate(part.children):
+            if child.part_id == part_id:
+                path = ("devices", index, "children", k)
+                uses.append(PartUse("library", None, path, part.part_id))
+        for k, loose in enumerate(part.loose_items):
+            if loose.part_id == part_id:
+                path = ("devices", index, "loose_items", k)
+                uses.append(PartUse("library", None, path, part.part_id))
+    return uses
 
 
 # --- values marked "# ASSUMED" ---

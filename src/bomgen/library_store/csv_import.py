@@ -560,7 +560,12 @@ def _mcb(tables: Mapping[str, _Table], base: Mapping[str, Any], skip: bool, asm:
     for row, cells in _unique(table, ("catalogue_id",), asm):
         cid = cells["catalogue_id"].strip()
         old = _base_entry(base, "mcb", cid)
-        data = _row_dict(table, cells, (n for n in McbCatalogue.model_fields if n != "codes"), old)
+        fields = [n for n in McbCatalogue.model_fields if n != "codes"]
+        if cid != DEFAULT_BRAND:
+            fields.append("ac_rated")
+        elif cells.get("ac_rated", "").strip():
+            asm.problem("mcb.csv", row, "ac_rated", "applies to brands, not the default row", cid)
+        data = _row_dict(table, cells, fields, old)
         if isinstance(data.get("ratings_a"), str):
             data["ratings_a"] = [
                 p.strip() for p in data["ratings_a"].split(LIST_SEPARATOR) if p.strip()
