@@ -29,7 +29,7 @@ from pydantic import BaseModel, ValidationError
 
 from bomgen import __version__
 from bomgen.app.catalogues import catalogues_page
-from bomgen.app.editing import edit_reply, panel_options_page
+from bomgen.app.editing import edit_reply, layout_issues, panel_options_page
 from bomgen.app.network import layout_page
 from bomgen.app.output import OutputRefusedError, build_file, build_target, checks_page
 from bomgen.app.preview import preview_page
@@ -486,15 +486,55 @@ class Api:
     def set_layout_overrides(
         self, project_file: str, substation_id: str, overrides: list[dict[str, Any]]
     ) -> dict[str, Any]:
-        """Write the board's pins and moves (``layout.overrides``), in order."""
-        return self._edit(project_file, substation_id, edit.set_layout_overrides, overrides)
+        """Write the board's pins and moves (``layout.overrides``), in order; a move the
+        layout cannot take is refused and nothing is written."""
+        return self._layout_edit(project_file, substation_id, overrides=overrides)
 
     @endpoint
     def set_layout_removed(
         self, project_file: str, substation_id: str, removed: list[dict[str, Any]]
     ) -> dict[str, Any]:
         """Write the units left out of the layout (``layout.removed``)."""
+        return self._layout_edit(project_file, substation_id, removed=removed)
+
+    def _layout_edit(
+        self,
+        project_file: str,
+        substation_id: str,
+        *,
+        overrides: list[dict[str, Any]] | None = None,
+        removed: list[dict[str, Any]] | None = None,
+    ) -> dict[str, Any]:
+        store = self._library_store()
+        with self._substation(substation_id):
+            issues = layout_issues(
+                Path(project_file), substation_id, store, overrides=overrides, removed=removed
+            )
+        if issues:
+            return {"written": False, "issues": issues, "page": None}
+        if overrides is not None:
+            return self._edit(project_file, substation_id, edit.set_layout_overrides, overrides)
         return self._edit(project_file, substation_id, edit.set_layout_removed, removed)
+
+    @endpoint
+    def check_layout(
+        self,
+        project_file: str,
+        substation_id: str,
+        overrides: list[dict[str, Any]],
+        removed: list[dict[str, Any]],
+    ) -> dict[str, Any]:
+        """Whether the layout can take these overrides and removed units, as the board asks
+        while a device is dragged; nothing is written."""
+        with self._substation(substation_id):
+            issues = layout_issues(
+                Path(project_file),
+                substation_id,
+                self._library_store(),
+                overrides=overrides,
+                removed=removed,
+            )
+        return {"fits": not issues, "issues": issues}
 
     @endpoint
     def set_enclosure(
