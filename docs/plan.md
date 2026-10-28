@@ -740,6 +740,9 @@ Delivered in small PRs by A11, one screen group each (ADR 0015 for the bridge):
   Consumption, Heat Dissipation and Heat Calculations values from the engine's build
   result, or the reason there is nothing to show. The "Show revised cells" toggle is
   left out: cells are marked only by Build's comparison with a previous issue.
+  Checks, Build and Preview re-lay out generated panels with M1c's `with_layout`, as
+  `bomgen build` does: layout errors are located problems that block Build and Preview,
+  warnings show in Checks.
 - **M10e:** A4's impeccable polish pass.
 
 ### M11 — Windows installer and releases

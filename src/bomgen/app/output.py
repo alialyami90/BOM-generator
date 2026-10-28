@@ -40,6 +40,7 @@ class OutputRefusedError(Exception):
 
 def problems_of(project_file: Path, found: Resolved, store: LibraryStore) -> list[dict[str, Any]]:
     rows = [{"level": "error", **dataclasses.asdict(i)} for i in found.problems]
+    rows += [{"level": "warning", **dataclasses.asdict(i)} for i in found.warnings]
     note = library_note(found.project, store)
     if note is not None:
         rows.append(

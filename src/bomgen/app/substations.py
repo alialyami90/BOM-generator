@@ -7,12 +7,15 @@ the substation writes itself (``docs/ui/screens.md``, Substation settings).
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any, NamedTuple
 
 from pydantic import BaseModel, ValidationError
 
 from bomgen.app.projects import load_with_issues, project_only
+from bomgen.engine.errors import EngineError
+from bomgen.engine.layout import with_layout
 from bomgen.io.errors import InputError, Issue
 from bomgen.io.loader import LoadedSubstation, load_library
 from bomgen.io.yaml_source import read_yaml
@@ -197,6 +200,27 @@ class Resolved(NamedTuple):
     file: Path
     loaded: LoadedSubstation | None
     problems: list[Issue]
+    warnings: Sequence[Issue] = ()
+
+
+def _laid_out(found: Resolved) -> Resolved:
+    """Generated panels re-laid out, as ``bomgen build`` does; layout errors block."""
+    assert found.loaded is not None
+    try:
+        loaded, report = with_layout(found.loaded)
+    except EngineError as exc:
+        return found._replace(loaded=None, problems=[Issue(found.file, "layout", str(exc))])
+    if report is None:
+        return found._replace(loaded=loaded)
+    errors = [
+        Issue(found.file, f"layout: {i.subject}", i.message) for i in report.issues if i.is_error
+    ]
+    warnings = [
+        Issue(found.file, f"layout: {i.subject}", i.message)
+        for i in report.issues
+        if not i.is_error
+    ]
+    return found._replace(loaded=None if errors else loaded, problems=errors, warnings=warnings)
 
 
 def resolve(project_file: Path, substation_id: str, store: LibraryStore) -> Resolved:
@@ -209,7 +233,7 @@ def resolve(project_file: Path, substation_id: str, store: LibraryStore) -> Reso
     if loaded_project is not None:
         for loaded in loaded_project.substations:
             if loaded.substation.substation.id == substation_id:
-                return Resolved(loaded.project, loaded.file, loaded, [])
+                return _laid_out(Resolved(loaded.project, loaded.file, loaded, []))
         raise SubstationNotFoundError(substation_id)
     project = project_only(project_file)
     if project is None:
