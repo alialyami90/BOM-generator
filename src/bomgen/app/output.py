@@ -1,8 +1,8 @@
 """Checks and Build for one substation (plan M10d; ``docs/ui/screens.md``, Checks and Build).
 
 The checks are the loader's located problems and the engine's step 15 report; the
-build runs the same steps as ``bomgen build``: engine, sheets, optional comparison with
-the previous issue, then the workbook and its ``.checks.json``.
+build is ``bomgen build``'s own ``build_substation``, with its failures mapped to the
+refusals the Build page explains.
 """
 
 from __future__ import annotations
@@ -12,19 +12,21 @@ import os
 from pathlib import Path
 from typing import Any
 
+import openpyxl
+
 from bomgen.app.projects import library_note
 from bomgen.app.substations import Resolved, resolve
+from bomgen.build import build_substation, workbook_name
 from bomgen.checks import check_report
 from bomgen.checks import render_json as render_checks_json
 from bomgen.engine.errors import EngineError
 from bomgen.engine.pipeline import build as build_bom
 from bomgen.io.errors import InputError
-from bomgen.io.loader import LoadedSubstation
 from bomgen.library_store.store import LibraryStore
 from bomgen.models.project import _FILE_NAME_FORBIDDEN
-from bomgen.revision import compare_with_previous, read_previous_issue
+from bomgen.revision import read_previous_issue
 from bomgen.sheets.workbook import build_workbook
-from bomgen.writer import WriterError, write_workbook
+from bomgen.writer import WriterError
 
 OUT_FOLDER = "out"
 WORKBOOK_SUFFIX = ".xlsx"
@@ -70,11 +72,6 @@ def checks_page(project_file: Path, substation_id: str, store: LibraryStore) -> 
     return {"problems": problems_of(project_file, found, store), "engine": engine}
 
 
-def _file_name(loaded: LoadedSubstation) -> str:
-    document = loaded.documents[loaded.substation.document]
-    return loaded.substation.output.resolve_file_name(document.doc_no, document.rev)
-
-
 def build_target(project_file: Path, substation_id: str, store: LibraryStore) -> dict[str, Any]:
     """Where Build writes by default, and what blocks it."""
     found = resolve(project_file, substation_id, store)
@@ -82,7 +79,7 @@ def build_target(project_file: Path, substation_id: str, store: LibraryStore) ->
     loaded = found.loaded
     name = sheets = revision = None
     if loaded is not None:
-        name = _file_name(loaded)
+        name = workbook_name(loaded)
         revision = loaded.documents[loaded.substation.document].rev
         try:
             workbook = build_workbook(loaded, build_bom(loaded))
@@ -159,7 +156,7 @@ def build_file(
     if loaded is None:
         raise OutputRefusedError("has_errors", f"{_errors(found)} block the build.")
     path = _checked_folder(folder) / _checked_name(
-        file_name if file_name is not None else _file_name(loaded)
+        file_name if file_name is not None else workbook_name(loaded)
     )
     if path.exists() and not replace:
         raise OutputRefusedError("file_exists", f"{path.name} is already in {folder}.")
@@ -170,13 +167,9 @@ def build_file(
         except InputError as exc:
             raise OutputRefusedError("bad_previous", str(exc)) from None
     try:
-        result = build_bom(loaded)
-        marked, revisions = compare_with_previous(result, previous) if previous else (result, None)
-        workbook = build_workbook(loaded, marked, logo=loaded.logo)
+        outcome = build_substation(loaded, path, previous=previous, checks=False)
     except EngineError as exc:
         raise OutputRefusedError("engine", f"The engine stopped: {exc}") from None
-    try:
-        write_workbook(workbook, path)
     except (WriterError, PermissionError) as exc:
         if _locked(exc) and folder.is_dir() and not os.access(folder, os.W_OK):
             raise OutputRefusedError(
@@ -188,17 +181,22 @@ def build_file(
                 f"{path.name} is open in another program, such as Excel.",
             ) from None
         raise OutputRefusedError("write", f"The workbook was not written: {exc}") from None
-    report = check_report(loaded, result)
+    report = check_report(loaded, outcome.result)
     try:
         path.with_suffix(".checks.json").write_text(render_checks_json(report), encoding="utf-8")
     except OSError as exc:
         raise OutputRefusedError(
             "io", f"The workbook {path} was written, but its check report was not: {exc}"
         ) from None
+    book = openpyxl.load_workbook(path, read_only=True)
+    try:
+        sheets = book.sheetnames
+    finally:
+        book.close()
     return {
         "path": path,
         "size": path.stat().st_size,
-        "sheets": [sheet.name for sheet in workbook.sheets],
+        "sheets": sheets,
         "checks": {"failed": report.failed, "items": report.items},
-        "revisions": revisions,
+        "revisions": outcome.revisions,
     }

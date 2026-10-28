@@ -9,6 +9,7 @@ from typing import Any
 import pytest
 import xlsxwriter.workbook
 
+from bomgen import build
 from bomgen.app import api, output
 from bomgen.engine.errors import EngineError
 from bomgen.models.report import CheckItem, CheckReport, CheckStatus
@@ -196,7 +197,7 @@ def test_an_engine_failure_is_refused_with_its_message(
     def stops(loaded: object) -> object:
         raise EngineError("no rule for this panel")
 
-    monkeypatch.setattr(output, "build_bom", stops)
+    monkeypatch.setattr(build, "build_bom", stops)
     envelope = app.build_workbook(str(project), "gis01", str(tmp_path))
 
     assert refused(envelope) == "engine"
