@@ -108,6 +108,4 @@
 - **Finding 24.** The FGR-60F's input range tops out at 125 V, below the battery float.
   Fortinet should confirm.
 
-## Spec and code disagreements
-
-None known for role 3.
+## Spec and code disagreements: none known for role 3
