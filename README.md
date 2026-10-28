@@ -45,22 +45,26 @@ Done:
   sharing and backup as `.bomproj` files (`bomgen project …`).
 - M9: UI design and clickable prototype in [`docs/ui/`](docs/ui/README.md),
   reworked for projects, substations and the panels board.
-- M10a and M10b: the desktop app shell, a pywebview window showing the
-  approved UI through a Python bridge (ADR 0015). Home lists the workspace's
-  projects; the Project page shows a real project read-only, with export,
-  backup, import (Keep both on a clash) and restore; the Library screens
-  browse the installed library with its device-database records, review and
-  run a `.bomlib` import, and switch versions.
-- M10c, read-only until the substation writers exist: a substation's
-  Settings, its Network inputs and result with the L1 ranking, and the Panels
-  board of the generated panels.
-- M10d: the Checks, Preview and Build screens, which show the check report,
-  every sheet as the engine computes it, and write the workbook.
+- M10: the Windows desktop app, a pywebview window showing the approved UI
+  through a Python bridge (ADR 0015), with the polish pass done (M10e).
+  - Home lists the workspace's projects and recently opened folders; the
+    Project page shows a project with export, backup, import (Keep both on a
+    clash) and restore.
+  - The Library screens browse the installed library with its device-database
+    records, review and run a `.bomlib` import, and switch versions.
+  - A substation's Settings, Network (inputs, result and L1 ranking) and the
+    Panels board of the generated panels.
+  - Checks, Preview and Build show the check report and every sheet as the
+    engine computes it, and write the workbook.
+
+  Projects and substations are read-only in the app until the project and
+  substation writers exist: edit the YAML files, then open the project again.
 - M11, built early (ADR 0009): the Windows installer and tag-driven releases.
   The installed app opens the desktop window, double-clicking a `.bomlib`
   imports it, and a `.bomproj` opens the app on that project.
 
-Next: M10e, the polish pass on the desktop app. Who builds what is in
+Next: the project and substation writers, so the app can create and edit
+projects and substations; not yet planned as a milestone. Who builds what is in
 [`docs/agents.md`](docs/agents.md); the terms project, substation, side and
 stream are defined in `docs/plan.md` → "Glossary".
 
