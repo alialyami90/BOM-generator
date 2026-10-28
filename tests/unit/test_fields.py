@@ -7,6 +7,7 @@ import pytest
 
 from bomgen.io import fields
 from bomgen.io.edit import EditError
+from bomgen.io.errors import format_location
 from bomgen.io.loader import LoadedSubstation, load_project
 
 EXAMPLES = Path(__file__).parents[2] / "examples"
@@ -123,3 +124,57 @@ def test_fingerprint_changes_with_the_file(project: Path) -> None:
     assert fields.file_fingerprint(project) == before
     fields.set_field(project, ("project", "client"), "SEC")
     assert fields.file_fingerprint(project) != before
+
+
+def uses(target: LoadedSubstation, part_id: str) -> list[tuple[str, str, str, str]]:
+    return [
+        (use.where, use.file.name if use.file else "", format_location(use.path), use.name)
+        for use in fields.part_users(target, part_id)
+    ]
+
+
+def test_part_users_list_equipment_rows_and_hand_written_panel_rows(project: Path) -> None:
+    target = gis01(project)
+    gps = [row.id for row in target.substation.equipment].index("gps")
+    assert uses(target, "SEL-2488") == [
+        ("equipment", "substation.yaml", f"equipment[{gps}]", "gps"),
+        ("panel", "psa3.yaml", "devices[0]", "psa3: SEL-2488"),
+    ]
+
+
+def test_part_users_skip_a_mirror_whose_rows_come_from_its_source(project: Path) -> None:
+    panels = [use for use in uses(gis01(project), "FOPP-96SM") if use[0] == "panel"]
+    assert panels == [("panel", "psa1.yaml", "devices[0]", "psa1: FOPP-96SM")]
+
+
+def test_part_users_name_a_tagged_panel_row_by_its_tag(project: Path) -> None:
+    (use,) = uses(gis01(project), "SEL-3355")
+    assert use[:3] == ("panel", "ws.yaml", "devices[0]")
+
+
+def test_part_users_list_loose_items_and_what_they_bring(project: Path) -> None:
+    assert uses(gis01(project), "NAP-K55") == [
+        (
+            "loose material",
+            "substation.yaml",
+            "loose_material.items[0]",
+            '55" LCD Alarm Annunciator',
+        )
+    ]
+    assert uses(gis01(project), "LPA37-696") == [
+        (
+            "loose material",
+            "substation.yaml",
+            "loose_material.items[0].children[0]",
+            '55" LCD Alarm Annunciator',
+        )
+    ]
+
+
+def test_part_users_list_library_parts_that_bring_the_part(project: Path) -> None:
+    first, *_alternatives = uses(gis01(project), "FOPP-SPOOL")
+    assert first == ("library", "", "devices[0].children[0]", "FOPP-96SM")
+
+
+def test_part_users_of_an_unused_part_is_empty(project: Path) -> None:
+    assert uses(gis01(project), "NOPE-1") == []
