@@ -1,0 +1,45 @@
+# yaml-language-server: $schema=../../schemas/panel.schema.json
+#
+# PSA Cabinet 003 (time sync, RTAC, hardwired IO), transcribed from the example
+# workbook, hidden master sheet 'Panel 3' (issued copy: sheet '3'). Values the
+# workbook does not give carry a trailing "# ASSUMED".
+
+id: psa3
+cabinet_number: 861-GIS01-PSA-0003
+cabinet_name: "PSA Cabinet - 003"  # '3'!A1; the master 'Panel 3'!A1 says "PSA CABINET-001"
+tag_prefix: PSA3
+sheet_name: "3"
+kind: control
+
+enclosure:  # 'Panel 3' row 3: PANEL
+  make: Rawabi
+  model: "Fixed Frame"
+  ordering_code: "Fixed Frame"
+  h_mm: 2100
+  d_mm: 1000
+  w_mm: 800
+  base_frame: { h_mm: 100, d_mm: 950, w_mm: 750 }
+  cable_entry: top
+
+devices:  # group B in row order ('Panel 3' rows 4-10)
+  - part_id: SEL-2488  # PSA3-GPS
+  - part_id: SEL-3555-RTAC  # PSA3-RTAC
+  - part_id: SEL-2240  # PSA3-HWIO
+
+port_plans:
+  SEL-3555-RTAC:
+    serial_ports: 6  # COM-CABLE qty 6, PSA3-XRTAC-C1 ... C6
+
+options:
+  ventilation: forced  # PSA3-FAN-1,2 and TH-1,2,3 (plan Q4)
+  change_over_diodes: true  # PSA3-COD-1, COD-2, QCOD-1 for the annunciator (plan Q13)
+  dc_spare_branches_per_feed: 1  # PSA3-Q1.4, Q2.4
+  ac_spare_branches: 1  # PSA3-C5
+  inter_panel_terminals: null  # no XIP strip in 'Panel 3'
+  terminal_overrides:
+    XDIN: 40  # PSA3-XDIN ('Panel 3'!D59, plan Q6)
+
+document:
+  doc_no: VD-EL0009-861GISPSA-001
+  rev: "02"
+  issue_date: 2026-10-28  # ASSUMED

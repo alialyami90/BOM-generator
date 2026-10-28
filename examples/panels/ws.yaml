@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=../../schemas/panel.schema.json
+#
+# WS Console 0010, transcribed from the example workbook, hidden master sheet 'Aux'
+# (top table; issued copy: sheet '4'). The loose-material table under it is in
+# project.yaml. Values the workbook does not give carry a trailing "# ASSUMED".
+
+id: ws
+cabinet_number: 861-GIS01-PSA-0010
+cabinet_name: "WS Console"  # 'Aux'!A1 prints it as "WS CONSOLE"
+tag_prefix: WS
+sheet_name: "4"
+kind: console
+
+enclosure:  # 'Aux' row 3: Panel
+  make: Rittal
+  model: "PC 5386.050"
+  ordering_code: "PC 5386.050"
+  h_mm: 1600
+  d_mm: 636
+  w_mm: 800
+  base_frame: { h_mm: 100, d_mm: 636, w_mm: 800 }
+  cable_entry: side
+
+devices:  # group B in row order ('Aux' rows 4-6)
+  - part_id: SEL-3355  # WS-SRV/OAS/EAS
+  - part_id: NAP-F23  # WS-MONITOR
+  - part_id: KEYTEK-KBM  # Keyboard & Mouse
+
+options:
+  ventilation: natural  # WS-FILTER and WS-TH-1, no fans
+  dc_spare_branches_per_feed: 1  # WS-Q1.2, WS-Q2.2
+  ac_spare_branches: 1  # WS-C3
+  inter_panel_terminals: 12  # WS-XIP
+  grounding_busbars: [power_ground]  # 'Aux' row 45: POWER-GROUND only
+
+document:
+  doc_no: VD-EL0009-861GISPSA-001
+  rev: "02"
+  issue_date: 2026-10-28  # ASSUMED
