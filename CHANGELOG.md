@@ -10,6 +10,11 @@ tagged release.
 
 ### Added
 
+- Windows installer and releases, built early: PyInstaller spec, per-user
+  Inno Setup installer with `.bomlib` file association, frozen-app launcher
+  with placeholders for the M10 window and `.bomlib` import, tag-driven
+  release workflow that builds, smoke-tests and publishes the installer,
+  `docs/install.md` and ADR 0009 (milestone M11, #2).
 - M9 UI design in `docs/ui/`: design tokens, component and screen specs, a
   clickable HTML/CSS prototype and bundled fonts; ADR 0011 (#8).
 - `docs/agents.md`: agent roles, file ownership, numbering and the review and

@@ -18,9 +18,13 @@ Done: M0 (repository, spec, plan, CI), M1 (input models, YAML loader, JSON
 Schemas, `examples/`, `bomgen validate`), M8 (device-library update packages,
 `bomgen library …`) and M9 (UI design and clickable prototype in
 [`docs/ui/`](docs/ui/README.md), accepted as a prototype; a design rework
-follows). The rule engine, sheet models and Excel writer (M2–M7) come next;
-`bomgen build` arrives with them, followed by the Windows desktop app and
-installer (M10–M11).
+follows). M11's Windows installer and tag-driven release pipeline is built
+early (ADR 0009): the installed app still shows placeholders for the desktop
+window and for opening a `.bomlib`. The rule engine, sheet models and Excel
+writer (M2–M7) come next, and `bomgen build` arrives with them; the desktop app
+(M10) follows the design rework.
+
+To install the Windows app, see [`docs/install.md`](docs/install.md).
 
 ## Usage
 

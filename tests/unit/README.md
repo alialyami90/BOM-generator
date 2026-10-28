@@ -16,5 +16,7 @@ A milestone with several modules may group them in a subfolder,
 | `library_store/test_library_manifest.py`, `test_library_package.py` | M8 | `.bomlib` manifest and versions; packing, checksums, tampered or mismatched packages rejected |
 | `library_store/test_library_store.py`, `test_library_diff.py` | M8 | per-user store: install, activate, downgrade refusal, rollback, safe failed imports; part diff |
 | `library_store/test_library_service.py`, `test_library_cli.py`, `test_library_wiring.py` | M8 | `bomgen library` commands and their wiring into `bomgen`, schema validation on pack and import |
+| `test_launcher.py` | M11 | frozen-app entry points: `.bomlib` argument routing, placeholders, CLI delegation, self-test module manifest |
+| `test_packaging.py` | M11 | Inno Setup script and PyInstaller spec: per-user install, Windows versions, `.bomlib` association, kept libraries on uninstall |
 
 `builders.py` holds small input builders shared by these tests.
