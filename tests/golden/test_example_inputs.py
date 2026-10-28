@@ -229,6 +229,13 @@ def test_example_substation_layout_inputs(loaded: LoadedSubstation) -> None:
         assert part(loaded, equipment.part_id).height_u is not None, equipment.part_id
 
 
+def test_rack_heights_answered_by_ali(loaded: LoadedSubstation) -> None:
+    # Q33: the FOPP is 1U; the workstation's monitor and keyboard sit on the desk.
+    assert part(loaded, "FOPP-96SM").height_u == 1
+    assert part(loaded, "NAP-F23").height_u == 0
+    assert part(loaded, "KEYTEK-KBM").height_u == 0
+
+
 def test_terminal_strip_descriptions_and_busbar_tags(loaded: LoadedSubstation) -> None:
     # Example workbook, 'Panel 3'!C55:C61 (strip descriptions) and 'Panel 1'!B76:B77,
     # 'Aux'!B45 (grounding row labels).

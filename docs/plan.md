@@ -781,7 +781,8 @@ gaps between them do (ADR 0013, rule R5). Asked 2026-10-28; waiting for Ali.
 
 **Q33 — FOPP-96SM rack height.** The datasheet was not found; the device database
 assumes 2U from Hubbell's 48-fibre 1U unit (`data/device-db/`, PR #18). *Default:*
-2U until Ali confirms. Asked 2026-10-28; waiting for Ali.
+2U until Ali confirms. Asked 2026-10-28. *Resolved 2026-10-28:* Ali: 1U
+(`examples/library.yaml`).
 
 **Q29 — Thermostat load and fan airflow in the library defaults.** The device
 research (`docs/device-db-findings.md`, items 1 and 2) found that the SK 3110.000
