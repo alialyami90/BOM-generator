@@ -139,6 +139,8 @@ Settled by A1:
   - `test_r6_only_common_devices_opens_one_pair_and_drops_empty_b`: one common 1U unit → one panel, number 1.
 - [ ] Run; fail. Implement. Run; pass. Checks. Commit `feat(layout): fill 32U panels with A/B streams and common devices (R5, R6)`.
 
+> **As built:** `auto_layout` takes M1b's own `UnitRef`, `DeviceMove` and `PairMove` (`models/substation.py`) instead of engine copies; `Unit` is `(device, n, side, part_id, rank, height_u, cable_manager_u)` with `key = device#n`; `LayoutResult` also carries `rules` and `l1_candidates`. `rank_l1_switches` and `l1_candidates(loaded)` serve the Network tab.
+
 ### Task 4: Overrides, removals and the fill report (R7, R8)
 
 **Files:** Modify `src/bomgen/engine/layout.py`; Test `tests/unit/engine/test_layout.py`.
