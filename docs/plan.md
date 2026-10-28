@@ -394,6 +394,14 @@ impeccable polish/audit pass against the M9 design.
 - Tests: smoke test that the frozen app starts and builds the example
   workbook on the Windows runner.
 
+*Built early (ADR 0009):* the installer pipeline landed before M1, M8 and M10,
+with placeholders in `bomgen.app.launcher` for the CLI, library import and the
+window. The release workflow already installs, checks and uninstalls the
+installer on the runner; the "builds the example workbook" smoke step is added
+once `bomgen build` exists (M7), and the bundled default library once M8 writes
+`out/default.bomlib`. The app icon comes with the M9 design
+(`packaging/icons/bomgen.ico`).
+
 ## 5. Testing strategy
 
 - **Unit (TDD):** one test per rule, named after it, in `tests/unit/`.
