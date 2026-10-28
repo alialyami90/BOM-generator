@@ -229,6 +229,35 @@ def test_example_substation_layout_inputs(loaded: LoadedSubstation) -> None:
         assert part(loaded, equipment.part_id).height_u is not None, equipment.part_id
 
 
+def test_equipment_purposes_match_the_hand_written_psa1(loaded: LoadedSubstation) -> None:
+    # 'Panel 1' rows 4 and 8: the FOPP and gateway descriptions' {purpose}.
+    purposes = {e.id: e.purpose for e in loaded.substation.equipment if e.purpose}
+    assert purposes == {"fopp": "L2-L3 Interface", "gw": "for Dhahran PCC connection"}
+
+
+def test_equipment_port_plans_match_the_hand_written_panels(loaded: LoadedSubstation) -> None:
+    # 'Panel 1' row 17 (EXT-FW-A SFP (MM), qty 2) and 'Panel 3' COM-CABLE qty 6.
+    plans = {e.id: e.port_plan for e in loaded.substation.equipment if e.port_plan}
+    assert set(plans) == {"ext-fw", "rtac"}
+    assert [(a.count, a.speed, a.media) for a in plans["ext-fw"].downlinks] == [(2, "1G", "MM")]
+    assert plans["rtac"].serial_ports == 6
+
+
+def test_equipment_follows_psa1_group_b_row_order(loaded: LoadedSubstation) -> None:
+    # 'Panel 1' rows 4-12: FOPP, L2, L1, EXT switch, gateway, firewall; then the others.
+    assert [e.id for e in loaded.substation.equipment] == [
+        "fopp",
+        "l2",
+        "l1",
+        "ext-esw",
+        "gw",
+        "ext-fw",
+        "gps",
+        "rtac",
+        "hwio",
+    ]
+
+
 def test_rack_heights_answered_by_ali(loaded: LoadedSubstation) -> None:
     # Q33: the FOPP is 1U; the workstation's monitor and keyboard sit on the desk.
     assert part(loaded, "FOPP-96SM").height_u == 1

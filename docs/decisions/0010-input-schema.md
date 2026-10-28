@@ -102,6 +102,11 @@ hand-written YAML.
     `purdue_level: L1` (the UI may ask the engineer to choose). A given
     `part_id` pins the model and must be an L1 `network_switch`. Every other
     role needs `part_id`.
+20. **Row fields on equipment.** `purpose` and `hwio_points` mean what they
+    mean on a panel row and are copied onto each row the layout writes for
+    the entry (`hwio_points` stays a row total, plan Q5). `port_plan` is per
+    unit and scaled by the row's qty; the `l1_switch` and `l2_switch` plans
+    come from the switch sizing, so they take none.
 
 ## Consequences
 

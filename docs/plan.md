@@ -215,6 +215,8 @@ equipment:                             # what the layout places (design 3.2)
   # role: l1_switch | l2_switch | ext_switch | firewall | fopp | other
   # redundant (one unit per side) or side: none | a | b; qty (not on l1_switch);
   # l2_ports, l2_speed (default 1G), l2_media (default MM)
+  # purpose, hwio_points: copied onto each row the layout writes (as on a panel row)
+  # port_plan: per unit, scaled by the row's qty; not on l1_switch or l2_switch (sized)
 network:
   ied_count: 40                        # never a BOM row (R4)
   topology: star                       # star | ring
@@ -552,8 +554,39 @@ update package (ADR 0008).
   Windows device names such as `con`.
 - A `.bomlib` given to `project import` (and the reverse) gets a one-line
   explanation.
-- Open item for M1b: once the `project.yaml` model is on main, read the id and
-  library through it instead of plain YAML.
+- The id and library are still read as plain YAML on purpose, not through the
+  M1b `Project` model: a backup or export must work on a project the model would
+  reject (a half-edited file). A test checks that the plain read agrees with the
+  model on the example project.
+- Dry-runs and backups for the UI (follow-up to M8b):
+  Follow-up for the "What the app needs from the engine" rows. Nothing here changes
+  how a package is built or installed.
+  - Each dry-run returns a list of `Check(id, label, status, detail, kind)` in
+    `bomgen.bundle.checks`; `status` is `ok`, `warning`, `failed` or `skipped`, and
+    `kind` is the `RefusalKind` of a failed check. A failed check skips every check
+    after it (`signature` always reads `skipped`), and the preview never raises for a bad package and writes nothing.
+    `can_import` is true when no check failed.
+  - `bomgen.library_store.preview_library_import(package, *, force=False, store=None)`
+    returns `LibraryImportPreview(checks, manifest, files, previous, diff, can_import)`.
+    Checks in order: `package`, `paths`, `size`, `manifest` (`INCOMPATIBLE` for
+    a newer format, schema or app version, else `INVALID_PACKAGE`), `files`,
+    `checksums`, `library`, `validation` (the build's loader), `version` (`DOWNGRADE` or
+    `ALREADY_INSTALLED` fail, and become warnings with `force`), `signature`
+    (always `skipped`: packages carry checksums only, plan Q18).
+  - `bomgen.project_store.preview_project_import(package, *, workspace=None,
+    store=None)` returns `ProjectImportPreview(checks, manifest, files, project_id,
+    target_dir, exists, library_note, can_import)`. Checks: the six above, then
+    `identity` (manifest and `project.yaml` agree), `contents` (no build output),
+    `name` (a warning when the project exists: import replaces it after a backup)
+    and `library` (a warning carrying the `library_note`).
+  - `bomgen.project_store.list_backups(project_file)` lists `Backups/` newest first
+    as `BackupInfo(path, saved, size, project_id, library_name, library_version,
+    file_count, problem)`, reading manifests only. A damaged file is listed with
+    `problem` set. `restore_backup(backup)` is the forced import into the backup's
+    own project, with the safety backup of the current state; review it first with
+    `preview_project_import(backup, workspace=<project folder>.parent)`.
+  - Still open: "projects built with it" has no data source until M1b records the
+    library on the project, and `InstalledLibrary.problem` needs wording from A4.
 
 ### M9 — UI design with impeccable
 Use the `impeccable` skill to design the screens and elements: open or create a
@@ -577,6 +610,22 @@ UI rendered in a native window with `pywebview` (Microsoft Edge WebView2),
 calling `bomgen` in-process through a small Python API. No browser, no local
 server port, works offline. The business rules stay in the engine. Ends with an
 impeccable polish/audit pass against the M9 design.
+
+Delivered in small PRs by A11, one screen group each (ADR 0015 for the bridge):
+
+- **M10a shell:** the M9 prototype in `src/bomgen/app/ui/`, `bomgen.app.window.run_window`
+  (the launcher's one call, wired by A6), `bomgen.app.api.Api` with `app_info`
+  (version, the `.bomproj` the app was opened with, workspace, installed libraries),
+  `ui/bridge.js`. pywebview is the `app` extra. `run_window` refuses to open when
+  the UI files or (on Windows) the WebView2 Runtime are missing. Screens still show
+  the prototype's example project and data; their tables are marked "not connected
+  yet". A6's launcher wiring adds `bomgen/app/ui` to `packaging/bomgen.spec`
+  (`collect_data_files("bomgen.app")`), which `collect_submodules` does not cover.
+- **M10b:** Home, Project, Library and Backup and share on `bomgen.library_store` and
+  `bomgen.project_store`.
+- **M10c:** Substation settings, Network and Panels after M1b and M1c.
+- **M10d:** Checks, Preview and Build after M4, M5 and M7.
+- **M10e:** A4's impeccable polish pass.
 
 ### M11 — Windows installer and releases
 - Freeze the app with PyInstaller (one folder) and wrap it in an Inno Setup

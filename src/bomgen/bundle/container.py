@@ -14,11 +14,13 @@ import re
 import zipfile
 import zlib
 from collections.abc import Callable, Mapping
+from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Protocol
 
 from pydantic import BaseModel
 
+from bomgen.bundle.checks import Check, CheckStatus
 from bomgen.bundle.errors import LibraryPackageError
 from bomgen.bundle.paths import check_case_collisions, is_safe_member
 
@@ -63,6 +65,150 @@ def write_bundle(out: Path, manifest: BaseModel, files: Mapping[str, bytes]) -> 
         partial.unlink(missing_ok=True)
 
 
+@dataclass(frozen=True)
+class BundleInspection[M: _HasFiles]:
+    """What opening a bundle found, check by check.
+
+    `files` is set only when every check passed; `manifest` is set once the
+    manifest check passed. `sizes` are the declared uncompressed sizes.
+    """
+
+    checks: list[Check]
+    manifest: M | None
+    files: dict[str, bytes] | None
+    sizes: dict[str, int]
+    error: LibraryPackageError | None
+
+
+class _Reader[M: _HasFiles]:
+    """The verification steps of `inspect_bundle`, run in order on one zip file."""
+
+    def __init__(self, path: Path, parse_manifest: Callable[[object], M], what: str) -> None:
+        self.path, self.parse_manifest, self.what = path, parse_manifest, what
+        self.zf: zipfile.ZipFile | None = None
+        self.infos: list[zipfile.ZipInfo] = []
+        self.manifest: M | None = None
+        self.files: dict[str, bytes] = {}
+
+    @property
+    def names(self) -> list[str]:
+        return [info.filename for info in self.infos]
+
+    @property
+    def sizes(self) -> dict[str, int]:
+        return {i.filename: i.file_size for i in self.infos if i.filename != MANIFEST_NAME}
+
+    def package(self) -> str:
+        try:
+            self.zf = zipfile.ZipFile(self.path)
+        except zipfile.BadZipFile as exc:
+            raise LibraryPackageError(
+                f"{self.path.name} is not a {self.what} (not a zip file)"
+            ) from exc
+        except OSError as exc:
+            raise LibraryPackageError(f"cannot open {self.path}: {exc.strerror or exc}") from exc
+        self.infos = [info for info in self.zf.infolist() if not info.is_dir()]
+        return f"{self.path.name}, {self.path.stat().st_size} bytes"
+
+    def paths(self) -> str:
+        for member in self.names:
+            if not is_safe_member(member):
+                raise LibraryPackageError(f"package contains an unsafe path {member!r}")
+        if len(set(self.names)) != len(self.names):
+            raise LibraryPackageError("package contains duplicate entries")
+        check_case_collisions(self.names)
+        return f"{len(self.names)} entries"
+
+    def size(self) -> str:
+        total = sum(info.file_size for info in self.infos)
+        if total > MAX_UNCOMPRESSED_BYTES:
+            raise LibraryPackageError("package is too large")
+        return f"{total} bytes unpacked"
+
+    def manifest_step(self) -> str:
+        assert self.zf is not None
+        if MANIFEST_NAME not in self.names:
+            raise LibraryPackageError(f"package has no {MANIFEST_NAME}")
+        try:
+            raw = json.loads(_read_member(self.zf, MANIFEST_NAME))
+        except ValueError as exc:
+            raise LibraryPackageError(f"{MANIFEST_NAME} is invalid: {exc}") from exc
+        self.manifest = self.parse_manifest(raw)
+        return ""
+
+    def files_step(self) -> str:
+        assert self.manifest is not None
+        members = set(self.names) - {MANIFEST_NAME}
+        if unlisted := sorted(members - self.manifest.files.keys()):
+            raise LibraryPackageError(f"files not listed in the manifest: {', '.join(unlisted)}")
+        if missing := sorted(self.manifest.files.keys() - members):
+            raise LibraryPackageError(f"files missing from the package: {', '.join(missing)}")
+        return f"{len(members)} files"
+
+    def checksums(self) -> str:
+        assert self.zf is not None
+        assert self.manifest is not None
+        for member in sorted(self.manifest.files):
+            data = _read_member(self.zf, member)
+            if sha256(data) != self.manifest.files[member]:
+                raise LibraryPackageError(f"checksum mismatch: {member} has been changed")
+            self.files[member] = data
+        return f"all {len(self.files)} files match"
+
+
+_STAGES = (
+    ("package", "Package is a readable file"),
+    ("paths", "File paths are safe"),
+    ("size", "Size is within the limit"),
+    ("manifest", "Manifest is valid and supported"),
+    ("files", "Files match the manifest"),
+    ("checksums", "Checksums match"),
+)
+
+
+def inspect_bundle[M: _HasFiles](
+    path: Path, parse_manifest: Callable[[object], M], what: str
+) -> BundleInspection[M]:
+    """Run every verification step and report each one; a bad bundle does not raise.
+
+    A failed step skips the steps after it. `parse_manifest` and `what` are as in
+    `read_bundle`.
+    """
+    reader = _Reader(path, parse_manifest, what)
+    steps = (
+        reader.package,
+        reader.paths,
+        reader.size,
+        reader.manifest_step,
+        reader.files_step,
+        reader.checksums,
+    )
+    checks: list[Check] = []
+    error: LibraryPackageError | None = None
+    try:
+        for (check_id, label), step in zip(_STAGES, steps, strict=True):
+            if error is not None:
+                checks.append(Check(check_id, label, CheckStatus.SKIPPED))
+                continue
+            try:
+                detail = step()
+            except LibraryPackageError as exc:
+                error = exc
+                checks.append(Check(check_id, label, CheckStatus.FAILED, str(exc), exc.kind))
+            else:
+                checks.append(Check(check_id, label, CheckStatus.OK, detail))
+    finally:
+        if reader.zf is not None:
+            reader.zf.close()
+    return BundleInspection(
+        checks,
+        reader.manifest,
+        reader.files if error is None else None,
+        reader.sizes,
+        error,
+    )
+
+
 def read_bundle[M: _HasFiles](
     path: Path, parse_manifest: Callable[[object], M], what: str
 ) -> tuple[M, dict[str, bytes]]:
@@ -72,45 +218,12 @@ def read_bundle[M: _HasFiles](
     model and applies the caller's own compatibility rules. `what` names the file
     type in messages, for example ".bomlib package".
     """
-    try:
-        zf = zipfile.ZipFile(path)
-    except zipfile.BadZipFile as exc:
-        raise LibraryPackageError(f"{path.name} is not a {what} (not a zip file)") from exc
-    except OSError as exc:
-        raise LibraryPackageError(f"cannot open {path}: {exc.strerror or exc}") from exc
-    with zf:
-        infos = [info for info in zf.infolist() if not info.is_dir()]
-        names = [info.filename for info in infos]
-        for member in names:
-            if not is_safe_member(member):
-                raise LibraryPackageError(f"package contains an unsafe path {member!r}")
-        if len(set(names)) != len(names):
-            raise LibraryPackageError("package contains duplicate entries")
-        check_case_collisions(names)
-        if sum(info.file_size for info in infos) > MAX_UNCOMPRESSED_BYTES:
-            raise LibraryPackageError("package is too large")
-        if MANIFEST_NAME not in names:
-            raise LibraryPackageError(f"package has no {MANIFEST_NAME}")
-
-        try:
-            raw = json.loads(_read_member(zf, MANIFEST_NAME))
-        except ValueError as exc:
-            raise LibraryPackageError(f"{MANIFEST_NAME} is invalid: {exc}") from exc
-        manifest = parse_manifest(raw)
-
-        members = set(names) - {MANIFEST_NAME}
-        if unlisted := sorted(members - manifest.files.keys()):
-            raise LibraryPackageError(f"files not listed in the manifest: {', '.join(unlisted)}")
-        if missing := sorted(manifest.files.keys() - members):
-            raise LibraryPackageError(f"files missing from the package: {', '.join(missing)}")
-
-        files: dict[str, bytes] = {}
-        for member in sorted(members):
-            data = _read_member(zf, member)
-            if sha256(data) != manifest.files[member]:
-                raise LibraryPackageError(f"checksum mismatch: {member} has been changed")
-            files[member] = data
-    return manifest, files
+    inspection = inspect_bundle(path, parse_manifest, what)
+    if inspection.error is not None:
+        raise inspection.error
+    assert inspection.manifest is not None
+    assert inspection.files is not None
+    return inspection.manifest, inspection.files
 
 
 def _read_member(zf: zipfile.ZipFile, member: str) -> bytes:

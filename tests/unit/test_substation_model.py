@@ -110,6 +110,32 @@ def test_l1_switch_model_is_picked_by_the_tool_unless_pinned() -> None:
         Equipment.model_validate({"id": "fw", "role": "firewall"})
 
 
+def test_equipment_carries_purpose_and_hwio_onto_its_rows() -> None:
+    fopp = Equipment.model_validate(
+        {"id": "fopp", "part_id": "X", "role": "fopp", "purpose": "L2-L3 Interface"}
+    )
+    assert fopp.purpose == "L2-L3 Interface"
+    assert fopp.hwio_points is None
+    l1 = Equipment.model_validate({"id": "l1", "role": "l1_switch", "hwio_points": 10})
+    assert l1.hwio_points == 10
+    with pytest.raises(ValidationError, match="hwio_points"):
+        Equipment.model_validate({"id": "l1", "role": "l1_switch", "hwio_points": -1})
+
+
+def test_equipment_port_plan_is_per_unit_and_not_on_sized_switches() -> None:
+    plan = {"downlinks": [{"count": 2, "speed": "1G", "media": "MM"}]}
+    firewall = Equipment.model_validate(
+        {"id": "fw", "part_id": "X", "role": "firewall", "port_plan": plan}
+    )
+    assert firewall.port_plan is not None
+    assert firewall.port_plan.downlinks[0].count == 2
+    for role in ("l1_switch", "l2_switch"):
+        with pytest.raises(ValidationError, match="computed by the switch sizing"):
+            Equipment.model_validate(
+                {"id": "s", "part_id": "X", "role": role, "redundant": True, "port_plan": plan}
+            )
+
+
 def test_l1_switch_count_is_not_an_input() -> None:
     with pytest.raises(ValidationError, match="leave qty out"):
         Equipment.model_validate({"id": "l1", "part_id": "X", "role": "l1_switch", "qty": 2})
