@@ -408,6 +408,61 @@ def test_self_test_passes_with_the_ui_entry_file_present() -> None:
     assert launcher.self_test() == []
 
 
+def fake_ui(directory: Path, *, drop: str | None = None) -> Path:
+    """A ui folder with a start page, one script, one stylesheet and its font."""
+    files = {
+        "index.html": (
+            '<link rel="stylesheet" href="styles.css">\n'
+            '<script src="screens-new.js"></script>\n'
+            '<a href="#home">Home</a><img src="data:image/png;base64,AA">'
+        ),
+        "styles.css": (
+            '@font-face { src: url("fonts/face.woff2") format("woff2"); }\n'
+            '.select { background-image: url("data:image/svg+xml,%3Csvg%3E"); }'
+        ),
+        "screens-new.js": "",
+        "fonts/face.woff2": "",
+    }
+    for name, text in files.items():
+        if name != drop:
+            (directory / name).parent.mkdir(parents=True, exist_ok=True)
+            (directory / name).write_text(text, encoding="utf-8")
+    return directory / "index.html"
+
+
+@pytest.mark.parametrize(
+    "dropped", ["screens-new.js", "styles.css", "fonts/face.woff2"], ids=["script", "css", "font"]
+)
+def test_self_test_names_a_file_the_start_page_loads_that_is_not_in_the_bundle(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, dropped: str
+) -> None:
+    # A screen script, stylesheet or font left out of the bundle breaks the window
+    # while index.html alone is present, so the check follows what the page loads.
+    monkeypatch.setattr(window, "INDEX", fake_ui(tmp_path / "ui", drop=dropped))
+
+    assert launcher.self_test() == [f"bomgen/app/ui/{dropped}"]
+
+
+def test_self_test_passes_when_every_file_the_start_page_loads_is_bundled(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(window, "INDEX", fake_ui(tmp_path / "ui"))
+
+    assert launcher.ui_files_missing() == []
+
+
+def test_every_screen_script_and_font_the_real_start_page_loads_is_checked() -> None:
+    loaded = launcher.ui_files(window.INDEX)
+
+    assert "screens-libcsv.js" in loaded
+    assert "screens-libedit.js" in loaded
+    assert "app.js" in loaded
+    assert "fonts/hanken-grotesk-latin-wght-normal.woff2" in loaded
+    assert sorted(p.name for p in window.UI_DIR.glob("*.js")) == sorted(
+        name for name in loaded if name.endswith(".js")
+    )
+
+
 def test_app_self_test_fails_when_a_module_is_missing(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:

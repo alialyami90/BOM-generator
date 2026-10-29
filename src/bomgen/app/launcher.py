@@ -15,6 +15,7 @@ The window itself is ``bomgen.app.window`` (M10), imported only when it is neede
 import importlib
 import os
 import pkgutil
+import re
 import sys
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
@@ -34,6 +35,8 @@ NO_DIALOGS_ENV = "BOMGEN_NO_DIALOGS"  # set by unattended CI: print instead of a
 SELF_TEST_FLAG = "--self-test"
 MODULE_MANIFEST = "bomgen_modules.txt"  # written by packaging/bomgen.spec
 BUNDLED_LIBRARY = Path("library") / "default.bomlib"  # beside the exe; see packaging/bomgen.iss
+_LOADED = re.compile(r"""\b(?:src|href)\s*=\s*["']([^"']+)["']""")  # in index.html
+_CSS_URL = re.compile(r"""url\(\s*["']?([^"')]+)["']?\s*\)""")  # fonts in a stylesheet
 
 Action = Literal["window", "import_library", "open_project", "self_test"]
 
@@ -81,19 +84,46 @@ def module_names() -> list[str]:
     ]
 
 
-def ui_entry_missing() -> str | None:
-    """The UI start page's bundle path when the window would find nothing to show."""
+def ui_files(index: Path) -> list[str]:
+    """The files the start page loads, relative to its folder.
+
+    Every local ``src``/``href`` in ``index`` and every ``url()`` in the stylesheets
+    it links (fonts); links within the page and ``data:`` URIs are not files.
+    """
+    folder = index.parent
+    loaded = [ref for ref in _LOADED.findall(index.read_text(encoding="utf-8")) if _is_file(ref)]
+    for sheet in [ref for ref in loaded if ref.endswith(".css")]:
+        if (folder / sheet).is_file():
+            css = (folder / sheet).read_text(encoding="utf-8")
+            base = Path(sheet).parent
+            loaded += [(base / ref).as_posix() for ref in _CSS_URL.findall(css) if _is_file(ref)]
+    return list(dict.fromkeys(loaded))
+
+
+def ui_files_missing() -> list[str]:
+    """The bundle paths of UI files the window needs but cannot find.
+
+    The start page first; without it nothing else is checked.
+    """
     try:
         window = importlib.import_module("bomgen.app.window")
     except Exception:
-        return None  # self_test reports the failed import itself
-    return None if window.INDEX.is_file() else UI_ENTRY
+        return []  # self_test reports the failed import itself
+    if not window.INDEX.is_file():
+        return [UI_ENTRY]
+    folder = window.INDEX.parent
+    prefix = UI_ENTRY.rsplit("/", 1)[0]
+    return [f"{prefix}/{ref}" for ref in ui_files(window.INDEX) if not (folder / ref).is_file()]
+
+
+def _is_file(ref: str) -> bool:
+    return not ref.startswith(("#", "data:", "http:", "https:", "//"))
 
 
 def self_test(
     import_module: Callable[[str], object] = importlib.import_module,
 ) -> list[str]:
-    """Import every ``bomgen`` module and check the UI is bundled; return what failed.
+    """Import every ``bomgen`` module and check every UI file is bundled; return what failed.
 
     Run from the frozen app (``--self-test``), this proves the bundle is complete;
     a green build otherwise says nothing about modules or UI files added later.
@@ -108,8 +138,7 @@ def self_test(
             import_module(name)
         except Exception:  # a broken module must be reported, not abort the test
             failed.append(name)
-    if (missing := ui_entry_missing()) is not None:
-        failed.append(missing)
+    failed += ui_files_missing()
     return sorted(set(failed))
 
 

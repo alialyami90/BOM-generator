@@ -33,7 +33,7 @@ excludes = ["tkinter"]
 datas = collect_data_files("bomgen.app", includes=["ui/**/*"])
 
 # `BOM Generator.exe --self-test` imports every bomgen module listed here (see
-# bomgen.app.launcher.module_names) and checks the UI start page, so a module or
+# bomgen.app.launcher.module_names) and every UI file the start page loads, so a module or
 # UI file missing from the bundle fails the release job instead of passing unnoticed.
 # pywebview's modules are not listed: its backends only import on their own platform.
 manifest = Path(CONF["workpath"]) / "bomgen_modules.txt"

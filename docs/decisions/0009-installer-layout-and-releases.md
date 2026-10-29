@@ -46,8 +46,9 @@ end to end now and let those milestones plug in without touching packaging.
   data files by itself, so the spec bundles the whole `ui` folder with
   `collect_data_files("bomgen.app")` at the same package-relative path, and
   collects pywebview's backends as hidden imports (`pip install ".[app]"`).
-  `--self-test` also fails when that start page is missing from the bundle, since
-  the window would otherwise open blank. On the Windows runner CI also starts the
+  `--self-test` also fails when that start page, or any script, stylesheet or
+  font it loads, is missing from the bundle, since the window would otherwise
+  open blank or broken. On the Windows runner CI also starts the
   frozen app and waits for a window titled "BOM Generator"; `run_window` exits 1
   at once when the UI, WebView2 or pywebview is missing, so a broken bundle fails
   that step.
