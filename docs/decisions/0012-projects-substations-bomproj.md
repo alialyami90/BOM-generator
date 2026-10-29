@@ -1,6 +1,6 @@
 # 0012. Projects hold substations; sharing by `.bomproj` export
 
-- Status: Accepted (Ali, project thread, 2026-10-28)
+- Status: Accepted (Ali, 2026-10-28)
 - Date: 2026-10-28
 - Spec sections: Overview; Inputs the tool needs → 3. Project settings; Data
   model and generation order (entity Project)
@@ -40,9 +40,9 @@ need to share a project with each other and keep backups. Today's inputs
 
 ## Consequences
 
-- A2 owns the new models and loader (milestone M1b); A5 the `.bomproj`
-  commands (M8b); A6 the `.bomproj` file association; A4 the home, project and
-  substation screens. The library stays one installed copy per machine, never
+- The work splits into the new models and loader (milestone M1b), the `.bomproj`
+  commands (M8b), the `.bomproj` file association (M11) and the home, project and
+  substation screens (M9). The library stays one installed copy per machine, never
   part of a project.
 - Today's `examples/` become one example project with one substation; the
   hand-written panels and every golden value stay valid.

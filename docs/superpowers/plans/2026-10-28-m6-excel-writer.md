@@ -1,7 +1,5 @@
 # M6 Excel Writer Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
 **Goal:** Translate library-agnostic sheet models into one .xlsx file with XlsxWriter: values, live formulas, styles, merges, widths, heights, hidden columns, print setup, page-break preview, page header/footer with the logo picture, full recalculation on load.
 
 **Architecture:** `bomgen.models.sheet` defines frozen pydantic value objects (`WorkbookModel` → `SheetModel` → `Cell`, `CellStyle`, `Merge`, `PrintSetup`, `HeaderFooter`). `bomgen.writer.xlsx.write_workbook()` is the only code that imports XlsxWriter (ADR 0003, ADR 0005). No business rules, layout or spec values live here: M5 (`bomgen.sheets`) builds the models, including the named styles of "Formatting".
@@ -103,7 +101,7 @@
 
 ### Task 6: Repo hygiene, docs
 
-**Files:** Test `tests/unit/writer/test_no_xlsx_in_repo.py`; Modify `docs/plan.md` (M6 section status), `tests/unit/README.md` row (via A7 if A1 prefers).
+**Files:** Test `tests/unit/writer/test_no_xlsx_in_repo.py`; Modify `docs/plan.md` (M6 section status), `tests/unit/README.md` row.
 
 - [ ] **Step 1:** `test_no_xlsx_tracked_in_git` (`git ls-files '*.xlsx' '*.xlsm'` is empty; skip when git is unavailable).
 - [ ] **Step 2:** Full gate: `ruff check . && ruff format --check . && mypy && pytest`.

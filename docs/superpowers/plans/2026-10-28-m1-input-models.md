@@ -1,7 +1,5 @@
 # M1 Input Models, Loader, Examples and `bomgen validate` Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
 **Goal:** Load and validate the three YAML input sets (device library, panels, project settings) into pydantic models with readable, located errors, ship the spec's example project in `examples/`, and expose `bomgen validate` and `bomgen schema`.
 
 **Architecture:** Pure pydantic models in `bomgen.models` validate one record at a time. `bomgen.io` reads YAML (keeping line numbers), validates each file, resolves panel mirroring, then runs cross-file reference checks, collecting every problem as an `Issue(file, location, message, line)` before raising one `InputError`. The typer CLI is a thin caller. Design choices: ADR 0010.

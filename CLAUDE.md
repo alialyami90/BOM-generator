@@ -1,11 +1,10 @@
 # Working rules for Claude
 
-## Team
+## Project state
 
-Work is split across agents, one per project thread (`Ax - Role`). Roles, file
-ownership, shared-file rules, ADR/question numbering and the review flow are in
-[`docs/agents.md`](docs/agents.md). Change only files your role owns; A1 (lead)
-reviews, approves and merges every PR.
+Current state, next steps, lessons and checkpoints are in [`docs/handoff/`](docs/handoff/)
+(`STATE.md`, `NEXT.md`, `LESSONS.md`, `CHECKPOINT.md`). Read them before starting work and
+keep them current when work stops.
 
 ## Source of truth
 
@@ -23,8 +22,21 @@ reviews, approves and merges every PR.
   `chore:`, `ci:`, `build:`; scope optional, e.g. `feat(dc-dist): size main MCBs`.
 - Significant design choices get an ADR in `docs/decisions/` (copy
   `0000-template.md`, next free number).
+- Numbers: the next free ADR number is the one after the last row of
+  `docs/decisions/README.md`; the next free open question is the one after the highest
+  `Q` number in `docs/plan.md` "Open questions".
+- `src/bomgen/cli.py`: other command groups live in their own module and attach with
+  one `app.add_typer(...)` line. `build` calls `bomgen.build.build_substation`.
+- A new CI job in `.github/workflows/ci.yml` must join `ci-status`'s `needs` (ADR 0006).
 - Never commit generated `.xlsx` outputs. Build into `out/` or a temp dir
   (both are git-ignored).
+
+## Review and merge
+
+1. Run the checks below, then open a PR from a branch.
+2. Review it against its milestone's scope in `docs/plan.md`, the spec and this file.
+3. Squash-merge it once CI is green and the branch has no conflict with `main`.
+4. A dependent PR rebases on `main` after the PR it depends on merges.
 
 ## Before every commit
 
@@ -53,7 +65,7 @@ pytest
 docs/spec/        generator spec (authoritative) + how to update it
 docs/decisions/   ADRs
 docs/plan.md      plan, milestones, open questions
-docs/agents.md    agent roles and file ownership
+docs/handoff/     project state, next steps, lessons, checkpoints
 src/bomgen/       package source
 tests/unit/       one test module per rule area
 tests/golden/     example-project golden values and tests

@@ -1,20 +1,20 @@
 # Design: projects, substations, network sizing and automatic panel layout
 
-- Status: **approved 2026-10-28** (Ali answered Q24–Q28 in the project thread;
+- Status: **approved 2026-10-28** (Ali answered Q24–Q28;
   Q27 by default). Recorded in ADR 0012 and ADR 0013.
 - Date: 2026-10-28
-- Author: A1 (lead developer), from Ali's requests in the project thread
+- Written from Ali's requests
 - Spec sections touched: Overview; How each panel BOM groups its materials;
   Tag naming conventions; Derivation rules → Network accessories; Inputs the
   tool needs; Data model and generation order
 - Becomes, once approved: a spec v3 addendum (Ali edits the master Claude Doc),
   ADR 0012 (projects, substations and `.bomproj` sharing), ADR 0013 (network
-  sizing and panel layout), plan sections 3 and 4, and one brief per agent
+  sizing and panel layout), plan sections 3 and 4, and the work breakdown
   (section 7)
 
 ## 1. What Ali asked for
 
-Written back from the project thread so it can be corrected. "Said" is Ali's
+Written back from Ali's requests so it can be corrected. "Said" is Ali's
 words; "assumed" is this design's reading, to be confirmed.
 
 **Projects and substations (said).** A project holds several substations.
@@ -87,7 +87,7 @@ panel to another, or delete it.
   `manifest.json` (format version, project id, library name and version,
   app version, SHA-256 per file). Export writes it; import unpacks it into the
   workspace and warns before overwriting an existing project id. Backup is
-  export into `Backups/`. The format, checksums and path checks reuse A5's
+  export into `Backups/`. The format, checksums and path checks reuse the
   `.bomlib` code (`library_store.package`), and the manifest records which
   library version the project was built with (plan Q21), so import tells the
   engineer which `.bomlib` to install if theirs differs.
@@ -145,7 +145,7 @@ layout:
   removed: [PSA1-DHPCC-GW-1]                      # deleted from the BOM
 ```
 
-Library additions (A2's schema, data from A3): `height_u` on every rack-mounted
+Library additions (input schema, data from the device database): `height_u` on every rack-mounted
 device (0 for DIN-rail parts, which do not count against the 32U), and on
 switches the port roles the sizer needs: `ports[].usable_for: ied | uplink | any`.
 The catalogue gains `enclosure_u: 42`.
@@ -225,7 +225,7 @@ golden value. The layout engine gets a second golden: the example substation
 (`examples/substation.yaml`, 40 IEDs, star) must produce two panels, 001 with
 the A units and 002 with the B units, with the GPS, RTAC and I/O spread by R6,
 and the port plans and L1 count R1–R3 give (3 L1 per side, not the spec
-example's 6). A8 records the expected panels in `tests/golden/layout/`; Ali
+example's 6). The expected panels are recorded in `tests/golden/layout/`; Ali
 confirmed them on 2026-10-28.
 
 ## 5. Engine and pipeline change
@@ -251,21 +251,20 @@ heat calculations, sheet formats, writer, library packages (`.bomlib`), the
 installer. Hand-written panels still work (`--no-layout`), which keeps the spec
 example and every golden test valid during the transition.
 
-## 7. Agent briefs (specific, once approved)
+## 7. Work breakdown (once approved)
 
-| Agent | Brief |
+| Area | Work |
 | --- | --- |
-| A2 Input models | Milestone **M1b**: `project.yaml` and `substation.yaml` models (sections 2–3), document register, `equipment`/`network`/`spares`/`layout`, library `height_u`, port `usable_for`, `enclosure_u`; loader resolves project → substations; `bomgen validate` accepts a project or a substation; example project + example substation whose layout reproduces today's panels; JSON Schemas; ADR 0012 numbers and schema notes. Plan section 3 is yours to rewrite. |
-| **A8 (new)** Sizing and layout engine | Milestone **M1c**: `engine/sizing.py` (R1–R3), `engine/layout.py` (R5–R9), `bomgen layout`, generated `panels/*.yaml`, golden test R10, check-report lines. TDD: one test per rule R1–R9, named after it. Starts when A2's M1b schema is on main. |
-| A3 Device DB | Add `height_u`, rack/DIN mounting and per-port role data for every switch and rack device to the records (datasheet block), and hand A2 the values for `examples/library.yaml`. No blank-plate part is needed (Q25). |
-| A4 UI | Follow-up to #8, after this design is approved: Home = projects; project page (info, document register, substations, export/import/backup); substation page = today's project screens plus a **Network** tab (IED count, star/ring, spares) and a **Panels board** (one column per panel, U-fill meter, drag a device or pair between panels, delete, "Reset to automatic"); "create substation from template" dialog. The board edits `layout.overrides`/`removed` and re-runs `bomgen layout`; no rule lives in the UI. |
-| A5 Library packages | Milestone **M8b**: `.bomproj` export/import/backup on top of `library_store.package` (manifest, checksums, path checks), `bomgen project export|import|backup`, overwrite warning, library-version mismatch message; `RefusalKind` extended. |
-| A6 Installer | Add the `.bomproj` file association next to `.bomlib`; launcher opens a double-clicked `.bomproj` through A5's import; after M1b, `bomgen build` smoke test uses the example substation. |
-| A7 Docs | README usage for `layout`/`project export`, CHANGELOG, plan consistency after each merge; glossary (project, substation, system, stream, side) in `docs/plan.md`. |
+| Input models | Milestone **M1b**: `project.yaml` and `substation.yaml` models (sections 2–3), document register, `equipment`/`network`/`spares`/`layout`, library `height_u`, port `usable_for`, `enclosure_u`; loader resolves project → substations; `bomgen validate` accepts a project or a substation; example project + example substation whose layout reproduces today's panels; JSON Schemas; ADR 0012 numbers and schema notes; plan section 3 rewritten. |
+| Sizing and layout engine | Milestone **M1c**: `engine/sizing.py` (R1–R3), `engine/layout.py` (R5–R9), `bomgen layout`, generated `panels/*.yaml`, golden test R10, check-report lines. TDD: one test per rule R1–R9, named after it. Starts when the M1b schema is on main. |
+| Device database | Add `height_u`, rack/DIN mounting and per-port role data for every switch and rack device to the records (datasheet block), and the values for `examples/library.yaml`. No blank-plate part is needed (Q25). |
+| UI | Follow-up to #8, after this design is approved: Home = projects; project page (info, document register, substations, export/import/backup); substation page = today's project screens plus a **Network** tab (IED count, star/ring, spares) and a **Panels board** (one column per panel, U-fill meter, drag a device or pair between panels, delete, "Reset to automatic"); "create substation from template" dialog. The board edits `layout.overrides`/`removed` and re-runs `bomgen layout`; no rule lives in the UI. |
+| Library packages | Milestone **M8b**: `.bomproj` export/import/backup on top of `library_store.package` (manifest, checksums, path checks), `bomgen project export|import|backup`, overwrite warning, library-version mismatch message; `RefusalKind` extended. |
+| Installer | Add the `.bomproj` file association next to `.bomlib`; launcher opens a double-clicked `.bomproj` through the `.bomproj` import; after M1b, `bomgen build` smoke test uses the example substation. |
+| Docs | README usage for `layout`/`project export`, CHANGELOG, plan consistency after each merge; glossary (project, substation, system, stream, side) in `docs/plan.md`. |
 
-A1 writes ADR 0012/0013 and the plan changes, and sets the
-merge order: A2 M1b → A8 M1c → A5 M8b → A4 UI follow-up; M2–M7 start on the
-generated panels as planned.
+ADR 0012/0013 and the plan changes come first. Merge order: M1b → M1c → M8b → UI
+follow-up; M2–M7 start on the generated panels as planned.
 
 ## 8. Open questions (answered)
 

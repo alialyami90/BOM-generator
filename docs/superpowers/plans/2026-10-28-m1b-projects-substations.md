@@ -1,8 +1,6 @@
 # M1b: Projects, Substations and Sizing Inputs Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
-**Goal:** Replace the single-system `project.yaml` with a project file that holds substations, each with its own substation file, panels and the inputs A8's sizing and layout engine needs.
+**Goal:** Replace the single-system `project.yaml` with a project file that holds substations, each with its own substation file, panels and the inputs the sizing and layout engine needs.
 
 **Architecture:** New pydantic models in `models/project.py` (rewritten) and `models/substation.py`. The loader resolves project → substations → panels and applies the project defaults key by key. Panels keep their schema except `document` (now a register key) and an optional `generated` flag. `bomgen validate` accepts either file. The example project gets one substation, and every M1 golden value stays the same.
 
@@ -16,7 +14,7 @@
 - Defaults (design 3.2): `port_fraction 0.20`, `sfp_per_l1 3`, `dc_branches_per_feed 3`, `ac_branches 1`, `rack_u_reserved 10`, `ring_max_switches 6`, `l1_uplinks_per_switch 1`, `l1_interlink true`, `l3_uplinks_per_l2 2`, `topology star`, `blank_plate_u 1`, catalogue `enclosure_u 42`.
 - IEDs never appear in the BOM (R4). `ied_count` is only an input.
 - No blank-plate part (Q25).
-- Readings sent to A1 on 2026-10-28, items (a)–(i), are the decisions below.
+- Readings settled on 2026-10-28, items (a)–(i), are the decisions below.
 
 ## Review Focus
 
@@ -220,7 +218,7 @@
   - `network: {ied_count: 40, topology: star}`.
   - `spares` with the defaults written out, and `layout: {blank_plate_u: 1}`.
 - [ ] Panels use `document: gis01-bom`, and the `$schema` comments point at `../../../../schemas/panel.schema.json`.
-- [ ] Library: add `height_u` to each equipment part with a `# ASSUMED (A3 to confirm)` comment: switches 1, FOPP 1, firewall 1, gateway 1, GPS 1, RTAC 1, Axion 2, EXT switch 1. Add `catalogues.enclosure_u: 42`.
+- [ ] Library: add `height_u` to each equipment part with a `# ASSUMED (device research to confirm)` comment: switches 1, FOPP 1, firewall 1, gateway 1, GPS 1, RTAC 1, Axion 2, EXT switch 1. Add `catalogues.enclosure_u: 42`.
 - [ ] Golden tests:
   - Load via `load_substation(EXAMPLES / "substations/gis01/substation.yaml")`. Every M1 value is unchanged.
   - Add `test_example_project_has_one_substation`.

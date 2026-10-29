@@ -155,7 +155,7 @@ here.
   change. Equipment rows are checked against the library; an unknown part id
   shows an inline error with a suggestion. In a star, each L1 has one uplink to
   its L2 plus an A–B interlink. The equipment table sits here because the panels
-  are generated from it (approved by A1).
+  are generated from it.
 - **New substation:** the **setup card** (see `components.md`) sits above Field network and lists
   the steps left: IEDs, equipment, panels. The IED count is marked required until entered.
 - **Equipment rows:** part (with "Change part…"), role, A and B, quantity (L1 rows read "Sized"),
@@ -400,24 +400,24 @@ The UI is built on a small Python API (milestone M10). From the design, it needs
 | Sheet models or computed rows for each workbook sheet | Preview |
 | Build: stage events (load, engine, sheets, write) and the result path, or a typed error such as "file is open" | Build |
 
-If any of these is missing, or shaped differently, the owning agent decides
+If any of these is missing, or shaped differently, the engine owner decides
 whether the engine or the design changes. The UI does not work around it by
 calculating rules itself.
 
 ### Open items found against the other work (to resolve, not resolved here)
 
-Recorded from A1's review of this PR, checked against the code on `main` and the
+Recorded from the review of this PR, checked against the code on `main` and the
 open PRs at the time.
 
 | Area | Mismatch | Design assumption to revisit |
 | --- | --- | --- |
-| Library packages (A5) | Resolved on the engine side: previews return a list of checks with a status each (see the engine list above). | The Import screen's verification checklist maps one row to each check; `skipped` renders as a muted row, and the signature row always reads "Not signed (not used)". |
-| Library packages (A5) | "Projects built with it" has no data source until M1b records the library per project. `InstalledLibrary.problem` had no UI state. | The Versions table shows a project count. A library with a problem shows a red "Problem" badge in the state column, the problem text under it, and "Make active" disabled. |
-| Device records (A3) | Data-quality level is `confirmed`, not `verified`. A tier's `verified` is a boolean. Alternatives are `make` plus `tiers{low,mid,high}` with `ordering_code`, `url`, `notes`. Datasheet `ratings`, `ordering_code_decoded` and `product_url` exist. `make` may be absent. | The prototype uses `confirmed`/`partial`/`unverified` per tier row and shows no URL, notes or ratings. Decide whether to show them. |
+| Library packages | Resolved on the engine side: previews return a list of checks with a status each (see the engine list above). | The Import screen's verification checklist maps one row to each check; `skipped` renders as a muted row, and the signature row always reads "Not signed (not used)". |
+| Library packages | "Projects built with it" has no data source until M1b records the library per project. `InstalledLibrary.problem` had no UI state. | The Versions table shows a project count. A library with a problem shows a red "Problem" badge in the state column, the problem text under it, and "Make active" disabled. |
+| Device records | Data-quality level is `confirmed`, not `verified`. A tier's `verified` is a boolean. Alternatives are `make` plus `tiers{low,mid,high}` with `ordering_code`, `url`, `notes`. Datasheet `ratings`, `ordering_code_decoded` and `product_url` exist. `make` may be absent. | The prototype uses `confirmed`/`partial`/`unverified` per tier row and shows no URL, notes or ratings. Decide whether to show them. |
 | Device records and library | Nobody owns the loader that joins device-database records to the library `part_id`s inside a `.bomlib`. | M10 dependency. The Library and the picker need it. |
-| Project model (A2) | `Project.library` is a path with no recorded name or version yet. | The "Built with" line and the Older-than-active badge need a recorded name and version. |
-| Panel model (A2) | Enclosure `base_frame` is `{h,d,w}`. `DeviceInstance.tag` and `lan` overrides, and `PortPlan.serial_ports`, are not in the Devices table. Constants are named `air_constant_m3k_per_wh` and `steel_coefficient_w_per_m2c`. | The prototype's field names are illustrative. The forms are generated from the JSON Schema, so labels come from the schema. |
-| Labels and help | The shape of the label and help override file needs a short section in the A2 schema ADR. | Forms need labels and help text beyond what the schema carries. |
+| Project model | `Project.library` is a path with no recorded name or version yet. | The "Built with" line and the Older-than-active badge need a recorded name and version. |
+| Panel model | Enclosure `base_frame` is `{h,d,w}`. `DeviceInstance.tag` and `lan` overrides, and `PortPlan.serial_ports`, are not in the Devices table. Constants are named `air_constant_m3k_per_wh` and `steel_coefficient_w_per_m2c`. | The prototype's field names are illustrative. The forms are generated from the JSON Schema, so labels come from the schema. |
+| Labels and help | The shape of the label and help override file needs a short section in the input schema ADR. | Forms need labels and help text beyond what the schema carries. |
 
 
 ## Decisions from the critique pass

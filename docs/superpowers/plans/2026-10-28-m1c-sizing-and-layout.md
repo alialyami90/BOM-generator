@@ -1,10 +1,8 @@
 # M1c Network Sizing and Panel Layout Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
 **Goal:** Size the L1 and L2 switches of a substation from its IED count and spares, and fill 32U panels automatically (A units in odd panels, B units in even ones, common devices spread, overrides and removals), writing today's `panels/*.yaml`.
 
-**Architecture:** Two pure modules. `engine/sizing.py` turns numbers into a `NetworkPlan` and port plans (R1–R4); `engine/layout.py` turns a list of placeable units into numbered panels plus issues (R5–R9). Both work on small engine dataclasses, not on the M1b models, so their tests are independent of A2's field names; one adapter task (Task 5) maps the loaded substation onto them and the result back onto `Panel` models. Nothing is written to disk by the engine; `bomgen layout` writes the files.
+**Architecture:** Two pure modules. `engine/sizing.py` turns numbers into a `NetworkPlan` and port plans (R1–R4); `engine/layout.py` turns a list of placeable units into numbered panels plus issues (R5–R9). Both work on small engine dataclasses, not on the M1b models, so their tests are independent of the M1b field names; one adapter task (Task 5) maps the loaded substation onto them and the result back onto `Panel` models. Nothing is written to disk by the engine; `bomgen layout` writes the files.
 
 **Tech Stack:** Python 3.12 stdlib (`dataclasses`, `fractions`, `math`), pydantic v2 models from M1/M1b, PyYAML for the generated files, typer for the CLI.
 
@@ -12,8 +10,8 @@
 
 ## Global Constraints
 
-- Starts when A2's M1b models are on `main`. Tasks 1–4 only need the M1 enums (`PortSpeed`, `Media`) and can be reviewed against this plan before then.
-- Owned files: `src/bomgen/engine/sizing.py`, `src/bomgen/engine/layout.py`, `tests/unit/engine/test_sizing.py`, `tests/unit/engine/test_layout.py`, `tests/golden/layout/`. `src/bomgen/engine/__init__.py` is A9's (import-free); create the same empty file only if M2 is not on `main` yet. `cli.py` gets one `layout` command, after telling A2.
+- Starts when the M1b models are on `main`. Tasks 1–4 only need the M1 enums (`PortSpeed`, `Media`) and can be reviewed against this plan before then.
+- Files: `src/bomgen/engine/sizing.py`, `src/bomgen/engine/layout.py`, `tests/unit/engine/test_sizing.py`, `tests/unit/engine/test_layout.py`, `tests/golden/layout/`. `src/bomgen/engine/__init__.py` is import-free; create the same empty file only if M2 is not on `main` yet. `cli.py` gets one `layout` command.
 - Port fractions are computed exactly: `Fraction(str(port_fraction))`, never float multiplication (26 × 0.8 must be 20.8, 30 × 0.9 must be 27).
 - IEDs never reach a panel, a description, a tag or a generated file (R4). `ied_count` appears only in `LayoutReport` lines.
 - Blank space is never a part or a BOM row (Q25); it exists only in the U arithmetic and the report.
@@ -35,28 +33,28 @@
 - **R3 L1 SFPs.** Each side's L1 row gets `uplinks: count = n_l1 × reserved` (uplink + interlink in a star, two ring ports in a ring), 1G MM, `spare: sfp_per_l1` once per row, as today's `=24+3` adds 3 to the whole row.
 - **R3 L2 port plan.** Counts are row totals (as in today's port plans): `uplinks_l3` = `l3_uplinks_per_l2 × n_l2` 1G SM; `downlinks` = the L1 links as 1G MM plus each equipment's L2 ports at the speed and media of its L2 link, grouped by (speed, media) in first-seen order.
 - **R7 a move that does not fit** is applied as asked and reported as `move-does-not-fit`, so the Panels board shows the panel over 32U in red; no other device moves.
-- **R9 numbering.** Units are numbered per side in fill order (L1 A11, A12, … across panels 1, 3, …; L2 A01, A02). A generated row whose numbering does not start at the tag rule's first number carries it in `first_nn` (A2 field, below); tag text itself is built by A9's `engine/tags.py`, never here.
+- **R9 numbering.** Units are numbered per side in fill order (L1 A11, A12, … across panels 1, 3, …; L2 A01, A02). A generated row whose numbering does not start at the tag rule's first number carries it in `first_nn` (an M1b field, below); tag text itself is built by `engine/tags.py`, never here.
 
-## Inputs this plan needs from A2 (M1b) and A1
+## Inputs this plan needs from M1b
 
-A2 agreed these names for M1b (`models/substation.py` unless noted); Task 5 uses them.
+These are the M1b names (`models/substation.py` unless noted); Task 5 uses them.
 
 - `Equipment(part_id, role, redundant=False, side=none, qty=1, l2_ports=0, l2_speed="1G", l2_media="MM")`; `qty` is rejected on `l1_switch` (the sizer counts those).
 - `Substation.generated_panels: GeneratedPanels | None`: templates `id`, `cabinet_number`, `cabinet_name`, `tag_prefix`, `sheet_name` with one `{n}` placeholder and an optional format spec (`"861-GIS01-PSA-{n:04d}"`, `"PSA{n}"`, `"psa{n}"`); `kind` (default network), `enclosure`, `document` key, `options` for every generated panel and `options_by_panel: dict[int, dict]` merged over them (validated by the loader as `PanelOptions`).
 - `Panel.generated: bool = False`; `DeviceInstance.first_nn: PositiveInt | None = None`.
 - Library: `DeviceType.height_u: int | None`, `PortGroup.usable_for: PortUse` (`ied | uplink | any`, default `any`), `Catalogues.enclosure_u = 42`.
 - `io.loader.load_substation(path, *, store=None) -> LoadedSubstation` with `.substation`, `.project`, `.library`, `.documents`, `.constants`, `.spares` (merged with project defaults), `.panels`, `.panel_files`, `.manual_panel_ids`, `.panel_capacity_u`.
-- Example substation: `examples/substations/gis01/substation.yaml` (40 IEDs, star, A3's `height_u` values).
+- Example substation: `examples/substations/gis01/substation.yaml` (40 IEDs, star, the device research's `height_u` values).
 
-- Every `Equipment` has a required unique `id` (slug: `l2`, `l1`, `ext-esw`, `ext-fw`, `fopp`, `gw`, `gps`, `rtac`, `hwio` in the example). Layout inputs name ids, never tags (A1): `UnitRef(device, unit: int | None, side: "a" | "b" | None)`, `DeviceMove(UnitRef + panel)` (side required on redundant entries), `PairMove(pair, unit: int | None, panel: (a, b))`, `removed: list[UnitRef]`; `None` means every unit or both sides. The loader checks ids exist; a unit number above the computed count is this engine's `stale-override`/`stale-removal`. Task 5 maps these onto the engine's `UnitRef`, `Move`, `PairMove`. Tags stay A9's (`engine/tags.py`) and are not needed here.
+- Every `Equipment` has a required unique `id` (slug: `l2`, `l1`, `ext-esw`, `ext-fw`, `fopp`, `gw`, `gps`, `rtac`, `hwio` in the example). Layout inputs name ids, never tags: `UnitRef(device, unit: int | None, side: "a" | "b" | None)`, `DeviceMove(UnitRef + panel)` (side required on redundant entries), `PairMove(pair, unit: int | None, panel: (a, b))`, `removed: list[UnitRef]`; `None` means every unit or both sides. The loader checks ids exist; a unit number above the computed count is this engine's `stale-override`/`stale-removal`. Task 5 maps these onto the engine's `UnitRef`, `Move`, `PairMove`. Tags stay in `engine/tags.py` and are not needed here.
 
-Settled by A1:
+Settled before the work started:
 
 - **Golden R10:** with 40 IEDs R1 gives 3 L1 switches per side (RST2228-L1-24MM: 19 usable ports), not the spec example's 6, and the port plans differ from the hand-written ones (L1 SFPs 3 × 2 + 3 = 9, not 24 + 3). Ali confirmed the golden on 2026-10-28. The golden records the rule results; the hand-written example panels keep every BOM golden value.
 - **UI contract** (`docs/ui/screens.md` → "What the app needs from the engine"): `layout_preview(substation, overrides) -> LayoutResult` with panels, U used, blank plates, DIN-rail counts and move errors; `NetworkPlan` read-only; stable equipment ids.
-- **Cable managers** (Q32, Ali 2026-10-28: count them): every rack-mounted switch or patch panel unit (`network_switch`, `firewall`, `patch_panel` with `height_u > 0`) takes a 1U cable manager directly under it. The pair is one block of `height_u + 1` with no blank plate inside it; blank plates go between blocks. `Unit` gets `cable_manager_u: int = 0` (1 for those categories) and `used_u` counts it. The panel's cable-manager count goes to A9's step 3 instead of today's fixed 9.
+- **Cable managers** (Q32, Ali 2026-10-28: count them): every rack-mounted switch or patch panel unit (`network_switch`, `firewall`, `patch_panel` with `height_u > 0`) takes a 1U cable manager directly under it. The pair is one block of `height_u + 1` with no blank plate inside it; blank plates go between blocks. `Unit` gets `cable_manager_u: int = 0` (1 for those categories) and `used_u` counts it. The panel's cable-manager count goes to the rule engine's step 3 instead of today's fixed 9.
 - **Port spare** (Ali 2026-10-28): default stays 20 %, editable per substation. Each IED has one port on side A and one on side B, so `ied_count` IEDs need `ied_count` ports per side (R1 as written).
-- **L1 switch model** (Ali 2026-10-28: the tool picks one, or the engineer selects the model): the sizer tries every library device with `category: network_switch` and `purdue_level: L1` and keeps the one with the fewest switches per side; ties go to the fewest total ports, then the lowest `part_id`. The engineer's selection is an `l1_switch` equipment entry with a `part_id`, which pins the model (asked of A2: make `part_id` optional on that role). L2 stays the engineer's choice.
+- **L1 switch model** (Ali 2026-10-28: the tool picks one, or the engineer selects the model): the sizer tries every library device with `category: network_switch` and `purdue_level: L1` and keeps the one with the fewest switches per side; ties go to the fewest total ports, then the lowest `part_id`. The engineer's selection is an `l1_switch` equipment entry with a `part_id`, which pins the model (`part_id` is optional on that role). L2 stays the engineer's choice.
 
 ---
 
@@ -164,13 +162,13 @@ Settled by A1:
 
 ### Task 5: Substation adapter, generated panels and `bomgen layout` (R4, R9)
 
-**Files:** Modify `src/bomgen/engine/layout.py`, `src/bomgen/cli.py` (one command, A2 told first); Test `tests/unit/engine/test_layout.py`, `tests/unit/test_cli.py` (layout cases only).
+**Files:** Modify `src/bomgen/engine/layout.py`, `src/bomgen/cli.py` (one command); Test `tests/unit/engine/test_layout.py`, `tests/unit/test_cli.py` (layout cases only).
 
 **Consumes:** Tasks 1–4; `load_substation`, `Equipment`, `GeneratedPanels` (names above); no tag function: units are keyed by equipment id. An equipment part with `height_u: None` is a `missing-height` issue and is placed as 0U; an explicit 0 is a DIN-rail part.
 **Produces:**
 - `@dataclass LayoutReport(ied_count: int, port_lines: list[str], fill_lines: list[str], issues: list[LayoutIssue])` with `lines() -> list[str]` (`"IED count: 40"` first; port lines `"{tag}: {demand} of {usable} usable ports"`; `has_errors`).
 - `@dataclass LayoutResult(panels: list[Panel], fills: list[PanelFill], plan: NetworkPlan, report: LayoutReport)` — `fills` carry the unit keys, U used, blank plates and DIN-rail counts for the Panels board.
-- `layout_preview(loaded: LoadedSubstation, overrides: LayoutOverrides | None = None) -> LayoutResult`: the UI entry point (`docs/ui/screens.md`); `overrides` (A2's model for `layout.overrides` + `removed`) replaces the file's when given, so the board previews a drag before saving.
+- `layout_preview(loaded: LoadedSubstation, overrides: LayoutOverrides | None = None) -> LayoutResult`: the UI entry point (`docs/ui/screens.md`); `overrides` (the model for `layout.overrides` + `removed`) replaces the file's when given, so the board previews a drag before saving.
 - `layout_substation(loaded: LoadedSubstation) -> LayoutResult` = `layout_preview(loaded)`: size (Tasks 1–2), expand equipment into `Unit`s (L1 × `l1_per_side`, L2 × `l2_per_side`, others × `qty`, keys `<id>#1…`; `redundant` → an A and a B unit with the same key), `auto_layout`, then group each panel's units back into `DeviceInstance`s (consecutive units of one part → one row with `qty` and `first_nn`), attach port plans to the panels that hold the switches, and build `Panel` models with `generated=True`. Panels with `kind: console` are not touched.
 - `render_panel_yaml(panel: Panel) -> str`: header comment `# Generated by bomgen layout. Edit layout.overrides in substation.yaml, not this file.`, then the model dump with `exclude_defaults=True`.
 - CLI: `bomgen layout --substation PATH [--out DIR]` writes `panels/<id>.yaml` next to the substation (or into `--out`), prints `report.lines()`, exits 1 when `has_errors`.
@@ -188,11 +186,11 @@ Settled by A1:
 
 ### Task 6: Layout golden (R10)
 
-**Files:** Create `tests/golden/layout/expected_panels.yaml`, `tests/golden/layout/test_layout_golden.py`; Modify `tests/golden/README.md` only through A7 (send A7 the line).
+**Files:** Create `tests/golden/layout/expected_panels.yaml`, `tests/golden/layout/test_layout_golden.py`; Modify `tests/golden/README.md`.
 
-**Consumes:** Task 5, A2's `examples/substations/gis01/substation.yaml` (40 IEDs, star) and A3's `height_u` values.
+**Consumes:** Task 5, `examples/substations/gis01/substation.yaml` (40 IEDs, star) and the device research's `height_u` values.
 
 - [ ] Write `expected_panels.yaml`: for each generated panel, its number, used U, and rows (`part_id`, `qty`, `lan`, `first_nn`) and port plans; each value commented with the rule it comes from (R1 → 3 L1 per side, R2 → demand and 1 L2 per side, R3 → plans, R6 → where GPS, RTAC and I/O land). With 1U for every rack device except a 2U RTAC, the design reads panel 1 = A units + GPS + I/O and panel 2 = B units + RTAC; the file records whatever the confirmed heights give.
 - [ ] `test_r10_example_substation_layout_matches_golden` loads the example substation, runs `layout_substation` and compares with the YAML; `test_r10_example_substation_has_no_layout_errors`.
 - [ ] Run; pass. Checks. Commit `test(layout): golden layout of the example substation (R10)`.
-- [ ] Open the PR (draft until Ali confirms the golden through A1), subscribe to it, and send A1 the number.
+- [ ] Open the PR (draft until Ali confirms the golden) and subscribe to it.

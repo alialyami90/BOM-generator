@@ -1,7 +1,7 @@
 # Plan: Substation SCADA BOM generator
 
 Status: implemented. M0–M11 are on main (v0.1.1); M12–M18 are the next version, tracked in
-[`backlog.md`](backlog.md). Changes go through the review flow in `docs/agents.md`.
+[`backlog.md`](backlog.md). Changes go through the review flow in `CLAUDE.md`.
 Spec: [`docs/spec/generator-spec-v2.md`](spec/generator-spec-v2.md). Sections are
 cited by name; this plan does not restate them.
 
@@ -24,9 +24,6 @@ Excel), and the sheet layer emits the same values as live formulas (OUT-5).
 
 The generator is delivered as a CLI first (M1–M7), then as an installable
 Windows desktop app with shareable device-library update packages (M8–M11).
-
-Milestones are built by agents working in parallel; who owns which milestone and
-files, and the review and merge order, are in [`agents.md`](agents.md).
 
 Stack: as briefed (ADR 0002), with one agreed deviation: write the file with
 **XlsxWriter** because openpyxl cannot put the logo picture in the page header
@@ -423,7 +420,7 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
   committed schemas are current, and `tests/golden/test_example_inputs.py`
   checks the example inputs against the workbook and spec values.
 
-### M1b — Projects, substations and the sizing inputs (A2, ADR 0012/0013)
+### M1b — Projects, substations and the sizing inputs (ADR 0012/0013)
 - `project.yaml` (project info, library name/version, document register,
   defaults, substations) and `substation.yaml` (today's project settings plus
   `equipment`, `network`, `spares`, `layout`); loader resolves project →
@@ -431,11 +428,11 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
   `enclosure_u`; JSON Schemas; `bomgen validate` on a project or a substation.
 - `examples/` becomes one project with one substation; the hand-written panels
   and every golden value stay as they are.
-- Section 3 of this plan is rewritten by A2 with the new schemas (done).
+- Section 3 of this plan is rewritten with the new schemas (done).
 - Also for M1c: `generated_panels` (identity of generated panels), equipment
   `qty`/`l2_speed`/`l2_media`, panel `generated` and device-row `first_nn`.
 
-### M1c — Network sizing and automatic panel layout (A8, ADR 0013)
+### M1c — Network sizing and automatic panel layout (ADR 0013)
 - `engine/sizing.py` (rules R1–R4 of the design) and `engine/layout.py`
   (R5–R9): L1/L2 counts from the IED count and spares, port plans, 32U fill
   with blank space, A/B streams, common devices spread, overrides and removals.
@@ -556,16 +553,16 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
 - OUT-8 yellow highlighting from panel `revision.highlight` and/or a comparison
   with the previous issue (Q10).
 - `bomgen build` final options (`--out`, `--compare`), README usage, example
-  walkthrough. *`--sheet-name` dropped (A1, 2026-10-28):* sheet names come from the
+  walkthrough. *`--sheet-name` dropped (2026-10-28):* sheet names come from the
   inputs (each panel's `sheet_name`, the substation's `output.sheet_names`).
 
-*Engine half delivered (A9, ADR 0016):* `bomgen.checks.check_report(loaded,
+*Engine half delivered (ADR 0016):* `bomgen.checks.check_report(loaded,
 result)` with `library_check`, `render_text`, `render_json` and `report.failed` for
 the exit code; `bomgen.revision.read_previous_issue(path)` and
 `compare_with_previous(result, previous)` mark changed cells and list the changes
 (`render_revisions`). `BuildResult.mains` carries each panel's ΣQ, rating and rule
 rating. ΣQ is now the cabinet's own DC loads, without loose loads it feeds through a
-QCOD. A2 wired them into `bomgen build` and `--compare` (#62); M7 is done.
+QCOD. They are wired into `bomgen build` and `--compare` (#62); M7 is done.
 
 ### M8 — Library update packages
 Ali wants the device library updated on every installed copy by sharing an
@@ -594,7 +591,7 @@ update package (ADR 0008).
   project model and the check report, so M7 wires `library_mismatch()` into the
   check report. Refusals carry a `RefusalKind` for the M10 import screen.
 
-### M8b — `.bomproj` export, import and backup (A5, ADR 0012)
+### M8b — `.bomproj` export, import and backup (ADR 0012)
 - `bomgen project export <project.yaml> [-o file]`, `import <file.bomproj>
   [--workspace dir] [--force]` and `backup <project.yaml>`; public functions
   `export_project`, `import_project`, `backup_project` and `default_workspace` in
@@ -676,7 +673,7 @@ update package (ADR 0008).
     that project), are `restore_backup`'s two refusals, followed by the normal import
     checks; a failure skips every check after it.
   - Still open: "projects built with it" has no data source until M1b records the
-    library on the project, and `InstalledLibrary.problem` needs wording from A4.
+    library on the project, and `InstalledLibrary.problem` needs wording from the UI design.
 
 ### M9 — UI design with impeccable
 Use the `impeccable` skill to design the screens and elements: open or create a
@@ -701,15 +698,15 @@ calling `bomgen` in-process through a small Python API. No browser, no local
 server port, works offline. The business rules stay in the engine. Ends with an
 impeccable polish/audit pass against the M9 design.
 
-Delivered in small PRs by A11, one screen group each (ADR 0015 for the bridge):
+Delivered in small PRs, one screen group each (ADR 0015 for the bridge):
 
 - **M10a shell:** the M9 prototype in `src/bomgen/app/ui/`, `bomgen.app.window.run_window`
-  (the launcher's one call, wired by A6), `bomgen.app.api.Api` with `app_info`
+  (the launcher's one call), `bomgen.app.api.Api` with `app_info`
   (version, the `.bomproj` the app was opened with, workspace, installed libraries),
   `ui/bridge.js`. pywebview is the `app` extra. `run_window` refuses to open when
   the UI files or (on Windows) the WebView2 Runtime are missing. Screens still show
   the prototype's example project and data; their tables are marked "not connected
-  yet". A6's launcher wiring adds `bomgen/app/ui` to `packaging/bomgen.spec`
+  yet". The launcher wiring adds `bomgen/app/ui` to `packaging/bomgen.spec`
   (`collect_data_files("bomgen.app")`), which `collect_submodules` does not cover.
 - **M10b:** Home, Project, Library and Backup and share on `bomgen.library_store` and
   `bomgen.project_store`, in two PRs. Library first: `library_overview` (the active
@@ -772,12 +769,12 @@ Delivered in small PRs by A11, one screen group each (ADR 0015 for the bridge):
   Checks, Build and Preview re-lay out generated panels with M1c's `with_layout`, as
   `bomgen build` does: layout errors are located problems that block Build and Preview,
   warnings show in Checks.
-- **M10e:** A4's impeccable polish pass. First round from A4's ranked findings
+- **M10e:** the impeccable polish pass. First round from the ranked findings
   (`m10e-polish-findings.md` in the project files): a compact Panels board header, equal
   twin columns, one "not available yet" line under every page's subtitle, an opacity pulse
   for the busy Build bar (the detector's marquee), a neutral "Partial" badge, and smaller
   fixes on the project, Library, Preview, Build, Network and Home screens. Done (#81);
-  A4 recorded the departures the built app made from the design in `docs/ui/` (#82).
+  the departures the built app made from the design are recorded in `docs/ui/` (#82).
 
 Status: done (M10a–M10e, #28 to #82). The app stays read-only on projects and
 substations until the project and substation writers exist: creating projects and
@@ -818,14 +815,14 @@ The app icon comes with the M9 design (`packaging/icons/bomgen.ico`).
 ### M12–M18 — Next version (v0.2)
 
 Ali's feedback on v0.1.0, point by point, is in [`backlog.md`](backlog.md). Each
-milestone below is one PR (or one PR per owner where two owners share it), and the owner
-writes its section's details when the work starts.
+milestone below is one PR (or one PR per area where two areas share it), and its
+section's details are written when the work starts.
 
-- **M12 — Cable managers as the gap (A8).** Backlog point 8. The one-blank-plate gap is only
+- **M12 — Cable managers as the gap .** Backlog point 8. The one-blank-plate gap is only
   between two active devices. A cable manager is a passive plate and sits directly against
   the next device, so a block that ends in a cable manager needs no blank plate after it.
   This amends ADR 0013's R5. The layout goldens change as Ali directed.
-- **M13 — Library model for alternatives and catalogue brands (A2, ADR 0017).** Backlog points
+- **M13 — Library model for alternatives and catalogue brands (ADR 0017).** Backlog points
   1–3. Alternatives become library parts linked by an alternative-group key. Catalogue
   entries (MCBs, auxiliary contact, terminal blocks, busbars, housekeeping parts) get the
   same treatment, so a project can pick another brand. Devices gain the electrical fields
@@ -841,17 +838,17 @@ writes its section's details when the work starts.
   - New constants are `min_branch_mcb_a` and `inrush_min_ms`.
   - The example builds byte-identical apart from the workbook's timestamps.
   - Sections 3.1–3.3 show the keys.
-- **M14 — Library data (A3).** Backlog points 2–3. Every alternative in `data/device-db/`
+- **M14 — Library data.** Backlog points 2–3. Every alternative in `data/device-db/`
   becomes a full library part with its datasheet electrical data, and the catalogues get
   their alternative brands. The default library becomes psa-devices 1.1.0.
-- **M15 — Branch MCB sizing from device data (A9, ADR 0019).** Backlog point 3. Ali's rule (Q35): the
+- **M15 — Branch MCB sizing from device data (ADR 0019).** Backlog point 3. Ali's rule (Q35): the
   smallest catalogue MCB ≥ 1.3 × running current, ≥ inrush ÷ magnetic trip multiple, and ≥ 2 A.
   `dc_dist.branch_sizing` sizes every Q1.n, Q2.n and QCOD-n by it; an inrush counts when it
   lasts at least `inrush_min_ms` or its duration is unknown, and DC loads divide by the
   set's DC multiple where given. The device field `min_branch_mcb_a` is deprecated in
   favour of the design constant. `BuildResult.branch_mcbs` carries each sizing and the
   check report prints one `branch_mcb` line per MCB.
-- **M16 — Library editing and CSV exchange (A5 store and CSV, ADR 0018; A11 app; A4
+- **M16 — Library editing and CSV exchange (store and CSV, ADR 0018; app;
   design).** Backlog points 1 and 10. Add and edit devices and catalogue entries, saved as
   a new local library version. Export and import the library as CSV, with alternatives
   linked by their group key. The Library screen gets catalogue tabs and an alternatives
@@ -866,12 +863,12 @@ writes its section's details when the work starts.
   `check_field`, `export_csv` / `preview_csv_import` / `import_csv`, and
   `LibraryStore.export_package` (the backup), with `bomgen library export`, `export-csv` and
   `import-csv` on the command line.
-- **M17 — Project and substation editing (A2 writers; A11 app; A4 design).** Backlog points
+- **M17 — Project and substation editing (writers, app, design).** Backlog points
   4, 7 and 9. Writers round-trip projects, substations and panels. The app creates projects
   and substations from scratch, every settings field is editable, and the Panels board gets
   drag and drop, pins and the panel editor. YAML and `.bomproj` files are then for import,
   export and backup only.
-  *Details (A2 writers, ADR 0021):*
+  *Details (writers, ADR 0021):*
   - The writers round-trip with ruamel.yaml, keeping the files' comments and style.
   - Each writer checks the edited project before writing, writes nothing when the edit
     causes a problem, and returns the problems and the new layout preview.
@@ -882,16 +879,16 @@ writes its section's details when the work starts.
     register's used-by list, per-field validation, confirming `ASSUMED` values and file
     fingerprints.
   - M17d covers create, rename and delete of projects and substations.
-- **M18 — Loose material (A2 model; A9 engine; A10 sheet; A11 editor).** Backlog point 6.
+- **M18 — Loose material (model, engine, sheet, editor).** Backlog point 6.
   Each substation has its own editable loose-material list, on its own "Loose Material"
   sheet (Q36, ADR 0020) and in Preview.
-  - Sheet side (A10, ADR 0020): the table moves off the WS console sheet onto its own
+  - Sheet side (ADR 0020): the table moves off the WS console sheet onto its own
     "Loose Material" sheet (`output.sheet_names.loose_material`), placed after the cabinet
     BOMs and before Power Consumption. It uses the panel BOM layout, print setup and
     header, and its header and footer come from `host_panel`'s document. External Equipment
     references follow it. Revision comparison reads the new sheet and falls back to the
     host sheet's second table for older issues.
-  - Model side (A2, ADR 0022): a loose item is a library part or free text (`description`
+  - Model side (ADR 0022): a loose item is a library part or free text (`description`
     in place of `part_id`, with no `children` or `fed_from`). A free-text row prints its
     description with make, model and ordering code left empty. `io/loose_edit.py` adds,
     replaces, removes and moves items, sets `host_panel`, and validates an item by field.
@@ -938,7 +935,7 @@ print.
 "Computed, 2 A floor". A branch MCB is the smallest catalogue rating that meets all three:
 at least 1.3 × the running current, at least the inrush current divided by the MCB set's
 magnetic trip multiple (C curve: 5) when the device has an inrush figure, and at least 2 A.
-This replaces the per-device `min_branch_mcb_a` as the floor (ADR 0019, A9).
+This replaces the per-device `min_branch_mcb_a` as the floor (ADR 0019).
 Ali also chose "Ignore spikes under 10 ms": the inrush counts only when it lasts at least
 `inrush_min_ms` (10 ms) or no duration is given, and a DC load uses the set's DC trip multiple when
 it has one. A device with no inrush figure is sized by the running current and the floor.
@@ -946,28 +943,28 @@ it has one. A device with no inrush figure is sized by the running current and t
 **Q39 — Separate AC and DC MCB brands** (M13, M15; backlog point 3). *Resolved 2026-10-28:*
 Ali chose "Separate AC and DC choices". A project or substation can choose the DC MCB brand set
 apart from the AC one, so a DC-only range (for example C60H-DC under Q37) can feed the DC branches
-while the AC branches keep an AC-rated set. The proposed shape, for ADR 0023 (B2): a
+while the AC branches keep an AC-rated set. The proposed shape, for ADR 0023: a
 `catalogue_choice` key `mcb_dc` that falls back to `mcb` when unset, so existing projects and the
-golden values do not change; `mcb` still refuses a brand that is not AC-rated (#145). B2 does the
-model, loader and schema; B9 sizes DC branches, mains and CINC from the DC set.
+golden values do not change; `mcb` still refuses a brand that is not AC-rated (#145). The model, loader and
+schema take the key; the engine sizes DC branches, mains and CINC from the DC set.
 
 **Q38 — Datasheet data in the shipped library** (M14; backlog point 3). *Resolved 2026-10-28:*
 Ali chose "Real data in shipped library only". The researched datasheet inrush (SEL originals) and
 DC input ranges go into the library the installer ships (psa-devices 1.1.0), so real projects size
 their branch MCBs from them under Q35. `examples/library.yaml` stays the spec's example project
-without them, so the golden values do not change. A3 generates both libraries from
-`data/device-db`; A6 points `release.yml` at the shipped one.
+without them, so the golden values do not change. Both libraries are generated from
+`data/device-db`; `release.yml` points at the shipped one.
 
 **Q37 — Default MCB set for the 125 V DC feeds** (M14, M15). *Resolved 2026-10-28:* Ali chose
 "Keep iC60N as default". The Schneider iC60N 2P (A9F742xx) is rated to exactly 125 V DC, while the
 battery floats at about 135–140 V. It stays the default; the DC-rated ranges (Schneider C60H-DC,
-ABB S200M UC, Siemens 5SY5) become selectable brand sets (A3, M14). The check report warns when a
-DC MCB's `dc_rating_v` or a DC-fed device's `input_v_max` is below `dc_float_v` (140 V) (A9).
+ABB S200M UC, Siemens 5SY5) become selectable brand sets (M14). The check report warns when a
+DC MCB's `dc_rating_v` or a DC-fed device's `input_v_max` is below `dc_float_v` (140 V).
 
 **Q36 — Where loose material goes** (M18; backlog point 6). *Resolved 2026-10-28:* Ali chose
 "Its own sheet". Loose material moves off the WS console sheet onto a "Loose Material" sheet,
 placed after the cabinet BOM sheets and before Power Consumption. This overrides the spec's
-OUT-3 and its loose-material table on sheet 4 (ADR 0020, A10).
+OUT-3 and its loose-material table on sheet 4 (ADR 0020).
 
 **Q1 — Example data is not in the spec (blocks M1 and the golden tests).**
 *Resolved 2026-10-28:* Ali uploaded the example workbook; `examples/` is transcribed
@@ -1136,8 +1133,8 @@ cable-manager count from the layout.
 
 **Q33 — FOPP-96SM rack height.** The datasheet was not found; the device database
 assumed 2U from Hubbell's 48-fibre 1U unit (`data/device-db/`, PR #18).
-*Resolved 2026-10-28:* Ali: 1U. A3 and A2 update the device database and the example
-library (done in #33: FOPP-96SM `height_u: 1`).
+*Resolved 2026-10-28:* Ali: 1U. The device database and the example library are updated
+(done in #33: FOPP-96SM `height_u: 1`).
 
 **Q34 — Group E–H rules the spec states only by example** (M3; ADR 0014).
 *Resolved 2026-10-28:* Ali accepted all four defaults below, including no XDIN row
@@ -1165,8 +1162,8 @@ thermostat's "30 W" is a contact switching rating, not a load, and that 716 m³/
 SK 3243.100 fan's free-blowing 60 Hz figure. *Resolved 2026-10-28:* Ali: the example
 and golden values stay as the issued workbook. Future library default: SK 3110
 thermostat 0 W; SK 3243.100 fan 460 m³/h with the SK 3243.200 outlet filter (60 Hz),
-so the per-fan airflow changes from 358. Applied when A2 next revises the library
-defaults, not to the example.
+so the per-fan airflow changes from 358. Applied when the library defaults are next
+revised, not to the example.
 
 **Q30 — Where a device's loose items go in the loose-material table.** *Resolved 2026-10-28:* Ali chose
 "Keep all the defaults": the default below stands. The workbook
@@ -1174,9 +1171,9 @@ lists the GPS clock's accessories (`Aux` rows 53–57) between the software and 
 cables; nothing in the inputs says where they belong. *Default:* the project's
 `loose_material.items` in order, then each device's `loose_items` as one block in
 panel order (ADR 0014). If the workbook order matters, `loose_material.items` would
-need a marker naming the device whose loose items go at that position (A2's schema).
+need a marker naming the device whose loose items go at that position (a schema change).
 
-**Q31 — Group A–D rules the spec states only by example** (A1 review of the M2 PR;
+**Q31 — Group A–D rules the spec states only by example** (review of the M2 PR;
 defaults in ADR 0014). *Resolved 2026-10-28:* Ali chose "Keep all the defaults"; items 1–4
 stand as written:
 1. The loose-material title line 2, "PSA Panels Loose Material and Auxiliary

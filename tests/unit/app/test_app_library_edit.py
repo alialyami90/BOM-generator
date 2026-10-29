@@ -338,7 +338,7 @@ def test_an_unused_part_has_no_users(app: api.Api, tmp_path: Path) -> None:
     )
 
 
-# -- datasheet records (device-db, B5's record edits) -----------------------------------------
+# -- datasheet records (device-db record edits) -----------------------------------------
 
 
 @pytest.fixture

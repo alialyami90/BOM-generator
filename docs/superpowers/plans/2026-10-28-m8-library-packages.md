@@ -1,7 +1,5 @@
 # M8 Library Update Packages Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
 **Goal:** Versioned `.bomlib` device-library packages that each Windows user can import, preview, list and roll back without admin rights.
 
 **Architecture:** A self-contained package `bomgen.library_store` with pure parts (manifest, version parsing, pack/verify, diff) and one stateful part (the on-disk store). It reads `library.yaml` as plain YAML and diffs devices by `part_id`, so it does not depend on the M1 pydantic models; full schema validation is injected as a `validate(path)` callable that the CLI wires to the M1 loader once M1 is merged.

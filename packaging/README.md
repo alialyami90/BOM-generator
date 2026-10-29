@@ -15,11 +15,11 @@ Builds the per-user Windows installer (plan M11, ADR 0007, ADR 0009).
 
 A release is one ordinary PR; nobody pushes a tag.
 
-1. When A1 or Ali say a release is due, the agent opens a PR that sets the new
+1. When Ali says a release is due, open a PR that sets the new
    version in `__version__` (`src/bomgen/__init__.py`), `version` in
    `pyproject.toml` and `tests/test_package.py`, and moves the `[Unreleased]`
    entries in `CHANGELOG.md` under `## [<version>] - <date>`.
-2. A1 reviews and merges it.
+2. Review and merge it.
 3. On that push to main, `.github/workflows/release.yml` sees that
    `v<version>` doesn't exist yet. It builds and smoke-tests the installer
    (install, window start, first-start library, build of the example,

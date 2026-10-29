@@ -1,8 +1,8 @@
 """Library export and CSV import for the app (M16 b, ADR 0018).
 
 docs/ui/editing.md "Export and import": export writes the active version as CSV tables or a
-backup package; a CSV import is first a dry run (A5's `preview_csv_import`) and then its
-valid rows go to the pending set, never straight into the library.
+backup package; a CSV import is first a dry run (`library_store`'s `preview_csv_import`)
+and then its valid rows go to the pending set, never straight into the library.
 """
 
 from __future__ import annotations

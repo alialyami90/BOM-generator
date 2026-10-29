@@ -105,7 +105,7 @@ network or equipment changes. It is the user-facing word for a layout override.
 - **Pin here** pins a device where it already is, without moving it. A pin that equals the automatic place is
   kept (engine need below).
 - **Unpin** hands the device back to the layout; it is placed again automatically.
-- A pin holds. The layout still fills first and the overrides are applied after it (R7, A8's #100), so a pinned unit is where it was pinned and the layout does not move it.
+- A pin holds. The layout still fills first and the overrides are applied after it (R7, #100), so a pinned unit is where it was pinned and the layout does not move it.
 - A pair is pinned and unpinned together; "Move this unit only…" pins one unit.
 - The header link reads "2 pinned · 1 deleted" (or "Nothing pinned or deleted") and opens the list:
   each row says what is pinned ("L1 switch 2 (pair) to panels 3 and 4, position 2") with **Unpin**, and each
@@ -160,17 +160,17 @@ Delete removes a device from the BOM (`layout.removed`). It is not a pin. The to
 - **Hand-written panels.** Everything is editable, as before, plus **Delete panel…** (confirmation, Undo).
   Created from Panels › **Add hand-written panel…**.
 
-## Engine needs for the board (for A8 and A2)
+## Engine needs for the board
 
 - An override may carry a **position** (index among the panel's rack devices): `DeviceMove.position`,
   `PairMove.position`, optional.
 - An override that equals the automatic place must be **kept**, not dropped, so that "Pin here" holds.
 - Overrides are applied after the automatic fill (R7, #100). A pin holds the unit where it was pinned; a pin that cannot fit is a reported error, never a silent reflow.
 - `layout_preview` keeps returning, per device, whether it is pinned and its position in the panel.
-- The writers (A2) write `layout.overrides` and `layout.removed` for each action and return the new
+- The writers write `layout.overrides` and `layout.removed` for each action and return the new
   `layout_preview`.
 
-## Back-end needs for the generated-panel editor (for A2 and A8, via A1)
+## Back-end needs for the generated-panel editor
 
 What the panel editor writes, by model field. Most fields exist in the model; what is missing is the writer, and
 for two of them a way to go back.
@@ -365,16 +365,16 @@ part's alternatives first under "Alternatives to X".
   changes* adds them to the pending set (rows with problems are skipped and listed, and the sentence says how
   to include them); (4) done: banner with *Review and apply…*. A CSV import never writes the library directly.
 
-### Engine needs for the library (for A5, A2 and A11)
+### Engine needs for the library
 
-- **A2:** per-field validation for every device and catalogue field (path and value in, message or nothing out).
-- **A5 (ADR 0018):** write a local library version from a diff and the version it starts from, keeping the previous one.
-- **A5 (ADR 0018):** CSV export (UTF-8 with BOM) and a CSV **dry run** that returns checks, row problems with table, row,
+- **Models:** per-field validation for every device and catalogue field (path and value in, message or nothing out).
+- **Library store (ADR 0018):** write a local library version from a diff and the version it starts from, keeping the previous one.
+- **Library store (ADR 0018):** CSV export (UTF-8 with BOM) and a CSV **dry run** that returns checks, row problems with table, row,
   column and message, and the added, changed and removed lists, without writing.
-- **A2:** alternatives as parts with a group key, returning the comparison fields (tier, make, power, inrush, ports,
+- **Models:** alternatives as parts with a group key, returning the comparison fields (tier, make, power, inrush, ports,
   height, data quality) for a device.
-- **A2:** catalogue brand choice per project and per substation (M13, #97): the substation's choice wins, otherwise the project's, otherwise the library default.
-- **A2:** list the equipment rows of a substation that use a part, for *Use this instead* and the delete warning.
+- **Models:** catalogue brand choice per project and per substation (M13, #97): the substation's choice wins, otherwise the project's, otherwise the library default.
+- **Models:** list the equipment rows of a substation that use a part, for *Use this instead* and the delete warning.
 
 ## Loose material (v0.2)
 
@@ -411,7 +411,7 @@ sheet name; it is no longer a Settings tab and no longer sits under the WS conso
   only when there are items, with an *Edit the list* link. Settings › Output gets a fourth sheet name, *Loose
   material* (`output.sheet_names.loose_material`). Build lists the sheet under "This workbook contains" only when
   it will be written.
-- **Back-end needs (A2, A10, A11):**
+- **Back-end needs:**
   - Done by ADR 0022: an item has `part_id` *or* `description`; the page's Designation is `tag`; a free-text
     item has no `fed_from` or `children`.
   - Read and write `loose_material.items` (`part_id` or `description`, `qty` as a whole number or `1 Lot`, `tag`,
@@ -426,7 +426,7 @@ Kept as an advanced view of the file, last in each tab list, labelled "Advanced"
 form will write, update as the form changes, and may be edited and applied back to the form as before.
 Neither the form nor the YAML tab is required for any task. A generated panel's YAML is read-only.
 
-## What the app needs from the engine (for A2 and A11)
+## What the app needs from the engine
 
 The writers are the engine's; the UI calls them and shows what they return.
 

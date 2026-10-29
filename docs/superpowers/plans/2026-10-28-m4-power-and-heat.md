@@ -1,7 +1,5 @@
 # M4 Power and Heat Engine Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
 **Goal:** Derive the Power Consumption, Heat Dissipation and Heat Calculations results from the built BOM, and let the heat check choose each `auto` panel's ventilation.
 
 **Architecture:** Result models in `models/calc.py` (frozen, `OutputModel` from `models/output.py` so `models/bom.py` can hold them in `BuildResult`). `engine/power.py` turns powered BOM rows into `PowerLine`s with a `LineRef` back to the row; `engine/thermal.py` holds the heat blocks, the forced and natural checks, the line-up check and the ventilation rule. `pipeline.build()` decides ventilation inside each panel's first pass and computes power and heat after the tables.
@@ -12,7 +10,7 @@
 
 ## Global Constraints
 
-- Values only; formulas and cell references are the sheet layer's (A10, M5).
+- Values only; formulas and cell references are the sheet layer's (M5).
 - Power lines in BOM order; V from the supply type (125 V DC, 230 V AC constants).
 - Block total = (1 + margin) × Σ J; heat has no margin; unit heat = W × 3.41.
 - `auto` ventilation is decided from the heat without the ventilation parts (Q4).

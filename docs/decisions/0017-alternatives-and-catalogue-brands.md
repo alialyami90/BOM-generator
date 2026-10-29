@@ -12,7 +12,7 @@ reference notes, so a panel cannot use them. The commodity catalogues (`catalogu
 `aux_contact`, `terminal_blocks`, `busbars`, `housekeeping`) each name one brand, so a
 project cannot pick another. M15 (ADR 0019) sizes branch MCBs from device data, so it
 needs inrush current on devices and the trip curve on the MCB catalogue. Ali's sizing rule
-is Q35. ADR 0018 (A5) carries the same fields in the library CSV.
+is Q35. ADR 0018 carries the same fields in the library CSV.
 
 ## Decision
 

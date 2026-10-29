@@ -2,7 +2,7 @@
 
 - Status: Accepted (Ali, 2026-10-28)
 - Date: 2026-10-28
-- Spec sections: — (the app is outside the spec; requested by Ali in the project thread)
+- Spec sections: — (the app is outside the spec; requested by Ali)
 
 ## Context
 

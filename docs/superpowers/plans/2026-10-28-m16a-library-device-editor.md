@@ -1,10 +1,8 @@
 # M16 app side, PR (a): pending set and Device editor — Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
 **Goal:** A person edits a library device in the app, the edit waits in a pending set, and *Review and apply* writes it as a new local library version.
 
-**Architecture:** The pending set is a list of `library_store.edit` operations kept per library in the app home (`library-pending/<name>.json`, with the base version). `src/bomgen/app/library_edit.py` loads, checks, describes and applies it with A5's `apply_edits`, `check_field`, `diff_libraries` and `save_edits`. The bridge exposes it, and `ui/screens-libedit.js` draws the pending bar, the Device editor (`#/library/device/<id>`) and Review (`#/library/review`).
+**Architecture:** The pending set is a list of `library_store.edit` operations kept per library in the app home (`library-pending/<name>.json`, with the base version). `src/bomgen/app/library_edit.py` loads, checks, describes and applies it with `library_store`'s `apply_edits`, `check_field`, `diff_libraries` and `save_edits`. The bridge exposes it, and `ui/screens-libedit.js` draws the pending bar, the Device editor (`#/library/device/<id>`) and Review (`#/library/review`).
 
 **Tech Stack:** Python 3.12, pydantic, pywebview bridge (ADR 0015), plain JS UI.
 
@@ -23,7 +21,7 @@
 
 In: pending set (store, bar, discard with Undo, review, apply); Device editor tabs **Identity**, **Electrical**, **Ports and mounting** (height, cores; port groups read-only list); *Edit device* on the library detail pane.
 Out, later PRs: port group, child, terminal and loose-item editing, Add device, Delete (PR a2); CSV (b); Alternatives tab (c); Catalogues editing.
-Not possible yet: the **Datasheet** tab edits device records (`device-db/`), which `library_store.edit` does not reach. Ask role 5 for a record edit path before building it.
+Not possible yet: the **Datasheet** tab edits device records (`device-db/`), which `library_store.edit` does not reach. It needs a record edit path in `library_store` before it is built.
 
 ## Review Focus
 
@@ -53,7 +51,7 @@ Not possible yet: the **Datasheet** tab edits device records (`device-db/`), whi
 
 **Interfaces — Produces (all `@endpoint`):**
 - `library_pending() -> {name, base, active, entries, count, next_version, problem}`; `next_version` from `library_store.local.next_local_version`.
-- `library_device(part_id) -> {device, saved, pending_fields, used_by, choices}` (`choices`: the model's enum values for category, supply_type, load_type, purdue_level): `device` is the pending-applied device JSON, `saved` the base one, `used_by` `[]` until role 2's "rows that use a part" lands.
+- `library_device(part_id) -> {device, saved, pending_fields, used_by, choices}` (`choices`: the model's enum values for category, supply_type, load_type, purdue_level): `device` is the pending-applied device JSON, `saved` the base one, `used_by` `[]` until the models' "rows that use a part" lands.
 - `check_library_field(part_id, field, value) -> str | None` on the pending-applied library.
 - `add_library_edits(edits: list[dict]) -> library_pending()`; refuses (`AppError("invalid_edit", …)` listing `location: message`) when `apply_edits` reports problems; nothing stored then.
 - `discard_library_edits() -> {discarded: list[dict], page}`; Undo re-sends `discarded` through `add_library_edits`.
@@ -78,5 +76,5 @@ Not possible yet: the **Datasheet** tab edits device records (`device-db/`), whi
 - [ ] Each field is checked on change with `check_library_field`; the message shows under the field (red border, error icon). Edited fields get `td.changed`/field highlight.
 - [ ] Save bar "n unsaved changes · added to pending changes", *Discard*, *Save device* (Ctrl+S, blurs the focused field first). Save sends one `set` (or `remove` for an emptied optional field) per changed field to `add_library_edits`; a refusal shows a red banner and keeps the form.
 - [ ] Leave dialog as Global Constraints. Unknown part: "Device not found" page with *Back to the library*.
-- [ ] E2E in the scratchpad: edit unit_power_w and ordering_code, save, see 2 pending, review, apply → versions list shows `1.0.0+local.1` active; invalid voltage shows the model's message; no console errors. Screens to role 4.
-- [ ] Gate; commit `feat(app): Device editor and Review and apply on the pending set (M16)`; open the PR for role 1.
+- [ ] E2E in the scratchpad: edit unit_power_w and ordering_code, save, see 2 pending, review, apply → versions list shows `1.0.0+local.1` active; invalid voltage shows the model's message; no console errors. Screen-check against the design.
+- [ ] Gate; commit `feat(app): Device editor and Review and apply on the pending set (M16)`; open the PR.

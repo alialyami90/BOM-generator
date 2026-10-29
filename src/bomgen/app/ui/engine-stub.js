@@ -1,5 +1,5 @@
 /* STAND-IN for the engine. Not UI code.
-   In the app the Python engine supplies `layout_preview(substation, overrides) -> LayoutResult` (A8, ADR 0013).
+   In the app the Python engine supplies `layout_preview(substation, overrides) -> LayoutResult` (ADR 0013).
    A switch, firewall or patch panel is placed together with its 1 U cable manager as one block (Q32).
    This stub exists only so the Panels board can be tried in the prototype. It places devices the way the
    design describes (32 U usable, a blank plate under each device whose block does not end in a cable manager, A units in odd panels, B units in even

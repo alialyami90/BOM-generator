@@ -8,8 +8,7 @@ setup, and page headers/footers.
 - **Spec (source of truth):** [`docs/spec/generator-spec-v2.md`](docs/spec/generator-spec-v2.md)
 - **Plan, milestones, open questions:** [`docs/plan.md`](docs/plan.md)
 - **Design decisions:** [`docs/decisions/`](docs/decisions/)
-- **Team:** the agents building the project and who owns what are in
-  [`docs/agents.md`](docs/agents.md)
+- **Project state and next steps:** [`docs/handoff/`](docs/handoff/)
 - **Changes:** [`CHANGELOG.md`](CHANGELOG.md)
 
 ## Status
@@ -94,8 +93,8 @@ Done in v0.2 (Ali's feedback on v0.1.0, tracked in
 - M18: loose material on its own sheet and Preview tab (ADR 0020), with
   free-text items and the app's Loose material page (ADR 0022).
 
-Who builds what is in [`docs/agents.md`](docs/agents.md); the terms project,
-substation, side and stream are defined in `docs/plan.md` → "Glossary".
+The terms project, substation, side and stream are defined in `docs/plan.md` →
+"Glossary".
 
 To install the Windows app, see [`docs/install.md`](docs/install.md).
 

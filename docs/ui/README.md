@@ -4,7 +4,7 @@ Design for the Windows desktop app (ADR 0007, library updates per ADR 0008).
 Design only: the app itself is M10. Status: the first prototype was accepted (#8). This
 revision reworks it for projects and substations (Home lists projects; a project holds
 substations and the document register; `.bomproj` export, import and backups) and adds the
-Network screen and the Panels board from A1's design
+Network screen and the Panels board from the substations and auto-layout design
 (`docs/superpowers/specs/2026-10-28-substations-and-auto-layout-design.md`). Ready for Ali's review.
 
 ## Read in this order
@@ -33,7 +33,7 @@ part of the app. All data is illustrative. Try: Home → open the project → Su
 open GIS Substation 01 → Panels (select a device, drag it, "Move pair…", Undo, Reset to
 automatic); switch to Control Building 03 in the rail for a substation with no network.
 `prototype/engine-stub.js` stands in for the layout engine so the board can be tried; it is
-not UI code: it applies the sizes in A1's design (32 U usable, one blank plate between neighbours, A in odd panels, B in even) just well enough to demonstrate, and A8's engine is authoritative.
+not UI code: it applies the sizes in the layout design (32 U usable, one blank plate between neighbours, A in odd panels, B in even) just well enough to demonstrate, and the layout engine is authoritative.
 
 ## Regenerate tokens
 
@@ -61,15 +61,15 @@ device picker keys (↑ ↓ Enter Esc). They are in `components.md` and `screens
   listing and an "opened from a .bomproj file" state (see `screens.md`, "What the app needs
   from the engine").
 
-- Alternatives are browse-only. Swapping a part needs a schema change (A2) and data (A3).
-- `verified` levels are confirmed/partial/unverified; `same_as` means a tier reuses a lower tier's part number and is shown as one spanning row (confirmed by A1).
+- Alternatives are browse-only. Swapping a part needs a schema change and device data.
+- `verified` levels are confirmed/partial/unverified; `same_as` means a tier reuses a lower tier's part number and is shown as one spanning row.
 - Located errors (`file:line: path: message`) come from ADR 0010; the Checks screen
   assumes the engine returns them as data.
 
 ## Critique pass
 
 Method: the impeccable detector (`impeccable detect --json docs/ui/prototype`)
-returns no findings. A separate design review (a sub-agent that was given only the
+returns no findings. A separate design review (given only the
 screenshots and the brief, not this conversation) scored Nielsen's heuristics 29/40
 and raised the points below. One round of fixes was applied; a second review was
 not run.
@@ -79,7 +79,7 @@ Preview control overload (group select), Checks page (collapsed engine checks,
 panel-first Where column), device-table drag handle and removal feedback, wrapped
 dates in Versions, cabinet names in the heat table, "Saved" wording.
 
-Fixed after A1's review: Preview, Power and Heat render literal engine figures only; library table fits 1280 px; mirrored panels follow A2's model (read-only tabs, full Mirror dialog, sample error moved to the original); deep links and picker keys; form labels now linked to their fields; hard-coded colours moved to tokens.
+Fixed after review: Preview, Power and Heat render literal engine figures only; library table fits 1280 px; mirrored panels follow the input model (read-only tabs, full Mirror dialog, sample error moved to the original); deep links and picker keys; form labels now linked to their fields; hard-coded colours moved to tokens.
 
 Not done, and why: read-only reviewer mode (needs Ali's call, see `screens.md`);
 inputs only on the focused device row (kept always-editable for speed, to review

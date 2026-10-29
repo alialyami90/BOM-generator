@@ -137,7 +137,7 @@ def test_sfps_come_before_cable_managers_and_serial_cables() -> None:
 
 
 def test_one_sfp_part_serving_two_media_gets_one_row_per_media() -> None:
-    # A1 review on #22: the SM uplinks must not disappear into an "SFP (MM)" row.
+    # Review on #22: the SM uplinks must not disappear into an "SFP (MM)" row.
     combo = device(
         "SFP-COMBO",
         "sfp",

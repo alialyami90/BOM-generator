@@ -1,5 +1,5 @@
-/* Illustrative data from the M9 prototype, read by the screens not yet connected to bomgen.app.api (plan M10). Shapes follow the input schema work (A2), the library package work (A5)
-   and the device-database records (A3). Values are for judging layout and density, not engineering truth. */
+/* Illustrative data from the M9 prototype, read by the screens not yet connected to bomgen.app.api (plan M10). Shapes follow the input schema, the library package work
+   and the device-database records. Values are for judging layout and density, not engineering truth. */
 (function () {
   /* The open substation: what the first prototype called the project (its panels, constants and workbook). */
   const sub = {

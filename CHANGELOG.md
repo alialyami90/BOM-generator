@@ -309,7 +309,7 @@ project uses [Semantic Versioning](https://semver.org/).
   the library switches (#18).
 - ADR 0012 (projects hold substations, `.bomproj` sharing) and ADR 0013
   (switch sizing and automatic panel layout), milestones M1b, M1c and M8b,
-  Q24–Q28 resolved and the A8–A10 roles (#16).
+  and Q24–Q28 resolved (#16).
 - Windows installer and releases, built early: PyInstaller spec, per-user
   Inno Setup installer with `.bomlib` file association, frozen-app launcher
   with placeholders for the M10 window and `.bomlib` import, tag-driven
@@ -317,8 +317,6 @@ project uses [Semantic Versioning](https://semver.org/).
   `docs/install.md` and ADR 0009 (milestone M11, #2).
 - M9 UI design in `docs/ui/`: design tokens, component and screen specs, a
   clickable HTML/CSS prototype and bundled fonts; ADR 0011 (#8).
-- `docs/agents.md`: agent roles, file ownership, numbering and the review and
-  merge flow (#3).
 - Device-library update packages: `.bomlib` pack and verify, a per-user
   library store with import preview, downgrade refusal and rollback, and the
   `bomgen library pack|import|list|rollback` commands (milestone M8, #9).
@@ -341,7 +339,7 @@ project uses [Semantic Versioning](https://semver.org/).
 
 - Version 0.1.0, the first release (#84).
 - Changelog release heading for 0.1.0 (#85).
-- Desktop app polish from A4's findings: a compact Panels board header, one
+- Desktop app polish from the design review's findings: a compact Panels board header, one
   "not available yet" line under each page's subtitle, a pulsing Build busy
   bar, a neutral "Partial" badge and smaller fixes across the screens
   (milestone M10e, #81).
@@ -366,8 +364,6 @@ project uses [Semantic Versioning](https://semver.org/).
   workbook already at that path (#69).
 - Q34 resolved by Ali; ADR 0014 accepted (#66, #67).
 - The import clash banner leads the review dialog (#64).
-- `docs/agents.md`: A9 owns the check report and revision modules; ADR 0016
-  taken (#61).
 - The release workflow's installed-build step parses on PowerShell (#57).
 - The release workflow builds the example workbook with the frozen and the
   installed CLI (#55).
@@ -397,8 +393,7 @@ project uses [Semantic Versioning](https://semver.org/).
   each switch, firewall or patch panel), Q33 (FOPP-96SM is 1U) and the L1
   switch selection rule (#25, #29); the device database and the UI design
   follow (#30, #32).
-- `docs/agents.md`: the A11 desktop app role, ADR 0015 taken, Q32 and Q33
-  resolved (#26, #35).
+- Q32 and Q33 resolved (#26, #35).
 - Changelog, README and test READMEs for #14–#23, and the plan glossary (#17).
 - M9 prototype reworked for projects and substations: project page with the
   document register and backup and share, a Network screen and a Panels board
@@ -409,8 +404,6 @@ project uses [Semantic Versioning](https://semver.org/).
   store and shows the change summary or the refusal; `.bomproj` files get a
   placeholder association; `BOMGEN_NO_DIALOGS=1` prints messages to stderr
   for unattended runs (M11, #15).
-- `docs/agents.md` refreshed: merge order, next milestones, reserved ADR and
-  open-question numbers (#13).
 - Plan Q29 resolved: the example keeps the workbook's thermostat load and fan
   airflow; future library defaults use 0 W for the SK 3110 thermostat and
   460 m³/h for the SK 3243.100 fan with its outlet filter (#12).
