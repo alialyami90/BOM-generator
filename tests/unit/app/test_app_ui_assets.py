@@ -243,3 +243,10 @@ def test_overview_and_network_use_the_shared_draft_form() -> None:
         assert "function toModel(" not in js  # one reader of typed values, in ui.js
     assert "const PO = App.draftForm({" in (UI_DIR / "screens-projects.js").read_text("utf-8")
     assert "const NET = App.draftForm({" in (UI_DIR / "screens-substation.js").read_text("utf-8")
+
+
+def test_deleting_a_device_not_applied_yet_drops_it_from_the_pending_changes() -> None:
+    edit = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
+    assert "data-new=\"${isNew ? 1 : ''}\"" in edit
+    assert "It is not in the library yet, so it goes at once" in edit
+    assert "dropped from the pending changes" in edit

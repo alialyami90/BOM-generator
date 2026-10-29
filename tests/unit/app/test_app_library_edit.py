@@ -465,3 +465,9 @@ def test_an_added_alternative_joins_the_group_as_a_copy(app: api.Api) -> None:
 
 def test_tier_choices_come_from_the_model(app: api.Api) -> None:
     assert ok(app.library_device(SWITCH))["choices"]["tier"] == ["low", "mid", "high"]
+
+
+def test_deleting_a_device_added_in_the_set_leaves_no_pending_change(app: api.Api) -> None:
+    ok(app.add_library_device("SITE-CABLE", "component", "Local", "Cable", None))
+    ok(app.add_library_edits([{"op": "remove", "path": ["devices", "SITE-CABLE"]}]))
+    assert ok(app.library_pending())["count"] == 0
