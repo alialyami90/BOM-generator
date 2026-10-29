@@ -501,11 +501,14 @@ class Api:
         panels = {file: panel for panel, file in found.loaded.panel_files.items()}
 
         def use(u: PartUse) -> dict[str, Any]:
+            # an equipment row's index, for Use this instead (docs/ui/editing.md, Alternatives)
+            index = u.path[1] if u.where == "equipment" else None
             if u.where != "panel":
-                return {"where": u.where, "name": u.name, "panel": None}
+                return {"where": u.where, "name": u.name, "panel": None, "index": index}
             panel = panels[u.file] if u.file is not None else None
             # part_users names a panel row "<panel>: <tag>"
-            return {"where": u.where, "name": u.name.split(": ", 1)[-1], "panel": panel}
+            name = u.name.split(": ", 1)[-1]
+            return {"where": u.where, "name": name, "panel": panel, "index": None}
 
         return {
             "substation": found.loaded.substation.substation.name or substation_id,

@@ -15,6 +15,7 @@ import pytest
 from bomgen.app import api
 from bomgen.app.library_edit import Pending, PendingEdits, describe, merge
 from bomgen.io.loader import load_library
+from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.package import pack
 from bomgen.library_store.store import LibraryStore
 
@@ -306,7 +307,19 @@ def test_part_users_lists_the_open_substations_rows(app: api.Api, tmp_path: Path
     assert reply["substation"]
     wheres = {u["where"] for u in reply["uses"]}
     assert "equipment" in wheres
-    assert all(set(u) == {"where", "name", "panel"} for u in reply["uses"])
+    assert all(set(u) == {"where", "name", "panel", "index"} for u in reply["uses"])
+
+
+def test_an_equipment_use_gives_its_row_for_use_this_instead(app: api.Api, tmp_path: Path) -> None:
+    project = Path(shutil.copytree(EXAMPLES, tmp_path / "workspace" / "jfgp2-pkg3"))
+    uses = ok(app.library_part_users(PART, str(project / "project.yaml"), "gis01"))["uses"]
+    row = next(u for u in uses if u["where"] == "equipment")
+    ids = [
+        e["id"]
+        for e in read_yaml(project / "substations" / "gis01" / "substation.yaml").data["equipment"]
+    ]
+    assert ids[row["index"]] == row["name"]
+    assert all(u["index"] is None for u in uses if u["where"] != "equipment")
 
 
 def test_a_panel_row_names_its_panel_apart(app: api.Api, tmp_path: Path) -> None:
