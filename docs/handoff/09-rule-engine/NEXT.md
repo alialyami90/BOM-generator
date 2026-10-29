@@ -1,47 +1,54 @@
-Next action: re-run the git commands and the gate (STATE.md → Verification), then check whether A3's Q38 follow-up PR (it adds `data/library/psa-devices.yaml`) has merged, and start task 1 if it has.
+Next action: re-run the git commands and the gate (STATE.md → Verification), post a readback in your
+thread, then ask the lead (ROSTER row 1, currently B1) for role 9's next task. **Nothing is queued:**
+every task B9 had is done and every question is answered.
 
-A1 assigned tasks 1 and 2 on 2026-10-28; task 2 is done (#154). Task 3 waits on Ali. Find A1's thread with
-`list_threads` and report each result there.
+## How to resume (C9 or later)
+1. Read `../README.md`, then this folder in the order STATE, NEXT, LESSONS and the latest checkpoint.
+   Then read `CLAUDE.md` and `docs/agents.md`.
+2. `git fetch origin main && git checkout -B <your thread branch> origin/main`. Don't reuse B9's
+   branch history. If your branch name already exists on the remote with merged history, merge its
+   tip with `git merge -s ours origin/<branch>` and push without a force: the auto-mode classifier
+   refuses `git push -f` (LESSONS).
+3. `pip install -e '.[dev]'`, then `python -m ruff check . && python -m ruff format --check .`,
+   `python -m mypy`, `python -m pytest -q` (background it: about 6 min) and `python -m pytest -q tests/golden`.
+   Compare the results with STATE.md → Verification, and record any drift in LESSONS.md.
+4. Post the readback: your name and role, the files you own, the state, your next action, and any drift.
 
-## 1. Check the engine against the shipped library (WAITING on A3's Q38 follow-up PR)
-- Goal: confirm that branch sizing and the `dc_float` warnings give the expected results
-  with the shipped `data/library/psa-devices.yaml`. This is an M15 follow-up. Change code
-  only if a defect shows.
-- Expected (A1, 2026-10-28):
-  - the SEL-3555, SEL-3355 and spare branches come out at 6 A;
-  - the goldens stay as they are (Q38: the spec example keeps its values).
-- Files: none to change at first. If a defect shows: `src/bomgen/engine/dc_dist.py`,
-  `src/bomgen/checks.py`, `tests/unit/engine/test_engine_dc_dist.py`,
-  `tests/unit/engine/test_checks.py` (all role 9). The library data is A3's
-  (`data/library/`, `data/device-db/`), and `examples/` is A2's.
-- Depends on: A3's Q38 follow-up PR, merged by A1. Find it with `list_pull_requests`.
-- Acceptance: the spec, "Derivation rules → DC distribution (group F)" and "Breaker part
-  numbers"; ADR 0019 items 1–7.
-- Tests first, only if a defect shows, named after the rule, e.g.
-  `test_branch_is_smallest_rating_meeting_running_inrush_and_floor`.
-- Done: the gate passes, `python -m pytest tests/golden` passes with the values unchanged,
-  and either a PR is open for A1 or A1 is told that nothing needed changing.
+## Likely next work (none assigned; take it only when the lead assigns it)
+- **A DC aux-contact choice.** If Ali wants DC aux contacts to follow `mcb_dc` (STATE → Risks), role 2
+  adds the choice key, then role 9 switches `aux_contact_line` in `engine/dc_dist.py` to it. Tests
+  first, for example `test_dc_aux_contacts_use_the_dc_aux_choice`.
+- **New shipped-library data.** When role 3 changes `inrush_a`, `inrush_ms` or `input_v_max` in
+  `data/library/`, rerun `tests/unit/engine/test_engine_shipped_library.py`. Update only its
+  expectations, keep the goldens on `examples/` (Q38), and tell the lead what moved.
+- **A changed engine rule** (anything Ali changes in plan §6): find the rule's module in STATE.md →
+  Code map, write the failing test named after the rule, change the code, and keep the goldens unless an
+  ADR moves them.
 
-## 2. Separate AC and DC MCB choices: engine side (DONE, #154)
-- Merged at f319f64. Nothing left; see STATE.md → Merged.
-
-## 3. Q30 and Q31 answers (when Ali answers, through A1)
-- Goal: implement any rule Ali changes. Milestone: whichever A1 names, one PR.
-- Files: `src/bomgen/engine/kits.py` (loose order, Q30); `network.py`, `housekeeping.py`,
-  `thermal.py` (Q31 items 2–4); goldens only with an ADR.
-- Tests first, e.g. `test_loose_table_lists_project_items_then_device_loose_items` (exists;
-  change it to the new order), `test_cable_managers_one_per_switch_and_patch_panel_unit`.
+## Rules for any task
+- One milestone per PR, a conventional commit (`feat(engine): …`, `test(engine): …`), and the gate
+  passing before every commit.
+- Tests first, named after the rule (`test_<rule>`). Writer-facing changes to `BuildResult` go to role 10
+  first.
+- The PR body starts with the two attribution lines from your session's instructions. Copy them from
+  there, not from an older PR, and assign it to `alialyami90`. Requesting Ali as reviewer fails
+  because he is the PR author, which is harmless. Subscribe to the PR, and when CI is green, message the
+  lead's thread. The lead reviews and squash-merges.
+- Report each result in the lead's thread with `message_thread`. Ask Ali only on a decision card with
+  your recommendation marked, and never ask him to merge.
 
 ## Don't do
-- Don't edit other roles' files without telling the owner: A2 has `models/library.py`,
-  `models/project.py`, `models/_base.py`, `io/`, `cli.py`, `build.py` and `examples/`. A8 has
-  `engine/sizing.py` and `layout.py`. A10 has `sheets/` and `writer/`. Tell A10 before
-  changing the shape of `BuildResult`.
-- Don't move golden values without an ADR. Don't settle a spec-vs-code gap by guessing:
-  ask Ali through A1 (next free Q40, ADR 0024: `docs/agents.md` → "Numbers").
+- Don't edit other roles' files without telling the owner: role 2 has `models/library.py`,
+  `models/project.py`, `models/panel.py`, `models/_base.py`, `io/`, `cli.py`, `build.py` and `examples/`.
+  Role 8 has `engine/sizing.py` and `engine/layout.py`. Role 10 has `sheets/`, `writer/` and
+  `models/sheet.py`. Role 11 has `app/`.
+- Don't move golden values without an ADR. Don't settle a spec-vs-code gap by guessing: ask Ali through
+  the lead. The next free numbers are Q42 and ADR 0024 (`docs/agents.md` → "Numbers").
 - Don't revive `DeviceType.min_branch_mcb_a` as a rating input (ADR 0019 item 4).
-- Don't count inrush peaks under `inrush_min_ms` (Ali, 2026-10-28; ADR 0019 item 3).
-- Don't switch the default DC MCB away from the iC60N (Q37: "Keep iC60N as default").
-- Don't open a PR that marks ADRs Accepted. Only Ali accepts ADRs, and A1 offers him a
-  batch card for all the Proposed ones (A1, 2026-10-28).
-- Don't apply `stash@{0}` (see STATE.md). Don't ask Ali to merge: A1 merges.
+- Don't count inrush peaks under `inrush_min_ms` (ADR 0019 item 3).
+- Don't switch the default DC MCB away from the iC60N (Q37), and don't drop the FGR-60F or the iC60N
+  `dc_float` warnings (Q37, Q41: Ali accepts both).
+- Don't put CINC on the DC set: it is group E's AC main (ADR 0023 point 1).
+- Don't read `catalogues.mcb` in DC code. Pass `library.catalogues.dc_mcb` to the `engine/mcb.py`
+  helpers.
+- Don't mark ADRs Accepted: only Ali does that.
