@@ -75,7 +75,7 @@
       <span class="sp"></span>
       <label class="switch"><input type="checkbox" data-action="hwio" ${showHwio ? 'checked' : ''}>HWIO column</label>
       <label class="switch"><input type="checkbox" data-action="rev" ${showRev ? 'checked' : ''}>Show revised cells</label></div>
-    <div class="sheet-title">${esc(p.cabinet)}<small>${esc(P.titleLine)} - ${esc(p.name)}</small></div>
+    <div class="sheet-title">${esc(p.cabinet)}<small>${esc(P.name)} - ${esc(p.name)}</small></div>
     <div class="table-wrap" style="max-height:calc(100vh - 380px)"><table class="table"><thead><tr><th title="Group (preview only)">Grp</th><th class="num">SR.NO</th><th>Item designation</th><th>Description</th><th class="num">Quantity</th><th>Make</th><th>Model</th><th>Ordering code</th>${showHwio ? '<th class="num">HWIO</th>' : ''}</tr></thead><tbody>${out || `<tr class="empty-row"><td colspan="9">No rows match. Clear the filter to see all ${rows.length} rows.</td></tr>`}</tbody></table></div>
     <div class="row" style="justify-content:space-between;margin-top:var(--space-2)"><span class="muted small">${rows.length} rows · Groups (A to H) and the HWIO column are for review. The issued sheet shows neither, and the HWIO column is hidden in the workbook.</span><span class="muted small">Panel HWIO total: <b>${hw}</b> ${illus()}</span></div>`;
   }

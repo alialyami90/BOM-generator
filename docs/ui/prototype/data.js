@@ -4,7 +4,6 @@
   /* The open substation: what the first prototype called the project (its panels, constants and workbook). */
   const sub = {
     name: 'GIS Substation 01',
-    titleLine: 'GIS Substation',
     path: 'D:\\Projects\\eastern-province\\substations\\gis01\\substation.yaml',
     savedAt: '10:02',
     sheetDocs: [
