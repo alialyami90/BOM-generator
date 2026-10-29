@@ -420,3 +420,12 @@ def test_the_save_bar_meets_the_window_bottom() -> None:
     page_rule = ".page:has(> .savebar) { padding-bottom: 0; display: flex; flex-direction: column;"
     assert f"{page_rule} min-height: 100%; }}" in css
     assert ".page > .savebar { margin-top: auto; }" in css  # short pages too (B4, #207)
+
+
+def test_ids_in_a_sub_line_never_break_and_tab_panels_keep_their_offset() -> None:
+    """B4's #207 re-check nits: "ext-fw" broke at its hyphen; the device editor panel sat
+    16px lower once the page became a flex column (margins no longer collapse)."""
+    css = (UI_DIR / "styles.css").read_text(encoding="utf-8")
+    assert ".table .cell-sub .mono { white-space: nowrap; }" in css
+    libedit = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
+    assert '<div role="tabpanel" aria-labelledby="tab-devEdit-${t}">' in libedit
