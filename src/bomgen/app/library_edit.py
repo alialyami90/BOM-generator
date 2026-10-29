@@ -231,6 +231,9 @@ class LibraryEditor:
             "used_by": [],
             "choices": CHOICES,
             "part_ids": sorted(d.part_id for d in library.devices),
+            "part_names": {
+                d.part_id: " ".join(filter(None, (d.make, d.model))) for d in library.devices
+            },
         }
 
     def check(self, part_id: str, key: str, value: object) -> str | None:
