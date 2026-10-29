@@ -46,3 +46,17 @@
 - **`icon` is a global in the UI scripts, not an `App` member.** Destructuring it from `App` makes it undefined.
 - **ISO date strings must be converted to dates before `set_field`** (`_dated()` in `api.py`). Otherwise YAML writes them as quoted text.
 - **Device records (data quality) exist only for an installed library.** A project whose `library.file` points to a folder copy has none, so the UI shows no badge rather than a wrong one.
+
+## B11 (2026-10-29, polish pass and retirement)
+- **Changed vs revision.** An unsaved edit gets the orange dot (`.chg`, via `App.changedField(html)` for a form field and `App.changedCell(on)` for a table cell). The yellow `td.changed` fill means "differs from the last issued revision" and is used on Preview only. Do not mix them (polish-v02 item 1).
+- **Two class attributes on one element silently drop the second.** The Network qty and L2 cells were never marked until `ch(f, cls)` merged the cell's own class with `is-changed`. Build one `class="…"` string.
+- **Model error text goes through `library_edit.in_words(key, message)`** before the UI shows it. Pydantic's "Input should be a valid integer" means nothing to an engineer; add a mapping there, not in JS.
+- **A list row with an empty cell is "unfinished" and is not checked until save** (`unfinished` in `screens-libedit.js`), so a half-typed row does not show errors while the user is still filling it.
+- **Async click → navigation race.** A button that awaits the bridge and then opens a dialog must set `aria-busy`/`disabled` and, after the await, return if `App.route()` or the substation changed (`eq-part-change`). The hashchange handler also calls `closeDialog()` before `render()`.
+- **Grid overflow.** A `minmax(0, 1fr)` track does not stop a nested grid with an implicit `auto` column from growing to its widest table. Give the nested grid `grid-template-columns: minmax(0, 1fr)` and the item `min-width: 0` (`.net-grid`), so a wide table scrolls inside its `.table-wrap`.
+- **Save bar at the window bottom.** A page with a save bar is a flex column with `min-height: 100%` and the bar has `margin-top: auto`. Flex items do not collapse margins: a child's `margin-top` now adds to the previous sibling's `margin-bottom` (the device editor tab panel moved 16px; fixed by dropping its own margin). Check spacing on every page after a layout-mode change.
+- **Ids never break.** Part ids and row ids are `white-space: nowrap` (`.part-line .mono`, `.table .cell-sub .mono`); a long id lets `Change…` wrap under it instead.
+- **Ruff RUF001** rejects ambiguous characters such as `›` in Python strings; write `›`.
+- **E2E: a dirty page opens the leave dialog** on navigation. Discard first (or answer the dialog) before `location.hash = …`, or the script times out.
+- **Reviews arrive from two agents at once** (role 1 and role 4 often send the same findings). Treat them as one list, fix once, answer both in one message to role 1.
+- **Measure, then claim.** Role 4 checks clipping and gaps by eye on screenshots. Before saying "fixed", measure in Playwright: a select's text width vs `clientWidth - 34`, a table's right edge vs the next column's left, `getClientRects().length > 1` for a broken id, the gap between `.savebar` and `#main`'s bottom.
