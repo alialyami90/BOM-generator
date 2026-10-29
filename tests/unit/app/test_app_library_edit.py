@@ -471,3 +471,12 @@ def test_deleting_a_device_added_in_the_set_leaves_no_pending_change(app: api.Ap
     ok(app.add_library_device("SITE-CABLE", "component", "Local", "Cable", None))
     ok(app.add_library_edits([{"op": "remove", "path": ["devices", "SITE-CABLE"]}]))
     assert ok(app.library_pending())["count"] == 0
+
+
+def test_library_device_names_each_part_by_make_and_model(app: api.Api) -> None:
+    ok(app.add_library_device("SITE-CABLE", "component", "Local", "Cable", None))
+    ok(app.add_library_device("SITE-BARE", "component", "", "", None))
+    names = ok(app.library_device(PART))["part_names"]
+    assert names["SITE-CABLE"] == "Local Cable"
+    assert names["SITE-BARE"] == ""
+    assert set(names) == set(ok(app.library_device(PART))["part_ids"])

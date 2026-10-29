@@ -259,3 +259,8 @@ def test_an_equipment_row_changes_its_part_with_its_alternatives_first() -> None
     assert 'label="Alternatives to ${esc(was)}"' in sub
     assert "Other parts in the library" in sub
     assert "ACTIONS['eq-part-change-do']" in sub
+
+
+def test_the_parts_datalist_shows_make_and_model() -> None:
+    edit = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
+    assert "label=\"${esc(names[p] || '')}\"" in edit
