@@ -127,41 +127,33 @@
     ['ac_branches', 'Spare AC branches', ['defaults', 'spares', 'ac_branches'], 'int']
   ];
   const BRANDS = [['mcb', 'MCBs, AC branches'], ['mcb_dc', 'MCBs, DC branches'], ['aux_contact', 'Aux contacts'], ['terminal_blocks', 'Terminal blocks'], ['busbars', 'Busbars'], ['housekeeping', 'Housekeeping']];
-  const PO = { draft: {}, errors: {}, saving: false };
-  const ovField = (key) => OV.find((f) => f[0] === key) || (key.startsWith('brand_') ? [key, '', ['defaults', 'catalogue_choice', key.slice(6)], 'brand'] : null);
+  const ovField = (key) => OV.find((f) => f[0] === key) || (key.startsWith('brand_') ? [key, '', ['defaults', 'catalogue_choice', key.slice(6)], 'choice'] : null);
   function saved(p, key) {
     const f = ovField(key), r = p.raw;
-    if (f[3] === 'brand') { const v = (r && r.catalogue_choice[key.slice(6)]) || ''; return v === 'default' && key !== 'brand_mcb_dc' ? '' : v; }
+    if (f[3] === 'choice') { const v = (r && r.catalogue_choice[key.slice(6)]) || ''; return v === 'default' && key !== 'brand_mcb_dc' ? '' : v; }
     if (key === 'client') return p.client || '';
     const v = r ? r[f[2][1]][f[2][2]] : null;
     return f[3] === 'pct' && v != null ? Math.round(v * 1000) / 10 : v;
   }
-  const shown = (p, key) => (key in PO.draft ? PO.draft[key] : saved(p, key));
-  function toModel(kind, raw) {  // [value for the file, a message when it cannot be read]
-    const t = String(raw == null ? '' : raw).trim();
-    if (!t) return [null, null];
-    if (kind === 'text' || kind === 'brand') return [t, null];
-    if (kind === 'int') return /^\d+$/.test(t) ? [Number(t), null] : [null, 'Enter a whole number, for example 2.'];
-    return /^\d+(\.\d+)?$/.test(t) ? [Math.round(Number(t) * 10) / 1000, null] : [null, 'Enter a percentage, for example 20.'];
-  }
+  const PO = App.draftForm({
+    prefix: 'po-', screen: 'project', file: 'project.yaml', label: 'Save project',
+    spec: (key) => { const f = ovField(key); return f && curProject() && curProject().real ? [f[2], f[3]] : null; },
+    saved: (key) => saved(curProject(), key),
+    check: (path, value) => Bridge.call('check_project_field', curProject().file, path, value),
+    write: (path, value) => Bridge.call('set_project_field', curProject().file, path, value),
+    done: (page) => { const tab = S.tab.project; S.project = view(page); S.tab.project = tab; }
+  });
+  const shown = (p, key) => PO.shown(key);
   function ovControl(p, f) {
     const [key, label, , kind, unit, help = ''] = f, id = 'po-' + key, err = PO.errors[key], v = shown(p, key);
     let html = input(id, v == null ? '' : String(v), { mono: kind !== 'text', num: kind !== 'text', invalid: !!err, placeholder: kind === 'text' ? 'Not set' : '' });
     if (unit) html = `<div class="input-affix">${html}<span class="affix">${esc(unit)}</span></div>`;
-    const out = field(esc(label), html, help, err ? esc(err) : '');
-    return key in PO.draft ? out.replace('<div class="field">', '<div class="field changed">') : out;
+    return PO.mark(key, field(esc(label), html, help, err ? esc(err) : ''));
   }
   function brandControl(p, kind, label) {
     const key = 'brand_' + kind, dc = kind === 'mcb_dc', opts = (p.brands[kind] || []).map((b) => [b.id === 'default' && !dc ? '' : b.id, b.name]);
     if (dc) opts.unshift(['', 'Same as the AC branches']);
-    const out = field(esc(label), select('po-' + key, opts.length ? opts : [['', 'Library default']], shown(p, key) || '', { invalid: !!PO.errors[key] }), '', PO.errors[key] ? esc(PO.errors[key]) : '');
-    return key in PO.draft ? out.replace('<div class="field">', '<div class="field changed">') : out;
-  }
-  function poBar() {
-    const n = Object.keys(PO.draft).length, bad = Object.keys(PO.errors).length;
-    if (!n && !PO.saving) return '';
-    return `<div class="savebar${bad ? ' savebar--bad' : ''}" role="region" aria-label="Unsaved changes"><span class="savebar-msg">${PO.saving ? '<span class="spinner"></span><b>Saving…</b>' : bad ? `${icon('error')}<b>${count(bad, 'field needs', 'fields need')} fixing</b> before you can save.` : `<span class="dot dot--warn" aria-hidden="true"></span><b>${count(n, 'unsaved change')}</b>`}</span>
-      <span class="sp"></span><button class="btn btn--secondary" data-action="po-discard" ${PO.saving ? 'disabled' : ''}>Discard</button><button class="btn btn--primary" data-action="po-save" ${PO.saving || bad ? 'disabled' : ''}>${icon('save')}Save project <kbd class="kbd">Ctrl+S</kbd></button></div>`;
+    return PO.mark(key, field(esc(label), select('po-' + key, opts.length ? opts : [['', 'Library default']], shown(p, key) || '', { invalid: !!PO.errors[key] }), '', PO.err(key)));
   }
   const projectInfo = (p) => `<div class="form form--2">
     <div class="span-2">${field('Project name', `<div class="row" style="flex-wrap:nowrap">${ro(input('p-name', p.name))}<button class="btn btn--secondary" data-action="rename-project" ${live()}>Rename…</button></div>`, 'Printed in bold at the top of every sheet header, for every substation. The folder keeps its name.')}</div>
@@ -187,50 +179,10 @@
       <h3>Delete project</h3>
       <p class="lede">Removes the project folder with all its substations. A copy is saved first as a <span class="mono">.bomproj</span> file, which Import project file brings back.</p>
       <button class="btn btn--danger" data-action="delete-project" ${live()}>${icon('trash')}Delete project…</button>
-    </div></div>${p.real ? poBar() : ''}`;
-  /* A field is read on change and checked by the model; the draft holds only what differs from the file. */
-  document.addEventListener('change', (e) => {
-    const m = /^po-(\w+)$/.exec(e.target.id || '');
-    if (!m || App.route().a !== 'project') return;
-    const p = curProject(), key = m[1], f = ovField(key);
-    if (!f || !p.real) return;
-    const typed = e.target.value, was = saved(p, key);
-    if (String(typed).trim() === String(was == null ? '' : was)) { delete PO.draft[key]; delete PO.errors[key]; queueMicrotask(App.render); return; }
-    PO.draft[key] = typed;
-    const [value, local] = toModel(f[3], typed);
-    if (local) { PO.errors[key] = local; queueMicrotask(App.render); return; }
-    delete PO.errors[key]; queueMicrotask(App.render);
-    Bridge.call('check_project_field', p.file, f[2], value).then((msg) => {
-      if (PO.draft[key] !== typed || (PO.errors[key] || null) === (msg || null)) return;  // a render would drop what is being typed elsewhere
-      if (msg) PO.errors[key] = msg; else delete PO.errors[key];
-      App.render();
-    }).catch(() => {});
-  });
-  ACTIONS['po-discard'] = () => { PO.draft = {}; PO.errors = {}; S.dirty = false; App.render(); toast('Changes discarded', 'undo'); };
-  ACTIONS['po-save'] = () => {
-    const p = curProject(), keys = Object.keys(PO.draft);
-    if (PO.saving || !keys.length || Object.keys(PO.errors).length) return;
-    PO.saving = true; App.render();
-    let page = null;
-    const next = (i) => {
-      if (i === keys.length) return Promise.resolve();
-      const key = keys[i], f = ovField(key);
-      return Bridge.call('set_project_field', p.file, f[2], toModel(f[3], PO.draft[key])[0]).then((r) => { page = r; delete PO.draft[key]; return next(i + 1); })
-        .catch((e) => { PO.errors[key] = e.message; throw e; });
-    };
-    next(0).then(() => { toast(`Saved ${count(keys.length, 'change')} to project.yaml`, 'check'); S.dirty = false; })
-      .catch(() => toast('Not saved: a value was refused. It is marked on the page.', 'error'))
-      .then(() => { PO.saving = false; if (page) { const tab = S.tab.project; S.project = view(page); S.tab.project = tab; } App.render(); });
-  };
-  document.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's' && App.route().a === 'project' && S.tab.project === 'info' && Object.keys(PO.draft).length) {
-      e.preventDefault(); if (document.activeElement) document.activeElement.blur(); queueMicrotask(ACTIONS['po-save']);
-    }
-  });
+    </div></div>${p.real ? PO.bar() : ''}`;
   const relogo = (call) => call.then((page) => { if (!page) return; S.project = view(page); S.tab.project = 'info'; App.render(); toast('Logo updated', 'check'); }).catch(fail);
   ACTIONS['po-logo'] = () => relogo(Bridge.call('set_project_logo', curProject().file));
   ACTIONS['po-logo-remove'] = () => relogo(Bridge.call('set_project_field', curProject().file, ['project', 'logo'], null));
-  window.addEventListener('hashchange', () => { if (App.route().a !== 'project') { PO.draft = {}; PO.errors = {}; } });
 
   const projectSubs = (p) => `<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">Each substation has its own network, panels, checks and workbook. To start a new one from an existing one, use “Create from this”.</p>
     <div class="table-wrap"><table class="table table--comfort"><thead><tr><th>Substation</th><th class="num">Panels</th><th>Last changed</th><th>Status</th><th style="width:430px"><span class="sr-only">Actions</span></th></tr></thead>

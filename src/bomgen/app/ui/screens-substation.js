@@ -13,7 +13,7 @@
   const real = () => S.backend === 'yes' && S.project && S.project.real && S.sub;
   function page() {
     const key = `${S.project.file}#${S.sub}`;
-    if (SUB.key !== key) { Object.assign(SUB, { key, state: 'idle', page: null, error: null }); NET.draft = {}; NET.errors = {}; ST.reset(); }
+    if (SUB.key !== key) { Object.assign(SUB, { key, state: 'idle', page: null, error: null }); NET.reset(); ST.reset(); }
     if (SUB.state === 'idle') {
       SUB.state = 'loading';
       const current = () => SUB.key === key;  // the user may have moved on while it loaded
@@ -161,7 +161,6 @@
   const SPARES = { port_fraction: ['Ports kept free on each switch', '%'], sfp_per_l1: ['Spare SFPs on each L1', ''], rack_u_reserved: ['Rack space kept free', 'U'], dc_branches_per_feed: ['Spare DC branches per feed', ''], ac_branches: ['Spare AC branches', ''] };
   const pct = (v) => Math.round(v * 100);
   /* Network inputs are edited on the page and saved together (docs/ui/editing.md); the model checks every value. */
-  const NET = { draft: {}, errors: {}, saving: false };
   const NF = {  // key -> [path, kind]; an emptied spare is removed, so the project's value applies
     ied_count: [['network', 'ied_count'], 'int'], topology: [['network', 'topology'], 'text'], ring_max_switches: [['network', 'ring_max_switches'], 'int'],
     ...Object.fromEntries(Object.keys(SPARES).map((k) => [k, [['spares', k], k === 'port_fraction' ? 'pct' : 'int']]))
@@ -181,27 +180,20 @@
     const row = p.spares.find((x) => x.key === key);
     return row ? (key === 'port_fraction' ? pct(row.value) : row.value) : '';
   }
-  const netShown = (p, key) => (key in NET.draft ? NET.draft[key] : netSaved(p, key));
-  function toModel(kind, raw) {  // [value for the file, a message when it cannot be read]
-    const t = String(raw == null ? '' : raw).trim();
-    if (!t) return [null, null];
-    if (kind === 'text') return [t, null];
-    if (kind === 'bool') return [t === 'true', null];
-    if (kind === 'int') return /^\d+$/.test(t) ? [Number(t), null] : [null, 'Enter a whole number, for example 40.'];
-    return /^\d+(\.\d+)?$/.test(t) ? [Math.round(Number(t) * 10) / 1000, null] : [null, 'Enter a percentage, for example 20.'];
-  }
-  const marked = (key, html) => (key in NET.draft ? html.replace('<div class="field">', '<div class="field changed">') : html);
+  const NET = App.draftForm({
+    prefix: 'n-', screen: 'network', file: 'substation.yaml', label: 'Save network', spec: nf,
+    saved: (key) => (SUB.page && SUB.page.network ? netSaved(SUB.page, key) : ''),
+    check: (path, value) => Bridge.call('check_substation_field', S.project.file, S.sub, path, value),
+    write: (path, value) => Bridge.call('set_substation_field', S.project.file, S.sub, path, value),
+    done: (page) => { if (page.id === S.sub) { SUB.page = page; App.network.reload(); } }
+  });
+  const netShown = (p, key) => NET.shown(key);
+  const marked = NET.mark;
   function netInput(p, key, unit, help, o = {}) {
     const err = NET.errors[key], v = netShown(p, key);
     let html = input('n-' + key, v == null ? '' : String(v), { num: true, mono: true, invalid: !!err || !!o.required, placeholder: o.required ? 'Required' : '' });
     if (unit) html = `<div class="input-affix">${html}<span class="affix">${esc(unit)}</span></div>`;
     return marked(key, field(esc(o.label), html, help, err ? esc(err) : o.required ? 'Enter the number of field IEDs, for example 40.' : ''));
-  }
-  function netBar() {
-    const n = Object.keys(NET.draft).length, bad = Object.keys(NET.errors).length;
-    if (!n && !NET.saving) return '';
-    return `<div class="savebar${bad ? ' savebar--bad' : ''}" role="region" aria-label="Unsaved changes"><span class="savebar-msg">${NET.saving ? '<span class="spinner"></span><b>Saving…</b>' : bad ? `${icon('error')}<b>${bad} ${bad === 1 ? 'field needs' : 'fields need'} fixing</b> before you can save.` : `<span class="dot dot--warn" aria-hidden="true"></span><b>${plural(n, 'unsaved change')}</b> · saved to substation.yaml`}</span>
-      <span class="sp"></span><button class="btn btn--secondary" data-action="net-discard" ${NET.saving ? 'disabled' : ''}>Discard</button><button class="btn btn--primary" data-action="net-save" ${NET.saving || bad ? 'disabled' : ''}>${icon('save')}Save network <kbd class="kbd">Ctrl+S</kbd></button></div>`;
   }
   /* A new substation: what is left, in the order that works (components.md, Setup card). Gone once all is done. */
   function setupCard(p) {
@@ -319,46 +311,6 @@
             <div class="form form--3">${p.spares.map((s) => { const [label, unit] = SPARES[s.key] || [s.key, '']; const d = s.key === 'port_fraction' ? pct(s.default) : s.default; return netInput(p, s.key, unit, s.changed ? `Changed from ${d}${unit && unit !== '%' ? ' ' + unit : unit}.` : 'Project default.', { label }); }).join('')}</div></section>
         </div>
         <aside class="net-result" aria-live="polite">${App.network.resultCard()}</aside>
-      </div>${netBar()}</div>`;
+      </div>${NET.bar()}</div>`;
   };
-  /* A field is read on change and checked by the model; the draft holds only what differs from the file. */
-  document.addEventListener('change', (e) => {
-    const m = /^n-([\w.]+)$/.exec(e.target.id || '');
-    if (!m || !nf(m[1]) || App.route().a !== 'network' || !real() || !SUB.page) return;
-    const p = SUB.page, key = m[1], [path, kind] = nf(key), typed = e.target.type === 'checkbox' ? String(e.target.checked) : e.target.value, was = netSaved(p, key);
-    if (String(typed).trim() === String(was == null ? '' : was)) { delete NET.draft[key]; delete NET.errors[key]; queueMicrotask(App.render); return; }
-    NET.draft[key] = typed;
-    const [value, local] = toModel(kind, typed);
-    if (local) { NET.errors[key] = local; queueMicrotask(App.render); return; }
-    delete NET.errors[key]; queueMicrotask(App.render);
-    if (value === null) return;  // emptied: removed on save
-    Bridge.call('check_substation_field', S.project.file, S.sub, path, value).then((msg) => {
-      if (NET.draft[key] !== typed || (NET.errors[key] || null) === (msg || null)) return;  // a render would drop what is being typed elsewhere
-      if (msg) NET.errors[key] = msg; else delete NET.errors[key];
-      App.render();
-    }).catch(() => {});
-  });
-  const netReset = () => { NET.draft = {}; NET.errors = {}; S.dirty = false; };
-  ACTIONS['net-discard'] = () => { netReset(); App.render(); toast('Changes discarded', 'undo'); };
-  ACTIONS['net-save'] = () => {
-    const keys = Object.keys(NET.draft), file = S.project.file, sub = S.sub, key0 = SUB.key;
-    if (NET.saving || !keys.length || Object.keys(NET.errors).length) return;
-    NET.saving = true; App.render();
-    let saved = null;
-    const next = (i) => {
-      if (i === keys.length) return Promise.resolve();
-      const key = keys[i], [path, kind] = nf(key);
-      return Bridge.call('set_substation_field', file, sub, path, toModel(kind, NET.draft[key])[0]).then((r) => { saved = r; delete NET.draft[key]; return next(i + 1); })
-        .catch((err) => { NET.errors[key] = err.message; throw err; });
-    };
-    next(0).then(() => { toast(`Saved ${plural(keys.length, 'change')} to substation.yaml`, 'check'); S.dirty = false; })
-      .catch(() => toast('Not saved: a value was refused. It is marked on the page.', 'error'))
-      .then(() => { NET.saving = false; if (saved && SUB.key === key0) { SUB.page = saved; App.network.reload(); } App.render(); });
-  };
-  document.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's' && App.route().a === 'network' && Object.keys(NET.draft).length) {
-      e.preventDefault(); if (document.activeElement) document.activeElement.blur(); queueMicrotask(ACTIONS['net-save']);
-    }
-  });
-  window.addEventListener('hashchange', () => { if (App.route().a !== 'network') { NET.draft = {}; NET.errors = {}; } });
 })();
