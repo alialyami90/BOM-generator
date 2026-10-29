@@ -78,7 +78,7 @@
       const first = free
         ? `${described(ctl(input('lm-desc-' + i, it.description || '', { placeholder: 'Describe the item', invalid: !!bad.description })), 'lm-desc-' + i, bad.description)}${cellErr('lm-desc-' + i, bad.description)}<span class="cell-sub">${badge('info', 'Free text')}</span>`
         : `<span class="mono">${esc(it.part_id)}</span><span class="cell-sub">${esc(makeModel(it) || 'Library part')}${it.children && it.children.length ? ` · comes with <span class="mono">${esc(it.children.join(', '))}</span>` : ''}</span>`;
-      const fed = free ? '<span class="muted small" title="A free-text item has no library data, so it cannot be fed">—</span>'
+      const fed = free ? '<span class="muted small" title="A free-text item has no library data, so it cannot be fed"><span aria-hidden="true">—</span><span class="sr-only">Not fed: a free-text item has no library part</span></span>'
         : ctl(select('lm-fed-' + i, fedOptions().concat(it.fed_from && !d.fed_options.some((p) => p.id === it.fed_from) ? [[it.fed_from, it.fed_from]] : []), it.fed_from || ''));
       /* An edited cell, or every cell of a new row, gets the forms' changed highlight. */
       const ch = (k) => (r.orig == null || !same({ [k]: it[k] }, { [k]: r.base[k] }) ? ' class="changed"' : '');
@@ -105,7 +105,7 @@
     if (!dirty() && !saving) return '';
     const n = changes(), bad = invalid();
     return `<div class="savebar${bad ? ' savebar--bad' : ''}" role="region" aria-label="Unsaved changes">
-      <span class="savebar-msg">${saving ? '<span class="spinner"></span><b>Saving…</b>' : bad ? `${icon('error')}<b>${bad} ${bad === 1 ? 'field needs' : 'fields need'} fixing</b> before you can save.` : `<span class="dot dot--warn" aria-hidden="true"></span><b>${plural(n, 'unsaved change')}</b> · saved to substation.yaml`}</span>
+      <span class="savebar-msg">${saving ? '<span class="spinner"></span><b>Saving…</b>' : bad ? `<button class="btn btn--ghost btn--sm" data-action="lm-first-bad">${icon('error')}<b>${bad} ${bad === 1 ? 'field needs' : 'fields need'} fixing</b></button> before you can save.` : `<span class="dot dot--warn" aria-hidden="true"></span><b>${plural(n, 'unsaved change')}</b> · saved to substation.yaml`}</span>
       <span class="sp"></span>
       <button class="btn btn--secondary" data-action="lm-discard" ${saving ? 'disabled' : ''}>Discard</button>
       <button class="btn btn--primary" data-action="lm-save" ${saving || bad ? 'disabled' : ''}>${icon('save')}Save changes <kbd class="kbd">Ctrl+S</kbd></button></div>`;
@@ -129,6 +129,7 @@
     });
   };
   ACTIONS['lm-discard'] = () => { reset(LM.data); refusal = ''; App.render(); toast('Changes discarded', 'undo'); };
+  ACTIONS['lm-first-bad'] = () => { const el = $('#main [aria-invalid="true"]'); if (el) { el.scrollIntoView({ block: 'center' }); el.focus(); } };
   ACTIONS['lm-refusal-close'] = () => { refusal = ''; App.render(); };
 
   /* ---------- Save: removes, then edits, then additions, then the host panel ----------
@@ -157,9 +158,10 @@
   }
   function save() {  // resolves true once everything is written
     if (saving || !dirty() || invalid()) return Promise.resolve(false);
+    const n = changes();
     saving = true; refusal = ''; App.render();
     return plan().reduce((chain, s) => chain.then(() => s()), Promise.resolve())
-      .then(() => { reset(LM.data); toast('Saved substation.yaml'); return true; })
+      .then(() => { reset(LM.data); toast(`Saved ${plural(n, 'change')}`, 'check'); return true; })
       .catch((err) => { refusal = /[.!?]$/.test(err.message) ? err.message : err.message + '.'; return false; })
       .then((ok) => { saving = false; App.render(); return ok; });
   }
@@ -175,10 +177,12 @@
   /* ---------- Add: from the library, or free text; the engine checks the item before it joins the draft ---------- */
   const pickRows = (q) => {
     const l = LM.data.parts.filter((p) => [p.part_id, p.make, p.model].join(' ').toLowerCase().includes(q.toLowerCase())).slice(0, 40);
-    return l.map((p) => `<label class="pick-row"><input type="radio" name="lm-part" value="${esc(p.part_id)}"><span><span class="mono">${esc(p.part_id)}</span><span class="cell-sub">${esc([p.make, p.model].filter(Boolean).join(' '))}</span></span></label>`).join('')
+    return l.map((p) => `<label class="pick-row"><input type="radio" name="lm-part" value="${esc(p.part_id)}"><span><span class="mono">${esc(p.part_id)}</span><span class="cell-sub">${esc([p.make, p.model].filter(Boolean).join(' '))}</span></span>${p.data_quality ? `${App.verified(p.data_quality)}` : ''}</label>`).join('')
       || '<div class="muted" style="padding:12px">No library part matches. Use free text, or add the part to the library.</div>';
   };
-  const errorLine = (msgs) => Object.entries(msgs).map(([k, v]) => `${k ? k.replace('_', ' ') + ': ' : ''}${v}`).join(' ');
+  const LABELS = { part_id: 'Part', fed_from: 'Fed from', children: 'Comes with', qty: 'Quantity', tag: 'Designation', description: 'Description' };
+  const labelOf = (k) => LABELS[k.replace(/\[\d+\]$/, '').split('.')[0]] || k.replace(/_/g, ' ');
+  const errorLine = (msgs) => Object.entries(msgs).map(([k, v]) => `${k ? labelOf(k) + ': ' : ''}${v}`).join(' ');
   function check(item, done) {
     Bridge.call('validate_loose_item', S.project.file, S.sub, null, item).then((msgs) => {
       if (Object.keys(msgs).length) { $('#lm-err').innerHTML = banner('bad', esc(errorLine(msgs))); return; }

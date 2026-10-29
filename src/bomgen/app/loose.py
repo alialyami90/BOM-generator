@@ -8,7 +8,10 @@ from pathlib import Path
 from typing import Any
 
 from bomgen.app.substations import resolve
+from bomgen.library_store.device_db import DeviceRecord, load_device_records
+from bomgen.library_store.errors import LibraryPackageError
 from bomgen.library_store.store import LibraryStore
+from bomgen.models.project import Project
 
 
 def loose_page(project_file: Path, substation_id: str, store: LibraryStore) -> dict[str, Any]:
@@ -38,12 +41,19 @@ def loose_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
         for p in loaded.panels
     ]
     generated = [p for p in panels if p["generated"]]
+    records = _records(loaded.project, store)
     page |= {
         "sheet_name": substation.output.sheet_names.loose_material,
         "host_options": panels,
         "fed_options": generated or panels,
         "parts": [
-            {"part_id": d.part_id, "make": d.make, "model": d.model, "category": d.category.value}
+            {
+                "part_id": d.part_id,
+                "make": d.make,
+                "model": d.model,
+                "category": d.category.value,
+                "data_quality": records[d.part_id].verified if d.part_id in records else None,
+            }
             for d in loaded.library.devices
         ],
     }
@@ -62,3 +72,14 @@ def loose_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
             }
         )
     return page
+
+
+def _records(project: Project, store: LibraryStore) -> dict[str, DeviceRecord]:
+    """The installed library's device records (their data quality); none for a library
+    loaded from a file, or when the records cannot be read."""
+    if project.library.file is not None:
+        return {}
+    try:
+        return load_device_records(store, project.library.name, project.library.version)
+    except (LibraryPackageError, OSError):
+        return {}
