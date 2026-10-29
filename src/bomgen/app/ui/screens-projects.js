@@ -205,8 +205,8 @@
     done: (page) => { S.project = view(page); S.tab.project = 'documents'; }
   });
   const rgCell = (d, f, label, o = {}) => {
-    const key = `d${d.index}_${f}`, v = RG.shown(key);
-    return `<td${key in RG.draft ? ' class="changed"' : ''}><label class="sr-only" for="rg-${key}">${label}, ${esc(d.key)}</label>${input('rg-' + key, v == null ? '' : String(v), { mono: !o.plain, invalid: !!RG.errors[key], placeholder: o.placeholder || '' })}${RG.errors[key] ? `<span class="err small">${icon('error')}<span>${RG.err(key)}</span></span>` : ''}${o.after || ''}</td>`;
+    const key = `d${d.index}_${f}`, v = RG.shown(key), [cls, dot] = App.changedCell(key in RG.draft);
+    return `<td${cls}>${dot}<label class="sr-only" for="rg-${key}">${label}, ${esc(d.key)}</label>${input('rg-' + key, v == null ? '' : String(v), { mono: !o.plain, invalid: !!RG.errors[key], placeholder: o.placeholder || '' })}${RG.errors[key] ? `<span class="err small">${icon('error')}<span>${RG.err(key)}</span></span>` : ''}${o.after || ''}</td>`;
   };
   function rgRow(p, d) {
     const used = d.used_by, why = used === null ? 'Fix the project\'s problems first: what uses it is not known.' : used.length ? `Used by ${used.join(', ')}. Pick another document there first.` : '';

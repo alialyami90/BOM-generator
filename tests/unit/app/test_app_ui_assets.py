@@ -269,10 +269,55 @@ def test_the_parts_datalist_shows_make_and_model() -> None:
 def test_loose_material_follows_the_design_review_notes() -> None:
     loose = (UI_DIR / "screens-loose.js").read_text(encoding="utf-8")
     assert "App.verified(p.data_quality)" in loose  # a data-quality badge in the picker
-    assert 'data-action="lm-first-bad"' in loose  # the count moves focus to the first one
+    assert "App.fixLine('lm-first-bad', bad)" in loose  # the count moves focus to the first one
     assert "Not fed: a free-text item has no library part" in loose
     assert "part_id: 'Part', fed_from: 'Fed from', children: 'Comes with'" in loose
     assert "toast(`Saved ${plural(n, 'change')}`" in loose
     assert "Saved substation.yaml" not in loose
     ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
-    assert 'data-action="${o.prefix}first-bad"' in ui
+    assert "fixLine(`${o.prefix}first-bad`, bad)" in ui
+
+
+# -- v0.2 polish (docs/ui/polish-v02.md) -------------------------------------------------------
+
+
+def _ui_scripts() -> dict[str, str]:
+    return {p.name: p.read_text(encoding="utf-8") for p in UI_DIR.glob("*.js")}
+
+
+def test_unsaved_edits_use_the_changed_marker_not_the_revision_yellow() -> None:
+    """polish-v02 item 1; components.md "Changed marker"."""
+    css = (UI_DIR / "styles.css").read_text(encoding="utf-8")
+    ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    assert '<span class="chg" aria-hidden="true"></span><span class="sr-only">changed</span>' in ui
+    assert ".field.changed" not in css
+    assert "td.is-changed" in css
+    assert ".table td.changed { background: var(--color-highlight-yellow)" in css  # Preview only
+    for name, js in _ui_scripts().items():
+        if name == "screens-preview.js":
+            continue
+        assert 'class="changed"' not in js, name
+        assert "field changed" not in js, name
+
+
+def test_every_number_input_is_right_aligned() -> None:
+    """polish-v02 item 5."""
+    css = (UI_DIR / "styles.css").read_text(encoding="utf-8")
+    assert ".input--num { font-variant-numeric: tabular-nums; text-align: right; }" in css
+
+
+def test_the_save_bar_fix_sentence_is_one_control() -> None:
+    """polish-v02 item 6; components.md "Save bar"."""
+    ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    assert "const fixLine = (action, bad) =>" in ui
+    assert "fixing</b> before you can save.</span></button>" in ui
+    for name in ("screens-loose.js", "screens-libedit.js"):
+        js = (UI_DIR / name).read_text(encoding="utf-8")
+        assert "fixLine(" in js, name
+        assert "fixing</b></button> before you can save." not in js, name
+
+
+def test_a_route_change_closes_an_open_dialog() -> None:
+    """polish-v02 item 15."""
+    ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    assert "window.addEventListener('hashchange', () => { closeDialog(); render();" in ui

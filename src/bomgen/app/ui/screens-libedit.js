@@ -148,14 +148,14 @@
     const choices = (ED.reply.choices || {})[isRec(key) ? recPath(key).pop() : key] || [];
     let html;
     if (kind === 'fixed') html = input(id, v, { mono: true, readonly: true });
-    else if (kind === 'bool') return `<div class="field${changed ? ' changed' : ''}"><label class="switch"><input type="checkbox" id="${id}" ${v ? 'checked' : ''}>${esc(label)}</label>${err ? `<span class="err" id="${id}-err">${icon('error')}<span>${esc(err)}</span></span>` : ''}</div>`;
+    else if (kind === 'bool') return ((h) => (changed ? App.changedField(h) : h))(`<div class="field"><label class="switch"><input type="checkbox" id="${id}" ${v ? 'checked' : ''}>${esc(label)}</label>${err ? `<span class="err" id="${id}-err">${icon('error')}<span>${esc(err)}</span></span>` : ''}</div>`);
     else if (kind === 'choice') html = select(id, [['', 'Not set'], ...choices.map((c) => [c, key === 'category' ? catName(c) : c])], v == null ? '' : String(v), o);
     else if (kind === 'feeds') html = select(id, [['0', 'None'], ['1', 'Single feed'], ['2', 'Dual feed (2 supplies)']], String(v || 0), o);
     else if (kind === 'area' || kind === 'lines') html = `<textarea class="input input--mono" id="${id}" rows="3" ${err ? 'aria-invalid="true"' : ''} style="height:auto;padding:8px 10px">${esc(v == null ? '' : v)}</textarea>`;
     else html = input(id, v == null ? '' : String(v), { ...o, mono: kind !== 'text' && kind !== 'csv', num: kind === 'int' || kind === 'num' || kind === 'snum' });
     if (unit) html = `<div class="input-affix">${html}<span class="affix">${unit}</span></div>`;
     const out = field(esc(label), html, help, err ? esc(err) : '');
-    return changed ? out.replace('<div class="field">', '<div class="field changed">') : out;
+    return changed ? App.changedField(out) : out;
   }
   function editor(id) {
     if (ED.key !== id) loadDevice(id);
@@ -277,7 +277,7 @@
     if (!dirty() && !ED.saving) return '';
     const bad = invalid();
     return `<div class="savebar${bad ? ' savebar--bad' : ''}" role="region" aria-label="Unsaved changes">
-      <span class="savebar-msg">${ED.saving ? '<span class="spinner"></span><b>Saving…</b>' : bad ? `<button class="btn btn--ghost btn--sm" data-action="de-first-bad">${icon('error')}<b>${bad} ${bad === 1 ? 'field needs' : 'fields need'} fixing</b></button> before you can save.` : `<span class="dot dot--warn" aria-hidden="true"></span><b>${plural(changes(), 'unsaved change')}</b> · added to pending changes`}</span>
+      <span class="savebar-msg">${ED.saving ? '<span class="spinner"></span><b>Saving…</b>' : bad ? App.fixLine('de-first-bad', bad) : `<span class="dot dot--warn" aria-hidden="true"></span><b>${plural(changes(), 'unsaved change')}</b> · added to pending changes`}</span>
       <span class="sp"></span><button class="btn btn--secondary" data-action="de-discard" ${ED.saving ? 'disabled' : ''}>Discard</button>
       <button class="btn btn--primary" data-action="de-save" ${ED.saving || bad ? 'disabled' : ''}>${icon('save')}Save device <kbd class="kbd">Ctrl+S</kbd></button></div>`;
   }
