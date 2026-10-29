@@ -1,57 +1,39 @@
-# STATE: role 7, Lead developer assistant (written by A7 for B7)
+# STATE: role 7, Lead developer assistant (written by B7)
 
-- Name: A7 (outgoing), successor B7. Date: 2026-10-28.
-- Branch: `claude/project-thread-u2u76o` (reset to `origin/main` after every merge).
-- HEAD = origin/main = `aad6094` (#133, the handoff skeleton). Gate run on `9313db1` (#129);
-  #133 is docs only.
+- Name: B7. Date: 2026-10-29.
+- Branch: `claude/project-thread-vl9f9y` (reset to `origin/main` after every merge, LESSONS L8).
+- Last covered: `fd4d7fd` (#209). Every non-docs PR up to #209 has a CHANGELOG entry or was
+  ruled out by the lead (#195, #197). Gate last run on `221b8ce` + #209's draft: ruff, format and
+  mypy pass (224 files), pytest 2671 passed.
 - Role, files and rules: `docs/agents.md` → "Roles" (A7 row) and "A7 — Lead developer assistant".
-  Files: `README.md`, `CHANGELOG.md`, `tests/unit/README.md`, `tests/golden/README.md`;
-  other files only when A1 assigns exact lines (last time: plan M10 status, plan status line
-  and agents.md rows in #83). Nothing is assigned now.
+  Files: `README.md`, `CHANGELOG.md`, `tests/unit/README.md`, `tests/golden/README.md`; other
+  files only when the lead assigns exact lines (last time: the ADR Status lines and
+  `docs/decisions/README.md` rows in #184).
+- The lead is B1, thread "B1 - Lead developer" (find it with `list_threads`; A1's thread is
+  retired). Message it with `message_thread`.
 
-## Merged (my PRs)
-#4, #10, #11, #14, #17, #37, #43, #56, #72, #75, #80, #83, #85 (0.1.0 heading), #87 (0.1.1 section).
-In review: this checkpoint's own docs-only PR (number in `checkpoints/2026-10-28.md`).
-In progress: none. Uncommitted changes: none.
+## Merged (my PRs as B7)
+- #147: README v0.2 status and library CSV usage; 14 rows in `tests/unit/README.md`.
+- #160: README marks M14 and M18 done, releases from main; changelog for #130–#154.
+- #174: changelog for #155–#171.
+- #184: 15 ADRs marked "Accepted (Ali, 2026-10-28)" (assigned by B1).
+- #193: `## [0.2.0] - 2026-10-29` (v0.2.0 is tagged at `f65a5fe`, #195).
+- #209: `## [0.2.1] - 2026-10-29`. B6 opens the 0.2.1 bump next.
+In review: this checkpoint's docs-only PR. Uncommitted changes: none.
 
-## What works (evidence: commands below, this session)
-- Docs are current through #87: CHANGELOG has `[0.1.1]` and `[0.1.0]` sections with link refs;
-  tags on origin: `v0.1.0` (2064227) and `v0.1.1` (`git ls-remote --tags origin`).
-- ADR index `docs/decisions/README.md` lists 0001–0022, matching the files.
-- Relative links in README.md, CHANGELOG.md and both test READMEs resolve.
+## What works (evidence: commands at #209)
+- CHANGELOG has `[Unreleased]` (empty), `[0.2.1]`, `[0.2.0]`, `[0.1.1]`, `[0.1.0]` with link refs.
+- `tests/golden/README.md` has every module (L4 loop).
+- Relative links in README, CHANGELOG and both test READMEs resolve (L5 loop prints nothing).
 
-## What's stale (the next task, see NEXT.md)
-- Merged since #87 (`39fddc4`, #87's squash commit) with no A7 docs pass: every PR #88–#129
-  (42, all merged, checked with `git log --format=%s 39fddc4..origin/main`) and #133:
-  - CHANGELOG: PR #143 (open, A1 merges, then Ali re-tags v0.1.1) adds the code PRs
-    #90–#129 to the `[0.1.1]` section, grouped by feature. Per A1, docs-only and handoff
-    PRs (#133 among them) get no entry.
-  - README: the "Next:" paragraph still says the writers are "not yet planned";
-    the library section lacks `export`, `export-csv`, `import-csv` (`bomgen library --help`).
-  - tests/unit/README.md lacks 14 modules: app/test_app_edit_api, library_store/
-    test_library_{alt_comparison,csv_export,csv_import,edit,local}, test_catalogue_choice_loader,
-    test_edit, test_fields, test_library_alternatives, test_lifecycle, test_loose_edit,
-    test_panel_edit, test_round_trip. tests/golden/README.md has every module.
-- Cause: A1 said it would send merge numbers for each pass; none came after #87.
-
-## Verification (2026-10-28, on 9313db1)
-| Command | Result |
-| --- | --- |
-| `ruff check . && ruff format --check .` | pass, 270 files formatted |
-| `mypy` | pass, 210 source files |
-| `pytest` | 2414 passed, 0 failed, 0 skipped (148 s) |
-| README-row coverage loop (LESSONS L4) | 14 unit modules missing, golden complete |
-| link check loop (LESSONS L5) | no broken links |
-Not run: the Windows installer and the pywebview window (Linux container, no WebView2).
+## What may be stale (check at the next wake)
+- README "Status" still frames M12–M18 as "In progress, for v0.2"; v0.2.0 and 0.2.1 shipped
+  them all (`docs/backlog.md`, #202). Ask B1 before rewording it.
+- `tests/unit/README.md` lacks 9 modules at `fd4d7fd` (L4 loop): app/test_app_library_edit,
+  test_app_library_csv, test_app_project_fields, test_app_lifecycle_api,
+  test_app_substation_fields, test_app_register, test_shipped_library,
+  engine/test_engine_shipped_library, library_store/test_library_record_edits.
 
 ## Waiting on / blockers
-- A1: go-ahead for the #88–#129 docs pass (not yet asked; since 2026-10-28).
-- Open PRs that will need changelog entries once merged: #130 (M14), #131 (M18), and the
-  role checkpoints #132, #134–#139 plus mine (one combined entry is enough).
-- No questions to Ali open. No plan.md section 6 question is assigned to role 7.
-- Spec vs code disagreements in my files: none known.
-
-## Contacts
-- A1's thread: find it with `list_threads` (title "A1 - Lead developer" or its successor);
-  message it with `message_thread`. A1 reviews and squash-merges; Ali is assigned, not
-  requested as reviewer (LESSONS L7).
+- B6's 0.2.1 version bump (no changelog entry for it, LESSONS L12).
+- No questions to Ali open.

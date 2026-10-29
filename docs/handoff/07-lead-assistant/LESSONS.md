@@ -33,3 +33,15 @@
 - **L11 Drift at this checkpoint.** No earlier STATE.md existed (first checkpoint). Docs
   fell 42 PRs behind because passes were triggered only by A1's merge notes; successor
   should check `git log` for unlisted merges at every wake instead of waiting.
+- **L12 What gets no changelog entry (B1, 2026-10-28/29).** Docs-only, handoff and chore PRs,
+  version bumps (the section heading records the version) and internal refactors with no
+  user-facing change (#197). This replaces L1's "my own docs PRs get a Changed entry".
+- **L13 Changelog wording.** User-facing: no agent names ("B4's wording" → say what changed);
+  word each entry from the PR's description and, for the last PR of a release, from its final
+  squash message (`git show -s --format=%B <sha>`), which can add items the description lacks.
+  Wrap at about 78 columns. One entry may group a milestone's PRs.
+- **L14 The lead moved.** A1's thread is retired; B1 has its own thread. Check `list_threads`
+  for the current lead before messaging, and resend if a note went to a retired thread.
+- **L15 Drift at the B7 checkpoint.** STATE.md was written at `aad6094`; 11 docs-only merges had
+  landed and #143 was merged, not open. The clone was shallow: `git fetch --unshallow` before
+  using old shas such as `39fddc4`.
