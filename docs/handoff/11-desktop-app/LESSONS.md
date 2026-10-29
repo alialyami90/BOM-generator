@@ -32,3 +32,17 @@
 - **Ctrl+S on a form must commit the focused field.** keydown fires before `change`, so the save ran without the typed value. Blur `document.activeElement` first.
 - **Never call `App.render()` synchronously from a `change` handler.** A blur during `innerHTML` (the focused input being removed) fires `change`, and a nested render throws "Failed to set the 'innerHTML' property". Queue it with `queueMicrotask(App.render)`.
 - **E2E without the window:** pack `examples/library.yaml` with `bomgen library pack … --name psa-devices --version 1.0.0` and import it into `BOMGEN_LIBRARY_HOME`, or Home shows the first-run page. The bridge stub: `page.exposeFunction('__py', …)` plus an init script setting `window.pywebview = { api: new Proxy({}, { get: (_, n) => (...a) => window.__py(n, a) }) }`, backed by a line-based Python process over `Api(env=…)`.
+
+## B11 (2026-10-29)
+- **One shared draft form, not one per screen.** `App.draftForm(o)` in `ui.js` owns the draft, the checks, the save bar, Ctrl+S and the reset on route change.
+  - A screen supplies `spec(key) -> [path, kind]`, `saved`, `check`, `write` and `done`.
+  - Overview, Settings, Network and the register use it. Loose material and the device editor keep their own bars because their saves are multi-step.
+- **Re-render on a check reply only when the error state changes.** A render while the user types elsewhere drops their keystrokes. This caused a lost `power_margin` draft.
+- **Percentages are shown as % and written as fractions rounded to 0.1%.** Use `toModel` kind `pct`.
+- **An empty field means null, which removes the key.** The project or library value then applies again.
+- **The model refuses equipment without its redundant L1 and L2 switches** (Substation validator). The first equipment is therefore written in one go by `start_equipment` ("Add the core switches…").
+- **`git rebase origin/main` after a squash merge replays the whole branch history and conflicts.** Use the restart recipe in NEXT.md (`checkout -B`, `merge -s ours`, `cherry-pick`).
+- **A grep for " passed" also matches ruff's "All checks passed!".** Wait on `" in [0-9.]*s"` when tailing pytest output.
+- **`icon` is a global in the UI scripts, not an `App` member.** Destructuring it from `App` makes it undefined.
+- **ISO date strings must be converted to dates before `set_field`** (`_dated()` in `api.py`). Otherwise YAML writes them as quoted text.
+- **Device records (data quality) exist only for an installed library.** A project whose `library.file` points to a folder copy has none, so the UI shows no badge rather than a wrong one.
