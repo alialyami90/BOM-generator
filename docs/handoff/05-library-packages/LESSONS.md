@@ -36,3 +36,16 @@
   loc segment; cut the loc where the data reaches a scalar and keep one message per location.
 - **Another agent may change my files on main** (#165 by A1/B3 added `ac_rated` and amended ADR
   0018). Fetch and read main's ADR before amending it.
+- **Reserved CSV ids use a character `BrandId` forbids.** `default_dc` (underscore) names
+  `catalogues.mcb_dc`, so it can never clash with a brand id (`^[a-z0-9][a-z0-9-]*$`). Rejected: a separate
+  `mcb_dc.csv` (one more table for one row) and `default-dc` (a valid brand id).
+- **Every catalogue key must be in `_compare`'s list** in `csv_import.py`, or a change to it never reaches
+  the `changes` check or the app's edits (`mcb_dc` was missing until #179).
+- **Row messages go through `plain_message`** (example values for number, whole number, bool and choice
+  errors; "Input should be" → "Must be"). Two places build row problems: `_Assembly.model_problems`
+  (catalogues) and `_device_problems` (devices); keep both on `plain_message`.
+- **Split ADR edits from checkpoints.** B1 refused an ADR amendment inside a checkpoint PR (#167 → #170).
+- **Push mechanics:** force-push is refused; after a squash-merge reset the branch to `origin/main` and
+  `git merge -s ours origin/<branch>` before pushing. A plain `git push` then works.
+- **Read the reviewer's PR body for the "why".** B1 relayed "wording of the changes check"; the reason
+  (rows go to the pending set, not saved) was only in #178's body. Read the source PR before guessing.
