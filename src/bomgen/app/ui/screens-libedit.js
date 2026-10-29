@@ -174,7 +174,7 @@
     const used = inUse ? `<div style="margin-bottom:var(--space-4)">${banner('info', `<b>This device is in use.</b> ${inUse} Projects keep the library version they record, so an edit reaches a project only when it records the version you apply.`)}</div>` : '';
     const notice = ED.refusal ? `<div style="margin-bottom:var(--space-4)">${banner('bad', `<b>Not saved.</b> ${esc(ED.refusal)}`)}</div>` : '';
     const isNew = !ED.reply.saved;
-    return `<div class="page">${pageHead(esc(d.part_id), esc([d.make, d.model, isNew ? 'new device, not applied yet' : ''].filter(Boolean).join(' · ')), `<button class="btn btn--danger" data-action="delete-device" data-id="${esc(d.part_id)}">${icon('trash')}Delete…</button>`, crumbs)}${notice}${used}${pend}
+    return `<div class="page">${pageHead(esc(d.part_id), esc([d.make, d.model, isNew ? 'new device, not applied yet' : ''].filter(Boolean).join(' · ')), `<button class="btn btn--danger" data-action="delete-device" data-id="${esc(d.part_id)}" data-new="${isNew ? 1 : ''}">${icon('trash')}Delete…</button>`, crumbs)}${notice}${used}${pend}
       ${tabs('devEdit', Object.entries(TABS).map(([k, [label]]) => [k, label]), t, 'Device sections')}
       <div role="tabpanel" aria-labelledby="tab-devEdit-${t}" style="margin-top:var(--space-4)">${t === 'parts' ? `<datalist id="dl-parts">${(ED.reply.part_ids || []).map((p) => `<option value="${esc(p)}">`).join('')}</datalist>` : ''}${lede}${fields.length ? `<div class="form ${t === 'identity' ? 'form--2' : 'form--3'}">${fields.map(spans).join('')}</div>` : ''}${lists}</div>${saveBar()}</div>`;
   }
@@ -358,13 +358,18 @@
       toast(`${id} added to pending changes. It joins the library when you apply them.`, 'plus'); go('#/library/device/' + encodeURIComponent(id));
     }).catch((e) => { $('#ad-err').innerHTML = banner('bad', esc(e.message)); });
   };
-  ACTIONS['delete-device'] = (el) => dialog({ title: `Delete ${esc(el.dataset.id)}?`, body: `<div class="stack"><p>The device is removed from the library when you apply the pending changes. You can still discard it before then.</p>${usesText() ? banner('bad', `<b>It is still used.</b> ${usesText()} After you apply this change, a project that records the new version reports an error until another part is picked.`) : '<p class="muted small">A project that uses it reports an error once it records the new version, until another part is picked.</p>'}<div id="dd-err"></div></div>`,
-    actions: `<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--danger" data-action="delete-device-do" data-id="${esc(el.dataset.id)}">${icon('trash')}Delete device</button>` });
+  ACTIONS['delete-device'] = (el) => {
+    const id = el.dataset.id, isNew = !!el.dataset.new;
+    const body = isNew ? `<p>${esc(id)} was added in the pending changes. It is not in the library yet, so it goes at once, with its edits.</p>`
+      : `<p>The device is removed from the library when you apply the pending changes. You can still discard it before then.</p>${usesText() ? banner('bad', `<b>It is still used.</b> ${usesText()} After you apply this change, a project that records the new version reports an error until another part is picked.`) : '<p class="muted small">A project that uses it reports an error once it records the new version, until another part is picked.</p>'}`;
+    dialog({ title: `Delete ${esc(id)}?`, body: `<div class="stack">${body}<div id="dd-err"></div></div>`,
+      actions: `<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--danger" data-action="delete-device-do" data-id="${esc(id)}" data-new="${isNew ? 1 : ''}">${icon('trash')}Delete device</button>` });
+  };
   ACTIONS['delete-device-do'] = (el) => {
     const id = el.dataset.id;
     Bridge.call('add_library_edits', [{ op: 'remove', path: ['devices', id] }]).then((p) => {
       PEND.page = p; PEND.state = 'loaded'; closeDialog(); ED.draft = {}; ED.errors = {}; ED.key = ''; go('#/library');
-      toast(`${id} will be removed when you apply the changes`, 'trash');
+      toast(el.dataset.new ? `${id} dropped from the pending changes` : `${id} will be removed when you apply the changes`, 'trash');
     }).catch((e) => { $('#dd-err').innerHTML = banner('bad', esc(e.message)); });
   };
 
