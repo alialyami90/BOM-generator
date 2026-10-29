@@ -13,6 +13,8 @@ from typing import Any
 import pytest
 
 from bomgen.app import api
+from bomgen.library_store.package import pack
+from bomgen.library_store.store import LibraryStore
 
 EXAMPLES = Path(__file__).parents[3] / "examples"
 FREE = {"description": "Fibre patch cords, LC to LC", "qty": "1 Lot", "tag": "FO cords"}
@@ -139,3 +141,24 @@ def test_an_edit_of_an_item_that_is_not_there_is_refused(app: api.Api, project: 
     error = refused(app.remove_loose_item(str(project), "gis01", 99))
 
     assert error["kind"] == "edit_refused"
+
+
+def test_library_parts_carry_their_data_quality_from_the_installed_library(
+    app: api.Api, project: Path, tmp_path: Path
+) -> None:
+    package = tmp_path / "lib.bomlib"
+    db = Path(__file__).parents[3] / "data" / "device-db"
+    pack(EXAMPLES / "library.yaml", package, name="psa-devices", version="1.1.0", extra_dirs=[db])
+    LibraryStore(tmp_path / "libraries").import_package(package)
+    text = project.read_text(encoding="utf-8").replace("  file: library.yaml\n", "")
+    project.write_text(text, encoding="utf-8")
+
+    parts = ok(app.loose_material(str(project), "gis01"))["parts"]
+
+    rtac = next(p for p in parts if p["part_id"] == "SEL-3555-RTAC")
+    assert rtac["data_quality"] == "partial"
+
+
+def test_parts_from_a_library_file_have_no_data_quality(app: api.Api, project: Path) -> None:
+    parts = ok(app.loose_material(str(project), "gis01"))["parts"]
+    assert {p["data_quality"] for p in parts} == {None}

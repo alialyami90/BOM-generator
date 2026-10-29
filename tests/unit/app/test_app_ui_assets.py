@@ -264,3 +264,15 @@ def test_an_equipment_row_changes_its_part_with_its_alternatives_first() -> None
 def test_the_parts_datalist_shows_make_and_model() -> None:
     edit = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
     assert "label=\"${esc(names[p] || '')}\"" in edit
+
+
+def test_loose_material_follows_the_design_review_notes() -> None:
+    loose = (UI_DIR / "screens-loose.js").read_text(encoding="utf-8")
+    assert "App.verified(p.data_quality)" in loose  # a data-quality badge in the picker
+    assert 'data-action="lm-first-bad"' in loose  # the count moves focus to the first one
+    assert "Not fed: a free-text item has no library part" in loose
+    assert "part_id: 'Part', fed_from: 'Fed from', children: 'Comes with'" in loose
+    assert "toast(`Saved ${plural(n, 'change')}`" in loose
+    assert "Saved substation.yaml" not in loose
+    ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    assert 'data-action="${o.prefix}first-bad"' in ui

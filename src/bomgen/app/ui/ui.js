@@ -245,7 +245,7 @@
     D.bar = () => {
       const c = n(D.draft), bad = n(D.errors);
       if (!c && !D.saving) return '';
-      return `<div class="savebar${bad ? ' savebar--bad' : ''}" role="region" aria-label="Unsaved changes"><span class="savebar-msg">${D.saving ? '<span class="spinner"></span><b>Saving…</b>' : bad ? `${icon('error')}<b>${bad} ${bad === 1 ? 'field needs' : 'fields need'} fixing</b> before you can save.` : `<span class="dot dot--warn" aria-hidden="true"></span><b>${c} unsaved change${c === 1 ? '' : 's'}</b> · saved to ${esc(o.file)}`}</span>
+      return `<div class="savebar${bad ? ' savebar--bad' : ''}" role="region" aria-label="Unsaved changes"><span class="savebar-msg">${D.saving ? '<span class="spinner"></span><b>Saving…</b>' : bad ? `<button class="btn btn--ghost btn--sm" data-action="${o.prefix}first-bad">${icon('error')}<b>${bad} ${bad === 1 ? 'field needs' : 'fields need'} fixing</b></button> before you can save.` : `<span class="dot dot--warn" aria-hidden="true"></span><b>${c} unsaved change${c === 1 ? '' : 's'}</b> · saved to ${esc(o.file)}`}</span>
         <span class="sp"></span><button class="btn btn--secondary" data-action="${o.prefix}discard" ${D.saving ? 'disabled' : ''}>Discard</button><button class="btn btn--primary" data-action="${o.prefix}save" ${D.saving || bad ? 'disabled' : ''}>${icon('save')}${esc(o.label)} <kbd class="kbd">Ctrl+S</kbd></button></div>`;
     };
     document.addEventListener('change', (e) => {
@@ -262,6 +262,10 @@
         render();
       }).catch(() => {});
     });
+    ACTIONS[o.prefix + 'first-bad'] = () => {  // the first refused field on the page
+      const key = Object.keys(D.errors).find((k) => document.getElementById(o.prefix + k)), el = key && document.getElementById(o.prefix + key);
+      if (el) { el.scrollIntoView({ block: 'center' }); el.focus(); }
+    };
     ACTIONS[o.prefix + 'discard'] = () => { D.reset(); S.dirty = false; render(); toast('Changes discarded', 'undo'); };
     ACTIONS[o.prefix + 'save'] = () => {
       const keys = Object.keys(D.draft);
