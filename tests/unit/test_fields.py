@@ -178,3 +178,16 @@ def test_part_users_list_library_parts_that_bring_the_part(project: Path) -> Non
 
 def test_part_users_of_an_unused_part_is_empty(project: Path) -> None:
     assert uses(gis01(project), "NOPE-1") == []
+
+
+def test_a_new_mapping_is_written_in_block_style(project: Path) -> None:
+    assert fields.set_field(project, ("constants", "t_max_c"), 40, substation="gis01").written
+    text = substation_yaml(project).read_text("utf-8")
+    assert "\nconstants:\n  t_max_c: 40\n" in text
+    assert "constants: {" not in text
+
+
+def test_new_nested_mappings_are_written_in_block_style(project: Path) -> None:
+    path = ("spares", "port_fraction")
+    assert fields.set_field(project, path, 0.25, substation="gis01").written
+    assert "\nspares:\n  port_fraction: 0.25\n" in substation_yaml(project).read_text("utf-8")

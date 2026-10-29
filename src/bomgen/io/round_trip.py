@@ -40,7 +40,12 @@ class _PaddedEmitter(Emitter):
 
 
 class _Representer(RoundTripRepresenter):
-    pass
+    def ignore_aliases(self, data: Any) -> bool:
+        """Write a scalar used twice (a writer's ``date``) in full, never as ``&id001``;
+        lists and mappings keep the aliases the file has."""
+        if isinstance(data, (dict, list)):
+            return bool(super().ignore_aliases(data))
+        return True
 
 
 _Representer.add_representer(
@@ -90,6 +95,8 @@ def set_entry(parent: Node, key: Any, new: Any) -> None:
     """Set ``parent[key]`` to ``new`` built on the old value (see :func:`merge_value`); for
     a sequence, ``key == len(parent)`` appends. The blank lines and comments that end the
     old value (or, for a new last entry, the old last entry) move to the new end."""
+    if not len(parent) and parent.fa.flow_style():
+        parent.fa.set_block_style()  # a collection that gains its first entry is written out
     if _has(parent, key):
         tail = _take_tail(parent, key)
     elif len(parent):

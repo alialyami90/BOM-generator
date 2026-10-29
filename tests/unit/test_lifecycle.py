@@ -169,3 +169,12 @@ def test_delete_project_keeps_what_the_bomproj_does_not_carry(
     delete_project(project, tmp_path / "Deleted")
     left = sorted(p.relative_to(folder).as_posix() for p in folder.rglob("*"))
     assert left == ["Backups", "Backups/old.bomproj", "notes.bomproj"]
+
+
+def test_a_new_substation_writes_every_value_in_full_without_anchors(tmp_path: Path) -> None:
+    project_file = new_project(tmp_path)
+    assert create_substation(project_file, "s1", "Dhahran", today=TODAY).written
+    text = project_file.read_text("utf-8")
+    assert "&id" not in text
+    assert "*id" not in text
+    assert text.count("2026-10-28") >= 3
