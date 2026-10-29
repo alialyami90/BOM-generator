@@ -106,3 +106,6 @@ Append-only. Mark replaced entries "superseded by …"; move old ones to `archiv
   final squash.
 - Changelog rules (L12/L13 in role 7's LESSONS): no entry for version bumps, docs, chore or
   refactor PRs; no agent names; word the last PR's entry from its final squash.
+- Final handover (10 roles at once): every merge of a ROSTER row conflicted the PRs for the
+  rows next to it (#215, #217, #219, #220). Merge non-adjacent rows first, then ask each
+  remaining owner to merge origin/main with a merge commit just before you merge theirs.

@@ -31,8 +31,9 @@ question to Ali (item 1).
 6. **Next release** (v0.2.2 or v0.3.0): STATE → "How a release happens". Hold other merges
    between the CHANGELOG merge and the published release.
 7. **Checkpoints:** every role writes a docs-only checkpoint PR touching only its own
-   `docs/handoff/NN-*` folder and its own ROSTER row. Merge them as they arrive; ROSTER rows
-   don't conflict when each PR touches only its own row.
+   `docs/handoff/NN-*` folder and its own ROSTER row. Merge them as they arrive. Edits to
+   neighbouring ROSTER rows do conflict (git treats adjacent changed lines as one hunk), so
+   after each merge re-check the others and ask the owner to merge origin/main again.
 
 ## Don't do
 
