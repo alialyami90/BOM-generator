@@ -235,3 +235,11 @@ def test_use_this_instead_hands_the_part_to_network_as_an_unsaved_edit() -> None
     assert "pins stay put" in edit
     assert "App.useButton(id, r.part_id)" in (UI_DIR / "screens-library.js").read_text("utf-8")
     assert "App.holdParts = " in (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
+
+
+def test_overview_and_network_use_the_shared_draft_form() -> None:
+    for name in ("screens-projects.js", "screens-substation.js"):
+        js = (UI_DIR / name).read_text(encoding="utf-8")
+        assert "function toModel(" not in js  # one reader of typed values, in ui.js
+    assert "const PO = App.draftForm({" in (UI_DIR / "screens-projects.js").read_text("utf-8")
+    assert "const NET = App.draftForm({" in (UI_DIR / "screens-substation.js").read_text("utf-8")
