@@ -134,3 +134,20 @@ def test_deleting_a_project_in_a_git_folder_is_refused_with_the_reason(
     assert error["kind"] == "edit_refused"
     assert ".git" in error["message"]
     assert project.is_file()
+
+
+def test_a_blank_substation_starts_its_equipment_with_the_core_switch_pair(
+    app: api.Api, project: Path
+) -> None:
+    made = ok(app.create_substation(str(project), "Substation 2", None))
+    page = ok(app.start_equipment(str(project), made["id"], "RST2228-L2"))
+    rows = {e["role"]: e for e in page["equipment"]}
+    assert rows["l2_switch"]["part_id"] == "RST2228-L2"
+    assert rows["l2_switch"]["redundant"] is True
+    assert rows["l1_switch"]["part_id"] is None  # picked by the sizing
+    assert rows["l1_switch"]["redundant"] is True
+
+
+def test_starting_equipment_twice_is_refused(app: api.Api, project: Path) -> None:
+    error = refused(app.start_equipment(str(project), "gis01", "RST2228-L2"))
+    assert error["kind"] == "edit_refused"

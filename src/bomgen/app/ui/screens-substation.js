@@ -166,8 +166,9 @@
     ied_count: [['network', 'ied_count'], 'int'], topology: [['network', 'topology'], 'text'], ring_max_switches: [['network', 'ring_max_switches'], 'int'],
     ...Object.fromEntries(Object.keys(SPARES).map((k) => [k, [['spares', k], k === 'port_fraction' ? 'pct' : 'int']]))
   };
-  /* The model takes equipment only with its redundant L1 and L2 switches and the generated panels' identity (Substation, ADR 0013). */
-  const FIRST = 'The first rows, the redundant L1 and L2 switches and the generated panels, are written in substation.yaml for now. Further devices are added here.';
+  /* The model takes equipment only with its redundant L1 and L2 switches (Substation, ADR 0013), so the first add writes both. */
+  const FIRST = 'Start with the core switches: the L2 switch you pick, and the L1 switches the sizing picks. Then add the rest.';
+  const startButton = (cls) => `<button class="btn ${cls}" data-action="eq-start">${icon('plus')}Add the core switches…</button>`;
   const EQ = { qty: 'int', l2_ports: 'int', role: 'text', redundant: 'bool' };
   function nf(key) {  // [path, kind]; an equipment cell is eq.<row>.<field>
     const m = /^eq\.(\d+)\.(\w+)$/.exec(key);
@@ -210,7 +211,7 @@
     return `<div class="setup" style="margin-bottom:var(--space-5)"><h3>Set up ${esc(p.name)}</h3><p class="muted small" style="margin-top:var(--space-1)">The panels appear on their own once the network and equipment are entered.</p>
       <ol>${step(true, false, 'Substation created', 'Its settings and calculation documents are in the register with blank numbers.', '<button class="btn btn--ghost btn--sm" data-action="goto" data-to="#/project/documents">Fill in numbers</button>')}
       ${step(hasIed, !hasIed, 'Enter the number of field IEDs', 'It sizes the L1 switches. It is never listed in the BOM.', hasIed ? '' : '<button class="btn btn--secondary btn--sm" data-action="net-focus-ied">Enter</button>')}
-      ${step(hasEq, hasIed && !hasEq, 'Add the equipment', `Switches, patch panel, gateway, firewall and the rest. ${FIRST}`)}
+      ${step(hasEq, hasIed && !hasEq, 'Add the equipment', `Switches, patch panel, gateway, firewall and the rest. ${FIRST}`, hasEq ? '' : startButton('btn--secondary btn--sm'))}
       ${step(hasPanels, hasIed && hasEq && !hasPanels, 'Look at the panels', 'Check the layout, then run Checks and build.', hasIed && hasEq ? '<a class="btn btn--primary btn--sm" href="#/panels">See the panels</a>' : '')}</ol></div>`;
   }
   /* One equipment row: its cells are drafted like the inputs above; Remove writes at once, with Undo. */
@@ -259,6 +260,20 @@
     document.getElementById('eq-id').value = freeId(d.part_id, taken);
     document.getElementById('eq-role').value = ROLE_OF[d.category] || 'other';
   });
+  const withParts = (then) => (parts ? then() : Bridge.call('library_overview').then((o) => { parts = o.devices; then(); }).catch((err) => toast(err.message, 'error')));
+  ACTIONS['eq-start'] = () => withParts(() => {
+    const switches = parts.filter((d) => d.category === 'network_switch');
+    if (!switches.length) { toast('The active library has no network switches.', 'error'); return; }
+    App.dialog({ title: 'Add the core switches', body: `<div class="form">
+      ${field('L2 switch', `<select class="select" id="es-l2">${switches.map((d) => `<option value="${esc(d.part_id)}">${esc(d.part_id)}${d.make || d.model ? ' · ' + esc([d.make, d.model].filter(Boolean).join(' ')) : ''}</option>`).join('')}</select>`, 'One redundant pair, A and B.')}
+      <p class="small muted">The L1 switches come as a redundant pair too. Their model and count are picked by the sizing from the IED count; you can pin a model in the ranking afterwards.</p>
+      <div id="es-err" class="err small" role="alert"></div></div>`,
+      actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="eq-start-do">Add the switches</button>' });
+  });
+  ACTIONS['eq-start-do'] = () => {
+    Bridge.call('start_equipment', S.project.file, S.sub, document.getElementById('es-l2').value).then((page) => { App.closeDialog(); relaid(page); toast('Added the L1 and L2 switches', 'check'); })
+      .catch((err) => { document.getElementById('es-err').innerHTML = `${icon('error')}<span>${esc(err.message)}</span>`; });
+  };
   ACTIONS['eq-add-do'] = () => {
     const v = (id) => document.getElementById(id), row = { id: v('eq-id').value.trim(), part_id: v('eq-part').value, role: v('eq-role').value };
     if (v('eq-red').checked) row.redundant = true;
@@ -286,7 +301,7 @@
             <p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">What the substation has, before any panel exists. Redundant devices come as an A and a B unit.</p>
             ${eq.length ? `<div class="table-wrap"><table class="table"><caption class="sr-only">Equipment</caption><thead><tr><th style="min-width:190px">Device</th><th style="width:160px">Role</th><th style="width:64px">A and B</th><th class="num" style="width:80px">Quantity</th><th class="num" style="width:80px">L2 ports</th><th class="num" style="width:64px">Height</th><th style="width:44px"><span class="sr-only">Remove</span></th></tr></thead><tbody>
               ${eq.map((e, i) => eqRow(p, e, i)).join('')}</tbody></table>
-              <div class="table-foot"><span>${plural(eq.length, 'item')} · height and mounting come from the library</span><span><button class="btn btn--secondary btn--sm" data-action="eq-add" ${dirty ? 'disabled title="Save or discard the changes first"' : ''}>${icon('plus')}Add device</button></span></div></div>` : `<div class="empty"><b>No equipment yet.</b><div class="muted small" style="margin-top:var(--space-1)">${FIRST}</div></div>`}</section>
+              <div class="table-foot"><span>${plural(eq.length, 'item')} · height and mounting come from the library</span><span><button class="btn btn--secondary btn--sm" data-action="eq-add" ${dirty ? 'disabled title="Save or discard the changes first"' : ''}>${icon('plus')}Add device</button></span></div></div>` : `<div class="empty"><b>No equipment yet.</b><div class="muted small" style="margin:var(--space-1) 0 var(--space-3)">${FIRST}</div>${startButton('btn--primary')}</div>`}</section>
           <section><h3>Spares</h3>
             <p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">Every spare starts from the project's shared defaults; the ones this substation changes are marked. Empty a field to use the project's value again.</p>
             <div class="form form--3">${p.spares.map((s) => { const [label, unit] = SPARES[s.key] || [s.key, '']; const d = s.key === 'port_fraction' ? pct(s.default) : s.default; return netInput(p, s.key, unit, s.changed ? `Changed from ${d}${unit && unit !== '%' ? ' ' + unit : unit}.` : 'Project default.', { label }); }).join('')}</div></section>

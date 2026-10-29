@@ -225,3 +225,5 @@ def test_the_document_register_is_edited_with_confirm_add_and_remove_with_undo()
     for name in ("confirm_project_field", "add_document", "remove_document", "restore_document"):
         assert f"Bridge.call('{name}'" in js
     assert "Pick another document there first." in js
+    network = (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
+    assert "Bridge.call('start_equipment'" in network
