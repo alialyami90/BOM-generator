@@ -83,6 +83,21 @@ def test_the_logo_is_copied_into_the_project(app: api.Api, project: Path, tmp_pa
     assert (project.parent / "assets" / "company-logo.png").read_bytes() == PNG
 
 
+def test_a_second_logo_with_the_same_file_name_does_not_overwrite_the_first(
+    app: api.Api, project: Path, tmp_path: Path
+) -> None:
+    first, second = tmp_path / "a" / "company-logo.png", tmp_path / "b" / "company-logo.png"
+    for source, data in ((first, PNG), (second, PNG + b"other")):
+        source.parent.mkdir()
+        source.write_bytes(data)
+    ok(app.set_project_logo(str(project), str(first)))
+    page = ok(app.set_project_logo(str(project), str(second)))
+    assert page["project"]["logo"] == "assets/company-logo-2.png"
+    assert (project.parent / "assets" / "company-logo.png").read_bytes() == PNG
+    again = ok(app.set_project_logo(str(project), str(first)))  # the same picture is reused
+    assert again["project"]["logo"] == "assets/company-logo.png"
+
+
 def test_a_logo_that_is_not_a_png_is_refused(app: api.Api, project: Path, tmp_path: Path) -> None:
     source = tmp_path / "logo.png"
     source.write_text("not a picture", encoding="utf-8")

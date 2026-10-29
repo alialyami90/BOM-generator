@@ -735,7 +735,10 @@ class Api:
         if not data.startswith(PNG_SIGNATURE):
             raise AppError("invalid_edit", f"{picture.name} is not a PNG picture.")
         file = Path(project_file)
-        target = file.parent / "assets" / f"{lifecycle.project_id_for(picture.stem)}.png"
+        stem = lifecycle.project_id_for(picture.stem)
+        target, number = file.parent / "assets" / f"{stem}.png", 2
+        while target.exists() and target.read_bytes() != data:  # never overwrite another logo
+            target, number = target.with_name(f"{stem}-{number}.png"), number + 1
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(data)
         logo = target.relative_to(file.parent).as_posix()
