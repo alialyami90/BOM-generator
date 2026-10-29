@@ -41,7 +41,10 @@ a field is invalid, and says why. Moving between tabs of the same page keeps the
 ## Validation
 
 - Each field is checked as it is edited, by the engine's model for that file, so the message is the
-  engine's. Show the **problem and the fix**: "Enter the number of field IEDs, for example 40."
+  engine's, in words: a pattern or type error from the model ("String should match pattern …") is
+  never shown as is; the app names what to enter ("Pick a part from the library.").
+- Choice values show labels, not the model's enum values: "Continuous", not `CONTINUOUS`;
+  "Serial port", not `serial_port`. Show the **problem and the fix**: "Enter the number of field IEDs, for example 40."
 - A field is marked (red border, error icon, message under it) once it has been left or once it is
   invalid *and* was valid before; an empty required field in a new record is marked on first save attempt,
   not while the person is still typing in the first field.
@@ -312,7 +315,7 @@ Tabs and fields, mapped to the model's `DeviceType`:
 | Electrical | Supply type, Voltage, Power supplies, Rated power (W), Inrush current (A), Load type, Minimum branch MCB (A), HWIO points, Digital inputs, Alarm on the branch MCB, Leave out of the power total |
 | Ports and mounting | Height (U), Fibre cores, port groups (count, speed, media, kind, used for) with add and remove |
 | Parts it brings | Child parts (part, qty), Terminals (strip, block, count, per), Loose items (part, qty, tag) |
-| Datasheet | Supply range, Operating temperature, Typical and Maximum power, Ports, Dimensions, Weight, Certifications, Datasheet link, Data quality, Sources |
+| Datasheet | Supply range, Operating temperature, Typical and Maximum power, Ports, Dimensions, Weight, Certifications, Datasheet link, Data quality, Sources. A datasheet height is labelled **Height in the datasheet** with the help "The layout uses Ports and mounting › Height.", so the two heights never read as one field |
 | Alternatives | Alternative group key and the comparison list below, *Add alternative…* |
 
 - **In use:** a banner says how many equipment rows in the open substation use the device, and that an edit
