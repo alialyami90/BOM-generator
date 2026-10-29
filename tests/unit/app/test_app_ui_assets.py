@@ -321,3 +321,44 @@ def test_a_route_change_closes_an_open_dialog() -> None:
     """polish-v02 item 15."""
     ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
     assert "window.addEventListener('hashchange', () => { closeDialog(); render();" in ui
+
+
+def test_a_new_list_row_is_checked_once_it_is_filled_or_on_save() -> None:
+    """polish-v02 item 2; editing.md "Validation"."""
+    edit = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
+    assert "const unfinished = (r) => Object.values(r).some((v) => v === '');" in edit
+    assert "rows.filter((r) => !unfinished(r))" in edit
+    assert "function checkUnfinished()" in edit
+    css = (UI_DIR / "styles.css").read_text(encoding="utf-8")
+    assert ".section > .err" in css
+
+
+def test_choices_show_labels_not_enum_values() -> None:
+    """polish-v02 item 3."""
+    edit = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
+    assert "const choiceName = (key, c) =>" in edit
+    assert "serial_port: 'Serial port'" in edit or "catName(c.toLowerCase())" in edit
+    assert "(choices[col] || []).map((c) => [c, choiceName(col, c)])" in edit
+    assert "choices.map((c) => [c, choiceName(key, c)])" in edit
+
+
+def test_the_datasheet_height_is_named_apart_and_power_input_is_a_textarea() -> None:
+    """polish-v02 item 8."""
+    edit = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
+    assert "['rec__datasheet__height_u', 'Height in the datasheet', 'int', " in edit
+    assert "The layout uses Ports and mounting \u203a Height." in edit
+    assert "['rec__datasheet__power__input', 'Power input', 'area', " in edit
+
+
+def test_row_delete_buttons_share_one_style() -> None:
+    """polish-v02 item 14: muted, danger on hover."""
+    css = (UI_DIR / "styles.css").read_text(encoding="utf-8")
+    assert ".btn--del { color: var(--color-text-muted); }" in css
+    for name in (
+        "screens-libedit.js",
+        "screens-substation.js",
+        "screens-loose.js",
+        "screens-projects.js",
+    ):
+        js = (UI_DIR / name).read_text(encoding="utf-8")
+        assert "btn--del" in js, name

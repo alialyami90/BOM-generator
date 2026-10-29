@@ -226,7 +226,7 @@
       <td${ch('qty', 'num')}${l1 ? '<span class="muted">Sized</span>' : num('qty', 'Quantity')}</td>
       <td${ch('l2_ports', 'num')}${num('l2_ports', 'L2 ports')}</td>
       <td class="num">${e.device && e.device.height_u != null ? (e.device.height_u ? e.device.height_u + ' U' : 'DIN') : '—'}</td>
-      <td><button class="btn btn--ghost btn--sm btn--icon" data-action="eq-remove" data-i="${i}" aria-label="Remove ${esc(e.id)}" title="${Object.keys(NET.draft).length ? 'Save or discard the changes first' : 'Remove'}" ${Object.keys(NET.draft).length ? 'disabled' : ''}>${icon('trash')}</button></td></tr>`;
+      <td><button class="btn btn--ghost btn--sm btn--icon btn--del" data-action="eq-remove" data-i="${i}" aria-label="Remove ${esc(e.id)}" title="${Object.keys(NET.draft).length ? 'Save or discard the changes first' : 'Remove'}" ${Object.keys(NET.draft).length ? 'disabled' : ''}>${icon('trash')}</button></td></tr>`;
   }
   const relaid = (page) => { SUB.page = page; App.network.reload(); App.render(); };
   ACTIONS['eq-remove'] = (el) => {

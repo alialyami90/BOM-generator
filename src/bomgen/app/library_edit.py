@@ -240,7 +240,7 @@ class LibraryEditor:
         """The model's message for setting one device field, or None when it fits."""
         pending = self._current()
         assert pending.base is not None
-        return check_field(self._edited(pending), ["devices", part_id, key], value)
+        return in_words(key, check_field(self._edited(pending), ["devices", part_id, key], value))
 
     def alternatives(self, part_id: str) -> dict[str, Any]:
         """The device and its alternatives as comparison rows, pending edits applied."""
@@ -271,7 +271,7 @@ class LibraryEditor:
         record = records[part_id].model_dump(mode="json", exclude_none=True)
         key, new = _with_field(record, path.split("."), value)
         message = check_record_field(records, [part_id, key], new)
-        return message.removeprefix("Value error, ") if message else None
+        return in_words(key, message.removeprefix("Value error, ") if message else None)
 
     def set_record_fields(self, part_id: str, fields: Mapping[str, object]) -> dict[str, Any]:
         """Set fields of a device's record (dotted paths; None empties one) in the pending set.
@@ -395,6 +395,29 @@ class LibraryEditor:
         )
         self.pending.clear(self.name)
         return {"version": saved.manifest.version, "previous": saved.previous, "diff": saved.diff}
+
+
+_PART_LISTS = frozenset({"children", "loose_items"})
+_TYPE_WORDS = (
+    ("Input should be a valid integer", "Enter a whole number, for example 2."),
+    ("Input should be a valid number", "Enter a number, for example 12.5."),
+    ("Input should be a valid boolean", "Choose yes or no."),
+)
+
+
+def in_words(key: str, message: str | None) -> str | None:
+    """The model's message as the page shows it (editing.md "Validation"): a pattern or type
+    error names what to enter; any other message is already in words and is kept."""
+    if message is None:
+        return None
+    if message.startswith("String should match pattern"):
+        if key in _PART_LISTS:
+            return "Pick a part from the library."
+        return "Use letters, digits, dots, dashes, plus signs or underscores."
+    for start, words in _TYPE_WORDS:
+        if message.startswith(start):
+            return words
+    return message
 
 
 def merge(

@@ -214,7 +214,7 @@
     return `<tr>${rgCell(d, 'title', 'Name', { plain: true, placeholder: d.key, after: `<span class="cell-sub mono">${esc(d.key)}</span>` })}${rgCell(d, 'doc_no', 'Document no.')}${rgCell(d, 'rev', 'Revision')}
       ${rgCell(d, 'issue_date', 'Issue date', { after: assumed ? `<span class="row" style="gap:var(--space-2);margin-top:4px">${badge('warn', 'Assumed date', 'warn')}<button class="btn btn--ghost btn--sm" data-action="rg-confirm" data-i="${d.index}">Confirm</button></span>` : '' })}
       <td class="small">${used && used.length ? esc(used.join(', ')) : '<span class="muted">Not used</span>'}</td>
-      <td><button class="btn btn--ghost btn--sm btn--icon" data-action="rg-remove" data-i="${d.index}" aria-label="Remove ${esc(d.key)}" title="${esc(why || (RG.dirty() ? 'Save or discard the changes first' : 'Remove'))}" ${why || RG.dirty() ? 'disabled' : ''}>${icon('trash')}</button></td></tr>`;
+      <td><button class="btn btn--ghost btn--sm btn--icon btn--del" data-action="rg-remove" data-i="${d.index}" aria-label="Remove ${esc(d.key)}" title="${esc(why || (RG.dirty() ? 'Save or discard the changes first' : 'Remove'))}" ${why || RG.dirty() ? 'disabled' : ''}>${icon('trash')}</button></td></tr>`;
   }
   const projectDocs = (p) => {
     if (p.real) {
