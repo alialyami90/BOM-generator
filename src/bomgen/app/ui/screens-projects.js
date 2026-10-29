@@ -10,8 +10,6 @@
   const kb = (b) => (b == null ? '—' : b < 1024 ? `${b} bytes` : `${Math.round(b / 1024)} KB`);
   const inside = (file, folder) => (file.startsWith(folder) ? file.slice(folder.length).replace(/^[\\/]/, '') : file);
   const count = (n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`;
-  /* What the app cannot edit yet (plan M17c): the project's own settings. */
-  const LATER = 'Client, logo and shared defaults cannot be edited in the app yet. Edit project.yaml, then open the project again.';
   const live = () => (offline() ? `disabled title="${esc('This works in the app, not in a browser.')}"` : '');
 
   /* ---------- the screens' view of a project (the prototype's shape) ---------- */
@@ -24,7 +22,7 @@
       opened: day(row.changed), status: row.status.level, statusText: row.status.text,
       substations: row.substations.map((s) => ({ id: s.id, name: s.name, folder: inside(s.file, row.folder), file: s.file, panels: s.panels == null ? '—' : s.panels, changed: day(s.changed), status: s.errors ? 'bad' : 'ok', statusText: s.errors ? `${s.errors} error${s.errors === 1 ? '' : 's'}` : row.status.level === 'bad' ? 'Not checked' : 'Ready', from: '' })),
       documents: (row.documents || []).map((d) => ({ key: d.key, sub: d.substation, label: d.title || d.key, docNo: d.doc_no, rev: d.rev, issue: d.issue_date || '', assumed: false, usedBy: '' })),
-      defaults: row.defaults ? defaultsRows(row.defaults) : [],
+      defaults: row.defaults ? defaultsRows(row.defaults) : [], raw: row.defaults || null, brands: row.brands || {},
       problems: row.problems || [], backups: null, real: true
     };
   }
@@ -110,17 +108,65 @@
       share: `<button class="btn btn--primary" data-action="export-project">${icon('upload')}Export project…</button>` }[t] || '';
     const body = { info: projectInfo, substations: projectSubs, documents: projectDocs, share: projectShare }[t](p);
     const problems = p.problems && p.problems.length ? `<div style="margin-bottom:var(--space-4)">${banner('bad', `<b>${p.problems.length} ${p.problems.length === 1 ? 'problem' : 'problems'} in the project files.</b> ${problemList(p.problems)}`)}</div>` : '';
-    return `<div class="page">${pageHead(esc(p.name), `${p.client ? esc(p.client) + ' · ' : ''}<span class="mono" style="font-size:13px">${esc(p.path)}</span>`, actions, `<a href="#/home">Projects</a>${icon('chevr')}<span>${esc((tabList.find(([k]) => k === t) || [, ''])[1])}</span>`, p.real ? LATER : '')}
+    return `<div class="page">${pageHead(esc(p.name), `${p.client ? esc(p.client) + ' · ' : ''}<span class="mono" style="font-size:13px">${esc(p.path)}</span>`, actions, `<a href="#/home">Projects</a>${icon('chevr')}<span>${esc((tabList.find(([k]) => k === t) || [, ''])[1])}</span>`)}
       ${problems}${tabs('project', tabList, t, 'Project sections')}
       <div role="tabpanel" aria-labelledby="tab-project-${t}">${body}</div></div>`;
   };
   const MAX_PROBLEMS = 8;
   const problemList = (list) => `<ul style="margin:6px 0 0;padding-left:18px">${list.slice(0, MAX_PROBLEMS).map((x) => `<li><span class="mono small">${esc(x.file.split(/[\\/]/).slice(-2).join('/'))}${x.line ? ':' + x.line : ''}</span>${x.location ? ` <span class="mono small">${esc(x.location)}</span>` : ''}: ${esc(x.message)}</li>`).join('')}</ul>${list.length > MAX_PROBLEMS ? `<div class="small">and ${list.length - MAX_PROBLEMS} more; the Checks screen lists them all.</div>` : ''}`;
 
+  /* ---------- Overview: the project's own fields, saved together (docs/ui/editing.md, Project › Overview) ---------- */
+  /* [key, label, path, kind, unit, help]; pct shows a fraction as a percentage. The model checks every value. */
+  const OV = [
+    ['client', 'Client', ['project', 'client'], 'text', '', 'Optional. Printed under the project name.'],
+    ['power_margin', 'Power margin', ['defaults', 'constants', 'power_margin'], 'pct', '%', 'Added to the power total.'],
+    ['port_fraction', 'Spare ports on each switch', ['defaults', 'spares', 'port_fraction'], 'pct', '%'],
+    ['sfp_per_l1', 'Spare SFPs per L1 switch', ['defaults', 'spares', 'sfp_per_l1'], 'int'],
+    ['rack_u_reserved', 'Rack space kept free', ['defaults', 'spares', 'rack_u_reserved'], 'int', 'U'],
+    ['dc_branches_per_feed', 'Spare DC branches', ['defaults', 'spares', 'dc_branches_per_feed'], 'int', 'per feed'],
+    ['ac_branches', 'Spare AC branches', ['defaults', 'spares', 'ac_branches'], 'int']
+  ];
+  const BRANDS = [['mcb', 'MCBs, AC branches'], ['mcb_dc', 'MCBs, DC branches'], ['aux_contact', 'Aux contacts'], ['terminal_blocks', 'Terminal blocks'], ['busbars', 'Busbars'], ['housekeeping', 'Housekeeping']];
+  const PO = { draft: {}, errors: {}, saving: false };
+  const ovField = (key) => OV.find((f) => f[0] === key) || (key.startsWith('brand_') ? [key, '', ['defaults', 'catalogue_choice', key.slice(6)], 'brand'] : null);
+  function saved(p, key) {
+    const f = ovField(key), r = p.raw;
+    if (f[3] === 'brand') { const v = (r && r.catalogue_choice[key.slice(6)]) || ''; return v === 'default' && key !== 'brand_mcb_dc' ? '' : v; }
+    if (key === 'client') return p.client || '';
+    const v = r ? r[f[2][1]][f[2][2]] : null;
+    return f[3] === 'pct' && v != null ? Math.round(v * 1000) / 10 : v;
+  }
+  const shown = (p, key) => (key in PO.draft ? PO.draft[key] : saved(p, key));
+  function toModel(kind, raw) {  // [value for the file, a message when it cannot be read]
+    const t = String(raw == null ? '' : raw).trim();
+    if (!t) return [null, null];
+    if (kind === 'text' || kind === 'brand') return [t, null];
+    if (kind === 'int') return /^\d+$/.test(t) ? [Number(t), null] : [null, 'Enter a whole number, for example 2.'];
+    return /^\d+(\.\d+)?$/.test(t) ? [Math.round(Number(t) * 10) / 1000, null] : [null, 'Enter a percentage, for example 20.'];
+  }
+  function ovControl(p, f) {
+    const [key, label, , kind, unit, help = ''] = f, id = 'po-' + key, err = PO.errors[key], v = shown(p, key);
+    let html = input(id, v == null ? '' : String(v), { mono: kind !== 'text', num: kind !== 'text', invalid: !!err, placeholder: kind === 'text' ? 'Not set' : '' });
+    if (unit) html = `<div class="input-affix">${html}<span class="affix">${esc(unit)}</span></div>`;
+    const out = field(esc(label), html, help, err ? esc(err) : '');
+    return key in PO.draft ? out.replace('<div class="field">', '<div class="field changed">') : out;
+  }
+  function brandControl(p, kind, label) {
+    const key = 'brand_' + kind, dc = kind === 'mcb_dc', opts = (p.brands[kind] || []).map((b) => [b.id === 'default' && !dc ? '' : b.id, b.name]);
+    if (dc) opts.unshift(['', 'Same as the AC branches']);
+    const out = field(esc(label), select('po-' + key, opts.length ? opts : [['', 'Library default']], shown(p, key) || '', { invalid: !!PO.errors[key] }), '', PO.errors[key] ? esc(PO.errors[key]) : '');
+    return key in PO.draft ? out.replace('<div class="field">', '<div class="field changed">') : out;
+  }
+  function poBar() {
+    const n = Object.keys(PO.draft).length, bad = Object.keys(PO.errors).length;
+    if (!n && !PO.saving) return '';
+    return `<div class="savebar${bad ? ' savebar--bad' : ''}" role="region" aria-label="Unsaved changes"><span class="savebar-msg">${PO.saving ? '<span class="spinner"></span><b>Saving…</b>' : bad ? `${icon('error')}<b>${count(bad, 'field needs', 'fields need')} fixing</b> before you can save.` : `<span class="dot dot--warn" aria-hidden="true"></span><b>${count(n, 'unsaved change')}</b>`}</span>
+      <span class="sp"></span><button class="btn btn--secondary" data-action="po-discard" ${PO.saving ? 'disabled' : ''}>Discard</button><button class="btn btn--primary" data-action="po-save" ${PO.saving || bad ? 'disabled' : ''}>${icon('save')}Save project <kbd class="kbd">Ctrl+S</kbd></button></div>`;
+  }
   const projectInfo = (p) => `<div class="form form--2">
     <div class="span-2">${field('Project name', `<div class="row" style="flex-wrap:nowrap">${ro(input('p-name', p.name))}<button class="btn btn--secondary" data-action="rename-project" ${live()}>Rename…</button></div>`, 'Printed in bold at the top of every sheet header, for every substation. The folder keeps its name.')}</div>
-    ${field('Client', ro(input('p-client', p.client, { placeholder: 'Not set' })))}
-    ${field('Logo', ro(input('p-logo', p.logo, { mono: true, placeholder: 'No logo chosen' })), p.logo ? 'PNG. Appears in the left of the page header.' : 'PNG. Appears in the left of the page header. <span style="color:var(--color-warning)">Not set: the header will have no picture.</span>')}
+    ${p.real ? ovControl(p, OV[0]) : field('Client', ro(input('p-client', p.client, { placeholder: 'Not set' })))}
+    ${field('Logo', `<div class="row" style="flex-wrap:nowrap">${ro(input('p-logo', p.logo, { mono: true, placeholder: 'No logo chosen' }))}${p.real ? `<button class="btn btn--secondary" data-action="po-logo">Choose…</button>${p.logo ? '<button class="btn btn--ghost" data-action="po-logo-remove">Remove</button>' : ''}` : ''}</div>`, p.logo ? 'PNG, copied into the project. Appears in the left of the page header.' : 'PNG, copied into the project. Appears in the left of the page header. <span style="color:var(--color-warning)">Not set: the header will have no picture.</span>')}
     <div class="span-2 section" style="margin:0">
       <h3>Device library</h3>
       <p class="lede">The project records which library version it was built with, so a colleague can reproduce the workbook. All its substations use the same version.</p>
@@ -128,16 +174,63 @@
       ${p.library.note ? `<p class="small" style="margin-top:var(--space-2);color:var(--color-warning)">${esc(p.library.note)}</p>` : ''}
       <div class="row" style="margin-top:var(--space-3)"><button class="btn btn--secondary" data-action="goto" data-to="#/library">Open library</button></div>
     </div>
+    ${p.real && Object.keys(p.brands).length ? `<div class="span-2 section" style="margin:0">
+      <h3>Catalogue brands</h3>
+      <p class="lede">Which brand's parts the MCBs, aux contacts and other catalogue items use. A brand changes the ordering codes on the next build, not ratings or sizes. A substation can choose its own.</p>
+      <div class="form form--3" style="margin-top:var(--space-3)">${BRANDS.map(([k, l]) => brandControl(p, k, l)).join('')}</div></div>` : ''}
     <div class="span-2 section" style="margin:0">
       <h3>Shared defaults</h3>
       <p class="lede">Every substation starts from these values. A substation can set its own; the ones it changes are marked there.</p>
-      <div class="form form--3" style="margin-top:var(--space-3)">${p.defaults.map((x, i) => field(x.label, `<div class="input-affix">${ro(input('df' + i, x.value, { num: true, mono: true }))}${x.unit ? `<span class="affix">${esc(x.unit)}</span>` : ''}</div>`)).join('') || '<p class="muted">No shared defaults are set.</p>'}</div>
+      <div class="form form--3" style="margin-top:var(--space-3)">${p.real && p.raw ? OV.slice(1).map((f) => ovControl(p, f)).join('') : p.defaults.map((x, i) => field(x.label, `<div class="input-affix">${ro(input('df' + i, x.value, { num: true, mono: true }))}${x.unit ? `<span class="affix">${esc(x.unit)}</span>` : ''}</div>`)).join('') || '<p class="muted">No shared defaults are set.</p>'}</div>
     </div>
     <div class="span-2 section" style="margin:0">
       <h3>Delete project</h3>
       <p class="lede">Removes the project folder with all its substations. A copy is saved first as a <span class="mono">.bomproj</span> file, which Import project file brings back.</p>
       <button class="btn btn--danger" data-action="delete-project" ${live()}>${icon('trash')}Delete project…</button>
-    </div></div>`;
+    </div></div>${p.real ? poBar() : ''}`;
+  /* A field is read on change and checked by the model; the draft holds only what differs from the file. */
+  document.addEventListener('change', (e) => {
+    const m = /^po-(\w+)$/.exec(e.target.id || '');
+    if (!m || App.route().a !== 'project') return;
+    const p = curProject(), key = m[1], f = ovField(key);
+    if (!f || !p.real) return;
+    const typed = e.target.value, was = saved(p, key);
+    if (String(typed).trim() === String(was == null ? '' : was)) { delete PO.draft[key]; delete PO.errors[key]; queueMicrotask(App.render); return; }
+    PO.draft[key] = typed;
+    const [value, local] = toModel(f[3], typed);
+    if (local) { PO.errors[key] = local; queueMicrotask(App.render); return; }
+    delete PO.errors[key]; queueMicrotask(App.render);
+    Bridge.call('check_project_field', p.file, f[2], value).then((msg) => {
+      if (PO.draft[key] !== typed || (PO.errors[key] || null) === (msg || null)) return;  // a render would drop what is being typed elsewhere
+      if (msg) PO.errors[key] = msg; else delete PO.errors[key];
+      App.render();
+    }).catch(() => {});
+  });
+  ACTIONS['po-discard'] = () => { PO.draft = {}; PO.errors = {}; S.dirty = false; App.render(); toast('Changes discarded', 'undo'); };
+  ACTIONS['po-save'] = () => {
+    const p = curProject(), keys = Object.keys(PO.draft);
+    if (PO.saving || !keys.length || Object.keys(PO.errors).length) return;
+    PO.saving = true; App.render();
+    let page = null;
+    const next = (i) => {
+      if (i === keys.length) return Promise.resolve();
+      const key = keys[i], f = ovField(key);
+      return Bridge.call('set_project_field', p.file, f[2], toModel(f[3], PO.draft[key])[0]).then((r) => { page = r; delete PO.draft[key]; return next(i + 1); })
+        .catch((e) => { PO.errors[key] = e.message; throw e; });
+    };
+    next(0).then(() => { toast(`Saved ${count(keys.length, 'change')} to project.yaml`, 'check'); S.dirty = false; })
+      .catch(() => toast('Not saved: a value was refused. It is marked on the page.', 'error'))
+      .then(() => { PO.saving = false; if (page) { const tab = S.tab.project; S.project = view(page); S.tab.project = tab; } App.render(); });
+  };
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's' && App.route().a === 'project' && S.tab.project === 'info' && Object.keys(PO.draft).length) {
+      e.preventDefault(); if (document.activeElement) document.activeElement.blur(); queueMicrotask(ACTIONS['po-save']);
+    }
+  });
+  const relogo = (call) => call.then((page) => { if (!page) return; S.project = view(page); S.tab.project = 'info'; App.render(); toast('Logo updated', 'check'); }).catch(fail);
+  ACTIONS['po-logo'] = () => relogo(Bridge.call('set_project_logo', curProject().file));
+  ACTIONS['po-logo-remove'] = () => relogo(Bridge.call('set_project_field', curProject().file, ['project', 'logo'], null));
+  window.addEventListener('hashchange', () => { if (App.route().a !== 'project') { PO.draft = {}; PO.errors = {}; } });
 
   const projectSubs = (p) => `<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">Each substation has its own network, panels, checks and workbook. To start a new one from an existing one, use “Create from this”.</p>
     <div class="table-wrap"><table class="table table--comfort"><thead><tr><th>Substation</th><th class="num">Panels</th><th>Last changed</th><th>Status</th><th style="width:430px"><span class="sr-only">Actions</span></th></tr></thead>

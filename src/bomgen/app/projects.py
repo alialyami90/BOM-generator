@@ -21,6 +21,7 @@ from bomgen.io.loader import PROJECT_FILE, LoadedProject, load_project
 from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.errors import LibraryPackageError
 from bomgen.library_store.store import LibraryRef, LibraryStore, library_mismatch
+from bomgen.models.library import DEFAULT_BRAND, CatalogueBrands, Library
 from bomgen.models.project import Project
 
 RECENT_FILE = "recent-projects.json"
@@ -167,6 +168,20 @@ def _substations(
     return rows
 
 
+def brands(library: Library) -> dict[str, list[dict[str, str]]]:
+    """The brand sets a project can choose per catalogue, the library default first; the DC
+    MCBs choose from the MCB brands (ADR 0023)."""
+    found: dict[str, list[dict[str, str]]] = {}
+    for kind in CatalogueBrands.model_fields:
+        sets = getattr(library.catalogue_brands, kind)
+        found[kind] = [
+            {"id": DEFAULT_BRAND, "name": "Library default"},
+            *({"id": b.id, "name": b.name or b.id} for b in sets),
+        ]
+    found["mcb_dc"] = found["mcb"]
+    return found
+
+
 def summarize(project_file: Path, store: LibraryStore, *, details: bool = False) -> dict[str, Any]:
     """One project as Home lists it; with ``details`` also what the Project page shows."""
     loaded, issues = load_with_issues(project_file, store)
@@ -194,6 +209,7 @@ def summarize(project_file: Path, store: LibraryStore, *, details: bool = False)
     }
     if details:
         summary |= {
+            "brands": brands(loaded.library) if loaded is not None else {},
             "project": project.project if project else None,
             "defaults": project.defaults if project else None,
             "documents": project.documents if project else [],

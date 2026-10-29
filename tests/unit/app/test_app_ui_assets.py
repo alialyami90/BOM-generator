@@ -185,3 +185,20 @@ def test_project_creation_is_live_and_deleting_a_project_asks_for_its_name() -> 
     for name in ("create_project", "create_substation", "rename_project", "rename_substation"):
         assert f"Bridge.call('{name}'" in js
     assert "Type the project name to confirm" in js
+
+
+def test_project_overview_edits_client_logo_defaults_and_brands_in_the_app() -> None:
+    js = (UI_DIR / "screens-projects.js").read_text(encoding="utf-8")
+    assert "cannot be edited in the app yet" not in js
+    for name in ("set_project_field", "check_project_field", "set_project_logo"):
+        assert f"Bridge.call('{name}'" in js
+    assert "Same as the AC branches" in js  # mcb_dc, ADR 0023
+
+
+def test_network_inputs_are_edited_with_a_setup_card_for_a_new_substation() -> None:
+    js = (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
+    for name in ("set_substation_field", "check_substation_field"):
+        assert f"Bridge.call('{name}'" in js
+    assert "function setupCard(p)" in js
+    css = (UI_DIR / "styles.css").read_text(encoding="utf-8")
+    assert ".setup li.done svg" in css

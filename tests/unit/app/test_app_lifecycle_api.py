@@ -124,3 +124,13 @@ def test_deleting_a_project_keeps_a_restorable_file_and_drops_it_from_the_list(
     assert saved.parent == tmp_path / "app" / "deleted-projects"
     assert not project.parent.exists()
     assert all(p["file"] != str(project) for p in ok(app.list_projects()))
+
+
+def test_deleting_a_project_in_a_git_folder_is_refused_with_the_reason(
+    app: api.Api, project: Path
+) -> None:
+    (project.parent / ".git").mkdir()
+    error = refused(app.delete_project(str(project)))
+    assert error["kind"] == "edit_refused"
+    assert ".git" in error["message"]
+    assert project.is_file()
