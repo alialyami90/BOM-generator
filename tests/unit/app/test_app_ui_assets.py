@@ -202,3 +202,10 @@ def test_network_inputs_are_edited_with_a_setup_card_for_a_new_substation() -> N
     assert "function setupCard(p)" in js
     css = (UI_DIR / "styles.css").read_text(encoding="utf-8")
     assert ".setup li.done svg" in css
+
+
+def test_equipment_rows_are_edited_on_network_and_removing_one_offers_undo() -> None:
+    js = (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
+    for name in ("add_equipment", "remove_equipment"):
+        assert f"Bridge.call('{name}'" in js
+    assert "toast(`Removed ${id}`, 'trash', () =>" in js
