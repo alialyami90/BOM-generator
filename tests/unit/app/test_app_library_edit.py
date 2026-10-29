@@ -480,3 +480,22 @@ def test_library_device_names_each_part_by_make_and_model(app: api.Api) -> None:
     assert names["SITE-CABLE"] == "Local Cable"
     assert names["SITE-BARE"] == ""
     assert set(names) == set(ok(app.library_device(PART))["part_ids"])
+
+
+# -- messages in words (docs/ui/polish-v02.md item 2; editing.md "Validation") -----------------
+
+
+def test_a_blank_child_part_asks_to_pick_a_part(app: api.Api) -> None:
+    message = ok(app.check_library_field(PART, "children", [{"part_id": "", "qty": 1}]))
+    assert message == "Pick a part from the library."
+
+
+def test_a_type_error_in_a_list_is_given_in_words(app: api.Api) -> None:
+    port = {"count": "a", "speed": "100M", "media": "RJ45", "kind": "fixed", "usable_for": "any"}
+    message = ok(app.check_library_field(PART, "ports", [port]))
+    assert message == "Enter a whole number, for example 2."
+
+
+def test_an_engine_message_already_in_words_is_kept(app: api.Api) -> None:
+    message = ok(app.check_library_field(PART, "children", [{"part_id": "NOPE", "qty": 1}]))
+    assert message == "unknown part_id 'NOPE' (not in library.yaml)"

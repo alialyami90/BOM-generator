@@ -98,6 +98,9 @@ svg.i--lg { width: 20px; height: 20px; }
 .btn--sm { height: var(--size-control-height-compact); padding: 0 var(--space-3); font-size: 12.5px; }
 .btn--icon { width: var(--size-control-height); padding: 0; }
 .btn--icon.btn--sm { width: var(--size-control-height-compact); }
+/* Row delete: muted, danger on hover (polish-v02 item 14). */
+.btn--del { color: var(--color-text-muted); }
+.btn--del:hover:not(:disabled) { color: var(--color-danger-text); background: var(--color-danger-soft); }
 .row-actions { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-2); }
 .btn[disabled], .btn[aria-disabled="true"] { background: var(--color-surface-sunken); color: var(--color-text-muted); border-color: var(--color-border); cursor: not-allowed; }
 .btn--ghost[disabled] { background: transparent; border-color: transparent; }
@@ -109,6 +112,7 @@ svg.i--lg { width: 20px; height: 20px; }
 .field > label, .field > .label { font-size: 13px; font-weight: var(--weight-medium); color: var(--color-text); display: flex; align-items: center; gap: 6px; }
 .field .help { font-size: 12px; color: var(--color-text-muted); }
 .field .err { font-size: 12px; color: var(--color-danger-text); display: flex; gap: 6px; align-items: flex-start; }
+.section > .err { font-size: 12px; color: var(--color-danger-text); display: flex; gap: 6px; align-items: flex-start; max-width: 760px; margin-top: 6px; }
 .input, .select, .textarea { height: var(--size-control-height); width: 100%; padding: 0 10px; background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border-control); border-radius: var(--radius-sm); font: inherit; font-size: 13.5px; }
 .input::placeholder { color: var(--color-text-muted); opacity: 1; }
 .input:hover, .select:hover { border-color: var(--color-text-muted); }

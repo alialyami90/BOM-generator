@@ -71,6 +71,9 @@
   const ED = { key: '', state: 'idle', reply: null, error: null, draft: {}, errors: {}, refusal: '', saving: false, users: null };
   const CAT = { io: 'IO', gps: 'GPS', rtac: 'RTAC', sfp: 'SFP' };
   const catName = (c) => c.split('_').map((w) => CAT[w] || w).join(' ').replace(/^./, (m) => m.toUpperCase());
+  /* A choice's label (editing.md "Validation"): codes such as VDC, L1, RJ45 or 10M stay; words read as words. */
+  const LABEL = { serial_port: 'Serial port', din_rail: 'DIN rail', plug_in: 'Plug-in', ied: 'IEDs', uplink: 'Uplinks' };
+  const choiceName = (key, c) => (key === 'category' ? catName(c) : LABEL[c] || (/^[A-Z0-9]{1,4}$/.test(c) || /\d/.test(c) ? c : catName(c.toLowerCase())));
   /* [key, label, kind, help]; kinds: text, mono, area, int, num, choice, feeds, bool. The model checks every value. */
   const TABS = {
     identity: ['Identity', [['part_id', 'Part ID', 'fixed', 'Fixed: projects refer to it. To rename, add a copy and retire this one.'], ['category', 'Category', 'choice'], ['make', 'Make', 'text'], ['model', 'Model', 'text'],
@@ -86,8 +89,8 @@
     /* The device-database record (rec__ keys: the record path with __ for each dot). */
     datasheet: ['Datasheet', [['rec__verified', 'Research status', 'choice', 'Confirmed once every figure is checked against the datasheet.'], ['rec__datasheet__mounting_kind', 'Mounting', 'choice'],
       ['rec__datasheet__summary', 'Summary', 'area', '', 2],
-      ['rec__datasheet__height_u', 'Height', 'int', 'Above 0 exactly when the mounting is rack.', 0, 'U'], ['rec__datasheet__weight_kg', 'Weight', 'num', '', 0, 'kg'],
-      ['rec__datasheet__power__input', 'Power input', 'text', 'As the datasheet gives it, e.g. 125 VDC.'], ['rec__datasheet__power__typical_w', 'Typical power', 'num', '', 0, 'W'], ['rec__datasheet__power__max_w', 'Maximum power', 'num', '', 0, 'W'],
+      ['rec__datasheet__height_u', 'Height in the datasheet', 'int', 'The layout uses Ports and mounting › Height. Above 0 exactly when the mounting is rack.', 0, 'U'], ['rec__datasheet__weight_kg', 'Weight', 'num', '', 0, 'kg'],
+      ['rec__datasheet__power__input', 'Power input', 'area', 'As the datasheet gives it, e.g. 125 VDC.', 2], ['rec__datasheet__power__typical_w', 'Typical power', 'num', '', 0, 'W'], ['rec__datasheet__power__max_w', 'Maximum power', 'num', '', 0, 'W'],
       ['rec__datasheet__operating_temp_c__min', 'Lowest operating temperature', 'snum', '', 0, '°C'], ['rec__datasheet__operating_temp_c__max', 'Highest operating temperature', 'snum', '', 0, '°C'],
       ['rec__datasheet__dimensions_mm__h', 'Case height', 'num', '', 0, 'mm'], ['rec__datasheet__dimensions_mm__w', 'Case width', 'num', '', 0, 'mm'], ['rec__datasheet__dimensions_mm__d', 'Case depth', 'num', '', 0, 'mm'],
       ['rec__datasheet__certifications', 'Certifications', 'csv', 'Separated by commas.', 2],
@@ -149,7 +152,7 @@
     let html;
     if (kind === 'fixed') html = input(id, v, { mono: true, readonly: true });
     else if (kind === 'bool') return ((h) => (changed ? App.changedField(h) : h))(`<div class="field"><label class="switch"><input type="checkbox" id="${id}" ${v ? 'checked' : ''}>${esc(label)}</label>${err ? `<span class="err" id="${id}-err">${icon('error')}<span>${esc(err)}</span></span>` : ''}</div>`);
-    else if (kind === 'choice') html = select(id, [['', 'Not set'], ...choices.map((c) => [c, key === 'category' ? catName(c) : c])], v == null ? '' : String(v), o);
+    else if (kind === 'choice') html = select(id, [['', 'Not set'], ...choices.map((c) => [c, choiceName(key, c)])], v == null ? '' : String(v), o);
     else if (kind === 'feeds') html = select(id, [['0', 'None'], ['1', 'Single feed'], ['2', 'Dual feed (2 supplies)']], String(v || 0), o);
     else if (kind === 'area' || kind === 'lines') html = `<textarea class="input input--mono" id="${id}" rows="3" ${err ? 'aria-invalid="true"' : ''} style="height:auto;padding:8px 10px">${esc(v == null ? '' : v)}</textarea>`;
     else html = input(id, v == null ? '' : String(v), { ...o, mono: kind !== 'text' && kind !== 'csv', num: kind === 'int' || kind === 'num' || kind === 'snum' });
@@ -246,23 +249,25 @@
     const choices = ED.reply.choices || {};
     const cell = (i, [col, label, kind]) => {
       const id = `dl-${key}-${i}-${col}`, v = rows[i][col];
-      const ctl = kind === 'choice' ? select(id, [...(col === 'media' ? [['', '—']] : []), ...(choices[col] || []).map((c) => [c, c])], v == null ? '' : String(v), { cls: 'ctl' })
+      const ctl = kind === 'choice' ? select(id, [...(col === 'media' ? [['', '—']] : []), ...(choices[col] || []).map((c) => [c, choiceName(col, c)])], v == null ? '' : String(v), { cls: 'ctl' })
         : input(id, v == null ? '' : String(v), { mono: kind !== 'text', num: kind === 'int' || kind === 'qty' }).replace('class="input', 'class="ctl input').replace('<input', `<input aria-label="${esc(label)}, row ${i + 1}"${kind === 'part' ? ' list="dl-parts"' : ''}`);
       return `<td>${ctl}</td>`;
     };
-    const body = rows.length ? rows.map((r, i) => `<tr>${cols.map((c) => cell(i, c)).join('')}<td><button class="btn btn--ghost btn--icon btn--sm" data-action="dl-remove" data-key="${key}" data-i="${i}" aria-label="Remove ${esc(title.toLowerCase())} row ${i + 1}">${icon('trash')}</button></td></tr>`).join('')
+    const body = rows.length ? rows.map((r, i) => `<tr>${cols.map((c) => cell(i, c)).join('')}<td><button class="btn btn--ghost btn--icon btn--sm btn--del" data-action="dl-remove" data-key="${key}" data-i="${i}" aria-label="Remove ${esc(title.toLowerCase())} row ${i + 1}">${icon('trash')}</button></td></tr>`).join('')
       : `<tr class="empty-row"><td colspan="${cols.length + 1}" class="muted">None. Add one if each unit brings it.</td></tr>`;
     return `<section class="section${changed ? ' changed' : ''}" style="padding-top:var(--space-3)"><div class="row" style="justify-content:space-between;max-width:760px"><h3>${esc(title)}${changed ? ` ${badge('warn', 'Changed')}` : ''}</h3><button class="btn btn--ghost btn--sm" data-action="dl-add" data-key="${key}">${icon('plus')}Add</button></div>
-      <div class="table-wrap" style="max-width:760px;margin-top:6px"><table class="table"><thead><tr>${cols.map(([, label]) => `<th>${esc(label)}</th>`).join('')}<th style="width:40px"><span class="sr-only">Actions</span></th></tr></thead><tbody>${body}</tbody></table></div>
-      ${err ? `<span class="err" style="margin-top:6px" id="dl-${key}-err">${icon('error')}<span>${esc(err)}</span></span>` : ''}</section>`;
+      <div class="table-wrap" style="max-width:760px;margin-top:6px"><table class="table"><thead><tr>${cols.map(([, label, kind]) => `<th${kind === 'choice' ? ' style="min-width:130px"' : ''}>${esc(label)}</th>`).join('')}<th style="width:40px"><span class="sr-only">Actions</span></th></tr></thead><tbody>${body}</tbody></table></div>
+      ${err ? `<span class="err" id="dl-${key}-err">${icon('error')}<span>${esc(err)}</span></span>` : ''}</section>`;
   }
-  /* A list edit replaces the whole list; the model checks it, and setting it back to the saved list drops the change. */
+  /* A list edit replaces the whole list; the model checks it, and setting it back to the saved list drops the change.
+     A new row keeps '' in the cells still to fill; it is left out of the check until it is filled or Save is pressed (editing.md "Validation"). */
+  const unfinished = (r) => Object.values(r).some((v) => v === '');
   function setList(key, rows) {
     const saved = ED.reply.device[key] || [];
     if (JSON.stringify(rows) === JSON.stringify(saved)) { delete ED.draft[key]; delete ED.errors[key]; queueMicrotask(App.render); return; }
     ED.draft[key] = rows; delete ED.errors[key]; queueMicrotask(App.render);
     const id = ED.key;
-    Bridge.call('check_library_field', id, key, rows).then((msg) => {
+    Bridge.call('check_library_field', id, key, rows.filter((r) => !unfinished(r))).then((msg) => {
       if (ED.key !== id || ED.draft[key] !== rows) return;
       if (msg) ED.errors[key] = msg; else delete ED.errors[key];
       App.render();
@@ -311,8 +316,17 @@
     }).catch(() => {});
   });
   ACTIONS['de-discard'] = () => { ED.draft = {}; ED.errors = {}; ED.refusal = ''; App.render(); toast('Changes discarded', 'undo'); };
+  function checkUnfinished() {  // on Save: the rows still being filled in are checked too, and marked if the model refuses them
+    const id = ED.key, keys = Object.keys(ED.draft).filter((k) => LISTS[k] && ED.draft[k].some(unfinished));
+    return Promise.all(keys.map((k) => Bridge.call('check_library_field', id, k, ED.draft[k]).then((msg) => {
+      if (msg) ED.errors[k] = msg;
+    }))).then(() => !invalid());
+  }
   function save() {  // resolves true once the edits are in the pending set
     if (ED.saving || !dirty() || invalid()) return Promise.resolve(false);
+    return checkUnfinished().then((ok) => (ok ? write() : (App.render(), false)));
+  }
+  function write() {
     const id = ED.key;
     const draft = Object.entries(ED.draft), rec = draft.filter(([k]) => isRec(k));
     const edits = draft.filter(([k]) => !isRec(k)).map(([k, v]) => (v == null ? { op: 'remove', path: ['devices', id, k] } : { op: 'set', path: ['devices', id, k], value: v }));

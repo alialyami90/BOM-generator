@@ -86,7 +86,7 @@
       const [c1, d1] = ch(free ? 'description' : 'part_id'), [c2, d2] = ch('tag'), [c3, d3] = ch('qty'), [c4, d4] = free ? ['', ''] : ch('fed_from');
       return `<tr><td class="num muted${ncls ? ' is-changed' : ''}" style="width:44px">${ndot}${i + 1}</td><td${c1}>${d1}${first}</td><td${c2}>${d2}${ctl(input('lm-tag-' + i, it.tag || '', { placeholder: 'Designation on the sheet' }))}</td>
         <td${c3}>${d3}${described(ctl(input('lm-qty-' + i, it.qty == null ? '' : String(it.qty), { num: true, mono: true, invalid: !!bad.qty })), 'lm-qty-' + i, bad.qty)}${cellErr('lm-qty-' + i, bad.qty)}</td><td${c4}>${d4}${fed}</td>
-        <td><button class="btn btn--ghost btn--icon btn--sm" data-action="lm-remove" data-i="${i}" aria-label="Remove ${esc(free ? (it.description || 'item ' + (i + 1)) : it.part_id)}" ${saving ? 'disabled' : ''}>${icon('trash')}</button></td></tr>`;
+        <td><button class="btn btn--ghost btn--icon btn--sm btn--del" data-action="lm-remove" data-i="${i}" aria-label="Remove ${esc(free ? (it.description || 'item ' + (i + 1)) : it.part_id)}" ${saving ? 'disabled' : ''}>${icon('trash')}</button></td></tr>`;
     }).join('');
     const host = d.host_options.map((p) => [p.id, `${p.name} (${p.sheet})`]);
     return `<div class="page">${head}${notice}
