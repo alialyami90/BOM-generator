@@ -1,18 +1,73 @@
 # NEXT — role 6, Windows installer and release
 
-**Next action:** none open. Wait for the lead (B1) or Ali to call the next release, then run task 1.
+**Next action:** none open. After your readback (handoff README steps 1–5), wait for the lead or
+Ali to call the next release, then do task 1. Nothing is half done.
 
 ## Tasks, in priority order
-1. **Next release from main (after v0.2.0).** When the lead or Ali call a release, the version-bump PR is one PR: `__version__`, `pyproject.toml`, `tests/test_package.py` (the lead's go covers them; not ours) and the `CHANGELOG.md` section (role 7 writes it, merged first). Keep a ready patch: v0.2.0 used `/mnt/project-files/b6/bump-0.2.0.patch`. After the lead merges it, follow the push run of `release.yml` on main: `plan` must say "Releasing v<version>", then installer, then "Publish GitHub Release". Then `get_release_by_tag`, confirm `bomgen-setup-<version>.exe`, send Ali the link and tell the lead. If `plan` fails on the changelog or pyproject check, nothing was created: report to the lead. If the tag creation is refused (a tag ruleset), report to the lead and Ali; the fallback is Ali publishing a release in the UI on that commit, which the workflow fills. Done when the link is sent.
-2. **If app work adds new dependencies or data files**, check the frozen build bundles them (the lead may ask; since #186 a missing UI file fails the frozen `--self-test`): freeze the PR head locally with `pip install ".[app]" -r packaging/requirements.txt` and `pyinstaller packaging/bomgen.spec`, run the frozen `--self-test` and `bomgen build examples/project.yaml`. Precedent: ruamel.yaml (#106) needed no spec change; its hook ships in pyinstaller-hooks-contrib.
+
+1. **Cut the next release when the lead or Ali call it** (v0.2.2, v0.3.0, ...). Done when Ali has
+   the release link.
+   1. Confirm `CHANGELOG.md` on main has `## [X.Y.Z]` (role 7 writes it and it merges first), and
+      that `list_tags` has no `vX.Y.Z`.
+   2. Branch from main. Change only `__version__` in `src/bomgen/__init__.py`, `version` in
+      `pyproject.toml`, and the assert in `tests/test_package.py`. Run the gate
+      (`ruff check . && ruff format --check .`, `python -m mypy`, `python -m pytest -q`; reinstall
+      with `pip install -e ".[dev]"` first so the version metadata updates).
+   3. Open the PR titled `chore(release): version X.Y.Z` (copy #211's body). Say in it that merging
+      publishes, and tell the lead. Do not open it before the lead says go.
+   4. After the lead merges it, find the push run of `release.yml` on main (`actions_list`,
+      `list_workflow_runs`, `release.yml`, branch main, event push). `plan` must pass, and
+      `installer` must run all its steps (check with `get_workflow_job`; a 90 s job is normal on a
+      cache hit). Then `release` publishes.
+   5. Run `get_release_by_tag vX.Y.Z`. Check that `bomgen-setup-X.Y.Z.exe` and `default.bomlib` are
+      present and the tag is on the merge commit. Send Ali the link in the role 6 thread and tell
+      the lead.
+   - If `plan` fails (pyproject mismatch or missing changelog), nothing was created. Fix it with a
+     follow-up PR and tell the lead.
+   - If `installer` fails, read the job log (`get_job_logs`), fix it in a PR with the Windows job
+     green on its head, and tell the lead. A merged fix on main does not re-release by itself unless
+     it touches `__version__`, `pyproject.toml` or `CHANGELOG.md`; use "Re-run failed jobs" on the
+     release run, or ask the lead.
+   - If tag creation is refused (a tag ruleset), tell the lead and Ali. The fallback is Ali
+     publishing a release in the GitHub UI on that commit with tag `vX.Y.Z`. The tag push re-runs
+     the workflow, which attaches the assets and fills an empty body.
+2. **When app work adds a dependency or a data file outside `src/bomgen/app/ui/`**, check the
+   frozen build carries it (the lead may ask). UI files are covered since #186: a missing one fails
+   `--self-test` on the Windows job. For anything else, check the PR's Windows job, or freeze on
+   Windows with `pip install ".[app]" -r packaging/requirements.txt` and
+   `pyinstaller packaging/bomgen.spec --noconfirm --clean`, then run `dist\bomgen\bomgen.exe build
+   examples\project.yaml` and `"dist\bomgen\BOM Generator.exe" --self-test`. Precedent: ruamel.yaml
+   (#106) needed no spec change, because its hook ships in pyinstaller-hooks-contrib.
+3. **Review any PR that touches the files in STATE "Role and ownership"** when the lead asks, as
+   with #161: check the pack step, the first-start regex, the test_packaging pins, ADR 0009, and a
+   green Windows job on the PR head.
+
+## Ideas not started (not asked for; ask the lead before doing any)
+
+- Code signing (plan Q19): only if Ali supplies a certificate. It would be a `signtool` step after
+  "Compile the installer", with the secret stored in repo settings.
+- A smoke step that upgrades from the previous release's installer (install old, install new, store
+  unchanged). Today only a same-version reinstall is tested.
+- Bump `actions/checkout@v4`, `setup-python@v5`, `upload-artifact@v4` and `download-artifact@v4`
+  when GitHub's Node 20 deprecation warning becomes an error. They are forced onto Node 24 today.
 
 ## Rules of the release workflow (do not break)
-- Any change to `release.yml`, `bomgen.iss`, `bomgen.spec` or `launcher.py` needs the "Build Windows installer" job green on the PR head before the lead merges (standing rule since #55).
-- Releases start from main (#153, ADR 0009): a merged PR that changes `__version__` releases when `v<version>` does not exist and CHANGELOG has `## [<version>]`. Keep build, tag and release in one run (a GITHUB_TOKEN tag starts no other workflow) and keep release runs uncancelled. Hand-pushed tags still work and must equal `__version__`; the workflow attaches to an existing release or creates one.
-- The Release workflow is path-filtered and is not part of `ci-status` (ADR 0006); never make it a required check.
+
+- Any change to `release.yml`, `bomgen.iss`, `bomgen.spec` or `launcher.py` needs "Build Windows
+  installer" green on the PR head before the lead merges (standing rule since #55).
+- Keep build, tag and release in one run, and keep release runs uncancelled (`cancel-in-progress`
+  only for PRs).
+- Keep the main-push path filter limited to the three version and changelog files, so ordinary
+  merges never start a release run.
+- The Release workflow is not part of `ci-status` (ADR 0006). Never make it a required check.
+- Never change the Inno Setup `AppId`.
+- The default library's name and version in the pack step must match `library:` in
+  `examples/project.yaml`. `test_packaging` enforces this, and role 3 bumps them together.
 
 ## Don't do
-- No code signing work unless Ali supplies a certificate (Q19).
-- No edits to `src/bomgen/app/` except `launcher.py` (A11), `CHANGELOG.md` (A7/A1), models or examples.
-- No tag pushes, force pushes or moving a published tag.
-- Don't make the launcher bundle or import libraries other than the one default package.
+
+- No tag pushes, force pushes, or moving or deleting a published tag or release.
+- No edits to `src/bomgen/app/` except `launcher.py` (role 11 owns the rest), and none to
+  `CHANGELOG.md` (role 7), models, examples or `data/` (role 3).
+- Don't make the launcher bundle or import any library other than the one default package.
+- No code signing work without a certificate from Ali.
