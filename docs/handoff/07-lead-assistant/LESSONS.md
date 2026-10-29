@@ -45,3 +45,14 @@
 - **L15 Drift at the B7 checkpoint.** STATE.md was written at `aad6094`; 11 docs-only merges had
   landed and #143 was merged, not open. The clone was shallow: `git fetch --unshallow` before
   using old shas such as `39fddc4`.
+- **L16 Pass tooling.** `fields` on `list_pull_requests` keeps answers small. GitHub MCP tools
+  must be loaded with ToolSearch first and the server sometimes drops; reload and retry.
+  `sleep` is blocked: use `run_in_background` or `timeout … until` loops. `git fetch --tags`
+  if `v0.2.x` tags are missing locally.
+- **L17 Writing rows.** Read each module's docstring and test names before writing its row; a
+  row says what is checked in plain words, not test names. `textwrap` breaks at hyphens
+  ("screen-reader"), so hand-wrap paragraphs that contain them.
+- **L18 Claims need a fresh run.** In #210 I first wrote that the row loop printed nothing; a
+  rerun showed 9 missing rows. Run every loop just before writing its result into STATE.md.
+- **L19 Final state (B7, 2026-10-29).** All agents retired at v0.2.1 with no open PRs and the
+  changelog current through #211. The next work depends on Ali's feedback on v0.2.1.

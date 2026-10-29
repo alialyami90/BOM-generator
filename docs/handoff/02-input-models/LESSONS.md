@@ -50,3 +50,27 @@
 - **Rebasing a test module both sides appended to:** take main's file, then add your own
   appended tail from `git show <commit>` (old base vs new). That's simpler than resolving
   interleaved hunks.
+
+## B2, 2026-10-29 (handover)
+- **ruamel anchors:** ruamel writes `&id001`/`*id001` when the same object is dumped
+  twice. A `date` reused for three register entries did this. `_Representer.ignore_aliases`
+  in `io/round_trip.py` returns True for scalars only. Ignoring aliases for lists and
+  mappings too broke the byte-identical round trip of `examples/library.yaml`: ruamel drops
+  `id\d+` anchor names on load, so you can't tell the file's own anchors from generated ones.
+- **Flow vs block style:** an empty collection is written in flow style (`[]`, `{}`) so
+  the file stays valid YAML. When it gains its first entry, `set_entry` switches it to
+  block style. Otherwise new nested mappings are written as `{ a: 1 }`.
+- **`model_copy` skips validators.** Anything built with `model_copy(update=...)` (like
+  `resolve_catalogues`) can hold values the model itself would refuse. Prefer computing
+  in a property, or re-validate.
+- **Seeded defaults with no source** get a `# ASSUMED` comment (`set_comment(node, key,
+  "ASSUMED")`). The app highlights them through `fields.assumed_fields(file)`. Ask the
+  lead before picking one. The lead may collect them into one question for Ali.
+- **Single branch, queued work:** while one PR is open on the push branch, build the
+  next one on a local branch from `origin/main`. After the merge, rebuild the push branch
+  with `checkout -B ... origin/main`, `cherry-pick`, and `merge -s ours`.
+- **Messaging threads:** check the thread id against `list_threads` before sending. A
+  wrong id reaches a retired thread silently.
+- **Ownership of `schemas/`:** it is not in the agents.md row, but it is generated from
+  role 2's models, so role 2 regenerates it with every model change. No test checks that
+  it is current.

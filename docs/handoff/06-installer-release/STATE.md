@@ -1,54 +1,160 @@
 # STATE — role 6, Windows installer and release (M11)
 
-- Outgoing: `A6 - Windows installer and release`. Successor: `B6 - Windows installer and release`.
-- Date 2026-10-28 (B6 after the context reset). Branch `claude/project-thread-s79idd` (docs-only checkpoint on `origin/main` f65a5fe, v0.2.0). The branch holds no unfinished work; restart it from main per LESSONS "Branch restarts".
-- Contacts: Ali's thread is this role's project thread `cmsg_01CGuLumA5u5e7gSGbisWmMiHdmiF2zR4D9rPGYUSRQDkT` (B6 after the reset; A6's was `cmsg_01CGuLumA5u5e7gSGbisWmMi9TL26SYzpQs1CWS9qSpPPv`) (reply with post_message). Lead (B1) thread: `cmsg_01CGuLumA5u5e7gSGbisWmMiJaADCWuiNCb42qQHM1dpuv` (A1's old thread is retired). A5 (library packages): `cmsg_01CGuLumA5u5e7gSGbisWmMi4GsrhHJfEnM1ZoKq6Av5HP`. B3 (device db): `cmsg_01CGuLumA5u5e7gSGbisWmMiMn4Ay5kTA4wLV22n9mEuru`.
-- Role, ownership and rules: [docs/agents.md](../../agents.md) "Roles" and "A6 — Windows installer and release (M11)"; design in [ADR 0009](../../decisions/0009-installer-layout-and-releases.md), [docs/install.md](../../install.md), [packaging/README.md](../../../packaging/README.md), plan M11.
+Final handoff from `B6 - Windows installer and release` to `C6 - Windows installer and release`, 2026-10-29. Ali retired every agent. The
+successor starts with no history, so this file is meant to stand on its own. Read it, then
+[NEXT.md](NEXT.md), [LESSONS.md](LESSONS.md) and the newest file in [checkpoints/](checkpoints/).
 
-## Owned files (agents.md)
-`packaging/` (spec, iss, entry points, requirements.txt, release-notes.md, README), `.github/workflows/release.yml`, `docs/install.md`, `src/bomgen/app/launcher.py` (the only file in `src/bomgen/app/` that is ours; A11 owns the rest), ADR 0009, the M11 section of `docs/plan.md`. Tests: `tests/unit/test_launcher.py`, `tests/unit/test_packaging.py`.
+## Where things stand (2026-10-29)
 
-## Merged (all squash-merged by the lead, A1 then B1)
-#2 installer pipeline, #15 real `.bomlib` import and `.bomproj` association, #24 test fixture fix, #38 launcher runs `run_window`, UI and pywebview bundled, #47 example `validate` smoke step, #55 example `build` smoke step, #57 PowerShell `$name:` parse fix, #70 UTF-8 console for the frozen CLI (touched A2's `cli.py`: `utf8_console` made public, A1 approved), #84 version 0.1.0, #86 default library bundled and installed on first start, version 0.1.1, release job attaches to an existing release, #138 handoff checkpoint, #153 release from main (a merged version bump builds, tags and publishes; ADR 0009 amended), #169 handoff checkpoint, #186 self-test checks every UI file the start page loads and the first-start regex is pinned to the packed library version, #195 version 0.2.0.
+- **Latest release: v0.2.1**, https://github.com/alialyami90/BOM-generator/releases/tag/v0.2.1.
+  The tag is on 1678343 (#211). It was published 2026-10-29 03:17 by the push run of `release.yml`
+  on main, with `bomgen-setup-0.2.1.exe` (29.7 MB) and `default.bomlib` (psa-devices 1.1.0).
+- **Before that: v0.2.0** (tag f65a5fe, #195, run 40797286698), the first release from main.
+  **v0.1.1** (tag 135d7ee, run 40773272092) and **v0.1.0** (tag 2064227, run 40736513114) were
+  released from hand-pushed or UI-made tags, before #153.
+- `bomgen.__version__` on main is `0.2.1`. The next release is whatever the lead and Ali call. No
+  version is reserved.
+- **No open PR, no unfinished branch, no uncommitted work.** The role's branch is
+  `claude/project-thread-s79idd`, and it only holds history already squash-merged (#169, #186, #195,
+  #196, #211). A6's old branch `claude/project-thread-y4aekh` is also fully merged. Restart a branch
+  from main before new work (LESSONS "Branch restarts").
+- Nothing is waiting on anyone. ADR 0009 is **Accepted** (Ali, 2026-10-28, #184).
+- Gate on main 1678343 (the 0.2.1 bump head): ruff and format pass, mypy passes (224 files), and
+  pytest has 2672 passed.
 
-## In review / in progress
-- No open PR of mine. Nothing uncommitted besides this checkpoint.
-- **Release v0.2.0 is done**, the first release from main: https://github.com/alialyami90/BOM-generator/releases/tag/v0.2.0 (tag on f65a5fe, push run 40797286698, published 2026-10-29 00:59 with `bomgen-setup-0.2.0.exe` and `default.bomlib` psa-devices 1.1.0). CHANGELOG `## [0.2.0]` by B7 (#193). Ali has the link.
-- Reviewed and approved the release.yml and ADR 0009 part of B3's Q38 PR #161 on head 64a8e65 (comment 6482158290): pack `data\library\psa-devices.yaml` as psa-devices 1.1.0, `data/library/**` and `data/device-db/**` in the PR paths, ADR 0009 line updated by B3 with my OK. Windows job green (run 40778617300). A1 merged it as 159591f.
-- Release v0.1.1 is done: https://github.com/alialyami90/BOM-generator/releases/tag/v0.1.1 (tag on 135d7ee, CHANGELOG #143 covers it; run 40773272092). Ali made the release in the UI, so its title and notes are empty; Ali was told and may paste the changelog section. Since #153 the workflow fills an empty UI release itself.
+## Role and ownership
 
-## What works (evidence)
-- Release v0.1.1 published with `bomgen-setup-0.1.1.exe` and `default.bomlib` (run 40773272092, both jobs green).
-- Release from main (#153): Windows job green on the PR head (run 40774940276). The plan step was run locally for every trigger (tag match and mismatch, main with tag present, PR, manual, bump without pyproject, without changelog, full bump). Its first real main release was v0.2.0 (run 40797286698), with no manual step.
-- Release v0.1.0 published with `bomgen-setup-0.1.0.exe` (run 40736513114, attempt 2; first attempt's publish step failed because Ali had already made an empty release in the UI).
-- Windows job (release.yml) green on #86 head and on main builds: freeze, frozen smoke (version, `--help`, validate, build + `.checks.json` + "0 failed", self-test, real window title), compile, install, installed smoke (first start installs `psa-devices 1.0.0`, reinstall + second start leave the store unchanged, `.bomlib` double-click import, build, shortcut, associations), uninstall cleanup.
-- Gate on 2026-10-28 (this checkpoint): see table.
+The roles table is in [docs/agents.md](../../agents.md), under "Roles" and "A6 — Windows installer
+and release (M11)". The design is in [ADR 0009](../../decisions/0009-installer-layout-and-releases.md).
+User-facing steps are in [docs/install.md](../../install.md), and build steps in
+[packaging/README.md](../../../packaging/README.md). The plan section is M11 in `docs/plan.md`.
 
-## Verification
-| command | result | date |
-|---|---|---|
-| `ruff check .` / `ruff format --check .` | pass (322 files), main 0f4b3eb | 2026-10-28 |
-| `mypy` | pass (214 files) | 2026-10-28 |
-| `pytest -q` | 2500 passed | 2026-10-28 |
-| `pytest -q tests/golden` | 94 passed | 2026-10-28 |
-| Windows job on v0.1.0 tag run | success | 2026-10-28 |
-| Windows job on v0.1.1 tag run (40765665083, 9313db1) | build + smoke passed; cancelled by me before publish | 2026-10-28 |
-| v0.1.1 tag run on 135d7ee (40773272092) | success, published | 2026-10-28 |
-| #153 PR run (40774940276) | success | 2026-10-28 |
-| #161 Windows job on 64a8e65 (run 40778617300) | success | 2026-10-28 |
-| `pytest -q` on the 0.2.0 bump head | 2642 passed | 2026-10-29 |
-| v0.2.0 push run on main (40797286698) | success, published | 2026-10-29 |
+Role 6 owns:
 
-Could not run here: the installer, the window and the PowerShell smoke steps (Windows only; CI is the proof), anything needing a tag push (sandbox returns HTTP 403 on tag pushes). Since #153 no one needs to push tags.
+| file | what it is |
+| --- | --- |
+| `packaging/bomgen.spec` | PyInstaller spec: one folder `dist/bomgen/`, two exes (`BOM Generator.exe` windowed, `bomgen.exe` console). It bundles all of `src/bomgen/app/ui/` and writes `bomgen_modules.txt` (every bomgen module) for `--self-test`. |
+| `packaging/bomgen.iss` | Inno Setup script. Per-user install (`PrivilegesRequired=lowest`) to `%LOCALAPPDATA%\Programs\BOM Generator`. It sets up the Start-menu shortcut and the `.bomlib`/`.bomproj` associations (HKCU), installs `default.bomlib` to `{app}\library`, and runs the WebView2 bootstrapper check (warn only). **AppId `{9B1E5C2A-4F37-4E8B-9D61-2C7A0F3B8E15}` must never change**, or upgrades stop replacing the old install. |
+| `packaging/entry_app.py`, `entry_cli.py` | PyInstaller entry scripts. They call `launcher.app_main` and `launcher.cli_main`. |
+| `packaging/requirements.txt` | Build-only dependencies (`pyinstaller==6.22.3`), kept out of pyproject on purpose. |
+| `packaging/release-notes.md` | Header of every GitHub Release body (install steps, SmartScreen note). GitHub's generated notes are appended under it. |
+| `packaging/README.md` | How to build locally on Windows. |
+| `.github/workflows/release.yml` | Jobs `plan` (ubuntu) → `installer` (windows) → `release` (ubuntu). See "How a release works". |
+| `docs/install.md` | End-user install, upgrade, library packages, uninstall. |
+| `src/bomgen/app/launcher.py` | The only file in `src/bomgen/app/` that is ours; role 11 owns the rest. `parse_args`, `app_main` (window, `.bomlib` import, `.bomproj` open, `--self-test`, first-start default library), `cli_main` (typer app with the UTF-8 console), `self_test`, `ui_files`/`ui_files_missing`, `install_bundled_library`. |
+| ADR 0009, the M11 section of `docs/plan.md` | Design record. |
+| `tests/unit/test_launcher.py` (43 tests), `tests/unit/test_packaging.py` (22 tests) | Unit tests for the above. `test_packaging` reads release.yml, the spec and the iss as text and pins their key lines. |
 
-## Scope check
-No file outside the owned list is changed by this checkpoint. Past out-of-role edits, all approved by A1 and merged: the ADR 0009 row of `docs/decisions/README.md` (#153, own-ADR row), `src/bomgen/cli.py` rename (#70), version strings in `pyproject.toml`, `src/bomgen/__init__.py`, `tests/test_package.py` (#84, #86).
+Edits outside this list, each approved by the lead at the time: the version strings in
+`pyproject.toml`, `src/bomgen/__init__.py` and `tests/test_package.py` (every bump, the lead's go
+covers them); `src/bomgen/cli.py` (#70, `utf8_console` made public); the ADR 0009 row of
+`docs/decisions/README.md` (#153).
+
+## How a release works (since #153)
+
+1. Role 7 (lead assistant) merges a `CHANGELOG.md` section `## [X.Y.Z] - date`. Ali's rule: never
+   release without a changelog section.
+2. Role 6 opens one PR that changes only the three version lines: `__version__` in
+   `src/bomgen/__init__.py`, `version` in `pyproject.toml`, and the assert in
+   `tests/test_package.py`. Examples are #195 and #211. Don't open it before the lead says so,
+   because merging it publishes.
+3. The lead squash-merges it once CI and "Build Windows installer" are green.
+4. The push to main starts `release.yml`. Main pushes are path-filtered to `src/bomgen/__init__.py`,
+   `pyproject.toml` and `CHANGELOG.md`. Steps:
+   - `plan` reads `__version__`. If tag `vX.Y.Z` already exists it builds nothing. Otherwise it
+     checks that pyproject agrees and that the CHANGELOG section exists, and either fails (nothing
+     created) or prints `Releasing vX.Y.Z from <sha>`.
+   - `installer` freezes, smoke-tests the frozen app, packs `default.bomlib` from
+     `data/library/psa-devices.yaml` plus `data/device-db`, compiles with Inno Setup, then installs,
+     smoke-tests and uninstalls.
+   - `release` runs `gh release create vX.Y.Z --target <sha>` with both assets. That command also
+     creates the tag. If a release already exists for the tag (made in the UI), it uploads with
+     `--clobber` instead, and fills an empty body.
+5. Role 6 checks with `get_release_by_tag`, then sends Ali the link and tells the lead.
+
+Also supported: a hand-pushed `v*` tag that equals `__version__` releases that commit (how v0.1.x
+went), and `workflow_dispatch` builds without publishing. PRs that touch `packaging/**`,
+`src/bomgen/app/**`, `data/library/**`, `data/device-db/**`, `pyproject.toml` or `release.yml` run
+the same build without publishing. Release runs never cancel each other; PR runs do.
+
+## What the Windows job proves (each run)
+
+- **Frozen app:** `--version`, `--help`, `validate` and `build` on `examples/project.yaml`. For
+  `build` it checks that `.checks.json` exists and the report says "0 failed". It also runs
+  `--self-test` (every module in the build-time manifest imports, and since #186 every script,
+  stylesheet and font `index.html` loads is in the bundle). Finally it starts the real window and
+  waits for the title "BOM Generator".
+- **Installed app:** a fresh `BOMGEN_LIBRARY_HOME`. The first start must list
+  `psa-devices\s+<version> (active)`, with the version pinned by `test_packaging` to
+  `examples/project.yaml` `library:`. A reinstall plus second start must leave the store snapshot
+  unchanged. It also checks the `.bomlib` double-click import, a `build` with the installed
+  `bomgen.exe`, the Start-menu shortcut, and the two file associations.
+- **Uninstall:** the exe, ProgIDs, extension keys and shortcut are all gone.
+
+## Decisions and why (details in ADR 0009 and LESSONS)
+
+- **Release from main, not tags (#153):** agents can't push tags (the sandbox returns HTTP 403), so
+  tag releases stalled on Ali. Build, tag and release run in one workflow run, because a tag made
+  with `GITHUB_TOKEN` does not trigger other workflows.
+- **The first-start default library comes from a launcher hook, not an installer `[Run]` step:** the
+  smoke test can use a temporary store and prove a reinstall changes nothing. The hook imports only
+  when `LibraryStore.list()` is empty, never forces, and never blocks the window.
+- **The self-test reads a build-time module manifest:** walking the frozen app only sees what
+  PyInstaller kept, so a dropped module would pass.
+- **The default library is the shipped `data/library/psa-devices.yaml` (Q38, #161), not
+  `examples/library.yaml`.** The example library stays golden-test data.
+- **Unsigned builds (plan Q19):** no certificate yet, so SmartScreen warns. Don't start signing work
+  unless Ali supplies a certificate.
+- **The Release workflow is not a required check and not part of `ci-status` (ADR 0006):** it is
+  path-filtered, so a required check would block unrelated PRs.
 
 ## Known issues and caveats
-- A broken bundled default library shows its message on every start while the store stays empty (accepted, A5 noted it).
-- The first-start message includes the raw refusal kind (e.g. `invalid_package`), same as the double-click import message; A5 called it a nit, left as is.
-- Superseded or cancelled CI runs report `ci-status` failure on the old head sha; check the newest run before reacting.
-- Releases are unsigned (plan Q19); SmartScreen warns.
 
-## Waiting on (since 2026-10-28)
-- Nothing. (The "tag-driven" lines in README.md and agents.md are already fixed on main.)
+- An existing install keeps its library store on upgrade by design. To move it to a newer default
+  library, the user double-clicks the release's `default.bomlib`. Ali was told this at v0.2.0.
+- A broken bundled default library shows its message on every start while the store stays empty.
+  Role 5 accepted this.
+- The first-start and import messages show the raw refusal kind (e.g. `invalid_package`). Role 5
+  called it a nit; left as is.
+- A superseded or cancelled run shows `ci-status` failure on the old sha. Check the newest run
+  before reacting.
+- `pip install -e ".[app]"` fails on Linux (pywebview's `proxy_tools` wheel), so use `.[dev]` for
+  the gate here. Anything Windows-only (freeze, installer, window, PowerShell) is proven only by the
+  Windows job.
+- A "Build Windows installer" job can finish in about 90 s on a pip cache hit. Confirm every step
+  ran before trusting it.
+
+## Contacts (threads in the "Scada BOM" project; all agents were retired 2026-10-29)
+
+- Role 6 thread (Ali reads it): `cmsg_01CGuLumA5u5e7gSGbisWmMiHdmiF2zR4D9rPGYUSRQDkT`. A6's
+  earlier thread was `cmsg_01CGuLumA5u5e7gSGbisWmMi9TL26SYzpQs1CWS9qSpPPv`.
+- Lead (B1) thread: `cmsg_01CGuLumA5u5e7gSGbisWmMiJaADCWuiNCb42qQHM1dpuv`. A1's thread is retired.
+  The lead reviews and squash-merges every PR; never ask Ali to merge. Ask Ali questions only as
+  decision cards with a recommendation.
+- Role 3 (device db, owns `data/library/`): `cmsg_01CGuLumA5u5e7gSGbisWmMiMn4Ay5kTA4wLV22n9mEuru`.
+  Role 5 (library packages): `cmsg_01CGuLumA5u5e7gSGbisWmMi4GsrhHJfEnM1ZoKq6Av5HP`.
+- These ids belong to retired sessions. Check ROSTER.md and the project's thread list for the
+  current ones.
+
+## Verification log
+
+| check | result | date |
+| --- | --- | --- |
+| ruff, format, mypy on main 1678343 | pass (224 files) | 2026-10-29 |
+| `pytest -q` on the 0.2.1 bump head | 2672 passed | 2026-10-29 |
+| v0.2.1 push run on main | success, published 03:17 | 2026-10-29 |
+| v0.2.0 push run on main (40797286698) | success, published 00:59 | 2026-10-29 |
+| #186 Windows job | success (B1 merged as 445baa6) | 2026-10-29 |
+| #161 Windows job on 64a8e65 (40778617300) | success | 2026-10-28 |
+| #153 PR run (40774940276) | success | 2026-10-28 |
+| v0.1.1 tag run on 135d7ee (40773272092) | success, published | 2026-10-28 |
+| v0.1.0 tag run (40736513114, attempt 2) | success, published | 2026-10-28 |
+
+## Merged history (all squash-merged by the lead)
+
+#2 installer pipeline · #15 `.bomlib` import and `.bomproj` association · #24 test fixture fix ·
+#38 launcher runs `run_window`, with the UI and pywebview bundled · #47 frozen `validate` smoke ·
+#55 frozen `build` smoke · #57 PowerShell `$name:` fix · #70 UTF-8 console for the frozen CLI ·
+#84 v0.1.0 · #86 default library bundled and installed on first start, v0.1.1, attach to an existing
+release · #138, #162, #169, #196 handoff checkpoints · #153 release from main · #186 self-test checks
+every UI file · #195 v0.2.0 · #211 v0.2.1. Reviewed: #161 (Q38 shipped library, release.yml part).

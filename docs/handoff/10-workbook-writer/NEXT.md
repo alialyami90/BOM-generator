@@ -1,24 +1,28 @@
 # Role 10 — next
 
-Next action: re-run the gate on origin/main and record drift, then ask A1 in A1's thread for the next role-10 work, since both open tasks below are blocked (M5, M6 and M18's sheet side are merged).
+Next action: follow `docs/handoff/README.md` step 4 (fetch, status, log, the gate) on origin/main and record any drift in LESSONS.md. Then tell the lead (role 1, current name in ROSTER.md) in its thread that you are ready, and stay idle until it assigns work. Role 10 has no open PR, no unmerged branch and no task you can start alone: the only open item waits on Ali.
 
 ## Tasks (priority order)
 
-1. **Printer footnote on Power Consumption** (follow-up to M5; blocked on A2).
-   - Goal: write the spec's printer footnote after NOTES ("Power Consumption sheet", item 5).
-   - Files: `src/bomgen/sheets/power_sheet.py`, `tests/unit/sheets/test_power_sheet.py`. The input field is A2's (`src/bomgen/models/`, schemas, `examples/`).
-   - Depends on: A2 adding an input field for the footnote text (name not decided; the reference workbook's text is "*Printer Power Consumption: 622 watts (Printing), …", Power Consumption row 98). Ask A2 to propose it; never hard-code it.
-   - Failing test first: `test_printer_footnote_follows_the_notes`.
-   - Done: gate passes; PR open for A1.
-2. **Calc-sheet header fit in Excel** (M5; waiting on Ali).
-   - If Ali reports the header overlaps the table, raise `LINE_SPACING` (now 1.2) in `src/bomgen/sheets/header_footer.py`, for example to 1.4, and update the expected sizes in `tests/unit/sheets/test_header_footer.py` (`fitting_size` floors the result, so sizes drop by about 1/7). Don't judge with LibreOffice (see LESSONS).
-   - If it stays unanswered past the next checkpoint, put it to Ali on a decision card (recommend: keep 1.2 unless the preview shows overlap).
+1. **Calc-sheet header fit in Excel** (M5, Q11; waiting on Ali through the lead).
+   - Why: the header size is computed so its three lines fit between the header and top margins at the sheet's print scale, but only Excel's Print Preview shows whether it overlaps the table.
+   - First check `docs/plan.md` → open questions and the lead's handoff to see whether Ali has answered.
+   - If Ali reports an overlap: raise `LINE_SPACING` (now 1.2) in `src/bomgen/sheets/header_footer.py`, for example to 1.4. Then update the expected sizes in `tests/unit/sheets/test_header_footer.py`. `fitting_size` floors its result, so at 1.4 the sizes become 15 pt at 49 %, 14 pt at 50 % and 9 pt at 78 % (checked 2026-10-29). Write the failing test first.
+   - If Ali reports it fits: no code change. Record the answer in the plan's Q11 entry (or ask the lead to, since plan structure is the lead's) and drop this task.
+   - If it is still unanswered and the lead hasn't sent a card: ask the lead to send one. Recommend keeping 1.2 unless the preview shows an overlap.
+   - Done: gate passes; PR open for the lead; the plan's Q11 says what Excel showed.
 
-Carried forward: none from a previous NEXT.md (this is the first checkpoint).
+Carried forward from the 2026-10-28 NEXT.md: task 2 (header fit). Task 1 there (printer footnote) is done (#157, Q40).
+
+## Likely future work (not assigned; wait for the lead)
+
+- Any new sheet column or sheet driven by an engine change: role 9 announces `BuildResult` changes to role 10 first (`docs/agents.md` → A9). New input fields come from role 2; never add one yourself.
+- If the spec gets updated for ADR 0020 or Q40, check that the sheet docstrings still cite the right section names.
 
 ## Don't do
 
-- Don't edit the spec for ADR 0020 (A1 puts it to Ali).
-- Don't change the Preview tab or loose-material editor (A11), the engine (A9) or input models (A2) without the owner's agreement; record cross-owner edits in the PR body.
-- Don't hard-code project text (such as the printer footnote) in the sheets.
-- Don't commit generated `.xlsx` files; build into `out/` or a temp dir (CLAUDE.md; `tests/unit/writer/test_no_xlsx_in_repo.py`).
+- Don't edit the spec for ADR 0020 or Q40 (the lead puts spec changes to Ali).
+- Don't change the Preview tab or loose-material editor (role 11), the engine (role 9) or input models (role 2) without the owner's agreement. Record any cross-owner edit in the PR body.
+- Don't hard-code project text (such as a footnote) in the sheets. It comes from inputs.
+- Don't commit generated `.xlsx` files. Build into `out/` or a temp dir (CLAUDE.md; `tests/unit/writer/test_no_xlsx_in_repo.py` enforces it).
+- Don't judge print layout from LibreOffice PDFs (LESSONS).

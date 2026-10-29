@@ -35,4 +35,20 @@ ADR 0013 and `docs/superpowers/specs/2026-10-28-substations-and-auto-layout-desi
 - ruff RUF001-003 reject en dash, × and − in code and comments. Write ASCII.
 - After rebasing a pushed branch, use `git push --force-with-lease=<branch>:<old sha>`.
 - Install with `pip install -e ".[dev]"` (pycel), and run `python3 -m mypy` / `python3 -m pytest`.
-- The full pytest run takes about 2 minutes; run it with a longer timeout or in the background.
+- The full pytest run takes 2 to 7 minutes; run it with a longer timeout or in the background.
+
+## 2026-10-29 (B8)
+- **Resume drift was harmless**: B8 found origin/main moved from `aad6094` to `ded5fe4` with only
+  other roles' checkpoint docs, and the gate green (2414 passed). Always diff role-8 paths
+  (`git log <old>..origin/main -- src/bomgen/engine/sizing.py src/bomgen/engine/layout.py tests/golden/layout`)
+  to tell docs-only drift from code drift.
+- **STATE's branch name goes stale**: each session is assigned its own branch; use the session's,
+  not the one STATE names.
+- **Releases freeze merges**: during a release (v0.1.1) the lead held code and docs merges until the tag;
+  commit locally and wait for the lead's go rather than opening a PR that has to wait.
+- **The lead changes**: A1 retired and B1 took over in a new thread. Message the lead's current thread
+  (ask the coordinator if unsure); a message to a retired thread is lost.
+- **Requesting Ali's review fails** on a PR the session opened as Ali ("Review cannot be requested from
+  pull request author"). Assigning him works; skip the review request.
+- **Docs-only PRs skip lint/mypy/pytest in CI**: only `ci-status` and "Detect code changes" run. Still
+  run `ruff` locally.

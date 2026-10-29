@@ -1,33 +1,44 @@
-# NEXT — A4, UI designer (for B4)
+# NEXT — B4, UI designer (for C4)
 
-**Next action:** review A11's Loose material PR against `docs/ui/editing.md` "Loose material (v0.2)" and ADR 0022 (`docs/decisions/0022-free-text-loose-items.md`), and send A11 notes.
-Find the PR with `mcp__github__list_pull_requests` (repo `alialyami90/BOM-generator`, newest open; title mentions loose material). Screenshots, if still there: `/mnt/project-files/a11-screens/loose-editor/`. If neither exists, ask A11 in their thread.
-Done when: A11 has notes in their Hearth thread (checked against editing.md: columns, Qty rule, Fed from "—" for free text, cards below the table, Discard restores, ADR 0022 rules); fixes are small ones A11 takes, or a PR comment ending with the Claude Code footer.
+**Next action:** screen-check #208 on `origin/main` in the real app (NEXT task 1), then open the
+v0.2 departures PR (task 2). Both are small. No PR or review is waiting on role 4 right now.
 
 ## Tasks, in priority order
-1. **Follow ADR 0022 in the loose-material design.** One small docs PR in `docs/ui/` (own PR, no milestone mixing; M18 design fix).
-   - Files: `docs/ui/editing.md` ("Loose material (v0.2)"), `docs/ui/screens.md` ("Loose material"), `docs/ui/prototype/screens-loose.js`, rebuild standalone.
-   - Change: a free-text row has no *Fed from* (show "—", not a select) and no children; the free-text dialog drops Fed from and its banner says an item that needs power must be a library part. Back-end needs list: drop `fed_from` for free text.
-   - Depends on: ADR 0022 text (`docs/decisions/0022-free-text-loose-items.md`, status Proposed, A1 accepts).
-   - Done when: detector returns `[]`, `build-tokens.mjs --check` passes, Playwright run of `#/loose` shows no JS errors, PR open for A1.
-2. **Screen reviews for A11's PRs** (A4 reviews screens; A1 merges). Check each against `editing.md` and send notes in A11's thread (id in LESSONS.md); a PR comment is fine for fixes.
-   - Loose material PR (next after #129).
-   - Library editors (catalogues, device editor, alternatives, CSV, review and apply), when it appears.
-   - Project and substation editors (create, rename, delete, documents, catalogue brands), when they appear.
-3. **Record v0.2 departures.** After A11's v0.2 screens are merged, extend `screens.md` "Departures in the built app" (PR #82 pattern) with: hand-written panels read-only board, Move… dialog position choices, free-text Qty message, anything else found. One docs PR.
-4. **Add the hand-written-panels rule to `editing.md` "Panels board"** (read-only, with the reason line) with task 3 or on its own.
+1. **Screen-check #208 on main** (role 11, "keep row ids whole and the device editor's tab offset", `dce6277`).
+   - Network › Equipment: a row id in the cell sub line (for example `ext-fw` on FGR-60F) stays on one line; the part id (for example `RST2228-L1-24MM`) never breaks, and *Change…* drops under it when there is no room.
+   - Library › any device › Electrical: the first field row sits as close under the tabs as on the other tabs; the save bar meets the window bottom on short and long tabs.
+   - Done when: the result is sent to the lead (role 1) and the desktop-app role (11) in one note each. If it fails, give the exact symptom and the CSS fix you suggest; role 11 fixes, role 1 merges.
+2. **Record the v0.2 departures in `docs/ui/screens.md` "Departures in the built app"** (one docs PR, PR #82 pattern; no milestone mixing).
+   - **Remove or rewrite the first bullet** ("Projects, substations and settings are read-only"): v0.2 made them editable, so it is now wrong.
+   - Add, after checking each against the app on main:
+     - Panels board is read-only for hand-written panels (with the reason line the app shows).
+     - Move… dialog: Position is top, bottom, or where the layout puts it, not a numbered select.
+     - Unsaved edits use the Changed marker (warning dot plus sr-only "changed"), never the revision yellow; yellow stays only in Preview for revised cells.
+     - Network equipment: *Change…* sits at the end of the part-id line and wraps under it when narrow.
+     - Catalogue brands on Settings › General are a 2-column form, and each "Same as the project (…)" option names the resolved brand.
+     - Settings › Documents: the register select shows the register key only.
+     - Project › Documents register rows are two lines (Confirm on the *Assumed date* line), and Used by drops the substation prefix inside its group.
+     - Design constants: the Default column is empty on unchanged rows.
+     - Any other difference you find while walking every v0.2 screen against `editing.md`, `screens.md` and the prototype.
+   - Done when: PR open for role 1, gate green, `impeccable detect --json docs/ui/prototype` returns `[]` (the prototype is untouched, so this is a sanity check).
+3. **Add the hand-written-panels rule to `docs/ui/editing.md` "Panels board: drag, drop, pin, delete"**: when the substation uses hand-written panels, the board is read-only. Say why (Build uses the panel files, so a pin would not change the BOM) and how the board says so (one-line banner, no grips, no pin or delete actions; LESSONS "Controls that cannot act are absent or disabled with a reason"). Can go in the same PR as task 2.
+4. **The small wording nits in STATE "Drift" item 4.** Check each on main. Send role 11 the ones that are still there, in one note. Do not file `polish-v02.md` again; it is complete.
+5. **Then, design work only on request.** The v0.2 design (parts 1–4, the Loose ADR 0022 fix, the polish pass) is merged and built. A new screen or flow starts with the `impeccable` skill, a section in `editing.md`/`screens.md`/`components.md`, and a prototype screen, as CLAUDE.md "UI work" says.
 
-## Setup for B4
-- Branch: your session gets its own thread branch name; if it is new, create it from `origin/main`. The old A4 branches `part3-library`, `part3-push`, `part4-loose`, `part4-push` in `/home/user/BOM-generator` and `claude/project-thread-iz2vd6` are merged; delete the local ones when convenient (`git branch -D`).
-- Gate venv: `uv venv /tmp/venv && uv pip install -p /tmp/venv -e ".[dev]"`, then `ruff check . && ruff format --check .`, `mypy`, `pytest` (docs-only PRs still run them before commit, CLAUDE.md).
-- Playwright smoke for `#/loose`: open `docs/ui/prototype/index.html#/loose` with `page.on('pageerror')` and `page.on('console')` collecting errors, click "Add from library" and "Add free text", expect zero errors. Rewrite it; the old scratch script is gone.
-- Hearth thread ids in LESSONS.md may be stale; if `message_thread` fails, use `list_threads` to find A1 and A11, or `message_coordinator`.
-- ROSTER row 4 says B4 and links this A4 checkpoint; edit only that row at your next checkpoint.
-- Tasks 3 and 4 wait for A11's v0.2 screens to merge (loose, library editors, project/substation editors). Check `git log origin/main --oneline` for them.
+## Setup for C4
+- **Branch:** your session has its own thread branch. Create it from `origin/main`. After each merged PR, use the reset recipe in LESSONS "Branch after a merged PR". Force push is denied.
+- **Gate venv:** `uv venv /tmp/venv && uv pip install -p /tmp/venv -e ".[dev]"`. Then run `ruff check . && ruff format --check .`, `/tmp/venv/bin/mypy` and `/tmp/venv/bin/pytest`. Use the venv binaries: the `mypy`/`pytest` on PATH (`/root/.local/bin`) are not the project's and fail.
+- **Impeccable:** `sh <skills>/impeccable/scripts/impeccable detect --json <dir>`. Run it through `sh`, because direct exec is "permission denied". Find the skill dir with `ls /root/.claude/skills/synced/*/impeccable`.
+- **Real-app harness:** for screen checks, use the recipe in LESSONS "Run the real app in Chromium". Rewrite the two scratch scripts; they lived in the session scratchpad and are gone.
+- **Prototype checks:** `docs/ui/tools/build-standalone.mjs`, `docs/ui/tools/build-tokens.mjs --check`, and Playwright with `page.on('pageerror')`. See LESSONS "How to work".
+- **Who is who:** every agent was retired on 2026-10-29, so all thread ids in LESSONS are stale. Find the current lead (role 1) and desktop-app owner (role 11) in `docs/handoff/ROSTER.md` and with `list_threads`, or ask the coordinator.
+- **Ali's standing rules:** all approvals and merges go to the lead (role 1), never to Ali. Ask Ali only on a decision card (`request_decision`), with your recommendation marked.
+- **ROSTER:** row 4 names C4 and links this checkpoint. Edit only that row.
 
 ## Don't do
-- Do not add business rules to the UI; sizing, placement and validation stay in the engine ([`CLAUDE.md`](../../../CLAUDE.md), UI work).
-- Do not change tokens or fonts without telling A11 (their copies must stay byte-identical).
-- Do not edit `src/`, `tests/`, spec, plan.md or ADRs. Design needs for the engine go to A1 or A2 in `editing.md` "Back-end needs" / "Engine needs" sections.
-- Do not mix milestones in one PR; do not commit `.xlsx`.
-- Do not redesign parts 1–4; they are merged and approved.
+- Do not add business rules to the UI; sizing, placement and validation stay in the engine ([`CLAUDE.md`](../../../CLAUDE.md), "UI work").
+- Do not change tokens or fonts without telling role 11: the app's copies of `tokens.css` and the fonts must stay byte-identical to `docs/ui/`.
+- Do not use `#FFFF00` (`highlight.yellow`) for anything but the workbook's revised cells (design-language "Colour"). Unsaved edits use the Changed marker (`components.md`).
+- Do not edit `src/`, `tests/`, the spec, `plan.md` (except the M9 section) or ADRs. Engine needs go to role 1 or 2 in `editing.md` "Back-end needs".
+- Do not mix milestones in one PR, and do not commit `.xlsx`.
+- Do not redesign v0.2 parts 1–4; they are merged, approved and built.
