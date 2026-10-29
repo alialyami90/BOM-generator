@@ -115,7 +115,7 @@ line. "Apply to form" is available only when the YAML is valid.
 - **States:** unsaved; invalid field; library older than active.
 
 ### Substation settings
-Only what belongs to this substation: *General* (name, title line, and a
+Only what belongs to this substation: *General* (name, which is also the BOM title line, and a
 read-only "From the project" block with a link to the project page), *Documents*
 (which register entry each calculation sheet prints; cabinet BOMs choose theirs on
 each panel), *Output* (main document, file-name pattern with the resulting name,

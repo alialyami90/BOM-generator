@@ -224,7 +224,7 @@ shows what a new record starts with. Labels are the user-facing words; model nam
 
 | Tab | Fields |
 | --- | --- |
-| General | Substation name (editable), substation id (read-only: "Names the substation in the register and in tags"), title line, **Catalogue brands** (one select each for MCBs, aux contacts and terminal blocks; the first option is "Same as the project (ABB S200)"), the read-only **From the project** block with a link to the overview |
+| General | Substation name (editable; it is also the second line of each BOM title, so there is no separate title-line field), substation id (read-only: "Names the substation in the register and in tags"), **Catalogue brands** (one select each for MCBs, aux contacts and terminal blocks; the first option is "Same as the project (ABB S200)"), the read-only **From the project** block with a link to the overview |
 | Documents | One select per calculation sheet (Power, Heat dissipation, Heat calculations) from the register, with its number, revision and date shown |
 | Output | Main document (select), file name pattern with the resulting name shown, the sheet names (Loose Material, Power, Heat dissipation, Heat calculations) |
 | Design constants | The ten constants as number fields with unit and default; changed ones are marked **Changed from 125** with **Reset**; **Reset all to defaults** in the table foot |

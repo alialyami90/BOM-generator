@@ -19,8 +19,7 @@
   ACTIONS.save = () => { S.dirty = false; App.render(); toast('Saved substation.yaml'); };
 
   const settingsGeneral = () => `<div class="form form--2">
-    ${field('Substation name', input('p-name', P.name), 'Shown in the app and used for the folder.')}
-    ${field('Title line', input('p-sub', P.titleLine), 'Second line of each BOM title, under the project name.')}
+    ${field('Substation name', input('p-name', P.name), 'Shown in the app, used for the folder, and printed as the second line of each BOM title.')}
     <div class="span-2 section" style="margin:0">
       <h3>Catalogue brands</h3>
       <p class="lede">Which make this substation takes ordering codes from. It uses the project's choice unless you set one here.</p>
@@ -67,7 +66,7 @@
   ACTIONS['yaml-apply'] = () => toast('Applied YAML to the form');
   ACTIONS['yaml-revert'] = () => toast('Reverted to the saved file', 'info');
   const settingsYaml = () => yamlView('substation.yaml', [
-    'substation:', `  name: "${P.name}"`, `  title_line: "${P.titleLine}"`, '', 'network:', `  ied_count: ${DB.sub.network.iedCount}   # ASSUMED`, `  topology: ${DB.sub.network.topology}`, '', 'spares:', `  port_fraction: 0.${DB.sub.network.spares.portPercent}`, `  sfp_per_l1: ${DB.sub.network.spares.sfpPerL1}`, `  rack_u_reserved: ${DB.sub.network.spares.rackUReserved}`, '', 'equipment:',
+    'substation:', `  name: "${P.name}"`, '', 'network:', `  ied_count: ${DB.sub.network.iedCount}   # ASSUMED`, `  topology: ${DB.sub.network.topology}`, '', 'spares:', `  port_fraction: 0.${DB.sub.network.spares.portPercent}`, `  sfp_per_l1: ${DB.sub.network.spares.sfpPerL1}`, `  rack_u_reserved: ${DB.sub.network.spares.rackUReserved}`, '', 'equipment:',
     ...DB.equipment.map((e) => `  - { id: ${e.id}, part_id: ${S.checks === 'errors' && e.id === 'ext' ? 'SEL-2730M-EXT2' : e.part}, redundant: ${e.redundant} }`).slice(0, 4), '  # …', '', 'manual_panels: [panels/ws.yaml]'], S.checks === 'errors' ? { 18: 'SEL-2730M-EXT2 is not in library psa-devices 1.4.0.' } : {});
 
   /* ---------- Panel editor ---------- */
