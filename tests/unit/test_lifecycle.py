@@ -178,3 +178,37 @@ def test_a_new_substation_writes_every_value_in_full_without_anchors(tmp_path: P
     assert "&id" not in text
     assert "*id" not in text
     assert text.count("2026-10-28") >= 3
+
+
+def test_a_blank_substation_seeds_generated_panels_so_equipment_can_be_added(
+    tmp_path: Path,
+) -> None:
+    project_file = new_project(tmp_path)
+    assert create_substation(project_file, "gis02", "GIS 2", today=TODAY).written
+    equipment = [
+        {"id": "l2", "part_id": "RST2228-L2", "role": "l2_switch", "redundant": True},
+        {"id": "l1", "role": "l1_switch", "redundant": True},
+    ]
+    result = fields.set_field(project_file, ("equipment",), equipment, substation="gis02")
+    assert result.written, result.issues
+    (target,) = load_project(project_file).substations
+    seeded = target.substation.generated_panels
+    assert seeded is not None
+    assert seeded.document == "gis02-bom"
+    assert seeded.cabinet_number.format(n=1) == "GIS02-PSA-0001"
+    assert [e.id for e in target.substation.equipment] == ["l2", "l1"]
+    substation_file = project_file.parent / "substations" / "gis02" / "substation.yaml"
+    assumed = fields.assumed_fields(substation_file)
+    assert ("generated_panels", "enclosure") in assumed
+    assert ("generated_panels", "cabinet_number") in assumed
+
+
+def test_a_copied_substation_keeps_its_sources_generated_panels(project: Path) -> None:
+    assert create_substation(project, "gis02", "GIS 2", copy_from="gis01").written
+    copy = next(
+        s for s in load_project(project).substations if s.substation.substation.id == "gis02"
+    )
+    seeded = copy.substation.generated_panels
+    assert seeded is not None
+    assert seeded.cabinet_number == "861-GIS01-PSA-{n:04d}"  # the source's block, as written
+    assert seeded.document == "gis02-bom"

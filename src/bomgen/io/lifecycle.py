@@ -153,6 +153,25 @@ def _blank(
             "heat_calculations": {"document": keys["heat"], **sheet},
         },
         "panels": [],
+        "generated_panels": {  # as the example project's; equipment needs it (ADR 0013)
+            "id": "psa{n}",
+            "cabinet_number": f"{substation_id.upper()}-PSA-{{n:04d}}",
+            "cabinet_name": "PSA Cabinet - {n:03d}",
+            "tag_prefix": "PSA{n}",
+            "sheet_name": "{n}",
+            "kind": "network",
+            "enclosure": {
+                "make": "Rawabi",
+                "model": "Fixed Frame",
+                "ordering_code": "Fixed Frame",
+                "h_mm": 2100,
+                "d_mm": 1000,
+                "w_mm": 800,
+                "base_frame": {"h_mm": 100, "d_mm": 950, "w_mm": 750},
+                "cable_entry": "top",
+            },
+            "document": keys["bom"],
+        },
     }
     entries = [
         {
@@ -164,7 +183,10 @@ def _blank(
         }
         for key in keys.values()
     ]
-    texts: dict[Path, str | None] = {folder / "substation.yaml": dump_text(_map(data))}
+    root = _map(data)
+    for field in ("cabinet_number", "enclosure"):  # no source names them for a new substation
+        set_comment(root["generated_panels"], field, "ASSUMED")
+    texts: dict[Path, str | None] = {folder / "substation.yaml": dump_text(root)}
     return texts, entries
 
 
