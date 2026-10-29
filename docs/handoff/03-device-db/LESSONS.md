@@ -57,3 +57,12 @@
 - **Never send placeholder text with `message_thread`.** Every call is delivered. Two
   stray messages ("unused", "placeholder-do-not-send") had to be retracted.
 - **Since #149 the full pytest takes about 3–4 minutes**, down from about 11 minutes.
+
+## 2026-10-29, retirement handover (B3 → C3)
+
+- **A refresh keeps the name; a reset or retirement moves it to the next letter.** The
+  2026-10-28-2 refresh stayed B3; this handover goes to C3.
+- **The full reference lives in `archive/reference.md`.** That keeps STATE/NEXT/LESSONS
+  inside the 250-line budget.
+- **Check plan.md §6 before carrying a question forward.** Finding 24 (FGR-60F) and the
+  iC60N float warning were settled by Q41 and Q37 while they still sat in NEXT.md.
