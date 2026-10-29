@@ -1,33 +1,42 @@
 # Role 1 (lead): next
 
-**Next action:** in `alialyami90/BOM-generator`, run `list_pull_requests state=open`; merge whatever is ready (#171, #166 when green), using the procedure in LESSONS.md. Items 1 and 2 wait on Ali's cards; work the rest in order.
+**Next action:** follow `docs/handoff/README.md` (fetch, status, gate). Then run
+`list_pull_requests state=open` on `alialyami90/BOM-generator` and review and merge whatever
+is ready, using the procedure in LESSONS.md → "Review procedure". Then repost the open
+question to Ali (item 1).
 
-1. **#157 (B10, power footnote rows).** Held for Ali's card on the print area (spec: A1:L97;
-   card `cmsg_01CGuLumA5u5e7gSGbisWmMiMH42ayNRhuWcnbjHvKGNWm`; close it with `close_decision`).
-   "Print it": merge, then add a plan note that the print area now covers the footnote (a
-   correction to the reference). "Keep it off the printout": B10 stops the print area at the
-   NOTES first. Done when it is merged and the plan says which.
-2. **FGR-60F `dc_float` warning** (B9, #171): its datasheet input stops at 125 V DC, below the
-   140 V float. Ask Ali on a card whether it stays (warning accepted, as for the iC60N under
-   Q37) or the firewall needs a DC-rated alternative; recommend keeping it with the warning.
-3. **#171 (B9, shipped-library sizing tests)** and **#166 (B11, Library list editing)**: merge
-   when CI is green; #166 also needs "Build Windows installer". Then B11's Datasheet tab (on
-   #164), CSV (b), alternatives (c), then project and substation creation on `io/lifecycle`.
-4. **B7's next docs pass:** CHANGELOG "Unreleased" lines for #155, #161, #163, #164, #165 and
-   the installer now shipping `data/library/` psa-devices 1.1.0.
-5. **Checkpoints:** review each docs-only checkpoint PR (own folder and own ROSTER row only;
-   ADR changes go in their own PR). Tell the coordinator as each merges.
-6. **Ali, when he has time:** one batch-accept card for the Proposed ADRs (list in STATE), and
-   B10's header-fit Print Preview check.
-7. **v0.2.0 release** once points 1, 4, 6, 7 and 10 of docs/backlog.md are done in the app. The
-   release is a PR that bumps `__version__` and pyproject with a `## [0.2.0]` CHANGELOG section;
-   merging it publishes (#153). B6 follows the run.
+1. **Ask Ali what comes after v0.2.1.** The old card (STATE → "Waiting on Ali") lives in the
+   retired B1 thread, so his answer can't reach you. Post a fresh `request_decision` in your
+   own thread: "What should the team do after v0.2.1?" with options "Test v0.2.1, send
+   feedback" (recommended: everything he asked for in v0.2 shipped and no one has used it in
+   the field yet), "I'll describe v0.3 now". Close the old card with `close_decision` (no
+   `chose`) if you can; if not, ignore it.
+2. **When Ali's feedback arrives:** write it into `docs/backlog.md` as numbered points (as
+   for v0.2), propose milestones in `docs/plan.md` (next milestone after M18 is M19), give
+   any decisions an ADR (0024 on) or a plan question (Q42 on), and brief each owning role
+   per `docs/agents.md` → "Owns". One PR per milestone.
+3. **One card for the ASSUMED seeds** (STATE → "Known gaps"): show Ali the cabinet number
+   pattern, the enclosure and the document number/date defaults a new substation gets, and
+   recommend "Keep them, edit per project in the app". If he changes them, role 2 owns
+   `src/bomgen/io/lifecycle.py`.
+4. **Spec catch-up** (STATE → "Known gaps"): when Ali has time, offer one card to bring the
+   spec in line with ADRs 0017, 0019, 0020, 0022, 0023 and Q35–Q41, through the process in
+   `docs/spec/`. Don't edit the spec without his go-ahead (CLAUDE.md).
+5. **Next release** (v0.2.2 or v0.3.0): STATE → "How a release happens". Hold other merges
+   between the CHANGELOG merge and the published release.
+6. **Checkpoints:** every role writes a docs-only checkpoint PR touching only its own
+   `docs/handoff/NN-*` folder and its own ROSTER row. Merge them as they arrive; ROSTER rows
+   don't conflict when each PR touches only its own row.
 
 ## Don't do
 
-- Don't edit other roles' files. Send a fix request to the owner's thread instead (agents.md).
-- Don't bump the version outside the release PR: on main it publishes at once (#153).
-- Don't change golden values unless an ADR changes them (Q38 keeps them).
-- Don't merge app or packaging PRs without a green "Build Windows installer".
-- Don't mark ADRs Accepted. Only Ali does that, in review.
-- Don't change what the spec describes without Ali's card (CLAUDE.md), as with #157.
+- Don't edit other roles' files. Send the fix request to the owner (agents.md "Owns").
+- Don't bump the version outside a release PR: on main it publishes at once.
+- Don't change golden values unless an ADR changes them (Q38 keeps `examples/` as the spec
+  example; the shipped library is separate in `data/library/`).
+- Don't merge app, packaging, pyproject or release-workflow PRs without a green "Build Windows
+  installer".
+- Don't mark ADRs Accepted; only Ali does.
+- Don't ask Ali anything in plain text; always a card with one option recommended.
+- Don't ask Ali to merge. He said: "Can you stop asking me for merges? Check the merge for
+  conflicts and merge it".

@@ -72,3 +72,37 @@ Append-only. Mark replaced entries "superseded by …"; move old ones to `archiv
   the new thread, or Ali's answers never reach the new lead.
 - Roles kept messaging the retired A1 thread after handover; the coordinator told them to use
   B1's thread. Give the thread id in the first message to each role.
+
+## B1 to final handover (2026-10-29)
+
+- Review procedure as B1 ran it for #174–#212 (supersedes step 3 above for small PRs):
+  `git fetch -q origin main refs/pull/N/head:refs/remotes/pr/N`, then
+  `git merge-tree --write-tree origin/main pr/N` (prints a tree id when clean), then
+  `git diff --stat origin/main...pr/N` for scope, then for each changed `.js` file
+  `git show pr/N:path > /tmp/c.js && node --check /tmp/c.js`, then
+  `pull_request_read get_check_runs`. The owner runs the full gate; CI reruns it. Run it
+  yourself only for engine or cross-role changes.
+- Docs-only PRs skip ruff, mypy and pytest in CI ("Detect code changes"); the `ci-status`
+  check is the one that must be green.
+- A screen check by role 4 in the real app (run against the Python Api) before merging UI
+  PRs catches what tests can't: clipped selects, ids that wrap, a dialog opening over the
+  wrong page after a slow call. #207 failed its first check and passed after one push.
+  Keep each UI PR to one screen area so the check is quick.
+- When a reviewer finds nits after a PR is good, merge it and send the nits as one small
+  follow-up PR (#208) rather than stacking more pushes on the reviewed head.
+- Approve with a COMMENT review on the exact head sha, then merge with that sha as
+  `expectedHeadSha`. GitHub sends your own review and the merge back as PR events; ignore them.
+- The GitHub MCP disconnects often. Reload with ToolSearch
+  `select:mcp__github__pull_request_read,mcp__github__pull_request_review_write,mcp__github__merge_pull_request`.
+  `subscribe_pr_activity` (claude-code-remote) takes `owner`, `repo`, `pullNumber`; subscribe
+  to each PR you will merge so CI results wake you instead of polling.
+- A force-push of the lead branch was refused by the session's safety check. To reuse the
+  branch after its PR merged, `git checkout -B <branch> origin/main`, then if the push is
+  rejected, `git merge -s ours origin/<branch>` and push normally.
+- Agents' reports of "pending" PRs can be stale (B4 listed #146, #155, #166 after they
+  merged). Check the PR state before acting on a report.
+- Release sequencing: held #194 until v0.2.0 published; prepared the 0.2.1 CHANGELOG while
+  the last polish PR was open, opened it only after that PR merged so its wording matched the
+  final squash.
+- Changelog rules (L12/L13 in role 7's LESSONS): no entry for version bumps, docs, chore or
+  refactor PRs; no agent names; word the last PR's entry from its final squash.
