@@ -31,3 +31,33 @@
 - 2026-10-29 (B4): the impeccable launcher works when run with `sh <skill-dir>/scripts/impeccable …` (direct exec is "permission denied"); `detect --json` returned `[]` on app and prototype.
 - 2026-10-29 (B4): to run the real app in Chromium: serve `src/bomgen/app/ui` over HTTP, forward `/call` to `bomgen.app.api.Api`, and inject `window.pywebview.api` with Playwright `exposeFunction` (a `fetch` from the page is blocked by the app's CSP). Example project copied into `BOMGEN_WORKSPACE`, library via `bomgen library import`.
 - 2026-10-29 (B4): I approved yellow `td.changed` as the unsaved-edit marker in #146; it breaks design-language (yellow = workbook revision only). Check a reused class's meaning in tokens/design-language before endorsing it.
+
+## B4 additions (2026-10-29)
+
+### How to work
+- **Thread ids are stale.** All agents were retired on 2026-10-29. B4 used B1 (lead) `cmsg_01CGuLumA5u5e7gSGbisWmMiJaADCWuiNCb42qQHM1dpuv` and B11 (desktop app) `cmsg_01CGuLumA5u5e7gSGbisWmMiSRmFy8hwGpYU6cXpyyR56y`. Find the current ones with `list_threads` or ask the coordinator.
+- **Who does what in a polish cycle.** Role 4 writes the findings (`docs/ui/polish-v02.md` pattern), ranked, each tagged *B11* (app fix) or *Doc* (design-doc change, made in the same PR as the findings). Role 11 fixes in small PRs. Role 4 screen-checks each PR in the real app **on its branch**, then sends one note to role 1 (lead) and one to role 11. Role 1 merges when the screen check and CI both pass. Ali approves nothing in this loop.
+- **Screen-check note format.** Start with the verdict ("passes", or "not yet, hold the merge"). List the failures with the exact symptom and a concrete CSS or wording fix. List what passed by item number. Mark nits "not for this PR". Keep it under 2000 characters (message cap).
+- **Real-app harness.** The scripts and the recipe are in `/mnt/project-files/ui/harness/` (`README.md`, `serve.py`, `shoot.js`). The server serves the **current checkout**, so `git checkout --detach <pr-sha>` changes what you see. Restart the server when Python changed.
+- **Branch after a merged PR** (force push is denied): `git fetch origin main && git checkout -B <thread-branch> origin/main`, commit, then `git fetch origin <thread-branch> && git merge -s ours origin/<thread-branch>`, and `git push -u origin <thread-branch>`.
+- **PR format used by B4:** the body starts with `<!-- claude-projects-attribution: {"github_login":"alialyami90"} -->` and a "_Requested by **Ali** · [project thread](…)_" line, and ends with the Claude Code attribution lines. Assign `alialyami90`, then subscribe to PR activity. GitHub comments end with the Claude Code footer.
+- **Gate:** use `/tmp/venv/bin/mypy` and `/tmp/venv/bin/pytest`. The copies on PATH in `/root/.local/bin` are not the project's and fail on import.
+
+### Decisions too small for an ADR
+- **Changed marker** (`components.md`, #204): an unsaved edit is shown by a 6 px warning-colour dot before the field label, or at the start of a table cell, plus sr-only "changed". A whole list that changed gets a *Changed* badge on its heading. Reason: `#FFFF00` means "the workbook will show this as revised" (design-language "Colour"). On a form it misleads, and in dark theme it glares. Rejected: yellow cells (my #146 endorsement).
+- **Save bar, invalid state:** the sentence "N fields need fixing before you can save." is one control that jumps to the first error. Rejected: a ghost button plus loose trailing text, which reads as two fragments.
+- **Errors in words** (`editing.md` "Validation", #204): pattern and type errors from the model are never shown raw. The bridge maps them (role 11 did it in `library_edit.in_words`). An empty new list row is marked on the first save, not on Add.
+- **Choices show labels, not enum values** ("Continuous", not `CONTINUOUS`). Codes such as VDC, L1 and RJ45 stay as they are.
+- **Substation name = BOM title line** (#191): no separate title-line field. The engine prints the substation name as the second title line, so a separate field would have been a second source for the same text.
+- **Loose material copy** (#142, polish item 12): the foot is "Quantity is a whole number, or 1 Lot." The free-text banner says there is no part, no ordering code, make or model, and it cannot be fed from a cabinet; an item that needs power must be added to the library first.
+- **Number inputs** are right-aligned with tabular figures, with or without a unit.
+- **Row delete** is one style everywhere: muted icon, danger on hover (`.btn--del`).
+
+### Failed approaches
+- Opening a dialog after async bridge calls without re-checking the route: the dialog landed on whatever page the user had moved to. Rule for any async-opened overlay: check that the route and the substation are unchanged before opening, and set the trigger busy (`aria-busy`, disabled) while it loads.
+- Inline *Change…* beside the part id with fixed column widths: the id broke mid-word and the table overflowed into the Result card. Fix: `white-space: nowrap` on ids, a wrapping `.part-line`, and column widths that fit the column.
+- Six brand selects in a 3-column grid: the resolved brand names clipped. Use 2 columns.
+- Save bar with page padding under it: it floated above an empty band. Fix: the page is a flex column and the save bar takes `margin-top: auto`.
+
+### Drift found
+- 2026-10-29 (B4 final): origin/main is `032bbea`, and v0.2.1 is released (#211). All 16 `polish-v02.md` items are merged (#205–#208). #208 is not yet screen-checked by role 4. `screens.md` "Departures" is still v0.1 and its first bullet is now false (projects and settings are editable in v0.2).
