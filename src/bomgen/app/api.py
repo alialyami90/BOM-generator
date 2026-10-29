@@ -14,6 +14,7 @@ import contextlib
 import dataclasses
 import errno
 import functools
+import json
 import os
 import subprocess
 import sys
@@ -53,8 +54,17 @@ from bomgen.bundle.errors import LibraryPackageError, RefusalKind
 from bomgen.io import edit, lifecycle, loose_edit
 from bomgen.io.edit import EditError, EditResult
 from bomgen.io.errors import InputError
-from bomgen.io.fields import PartUse, part_users, remove_field, set_field, validate_field
+from bomgen.io.fields import (
+    PartUse,
+    insert_item,
+    part_users,
+    remove_field,
+    remove_item,
+    set_field,
+    validate_field,
+)
 from bomgen.io.loader import PROJECT_FILE, load_library
+from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.csv_export import GROUPS as CSV_GROUPS
 from bomgen.library_store.device_db import DeviceRecord, load_device_records
 from bomgen.library_store.manifest import Manifest
@@ -219,7 +229,9 @@ PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 def _written(result: EditResult) -> None:
     """A writer that wrote nothing refuses with the problems the edit would cause."""
     if not result.written:
-        listed = "; ".join(f"{i.location}: {i.message}" for i in result.issues)
+        listed = "; ".join(
+            f"{i.location}: {i.message}" if i.location else i.message for i in result.issues
+        )
         raise AppError("invalid_edit", listed or "The change was not written.")
 
 
@@ -847,6 +859,43 @@ class Api:
                 substation=substation_id,
                 store=self._library_store(),
             )
+
+    @endpoint
+    def add_equipment(
+        self, project_file: str, substation_id: str, row: dict[str, Any], index: int | None
+    ) -> dict[str, Any]:
+        """Insert an equipment row (at the end when ``index`` is None); refused with the
+        model's message, e.g. for an id the substation already has. Returns the page."""
+        store = self._library_store()
+        with self._substation(substation_id), _edit_refusals():
+            result = insert_item(
+                Path(project_file),
+                ("equipment",),
+                index,
+                row,
+                substation=substation_id,
+                store=store,
+            )
+        _written(result)
+        return substation_page(Path(project_file), substation_id, store)
+
+    @endpoint
+    def remove_equipment(self, project_file: str, substation_id: str, index: int) -> dict[str, Any]:
+        """Remove an equipment row; returns the page and the row as written, for Undo."""
+        store = self._library_store()
+        project = Path(project_file)
+        with self._substation(substation_id):
+            file = resolve(project, substation_id, store).file
+        rows = read_yaml(file).data.get("equipment") or []
+        if not 0 <= index < len(rows):
+            raise AppError("edit_refused", f"There is no equipment row {index + 1}.")
+        row = json.loads(json.dumps(rows[index], default=str))
+        with self._substation(substation_id), _edit_refusals():
+            result = remove_item(
+                project, ("equipment",), index, substation=substation_id, store=store
+            )
+        _written(result)
+        return {"page": substation_page(project, substation_id, store), "row": row}
 
     # -- Checks and Build (docs/ui/screens.md: Checks, Build) --
 

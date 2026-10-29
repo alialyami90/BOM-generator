@@ -102,7 +102,16 @@
     ied_count: [['network', 'ied_count'], 'int'], topology: [['network', 'topology'], 'text'], ring_max_switches: [['network', 'ring_max_switches'], 'int'],
     ...Object.fromEntries(Object.keys(SPARES).map((k) => [k, [['spares', k], k === 'port_fraction' ? 'pct' : 'int']]))
   };
+  /* The model takes equipment only with its redundant L1 and L2 switches and the generated panels' identity (Substation, ADR 0013). */
+  const FIRST = 'The first rows, the redundant L1 and L2 switches and the generated panels, are written in substation.yaml for now. Further devices are added here.';
+  const EQ = { qty: 'int', l2_ports: 'int', role: 'text', redundant: 'bool' };
+  function nf(key) {  // [path, kind]; an equipment cell is eq.<row>.<field>
+    const m = /^eq\.(\d+)\.(\w+)$/.exec(key);
+    return m ? [['equipment', Number(m[1]), m[2]], EQ[m[2]]] : NF[key];
+  }
   function netSaved(p, key) {
+    const m = /^eq\.(\d+)\.(\w+)$/.exec(key);
+    if (m) { const v = (p.equipment[Number(m[1])] || {})[m[2]]; return typeof v === 'boolean' ? String(v) : v; }
     if (key in p.network) return key === 'ied_count' && !p.network.ied_count ? '' : p.network[key];
     const row = p.spares.find((x) => x.key === key);
     return row ? (key === 'port_fraction' ? pct(row.value) : row.value) : '';
@@ -112,6 +121,7 @@
     const t = String(raw == null ? '' : raw).trim();
     if (!t) return [null, null];
     if (kind === 'text') return [t, null];
+    if (kind === 'bool') return [t === 'true', null];
     if (kind === 'int') return /^\d+$/.test(t) ? [Number(t), null] : [null, 'Enter a whole number, for example 40.'];
     return /^\d+(\.\d+)?$/.test(t) ? [Math.round(Number(t) * 10) / 1000, null] : [null, 'Enter a percentage, for example 20.'];
   }
@@ -136,16 +146,68 @@
     return `<div class="setup" style="margin-bottom:var(--space-5)"><h3>Set up ${esc(p.name)}</h3><p class="muted small" style="margin-top:var(--space-1)">The panels appear on their own once the network and equipment are entered.</p>
       <ol>${step(true, false, 'Substation created', 'Its settings and calculation documents are in the register with blank numbers.', '<button class="btn btn--ghost btn--sm" data-action="goto" data-to="#/project/documents">Fill in numbers</button>')}
       ${step(hasIed, !hasIed, 'Enter the number of field IEDs', 'It sizes the L1 switches. It is never listed in the BOM.', hasIed ? '' : '<button class="btn btn--secondary btn--sm" data-action="net-focus-ied">Enter</button>')}
-      ${step(hasEq, hasIed && !hasEq, 'Add the equipment', 'Switches, patch panel, gateway, firewall and the rest. Redundant devices come as an A and a B unit. For now they are written under <span class="mono">equipment</span> in substation.yaml.')}
+      ${step(hasEq, hasIed && !hasEq, 'Add the equipment', `Switches, patch panel, gateway, firewall and the rest. ${FIRST}`)}
       ${step(hasPanels, hasIed && hasEq && !hasPanels, 'Look at the panels', 'Check the layout, then run Checks and build.', hasIed && hasEq ? '<a class="btn btn--primary btn--sm" href="#/panels">See the panels</a>' : '')}</ol></div>`;
   }
+  /* One equipment row: its cells are drafted like the inputs above; Remove writes at once, with Undo. */
+  function eqRow(p, e, i) {
+    const k = (f) => `eq.${i}.${f}`, err = (f) => NET.errors[k(f)], ch = (f) => (k(f) in NET.draft ? ' class="changed"' : '');
+    const cellErr = ['role', 'redundant', 'qty', 'l2_ports'].map((f) => err(f) && `<span class="err small" id="n-${k(f)}-err">${icon('error')}<span>${esc(err(f))}</span></span>`).filter(Boolean).join('');
+    const red = netShown(p, k('redundant')) === 'true', l1 = netShown(p, k('role')) === 'l1_switch';
+    const num = (f, label) => `<input class="input input--num input--mono" id="n-${k(f)}" aria-label="${label}, ${esc(e.id)}" value="${esc(netShown(p, k(f)))}" ${err(f) ? 'aria-invalid="true"' : ''} data-dirty="1">`;
+    return `<tr><td><span class="mono">${esc(e.part_id || '—')}</span>${e.device && !e.device.known ? `<span class="err small">${icon('error')}<span>Not in ${esc(p.project.library.name)} ${esc(p.project.library.version)}</span></span>` : `<span class="cell-sub">${esc([e.device && e.device.make, e.device && e.device.model].filter(Boolean).join(' ') || (e.role === 'l1_switch' && !e.part_id ? 'Picked from the library by the sizing' : ''))} · <span class="mono">${esc(e.id)}</span></span>`}${cellErr}</td>
+      <td${ch('role')}><select class="select" id="n-${k('role')}" aria-label="Role, ${esc(e.id)}" data-dirty="1">${Object.entries(ROLES).map(([v, t]) => `<option value="${v}" ${v === netShown(p, k('role')) ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></td>
+      <td${ch('redundant')}><label class="check"><input type="checkbox" id="n-${k('redundant')}" ${red ? 'checked' : ''} data-dirty="1"><span class="sr-only">A and B units, ${esc(e.id)}</span></label></td>
+      <td class="num"${ch('qty')}>${l1 ? '<span class="muted">Sized</span>' : num('qty', 'Quantity')}</td>
+      <td class="num"${ch('l2_ports')}>${num('l2_ports', 'L2 ports')}</td>
+      <td class="num">${e.device && e.device.height_u != null ? (e.device.height_u ? e.device.height_u + ' U' : 'DIN') : '—'}</td>
+      <td><button class="btn btn--ghost btn--sm btn--icon" data-action="eq-remove" data-i="${i}" aria-label="Remove ${esc(e.id)}" title="${Object.keys(NET.draft).length ? 'Save or discard the changes first' : 'Remove'}" ${Object.keys(NET.draft).length ? 'disabled' : ''}>${icon('trash')}</button></td></tr>`;
+  }
+  const relaid = (page) => { SUB.page = page; App.network.reload(); App.render(); };
+  ACTIONS['eq-remove'] = (el) => {
+    const i = Number(el.dataset.i), file = S.project.file, sub = S.sub, id = SUB.page.equipment[i].id;
+    Bridge.call('remove_equipment', file, sub, i).then((r) => {
+      relaid(r.page);
+      toast(`Removed ${id}`, 'trash', () => Bridge.call('add_equipment', file, sub, r.row, i).then(relaid).catch((err) => toast(err.message, 'error')));
+    }).catch((err) => toast(err.message, 'error'));
+  };
+  /* Add device: a library part, its role, and A and B units; the id names it in the layout and must be new. */
+  const ROLE_OF = { firewall: 'firewall', patch_panel: 'fopp', network_switch: 'l2_switch' };
+  let parts = null;
+  const freeId = (part, taken) => { const base = (part || 'device').toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^[^a-z0-9]+|-+$/g, '') || 'device'; let id = base, n = 2; while (taken.includes(id)) id = `${base}-${n++}`; return id; };
+  ACTIONS['eq-add'] = () => {
+    const open = () => {
+      const taken = SUB.page.equipment.map((e) => e.id), first = parts[0];
+      App.dialog({ title: 'Add device', body: `<div class="form">
+        ${field('Part', `<select class="select" id="eq-part">${parts.map((d) => `<option value="${esc(d.part_id)}">${esc(d.part_id)}${d.make || d.model ? ' · ' + esc([d.make, d.model].filter(Boolean).join(' ')) : ''}</option>`).join('')}</select>`, 'From the active library.')}
+        ${field('Role', select('eq-role', Object.entries(ROLES), first ? ROLE_OF[first.category] || 'other' : 'other'))}
+        <label class="check"><input type="checkbox" id="eq-red">A and B units (redundant)</label>
+        ${field('Id', input('eq-id', first ? freeId(first.part_id, taken) : '', { mono: true }), 'Names the row in the layout. Not printed.')}
+        <div id="eq-err" class="err small" role="alert"></div></div>`,
+        actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="eq-add-do">Add device</button>' });
+    };
+    if (parts) return open();
+    Bridge.call('library_overview').then((o) => { parts = o.devices; if (!parts.length) toast('The active library has no devices.', 'error'); else open(); }).catch((err) => toast(err.message, 'error'));
+  };
+  document.addEventListener('change', (e) => {
+    if (e.target.id !== 'eq-part' || !parts) return;
+    const d = parts.find((x) => x.part_id === e.target.value), taken = SUB.page.equipment.map((x) => x.id);
+    document.getElementById('eq-id').value = freeId(d.part_id, taken);
+    document.getElementById('eq-role').value = ROLE_OF[d.category] || 'other';
+  });
+  ACTIONS['eq-add-do'] = () => {
+    const v = (id) => document.getElementById(id), row = { id: v('eq-id').value.trim(), part_id: v('eq-part').value, role: v('eq-role').value };
+    if (v('eq-red').checked) row.redundant = true;
+    Bridge.call('add_equipment', S.project.file, S.sub, row, null).then((page) => { App.closeDialog(); relaid(page); toast(`Added ${row.id}`, 'check'); })
+      .catch((err) => { v('eq-err').innerHTML = `${icon('error')}<span>${esc(err.message)}</span>`; });
+  };
   ACTIONS['net-focus-ied'] = () => { const el = document.getElementById('n-ied_count'); if (el) { el.scrollIntoView({ block: 'center' }); el.focus(); } };
   SCREENS.network = () => {
     if (!real()) return example.network();
     const p = page(); if (!p) return waiting('Network');
     if (!p.network) return `<div class="page">${pageHead('Network', 'What the substation contains and how the network is sized.')}${problems(p)}</div>`;
-    const eq = p.equipment, unset = !p.network.ied_count && !('ied_count' in NET.draft), topo = netShown(p, 'topology');
-    return `<div class="page">${pageHead('Network', 'What the substation contains and how the network is sized. The panels are laid out from this.', '', '', 'Equipment rows cannot be edited in the app yet. Edit substation.yaml, then open the project again.')}
+    const eq = p.equipment, unset = !p.network.ied_count && !('ied_count' in NET.draft), topo = netShown(p, 'topology'), dirty = Object.keys(NET.draft).length > 0;
+    return `<div class="page">${pageHead('Network', 'What the substation contains and how the network is sized. The panels are laid out from this.', '', '', '')}
       ${problems(p)}${setupCard(p)}
       <div class="net-grid">
         <div class="stack" style="gap:var(--space-6)">
@@ -158,11 +220,9 @@
           <section><h3>L1 switch model</h3>${App.network.rankTable()}</section>
           <section><h3>Equipment</h3>
             <p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">What the substation has, before any panel exists. Redundant devices come as an A and a B unit.</p>
-            ${eq.length ? `<div class="table-wrap"><table class="table"><thead><tr><th>Device</th><th style="width:150px">Role</th><th style="width:90px">A and B</th><th class="num" style="width:90px">L2 ports</th><th class="num" style="width:64px">Height</th></tr></thead><tbody>
-              ${eq.map((e) => `<tr><td><span class="mono">${esc(e.part_id || '—')}</span>${e.device && !e.device.known ? `<span class="err small">${icon('error')}<span>Not in ${esc(p.project.library.name)} ${esc(p.project.library.version)}</span></span>` : `<span class="cell-sub">${esc([e.device && e.device.make, e.device && e.device.model].filter(Boolean).join(' ') || (e.role === 'l1_switch' && !e.part_id ? 'Picked from the library by the sizing' : e.id))}${e.role === 'l1_switch' ? ' · count from the sizing' : e.qty > 1 ? ` · ${e.qty} units` : ''}</span>`}</td>
-                <td>${esc(ROLES[e.role] || e.role)}</td><td>${e.redundant ? 'A + B' : e.side !== 'none' ? 'Side ' + esc(e.side.toUpperCase()) : '<span class="muted">Common</span>'}</td>
-                <td class="num">${e.l2_ports || '<span class="muted">0</span>'}</td><td class="num">${e.device && e.device.height_u != null ? (e.device.height_u ? e.device.height_u + ' U' : 'DIN') : '—'}</td></tr>`).join('')}</tbody></table>
-              <div class="table-foot"><span>${plural(eq.length, 'item')} · height and mounting come from the library</span></div></div>` : `<div class="empty"><b>No equipment yet.</b><div class="muted small">The switches, gateways and other devices this substation needs go under <span class="mono">equipment</span>.</div></div>`}</section>
+            ${eq.length ? `<div class="table-wrap"><table class="table"><caption class="sr-only">Equipment</caption><thead><tr><th style="min-width:190px">Device</th><th style="width:160px">Role</th><th style="width:64px">A and B</th><th class="num" style="width:80px">Quantity</th><th class="num" style="width:80px">L2 ports</th><th class="num" style="width:64px">Height</th><th style="width:44px"><span class="sr-only">Remove</span></th></tr></thead><tbody>
+              ${eq.map((e, i) => eqRow(p, e, i)).join('')}</tbody></table>
+              <div class="table-foot"><span>${plural(eq.length, 'item')} · height and mounting come from the library</span><span><button class="btn btn--secondary btn--sm" data-action="eq-add" ${dirty ? 'disabled title="Save or discard the changes first"' : ''}>${icon('plus')}Add device</button></span></div></div>` : `<div class="empty"><b>No equipment yet.</b><div class="muted small" style="margin-top:var(--space-1)">${FIRST}</div></div>`}</section>
           <section><h3>Spares</h3>
             <p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">Every spare starts from the project's shared defaults; the ones this substation changes are marked. Empty a field to use the project's value again.</p>
             <div class="form form--3">${p.spares.map((s) => { const [label, unit] = SPARES[s.key] || [s.key, '']; const d = s.key === 'port_fraction' ? pct(s.default) : s.default; return netInput(p, s.key, unit, s.changed ? `Changed from ${d}${unit && unit !== '%' ? ' ' + unit : unit}.` : 'Project default.', { label }); }).join('')}</div></section>
@@ -172,9 +232,9 @@
   };
   /* A field is read on change and checked by the model; the draft holds only what differs from the file. */
   document.addEventListener('change', (e) => {
-    const m = /^n-(\w+)$/.exec(e.target.id || '');
-    if (!m || !(m[1] in NF) || App.route().a !== 'network' || !real() || !SUB.page) return;
-    const p = SUB.page, key = m[1], [path, kind] = NF[key], typed = e.target.value, was = netSaved(p, key);
+    const m = /^n-([\w.]+)$/.exec(e.target.id || '');
+    if (!m || !nf(m[1]) || App.route().a !== 'network' || !real() || !SUB.page) return;
+    const p = SUB.page, key = m[1], [path, kind] = nf(key), typed = e.target.type === 'checkbox' ? String(e.target.checked) : e.target.value, was = netSaved(p, key);
     if (String(typed).trim() === String(was == null ? '' : was)) { delete NET.draft[key]; delete NET.errors[key]; queueMicrotask(App.render); return; }
     NET.draft[key] = typed;
     const [value, local] = toModel(kind, typed);
@@ -196,7 +256,7 @@
     let saved = null;
     const next = (i) => {
       if (i === keys.length) return Promise.resolve();
-      const key = keys[i], [path, kind] = NF[key];
+      const key = keys[i], [path, kind] = nf(key);
       return Bridge.call('set_substation_field', file, sub, path, toModel(kind, NET.draft[key])[0]).then((r) => { saved = r; delete NET.draft[key]; return next(i + 1); })
         .catch((err) => { NET.errors[key] = err.message; throw err; });
     };

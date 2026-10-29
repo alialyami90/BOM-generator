@@ -79,3 +79,40 @@ def test_checking_a_field_gives_the_models_message_or_none(app: api.Api, project
     message = ok(app.check_substation_field(str(project), SUB, ["network", "topology"], "mesh"))
     assert message
     assert "Value error, " not in message
+
+
+def test_an_added_equipment_row_is_written_at_the_end(app: api.Api, project: Path) -> None:
+    row = {"id": "gps-2", "part_id": "SEL-2488", "role": "other", "l2_ports": 1}
+    page = ok(app.add_equipment(str(project), SUB, row, None))
+    assert page["equipment"][-1]["id"] == "gps-2"
+    assert substation_yaml(project)["equipment"][-1]["part_id"] == "SEL-2488"
+
+
+def test_a_removed_row_comes_back_at_its_place_on_undo(app: api.Api, project: Path) -> None:
+    before = substation_yaml(project)["equipment"]
+    at = [e["id"] for e in before].index("gps")
+    removed = ok(app.remove_equipment(str(project), SUB, at))
+    page = removed["page"]
+    assert [e["id"] for e in page["equipment"]] == [e["id"] for e in before if e["id"] != "gps"]
+    assert removed["row"] == page_row(before[at])  # as written, for Undo
+    ok(app.add_equipment(str(project), SUB, removed["row"], at))
+    assert [e["id"] for e in substation_yaml(project)["equipment"]] == [e["id"] for e in before]
+
+
+def test_an_equipment_row_with_a_taken_id_is_refused(app: api.Api, project: Path) -> None:
+    taken = substation_yaml(project)["equipment"][0]["id"]
+    row = {"id": taken, "part_id": "SEL-2488", "role": "other"}
+    assert refused(app.add_equipment(str(project), SUB, row, None))["kind"] == "invalid_edit"
+
+
+def page_row(row: Any) -> dict[str, Any]:
+    plain: dict[str, Any] = json.loads(json.dumps(dict(row), default=str))
+    return plain
+
+
+def test_a_row_the_substation_needs_is_not_removed_and_the_reason_is_plain(
+    app: api.Api, project: Path
+) -> None:
+    ids = [e["id"] for e in substation_yaml(project)["equipment"]]
+    error = refused(app.remove_equipment(str(project), SUB, ids.index("l2")))
+    assert error["message"].startswith("equipment needs")
