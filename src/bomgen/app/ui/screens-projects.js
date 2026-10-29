@@ -22,7 +22,7 @@
       opened: day(row.changed), status: row.status.level, statusText: row.status.text,
       substations: row.substations.map((s) => ({ id: s.id, name: s.name, folder: inside(s.file, row.folder), file: s.file, panels: s.panels == null ? '—' : s.panels, changed: day(s.changed), status: s.errors ? 'bad' : 'ok', statusText: s.errors ? `${s.errors} error${s.errors === 1 ? '' : 's'}` : row.status.level === 'bad' ? 'Not checked' : 'Ready', from: '' })),
       documents: (row.documents || []).map((d) => ({ key: d.key, sub: d.substation, label: d.title || d.key, docNo: d.doc_no, rev: d.rev, issue: d.issue_date || '', assumed: false, usedBy: '' })),
-      defaults: row.defaults ? defaultsRows(row.defaults) : [], raw: row.defaults || null, brands: row.brands || {},
+      defaults: row.defaults ? defaultsRows(row.defaults) : [], raw: row.defaults || null, brands: row.brands || {}, register: row.register || [],
       problems: row.problems || [], backups: null, real: true
     };
   }
@@ -241,16 +241,74 @@
       <div class="table-foot"><span>${count(p.substations.length, 'substation')}</span>${p.real ? '' : `<span>${illus()}</span>`}</div></div>`;
   ACTIONS['open-sub'] = (el, e) => { if (e && e.target.closest('button') && e.target.closest('button') !== el) return; S.sub = el.dataset.id; S.dirty = false; S.layout = { overrides: [], removed: [], history: [], selected: '', openOverrides: false }; go('#/panels'); };
 
+  /* ---------- Documents: the register, edited in place (docs/ui/editing.md, Project › Documents) ---------- */
+  const RG_FIELDS = ['doc_no', 'rev', 'issue_date', 'title'];
+  const rgSplit = (key) => { const m = /^d(\d+)_(\w+)$/.exec(key); return m && RG_FIELDS.includes(m[2]) ? [Number(m[1]), m[2]] : null; };
+  const RG = App.draftForm({
+    prefix: 'rg-', screen: 'project', file: 'project.yaml', label: 'Save register',
+    spec: (key) => { const k = rgSplit(key); return k ? [['documents', k[0], k[1]], 'text'] : null; },
+    saved: (key) => { const k = rgSplit(key), row = k && curProject() && curProject().register[k[0]]; return row ? row[k[1]] || '' : ''; },
+    check: (path, value) => Bridge.call('check_project_field', curProject().file, path, value),
+    write: (path, value) => Bridge.call('set_project_field', curProject().file, path, value),
+    done: (page) => { S.project = view(page); S.tab.project = 'documents'; }
+  });
+  const rgCell = (d, f, label, o = {}) => {
+    const key = `d${d.index}_${f}`, v = RG.shown(key);
+    return `<td${key in RG.draft ? ' class="changed"' : ''}><label class="sr-only" for="rg-${key}">${label}, ${esc(d.key)}</label>${input('rg-' + key, v == null ? '' : String(v), { mono: !o.plain, invalid: !!RG.errors[key], placeholder: o.placeholder || '' })}${RG.errors[key] ? `<span class="err small">${icon('error')}<span>${RG.err(key)}</span></span>` : ''}${o.after || ''}</td>`;
+  };
+  function rgRow(p, d) {
+    const used = d.used_by, why = used === null ? 'Fix the project\'s problems first: what uses it is not known.' : used.length ? `Used by ${used.join(', ')}. Pick another document there first.` : '';
+    const assumed = d.assumed.includes('issue_date') && !(`d${d.index}_issue_date` in RG.draft);
+    return `<tr>${rgCell(d, 'title', 'Name', { plain: true, placeholder: d.key, after: `<span class="cell-sub mono">${esc(d.key)}</span>` })}${rgCell(d, 'doc_no', 'Document no.')}${rgCell(d, 'rev', 'Revision')}
+      ${rgCell(d, 'issue_date', 'Issue date', { after: assumed ? `<span class="row" style="gap:var(--space-2);margin-top:4px">${badge('warn', 'Assumed date', 'warn')}<button class="btn btn--ghost btn--sm" data-action="rg-confirm" data-i="${d.index}">Confirm</button></span>` : '' })}
+      <td class="small">${used && used.length ? esc(used.join(', ')) : '<span class="muted">Not used</span>'}</td>
+      <td><button class="btn btn--ghost btn--sm btn--icon" data-action="rg-remove" data-i="${d.index}" aria-label="Remove ${esc(d.key)}" title="${esc(why || (RG.dirty() ? 'Save or discard the changes first' : 'Remove'))}" ${why || RG.dirty() ? 'disabled' : ''}>${icon('trash')}</button></td></tr>`;
+  }
   const projectDocs = (p) => {
+    if (p.real) {
+      const ids = [...new Set([...p.substations.map((s) => s.id), ...p.register.map((d) => d.substation)])];
+      const groups = ids.map((id) => ({ s: p.substations.find((x) => x.id === id) || { id, name: id }, rows: p.register.filter((d) => d.substation === id) }));
+      const assumed = p.register.filter((d) => d.assumed.includes('issue_date')).length;
+      return `<p class="lede muted" style="max-width:68ch;margin-bottom:var(--space-4)">One register for the whole project. Each panel and calculation sheet picks a document from it, so a single transmittal list drives every header.</p>
+        ${assumed ? banner('warn', `<b>The issue date of ${count(assumed, 'document is', 'documents are')} assumed.</b> Confirm the dates before issuing.`) : ''}
+        <div class="table-wrap" style="margin-top:var(--space-4)"><table class="table"><caption class="sr-only">Document register</caption><thead><tr><th>Document</th><th style="width:220px">Document no.</th><th style="width:76px">Rev</th><th style="width:170px">Issue date</th><th>Used by</th><th style="width:44px"><span class="sr-only">Remove</span></th></tr></thead>
+        <tbody>${groups.map((g) => `<tr class="band"><td colspan="6"><div class="row"><b>${esc(g.s.name)}</b> <span class="muted">· ${count(g.rows.length, 'document')}</span><span class="sp" style="flex:1"></span><button class="btn btn--ghost btn--sm" data-action="rg-add" data-sub="${esc(g.s.id)}" ${RG.dirty() ? 'disabled title="Save or discard the changes first"' : ''}>${icon('plus')}Add</button></div></td></tr>
+          ${g.rows.map((d) => rgRow(p, d)).join('')}`).join('')}</tbody></table>
+        <div class="table-foot"><span>${count(p.register.length, 'document')} in ${count(groups.filter((g) => g.rows.length).length, 'substation')} · issue dates are written as YYYY-MM-DD</span></div></div>${RG.bar()}`;
+    }
     const ids = [...new Set([...p.substations.map((s) => s.id), ...p.documents.map((d) => d.sub)])];
     const groups = ids.map((id) => ({ s: p.substations.find((x) => x.id === id) || { id, name: id }, rows: p.documents.filter((d) => d.sub === id) })).filter((g) => g.rows.length);
     const assumed = p.documents.filter((d) => d.assumed).length;
     return `<p class="lede muted" style="max-width:68ch;margin-bottom:var(--space-4)">One register for the whole project. Each panel and calculation sheet picks a document from it, so a single transmittal list drives every header.</p>
       ${assumed ? banner('warn', `<b>The issue date of ${assumed} documents is assumed.</b> Confirm the dates before issuing.`) : ''}
-      ${groups.length ? `<div class="table-wrap" style="margin-top:var(--space-4)"><table class="table"><thead><tr><th>Document</th><th>Document no.</th><th style="width:70px">Rev</th><th style="width:150px">Issue date</th>${p.real ? '' : '<th>Used by</th><th style="width:110px">State</th>'}</tr></thead>
-      <tbody>${groups.map((g) => `<tr class="band"><td colspan="${p.real ? 4 : 6}"><b>${esc(g.s.name)}</b> <span class="muted">· ${count(g.rows.length, 'document')}</span></td></tr>
-        ${g.rows.map((d) => `<tr><td>${esc(d.label)}${d.label !== d.key ? `<span class="cell-sub mono">${esc(d.key)}</span>` : ''}</td><td>${ro(input('dn-' + d.key, d.docNo, { mono: true }))}</td><td>${ro(input('dr-' + d.key, d.rev, { mono: true }))}</td><td>${ro(input('di-' + d.key, d.issue, { mono: true }))}</td>${p.real ? '' : `<td>${esc(d.usedBy)}</td><td>${d.assumed ? badge('warn', 'Assumed date', 'warn') : '<span class="muted small">Confirmed</span>'}</td>`}</tr>`).join('')}`).join('')}</tbody></table>
-      <div class="table-foot"><span>${count(p.documents.length, 'document')} in ${count(groups.length, 'substation')}</span>${p.real ? '' : `<span>${illus()}</span>`}</div></div>` : '<div class="empty"><b>No documents in the register.</b></div>'}`;
+      ${groups.length ? `<div class="table-wrap" style="margin-top:var(--space-4)"><table class="table"><thead><tr><th>Document</th><th>Document no.</th><th style="width:70px">Rev</th><th style="width:150px">Issue date</th><th>Used by</th><th style="width:110px">State</th></tr></thead>
+      <tbody>${groups.map((g) => `<tr class="band"><td colspan="6"><b>${esc(g.s.name)}</b> <span class="muted">· ${count(g.rows.length, 'document')}</span></td></tr>
+        ${g.rows.map((d) => `<tr><td>${esc(d.label)}${d.label !== d.key ? `<span class="cell-sub mono">${esc(d.key)}</span>` : ''}</td><td>${ro(input('dn-' + d.key, d.docNo, { mono: true }))}</td><td>${ro(input('dr-' + d.key, d.rev, { mono: true }))}</td><td>${ro(input('di-' + d.key, d.issue, { mono: true }))}</td><td>${esc(d.usedBy)}</td><td>${d.assumed ? badge('warn', 'Assumed date', 'warn') : '<span class="muted small">Confirmed</span>'}</td></tr>`).join('')}`).join('')}</tbody></table>
+      <div class="table-foot"><span>${count(p.documents.length, 'document')} in ${count(groups.length, 'substation')}</span><span>${illus()}</span></div></div>` : '<div class="empty"><b>No documents in the register.</b></div>'}`;
+  };
+  const reregister = (page) => { S.project = view(page); S.tab.project = 'documents'; App.render(); };
+  ACTIONS['rg-confirm'] = (el) => Bridge.call('confirm_project_field', curProject().file, ['documents', Number(el.dataset.i), 'issue_date'])
+    .then((page) => { reregister(page); toast('Issue date confirmed', 'check'); }).catch(fail);
+  ACTIONS['rg-remove'] = (el) => {
+    const file = curProject().file, i = Number(el.dataset.i), key = curProject().register[i].key;
+    Bridge.call('remove_document', file, i).then((r) => {
+      reregister(r.page);
+      toast(`Removed ${key}`, 'trash', () => Bridge.call('restore_document', file, r.row, i).then(reregister).catch(fail));
+    }).catch(fail);
+  };
+  ACTIONS['rg-add'] = (el) => {
+    const p = curProject(), sub = el.dataset.sub;
+    dialog({ title: 'Add document', body: `<div class="form">
+      ${field('Substation', select('ad-sub', p.substations.map((s) => [s.id, s.name]), sub))}
+      ${field('Name', input('ad-name', '', { placeholder: 'For example, Cable schedule' }), 'The key that panels and sheets name is made from it. Its number, revision and date are filled in on the register.')}
+      <div id="ad-err"></div></div>`,
+      actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="rg-add-do">Add document</button>' });
+    setTimeout(() => { const n = $('#ad-name'); if (n) n.focus(); }, 0);
+  };
+  ACTIONS['rg-add-do'] = () => {
+    const name = $('#ad-name').value;
+    Bridge.call('add_document', curProject().file, $('#ad-sub').value, name).then((page) => { closeDialog(); reregister(page); toast(`Added ${name.trim()}`, 'check'); })
+      .catch((e) => err('ad-err', e));
   };
 
   /* ---------- Create, rename and delete (docs/ui/editing.md "Creating", plan M17d) ---------- */

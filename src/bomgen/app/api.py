@@ -56,6 +56,7 @@ from bomgen.io.edit import EditError, EditResult
 from bomgen.io.errors import InputError
 from bomgen.io.fields import (
     PartUse,
+    confirm_field,
     insert_item,
     part_users,
     remove_field,
@@ -224,6 +225,17 @@ def _edit_refusals() -> Iterator[None]:
 
 DELETED_DIR = "deleted-projects"
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+
+
+def _dated(path: Sequence[str | int], value: Any) -> Any:
+    """An ISO date typed for an ``issue_date`` (alone or in a row) as a date, so the file
+    keeps a YAML date rather than quoted text."""
+    if isinstance(value, dict):
+        return {k: _dated([k], v) for k, v in value.items()}
+    if path and path[-1] == "issue_date" and isinstance(value, str):
+        with contextlib.suppress(ValueError):
+            return date.fromisoformat(value)
+    return value
 
 
 def _written(result: EditResult) -> None:
@@ -719,7 +731,7 @@ class Api:
             if value is None or value == "":
                 result = remove_field(file, tuple(path), store=store)
             else:
-                result = set_field(file, tuple(path), value, store=store)
+                result = set_field(file, tuple(path), _dated(path, value), store=store)
         _written(result)
         return summarize(file, store, details=True)
 
@@ -732,6 +744,78 @@ class Api:
             return validate_field(
                 Path(project_file), tuple(path), value, store=self._library_store()
             )
+
+    @endpoint
+    def confirm_project_field(self, project_file: str, path: Sequence[str | int]) -> dict[str, Any]:
+        """Drop the ``ASSUMED`` mark from a project.yaml value; returns the page."""
+        file, store = Path(project_file), self._library_store()
+        with _edit_refusals():
+            result = confirm_field(file, tuple(path), store=store)
+        _written(result)
+        return summarize(file, store, details=True)
+
+    @endpoint
+    def add_document(self, project_file: str, substation_id: str, title: str) -> dict[str, Any]:
+        """Add a register document for a substation, keyed from its title, with a blank
+        number, revision 00 and today's date; returns the page."""
+        file, store = Path(project_file), self._library_store()
+        name = title.strip()
+        if not name:
+            raise AppError("invalid_edit", "Give the document a name.")
+        taken = {str(d.get("key")) for d in read_yaml(file).data.get("documents") or []}
+        base = lifecycle.project_id_for(f"{substation_id} {name}")
+        key, number = base, 2
+        while key in taken:
+            key, number = f"{base}-{number}", number + 1
+        row = {
+            "key": key,
+            "substation": substation_id,
+            "title": name,
+            "doc_no": "TBD",
+            "rev": "00",
+            "issue_date": date.today(),
+        }
+        with _edit_refusals():
+            result = insert_item(file, ("documents",), None, row, store=store)
+        _written(result)
+        return summarize(file, store, details=True)
+
+    @endpoint
+    def remove_document(self, project_file: str, index: int) -> dict[str, Any]:
+        """Remove a register document nothing uses; refused with its users otherwise. Returns
+        the page and the row as written, for Undo."""
+        file, store = Path(project_file), self._library_store()
+        rows = summarize(file, store, details=True)["register"]
+        if not 0 <= index < len(rows):
+            raise AppError("edit_refused", f"There is no document {index + 1} in the register.")
+        users = rows[index]["used_by"]
+        if users is None:
+            raise AppError(
+                "edit_refused",
+                "Fix the project's problems first: what uses this document is not known.",
+            )
+        if users:
+            raise AppError(
+                "edit_refused",
+                f"{rows[index]['key']} is used by {', '.join(users)}. "
+                "Pick another document there first.",
+            )
+        row = json.loads(json.dumps(read_yaml(file).data["documents"][index], default=str))
+        with _edit_refusals():
+            result = remove_item(file, ("documents",), index, store=store)
+        _written(result)
+        return {"page": summarize(file, store, details=True), "row": row}
+
+    @endpoint
+    def restore_document(
+        self, project_file: str, row: dict[str, Any], index: int
+    ) -> dict[str, Any]:
+        """Put a removed register document back at its place (Undo); returns the page."""
+        file, store = Path(project_file), self._library_store()
+        with _edit_refusals():
+            result = insert_item(file, ("documents",), index, _dated([], row), store=store)
+        _written(result)
+        return summarize(file, store, details=True)
 
     @endpoint
     def set_project_logo(

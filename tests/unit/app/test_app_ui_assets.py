@@ -218,3 +218,10 @@ def test_substation_settings_are_edited_through_the_shared_draft_form() -> None:
     assert "App.draftForm({" in js
     assert "Editing substations in the app is not available yet" not in js
     assert "Reset all to defaults" in js
+
+
+def test_the_document_register_is_edited_with_confirm_add_and_remove_with_undo() -> None:
+    js = (UI_DIR / "screens-projects.js").read_text(encoding="utf-8")
+    for name in ("confirm_project_field", "add_document", "remove_document", "restore_document"):
+        assert f"Bridge.call('{name}'" in js
+    assert "Pick another document there first." in js

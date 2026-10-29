@@ -16,6 +16,7 @@ from typing import Any
 from pydantic import ValidationError
 
 from bomgen.io.errors import InputError, Issue
+from bomgen.io.fields import assumed_fields, document_users
 from bomgen.io.lifecycle import project_id_for
 from bomgen.io.loader import PROJECT_FILE, LoadedProject, load_project
 from bomgen.io.yaml_source import read_yaml
@@ -187,6 +188,26 @@ def brands(library: Library) -> dict[str, list[dict[str, str]]]:
     return found
 
 
+def register(
+    project_file: Path, project: Project, loaded: LoadedProject | None
+) -> list[dict[str, Any]]:
+    """The register's documents in file order, each with its fields marked ``ASSUMED`` and
+    what uses it (None while the project does not load, so Remove stays off)."""
+    assumed: dict[int, list[str]] = {}
+    for loc in assumed_fields(project_file):
+        if len(loc) == 3 and loc[0] == "documents" and isinstance(loc[1], int):
+            assumed.setdefault(loc[1], []).append(str(loc[2]))
+    return [
+        {
+            "index": index,
+            **entry.model_dump(mode="json"),
+            "assumed": assumed.get(index, []),
+            "used_by": document_users(loaded, entry.key) if loaded is not None else None,
+        }
+        for index, entry in enumerate(project.documents)
+    ]
+
+
 def summarize(project_file: Path, store: LibraryStore, *, details: bool = False) -> dict[str, Any]:
     """One project as Home lists it; with ``details`` also what the Project page shows."""
     loaded, issues = load_with_issues(project_file, store)
@@ -218,6 +239,7 @@ def summarize(project_file: Path, store: LibraryStore, *, details: bool = False)
             "project": project.project if project else None,
             "defaults": project.defaults if project else None,
             "documents": project.documents if project else [],
+            "register": register(project_file, project, loaded) if project else [],
             "problems": issues,
         }
     return summary
