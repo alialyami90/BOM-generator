@@ -10,7 +10,7 @@
 ## Context
 
 ADR 0005 splits the pipeline into engine, sheet models and writer. The sheet layer
-(A10, M5) needs every BOM line in final order, with enough structure to emit SR.NO
+(M5) needs every BOM line in final order, with enough structure to emit SR.NO
 formulas, separator rows, merges and the Power Consumption references. Several
 group A–D rules in the spec say what the example shows but not how to decide it in
 general (which SFP part serves a port, how many cable managers, where loose items of
@@ -88,4 +88,4 @@ that reproduce them):
 The sheet layer reads one flat list per sheet and needs no knowledge of the rules.
 Inserting lines in M3 (groups E–H) only appends to the same list. If Ali wants the
 loose table in the workbook's order (GPS accessories between software and cables),
-the project file needs a position marker for device loose items (A2's schema).
+the project file needs a position marker for device loose items (a schema change).

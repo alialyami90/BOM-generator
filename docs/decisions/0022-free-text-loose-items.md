@@ -8,7 +8,7 @@
 ## Context
 
 Until now every loose-material row named a library part, and the row's description,
-make, model and ordering code came from it. A4's Loose material page
+make, model and ordering code came from it. The Loose material page
 (`docs/ui/editing.md`, "Loose material (v0.2)") adds *Add free text…*: a row typed in
 by hand for something the library does not hold, such as a site item or one supplied
 by others. Its banner tells the person that such a row has no ordering code, make or
@@ -52,12 +52,12 @@ model on the sheet. The sheet now stands on its own (ADR 0020).
 ## Consequences
 
 - Existing substation files load unchanged.
-- The engine's loose-item code paths (A9) check `part_id` before looking a part up.
+- The engine's loose-item code paths check `part_id` before looking a part up.
   Each one ignores a free-text item except `kits.py`, which prints it.
 - A free-text row adds no load or heat. If an item needs power, it has to be added to
   the library first, which the page's banner says.
 - The library's own `loose_items` on a device stay library parts. This decision covers
   only the substation's list.
 - With `items: []` the engine still returns a loose table with no lines. The sheet is to
-  be written only while there are items (`docs/ui/editing.md`); that is A9's and A10's
+  be written only while there are items (`docs/ui/editing.md`); that is the engine's and the sheet's
   side.

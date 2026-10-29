@@ -70,7 +70,7 @@ end to end now and let those milestones plug in without touching packaging.
   registry, uninstall and check cleanup, then create the tag on that commit and
   the GitHub Release with `bomgen-setup-<version>.exe` and `default.bomlib`.
   It all happens in one run with `GITHUB_TOKEN`, because a tag that token creates
-  starts no other workflow; agent sessions can't push tags, so a tag-driven
+  starts no other workflow; the development sessions can't push tags, so a tag-driven
   release needed Ali at a terminal (amended 2026-10-28, Ali's approval). The
   run creates nothing when the tag already exists, when the build fails, when
   `CHANGELOG.md` has no `## [<version>]` section (Ali: never release with a
@@ -104,7 +104,7 @@ end to end now and let those milestones plug in without touching packaging.
   `release.yml` a required check:** a path-filtered workflow reports no status on
   other PRs, so a required check would hang them.
 - Every PR that changes the version is a release once merged, so a version bump
-  goes in its own PR, with its changelog section, after A1 or Ali call the
+  goes in its own PR, with its changelog section, after Ali calls the
   release (`packaging/README.md`).
 - Each release smoke-tests the real installer on a clean per-user profile, but
   only on the runner's Windows version.

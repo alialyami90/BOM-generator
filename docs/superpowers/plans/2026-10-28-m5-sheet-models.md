@@ -1,7 +1,5 @@
 # M5 Sheet Models Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
 **Goal:** Lay out the engine's `BuildResult` as `SheetModel`s: one BOM sheet per cabinet (the loose-material table under its host), Power Consumption, Heat Dissipation and Heat Calculations, with live formulas built from resolved cell addresses, the "Formatting" styles, print setup and page header/footer.
 
 **Architecture:** `bomgen.sheets` turns `BuildResult` + `LoadedSubstation` into a `WorkbookModel` (M6) and adds no rules of its own (ADR 0005). Each sheet module returns its `SheetModel` plus the row map the next sheet needs (BOM line → row, power line → row, heat block → total row), so every formula points at a resolved address. Every formula carries its engine-computed result as the cached value.

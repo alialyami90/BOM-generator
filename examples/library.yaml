@@ -73,7 +73,7 @@ devices:
   - part_id: RST2228-L2  # 'Panel 1' row 8: PSA1-L2-ESW-A01
     category: network_switch
     alt_group: RST2228-L2  # M14 (ADR 0017)
-    height_u: 1  # A3 (PR #18)
+    height_u: 1  # device database (PR #18)
     make: Ruggedcom
     model: RST-2228
     ordering_code: "6GK6222-6AB00-5CC0-Z A00+B06+C06+D06+E06+F06+G00"
@@ -87,17 +87,17 @@ devices:
     power_supplies: 2
     min_branch_mcb_a: 2
     hwio_points: 1  # 'Panel 1'!H8
-    ports:  # A3 (PR #18); the workbook gives no port inventory. Slot 6 is blank (G00).
+    ports:  # device database (PR #18); the workbook gives no port inventory. Slot 6 is blank (G00).
       - { count: 20, speed: 1G, kind: sfp_slot, usable_for: any }  # slots 1-5, 100M/1G
       - { count: 4, speed: 1G, kind: sfp_slot, usable_for: uplink }  # slot 0, SFP+
-      # Slot 0 takes 1/10G SFP+ (A3 records 10G); written 1G because 1G SFPs are fitted
+      # Slot 0 takes 1/10G SFP+ (the device database records 10G); written 1G because 1G SFPs are fitted
       # in the example, and M1c matches port groups by speed.
 
   - part_id: RST2228-L1-24MM  # 'Panel 1' row 9: PSA1-L1-ESW-A11 to A16
     # The spec's library example (Inputs the tool needs -> 1. Device library).
     category: network_switch
     alt_group: RST2228-L1-24MM  # M14 (ADR 0017)
-    height_u: 1  # A3 (PR #18)
+    height_u: 1  # device database (PR #18)
     make: Ruggedcom
     model: RST-2228
     ordering_code: "6GK6222-6AB00-5CC0-Z A05+B05+C05+D05+E05+F05+G05"
@@ -115,13 +115,13 @@ devices:
     ports:
       - { count: 24, speed: 100M, media: MM, kind: fixed, usable_for: ied }
       - { count: 4, speed: 1G, kind: sfp_slot, usable_for: uplink }  # SFP+ (1/10G), 1G fitted
-      # Written 1G, not A3's 10G: 1G SFPs are fitted, and M1c matches groups by speed.
+      # Written 1G, not the device database's 10G: 1G SFPs are fitted, and M1c matches groups by speed.
     excluded_from_power: false
 
   - part_id: SEL-2730M-EXT  # 'Panel 1' row 10: PSA1-EXT-ESW-A
     category: network_switch
     alt_group: SEL-2730M-EXT  # M14 (ADR 0017)
-    height_u: 1  # A3 (PR #18)
+    height_u: 1  # device database (PR #18)
     make: SEL
     model: SEL-2730M
     ordering_code: "2730M#2CF9"
@@ -135,7 +135,7 @@ devices:
     power_supplies: 2
     min_branch_mcb_a: 2
     hwio_points: 1  # 'Panel 1'!H10
-    ports:  # A3 (PR #18)
+    ports:  # device database (PR #18)
       - { count: 4, speed: 1G, kind: sfp_slot, usable_for: uplink }  # ports 1-4
       - { count: 4, speed: 1G, media: RJ45, kind: fixed, usable_for: any }  # ports 5-8
       - { count: 16, speed: 100M, media: MM, kind: fixed, usable_for: ied }  # ports 9-24
@@ -145,7 +145,7 @@ devices:
   - part_id: SEL-3555-GW  # 'Panel 1' row 11: PSA1-DHPCC-GW-1
     category: gateway
     alt_group: SEL-3555-GW  # M14 (ADR 0017)
-    height_u: 3  # A3 (PR #18)
+    height_u: 3  # device database (PR #18)
     make: SEL
     model: SEL-3555
     ordering_code: "3555#0KVC"
@@ -162,7 +162,7 @@ devices:
   - part_id: FGR-60F  # 'Panel 1' row 12: PSA1-EXT-FW-A
     category: firewall
     alt_group: FGR-60F  # M14 (ADR 0017)
-    height_u: 0  # A3 (PR #18): DIN rail
+    height_u: 0  # device database (PR #18): DIN rail
     make: Fortigate
     model: FGR-60F
     ordering_code: FGR-60F
@@ -176,7 +176,7 @@ devices:
     power_supplies: 2
     min_branch_mcb_a: 2
     alarm_on_branch_mcb: true  # Q1.10/Q2.10 aux contacts ('Panel 1'!C63)
-    ports:  # the 2 GE SFP/RJ45 shared WAN ports (A3 record; count not datasheet-verified)
+    ports:  # the 2 GE SFP/RJ45 shared WAN ports (device-database record; count not datasheet-verified)
       - { count: 2, speed: 1G, kind: sfp_slot }
 
   # --- Group B: control cabinet (example workbook, 'Panel 3'!B4:G10) ------------------
@@ -184,7 +184,7 @@ devices:
   - part_id: SEL-2488  # 'Panel 3' row 4: PSA3-GPS
     category: gps_clock
     alt_group: SEL-2488  # M14 (ADR 0017)
-    height_u: 1  # A3 (PR #18)
+    height_u: 1  # device database (PR #18)
     make: SEL
     model: SEL-2488
     ordering_code: "2488#J544"
@@ -210,7 +210,7 @@ devices:
   - part_id: SEL-3555-RTAC  # 'Panel 3' row 5: PSA3-RTAC
     category: rtac
     alt_group: SEL-3555-RTAC  # M14 (ADR 0017)
-    height_u: 3  # A3 (PR #18)
+    height_u: 3  # device database (PR #18)
     make: SEL
     model: SEL-3555
     ordering_code: "3555#F2R2"
@@ -233,7 +233,7 @@ devices:
   - part_id: SEL-2240  # 'Panel 3' row 6: PSA3-HWIO
     category: io_chassis
     alt_group: SEL-2240  # M14 (ADR 0017)
-    height_u: 5  # A3 (PR #18): the chassis; its modules are 0
+    height_u: 5  # device database (PR #18): the chassis; its modules are 0
     make: SEL
     model: SEL-2240
     description_template: "Axion IO and Non-IEC Protocol Gateway"
@@ -300,7 +300,7 @@ devices:
   - part_id: SEL-3355  # 'Aux' row 4: WS-SRV/OAS/EAS
     category: workstation
     alt_group: SEL-3355  # M14 (ADR 0017)
-    height_u: 3  # A3 (PR #18)
+    height_u: 3  # device database (PR #18)
     make: SEL
     model: SEL-3355
     ordering_code: "3355#F5P8"
@@ -392,7 +392,7 @@ devices:
   - part_id: PL1U12NEBK  # 'Panel 1' row 18: Cable Manager (9 per network cabinet)
     category: cable_manager
     alt_group: PL1U12NEBK  # M14 (ADR 0017)
-    height_u: 1  # A3 (PR #18)
+    height_u: 1  # device database (PR #18)
     make: Marshcom
     model: PL1U12NEBK
     ordering_code: PL1U12NEBK

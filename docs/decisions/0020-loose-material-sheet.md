@@ -52,4 +52,4 @@ sections above until the spec is updated.
 - `host_panel` stays required, so existing substation files load unchanged. It still
   chooses the header document, and the engine still uses it to validate input.
 - Showing and editing the list in the app (Preview and the substation editor) is M18's
-  app side (A11) and is not part of this change.
+  app side and is not part of this change.

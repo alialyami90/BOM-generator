@@ -1,10 +1,8 @@
 # M2 BOM Groups A–D Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
 **Goal:** Turn the loaded example project into BOM lines for groups A–D of every cabinet (enclosure, main equipment with kit children, network and IO accessories, housekeeping) plus the loose-material table.
 
-**Architecture:** Pure functions in `bomgen.engine` over the M1 models (ADR 0005). Each group builder returns `BomItem`s (a line plus its child lines); `engine.pipeline.build()` flattens them into `PanelBom.lines` with absolute parent indices, which is the shape A10's sheet layer reads (`models/bom.py`). Ventilation comes from the panel option; `auto` is treated as forced until M4 adds the heat check.
+**Architecture:** Pure functions in `bomgen.engine` over the M1 models (ADR 0005). Each group builder returns `BomItem`s (a line plus its child lines); `engine.pipeline.build()` flattens them into `PanelBom.lines` with absolute parent indices, which is the shape the sheet layer reads (`models/bom.py`). Ventilation comes from the panel option; `auto` is treated as forced until M4 adds the heat check.
 
 **Tech Stack:** Python 3.12, pydantic v2 (frozen models), pytest.
 

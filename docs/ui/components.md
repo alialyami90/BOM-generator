@@ -192,7 +192,7 @@ Sortable columns (library, projects) show a sort button in the header with
 20 px, 12 px medium text, 2 px radius, soft fill, optional 12 px icon. Kinds:
 ok, warn, bad, info, plain. Always text, never a bare coloured dot.
 
-Data-quality badges map the device-database `verified` level (confirmed by A1):
+Data-quality badges map the device-database `verified` level:
 Confirmed (ok), Partial (warn), Unverified (plain).
 
 In the Alternatives table, `same_as` means a tier reuses the part number of a

@@ -1,6 +1,6 @@
 # 0013. Switches sized from the IED count; panels laid out automatically
 
-- Status: Accepted (Ali, project thread, 2026-10-28)
+- Status: Accepted (Ali, 2026-10-28)
 - Date: 2026-10-28
 - Spec sections: How each panel BOM groups its materials; Tag naming
   conventions; Derivation rules → Network accessories; Inputs the tool needs →

@@ -56,7 +56,7 @@ Root: HKA; Subkey: "Software\Classes\.bomlib\OpenWithProgids"; ValueType: string
 Root: HKA; Subkey: "Software\Classes\{#ProgId}"; ValueType: string; ValueName: ""; ValueData: "BOM Generator library update"; Flags: uninsdeletekey
 Root: HKA; Subkey: "Software\Classes\{#ProgId}\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#AppExeName},0"; Flags: uninsdeletekey
 Root: HKA; Subkey: "Software\Classes\{#ProgId}\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#AppExeName}"" ""%1"""; Flags: uninsdeletekey
-; .bomproj project files (A5's project export) open in the app too; registered now so the
+; .bomproj project files (the project export) open in the app too; registered now so the
 ; installer needn't change again. Until M8b the app only says it can't open them yet.
 Root: HKA; Subkey: "Software\Classes\.bomproj"; ValueType: string; ValueName: ""; ValueData: "{#ProjectProgId}"; Flags: uninsdeletevalue uninsdeletekeyifempty
 Root: HKA; Subkey: "Software\Classes\.bomproj\OpenWithProgids"; ValueType: string; ValueName: "{#ProjectProgId}"; ValueData: ""; Flags: uninsdeletevalue uninsdeletekeyifempty

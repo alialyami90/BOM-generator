@@ -50,7 +50,7 @@ engine; the UI only shows what the engine returns.
   list) and panel editor (form and YAML tab); device library (browse, datasheet,
   alternatives); library import and versions; checks; BOM and calculation
   preview; build and save.
-- Added after review (A1's design for projects, substations and automatic
+- Added after review (the design for projects, substations and automatic
   layout): the Network screen and the Panels board, where an engineer moves,
   deletes or resets devices that the layout engine placed. The board only
   writes layout overrides; the rules stay in the engine.
@@ -91,8 +91,7 @@ up to roughly 150 BOM rows per panel, library of about 45 to a few hundred parts
 ## Open decisions
 
 - Language: English only for the first release (decided by Ali).
-- Alternatives and datasheet field names follow the device-database records
-  (A3, confirmed by A1). `verified` is confirmed/partial/unverified and `same_as`
+- Alternatives and datasheet field names follow the device-database records. `verified` is confirmed/partial/unverified and `same_as`
   means a tier reuses a lower tier's part number (shown as one spanning row).
 - Swapping a part for an alternative is a later extension. It needs a schema
-  change (A2) and data (A3); the design only documents where it would go.
+  change and device data; the design only documents where it would go.

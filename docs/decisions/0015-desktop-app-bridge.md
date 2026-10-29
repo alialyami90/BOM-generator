@@ -10,7 +10,7 @@ ADR 0007 puts the M9 design in a pywebview window that calls `bomgen` in-process
 pywebview exposes every public attribute of the `js_api` object to the page and
 returns results as JSON promises. An exception inside a call reaches the page as a
 rejected promise with whatever text pywebview gives it, and pywebview runs each call
-on its own thread. The design (`docs/ui/`) is owned by A4 and keeps evolving; the
+on its own thread. The design (`docs/ui/`) keeps evolving; the
 app must not drift from it.
 
 ## Decision
@@ -26,7 +26,7 @@ app must not drift from it.
   console run shows; the windowed exe has none). Results are
   converted to JSON (paths to strings, dataclasses and pydantic models to objects).
 - **No rule in the bridge.** Endpoints call engine and store functions and reshape
-  their results; anything missing goes to the owning agent, not into `app/`.
+  their results; anything missing goes into the engine or store, not into `app/`.
 - **One JS entry.** `ui/bridge.js` is the only script that touches
   `window.pywebview.api`. `Bridge.call(name, ...args)` resolves with `data` or
   rejects with `{kind, message}`. Opened in a plain browser it rejects with
@@ -40,7 +40,7 @@ app must not drift from it.
   endpoints one PR at a time (plan M10b–M10d); `data.js` and `engine-stub.js` go
   when the last screen is connected.
 - **The frozen app must bundle the UI.** `collect_submodules` collects no data
-  files, so `packaging/bomgen.spec` (A6) adds `bomgen/app/ui` with
+  files, so `packaging/bomgen.spec` adds `bomgen/app/ui` with
   `collect_data_files("bomgen.app")` or a `Tree` when it wires `run_window` into the
   launcher. `run_window` checks `ui/index.html` exists and otherwise shows "Reinstall"
   and returns 1, rather than opening a blank window.
@@ -62,4 +62,4 @@ app must not drift from it.
 - Long calls (build, layout) block only their own pywebview thread; progress for
   Build needs a push channel (`window.evaluate_js`), decided when M10d starts.
 - Design changes in `docs/ui/` reach the app by copying files; the token and font
-  tests catch the shared files, screen changes are reviewed by A4.
+  tests catch the shared files, screen changes are reviewed against the design.

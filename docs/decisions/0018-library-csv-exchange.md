@@ -11,7 +11,7 @@ Ali wants to edit the device library in the app, and to export the whole library
 import it back, so engineers can work on it in Excel (backlog points 1 and 10, plan M16).
 The library is nested: a device has ports, children, terminal rules and loose items, and the
 commodity catalogues (MCB, aux contact, terminal blocks, busbars, housekeeping) are separate
-tables. Alternatives are linked by A2's `alt_group` key on devices, and catalogue brands by a
+tables. Alternatives are linked by the `alt_group` key on devices, and catalogue brands by a
 brand `id` (ADR 0017, M13).
 
 Excel is the reader and the writer, so the format has to survive Excel: it cannot open a zip,
@@ -122,7 +122,7 @@ from a `Library` and a base version. The `.bomlib` backup of an edited library i
   local version, its dry-run warns: your local edits in 1.0.0+local.2 stay installed but are
   no longer active, and a rollback keeps them in use. A `.bomlib` backup of an edited
   library carries the `+local.<n>` version and imports on another machine like any package.
-- The shape of the brand tables follows ADR 0017 as agreed with A2 on 2026-10-28 (including
+- The shape of the brand tables follows ADR 0017 as agreed on 2026-10-28 (including
   `codes` as an alternative to `code_pattern`, which `mcb_codes.csv` covers; `ratings_a` stays
   required and the model rejects `codes` keys that differ from it). If M13 changes a
   field, this ADR is amended in the PR that builds the code.

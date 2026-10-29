@@ -20,7 +20,7 @@ examples/
 
 The hand-written panels keep every golden value. The `equipment`, `network` and
 `generated_panels` sections are the inputs the automatic layout (M1c) reads; rack
-heights and port roles come from the device research (A3, PR #18).
+heights and port roles come from the device research (PR #18).
 
 Schemas: `docs/plan.md` → "Input file schemas".
 

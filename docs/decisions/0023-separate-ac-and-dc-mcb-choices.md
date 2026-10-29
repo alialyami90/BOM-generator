@@ -41,7 +41,7 @@ as `mcb`. Ali chose separate AC and DC choices (Q39).
 
 - The engine must size the DC branches from `catalogues.dc_mcb` instead of `catalogues.mcb`
   (`engine/dc_dist.py`, `engine/mcb.py`, and the `dc_float` check in `checks.py`). That
-  work belongs to role 9 and follows this change. Until then, `mcb_dc` loads and is checked
+  work follows this change. Until then, `mcb_dc` loads and is checked
   but does not yet change the BOM.
 - The DC MCBs' auxiliary contacts still come from `aux_contact`. A DC brand whose contacts
   differ needs its own `aux_contact` choice.

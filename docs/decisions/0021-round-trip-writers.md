@@ -10,7 +10,7 @@ In M17 (backlog points 4, 7 and 9), the app edits projects, substations and pane
 YAML becomes an import, export and backup format. The input files are hand-written, and
 their comments carry provenance ("# ASSUMED", "'Panel 1' row 8"). The example
 substation file alone has 43 comment lines. If a writer regenerated the files from the
-models, it would drop those comments, reorder keys and expand every default. A4's
+models, it would drop those comments, reorder keys and expand every default. The
 editor table (`docs/ui/editing.md`, "Back-end needs for the generated-panel editor")
 lists the first writers, and each one returns the new layout preview and its problems.
 
@@ -74,7 +74,7 @@ lists the first writers, and each one returns the new layout preview and its pro
      removes the folder, the project's entry for it and its register documents.
    - `delete_project` saves `<Deleted>/<id>.bomproj`, then removes the folder.
    - Names are edited with `set_field`. Ids name folders and register keys, so they stay
-     read-only, as A4's design has them.
+     read-only, as the design has them.
    - Two model rules are loosened so that a new project or substation can load:
      `substations` may be an empty list (the key is still required), and a substation
      may list no panel files. `build_substation` raises `EngineError` ("has no panels
@@ -112,7 +112,7 @@ lists the first writers, and each one returns the new layout preview and its pro
 ## Consequences
 
 - A new runtime dependency, `ruamel.yaml` (MIT, pure Python; the C extension is
-  optional). The frozen app must bundle it (A6).
+  optional). The frozen app must bundle it.
 - Each write loads the project twice: once as it is and once with the edit. That is
   fast enough for one edit at a time.
 - New YAML a writer adds (a new key or item) is written in block style, apart from the

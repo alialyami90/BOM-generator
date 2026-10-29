@@ -366,12 +366,12 @@ def test_row_delete_buttons_share_one_style() -> None:
 
 
 def test_network_rows_are_two_lines_and_the_role_select_fits() -> None:
-    """polish-v02 items 4 and 11, and B4's #205 screen check (a) and (b)."""
+    """polish-v02 items 4 and 11, and the #205 screen check (a) and (b)."""
     sub = (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
     assert '<th style="min-width:170px">Role</th><th style="width:56px">A and B</th>' in sub
     assert 'class="part-line"' in sub  # Change… sits at the end of the part-id line
     css = (UI_DIR / "styles.css").read_text(encoding="utf-8")
-    # B4's #207 check: the table stays in its column; a part id never breaks, Change… wraps
+    # #207 check: the table stays in its column; a part id never breaks, Change… wraps
     assert ".net-grid > * { min-width: 0; }" in css
     assert ".part-line { display: flex; flex-wrap: wrap;" in css
     assert ".part-line .mono { white-space: nowrap; }" in css
@@ -415,15 +415,15 @@ def test_the_project_path_stays_on_one_line() -> None:
 
 
 def test_the_save_bar_meets_the_window_bottom() -> None:
-    """B4's screen check of #206: no empty band under the bar at the end of a page."""
+    """Screen check of #206: no empty band under the bar at the end of a page."""
     css = (UI_DIR / "styles.css").read_text(encoding="utf-8")
     page_rule = ".page:has(> .savebar) { padding-bottom: 0; display: flex; flex-direction: column;"
     assert f"{page_rule} min-height: 100%; }}" in css
-    assert ".page > .savebar { margin-top: auto; }" in css  # short pages too (B4, #207)
+    assert ".page > .savebar { margin-top: auto; }" in css  # short pages too (#207)
 
 
 def test_ids_in_a_sub_line_never_break_and_tab_panels_keep_their_offset() -> None:
-    """B4's #207 re-check nits: "ext-fw" broke at its hyphen; the device editor panel sat
+    """#207 re-check nits: "ext-fw" broke at its hyphen; the device editor panel sat
     16px lower once the page became a flex column (margins no longer collapse)."""
     css = (UI_DIR / "styles.css").read_text(encoding="utf-8")
     assert ".table .cell-sub .mono { white-space: nowrap; }" in css

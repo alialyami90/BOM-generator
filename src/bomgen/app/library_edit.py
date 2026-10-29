@@ -2,8 +2,8 @@
 
 docs/ui/editing.md "The pending set": saved device edits collect here, per library, with the
 installed version they started from. They are `library_store.edit` operations as plain JSON,
-so applying them is A5's `save_edits`; this module only keeps them between sessions, folds
-repeated edits of one field together and describes the result for the review.
+so applying them is `library_store`'s `save_edits`; this module only keeps them between
+sessions, folds repeated edits of one field together and describes the result for the review.
 """
 
 from __future__ import annotations

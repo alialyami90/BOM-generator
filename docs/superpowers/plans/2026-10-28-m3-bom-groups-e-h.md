@@ -1,7 +1,5 @@
 # M3 BOM Groups E–H, HWIO and Assembly Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
 **Goal:** Extend every cabinet's BOM from groups A–D to A–H: AC and DC distribution, terminal strips, grounding busbars, HWIO per row and panel, and revision marks, in final line order.
 
 **Architecture:** Pure functions in `bomgen.engine` (ADR 0005), each returning `BomItem`s that `pipeline.build()` flattens into `PanelBom.lines` (ADR 0014). The pipeline runs in two passes: groups A–F of every panel, then groups G–H, because XDIN defaults to the substation's HWIO total. SR.NO and separators follow from line order (`BomTable.separators_before`), so assembly only marks revisions.
