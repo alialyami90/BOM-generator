@@ -253,7 +253,19 @@ warning dot and "3 unsaved changes · saved to substation.yaml". Right: Discard
 (secondary) and Save changes (primary, with `Ctrl+S` as a keycap). While a field is
 invalid the text turns red with the error icon ("1 field needs fixing before you
 can save."), Save is disabled and the text moves focus to the first invalid field.
-`role="region"`, labelled "Unsaved changes". Rules in [`editing.md`](editing.md).
+The whole sentence is one control; "needs fixing" and "before you can save" are never
+split apart. `role="region"`, labelled "Unsaved changes". Rules in [`editing.md`](editing.md).
+
+### Changed marker (v0.2)
+Marks a value that differs from the saved file until it is saved or discarded. It is a
+6 px dot in `warning`, placed before the field label, or at the start of a table cell
+for an edited cell, with "changed" for screen readers (`<span class="sr-only">`).
+A new table row gets the dot in its first cell only. A list edited as a whole (port
+groups, child parts) keeps the *Changed* badge on its heading. The control itself
+keeps its normal fill and border, so an error state still reads.
+- **Never the yellow.** `highlight.yellow` means "the workbook will highlight this cell
+  as revised" (Preview and the sheets only, design-language "Colour"). An unsaved edit
+  painted yellow would read as a revision.
 
 ### Pending bar
 Like the save bar (same height, rule and shadow) with a warning dot, "3 pending changes · not applied yet.
