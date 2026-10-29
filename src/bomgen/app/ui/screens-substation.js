@@ -169,7 +169,7 @@
   /* The model takes equipment only with its redundant L1 and L2 switches (Substation, ADR 0013), so the first add writes both. */
   const FIRST = 'Start with the core switches: the L2 switch you pick, and the L1 switches the sizing picks. Then add the rest.';
   const startButton = (cls) => `<button class="btn ${cls}" data-action="eq-start">${icon('plus')}Add the core switches…</button>`;
-  const EQ = { qty: 'int', l2_ports: 'int', role: 'text', redundant: 'bool' };
+  const EQ = { qty: 'int', l2_ports: 'int', role: 'text', redundant: 'bool', part_id: 'text' };
   function nf(key) {  // [path, kind]; an equipment cell is eq.<row>.<field>
     const m = /^eq\.(\d+)\.(\w+)$/.exec(key);
     return m ? [['equipment', Number(m[1]), m[2]], EQ[m[2]]] : NF[key];
@@ -217,10 +217,16 @@
   /* One equipment row: its cells are drafted like the inputs above; Remove writes at once, with Undo. */
   function eqRow(p, e, i) {
     const k = (f) => `eq.${i}.${f}`, err = (f) => NET.errors[k(f)], ch = (f) => (k(f) in NET.draft ? ' class="changed"' : '');
-    const cellErr = ['role', 'redundant', 'qty', 'l2_ports'].map((f) => err(f) && `<span class="err small" id="n-${k(f)}-err">${icon('error')}<span>${esc(err(f))}</span></span>`).filter(Boolean).join('');
+    const cellErr = ['part_id', 'role', 'redundant', 'qty', 'l2_ports'].map((f) => err(f) && `<span class="err small" id="n-${k(f)}-err">${icon('error')}<span>${esc(err(f))}</span></span>`).filter(Boolean).join('');
+    const swap = k('part_id') in NET.draft ? NET.draft[k('part_id')] : '';
+    if (swap) return `<tr><td class="changed"><span class="mono">${esc(swap)}</span><span class="cell-sub">Was <span class="mono">${esc(e.part_id || '—')}</span> · <span class="mono">${esc(e.id)}</span> · saved with the rest</span>${cellErr}</td>${eqCells(p, e, i)}`;
+    return `<tr><td><span class="mono">${esc(e.part_id || '—')}</span>${e.device && !e.device.known ? `<span class="err small">${icon('error')}<span>Not in ${esc(p.project.library.name)} ${esc(p.project.library.version)}</span></span>` : `<span class="cell-sub">${esc([e.device && e.device.make, e.device && e.device.model].filter(Boolean).join(' ') || (e.role === 'l1_switch' && !e.part_id ? 'Picked from the library by the sizing' : ''))} · <span class="mono">${esc(e.id)}</span></span>`}${cellErr}</td>${eqCells(p, e, i)}`;
+  }
+  function eqCells(p, e, i) {
+    const k = (f) => `eq.${i}.${f}`, err = (f) => NET.errors[k(f)], ch = (f) => (k(f) in NET.draft ? ' class="changed"' : '');
     const red = netShown(p, k('redundant')) === 'true', l1 = netShown(p, k('role')) === 'l1_switch';
     const num = (f, label) => `<input class="input input--num input--mono" id="n-${k(f)}" aria-label="${label}, ${esc(e.id)}" value="${esc(netShown(p, k(f)))}" ${err(f) ? 'aria-invalid="true"' : ''} data-dirty="1">`;
-    return `<tr><td><span class="mono">${esc(e.part_id || '—')}</span>${e.device && !e.device.known ? `<span class="err small">${icon('error')}<span>Not in ${esc(p.project.library.name)} ${esc(p.project.library.version)}</span></span>` : `<span class="cell-sub">${esc([e.device && e.device.make, e.device && e.device.model].filter(Boolean).join(' ') || (e.role === 'l1_switch' && !e.part_id ? 'Picked from the library by the sizing' : ''))} · <span class="mono">${esc(e.id)}</span></span>`}${cellErr}</td>
+    return `
       <td${ch('role')}><select class="select" id="n-${k('role')}" aria-label="Role, ${esc(e.id)}" data-dirty="1">${Object.entries(ROLES).map(([v, t]) => `<option value="${v}" ${v === netShown(p, k('role')) ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></td>
       <td${ch('redundant')}><label class="check"><input type="checkbox" id="n-${k('redundant')}" ${red ? 'checked' : ''} data-dirty="1"><span class="sr-only">A and B units, ${esc(e.id)}</span></label></td>
       <td class="num"${ch('qty')}>${l1 ? '<span class="muted">Sized</span>' : num('qty', 'Quantity')}</td>
@@ -279,6 +285,12 @@
     if (v('eq-red').checked) row.redundant = true;
     Bridge.call('add_equipment', S.project.file, S.sub, row, null).then((page) => { App.closeDialog(); relaid(page); toast(`Added ${row.id}`, 'check'); })
       .catch((err) => { v('eq-err').innerHTML = `${icon('error')}<span>${esc(err.message)}</span>`; });
+  };
+  /* Use this instead (docs/ui/editing.md, Alternatives): the chosen rows get the other part as an unsaved Network edit. */
+  App.holdParts = (indices, part) => {
+    page();  // the open substation's draft; a different substation's would be dropped on load
+    indices.forEach((i) => { NET.draft[`eq.${i}.part_id`] = part; delete NET.errors[`eq.${i}.part_id`]; });
+    S.dirty = true; App.go('#/network');
   };
   ACTIONS['net-focus-ied'] = () => { const el = document.getElementById('n-ied_count'); if (el) { el.scrollIntoView({ block: 'center' }); el.focus(); } };
   SCREENS.network = () => {

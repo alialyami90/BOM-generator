@@ -2,7 +2,7 @@
    Saved device edits collect in a pending set kept by the app; Review and apply writes them as a new local
    library version. The Device editor is a form over one device; the model checks every value it sends. */
 (function () {
-  const { esc, S, ACTIONS, SCREENS, badge, verified, banner, tabs, field, input, select, pageHead, dialog, closeDialog, toast, go, $ } = App;
+  const { esc, S, ACTIONS, SCREENS, badge, verified, banner, tabs, field, input, select, pageHead, dialog, closeDialog, toast, go, $, $$ } = App;
   const real = () => S.backend === 'yes';
   const plural = (n, one) => `${n} ${one}${n === 1 ? '' : 's'}`;
   const onLibrary = () => App.route().a === 'library';
@@ -190,12 +190,38 @@
     if (!a.group) return `${head}<p class="muted">Not in a group. Give it an alternative group, save, and add parts to the same group to compare them here.</p>`;
     const tier = (t) => (t ? t[0].toUpperCase() + t.slice(1) : '—');
     const num = (v, u) => (v == null ? '—' : `${v} ${u}`);
-    return `${head}<div class="table-wrap"><table class="table"><thead><tr><th style="width:64px">Tier</th><th>Part</th><th>Make</th><th class="num">Power</th><th class="num">Inrush</th><th>Ports</th><th class="num">Height</th><th>Data</th></tr></thead><tbody>
+    return `${head}<div class="table-wrap"><table class="table"><thead><tr><th style="width:64px">Tier</th><th>Part</th><th>Make</th><th class="num">Power</th><th class="num">Inrush</th><th>Ports</th><th class="num">Height</th><th>Data</th><th><span class="sr-only">Use</span></th></tr></thead><tbody>
       ${a.rows.map((r) => `<tr${r.is_self ? ' class="is-self"' : ''}><td>${r.is_self ? '<b>This</b>' : esc(tier(r.tier))}</td><td>${r.is_self ? `<span class="mono">${esc(r.part_id)}</span>` : `<a class="mono" href="#/library/device/${encodeURIComponent(r.part_id)}">${esc(r.part_id)}</a>`}<span class="cell-sub">${esc(r.model || '')}</span></td><td>${esc(r.make || '')}</td>
         <td class="num nowrap">${num(r.unit_power_w, 'W')}${r.is_self ? '' : chip(r.power_delta_w, 'W')}</td><td class="num nowrap">${num(r.inrush_a, 'A')}${r.is_self ? '' : chip(r.inrush_delta_a, 'A')}</td>
-        <td class="nowrap">${esc(portText(r.first_port_group))}</td><td class="num nowrap">${num(r.height_u, 'U')}${r.is_self ? '' : chip(r.height_delta_u, 'U')}</td><td>${r.data_quality ? verified(r.data_quality) : '<span class="muted">—</span>'}</td></tr>`).join('')}
+        <td class="nowrap">${esc(portText(r.first_port_group))}</td><td class="num nowrap">${num(r.height_u, 'U')}${r.is_self ? '' : chip(r.height_delta_u, 'U')}</td><td>${r.data_quality ? verified(r.data_quality) : '<span class="muted">—</span>'}</td><td>${r.is_self ? '' : App.useButton(d.part_id, r.part_id)}</td></tr>`).join('')}
       </tbody></table><div class="table-foot"><span>${a.rows.length - 1} alternatives · group <span class="mono">${esc(a.group)}</span></span><span>Differences are against this device.</span></div></div>`;
   }
+  /* Use this instead (docs/ui/editing.md, Alternatives): pick the open substation's equipment rows that use this
+     device; Network then holds the other part on them as an unsaved edit, so it is reviewed and saved there. */
+  App.useButton = (from, to) => `<button class="btn btn--ghost btn--sm" data-action="use-instead" data-from="${esc(from)}" data-to="${esc(to)}" aria-label="Use ${esc(to)} instead of ${esc(from)}">Use…</button>`;
+  ACTIONS['use-instead'] = (el) => {
+    const from = el.dataset.from, to = el.dataset.to, title = `Use ${esc(to)} instead`;
+    const cancel = '<button class="btn btn--secondary" data-action="close">Cancel</button>';
+    if (!(S.backend === 'yes' && S.project && S.project.real && S.sub)) {
+      dialog({ title, body: '<p>Open a substation first. The change is made on the equipment rows of the substation you have open.</p>', actions: cancel + '<button class="btn btn--primary" disabled>Use on these rows</button>' });
+      return;
+    }
+    Bridge.call('library_part_users', from, S.project.file, S.sub).then((u) => {
+      const rows = (u.uses || []).filter((x) => x.where === 'equipment');
+      const body = u.uses === null ? `<p>${esc(u.substation)} cannot be read, so its rows are not known. Its problems are on Checks.</p>`
+        : !rows.length ? `<p>No equipment row of ${esc(u.substation)} uses <span class="mono">${esc(from)}</span>.</p>`
+        : `<p>Equipment rows of ${esc(u.substation)} that use <span class="mono">${esc(from)}</span>:</p>
+          <div class="stack" style="margin:var(--space-3) 0">${rows.map((x) => `<label class="check"><input type="checkbox" data-use-row="${x.index}" checked><span class="mono">${esc(x.name)}</span></label>`).join('')}</div>
+          <p class="small muted">Only the part changes. The layout, MCB sizes and BOM are worked out again, and pins stay put. The change waits on Network for you to review and save.</p>`;
+      dialog({ title, body, actions: cancel + `<button class="btn btn--primary" data-action="use-instead-do" data-to="${esc(to)}" ${rows.length ? '' : 'disabled'}>Use on these rows</button>` });
+    }).catch((err) => toast(err.message, 'error'));
+  };
+  ACTIONS['use-instead-do'] = (el) => {
+    const picked = $$('[data-use-row]').filter((x) => x.checked).map((x) => Number(x.dataset.useRow));
+    if (!picked.length) { toast('Tick at least one row.', 'error'); return; }
+    closeDialog(); App.holdParts(picked, el.dataset.to);
+    toast(`${picked.length === 1 ? 'One row changes' : `${picked.length} rows change`} to ${el.dataset.to}. Review and save it on Network.`, 'info');
+  };
   ACTIONS['add-alternative'] = (el) => { ACTIONS['add-device'](); const from = $('#ad-from'); from.value = el.dataset.id; from.dispatchEvent(new Event('change', { bubbles: true })); $('#ad-group').value = el.dataset.group; $('#ad-title-note').textContent = `It joins the group ${el.dataset.group}.`; };
 
   /* "GIS Substation uses it in 2 rows: the equipment row rtac (Network) and a row on panel psa3 (Panels)." Library rows that bring it are named apart. */

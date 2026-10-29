@@ -227,3 +227,11 @@ def test_the_document_register_is_edited_with_confirm_add_and_remove_with_undo()
     assert "Pick another document there first." in js
     network = (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
     assert "Bridge.call('start_equipment'" in network
+
+
+def test_use_this_instead_hands_the_part_to_network_as_an_unsaved_edit() -> None:
+    edit = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
+    assert "ACTIONS['use-instead']" in edit
+    assert "pins stay put" in edit
+    assert "App.useButton(id, r.part_id)" in (UI_DIR / "screens-library.js").read_text("utf-8")
+    assert "App.holdParts = " in (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
