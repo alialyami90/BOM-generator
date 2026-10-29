@@ -110,7 +110,7 @@
     ${Object.keys(p.brands).length ? `<div class="span-2 section" style="margin:0">
       <h3>Catalogue brands</h3>
       <p class="lede">The project's brands apply unless this substation chooses its own.</p>
-      <div class="form form--3" style="margin-top:var(--space-3)">${KINDS.map(([k, l]) => brandSelect(p, k, l)).join('')}</div></div>` : ''}
+      <div class="form form--2" style="margin-top:var(--space-3)">${KINDS.map(([k, l]) => brandSelect(p, k, l)).join('')}</div></div>` : ''}
     <div class="span-2 section" style="margin:0">
       <h3>From the project</h3>
       <p class="lede">These come from the project and are the same for every substation in it.</p>
@@ -345,7 +345,7 @@
           <section><h3>L1 switch model</h3>${App.network.rankTable()}</section>
           <section><h3>Equipment</h3>
             <p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">What the substation has, before any panel exists. Redundant devices come as an A and a B unit.</p>
-            ${eq.length ? `<div class="table-wrap"><table class="table"><caption class="sr-only">Equipment</caption><thead><tr><th style="min-width:190px">Device</th><th style="min-width:150px">Role</th><th style="width:56px">A and B</th><th class="num" style="width:80px">Quantity</th><th class="num" style="width:80px">L2 ports</th><th class="num" style="width:64px">Height</th><th style="width:44px"><span class="sr-only">Remove</span></th></tr></thead><tbody>
+            ${eq.length ? `<div class="table-wrap"><table class="table"><caption class="sr-only">Equipment</caption><thead><tr><th style="min-width:170px">Device</th><th style="min-width:170px">Role</th><th style="width:56px">A and B</th><th class="num" style="width:72px">Quantity</th><th class="num" style="width:72px">L2 ports</th><th class="num" style="width:60px">Height</th><th style="width:44px"><span class="sr-only">Remove</span></th></tr></thead><tbody>
               ${eq.map((e, i) => eqRow(p, e, i)).join('')}</tbody></table>
               <div class="table-foot"><span>${plural(eq.length, 'item')} · height and mounting come from the library</span><span><button class="btn btn--secondary btn--sm" data-action="eq-add" ${dirty ? 'disabled title="Save or discard the changes first"' : ''}>${icon('plus')}Add device</button></span></div></div>` : `<div class="empty"><b>No equipment yet.</b><div class="muted small" style="margin:var(--space-1) 0 var(--space-3)">${FIRST}</div>${startButton('btn--primary')}</div>`}</section>
           <section><h3>Spares</h3>

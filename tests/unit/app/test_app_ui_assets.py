@@ -368,8 +368,13 @@ def test_row_delete_buttons_share_one_style() -> None:
 def test_network_rows_are_two_lines_and_the_role_select_fits() -> None:
     """polish-v02 items 4 and 11, and B4's #205 screen check (a) and (b)."""
     sub = (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
-    assert '<th style="min-width:150px">Role</th><th style="width:56px">A and B</th>' in sub
+    assert '<th style="min-width:170px">Role</th><th style="width:56px">A and B</th>' in sub
     assert 'class="part-line"' in sub  # Change… sits at the end of the part-id line
+    css = (UI_DIR / "styles.css").read_text(encoding="utf-8")
+    # B4's #207 check: the table stays in its column; a part id never breaks, Change… wraps
+    assert ".net-grid > * { min-width: 0; }" in css
+    assert ".part-line { display: flex; flex-wrap: wrap;" in css
+    assert ".part-line .mono { white-space: nowrap; }" in css
     assert "if (App.route().a !== 'network' || S.sub !== sub) return;" in sub
     assert "el.setAttribute('aria-busy', 'true')" in sub
     assert "dc_branches_per_feed: ['Spare DC branches', 'per feed']" in sub
@@ -379,6 +384,7 @@ def test_settings_names_the_resolved_brand_and_the_register_key() -> None:
     """polish-v02 items 7, 9 and 13."""
     sub = (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
     assert "'Same as AC branches'" in sub
+    assert '<div class="form form--2" style="margin-top:var(--space-3)">${KINDS.map(' in sub
     assert "`Same as the project (${from})`" in sub
     assert "const docOpts = (p) => p.documents.map((d) => [d.key, d.key]);" in sub
     assert "data-key=\"${key}\">Reset</button>` : ''}</td></tr>`" in sub  # no "Default" on each row
@@ -411,4 +417,6 @@ def test_the_project_path_stays_on_one_line() -> None:
 def test_the_save_bar_meets_the_window_bottom() -> None:
     """B4's screen check of #206: no empty band under the bar at the end of a page."""
     css = (UI_DIR / "styles.css").read_text(encoding="utf-8")
-    assert ".page:has(> .savebar) { padding-bottom: 0; }" in css
+    page_rule = ".page:has(> .savebar) { padding-bottom: 0; display: flex; flex-direction: column;"
+    assert f"{page_rule} min-height: 100%; }}" in css
+    assert ".page > .savebar { margin-top: auto; }" in css  # short pages too (B4, #207)

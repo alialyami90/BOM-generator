@@ -343,6 +343,8 @@ fieldset.readonly .btn, fieldset.readonly .grip { opacity: .5; cursor: default; 
 
 /* ---------- network screen ---------- */
 .net-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: var(--space-6); align-items: start; }
+.net-grid > * { min-width: 0; }
+.net-grid > .stack { grid-template-columns: minmax(0, 1fr); }  /* a wide table scrolls in its column */
 .net-result { position: sticky; top: 0; }
 @media (max-width: 1100px) { .net-grid { grid-template-columns: minmax(0, 1fr); } .net-result { position: static; } }
 
@@ -450,7 +452,10 @@ fieldset.readonly .btn, fieldset.readonly .grip { opacity: .5; cursor: default; 
 .setup li.now svg { color: var(--color-action-text); }
 .setup li.now b { color: var(--color-action-text); }
 /* Network equipment: the part id and its Change… on one line (polish-v02 item 11). */
-.part-line { display: flex; align-items: baseline; gap: var(--space-2); }
+.part-line { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: var(--space-2); }
+.part-line .mono { white-space: nowrap; }
 .part-line .btn { padding-inline: 0; min-height: 0; height: auto; }
 /* The save bar is the page's last block: no page padding under it, so it meets the window bottom. */
-.page:has(> .savebar) { padding-bottom: 0; }
+.page:has(> .savebar) { padding-bottom: 0; display: flex; flex-direction: column; min-height: 100%; }
+.page > .savebar { margin-top: auto; }
+.page:has(> .savebar) > :nth-last-child(2) { margin-bottom: var(--space-5); }  /* the bar's own top margin is auto */
