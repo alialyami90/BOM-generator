@@ -14,7 +14,10 @@ setup, and page headers/footers.
 
 ## Status
 
-Done:
+v0.2.1 is released ([`CHANGELOG.md`](CHANGELOG.md)). The next work waits on
+Ali's testing feedback on it.
+
+Done in v0.1:
 
 - M0 (repository, spec, plan, CI) and M1 (input models, YAML loader, JSON
   Schemas, `examples/`, `bomgen validate`).
@@ -57,37 +60,39 @@ Done:
   - Checks, Preview and Build show the check report and every sheet as the
     engine computes it, and write the workbook.
 
-  Apart from the Panels board (M17, below), projects and substations are
-  still read-only in the app: edit the YAML files, then open the project again.
+  Since v0.2 projects, substations, panels and the library are edited in the
+  app (M16–M18, below).
 - M11, built early (ADR 0009): the Windows installer and releases from
   `main` when a merged PR bumps the version
   ([`packaging/README.md`](packaging/README.md)).
   The installed app opens the desktop window, double-clicking a `.bomlib`
   imports it, and a `.bomproj` opens the app on that project.
 
-In progress, for v0.2 (Ali's feedback on v0.1.0, tracked in
+Done in v0.2 (Ali's feedback on v0.1.0, tracked in
 [`docs/backlog.md`](docs/backlog.md); milestones in `docs/plan.md` →
 "M12–M18 (v0.2)"):
 
-- M12 (done): a cable manager sits directly against the next device; the
+- M12: a cable manager sits directly against the next device; the
   blank-plate gap is only between two active devices.
-- M13 (done): alternatives are library parts (`alt_group`, `tier`), and
-  further MCB brand sets are chosen per project or substation with
-  `catalogue_choice` (ADR 0017); the DC branches can use their own DC-rated
-  set with `catalogue_choice.mcb_dc` (ADR 0023). The Library screen shows the
+- M13: alternatives are library parts (`alt_group`, `tier`), and further MCB
+  brand sets are chosen per project or substation with `catalogue_choice`
+  (ADR 0017); the DC branches can use their own DC-rated set with
+  `catalogue_choice.mcb_dc` (ADR 0023). The Library screen shows the
   catalogues.
-- M14 (done): the example library is psa-devices 1.1.0, with the researched
-  alternatives as parts and DC-rated MCB brand sets (plan Q37, Q38).
-- M15 (done): branch MCBs sized from each device's running and inrush current
+- M14: the installer ships psa-devices 1.1.0 from `data/library/`, with the
+  researched alternatives as parts, DC-rated MCB brand sets and the originals'
+  datasheet figures (plan Q37, Q38).
+- M15: branch MCBs sized from each device's running and inrush current
   (ADR 0019), with DC float-voltage checks.
-- M16: library editing as local versions (`+local.N`) with `.bomlib` backups,
-  CSV export and import for Excel (ADR 0018), and the alternatives comparison.
-  The store and CLI are done; the app's editors come next.
-- M17: create and edit projects, substations and panels in the app. The
-  writers (ADR 0021) and the Panels board's drag and drop, pins, deletes,
-  undo and keyboard moves are done; the app's other editors come next.
-- M18 (done): loose material on its own sheet and Preview tab (ADR 0020),
-  with free-text items, writers and the app's Loose material page (ADR 0022).
+- M16: library editing in the app and on the command line: the device editor
+  with its Datasheet and Alternatives tabs, local versions (`+local.N`) with
+  `.bomlib` backups, and CSV export and import for Excel (ADR 0018).
+- M17: create, rename, edit and delete projects and substations in the app:
+  project and substation settings, Network inputs and equipment rows, the
+  document register, and the Panels board's drag and drop, pins, deletes,
+  undo and keyboard moves (ADR 0021).
+- M18: loose material on its own sheet and Preview tab (ADR 0020), with
+  free-text items and the app's Loose material page (ADR 0022).
 
 Who builds what is in [`docs/agents.md`](docs/agents.md); the terms project,
 substation, side and stream are defined in `docs/plan.md` → "Glossary".

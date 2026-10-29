@@ -78,6 +78,15 @@ A milestone with several modules may group them in a subfolder,
 | `test_fields.py` | M17c | field writers for project defaults and substation overrides, per-field validation, list rows, the document register's users, assumed values |
 | `test_lifecycle.py` | M17d | create and delete projects and substations: ids, copies with panels and documents, backups before a delete |
 | `app/test_app_edit_api.py` | M17 | the app's editing endpoints: what is written, refused edits, the refreshed board, whether a move fits and the rack space it leaves (ADR 0021) |
+| `test_shipped_library.py` | M14 | the shipped `data/library/psa-devices.yaml`: up to date with its sources, the example plus the originals' datasheet inrush and input range, builds the example project, C60H-DC is DC only (plan Q38) |
+| `engine/test_engine_shipped_library.py` | M15 | MCB sizing with the shipped library: 6 A for the SEL branches that clear their inrush, the 2 A floor elsewhere, spares, unchanged mains, the float-voltage warnings |
+| `library_store/test_library_record_edits.py` | M16 | device-database record edits: one field at a time, new and removed records, problems by part and field, saved in a local version with its release notes (ADR 0018) |
+| `app/test_app_library_edit.py` | M16 | the device editor's pending set and endpoints: kept between sessions, review entries, refused edits, new and copied devices, deletes, saving a local version, part users |
+| `app/test_app_library_csv.py` | M16 | the app's library export and CSV import: one folder per export, the review of changed and bad rows, accepted rows reaching the pending set |
+| `app/test_app_project_fields.py` | M17c | the Project page's fields: client, shared defaults, refused values, the logo copy, catalogue brand choices |
+| `app/test_app_substation_fields.py` | M17c | a substation's Network inputs and equipment rows: writes, emptied spares, refused values, added and removed rows with Undo, brand choices |
+| `app/test_app_register.py` | M17c | the document register: what uses each document, assumed dates and Confirm, Add with a free key, Remove and a refused remove, dates written as dates |
+| `app/test_app_lifecycle_api.py` | M17d | create, rename and delete projects and substations in the app: ids from names, copies, backups before a delete, the first core switches |
 | `test_loose_edit.py` | M18 | loose-material writers: library and free-text items, move, remove, host panel, per-field checks (ADR 0022) |
 | `app/test_app_loose_api.py` | M18 | the Loose material page's API: the list with its library parts, add, edit, move and remove, refused edits not written, per-field messages, the host panel's document |
 
