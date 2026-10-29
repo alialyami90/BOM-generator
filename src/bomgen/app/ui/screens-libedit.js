@@ -179,7 +179,7 @@
     const isNew = !ED.reply.saved;
     return `<div class="page">${pageHead(esc(d.part_id), esc([d.make, d.model, isNew ? 'new device, not applied yet' : ''].filter(Boolean).join(' · ')), `<button class="btn btn--danger" data-action="delete-device" data-id="${esc(d.part_id)}" data-new="${isNew ? 1 : ''}">${icon('trash')}Delete…</button>`, crumbs)}${notice}${used}${pend}
       ${tabs('devEdit', Object.entries(TABS).map(([k, [label]]) => [k, label]), t, 'Device sections')}
-      <div role="tabpanel" aria-labelledby="tab-devEdit-${t}" style="margin-top:var(--space-4)">${t === 'parts' ? `<datalist id="dl-parts">${((names) => (ED.reply.part_ids || []).map((p) => `<option value="${esc(p)}" label="${esc(names[p] || '')}">`).join(''))(ED.reply.part_names || {})}</datalist>` : ''}${lede}${fields.length ? `<div class="form ${t === 'identity' ? 'form--2' : 'form--3'}">${fields.map(spans).join('')}</div>` : ''}${lists}</div>${saveBar()}</div>`;
+      <div role="tabpanel" aria-labelledby="tab-devEdit-${t}">${t === 'parts' ? `<datalist id="dl-parts">${((names) => (ED.reply.part_ids || []).map((p) => `<option value="${esc(p)}" label="${esc(names[p] || '')}">`).join(''))(ED.reply.part_names || {})}</datalist>` : ''}${lede}${fields.length ? `<div class="form ${t === 'identity' ? 'form--2' : 'form--3'}">${fields.map(spans).join('')}</div>` : ''}${lists}</div>${saveBar()}</div>`;
   }
   /* ---------- Alternatives: the device first, then each part with the same alt_group (ADR 0017) ---------- */
   /* A delta chip: plain text with a sign, warning-tinted when higher, success-tinted when lower. */
