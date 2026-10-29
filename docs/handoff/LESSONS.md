@@ -1,42 +1,38 @@
-# LESSONS: the whole team
+# LESSONS
 
-Decisions too small for an ADR, and approaches that failed. Merged from every role's `LESSONS.md`
-(2026-10-28 to the final handover on 2026-10-29). Section 1 holds what several roles learned; each
-role's own section follows. Append-only: add new entries at the end of the right section and mark a
+Decisions too small for an ADR, and approaches that failed. Section 1 covers working practice; the
+rest is grouped by code area. Append-only: add new entries at the end of the right section and mark a
 replaced entry "superseded by …".
 
-## 1. Lessons shared by every role
+## 1. Working practice
 
-### Ali's standing instructions
+### Ali's standing rules
 
-- Ali: "Moving forward all PR approvals send to A1" and "stop asking me for merges. Check the merge for
-  conflicts and merge it". Role 1 reviews, approves and squash-merges every PR. Never ask Ali to merge.
-- Ali: "If u have questions to me prompt it in a cards always." Every question to Ali goes on a
-  `request_decision` card with one option recommended. Record the answer as a plan §6 question (next
-  free number in agents.md) in a docs PR.
-- Only Ali accepts ADRs. Use the Superpowers skills. Read the handoff docs well.
+- Don't ask Ali to merge ("Check the merge for conflicts and merge it"). PRs are squash-merged once
+  they are conflict-free and CI is green.
+- Every question to Ali goes on a decision card with one option recommended ("If u have questions to me
+  prompt it in a cards always"). Record the answer as a plan §6 question.
+- Only Ali accepts ADRs. Use the Superpowers skills.
 - Releases come from main when a version bump merges (#153); nobody pushes tags.
 
 ### Git and branches
 
-- **Each session may push only to its own designated branch**, and force-push is refused by the
-  session's safety check. A successor can't push to its predecessor's branch: carry the open PR's
-  commits onto your branch, open a replacement PR that says so, and comment on the old one (#131 → #146).
-- **Branch restart after a squash merge** (every role used this):
+- Force-push is refused by the session's safety check, and a session may push only to its own branch.
+- **Branch restart after a squash merge:**
   ```bash
   git fetch origin main <branch>
   git checkout -B <branch> origin/main      # then commit or cherry-pick the next change
   git merge -s ours origin/<branch> -m "chore: merge old branch history (already squash-merged)"
   git push -u origin <branch>               # a plain push now fast-forwards
   ```
-  `git rebase origin/main` after a squash merge replays the whole branch history and conflicts. Role 7
-  once used `git push --force-with-lease`, and role 8 used `--force-with-lease=<branch>:<old sha>` after
-  a rebase; most sessions refuse any force push, so prefer the recipe above.
+  `git rebase origin/main` after a squash merge replays the whole branch history and conflicts.
 - **Queued work on one branch:** while one PR is open, build the next on a local branch from
   `origin/main` (keep a patch backup in project files), then rebuild the push branch with the recipe.
 - **Rebasing a test module both sides appended to:** take main's file, then add your appended tail from
   `git show <commit>`. Put new tests away from another open PR's insertion point, and check with
-  `git merge-tree --write-tree HEAD origin/<their-branch>` before pushing.
+  `git merge-tree --write-tree HEAD origin/<other-branch>` before pushing.
+- `docs/decisions/README.md` and `docs/plan.md` conflict when two milestones are open; keep every row in
+  number order and both notes.
 - The clone may be shallow: `git fetch --unshallow` before using old shas; `git fetch --tags` if
   `v0.2.x` tags are missing locally.
 
@@ -49,12 +45,12 @@ replaced entry "superseded by …".
   ("Error importing plugin pydantic.mypy"). Use `python -m mypy` / `python -m pytest`, or a venv
   (`uv venv /tmp/venv && uv pip install -p /tmp/venv -e ".[dev]"`).
 - **In a git worktree the editable install points at the main checkout**, so tests run the wrong `src/`.
-  Run with `PYTHONPATH=src` and check `python -c "import bomgen; print(bomgen.__file__)"`. A5 once
-  misreported 3 failures this way; B11's reported `check_layout` failures were the same stale install.
-- The full suite took ~10 min after #130, ~2–4 min after #149's parse cache, and 5–7 min at the
-  handover; goldens about 5–7 s. Run pytest in the background (foreground calls time out at 120 s or
-  600 s). `sleep` is blocked: use `run_in_background` or `timeout … until` loops. A grep for " passed"
-  also matches ruff's "All checks passed!"; wait on `" in [0-9.]*s"`.
+  Run with `PYTHONPATH=src` and check `python -c "import bomgen; print(bomgen.__file__)"` first; a stale
+  install has twice produced false test failures.
+- The full suite took ~10 min after #130, ~2–4 min after #149's parse cache, and 5–7 min at 2672 tests;
+  goldens take about 5–7 s. Run pytest in the background (foreground calls time out at 120 s or 600 s).
+  `sleep` is blocked: use `run_in_background` or `timeout … until` loops. A grep for " passed" also
+  matches ruff's "All checks passed!"; wait on `" in [0-9.]*s"`.
 - ruff RUF001–003 reject en dash, ×, −, `›` and other ambiguous characters in code and comments. Write
   ASCII or escapes.
 - Docs-only PRs skip lint, mypy and pytest in CI ("Detect code changes"); `ci-status` is the check that
@@ -66,88 +62,54 @@ replaced entry "superseded by …".
 
 - PR body starts with the attribution block from the session's instructions (copy it from there, not
   from an older PR: #123 and #159 had wrong links, fixed with `update_pull_request`) and ends with the
-  attribution footer; add no model name. GitHub comments end with the Claude Code footer.
+  attribution footer. GitHub comments end with the Claude Code footer.
 - Requesting Ali as reviewer fails ("Review cannot be requested from pull request author"); assign
-  `alialyami90` instead. Subscribe to every PR you open.
+  `alialyami90` instead. Subscribe to every PR you open so CI results arrive without polling.
 - The GitHub MCP tools must be loaded with ToolSearch and the server drops often; reload and retry.
   `fields` on `list_pull_requests` keeps answers small.
-- Read the source PR's body for the "why" before guessing a reviewer's intent (#178).
-- Agents' reports of "pending" PRs can be stale; check the PR state before acting on a report.
-- Some early PRs show "closed, not merged" because A1 landed them as commits; check `git log origin/main`.
+- Some early PRs show "closed, not merged" because they landed as commits; check `git log origin/main`.
+- Read a PR's own description for the "why" of a change before guessing (#178).
+- Keep ADR edits in their own `docs(adr): …` PR, not mixed into a docs update (#167 → #170).
 
-### Messaging and handoffs
-
-- **Thread ids go stale.** Roles move to new threads after a reset; a message to a retired thread is
-  lost or answered by the retired agent (a retired A5 and the new B5 gave conflicting answers on #161;
-  the coordinator ruled for B5). Check `list_threads` or ask the coordinator before messaging, and give
-  your own thread id in your first message.
-- Never send placeholder text with `message_thread`: every call is delivered (two stray messages had to
-  be retracted). Write the real text first, check the message id before `edit_message`.
-- Messages are capped at 2000 characters; put long notes in a file under `/mnt/project-files/` and link it.
-- Cards live in the thread that posted them; when a thread retires, repost its open cards in the new one.
-- A refresh keeps the name; a reset or retirement moves to the next letter.
-- Before carrying a question forward, check plan §6: finding 24 and the iC60N float warning were
-  settled by Q41 and Q37 while still listed as open.
-- Drift checks at resume were always worth it: STATE named shas that docs-only merges had moved past,
-  open PRs that had merged, and branches that differed per session. Diff your own paths
-  (`git log <old>..origin/main -- <paths>`) to tell docs-only drift from code drift, and run every
-  check just before writing its result (role 7 once claimed a loop printed nothing; a rerun showed 9
-  missing rows).
-- A fresh read-only reader of the handoff docs is a good test: it found real gaps for roles 7, 9 and 10
-  (short paths, branch ranges, owned files, setup steps). Write full paths.
-- Keep ADR edits out of checkpoint PRs; B1 refused one (#167 → #170).
-
-## 2. Role 1: Lead developer
-
-### Review procedure
+### Reviewing a PR
 
 1. `git fetch -q origin main refs/pull/N/head:refs/remotes/pr/N` (wrap in `timeout 90` with retries;
    fetches sometimes hang).
 2. `git merge-tree --write-tree origin/main pr/N` (prints a tree id when clean).
-3. `git diff --stat origin/main...pr/N` for scope: only the role's files (agents.md "Owns").
+3. `git diff --stat origin/main...pr/N` for scope.
 4. For each changed `.js` file: `git show pr/N:path > /tmp/c.js && node --check /tmp/c.js`, and read the
    template strings (#126 had `aria-label=""${…}` that no test catches).
-5. `pull_request_read get_check_runs`. PRs touching `src/bomgen/app/`, `packaging/`, `pyproject.toml`
-   or `release.yml` also need a green "Build Windows installer".
-6. The owner runs the full gate and CI reruns it. Run it yourself only for engine or cross-role
-   changes: in a scratch `git worktree` with `git merge --no-commit origin/main`, then ruff,
-   `PYTHONPATH=src python3 -m mypy`, `PYTHONPATH=src python3 -m pytest -q -p no:cacheprovider`.
-7. Approve with a COMMENT review on the exact head sha (the account can't approve its own PRs) whose
-   body starts "B1: approved" and ends with the footer; merge with `merge_method: squash` and that sha as
-   `expectedHeadSha`. A 409 means the head moved: re-review. Your own review and the merge come back as
-   PR events; ignore them. `subscribe_pr_activity` (`owner`, `repo`, `pullNumber`) to each PR you will
-   merge so CI wakes you.
+5. `pull_request_read get_check_runs`; app, packaging, pyproject and release-workflow PRs also need a
+   green "Build Windows installer".
+6. Run the full gate yourself for engine or cross-area changes: in a scratch `git worktree` with
+   `git merge --no-commit origin/main`, then ruff, `PYTHONPATH=src python3 -m mypy`,
+   `PYTHONPATH=src python3 -m pytest -q -p no:cacheprovider`.
+7. Merge with `merge_method: squash` and the reviewed head sha as `expectedHeadSha`. A 409 means the head
+   moved: re-review.
 
-### Decisions
-
-- Brief agents specifically: the files, the rule, the tests, and what not to touch.
-- Q38: `examples/library.yaml` stays the spec example (golden values fixed); the shipped library is
-  generated separately in `data/library/`.
-- Cross-role engine edits are fine when they are minimal guards (#122's `part_id is not None`), but tell
-  the owner.
 - A spec disagreement found in review (#157's print area) goes to Ali on a card before merging, even
   when the code is right.
-- A screen check by role 4 in the real app before merging UI PRs catches what tests can't (clipped
-  selects, ids that wrap, a dialog opening over the wrong page). #207 failed its first check. Keep each
-  UI PR to one screen area.
-- When a reviewer finds nits after a PR is good, merge it and send the nits as one follow-up PR (#208).
-- Release sequencing: held #194 until v0.2.0 published; prepared the 0.2.1 CHANGELOG while the last
-  polish PR was open and opened it only after that PR merged, so its wording matched the final squash.
-  Code merges used to be held while a tag was pending; release-from-main made that unnecessary.
-- Final handover (10 roles at once): every merge of a ROSTER row conflicted its neighbours (#215, #217,
-  #219, #220). Merge non-adjacent edits first, then ask each remaining owner to merge origin/main just
-  before you merge theirs. (The roster is now gone, but the same holds for shared handoff files.)
+- Cross-area engine edits are fine when they are minimal guards (#122's `part_id is not None`).
+- A screen check in the real app before merging UI PRs catches what tests can't (clipped selects, ids
+  that wrap, a dialog opening over the wrong page). #207 failed its first check. Keep each UI PR to one
+  screen area.
+- When nits turn up after a PR is good, merge it and send the nits as one follow-up PR (#208).
+- Release sequencing: hold other merges until a release is published; prepare the CHANGELOG while the
+  last PR is open but open it only after that PR merges, so its wording matches the final squash.
 
-### Failed approaches
+### Keeping these docs honest
 
-- Checking a tag only on Ali's word: v0.1.1 stayed on the old commit after "Retag is done". Always
-  confirm with `git ls-remote origin refs/tags/<tag>`; Ali finally redid it in the GitHub UI.
-- Ali pushed tags himself at first; session tag pushes get a 403 (superseded by #153).
-- Roles kept messaging the retired A1 thread after handover; give the new thread id in the first message.
+- Check what merged since STATE.md was written before trusting it: STATE has named shas that docs-only
+  merges had moved past and PRs as open that had merged. Diff the paths you care about
+  (`git log <old>..origin/main -- <paths>`) to tell docs-only drift from code drift.
+- Run every check just before writing its result (a row loop once "printed nothing" until a rerun showed
+  9 missing rows).
+- Before carrying a question forward, check plan §6: finding 24 and the iC60N float warning were
+  settled by Q41 and Q37 while still listed as open.
+- A fresh reader of these docs is a good test; it has found short paths, missing setup steps and wrong
+  branch ranges. Write full paths.
 
-## 3. Role 2: Input models and examples
-
-### Decisions
+## 2. Input models and I/O
 
 - Writers compare problems by (file, location, message), not by line; lines move with an edit (ADR
   0021 point 2).
@@ -159,9 +121,14 @@ replaced entry "superseded by …".
 - `validate_*` functions are dry runs of the writer: one code path, so the form's message is exactly what
   the save would report.
 - Seeded defaults with no source get a `# ASSUMED` comment (`set_comment(node, key, "ASSUMED")`); the app
-  highlights them through `fields.assumed_fields(file)`. Ask the lead before picking one.
-- `schemas/` isn't in role 2's agents.md row, but it is generated from role 2's models, so role 2
-  regenerates it with every model change. No test checks it is current.
+  highlights them through `fields.assumed_fields(file)`.
+- `schemas/` is generated from the models; regenerate it with every model change. No test checks it.
+- `model_copy` skips validators: anything built with `model_copy(update=...)` (like
+  `resolve_catalogues`) can hold values the model would refuse. Prefer a property, or re-validate.
+- Copy shared fixture dicts (`dict(ABB_MCB)`) before mutating them; one test leaked into the next.
+- Suite speed: the cost was YAML parsing, not pydantic. Profile one slow test with
+  `python -m cProfile -s cumtime -m pytest <test>` before adding fixtures. The parse cache is keyed by
+  text, so it can't go stale; errors aren't cached, so each names its own file.
 
 ### ruamel.yaml round-trip traps (`io/round_trip.py`)
 
@@ -180,19 +147,10 @@ replaced entry "superseded by …".
 - An empty collection is written in flow style (`[]`, `{}`) so the file stays valid; when it gains its
   first entry `set_entry` switches it to block style. Otherwise new nested mappings come out `{ a: 1 }`.
 
-### Other
+## 3. Device database and shipped library
 
-- `model_copy` skips validators: anything built with `model_copy(update=...)` (like
-  `resolve_catalogues`) can hold values the model would refuse. Prefer a property, or re-validate.
-- Copy shared fixture dicts (`dict(ABB_MCB)`) before mutating them; one test leaked into the next.
-- Suite speed: the cost was YAML parsing, not pydantic. Profile one slow test with
-  `python -m cProfile -s cumtime -m pytest <test>` before adding fixtures. The parse cache is keyed by
-  text, so it can't go stale; errors aren't cached, so each names its own file.
-
-## 4. Role 3: Device database researcher
-
-- **Web budget:** about 100 fetches an hour shared. Run research agents with at most ~35 fetches each
-  and plan a second pass an hour later (M14 round 1 ran out; a resumed second pass finished it).
+- **Web budget:** about 100 fetches an hour. Run research with at most ~35 fetches per pass and plan a
+  second pass an hour later (M14's first round ran out; a second pass finished it).
 - `verified: true` only when that exact code was read on a manufacturer or distributor page. Never
   invent a code or figure: leave it out and say so in `notes`.
 - The iC60N 2P is rated to exactly 125 V DC; the float is about 135–140 V. Q37 kept it as default; the DC
@@ -203,23 +161,21 @@ replaced entry "superseded by …".
 - A rack part with unknown height leaves `height_u` out; the loader requires `height_u > 0` for rack parts.
 - Normalise generated YAML with `dump_text(load_text(text))` and write block style; flow-style output
   failed `tests/unit/test_round_trip.py`.
-- Check for existing keys before inserting: role 2 had already added `dc_rating_v` to `catalogues.mcb`
-  and the generator wrote it twice.
-- Tests outside role 3's files: change them only with the lead's approval, assert the new composition,
-  never loosen a test, list them in the PR body under "Tests outside role 3's files", and ask the owner
-  to review.
-- When another role lands the same fix first (B5's #165), merge main and take its version, then check
-  its new tests against your data (one assumed every shipped brand is AC-rated).
+- Check for existing keys before inserting: `dc_rating_v` was already on `catalogues.mcb` and the
+  generator wrote it twice.
+- When changing tests outside `data/`, assert the new composition, never loosen a test, and list them in
+  the PR body.
+- When the same fix lands elsewhere first (#165), merge main and take that version, then check its new
+  tests against the data (one assumed every shipped brand is AC-rated).
 
-## 5. Role 4: UI designer
+## 4. UI design
 
 ### How to work
 
 - **Impeccable:** run the launcher through `sh <skill-dir>/scripts/impeccable …` (direct exec is
-  "permission denied"); `detect --json` on the app and prototype must return `[]`. In one container the
-  binary at `/root/.impeccable/bin/0.1.14/` was absent and npx was refused; the craft floor was checked
-  by hand. Craft floor: no kickers, no side-stripe borders, no nested cards, no hard offset shadows, no
-  gradient text.
+  "permission denied"); `detect --json` on the app and prototype must return `[]`. If the binary is
+  missing and npx is refused, check the craft floor by hand: no kickers, no side-stripe borders, no
+  nested cards, no hard offset shadows, no gradient text.
 - **Prototype checks:** vanilla JS in `docs/ui/prototype/` (`ui.js` App namespace, `ACTIONS` by
   `data-action`, `SCREENS`, hash routes, `engine-stub.js` stands in for the layout engine, `data*.js` is
   illustrative). Playwright: `NODE_PATH=$(npm root -g) node script.js` with
@@ -232,13 +188,12 @@ replaced entry "superseded by …".
   the library with `bomgen library import`. The scripts are in `/mnt/project-files/ui/harness/`
   (`README.md`, `serve.py`, `shoot.js`). The server serves the current checkout, so
   `git checkout --detach <pr-sha>` changes what you see; restart it when Python changed.
-- **Polish cycle:** role 4 writes ranked findings (`docs/ui/polish-v02.md` pattern), each tagged app fix
-  or doc change (doc changes in the same PR as the findings). Role 11 fixes in small PRs. Role 4
-  screen-checks each PR in the real app on its branch, then sends one note to the lead and one to role
-  11. The lead merges when the screen check and CI pass. Ali approves nothing in this loop.
-- **Screen-check note:** start with the verdict ("passes", or "not yet, hold the merge"); list failures
+- **Polish cycle:** write ranked findings (`docs/ui/polish-v02.md` pattern), each tagged app fix or doc
+  change (doc changes in the same PR as the findings); fix them in small PRs, one screen area each;
+  screen-check each PR in the real app on its branch before merging.
+- **Screen-check notes:** start with the verdict ("passes", or "not yet, hold the merge"); list failures
   with the exact symptom and a concrete CSS or wording fix; list what passed by item number; mark nits
-  "not for this PR"; stay under 2000 characters.
+  "not for this PR".
 
 ### Decisions
 
@@ -259,8 +214,8 @@ replaced entry "superseded by …".
 - **Changed marker** (`components.md`, #204): an unsaved edit is a 6 px warning-colour dot before the
   field label or at the start of a table cell, plus sr-only "changed"; a changed list gets a *Changed*
   badge. `#FFFF00` means "the workbook will show this as revised" and is wrong on a form. Rejected:
-  yellow cells (B4 wrongly endorsed `td.changed` in #146; check a reused class's meaning in the tokens
-  and design language before endorsing it).
+  yellow `td.changed` cells (briefly used in #146; check a reused class's meaning in the tokens and
+  design language before reusing it).
 - **Save bar, invalid state:** "N fields need fixing before you can save." is one control that jumps to
   the first error.
 - **Errors in words** (`editing.md` "Validation"): model pattern and type errors are never shown raw;
@@ -272,7 +227,7 @@ replaced entry "superseded by …".
 - **Loose material copy** (#142): foot "Quantity is a whole number, or 1 Lot."; the free-text banner says
   there is no part, ordering code, make or model and it can't be fed from a cabinet, so an item needing
   power must be added to the library first. The Qty rule matches `_validate_quantity` (whole number ≥ 1
-  or `1 Lot`), not "a number with a unit".
+  or `1 Lot`).
 - Number inputs are right-aligned with tabular figures. Row delete is one style: muted icon, danger on
   hover (`.btn--del`).
 
@@ -293,17 +248,17 @@ replaced entry "superseded by …".
 - A save bar with page padding under it floated above an empty band; the page is a flex column and the
   bar takes `margin-top: auto`.
 
-## 6. Role 5: Library update packages
+## 5. Library store and packages
 
 - **Edits are path-based JSON ops, not one function per field**, so the app's pending set maps onto ops
-  and every model field is editable (ADR 0018 "Amendment: edit operations"). Device records use the
-  same ops keyed by `part_id`; records stay in their file and new ones go to `device-db/local.yaml`, so
+  and every model field is editable (ADR 0018 "Amendment: edit operations"). Device records use the same
+  ops keyed by `part_id`; records stay in their file and new ones go to `device-db/local.yaml`, so
   unchanged files keep their bytes.
-- **CSV import yields both a saved library and edit ops:** the CLI keeps the file's row order and saves
-  at once; the app takes `edits` into its pending set.
+- **CSV import yields both a saved library and edit ops:** the CLI keeps the file's row order and saves at
+  once; the app takes `edits` into its pending set.
 - Row problems fail by default; `skip_invalid` makes them warnings and skips the rows (an existing device
-  keeps its installed values). A missing table or column keeps installed values; a present table
-  replaces that table's rows.
+  keeps its installed values). A missing table or column keeps installed values; a present table replaces
+  that table's rows.
 - A bad cell starting `=`, `+`, `-`, `@` gets "(probably an Excel formula)"; valid values are never
   flagged.
 - Reserved CSV ids use a character `BrandId` forbids: `default_dc` (underscore) names
@@ -322,10 +277,9 @@ replaced entry "superseded by …".
   `partial.unlink` in `finally` must suppress `OSError` (a file in the folder's place raised
   `NotADirectoryError`). After the version folder is swapped in, a failed `active` write removes the new
   folder and restores the `.replaced-<uuid>` one.
-- Another role may change your files on main (#165 added `ac_rated` and amended ADR 0018). Fetch and
-  read main's ADR before amending it.
+- Fetch and read main's copy of an ADR before amending it; it may have changed (#165 amended ADR 0018).
 
-## 7. Role 6: Windows installer and release
+## 6. Windows installer and release
 
 - **Self-test reads a build-time module manifest**, not the frozen app: `packaging/bomgen.spec` writes
   `bomgen_modules.txt` and `--self-test` imports every listed module. Walking the frozen app only sees
@@ -338,55 +292,50 @@ replaced entry "superseded by …".
 - The frozen CLI skips `cli.main()`: `launcher.cli_main` calls the typer app directly, so setup in
   `main()` (UTF-8 console) must also run in `cli_main` (#70). Test with cp1252 stdout/stderr.
 - `build` prints the workbook path first, then the check report; the smoke step takes line 1 as the path.
-- A release made by hand blocks `gh release create` (Ali published an empty v0.1.0 in the UI first).
+- A release made by hand blocks `gh release create` (an empty v0.1.0 was published in the UI first).
   Fix: delete the empty release (keep the tag) and "Re-run failed jobs"; the workflow now guards with
   `gh release view` then `upload --clobber` (#86).
 - Tag name case matters: the workflow triggers on `v*`, and `V0.1.1` started nothing.
-- Tag the commit the changelog covers. Before following a tag run, compare its sha with the commit the
-  lead named; if they differ, cancel before the publish job. A retag that "is done" may not be on
-  GitHub; check with `list_tags` or `git ls-remote`. From a phone: delete the tag in the UI, then publish
-  a release with a new tag on the chosen commit.
-- **Release from main, not tags (#153):** agents can't push tags (HTTP 403), so tag releases stalled on
-  Ali. Build, tag and release run in one workflow run because a tag made with `GITHUB_TOKEN` doesn't
-  trigger other workflows. Rejected: a separate tagging workflow.
+- Tag the commit the changelog covers. A retag reported as done may not be on GitHub (v0.1.1 stayed on
+  the old commit because the old tag still existed); always check with `list_tags` or
+  `git ls-remote origin refs/tags/<tag>`. From a phone: delete the tag in the UI, then publish a release
+  with a new tag on the chosen commit.
+- **Release from main, not tags (#153):** sessions can't push tags (HTTP 403), so tag releases stalled.
+  Build, tag and release run in one workflow run because a tag made with `GITHUB_TOKEN` doesn't trigger
+  other workflows. Rejected: a separate tagging workflow.
 - **First-start default library is a launcher hook, not an installer `[Run]` step,** so the smoke test
   can use a temporary store and prove a reinstall changes nothing. Import only when `LibraryStore.list()`
   is empty, never force, never block the window; a double-clicked `.bomlib` skips it.
-- Read main's file before reviewing against NEXT (B6's Q38 review assumed main still packed 1.0.0).
 - A fast Windows job (about 90 s on a pip cache hit) is not a skipped one: check every step ran
   (`get_workflow_job`) and the log ends "Installed, verified and uninstalled".
 - The first release from main (v0.2.0) worked end to end: plan 5 s, build/tag/publish about 3 min.
   Before opening a bump, check `list_tags` has no `v<version>` and `grep '^## \[<version>\]' CHANGELOG.md`.
 
-## 8. Role 7: Lead developer assistant
+## 7. Documentation and changelog
 
-- **L1 Changelog format.** Keep a Changelog; every merged PR number appears once (one milestone's PRs may
+- **Changelog format.** Keep a Changelog; every merged PR number appears once (one milestone's PRs may
   share an entry, e.g. "(#44, #46)"), newest first in Added and Changed. Released sections
   `## [x.y.z] - YYYY-MM-DD` with link refs at the bottom (`compare/vA...vB`, `releases/tag/v0.1.0`).
   Rejected: per-milestone entries only (lost the fix PRs).
-- **L2 Batching.** The lead prefers one docs PR over a range of merges and sometimes asks to wait for
-  named PRs. Ask before opening a pass.
-- **L3 Verify commands on a copy:** `cp -r examples <scratch>/ex`. `bomgen layout` on the shipped example
-  exits 1 by design (`fed_from: psa3`, plan M1c); `--force` rewrites `panels/`. Never on `examples/`.
-- **L4 README-row coverage loop:**
+- **No changelog entry** for docs-only, handoff and chore PRs, version bumps (the heading records the
+  version) and internal refactors with no user-facing change (#197).
+- **Wording:** user-facing, no internal names; word each entry from the PR description and, for a
+  release's last PR, from its final squash message (`git show -s --format=%B <sha>`). Wrap at about 78
+  columns.
+- Batch docs updates into one PR over a range of merges. Check `git log` for unlisted merges each time;
+  docs once fell 42 PRs behind.
+- **Verify commands on a copy:** `cp -r examples <scratch>/ex`. `bomgen layout` on the shipped example
+  exits 1 by design (`fed_from: psa3`, plan M1c); `--force` rewrites `panels/`.
+- **README-row coverage loop:**
   `for f in $(cd tests/unit && find . -name 'test_*.py'); do grep -q "$(basename $f)" tests/unit/README.md || echo "missing $f"; done`
   (same for `tests/golden`).
-- **L5 Link check loop:** for each doc, `grep -o '](\([^)#]*\))'`, drop http links, test
+- **Link check loop:** for each doc, `grep -o '](\([^)#]*\))'`, drop http links, test
   `[ -e "$(dirname $f)/$l" ]`.
-- **L6** Report stale lines in other roles' files to the lead with path, line and evidence.
-- **L10** A blank line inside a Markdown table ends it; check rendering after inserting rows.
-- **L11** Docs once fell 42 PRs behind because passes waited for the lead's merge notes; check `git log`
-  for unlisted merges at every wake.
-- **L12 No changelog entry** for docs-only, handoff and chore PRs, version bumps (the heading records the
-  version) and internal refactors with no user-facing change (#197). Replaces L1's "my own docs PRs get a
-  Changed entry".
-- **L13 Changelog wording:** user-facing, no agent names; word each entry from the PR description and,
-  for a release's last PR, from its final squash message (`git show -s --format=%B <sha>`). Wrap at
-  about 78 columns.
-- **L17 Writing rows:** read each module's docstring and test names first; a row says what is checked
-  in plain words, not test names. `textwrap` breaks at hyphens ("screen-reader"), so hand-wrap those.
+- A blank line inside a Markdown table ends it; check rendering after inserting rows.
+- **Writing test-README rows:** read each module's docstring and test names first; a row says what is
+  checked in plain words, not test names. `textwrap` breaks at hyphens ("screen-reader"), so hand-wrap.
 
-## 9. Role 8: Sizing and layout engine
+## 8. Sizing and layout engine
 
 The rules are in ADR 0013 and the design spec (R1–R10).
 
@@ -398,25 +347,24 @@ The rules are in ADR 0013 and the design spec (R1–R10).
 - **Annunciator after a layout is fed from panel 001** (Ali). `examples/` keeps psa3 for the hand-written
   goldens; the layout golden's fixture rewrites `fed_from: psa3` to `psa1`.
 - **`with_layout` takes over `panels:` only once a listed file is `generated: true`**, keeping the spec
-  goldens (A1 agreed).
-- **Size from kept units** (A1 review of #19): removed units leave the L2 demand and SFPs; when kept
-  switches fall short, report `port-capacity`.
+  goldens.
+- **Size from kept units:** removed units leave the L2 demand and SFPs; when kept switches fall short,
+  report `port-capacity`. Rejected: removal as layout-only.
 - **`l2_ports` count once per entry**, as R2 says. The first `_side_ports` multiplied by unit count and
   was reverted.
 - **`bomgen layout` rewrites `panels:` as text** to keep comments; it deletes stale generated files and
   only names hand-written ones. Rejected: a YAML round-trip, which drops comments.
 - **Overrides apply after the fill (R7), in order; a later move of a unit replaces it.** Pins-first was
-  rejected (A1, 2026-10-28): it re-flows other devices, which the board contract forbids. A pin to the
-  automatic place stays a pin.
+  rejected: it re-flows other devices, which the board contract forbids. A pin to the automatic place
+  stays a pin.
 - **Position** = 1-based place among rack devices; DIN-rail parts don't count; past the bottom means
   last; ties go by group order. A `PairMove` on an entry without A/B units is `stale-override`.
 - **Blank plates (M12, Ali):** one under each rack block that ends in its active device, never under a
   cable manager. Plates have no BOM row (Q25).
 - A CLI test growing the layout to psa4 clashed with the manual `ws` panel's sheet "4"; the test renames
   ws's sheet first.
-- During a release the lead held merges; commit locally and wait for the go.
 
-## 10. Role 9: BOM rule engine
+## 9. BOM rule engine
 
 - `loose_table` returns None when it has no rows (#123, ADR 0020). Rejected: an empty `LooseTable` that
   sheets and writer would each skip.
@@ -424,28 +372,26 @@ The rules are in ADR 0013 and the design spec (R1–R10).
   item 5); PSA3-QCOD-1's annunciator at 1.04 A gives "running,floor".
 - One `dc_float` MCB item, only when some panel has DC mains; a device without `input_v_max` gets no line.
 - The spare branch rating is the largest used branch on its feed, or the floor when the feed has none.
-- M7 revision rows match by tag; untagged rows (kit children) match under the tag above them, by
+- Revision rows match by tag; untagged rows (kit children) match under the tag above them, by
   description then order. Rejected: matching by position.
 - ΣQ in the check report is the cabinet's own DC loads (ADR 0016), not the feed total.
 - The MCB helpers (`rating_at_least`, `rating_above`, `mcb_line`) take the `McbCatalogue` to use (#154).
   Rejected: a `dc: bool` flag, which let a caller size from the wrong set silently.
-- CINC stays on the AC set (#154): group E's "Main Auxiliary AC Supply" breaker. A1's task note had
-  listed it with the DC items; check each breaker's group in the code before following a note.
+- CINC stays on the AC set (#154): it is group E's "Main Auxiliary AC Supply" breaker. Check each
+  breaker's group in the code (`ac_dist.py` vs `dc_dist.py`) before following a task note.
 - #171 tests the shipped library in a module-scoped temp copy of `examples/` with the shipped file
   swapped in, instead of new goldens.
 - Q30 and Q31: Ali kept every ADR 0014 default (#183), so no code change.
-- M15 was written before role 2's fields merged; a local stand-in patch let tests run and was reverted
-  before the PR. Never commit another role's model change.
+- When a model field the engine needs hasn't merged yet, stub it locally to run the tests and revert the
+  stub before the PR; never commit a model change inside an engine PR.
 - mypy (strict) rejected importing `BranchSizing` from `engine.dc_dist`; import models from
   `bomgen.models.calc`.
 - A golden expecting `set_by == "floor"` for every branch failed on the annunciator; check what each
   example load is before writing the expected value.
-- `docs/decisions/README.md` and `docs/plan.md` merges conflicted while two milestones were open; keep
-  every row in number order and both notes.
 - `resolve_catalogues(library, CatalogueChoice(...))` lets engine tests cover brand choices without the
   loader; `engine_factories.library(mcb_brands=[...])` fills `catalogue_brands.mcb`.
 
-## 11. Role 10: Excel workbook writer
+## 10. Excel workbook writer
 
 - **Formula plus cached result:** every computed cell is `Formula(text, result)` so the file shows
   numbers before Excel recalculates (OUT-5).
@@ -461,9 +407,9 @@ The rules are in ADR 0013 and the design spec (R1–R10).
 - **Power footnotes** (#157): one row per entry, in file order, two blank rows below the NOTES (the
   reference has NOTES at B93–B95 and the footnote at B98); merged B:L, left/centre wrap
   (`styles.FOOTNOTE`); 15 pt per line because Excel doesn't autofit merged cells. No footnotes, no rows.
-  Rejected: wrapping in narrow column B as the reference does. Field shape agreed with role 2 first: a
-  list of strings on the substation's `output` block. Print area includes them (Q40; the reference's
-  print area leaving it off is treated as a slip).
+  Rejected: wrapping in narrow column B as the reference does. The field is a list of strings on the
+  substation's `output` block (one string can't hold several; the printer isn't a BOM device). Print
+  area includes them (Q40; the reference leaving it off is treated as a slip).
 - **pycel reads cached values:** `ExcelCompiler.evaluate` returns the cached result, so a golden
   comparing evaluated with cached values tested nothing. Evaluate every formula once, then
   `compiler.recalculate()`.
@@ -474,11 +420,11 @@ The rules are in ADR 0013 and the design spec (R1–R10).
   before close; widths are stored as UI width + 5 px.
 - A spec gap the reference "answers" can still be a disagreement (#157's print area went to Ali as Q40).
   Flag every departure from the reference workbook in the PR body.
-- **Read Ali's reference workbook directly.** It is in the project files under `uploads/hearth/` (at
-  handover `dbc9ed74-…`; `file` reports "Microsoft Excel 2007+"). Copy it to a scratch dir as `.xlsx`
-  for openpyxl and run Python with `-I` from another directory.
+- **Read Ali's reference workbook directly.** It is in the project files under `uploads/hearth/` (the
+  file `dbc9ed74-…`; `file` reports "Microsoft Excel 2007+"). Copy it to a scratch dir as `.xlsx` for
+  openpyxl and run Python with `-I` from another directory.
 
-## 12. Role 11: Desktop app
+## 11. Desktop app
 
 ### Decisions
 
@@ -528,17 +474,15 @@ The rules are in ADR 0013 and the design spec (R1–R10).
   `margin-top: auto`. Flex items don't collapse margins (the device editor tab panel moved 16 px).
 - Ids never break: `white-space: nowrap` on part and row ids; `Change…` wraps under a long id.
 
-### E2E and reviews
+### E2E and checking
 
 - E2E on the example needs generated panels: edit `fed_from: psa3` to `psa1` first.
-- E2E without the window: pack `examples/library.yaml` with `bomgen library pack … --name psa-devices
-  --version 1.0.0` and import it into `BOMGEN_LIBRARY_HOME`, or Home shows the first-run page. Bridge
-  stub: `page.exposeFunction('__py', …)` plus an init script setting
+- **E2E without the window:** pack `examples/library.yaml` with `bomgen library pack … --name
+  psa-devices --version 1.0.0` and import it into `BOMGEN_LIBRARY_HOME`, or Home shows the first-run
+  page. Bridge stub: `page.exposeFunction('__py', …)` plus an init script setting
   `window.pywebview = { api: new Proxy({}, { get: (_, n) => (...a) => window.__py(n, a) }) }`, backed by a
   line-based Python process over `Api(env=…)`.
 - A dirty page opens the leave dialog on navigation; discard first before `location.hash = …`.
-- Reviews often arrive from the lead and role 4 at once; treat them as one list, fix once, answer both in
-  one message to the lead.
 - Measure, then claim: in Playwright check a select's text width vs `clientWidth - 34`, a table's right
   edge vs the next column, `getClientRects().length > 1` for a broken id, the gap between `.savebar` and
   `#main`'s bottom.

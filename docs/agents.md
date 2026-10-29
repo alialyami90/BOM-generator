@@ -25,10 +25,9 @@ agent; the milestones are in [`plan.md`](plan.md) → "Milestones".
 | A10 | Excel workbook writer | M6, then M5 | `src/bomgen/sheets/`, `src/bomgen/writer/`, `src/bomgen/models/sheet.py`, the M5–M6 sections |
 | A11 | Desktop app | M10 (done) | `src/bomgen/app/` except `launcher.py` (A6), `src/bomgen/app/ui/`, `tests/unit/app/`, the M10 section |
 
-Each agent also owns its own section in the shared handoff files in
-[`docs/handoff/`](handoff/) (`STATE.md`, `NEXT.md`, `LESSONS.md`, `CHECKPOINT.md`; restart-safe
-checkpoints; names keep the role number, the letter counts resets, so B1 has A1's rights). A1
-owns the shared parts of those files. Each agent also owns its tests (`tests/unit/<area>/` or `tests/unit/test_<area>.py`)
+Project state, next steps, lessons and checkpoints are kept in [`docs/handoff/`](handoff/)
+(`STATE.md`, `NEXT.md`, `LESSONS.md`, `CHECKPOINT.md`), organised by code area. Names keep the
+role number and the letter counts resets, so B1 has A1's rights. Each agent also owns its tests (`tests/unit/<area>/` or `tests/unit/test_<area>.py`)
 and its implementation plan under `docs/superpowers/plans/`.
 
 ### A1 — Lead developer
