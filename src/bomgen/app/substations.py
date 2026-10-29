@@ -13,7 +13,7 @@ from typing import Any, NamedTuple
 
 from pydantic import BaseModel, ValidationError
 
-from bomgen.app.projects import load_with_issues, project_only
+from bomgen.app.projects import brands, load_with_issues, project_only
 from bomgen.engine.errors import EngineError
 from bomgen.engine.layout import LayoutIssue, with_layout
 from bomgen.io.errors import InputError, Issue
@@ -189,6 +189,16 @@ def _page(
         ],
         "network": substation.network,
         "panels": len(loaded.panels) if loaded else None,
+        # brand sets: the substation's own choice wins over the project's, key by key
+        "catalogue_choice": (
+            substation.catalogue_choice.model_dump(exclude_none=True)
+            if substation.catalogue_choice
+            else {}
+        ),
+        "project_choice": (
+            project.defaults.catalogue_choice.model_dump(exclude_none=True) if project else {}
+        ),
+        "brands": brands(library) if library is not None else {},
     }
     return page
 

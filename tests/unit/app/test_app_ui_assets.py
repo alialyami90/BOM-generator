@@ -209,3 +209,12 @@ def test_equipment_rows_are_edited_on_network_and_removing_one_offers_undo() -> 
     for name in ("add_equipment", "remove_equipment"):
         assert f"Bridge.call('{name}'" in js
     assert "toast(`Removed ${id}`, 'trash', () =>" in js
+
+
+def test_substation_settings_are_edited_through_the_shared_draft_form() -> None:
+    ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    assert "function draftForm(o)" in ui
+    js = (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
+    assert "App.draftForm({" in js
+    assert "Editing substations in the app is not available yet" not in js
+    assert "Reset all to defaults" in js

@@ -170,7 +170,7 @@ def _substations(
 
 def brands(library: Library) -> dict[str, list[dict[str, str]]]:
     """The brand sets a project can choose per catalogue, the library default first; the DC
-    MCBs choose from the MCB brands (ADR 0023)."""
+    MCBs choose from every MCB brand, the AC ones from the AC-rated brands (ADR 0023)."""
     found: dict[str, list[dict[str, str]]] = {}
     for kind in CatalogueBrands.model_fields:
         sets = getattr(library.catalogue_brands, kind)
@@ -179,6 +179,11 @@ def brands(library: Library) -> dict[str, list[dict[str, str]]]:
             *({"id": b.id, "name": b.name or b.id} for b in sets),
         ]
     found["mcb_dc"] = found["mcb"]
+    found["mcb"] = [  # a DC-only family is refused for the AC branches (ADR 0023)
+        b
+        for b, s in zip(found["mcb"], [None, *library.catalogue_brands.mcb], strict=True)
+        if s is None or s.ac_rated
+    ]
     return found
 
 

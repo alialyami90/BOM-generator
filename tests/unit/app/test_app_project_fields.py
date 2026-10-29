@@ -108,7 +108,10 @@ def test_the_page_offers_each_catalogues_brands_with_mcb_dc(app: api.Api, projec
     brands = ok(app.open_project(str(project)))["brands"]
     assert brands["mcb"][0] == {"id": "default", "name": "Library default"}
     assert "siemens-5sy5" in [b["id"] for b in brands["mcb"]]
-    assert [b["id"] for b in brands["mcb_dc"]] == [b["id"] for b in brands["mcb"]]
+    # a DC-only family sizes no AC branch, so only the DC MCBs offer it (ADR 0023)
+    assert "schneider-c60h-dc" not in [b["id"] for b in brands["mcb"]]
+    dc = {b["id"] for b in brands["mcb_dc"]}
+    assert dc == {b["id"] for b in brands["mcb"]} | {"schneider-c60h-dc"}
     assert {"aux_contact", "terminal_blocks", "busbars", "housekeeping"} <= set(brands)
 
 

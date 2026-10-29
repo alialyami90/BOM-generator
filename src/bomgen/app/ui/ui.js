@@ -212,5 +212,80 @@
   ACTIONS.scrim = () => closeDialog();
   window.addEventListener('hashchange', () => { render(); $('#main').scrollTop = 0; });
 
-  window.App = { $, $$, esc, S, ACTIONS, SCREENS, counts, badge, verified, banner, tabs, field, input, select, pageHead, illus, dialog, closeDialog, toast, go, render, setAppInfo, checkList, route, hasProject, hasSub, curProject, curSub, renderStatus };
+  /* ---------- a form drafted on the page and saved together (docs/ui/editing.md) ----------
+     Each field is read on change and checked by the model; the draft holds only what differs from the file.
+     o: { prefix (control ids are prefix + key), screen (route), file, label, spec(key) -> [path, kind] or null,
+          saved(key), check(path, value) -> Promise of a message, write(path, value) -> Promise of the page, done(page, keys) } */
+  function toModel(kind, raw) {  // [value for the file, or null to remove the key; a message when it cannot be read]
+    const t = String(raw == null ? '' : raw).trim();
+    if (!t) return [null, null];
+    if (kind === 'text' || kind === 'choice') return [t, null];
+    if (kind === 'bool') return [t === 'true', null];
+    if (kind === 'int') return /^\d+$/.test(t) ? [Number(t), null] : [null, 'Enter a whole number, for example 2.'];
+    if (kind === 'num') return /^-?\d+(\.\d+)?$/.test(t) ? [Number(t), null] : [null, 'Enter a number, for example 1.3.'];
+    return /^\d+(\.\d+)?$/.test(t) ? [Math.round(Number(t) * 10) / 1000, null] : [null, 'Enter a percentage, for example 20.'];
+  }
+  function draftForm(o) {
+    const D = { draft: {}, errors: {}, saving: false };
+    const n = (x) => Object.keys(x).length;
+    D.shown = (key) => (key in D.draft ? D.draft[key] : o.saved(key));
+    D.mark = (key, html) => (key in D.draft ? html.replace('<div class="field">', '<div class="field changed">') : html);
+    D.err = (key) => (D.errors[key] ? esc(D.errors[key]) : '');
+    D.dirty = () => n(D.draft) > 0;
+    D.reset = () => { D.draft = {}; D.errors = {}; };
+    D.set = (key, typed) => {  // a typed value; returns the value for the file, or undefined when it cannot be read
+      const sp = o.spec(key), was = o.saved(key);
+      if (String(typed).trim() === String(was == null ? '' : was)) { delete D.draft[key]; delete D.errors[key]; return undefined; }
+      D.draft[key] = typed;
+      const [value, local] = toModel(sp[1], typed);
+      if (local) { D.errors[key] = local; return undefined; }
+      delete D.errors[key];
+      return value;
+    };
+    D.bar = () => {
+      const c = n(D.draft), bad = n(D.errors);
+      if (!c && !D.saving) return '';
+      return `<div class="savebar${bad ? ' savebar--bad' : ''}" role="region" aria-label="Unsaved changes"><span class="savebar-msg">${D.saving ? '<span class="spinner"></span><b>Saving…</b>' : bad ? `${icon('error')}<b>${bad} ${bad === 1 ? 'field needs' : 'fields need'} fixing</b> before you can save.` : `<span class="dot dot--warn" aria-hidden="true"></span><b>${c} unsaved change${c === 1 ? '' : 's'}</b> · saved to ${esc(o.file)}`}</span>
+        <span class="sp"></span><button class="btn btn--secondary" data-action="${o.prefix}discard" ${D.saving ? 'disabled' : ''}>Discard</button><button class="btn btn--primary" data-action="${o.prefix}save" ${D.saving || bad ? 'disabled' : ''}>${icon('save')}${esc(o.label)} <kbd class="kbd">Ctrl+S</kbd></button></div>`;
+    };
+    document.addEventListener('change', (e) => {
+      const id = e.target.id || '';
+      if (!id.startsWith(o.prefix) || route().a !== o.screen) return;
+      const key = id.slice(o.prefix.length), sp = o.spec(key);
+      if (!sp) return;
+      const typed = e.target.type === 'checkbox' ? String(e.target.checked) : e.target.value, value = D.set(key, typed);
+      queueMicrotask(render);
+      if (value == null) return;  // unchanged, unreadable or emptied (removed on save)
+      o.check(sp[0], value).then((msg) => {
+        if (D.draft[key] !== typed || (D.errors[key] || null) === (msg || null)) return;  // a render would drop what is being typed elsewhere
+        if (msg) D.errors[key] = msg; else delete D.errors[key];
+        render();
+      }).catch(() => {});
+    });
+    ACTIONS[o.prefix + 'discard'] = () => { D.reset(); S.dirty = false; render(); toast('Changes discarded', 'undo'); };
+    ACTIONS[o.prefix + 'save'] = () => {
+      const keys = Object.keys(D.draft);
+      if (D.saving || !keys.length || n(D.errors)) return;
+      D.saving = true; render();
+      let page = null;
+      const next = (i) => {
+        if (i === keys.length) return Promise.resolve();
+        const key = keys[i], [path, kind] = o.spec(key);
+        return o.write(path, toModel(kind, D.draft[key])[0]).then((r) => { page = r; delete D.draft[key]; return next(i + 1); })
+          .catch((err) => { D.errors[key] = err.message; throw err; });
+      };
+      next(0).then(() => { toast(`Saved ${keys.length} change${keys.length === 1 ? '' : 's'} to ${o.file}`, 'check'); S.dirty = false; })
+        .catch(() => toast('Not saved: a value was refused. It is marked on the page.', 'error'))
+        .then(() => { D.saving = false; if (page) o.done(page, keys); render(); });
+    };
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's' && route().a === o.screen && D.dirty()) {
+        e.preventDefault(); if (document.activeElement) document.activeElement.blur(); queueMicrotask(ACTIONS[o.prefix + 'save']);
+      }
+    });
+    window.addEventListener('hashchange', () => { if (route().a !== o.screen) D.reset(); });
+    return D;
+  }
+
+  window.App = { $, $$, esc, S, ACTIONS, SCREENS, counts, badge, verified, banner, tabs, field, input, select, pageHead, illus, dialog, closeDialog, toast, go, render, setAppInfo, checkList, route, hasProject, hasSub, curProject, curSub, renderStatus, draftForm };
 })();

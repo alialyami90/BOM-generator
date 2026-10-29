@@ -116,3 +116,13 @@ def test_a_row_the_substation_needs_is_not_removed_and_the_reason_is_plain(
     ids = [e["id"] for e in substation_yaml(project)["equipment"]]
     error = refused(app.remove_equipment(str(project), SUB, ids.index("l2")))
     assert error["message"].startswith("equipment needs")
+
+
+def test_the_page_lists_the_brands_and_whose_choice_applies(app: api.Api, project: Path) -> None:
+    page = ok(app.open_substation(str(project), SUB))
+    assert page["catalogue_choice"] == {}  # nothing chosen by the substation itself
+    assert set(page["brands"]) >= {"mcb", "mcb_dc", "aux_contact", "terminal_blocks"}
+    ok(app.set_substation_field(str(project), SUB, ["catalogue_choice", "mcb"], "default"))
+    page = ok(app.open_substation(str(project), SUB))
+    assert page["catalogue_choice"] == {"mcb": "default"}
+    assert "project_choice" in page

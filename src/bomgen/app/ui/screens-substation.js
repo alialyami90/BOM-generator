@@ -1,10 +1,9 @@
 /* Screens: substation Settings and the Network inputs on bomgen.app.api (plan M10c).
-   Settings are read-only until their writers are wired; the Network inputs are edited here (M17c). The L1 ranking and the Result card come from screens-panels.js.
+   Settings and the Network inputs are edited here (M17c). The L1 ranking and the Result card come from screens-panels.js.
    Opened in a plain browser, the prototype's screens in screens-project.js and screens-layout.js are used instead. */
 (function () {
   const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, field, input, select, pageHead, toast } = App;
   const example = { settings: SCREENS.settings, network: SCREENS.network };
-  const LATER = 'Editing substations in the app is not available yet. Edit substation.yaml, then open the project again.';
   const ro = (html) => html.replace('data-dirty="1"', 'readonly').replace('class="input', 'class="ctl input');
   const fixed = (v, unit) => `<div class="input-affix">${ro(input('x', v, { num: true, mono: true }))}${unit ? `<span class="affix">${esc(unit)}</span>` : ''}</div>`;
   const plural = (n, one) => `${n} ${one}${n === 1 ? '' : 's'}`;
@@ -14,7 +13,7 @@
   const real = () => S.backend === 'yes' && S.project && S.project.real && S.sub;
   function page() {
     const key = `${S.project.file}#${S.sub}`;
-    if (SUB.key !== key) { Object.assign(SUB, { key, state: 'idle', page: null, error: null }); NET.draft = {}; NET.errors = {}; }
+    if (SUB.key !== key) { Object.assign(SUB, { key, state: 'idle', page: null, error: null }); NET.draft = {}; NET.errors = {}; ST.reset(); }
     if (SUB.state === 'idle') {
       SUB.state = 'loading';
       const current = () => SUB.key === key;  // the user may have moved on while it loaded
@@ -44,7 +43,8 @@
   const CONSTANTS = {
     dc_voltage_v: ['DC supply voltage', 'V'], ac_voltage_v: ['AC supply voltage', 'V'], power_margin: ['Power margin', '×'], current_factor: ['Current factor', '×'],
     btu_per_w: ['Heat conversion', 'BTU/h per W'], t_max_c: ['Maximum ambient', '°C'], t_int_c: ['Internal limit', '°C'],
-    air_constant_m3k_per_wh: ['Air constant', 'm³·K/Wh'], steel_coefficient_w_per_m2c: ['Sheet-steel heat transfer', 'W/m²·°C'], min_main_mcb_a: ['Minimum main MCB', 'A']
+    air_constant_m3k_per_wh: ['Air constant', 'm³·K/Wh'], steel_coefficient_w_per_m2c: ['Sheet-steel heat transfer', 'W/m²·°C'], min_main_mcb_a: ['Minimum main MCB', 'A'],
+    min_branch_mcb_a: ['Smallest branch MCB', 'A'], inrush_min_ms: ['Shortest inrush that sizes an MCB', 'ms'], dc_float_v: ['Battery float voltage', 'V']
   };
   const tabsSettings = [['general', 'General'], ['documents', 'Documents'], ['output', 'Output'], ['constants', 'Design constants'], ['yaml', 'YAML']];
   SCREENS.settings = () => {
@@ -53,33 +53,97 @@
     const rb = App.route().b; if (tabsSettings.some(([k]) => k === rb)) S.tab.settings = rb;
     const t = p.calculations || S.tab.settings === 'yaml' ? S.tab.settings : 'yaml';
     const body = { general, documents, output, constants, yaml }[t](p);
-    return `<div class="page">${pageHead('Settings', `Settings of ${esc(p.name)} only. Project-wide values are on the project page.`, '', '', LATER)}
-      ${problems(p)}${tabs('settings', tabsSettings, t, 'Substation settings')}
-      <div role="tabpanel" aria-labelledby="tab-settings-${t}">${body}</div></div>`;
+    return `<div class="page">${pageHead('Settings', `Settings of ${esc(p.name)} only. Project-wide values are on the project page.`)}
+      ${problems(p)}${tabs('settings', tabsSettings.map(([k, l]) => [k, l, tabMark(k)]), t, 'Substation settings')}
+      <div role="tabpanel" aria-labelledby="tab-settings-${t}">${body}</div>${ST.bar()}</div>`;
   };
+  /* Settings fields are drafted and saved together; an emptied field is removed so the default applies. */
+  const KINDS = [['mcb', 'MCBs, AC branches'], ['mcb_dc', 'MCBs, DC branches'], ['aux_contact', 'Aux contacts'], ['terminal_blocks', 'Terminal blocks'], ['busbars', 'Busbars'], ['housekeeping', 'Housekeeping']];
+  const PCT = new Set(['power_margin']);
+  function stSpec(key) {
+    const [, kind, rest] = /^(\w+?)_(.*)$/.exec(key) || [, key, ''];
+    if (key === 'name') return [['substation', 'name'], 'text'];
+    if (key === 'document') return [['document'], 'choice'];
+    if (key === 'file_name') return [['output', 'file_name'], 'text'];
+    if (kind === 'brand') return [['catalogue_choice', rest], 'choice'];
+    if (kind === 'calc') return [['calculations', rest, 'document'], 'choice'];
+    if (kind === 'sheet') return [['output', 'sheet_names', rest], 'text'];
+    if (kind === 'c') return [['constants', rest], PCT.has(rest) ? 'pct' : rest.endsWith('_a') ? 'int' : 'num'];
+    return null;
+  }
+  function stSaved(key) {
+    const p = SUB.page, [, kind, rest] = /^(\w+?)_(.*)$/.exec(key) || [, key, ''];
+    if (!p || !p.calculations) return '';
+    if (key === 'name') return p.name;
+    if (key === 'document') return p.output.document;
+    if (key === 'file_name') return p.output.file_name;
+    if (kind === 'brand') return p.catalogue_choice[rest] || '';
+    if (kind === 'calc') return (p.calculations.find((c) => c.key === rest) || {}).document || '';
+    if (kind === 'sheet') return p.output.sheet_names[rest];
+    if (kind === 'c') { const c = p.constants.find((x) => x.key === rest); return c ? (PCT.has(rest) ? Math.round(c.value * 1000) / 10 : c.value) : ''; }
+    return '';
+  }
+  const ST = App.draftForm({
+    prefix: 'st-', screen: 'settings', file: 'substation.yaml', label: 'Save settings', spec: stSpec, saved: stSaved,
+    check: (path, value) => Bridge.call('check_substation_field', S.project.file, S.sub, path, value),
+    write: (path, value) => Bridge.call('set_substation_field', S.project.file, S.sub, path, value),
+    done: (page, keys) => {
+      SUB.page = page; App.network.reload();
+      const row = keys.includes('name') && S.project.substations.find((x) => x.id === S.sub);
+      if (row) row.name = page.name;
+    }
+  });
+  const edit = (key, label, html, help) => ST.mark(key, field(label, html, help, ST.err(key)));
+  const text = (key, o = {}) => input('st-' + key, ST.shown(key) == null ? '' : String(ST.shown(key)), { invalid: !!ST.errors[key], ...o });
+  const choice = (key, opts) => select('st-' + key, opts, ST.shown(key) || '', { invalid: !!ST.errors[key] });
+  const brandName = (p, kind, id) => ((p.brands[kind] || []).find((b) => b.id === id) || { name: id }).name;
+  function brandSelect(p, kind, label) {
+    const own = p.project_choice[kind], from = own ? brandName(p, kind, own) : kind === 'mcb_dc' ? 'as the AC branches' : brandName(p, kind, 'default');
+    const opts = [['', `Same as the project (${from})`], ...(p.brands[kind] || []).map((b) => [b.id, b.name])];
+    return edit('brand_' + kind, esc(label), choice('brand_' + kind, opts));
+  }
   const general = (p) => `<div class="form form--2">
-    ${field('Substation name', ro(input('s-name', p.name)), 'Shown in the app and in each sheet header.')}
+    ${edit('name', 'Substation name', text('name'), 'Shown in the app and in each sheet header.')}
     ${field('Substation id', ro(input('s-id', p.id, { mono: true })), 'Names the substation in the register and in tags. Not printed.')}
+    ${Object.keys(p.brands).length ? `<div class="span-2 section" style="margin:0">
+      <h3>Catalogue brands</h3>
+      <p class="lede">The project's brands apply unless this substation chooses its own.</p>
+      <div class="form form--3" style="margin-top:var(--space-3)">${KINDS.map(([k, l]) => brandSelect(p, k, l)).join('')}</div></div>` : ''}
     <div class="span-2 section" style="margin:0">
       <h3>From the project</h3>
       <p class="lede">These come from the project and are the same for every substation in it.</p>
       <dl class="kv"><dt>Project</dt><dd>${esc(p.project.name)}</dd><dt>Client</dt><dd>${esc(p.project.client || '—')}</dd><dt>Device library</dt><dd>${esc(p.project.library.name)}, built with ${esc(p.project.library.version)}</dd></dl>
       <div class="row" style="margin-top:var(--space-3)"><button class="btn btn--secondary" data-action="goto" data-to="#/project/info">Open project overview</button></div>
     </div></div>`;
+  const docOpts = (p) => p.documents.map((d) => [d.key, `${d.key} · ${d.doc_no} rev ${d.rev}`]);
+  const entryOf = (p, key) => p.documents.find((d) => d.key === key);
   const docCells = (e) => (e ? `<td class="mono">${esc(e.doc_no)}</td><td class="mono">${esc(e.rev)}</td><td class="mono">${esc(e.issue_date)}</td>` : `<td colspan="3"><span class="err small">${icon('error')}<span>Not in the register</span></span></td>`);
   const documents = (p) => `<p class="lede muted" style="max-width:68ch;margin-bottom:var(--space-4)">Each calculation sheet prints the document number, revision and issue date of the register entry it names. Cabinet BOMs choose theirs on each panel. The register itself is on the project page.</p>
-    <div class="table-wrap" style="max-width:980px"><table class="table"><thead><tr><th>Sheet</th><th style="width:200px">Register document</th><th>Document no.</th><th style="width:70px">Rev</th><th style="width:120px">Issue date</th></tr></thead>
-    <tbody>${p.calculations.map((c) => `<tr><td>${esc(SHEETS[c.key])}<span class="cell-sub">${esc(c.scope)}</span></td><td class="mono">${esc(c.document)}</td>${docCells(c.entry)}</tr>`).join('')}</tbody></table></div>
+    <div class="table-wrap" style="max-width:980px"><table class="table"><thead><tr><th>Sheet</th><th style="width:300px">Register document</th><th>Document no.</th><th style="width:70px">Rev</th><th style="width:120px">Issue date</th></tr></thead>
+    <tbody>${p.calculations.map((c) => { const key = 'calc_' + c.key; return `<tr><td>${esc(SHEETS[c.key])}<span class="cell-sub">${esc(c.scope)}</span></td><td${key in ST.draft ? ' class="changed"' : ''}><label class="sr-only" for="st-${key}">Register document, ${esc(SHEETS[c.key])}</label>${choice(key, docOpts(p))}${ST.errors[key] ? `<span class="err small">${icon('error')}<span>${ST.err(key)}</span></span>` : ''}</td>${docCells(entryOf(p, ST.shown(key)))}</tr>`; }).join('')}</tbody></table></div>
     <div class="row" style="margin-top:var(--space-3)"><button class="btn btn--secondary btn--sm" data-action="goto" data-to="#/project/documents">Open the register</button></div>`;
+  const SHEET_LABELS = { loose_material: 'Loose material', power_consumption: 'Power', heat_dissipation: 'Heat dissipation', heat_calculations: 'Heat calculations' };
   const output = (p) => { const o = p.output; return `<div class="form">
-    ${field('Main document', ro(input('o-main', o.document, { mono: true })), 'The document whose number and revision go into the workbook file name.')}
-    ${field('File name', ro(input('o-pat', o.file_name, { mono: true })), 'Fields: <span class="mono">{doc_no}</span> and <span class="mono">{rev}</span>.')}
-    ${o.result ? `<div class="banner banner--info">${icon('info')}<div class="grow"><b>Result:</b> <span class="mono">${esc(o.result)}</span></div></div>` : banner('bad', `<b>No file name.</b> The main document <span class="mono">${esc(o.document)}</span> is not in the register.`)}
-    <div class="section" style="margin:0"><h3>Calculation sheet names</h3><p class="lede">Cabinet sheets are named by each panel's sheet name.</p>
-    <div class="stack">${Object.keys(SHEETS).map((k, i) => field(['Power', 'Heat dissipation', 'Heat calculations'][i], ro(input('o-sh' + i, o.sheet_names[k])))).join('')}</div></div></div>`; };
-  const constants = (p) => `<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">Defaults come from the project's shared defaults. A value this substation writes itself is marked.</p>
-    <div class="table-wrap" style="max-width:820px"><table class="table"><thead><tr><th>Constant</th><th class="num" style="width:130px">Value</th><th>Unit</th><th style="width:170px">Default</th></tr></thead>
-    <tbody>${p.constants.map((c) => { const [label, unit] = CONSTANTS[c.key] || [c.key, '']; return `<tr><td>${esc(label)}<span class="cell-sub mono">${esc(c.key)}</span></td><td>${ro(input('c-' + c.key, c.value, { num: true, mono: true }))}</td><td class="muted">${esc(unit)}</td><td>${changed(c)}</td></tr>`; }).join('')}</tbody></table></div>`;
+    ${edit('document', 'Main document', choice('document', docOpts(p)), 'The document whose number and revision go into the workbook file name.')}
+    ${edit('file_name', 'File name', text('file_name', { mono: true }), 'Fields: <span class="mono">{doc_no}</span> and <span class="mono">{rev}</span>. Empty it to use the default.')}
+    ${o.result ? `<div class="banner banner--info">${icon('info')}<div class="grow"><b>Result:</b> <span class="mono">${esc(o.result)}</span>${ST.dirty() ? ' <span class="muted small">(as saved)</span>' : ''}</div></div>` : banner('bad', `<b>No file name.</b> The main document <span class="mono">${esc(o.document)}</span> is not in the register.`)}
+    <div class="section" style="margin:0"><h3>Sheet names</h3><p class="lede">Cabinet sheets are named by each panel's sheet name. Empty a name to use the default.</p>
+    <div class="stack">${Object.keys(SHEET_LABELS).map((k) => edit('sheet_' + k, SHEET_LABELS[k], text('sheet_' + k))).join('')}</div></div></div>`; };
+  const constants = (p) => { const changedRows = p.constants.filter((c) => c.changed); return `<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">Defaults come from the project's shared defaults. A value this substation writes itself is marked; Reset removes it so the default applies again.</p>
+    <div class="table-wrap" style="max-width:860px"><table class="table"><thead><tr><th>Constant</th><th class="num" style="width:130px">Value</th><th>Unit</th><th style="width:230px">Default</th></tr></thead>
+    <tbody>${p.constants.map((c) => { const [label, unit] = CONSTANTS[c.key] || [c.key, ''], key = 'c_' + c.key, pc = PCT.has(c.key), d = pc ? Math.round(c.default * 1000) / 10 : c.default; const reset = key in ST.draft && ST.draft[key] === '';
+      return `<tr><td>${esc(label)}<span class="cell-sub mono">${esc(c.key)}</span>${ST.errors[key] ? `<span class="err small">${icon('error')}<span>${ST.err(key)}</span></span>` : ''}</td><td${key in ST.draft ? ' class="changed"' : ''}><label class="sr-only" for="st-${key}">${esc(label)}</label>${text(key, { num: true, mono: true, placeholder: String(d) })}</td><td class="muted">${esc(pc ? '%' : unit)}</td>
+        <td>${reset ? '<span class="muted small">Reset on save</span>' : c.changed ? `${badge('info', `Changed from ${d}`)} <button class="btn btn--ghost btn--sm" data-action="st-reset" data-key="${key}">Reset</button>` : '<span class="muted small">Default</span>'}</td></tr>`; }).join('')}</tbody></table>
+    <div class="table-foot"><span>${plural(changedRows.length, 'constant')} changed for this substation</span><span>${changedRows.length ? '<button class="btn btn--ghost btn--sm" data-action="st-reset-all">Reset all to defaults</button>' : ''}</span></div></div>`; };
+  /* A tab with unsaved or refused values says so, since the save bar counts every tab. */
+  const TAB_OF = (key) => (key === 'name' || key.startsWith('brand_') ? 'general' : key.startsWith('calc_') ? 'documents' : key.startsWith('c_') ? 'constants' : 'output');
+  function tabMark(tab) {
+    const bad = Object.keys(ST.errors).filter((k) => TAB_OF(k) === tab).length, changed = Object.keys(ST.draft).filter((k) => TAB_OF(k) === tab).length;
+    if (bad) return ` <span class="dot dot--bad" aria-hidden="true"></span><span class="sr-only">(${bad} to fix)</span>`;
+    return changed ? ` <span class="dot dot--warn" aria-hidden="true"></span><span class="sr-only">(${changed} unsaved)</span>` : '';
+  }
+  ACTIONS['st-reset'] = (el) => { ST.set(el.dataset.key, ''); S.dirty = true; App.render(); };
+  ACTIONS['st-reset-all'] = () => { SUB.page.constants.filter((c) => c.changed).forEach((c) => ST.set('c_' + c.key, '')); S.dirty = true; App.render(); };
   const hl = (line) => esc(line).replace(/^(\s*)(- )?([A-Za-z_][\w]*)(:)/, '$1$2<span class="k">$3</span>$4').replace(/(#.*)$/, '<span class="c">$1</span>');
   function yaml(p) {
     const lines = p.yaml.replace(/\n$/, '').split('\n');
