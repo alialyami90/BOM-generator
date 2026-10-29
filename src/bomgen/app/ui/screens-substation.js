@@ -211,8 +211,8 @@
     const k = (f) => `eq.${i}.${f}`, err = (f) => NET.errors[k(f)], ch = (f) => (k(f) in NET.draft ? ' class="changed"' : '');
     const cellErr = ['part_id', 'role', 'redundant', 'qty', 'l2_ports'].map((f) => err(f) && `<span class="err small" id="n-${k(f)}-err">${icon('error')}<span>${esc(err(f))}</span></span>`).filter(Boolean).join('');
     const swap = k('part_id') in NET.draft ? NET.draft[k('part_id')] : '';
-    if (swap) return `<tr><td class="changed"><span class="mono">${esc(swap)}</span><span class="cell-sub">Was <span class="mono">${esc(e.part_id || '—')}</span> · <span class="mono">${esc(e.id)}</span> · saved with the rest</span>${cellErr}</td>${eqCells(p, e, i)}`;
-    return `<tr><td><span class="mono">${esc(e.part_id || '—')}</span>${e.device && !e.device.known ? `<span class="err small">${icon('error')}<span>Not in ${esc(p.project.library.name)} ${esc(p.project.library.version)}</span></span>` : `<span class="cell-sub">${esc([e.device && e.device.make, e.device && e.device.model].filter(Boolean).join(' ') || (e.role === 'l1_switch' && !e.part_id ? 'Picked from the library by the sizing' : ''))} · <span class="mono">${esc(e.id)}</span></span>`}${cellErr}</td>${eqCells(p, e, i)}`;
+    if (swap) return `<tr><td class="changed"><span class="mono">${esc(swap)}</span><span class="cell-sub">Was <span class="mono">${esc(e.part_id || '—')}</span> · <span class="mono">${esc(e.id)}</span> · saved with the rest</span>${cellErr}${changeButton(e, i)}</td>${eqCells(p, e, i)}`;
+    return `<tr><td><span class="mono">${esc(e.part_id || '—')}</span>${e.device && !e.device.known ? `<span class="err small">${icon('error')}<span>Not in ${esc(p.project.library.name)} ${esc(p.project.library.version)}</span></span>` : `<span class="cell-sub">${esc([e.device && e.device.make, e.device && e.device.model].filter(Boolean).join(' ') || (e.role === 'l1_switch' && !e.part_id ? 'Picked from the library by the sizing' : ''))} · <span class="mono">${esc(e.id)}</span></span>`}${cellErr}${changeButton(e, i)}</td>${eqCells(p, e, i)}`;
   }
   function eqCells(p, e, i) {
     const k = (f) => `eq.${i}.${f}`, err = (f) => NET.errors[k(f)], ch = (f) => (k(f) in NET.draft ? ' class="changed"' : '');
@@ -277,6 +277,37 @@
     if (v('eq-red').checked) row.redundant = true;
     Bridge.call('add_equipment', S.project.file, S.sub, row, null).then((page) => { App.closeDialog(); relaid(page); toast(`Added ${row.id}`, 'check'); })
       .catch((err) => { v('eq-err').innerHTML = `${icon('error')}<span>${esc(err.message)}</span>`; });
+  };
+  /* Change part: the saved part's alternatives first, then the rest of the active library; the pick is a Network edit like Use this instead. */
+  const changeButton = (e, i) => (e.part_id ? `<button class="btn btn--ghost btn--sm" style="padding-inline:0;min-height:0" data-action="eq-part-change" data-i="${i}" aria-label="Change the part of ${esc(e.id)}">Change…</button>` : '');
+  const partText = (d) => `${esc(d.part_id)}${d.make || d.model ? ' · ' + esc([d.make, d.model].filter(Boolean).join(' ')) : ''}`;
+  ACTIONS['eq-part-change'] = (el) => withParts(() => {
+    const i = Number(el.dataset.i), e = SUB.page.equipment[i], was = e.part_id, now = NET.shown(`eq.${i}.part_id`);
+    Bridge.call('library_alternatives', was).catch(() => ({ rows: [] })).then((a) => {
+      const known = new Set(parts.map((d) => d.part_id));
+      const alts = a.rows.filter((r) => !r.is_self && known.has(r.part_id)), altIds = new Set(alts.map((r) => r.part_id));
+      const watts = (r) => { const w = Math.round(Math.abs(r.power_delta_w || 0) * 10) / 10; return w ? ` (${r.power_delta_w > 0 ? '+' : '−'}${w} W)` : ''; };
+      const opt = (id, text) => `<option value="${esc(id)}" ${id === now ? 'selected' : ''}>${text}</option>`;
+      const rest = parts.filter((d) => d.part_id !== was && !altIds.has(d.part_id));
+      const same = parts.find((d) => d.part_id === was);
+      App.dialog({ title: `Change the part of ${esc(e.id)}`, body: `<div class="form">
+        ${field('Part', `<select class="select" id="eq-chg-part">${opt(was, `${same ? partText(same) : esc(was)} · as saved`)}
+          ${alts.length ? `<optgroup label="Alternatives to ${esc(was)}">${alts.map((r) => opt(r.part_id, partText(r) + esc(watts(r)))).join('')}</optgroup>` : ''}
+          <optgroup label="Other parts in the library">${rest.map((d) => opt(d.part_id, partText(d))).join('')}</optgroup></select>`,
+          alts.length ? 'Alternatives fit the same place; the power change is per unit.' : `The library lists no alternatives to ${esc(was)}.`)}
+        <p class="small muted">The row keeps its id, role and quantities. The change is saved with the rest of the network.</p></div>`,
+        actions: `<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="eq-part-change-do" data-i="${i}">Change part</button>` });
+    });
+  });
+  ACTIONS['eq-part-change-do'] = (el) => {
+    const key = `eq.${el.dataset.i}.part_id`, value = NET.set(key, document.getElementById('eq-chg-part').value);
+    App.closeDialog(); S.dirty = NET.dirty(); App.render();
+    if (value == null) return;
+    Bridge.call('check_substation_field', S.project.file, S.sub, nf(key)[0], value).then((msg) => {
+      if (NET.draft[key] !== value) return;
+      if (msg) NET.errors[key] = msg; else delete NET.errors[key];
+      App.render();
+    }).catch(() => {});
   };
   /* Use this instead (docs/ui/editing.md, Alternatives): the chosen rows get the other part as an unsaved Network edit. */
   App.holdParts = (indices, part) => {

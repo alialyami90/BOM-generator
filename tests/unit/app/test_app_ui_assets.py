@@ -250,3 +250,12 @@ def test_deleting_a_device_not_applied_yet_drops_it_from_the_pending_changes() -
     assert "data-new=\"${isNew ? 1 : ''}\"" in edit
     assert "It is not in the library yet, so it goes at once" in edit
     assert "dropped from the pending changes" in edit
+
+
+def test_an_equipment_row_changes_its_part_with_its_alternatives_first() -> None:
+    sub = (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
+    assert 'data-action="eq-part-change"' in sub
+    assert "Bridge.call('library_alternatives', was)" in sub
+    assert 'label="Alternatives to ${esc(was)}"' in sub
+    assert "Other parts in the library" in sub
+    assert "ACTIONS['eq-part-change-do']" in sub
