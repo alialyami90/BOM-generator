@@ -34,20 +34,19 @@ project uses [Semantic Versioning](https://semver.org/).
     (Continuous, Serial port, DIN rail), labels the Datasheet height "Height
     in the datasheet" and gives Power input a text area; row delete buttons
     share one style (#206).
-  - Network equipment rows keep the part id on one line with Change… after
-    it, the Role column shows whole names, and Change… shows a busy state and opens
-    only if you are still on that Network page. Settings names the resolved
-    brand ("Same as the project (Schneider Acti9 2P)", "Same as AC
-    branches") in a two-column Catalogue brands form and shows document
-    keys. Register rows are two lines with singular or plural wording, the
-    project path is cut with an ellipsis, the save bar is pinned to the
-    window's bottom edge on every page, and Loose material uses B4's wording
-    (#207).
-- Loose material follows B4's review notes: the library picker shows each
-  part's data-quality badge, "N fields need fixing" moves to the first invalid
-  field on every draft form, dialog errors name the fields, a free-text item's
-  Fed from "—" has screen-reader text, and the save toast reads "Saved N
-  changes" (#201).
+  - Network equipment rows keep the part id on one line with Change… after it,
+    the Role column shows whole names, and Change… shows a busy state and
+    opens only if you are still on that Network page. Settings names the
+    resolved brand ("Same as the project (Schneider Acti9 2P)", "Same as AC
+    branches") in a two-column Catalogue brands form and shows document keys.
+    Register rows are two lines with singular or plural wording, the project
+    path is cut with an ellipsis, the save bar is pinned to the window's
+    bottom edge on every page, and Loose material's table foot and free-text
+    banner are reworded (#207).
+- The Loose material library picker shows each part's data-quality badge,
+  "N fields need fixing" moves to the first invalid field on every draft
+  form, dialog errors name the fields, a free-text item's Fed from "—" has
+  screen-reader text, and the save toast reads "Saved N changes" (#201).
 
 ### Fixed
 
