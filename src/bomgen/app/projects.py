@@ -9,6 +9,7 @@ from __future__ import annotations
 import contextlib
 import json
 import os
+from collections.abc import Iterable
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -169,23 +170,54 @@ def _substations(
     return rows
 
 
-def brands(library: Library) -> dict[str, list[dict[str, str]]]:
+def brands(library: Library) -> dict[str, list[dict[str, str | None]]]:
     """The brand sets a project can choose per catalogue, the library default first; the DC
-    MCBs choose from every MCB brand, the AC ones from the AC-rated brands (ADR 0023)."""
-    found: dict[str, list[dict[str, str]]] = {}
+    MCBs choose from every MCB brand, the AC ones from the AC-rated brands (ADR 0023).
+
+    Each has the ``product`` it stands for (make and family when the set has no name), so
+    "Same as the project" can name it; the library default's is read from ``catalogues``."""
+    catalogues = library.catalogues
+    defaults: dict[str, str | None] = {
+        "mcb": _product(catalogues.mcb),
+        "mcb_dc": _product(catalogues.dc_mcb),
+        "aux_contact": _product(catalogues.aux_contact),
+        "terminal_blocks": _makes(catalogues.terminal_blocks.values()),
+        "busbars": None,
+        "housekeeping": None,
+    }
+
+    def default(kind: str) -> dict[str, str | None]:
+        product = defaults[kind]
+        name = f"Library default ({product})" if product else "Library default"
+        return {"id": DEFAULT_BRAND, "name": name, "product": product}
+
+    found: dict[str, list[dict[str, str | None]]] = {}
     for kind in CatalogueBrands.model_fields:
         sets = getattr(library.catalogue_brands, kind)
-        found[kind] = [
-            {"id": DEFAULT_BRAND, "name": "Library default"},
-            *({"id": b.id, "name": b.name or b.id} for b in sets),
-        ]
-    found["mcb_dc"] = found["mcb"]
+        named = [(b, b.name or _product(b) or b.id) for b in sets]
+        found[kind] = [default(kind), *({"id": b.id, "name": n, "product": n} for b, n in named)]
+    dc = [default("mcb_dc"), *found["mcb"][1:]]
     found["mcb"] = [  # a DC-only family is refused for the AC branches (ADR 0023)
         b
         for b, s in zip(found["mcb"], [None, *library.catalogue_brands.mcb], strict=True)
         if s is None or s.ac_rated
     ]
+    found["mcb_dc"] = dc
     return found
+
+
+def _product(item: object) -> str | None:
+    """Make and family (or model), as a brand set names what it stands for."""
+    words = [
+        getattr(item, "make", None),
+        getattr(item, "family", None) or getattr(item, "model", None),
+    ]
+    return " ".join(str(w) for w in words if w) or None
+
+
+def _makes(items: Iterable[object]) -> str | None:
+    makes = list(dict.fromkeys(m for m in (getattr(i, "make", None) for i in items) if m))
+    return ", ".join(makes) or None
 
 
 def register(

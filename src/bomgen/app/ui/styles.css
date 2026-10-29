@@ -69,7 +69,8 @@ svg.i--lg { width: 20px; height: 20px; }
 .page-head { display: flex; align-items: flex-end; gap: var(--space-4); margin-bottom: var(--space-5); flex-wrap: wrap; }
 .page-head .lede { color: var(--color-text-muted); max-width: 68ch; margin-top: var(--space-1); }
 .page-head .actions { margin-left: auto; display: flex; gap: var(--space-2); }
-.page-head-main { min-width: 0; flex: 1 1 auto; }
+.page-head-main { min-width: 0; flex: 1 1 0; }
+.page-head .lede .one-line { display: inline-block; max-width: 100%; vertical-align: bottom; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .page-note { display: flex; align-items: center; gap: 6px; margin-top: var(--space-2); font-size: 12px; color: var(--color-text-muted); white-space: nowrap; }
 .page-note > span { overflow: hidden; text-overflow: ellipsis; }
 .page-note svg.i { width: 14px; height: 14px; }
@@ -448,3 +449,8 @@ fieldset.readonly .btn, fieldset.readonly .grip { opacity: .5; cursor: default; 
 .setup li.done svg { color: var(--color-success); }
 .setup li.now svg { color: var(--color-action-text); }
 .setup li.now b { color: var(--color-action-text); }
+/* Network equipment: the part id and its Change… on one line (polish-v02 item 11). */
+.part-line { display: flex; align-items: baseline; gap: var(--space-2); }
+.part-line .btn { padding-inline: 0; min-height: 0; height: auto; }
+/* The save bar is the page's last block: no page padding under it, so it meets the window bottom. */
+.page:has(> .savebar) { padding-bottom: 0; }

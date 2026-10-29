@@ -108,7 +108,7 @@
       share: `<button class="btn btn--primary" data-action="export-project">${icon('upload')}Export project…</button>` }[t] || '';
     const body = { info: projectInfo, substations: projectSubs, documents: projectDocs, share: projectShare }[t](p);
     const problems = p.problems && p.problems.length ? `<div style="margin-bottom:var(--space-4)">${banner('bad', `<b>${p.problems.length} ${p.problems.length === 1 ? 'problem' : 'problems'} in the project files.</b> ${problemList(p.problems)}`)}</div>` : '';
-    return `<div class="page">${pageHead(esc(p.name), `${p.client ? esc(p.client) + ' · ' : ''}<span class="mono" style="font-size:13px">${esc(p.path)}</span>`, actions, `<a href="#/home">Projects</a>${icon('chevr')}<span>${esc((tabList.find(([k]) => k === t) || [, ''])[1])}</span>`)}
+    return `<div class="page">${pageHead(esc(p.name), `${p.client ? esc(p.client) + ' · ' : ''}<span class="mono one-line" title="${esc(p.path)}">${esc(p.path)}</span>`, actions, `<a href="#/home">Projects</a>${icon('chevr')}<span>${esc((tabList.find(([k]) => k === t) || [, ''])[1])}</span>`)}
       ${problems}${tabs('project', tabList, t, 'Project sections')}
       <div role="tabpanel" aria-labelledby="tab-project-${t}">${body}</div></div>`;
   };
@@ -211,9 +211,9 @@
   function rgRow(p, d) {
     const used = d.used_by, why = used === null ? 'Fix the project\'s problems first: what uses it is not known.' : used.length ? `Used by ${used.join(', ')}. Pick another document there first.` : '';
     const assumed = d.assumed.includes('issue_date') && !(`d${d.index}_issue_date` in RG.draft);
-    return `<tr>${rgCell(d, 'title', 'Name', { plain: true, placeholder: d.key, after: `<span class="cell-sub mono">${esc(d.key)}</span>` })}${rgCell(d, 'doc_no', 'Document no.')}${rgCell(d, 'rev', 'Revision')}
-      ${rgCell(d, 'issue_date', 'Issue date', { after: assumed ? `<span class="row" style="gap:var(--space-2);margin-top:4px">${badge('warn', 'Assumed date', 'warn')}<button class="btn btn--ghost btn--sm" data-action="rg-confirm" data-i="${d.index}">Confirm</button></span>` : '' })}
-      <td class="small">${used && used.length ? esc(used.join(', ')) : '<span class="muted">Not used</span>'}</td>
+    return `<tr>${rgCell(d, 'title', 'Name', { plain: true, placeholder: d.key })}${rgCell(d, 'doc_no', 'Document no.')}${rgCell(d, 'rev', 'Revision')}
+      ${rgCell(d, 'issue_date', 'Issue date', { after: assumed ? `<span class="row" style="gap:var(--space-2);margin-top:4px;flex-wrap:nowrap">${badge('warn', 'Assumed date', 'warn')}<button class="btn btn--ghost btn--sm" data-action="rg-confirm" data-i="${d.index}">Confirm</button></span>` : '' })}
+      <td class="small">${used && used.length ? esc(used.map((u) => u.replace(`${d.substation}: `, '')).join(', ')) : '<span class="muted">Not used</span>'}</td>
       <td><button class="btn btn--ghost btn--sm btn--icon btn--del" data-action="rg-remove" data-i="${d.index}" aria-label="Remove ${esc(d.key)}" title="${esc(why || (RG.dirty() ? 'Save or discard the changes first' : 'Remove'))}" ${why || RG.dirty() ? 'disabled' : ''}>${icon('trash')}</button></td></tr>`;
   }
   const projectDocs = (p) => {
@@ -222,7 +222,7 @@
       const groups = ids.map((id) => ({ s: p.substations.find((x) => x.id === id) || { id, name: id }, rows: p.register.filter((d) => d.substation === id) }));
       const assumed = p.register.filter((d) => d.assumed.includes('issue_date')).length;
       return `<p class="lede muted" style="max-width:68ch;margin-bottom:var(--space-4)">One register for the whole project. Each panel and calculation sheet picks a document from it, so a single transmittal list drives every header.</p>
-        ${assumed ? banner('warn', `<b>The issue date of ${count(assumed, 'document is', 'documents are')} assumed.</b> Confirm the dates before issuing.`) : ''}
+        ${assumed ? banner('warn', `<b>The issue date${assumed === 1 ? '' : 's'} of ${count(assumed, 'document')} ${assumed === 1 ? 'is' : 'are'} assumed.</b> Confirm the dates before issuing.`) : ''}
         <div class="table-wrap" style="margin-top:var(--space-4)"><table class="table"><caption class="sr-only">Document register</caption><thead><tr><th>Document</th><th style="width:220px">Document no.</th><th style="width:76px">Rev</th><th style="width:170px">Issue date</th><th>Used by</th><th style="width:44px"><span class="sr-only">Remove</span></th></tr></thead>
         <tbody>${groups.map((g) => `<tr class="band"><td colspan="6"><div class="row"><b>${esc(g.s.name)}</b> <span class="muted">· ${count(g.rows.length, 'document')}</span><span class="sp" style="flex:1"></span><button class="btn btn--ghost btn--sm" data-action="rg-add" data-sub="${esc(g.s.id)}" ${RG.dirty() ? 'disabled title="Save or discard the changes first"' : ''}>${icon('plus')}Add</button></div></td></tr>
           ${g.rows.map((d) => rgRow(p, d)).join('')}`).join('')}</tbody></table>
@@ -232,7 +232,7 @@
     const groups = ids.map((id) => ({ s: p.substations.find((x) => x.id === id) || { id, name: id }, rows: p.documents.filter((d) => d.sub === id) })).filter((g) => g.rows.length);
     const assumed = p.documents.filter((d) => d.assumed).length;
     return `<p class="lede muted" style="max-width:68ch;margin-bottom:var(--space-4)">One register for the whole project. Each panel and calculation sheet picks a document from it, so a single transmittal list drives every header.</p>
-      ${assumed ? banner('warn', `<b>The issue date of ${assumed} documents is assumed.</b> Confirm the dates before issuing.`) : ''}
+      ${assumed ? banner('warn', `<b>The issue date${assumed === 1 ? '' : 's'} of ${count(assumed, 'document')} ${assumed === 1 ? 'is' : 'are'} assumed.</b> Confirm the dates before issuing.`) : ''}
       ${groups.length ? `<div class="table-wrap" style="margin-top:var(--space-4)"><table class="table"><thead><tr><th>Document</th><th>Document no.</th><th style="width:70px">Rev</th><th style="width:150px">Issue date</th><th>Used by</th><th style="width:110px">State</th></tr></thead>
       <tbody>${groups.map((g) => `<tr class="band"><td colspan="6"><b>${esc(g.s.name)}</b> <span class="muted">· ${count(g.rows.length, 'document')}</span></td></tr>
         ${g.rows.map((d) => `<tr><td>${esc(d.label)}${d.label !== d.key ? `<span class="cell-sub mono">${esc(d.key)}</span>` : ''}</td><td>${ro(input('dn-' + d.key, d.docNo, { mono: true }))}</td><td>${ro(input('dr-' + d.key, d.rev, { mono: true }))}</td><td>${ro(input('di-' + d.key, d.issue, { mono: true }))}</td><td>${esc(d.usedBy)}</td><td>${d.assumed ? badge('warn', 'Assumed date', 'warn') : '<span class="muted small">Confirmed</span>'}</td></tr>`).join('')}`).join('')}</tbody></table>

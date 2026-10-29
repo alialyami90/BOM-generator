@@ -92,7 +92,7 @@
     return `<div class="page">${head}${notice}
       <div class="stack" style="gap:var(--space-5)">
         <div><div class="table-wrap"><table class="table"><caption class="sr-only">Loose material, in the sheet's order</caption><thead><tr><th class="num">No.</th><th style="min-width:190px">Part or description</th><th style="min-width:230px">Designation</th><th style="width:110px">Qty</th><th style="width:200px">Fed from</th><th style="width:40px"><span class="sr-only">Actions</span></th></tr></thead><tbody>${rows}</tbody></table>
-          <div class="table-foot"><span>${plural(draft.rows.length, 'item')}</span><span>Quantity: A whole number, or 1 Lot.</span></div></div>
+          <div class="table-foot"><span>${plural(draft.rows.length, 'item')}</span><span>Quantity is a whole number, or 1 Lot.</span></div></div>
           <p class="muted small" style="margin-top:var(--space-3);max-width:68ch">An item that needs power names the cabinet that feeds it, and the engine adds its load to that cabinet. Parts that come with an item are added by the library and listed under it.</p></div>
         <aside class="lm-cards" aria-label="Where it goes in the workbook">
           <section class="card" style="padding:var(--space-4)"><h3>On the workbook</h3>
@@ -210,7 +210,7 @@
   ACTIONS['lm-add-free'] = () => dialog({ title: 'Add a free-text item', body: `<div class="stack">
     <div class="form">${field('Description', input('lm-fd', '', { placeholder: 'e.g. Fibre optic patch cords, LC to LC' }), 'Printed as it is. Required.')}</div>
     <div class="form form--3">${field('Quantity', input('lm-fq', '1', { num: true, mono: true }), 'A whole number, or 1 Lot.')}${field('Designation', input('lm-ft', ''))}</div>
-    ${banner('info', 'A free-text item has no part, so the sheet shows no ordering code, make or model for it, and it cannot be fed from a cabinet. Add the part to the library to get them.')}<div id="lm-err"></div></div>`,
+    ${banner('info', 'A free-text item has no part, so the sheet shows no ordering code, make or model for it, and it cannot be fed from a cabinet. An item that needs power must be added to the library first.')}<div id="lm-err"></div></div>`,
     actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="lm-add-free-do">Add item</button>' });
   ACTIONS['lm-add-free-do'] = () => {
     const desc = $('#lm-fd').value.trim(), qty = $('#lm-fq').value.trim();
