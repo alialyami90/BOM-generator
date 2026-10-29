@@ -80,10 +80,12 @@
         : `<span class="mono">${esc(it.part_id)}</span><span class="cell-sub">${esc(makeModel(it) || 'Library part')}${it.children && it.children.length ? ` · comes with <span class="mono">${esc(it.children.join(', '))}</span>` : ''}</span>`;
       const fed = free ? '<span class="muted small" title="A free-text item has no library data, so it cannot be fed"><span aria-hidden="true">—</span><span class="sr-only">Not fed: a free-text item has no library part</span></span>'
         : ctl(select('lm-fed-' + i, fedOptions().concat(it.fed_from && !d.fed_options.some((p) => p.id === it.fed_from) ? [[it.fed_from, it.fed_from]] : []), it.fed_from || ''));
-      /* An edited cell, or every cell of a new row, gets the forms' changed highlight. */
-      const ch = (k) => (r.orig == null || !same({ [k]: it[k] }, { [k]: r.base[k] }) ? ' class="changed"' : '');
-      return `<tr><td class="num muted" style="width:44px">${i + 1}</td><td${ch(free ? 'description' : 'part_id')}>${first}</td><td${ch('tag')}>${ctl(input('lm-tag-' + i, it.tag || '', { placeholder: 'Designation on the sheet' }))}</td>
-        <td${ch('qty')}>${described(ctl(input('lm-qty-' + i, it.qty == null ? '' : String(it.qty), { num: true, mono: true, invalid: !!bad.qty })), 'lm-qty-' + i, bad.qty)}${cellErr('lm-qty-' + i, bad.qty)}</td><td${free ? '' : ch('fed_from')}>${fed}</td>
+      /* Changed marker: a new row's first cell, or each edited cell of a saved row. */
+      const isNew = r.orig == null, [ncls, ndot] = App.changedCell(isNew);
+      const ch = (k) => App.changedCell(!isNew && !same({ [k]: it[k] }, { [k]: r.base[k] }));
+      const [c1, d1] = ch(free ? 'description' : 'part_id'), [c2, d2] = ch('tag'), [c3, d3] = ch('qty'), [c4, d4] = free ? ['', ''] : ch('fed_from');
+      return `<tr><td class="num muted${ncls ? ' is-changed' : ''}" style="width:44px">${ndot}${i + 1}</td><td${c1}>${d1}${first}</td><td${c2}>${d2}${ctl(input('lm-tag-' + i, it.tag || '', { placeholder: 'Designation on the sheet' }))}</td>
+        <td${c3}>${d3}${described(ctl(input('lm-qty-' + i, it.qty == null ? '' : String(it.qty), { num: true, mono: true, invalid: !!bad.qty })), 'lm-qty-' + i, bad.qty)}${cellErr('lm-qty-' + i, bad.qty)}</td><td${c4}>${d4}${fed}</td>
         <td><button class="btn btn--ghost btn--icon btn--sm" data-action="lm-remove" data-i="${i}" aria-label="Remove ${esc(free ? (it.description || 'item ' + (i + 1)) : it.part_id)}" ${saving ? 'disabled' : ''}>${icon('trash')}</button></td></tr>`;
     }).join('');
     const host = d.host_options.map((p) => [p.id, `${p.name} (${p.sheet})`]);
@@ -105,7 +107,7 @@
     if (!dirty() && !saving) return '';
     const n = changes(), bad = invalid();
     return `<div class="savebar${bad ? ' savebar--bad' : ''}" role="region" aria-label="Unsaved changes">
-      <span class="savebar-msg">${saving ? '<span class="spinner"></span><b>Saving…</b>' : bad ? `<button class="btn btn--ghost btn--sm" data-action="lm-first-bad">${icon('error')}<b>${bad} ${bad === 1 ? 'field needs' : 'fields need'} fixing</b></button> before you can save.` : `<span class="dot dot--warn" aria-hidden="true"></span><b>${plural(n, 'unsaved change')}</b> · saved to substation.yaml`}</span>
+      <span class="savebar-msg">${saving ? '<span class="spinner"></span><b>Saving…</b>' : bad ? App.fixLine('lm-first-bad', bad) : `<span class="dot dot--warn" aria-hidden="true"></span><b>${plural(n, 'unsaved change')}</b> · saved to substation.yaml`}</span>
       <span class="sp"></span>
       <button class="btn btn--secondary" data-action="lm-discard" ${saving ? 'disabled' : ''}>Discard</button>
       <button class="btn btn--primary" data-action="lm-save" ${saving || bad ? 'disabled' : ''}>${icon('save')}Save changes <kbd class="kbd">Ctrl+S</kbd></button></div>`;

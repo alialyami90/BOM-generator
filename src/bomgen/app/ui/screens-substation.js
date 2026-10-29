@@ -120,7 +120,7 @@
   const docCells = (e) => (e ? `<td class="mono">${esc(e.doc_no)}</td><td class="mono">${esc(e.rev)}</td><td class="mono">${esc(e.issue_date)}</td>` : `<td colspan="3"><span class="err small">${icon('error')}<span>Not in the register</span></span></td>`);
   const documents = (p) => `<p class="lede muted" style="max-width:68ch;margin-bottom:var(--space-4)">Each calculation sheet prints the document number, revision and issue date of the register entry it names. Cabinet BOMs choose theirs on each panel. The register itself is on the project page.</p>
     <div class="table-wrap" style="max-width:980px"><table class="table"><thead><tr><th>Sheet</th><th style="width:300px">Register document</th><th>Document no.</th><th style="width:70px">Rev</th><th style="width:120px">Issue date</th></tr></thead>
-    <tbody>${p.calculations.map((c) => { const key = 'calc_' + c.key; return `<tr><td>${esc(SHEETS[c.key])}<span class="cell-sub">${esc(c.scope)}</span></td><td${key in ST.draft ? ' class="changed"' : ''}><label class="sr-only" for="st-${key}">Register document, ${esc(SHEETS[c.key])}</label>${choice(key, docOpts(p))}${ST.errors[key] ? `<span class="err small">${icon('error')}<span>${ST.err(key)}</span></span>` : ''}</td>${docCells(entryOf(p, ST.shown(key)))}</tr>`; }).join('')}</tbody></table></div>
+    <tbody>${p.calculations.map((c) => { const key = 'calc_' + c.key; return `<tr><td>${esc(SHEETS[c.key])}<span class="cell-sub">${esc(c.scope)}</span></td><td${App.changedCell(key in ST.draft)[0]}>${App.changedCell(key in ST.draft)[1]}<label class="sr-only" for="st-${key}">Register document, ${esc(SHEETS[c.key])}</label>${choice(key, docOpts(p))}${ST.errors[key] ? `<span class="err small">${icon('error')}<span>${ST.err(key)}</span></span>` : ''}</td>${docCells(entryOf(p, ST.shown(key)))}</tr>`; }).join('')}</tbody></table></div>
     <div class="row" style="margin-top:var(--space-3)"><button class="btn btn--secondary btn--sm" data-action="goto" data-to="#/project/documents">Open the register</button></div>`;
   const SHEET_LABELS = { loose_material: 'Loose material', power_consumption: 'Power', heat_dissipation: 'Heat dissipation', heat_calculations: 'Heat calculations' };
   const output = (p) => { const o = p.output; return `<div class="form">
@@ -132,7 +132,7 @@
   const constants = (p) => { const changedRows = p.constants.filter((c) => c.changed); return `<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">Defaults come from the project's shared defaults. A value this substation writes itself is marked; Reset removes it so the default applies again.</p>
     <div class="table-wrap" style="max-width:860px"><table class="table"><thead><tr><th>Constant</th><th class="num" style="width:130px">Value</th><th>Unit</th><th style="width:230px">Default</th></tr></thead>
     <tbody>${p.constants.map((c) => { const [label, unit] = CONSTANTS[c.key] || [c.key, ''], key = 'c_' + c.key, pc = PCT.has(c.key), d = pc ? Math.round(c.default * 1000) / 10 : c.default; const reset = key in ST.draft && ST.draft[key] === '';
-      return `<tr><td>${esc(label)}<span class="cell-sub mono">${esc(c.key)}</span>${ST.errors[key] ? `<span class="err small">${icon('error')}<span>${ST.err(key)}</span></span>` : ''}</td><td${key in ST.draft ? ' class="changed"' : ''}><label class="sr-only" for="st-${key}">${esc(label)}</label>${text(key, { num: true, mono: true, placeholder: String(d) })}</td><td class="muted">${esc(pc ? '%' : unit)}</td>
+      return `<tr><td>${esc(label)}<span class="cell-sub mono">${esc(c.key)}</span>${ST.errors[key] ? `<span class="err small">${icon('error')}<span>${ST.err(key)}</span></span>` : ''}</td><td${App.changedCell(key in ST.draft)[0]}>${App.changedCell(key in ST.draft)[1]}<label class="sr-only" for="st-${key}">${esc(label)}</label>${text(key, { num: true, mono: true, placeholder: String(d) })}</td><td class="muted">${esc(pc ? '%' : unit)}</td>
         <td>${reset ? '<span class="muted small">Reset on save</span>' : c.changed ? `${badge('info', `Changed from ${d}`)} <button class="btn btn--ghost btn--sm" data-action="st-reset" data-key="${key}">Reset</button>` : '<span class="muted small">Default</span>'}</td></tr>`; }).join('')}</tbody></table>
     <div class="table-foot"><span>${plural(changedRows.length, 'constant')} changed for this substation</span><span>${changedRows.length ? '<button class="btn btn--ghost btn--sm" data-action="st-reset-all">Reset all to defaults</button>' : ''}</span></div></div>`; };
   /* A tab with unsaved or refused values says so, since the save bar counts every tab. */
@@ -208,21 +208,23 @@
   }
   /* One equipment row: its cells are drafted like the inputs above; Remove writes at once, with Undo. */
   function eqRow(p, e, i) {
-    const k = (f) => `eq.${i}.${f}`, err = (f) => NET.errors[k(f)], ch = (f) => (k(f) in NET.draft ? ' class="changed"' : '');
+    const k = (f) => `eq.${i}.${f}`, err = (f) => NET.errors[k(f)];
     const cellErr = ['part_id', 'role', 'redundant', 'qty', 'l2_ports'].map((f) => err(f) && `<span class="err small" id="n-${k(f)}-err">${icon('error')}<span>${esc(err(f))}</span></span>`).filter(Boolean).join('');
     const swap = k('part_id') in NET.draft ? NET.draft[k('part_id')] : '';
-    if (swap) return `<tr><td class="changed"><span class="mono">${esc(swap)}</span><span class="cell-sub">Was <span class="mono">${esc(e.part_id || '—')}</span> · <span class="mono">${esc(e.id)}</span> · saved with the rest</span>${cellErr}${changeButton(e, i)}</td>${eqCells(p, e, i)}`;
+    if (swap) return `<tr><td class="is-changed">${App.changedCell(true)[1]}<span class="mono">${esc(swap)}</span><span class="cell-sub">Was <span class="mono">${esc(e.part_id || '—')}</span> · <span class="mono">${esc(e.id)}</span> · saved with the rest</span>${cellErr}${changeButton(e, i)}</td>${eqCells(p, e, i)}`;
     return `<tr><td><span class="mono">${esc(e.part_id || '—')}</span>${e.device && !e.device.known ? `<span class="err small">${icon('error')}<span>Not in ${esc(p.project.library.name)} ${esc(p.project.library.version)}</span></span>` : `<span class="cell-sub">${esc([e.device && e.device.make, e.device && e.device.model].filter(Boolean).join(' ') || (e.role === 'l1_switch' && !e.part_id ? 'Picked from the library by the sizing' : ''))} · <span class="mono">${esc(e.id)}</span></span>`}${cellErr}${changeButton(e, i)}</td>${eqCells(p, e, i)}`;
   }
   function eqCells(p, e, i) {
-    const k = (f) => `eq.${i}.${f}`, err = (f) => NET.errors[k(f)], ch = (f) => (k(f) in NET.draft ? ' class="changed"' : '');
+    const k = (f) => `eq.${i}.${f}`, err = (f) => NET.errors[k(f)];
+    /* A cell's class and its changed marker; cls is the cell's own class. */
+    const ch = (f, cls = '') => { const on = k(f) in NET.draft, c = [cls, on ? 'is-changed' : ''].filter(Boolean).join(' '); return `${c ? ` class="${c}"` : ''}>${App.changedCell(on)[1]}`; };
     const red = netShown(p, k('redundant')) === 'true', l1 = netShown(p, k('role')) === 'l1_switch';
     const num = (f, label) => `<input class="input input--num input--mono" id="n-${k(f)}" aria-label="${label}, ${esc(e.id)}" value="${esc(netShown(p, k(f)))}" ${err(f) ? 'aria-invalid="true"' : ''} data-dirty="1">`;
     return `
-      <td${ch('role')}><select class="select" id="n-${k('role')}" aria-label="Role, ${esc(e.id)}" data-dirty="1">${Object.entries(ROLES).map(([v, t]) => `<option value="${v}" ${v === netShown(p, k('role')) ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></td>
-      <td${ch('redundant')}><label class="check"><input type="checkbox" id="n-${k('redundant')}" ${red ? 'checked' : ''} data-dirty="1"><span class="sr-only">A and B units, ${esc(e.id)}</span></label></td>
-      <td class="num"${ch('qty')}>${l1 ? '<span class="muted">Sized</span>' : num('qty', 'Quantity')}</td>
-      <td class="num"${ch('l2_ports')}>${num('l2_ports', 'L2 ports')}</td>
+      <td${ch('role')}<select class="select" id="n-${k('role')}" aria-label="Role, ${esc(e.id)}" data-dirty="1">${Object.entries(ROLES).map(([v, t]) => `<option value="${v}" ${v === netShown(p, k('role')) ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></td>
+      <td${ch('redundant')}<label class="check"><input type="checkbox" id="n-${k('redundant')}" ${red ? 'checked' : ''} data-dirty="1"><span class="sr-only">A and B units, ${esc(e.id)}</span></label></td>
+      <td${ch('qty', 'num')}${l1 ? '<span class="muted">Sized</span>' : num('qty', 'Quantity')}</td>
+      <td${ch('l2_ports', 'num')}${num('l2_ports', 'L2 ports')}</td>
       <td class="num">${e.device && e.device.height_u != null ? (e.device.height_u ? e.device.height_u + ' U' : 'DIN') : '—'}</td>
       <td><button class="btn btn--ghost btn--sm btn--icon" data-action="eq-remove" data-i="${i}" aria-label="Remove ${esc(e.id)}" title="${Object.keys(NET.draft).length ? 'Save or discard the changes first' : 'Remove'}" ${Object.keys(NET.draft).length ? 'disabled' : ''}>${icon('trash')}</button></td></tr>`;
   }

@@ -57,6 +57,12 @@
     const ctl = desc && !/aria-describedby=/.test(control) ? control.replace(/<(input|select|textarea)\b/, `<$1 aria-describedby="${desc}"`) : control;
     return `<div class="field"><label${id ? ` for="${id}"` : ''}>${label}</label>${ctl}${help ? `<span class="help"${id ? ` id="${id}-help"` : ''}>${help}</span>` : ''}${err ? `<span class="err"${id ? ` id="${id}-err"` : ''}>${icon('error')}<span>${err}</span></span>` : ''}</div>`;
   };
+  /* Changed marker (components.md): a warning dot before the label, or at the start of an edited cell, never the revision yellow. */
+  const CHG = '<span class="chg" aria-hidden="true"></span><span class="sr-only">changed</span>';
+  const changedField = (html) => html.replace(/^<div class="field">(<label[^>]*>)/, `<div class="field is-changed">$1${CHG}`);
+  const changedCell = (on) => (on ? [' class="is-changed"', CHG] : ['', '']);
+  /* The save bar's invalid line: one control that moves focus to the first invalid field (components.md "Save bar"). */
+  const fixLine = (action, bad) => `<button class="savebar-fix" data-action="${action}">${icon('error')}<span><b>${bad} ${bad === 1 ? 'field needs' : 'fields need'} fixing</b> before you can save.</span></button>`;
   const input = (id, value, o = {}) => `<input class="input ${o.mono ? 'input--mono' : ''} ${o.num ? 'input--num' : ''}" id="${id}" value="${esc(value)}" ${o.readonly ? 'readonly' : ''} ${o.invalid ? 'aria-invalid="true"' : ''} ${o.placeholder ? `placeholder="${esc(o.placeholder)}"` : ''} data-dirty="1">`;
   const select = (id, opts, value, o = {}) => `<select class="select ${o.cls || ''}" id="${id}" ${o.invalid ? 'aria-invalid="true"' : ''} data-dirty="1">${opts.map((x) => { const [v, t] = Array.isArray(x) ? x : [x, x]; return `<option value="${esc(v)}" ${v === value ? 'selected' : ''}>${esc(t)}</option>`; }).join('')}</select>`;
   /* `note`: one muted line under the lede, the same place on every page (what the app cannot do yet). */
@@ -210,7 +216,7 @@
   ACTIONS.help = () => dialog({ title: 'Help', body: '<p>The user guide is not written yet.</p>', actions: '<button class="btn btn--primary" data-action="close">Close</button>' });
   ACTIONS.close = () => closeDialog();
   ACTIONS.scrim = () => closeDialog();
-  window.addEventListener('hashchange', () => { render(); $('#main').scrollTop = 0; });
+  window.addEventListener('hashchange', () => { closeDialog(); render(); $('#main').scrollTop = 0; });
 
   /* ---------- a form drafted on the page and saved together (docs/ui/editing.md) ----------
      Each field is read on change and checked by the model; the draft holds only what differs from the file.
@@ -229,7 +235,7 @@
     const D = { draft: {}, errors: {}, saving: false };
     const n = (x) => Object.keys(x).length;
     D.shown = (key) => (key in D.draft ? D.draft[key] : o.saved(key));
-    D.mark = (key, html) => (key in D.draft ? html.replace('<div class="field">', '<div class="field changed">') : html);
+    D.mark = (key, html) => (key in D.draft ? changedField(html) : html);
     D.err = (key) => (D.errors[key] ? esc(D.errors[key]) : '');
     D.dirty = () => n(D.draft) > 0;
     D.reset = () => { D.draft = {}; D.errors = {}; };
@@ -245,7 +251,7 @@
     D.bar = () => {
       const c = n(D.draft), bad = n(D.errors);
       if (!c && !D.saving) return '';
-      return `<div class="savebar${bad ? ' savebar--bad' : ''}" role="region" aria-label="Unsaved changes"><span class="savebar-msg">${D.saving ? '<span class="spinner"></span><b>Saving…</b>' : bad ? `<button class="btn btn--ghost btn--sm" data-action="${o.prefix}first-bad">${icon('error')}<b>${bad} ${bad === 1 ? 'field needs' : 'fields need'} fixing</b></button> before you can save.` : `<span class="dot dot--warn" aria-hidden="true"></span><b>${c} unsaved change${c === 1 ? '' : 's'}</b> · saved to ${esc(o.file)}`}</span>
+      return `<div class="savebar${bad ? ' savebar--bad' : ''}" role="region" aria-label="Unsaved changes"><span class="savebar-msg">${D.saving ? '<span class="spinner"></span><b>Saving…</b>' : bad ? fixLine(`${o.prefix}first-bad`, bad) : `<span class="dot dot--warn" aria-hidden="true"></span><b>${c} unsaved change${c === 1 ? '' : 's'}</b> · saved to ${esc(o.file)}`}</span>
         <span class="sp"></span><button class="btn btn--secondary" data-action="${o.prefix}discard" ${D.saving ? 'disabled' : ''}>Discard</button><button class="btn btn--primary" data-action="${o.prefix}save" ${D.saving || bad ? 'disabled' : ''}>${icon('save')}${esc(o.label)} <kbd class="kbd">Ctrl+S</kbd></button></div>`;
     };
     document.addEventListener('change', (e) => {
@@ -291,5 +297,5 @@
     return D;
   }
 
-  window.App = { $, $$, esc, S, ACTIONS, SCREENS, counts, badge, verified, banner, tabs, field, input, select, pageHead, illus, dialog, closeDialog, toast, go, render, setAppInfo, checkList, route, hasProject, hasSub, curProject, curSub, renderStatus, draftForm };
+  window.App = { $, $$, esc, S, ACTIONS, SCREENS, counts, badge, verified, banner, tabs, field, input, select, pageHead, illus, dialog, closeDialog, toast, go, render, setAppInfo, checkList, route, hasProject, hasSub, curProject, curSub, renderStatus, draftForm, changedField, changedCell, fixLine };
 })();

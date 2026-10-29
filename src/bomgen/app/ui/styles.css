@@ -117,7 +117,7 @@ svg.i--lg { width: 20px; height: 20px; }
 .input[aria-invalid="true"], .select[aria-invalid="true"] { border-color: var(--color-danger); background: var(--color-danger-soft); }
 .input[disabled], .select[disabled] { background: var(--color-surface-sunken); color: var(--color-text-muted); cursor: not-allowed; }
 .input--mono { font-family: var(--font-mono); font-size: 12.5px; }
-.input--num { font-variant-numeric: tabular-nums; }
+.input--num { font-variant-numeric: tabular-nums; text-align: right; }
 .table .input--num, .input-affix .input--num { text-align: right; }
 .select { appearance: none; padding-right: 30px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23566579' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6.5l4 4 4-4'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; background-size: 14px; }
 :root[data-theme="dark"] .select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%239AABC0' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6.5l4 4 4-4'/%3E%3C/svg%3E"); }
@@ -212,9 +212,11 @@ table.table { width: 100%; border-collapse: separate; border-spacing: 0; font-si
 .table tr.gap:hover td { background: var(--color-ground); }
 .table td.merged { vertical-align: top; padding-top: 5px; border-right: 1px solid var(--color-border); }
 .table td.changed { background: var(--color-highlight-yellow) !important; color: var(--color-on-highlight); }
-.field.changed .input, .field.changed .select { background: var(--color-highlight-yellow); color: var(--color-on-highlight); }
-.field.changed .switch { background: var(--color-highlight-yellow); color: var(--color-on-highlight); border-radius: var(--radius-sm); padding: 2px 6px; }
-.field.changed .input[aria-invalid="true"], .field.changed .select[aria-invalid="true"] { background: var(--color-danger-soft); color: inherit; }
+/* Changed marker (components.md): an unsaved edit gets a warning dot, never the revision yellow above (Preview only). */
+.chg { display: inline-block; flex: none; width: 6px; height: 6px; border-radius: var(--radius-full); background: var(--color-bar-warn); vertical-align: middle; }
+.field.is-changed > label .chg { margin-right: 6px; position: relative; top: -1px; }
+.table td.is-changed { position: relative; }
+.table td.is-changed > .chg { position: absolute; left: 3px; top: 50%; margin-top: -3px; }
 .table td.wrap { white-space: normal; height: auto; padding-top: 5px; padding-bottom: 5px; }
 .table .ctl { height: var(--size-control-height-compact); font-size: 12.5px; padding: 0 8px; }
 .table .select.ctl { padding-right: 24px; }
@@ -430,6 +432,8 @@ fieldset.readonly .btn, fieldset.readonly .grip { opacity: .5; cursor: default; 
 .savebar .sp { flex: 1; }
 .savebar--bad { border-top-color: var(--color-danger); }
 .savebar--bad .savebar-msg svg { color: var(--color-danger-text); }
+.savebar-fix { display: inline-flex; align-items: center; gap: var(--space-2); padding: 4px 6px; margin: -4px -6px; border: 0; border-radius: var(--radius-sm); background: none; color: var(--color-danger-text); font: inherit; text-align: left; cursor: pointer; }
+.savebar-fix:hover span { text-decoration: underline; }
 .cell-err { display: flex; align-items: flex-start; gap: 4px; margin-top: 2px; font-size: 12px; color: var(--color-danger-text); }
 .cell-err svg { flex: none; width: 13px; height: 13px; margin-top: 1px; }
 .savebar .btn .kbd { margin-left: var(--space-2); background: transparent; color: inherit; border-color: currentColor; opacity: .8; }
