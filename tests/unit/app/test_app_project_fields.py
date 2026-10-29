@@ -106,7 +106,11 @@ def test_a_logo_that_is_not_a_png_is_refused(app: api.Api, project: Path, tmp_pa
 
 def test_the_page_offers_each_catalogues_brands_with_mcb_dc(app: api.Api, project: Path) -> None:
     brands = ok(app.open_project(str(project)))["brands"]
-    assert brands["mcb"][0] == {"id": "default", "name": "Library default"}
+    assert brands["mcb"][0] == {
+        "id": "default",
+        "name": "Library default (Schneider Acti9 2P)",
+        "product": "Schneider Acti9 2P",
+    }
     assert "siemens-5sy5" in [b["id"] for b in brands["mcb"]]
     # a DC-only family sizes no AC branch, so only the DC MCBs offer it (ADR 0023)
     assert "schneider-c60h-dc" not in [b["id"] for b in brands["mcb"]]
@@ -119,3 +123,13 @@ def test_a_brand_choice_is_written(app: api.Api, project: Path) -> None:
     path = ["defaults", "catalogue_choice", "mcb_dc"]
     page = ok(app.set_project_field(str(project), path, "schneider-c60h-dc"))
     assert page["defaults"]["catalogue_choice"]["mcb_dc"] == "schneider-c60h-dc"
+
+
+def test_a_brand_without_a_name_is_named_by_its_make_and_family(
+    app: api.Api, project: Path
+) -> None:
+    brands = ok(app.open_project(str(project)))["brands"]
+    abb = next(b for b in brands["mcb"] if b["id"] == "abb-s200m-uc")
+    assert abb["name"] == abb["product"] == "ABB S200M UC 2P"
+    assert brands["terminal_blocks"][0]["product"] == "Phoenix"
+    assert brands["busbars"][0] == {"id": "default", "name": "Library default", "product": None}

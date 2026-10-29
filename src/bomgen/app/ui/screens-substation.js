@@ -98,8 +98,10 @@
   const choice = (key, opts) => select('st-' + key, opts, ST.shown(key) || '', { invalid: !!ST.errors[key] });
   const brandName = (p, kind, id) => ((p.brands[kind] || []).find((b) => b.id === id) || { name: id }).name;
   function brandSelect(p, kind, label) {
-    const own = p.project_choice[kind], from = own ? brandName(p, kind, own) : kind === 'mcb_dc' ? 'as the AC branches' : brandName(p, kind, 'default');
-    const opts = [['', `Same as the project (${from})`], ...(p.brands[kind] || []).map((b) => [b.id, b.name])];
+    const own = p.project_choice[kind], lib = (p.brands[kind] || [])[0] || {};
+    const from = own ? brandName(p, kind, own) : lib.product || 'Library default';
+    const same = !own && kind === 'mcb_dc' ? 'Same as AC branches' : `Same as the project (${from})`;
+    const opts = [['', same], ...(p.brands[kind] || []).map((b) => [b.id, b.name])];
     return edit('brand_' + kind, esc(label), choice('brand_' + kind, opts));
   }
   const general = (p) => `<div class="form form--2">
@@ -108,14 +110,14 @@
     ${Object.keys(p.brands).length ? `<div class="span-2 section" style="margin:0">
       <h3>Catalogue brands</h3>
       <p class="lede">The project's brands apply unless this substation chooses its own.</p>
-      <div class="form form--3" style="margin-top:var(--space-3)">${KINDS.map(([k, l]) => brandSelect(p, k, l)).join('')}</div></div>` : ''}
+      <div class="form form--2" style="margin-top:var(--space-3)">${KINDS.map(([k, l]) => brandSelect(p, k, l)).join('')}</div></div>` : ''}
     <div class="span-2 section" style="margin:0">
       <h3>From the project</h3>
       <p class="lede">These come from the project and are the same for every substation in it.</p>
       <dl class="kv"><dt>Project</dt><dd>${esc(p.project.name)}</dd><dt>Client</dt><dd>${esc(p.project.client || '—')}</dd><dt>Device library</dt><dd>${esc(p.project.library.name)}, built with ${esc(p.project.library.version)}</dd></dl>
       <div class="row" style="margin-top:var(--space-3)"><button class="btn btn--secondary" data-action="goto" data-to="#/project/info">Open project overview</button></div>
     </div></div>`;
-  const docOpts = (p) => p.documents.map((d) => [d.key, `${d.key} · ${d.doc_no} rev ${d.rev}`]);
+  const docOpts = (p) => p.documents.map((d) => [d.key, d.key]);
   const entryOf = (p, key) => p.documents.find((d) => d.key === key);
   const docCells = (e) => (e ? `<td class="mono">${esc(e.doc_no)}</td><td class="mono">${esc(e.rev)}</td><td class="mono">${esc(e.issue_date)}</td>` : `<td colspan="3"><span class="err small">${icon('error')}<span>Not in the register</span></span></td>`);
   const documents = (p) => `<p class="lede muted" style="max-width:68ch;margin-bottom:var(--space-4)">Each calculation sheet prints the document number, revision and issue date of the register entry it names. Cabinet BOMs choose theirs on each panel. The register itself is on the project page.</p>
@@ -133,7 +135,7 @@
     <div class="table-wrap" style="max-width:860px"><table class="table"><thead><tr><th>Constant</th><th class="num" style="width:130px">Value</th><th>Unit</th><th style="width:230px">Default</th></tr></thead>
     <tbody>${p.constants.map((c) => { const [label, unit] = CONSTANTS[c.key] || [c.key, ''], key = 'c_' + c.key, pc = PCT.has(c.key), d = pc ? Math.round(c.default * 1000) / 10 : c.default; const reset = key in ST.draft && ST.draft[key] === '';
       return `<tr><td>${esc(label)}<span class="cell-sub mono">${esc(c.key)}</span>${ST.errors[key] ? `<span class="err small">${icon('error')}<span>${ST.err(key)}</span></span>` : ''}</td><td${App.changedCell(key in ST.draft)[0]}>${App.changedCell(key in ST.draft)[1]}<label class="sr-only" for="st-${key}">${esc(label)}</label>${text(key, { num: true, mono: true, placeholder: String(d) })}</td><td class="muted">${esc(pc ? '%' : unit)}</td>
-        <td>${reset ? '<span class="muted small">Reset on save</span>' : c.changed ? `${badge('info', `Changed from ${d}`)} <button class="btn btn--ghost btn--sm" data-action="st-reset" data-key="${key}">Reset</button>` : '<span class="muted small">Default</span>'}</td></tr>`; }).join('')}</tbody></table>
+        <td>${reset ? '<span class="muted small">Reset on save</span>' : c.changed ? `${badge('info', `Changed from ${d}`)} <button class="btn btn--ghost btn--sm" data-action="st-reset" data-key="${key}">Reset</button>` : ''}</td></tr>`; }).join('')}</tbody></table>
     <div class="table-foot"><span>${plural(changedRows.length, 'constant')} changed for this substation</span><span>${changedRows.length ? '<button class="btn btn--ghost btn--sm" data-action="st-reset-all">Reset all to defaults</button>' : ''}</span></div></div>`; };
   /* A tab with unsaved or refused values says so, since the save bar counts every tab. */
   const TAB_OF = (key) => (key === 'name' || key.startsWith('brand_') ? 'general' : key.startsWith('calc_') ? 'documents' : key.startsWith('c_') ? 'constants' : 'output');
@@ -158,7 +160,7 @@
 
   /* ---------- Network: the inputs, with the engine's ranking and result ---------- */
   const ROLES = { fopp: 'Fibre patch panel', l2_switch: 'L2 switch', l1_switch: 'L1 switch', ext_switch: 'External switch', firewall: 'Firewall', other: 'Other' };
-  const SPARES = { port_fraction: ['Ports kept free on each switch', '%'], sfp_per_l1: ['Spare SFPs on each L1', ''], rack_u_reserved: ['Rack space kept free', 'U'], dc_branches_per_feed: ['Spare DC branches per feed', ''], ac_branches: ['Spare AC branches', ''] };
+  const SPARES = { port_fraction: ['Ports kept free on each switch', '%'], sfp_per_l1: ['Spare SFPs on each L1', ''], rack_u_reserved: ['Rack space kept free', 'U'], dc_branches_per_feed: ['Spare DC branches', 'per feed'], ac_branches: ['Spare AC branches', ''] };
   const pct = (v) => Math.round(v * 100);
   /* Network inputs are edited on the page and saved together (docs/ui/editing.md); the model checks every value. */
   const NF = {  // key -> [path, kind]; an emptied spare is removed, so the project's value applies
@@ -211,8 +213,8 @@
     const k = (f) => `eq.${i}.${f}`, err = (f) => NET.errors[k(f)];
     const cellErr = ['part_id', 'role', 'redundant', 'qty', 'l2_ports'].map((f) => err(f) && `<span class="err small" id="n-${k(f)}-err">${icon('error')}<span>${esc(err(f))}</span></span>`).filter(Boolean).join('');
     const swap = k('part_id') in NET.draft ? NET.draft[k('part_id')] : '';
-    if (swap) return `<tr><td class="is-changed">${App.changedCell(true)[1]}<span class="mono">${esc(swap)}</span><span class="cell-sub">Was <span class="mono">${esc(e.part_id || '—')}</span> · <span class="mono">${esc(e.id)}</span> · saved with the rest</span>${cellErr}${changeButton(e, i)}</td>${eqCells(p, e, i)}`;
-    return `<tr><td><span class="mono">${esc(e.part_id || '—')}</span>${e.device && !e.device.known ? `<span class="err small">${icon('error')}<span>Not in ${esc(p.project.library.name)} ${esc(p.project.library.version)}</span></span>` : `<span class="cell-sub">${esc([e.device && e.device.make, e.device && e.device.model].filter(Boolean).join(' ') || (e.role === 'l1_switch' && !e.part_id ? 'Picked from the library by the sizing' : ''))} · <span class="mono">${esc(e.id)}</span></span>`}${cellErr}${changeButton(e, i)}</td>${eqCells(p, e, i)}`;
+    if (swap) return `<tr><td class="is-changed">${App.changedCell(true)[1]}<span class="part-line"><span class="mono">${esc(swap)}</span>${changeButton(e, i)}</span><span class="cell-sub">Was <span class="mono">${esc(e.part_id || '—')}</span> · <span class="mono">${esc(e.id)}</span> · saved with the rest</span>${cellErr}</td>${eqCells(p, e, i)}`;
+    return `<tr><td><span class="part-line"><span class="mono">${esc(e.part_id || '—')}</span>${changeButton(e, i)}</span>${e.device && !e.device.known ? `<span class="err small">${icon('error')}<span>Not in ${esc(p.project.library.name)} ${esc(p.project.library.version)}</span></span>` : `<span class="cell-sub">${esc([e.device && e.device.make, e.device && e.device.model].filter(Boolean).join(' ') || (e.role === 'l1_switch' && !e.part_id ? 'Picked from the library by the sizing' : ''))} · <span class="mono">${esc(e.id)}</span></span>`}${cellErr}</td>${eqCells(p, e, i)}`;
   }
   function eqCells(p, e, i) {
     const k = (f) => `eq.${i}.${f}`, err = (f) => NET.errors[k(f)];
@@ -281,11 +283,17 @@
       .catch((err) => { v('eq-err').innerHTML = `${icon('error')}<span>${esc(err.message)}</span>`; });
   };
   /* Change part: the saved part's alternatives first, then the rest of the active library; the pick is a Network edit like Use this instead. */
-  const changeButton = (e, i) => (e.part_id ? `<button class="btn btn--ghost btn--sm" style="padding-inline:0;min-height:0" data-action="eq-part-change" data-i="${i}" aria-label="Change the part of ${esc(e.id)}">Change…</button>` : '');
+  const changeButton = (e, i) => (e.part_id ? `<button class="btn btn--ghost btn--sm" data-action="eq-part-change" data-i="${i}" aria-label="Change the part of ${esc(e.id)}">Change…</button>` : '');
   const partText = (d) => `${esc(d.part_id)}${d.make || d.model ? ' · ' + esc([d.make, d.model].filter(Boolean).join(' ')) : ''}`;
-  ACTIONS['eq-part-change'] = (el) => withParts(() => {
+  /* Busy while the parts load; the dialog opens only if the person is still on this substation's Network page. */
+  ACTIONS['eq-part-change'] = (el) => {
+    const sub = S.sub;
+    el.setAttribute('aria-busy', 'true'); el.disabled = true;
+    withParts(() => {
     const i = Number(el.dataset.i), e = SUB.page.equipment[i], was = e.part_id, now = NET.shown(`eq.${i}.part_id`);
     Bridge.call('library_alternatives', was).catch(() => ({ rows: [] })).then((a) => {
+      el.removeAttribute('aria-busy'); el.disabled = false;
+      if (App.route().a !== 'network' || S.sub !== sub) return;
       const known = new Set(parts.map((d) => d.part_id));
       const alts = a.rows.filter((r) => !r.is_self && known.has(r.part_id)), altIds = new Set(alts.map((r) => r.part_id));
       const watts = (r) => { const w = Math.round(Math.abs(r.power_delta_w || 0) * 10) / 10; return w ? ` (${r.power_delta_w > 0 ? '+' : '−'}${w} W)` : ''; };
@@ -300,7 +308,8 @@
         <p class="small muted">The row keeps its id, role and quantities. The change is saved with the rest of the network.</p></div>`,
         actions: `<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="eq-part-change-do" data-i="${i}">Change part</button>` });
     });
-  });
+    });
+  };
   ACTIONS['eq-part-change-do'] = (el) => {
     const key = `eq.${el.dataset.i}.part_id`, value = NET.set(key, document.getElementById('eq-chg-part').value);
     App.closeDialog(); S.dirty = NET.dirty(); App.render();
@@ -336,7 +345,7 @@
           <section><h3>L1 switch model</h3>${App.network.rankTable()}</section>
           <section><h3>Equipment</h3>
             <p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">What the substation has, before any panel exists. Redundant devices come as an A and a B unit.</p>
-            ${eq.length ? `<div class="table-wrap"><table class="table"><caption class="sr-only">Equipment</caption><thead><tr><th style="min-width:190px">Device</th><th style="width:160px">Role</th><th style="width:64px">A and B</th><th class="num" style="width:80px">Quantity</th><th class="num" style="width:80px">L2 ports</th><th class="num" style="width:64px">Height</th><th style="width:44px"><span class="sr-only">Remove</span></th></tr></thead><tbody>
+            ${eq.length ? `<div class="table-wrap"><table class="table"><caption class="sr-only">Equipment</caption><thead><tr><th style="min-width:170px">Device</th><th style="min-width:170px">Role</th><th style="width:56px">A and B</th><th class="num" style="width:72px">Quantity</th><th class="num" style="width:72px">L2 ports</th><th class="num" style="width:60px">Height</th><th style="width:44px"><span class="sr-only">Remove</span></th></tr></thead><tbody>
               ${eq.map((e, i) => eqRow(p, e, i)).join('')}</tbody></table>
               <div class="table-foot"><span>${plural(eq.length, 'item')} · height and mounting come from the library</span><span><button class="btn btn--secondary btn--sm" data-action="eq-add" ${dirty ? 'disabled title="Save or discard the changes first"' : ''}>${icon('plus')}Add device</button></span></div></div>` : `<div class="empty"><b>No equipment yet.</b><div class="muted small" style="margin:var(--space-1) 0 var(--space-3)">${FIRST}</div>${startButton('btn--primary')}</div>`}</section>
           <section><h3>Spares</h3>
