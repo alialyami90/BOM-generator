@@ -150,7 +150,12 @@ def test_release_workflow_proves_the_first_start_install_and_that_a_reinstall_ke
         encoding="utf-8"
     )
     assert 'Show-Window "First start"' in workflow
-    assert "psa-devices" in workflow
+    library = yaml.safe_load((PACKAGING.parent / "examples" / "project.yaml").read_text("utf-8"))[
+        "library"
+    ]
+    version = library["version"].replace(".", r"\.")
+    # The first start must show the version the pack step names, not a stale one.
+    assert f"{library['name']}\\s+{version} \\(active\\)" in workflow
     assert 'Show-Window "Second start"' in workflow
     assert "The library store changed on the second start" in workflow
 
