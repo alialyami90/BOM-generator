@@ -22,9 +22,15 @@ question to Ali (item 1).
 4. **Spec catch-up** (STATE → "Known gaps"): when Ali has time, offer one card to bring the
    spec in line with ADRs 0017, 0019, 0020, 0022, 0023 and Q35–Q41, through the process in
    `docs/spec/`. Don't edit the spec without his go-ahead (CLAUDE.md).
-5. **Next release** (v0.2.2 or v0.3.0): STATE → "How a release happens". Hold other merges
+5. **Excel header fit (Q11, role 10's one open item).** Only Excel's Print Preview shows
+   whether the calc-sheet header's three lines overlap the table. Card for Ali: "Does the
+   header on Power Consumption and Heat Dissipation overlap the table in Excel's Print
+   Preview?" Options "It fits" (recommended: the size is computed to fit at the print scale)
+   and "It overlaps". Pass the answer to role 10; its NEXT.md task 1 says what to change
+   (`LINE_SPACING` 1.2 → 1.4 in `src/bomgen/sheets/header_footer.py`) and record it in Q11.
+6. **Next release** (v0.2.2 or v0.3.0): STATE → "How a release happens". Hold other merges
    between the CHANGELOG merge and the published release.
-6. **Checkpoints:** every role writes a docs-only checkpoint PR touching only its own
+7. **Checkpoints:** every role writes a docs-only checkpoint PR touching only its own
    `docs/handoff/NN-*` folder and its own ROSTER row. Merge them as they arrive; ROSTER rows
    don't conflict when each PR touches only its own row.
 

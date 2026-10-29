@@ -55,6 +55,7 @@ None at 032bbea apart from the role-handoff PRs, which this checkpoint merges. R
   card only reaches the thread that posted it; a new lead in a new thread must repost it
   (or a fresh one about v0.2.1) and close the old one with `close_decision`.
 - Next feature work waits on his testing feedback on v0.2.1 (README "Status" says so).
+- Q11 header fit in Excel Print Preview (role 10): no card sent yet; NEXT item 5.
 
 ## Known gaps and risks (not blocking, worth raising with Ali)
 
