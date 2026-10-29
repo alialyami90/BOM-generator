@@ -7,6 +7,54 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-29
+
+### Added
+
+- Network › Equipment: Change… on a row with a part picks a new part, with the
+  part's alternatives listed first and their power change per unit; the pick
+  is an unsaved edit, checked and saved with the rest, and the row shows
+  "Was X" (#199).
+- The device editor's Parts picker shows each part's make and model next to
+  its id (#200).
+- Use this instead: Use… on an Alternatives row lists the open substation's
+  equipment rows that use the device, and choosing one opens Network with the
+  new part as an unsaved edit (#194).
+
+### Changed
+
+- The v0.2 polish pass (`docs/ui/polish-v02.md`):
+  - Unsaved edits get the changed marker (a dot and a hidden "changed")
+    instead of the revision yellow, which is kept for Preview's revised
+    cells. Number inputs are right-aligned, "N fields need fixing" is one
+    control that moves to the first invalid field, and a route change closes
+    an open dialog (#205).
+  - The device editor gives list errors in words ("Pick a part from the
+    library.") and only once a new row is saved, shows choices as labels
+    (Continuous, Serial port, DIN rail), labels the Datasheet height "Height
+    in the datasheet" and gives Power input a text area; row delete buttons
+    share one style (#206).
+  - Network equipment rows keep the part id on one line with Change… after it,
+    the Role column shows whole names, and Change… shows a busy state and
+    opens only if you are still on that Network page. Settings names the
+    resolved brand ("Same as the project (Schneider Acti9 2P)", "Same as AC
+    branches") in a two-column Catalogue brands form and shows document keys.
+    Register rows are two lines with singular or plural wording, the project
+    path is cut with an ellipsis, the save bar is pinned to the window's
+    bottom edge on every page, and Loose material's table foot and free-text
+    banner are reworded (#207).
+- The Loose material library picker shows each part's data-quality badge,
+  "N fields need fixing" moves to the first invalid field on every draft
+  form, dialog errors name the fields, a free-text item's Fed from "—" has
+  screen-reader text, and the save toast reads "Saved N changes" (#201).
+
+### Fixed
+
+- An id in a table's second line no longer breaks at a hyphen, and the device
+  editor's tab panel is back at its offset from before #207 (#208).
+- Deleting a device added in the pending changes and not applied yet says it
+  is dropped from the pending changes, without the in-use warning (#198).
+
 ## [0.2.0] - 2026-10-29
 
 ### Added
@@ -367,7 +415,8 @@ project uses [Semantic Versioning](https://semver.org/).
   airflow; future library defaults use 0 W for the SK 3110 thermostat and
   460 m³/h for the SK 3243.100 fan with its outlet filter (#12).
 
-[Unreleased]: https://github.com/alialyami90/BOM-generator/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/alialyami90/BOM-generator/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/alialyami90/BOM-generator/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/alialyami90/BOM-generator/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/alialyami90/BOM-generator/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/alialyami90/BOM-generator/releases/tag/v0.1.0
