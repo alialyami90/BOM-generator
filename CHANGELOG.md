@@ -51,6 +51,8 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- An id in a table's second line no longer breaks at a hyphen, and the device
+  editor's tab panel is back at its offset from before #207 (#208).
 - Deleting a device added in the pending changes and not applied yet says it
   is dropped from the pending changes, without the in-use warning (#198).
 
