@@ -9,6 +9,7 @@ distribution (group F)").
 | File | Version | Source |
 | --- | --- | --- |
 | `generator-spec-v2.md` | v2 (28 Oct 2026) | Claude Doc "Substation SCADA BOM – Generator Spec v2", exported to Markdown |
+| `generator-spec-v2.md` | v2.1 (30 Oct 2026) | Hand-edited from the v2 export with the passages of the Claude Doc "Spec v2.1 draft" (ADRs 0017, 0019, 0020, 0022, 0023); the master doc still reads v2 |
 
 The export replaces the doc's embedded "workbook data flow" diagram with a text
 placeholder under "Relationships between sheets"; the surrounding text describes
