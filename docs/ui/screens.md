@@ -326,14 +326,37 @@ The app (M10) follows this design except where listed here. Each departure was
 reviewed by the design owner and is the intended behaviour; the prototype in
 `prototype/` is not changed to match.
 
-- **Projects, substations and settings are read-only.** Creating and editing
-  projects, substations and settings is not in the first release: the pages show
-  the values in disabled fields, "New project…", "New substation…" and similar
-  actions are disabled, and one line under the page subtitle says "Creating and
-  editing … in the app is not available yet. Edit the YAML files, then open the
-  project again." It is a single component (`note` in `pageHead`): one line, an
-  info icon, ellipsis and a tooltip on overflow. Empty read-only fields read
-  "Not set".
+- **Editing (v0.2, M16–M18).** Projects, substations, panels, loose material and the
+  library are edited in the app through the save bar in `editing.md`; the v0.1
+  read-only note under page titles is gone. Empty read-only fields (such as the
+  substation id) still read "Not set".
+- **Changed marker, not revision yellow (v0.2.1, #205).** An unsaved edit shows the
+  Changed marker (a warning dot before the label or at the start of the cell, with
+  a hidden "changed" for screen readers). The revision yellow is used only in
+  Preview, for cells revised since the previous issue.
+- **Panels board of hand-written panels (v0.2).** When the substation's panels are
+  hand-written files the board is read-only: no grips, no pins, no delete, and a
+  one-line banner says why ("Hand-written panels. The board shows what `bomgen
+  layout` would write; Build uses your panel files."). See `editing.md`, "Panels
+  board: drag, drop, pin, delete".
+- **Move… dialog (v0.2, #129).** Position is a choice of "Where the layout puts
+  it", "At the top" or "At the bottom", not a numbered select; the destination
+  panels are listed under it with what each move would do.
+- **Network › Equipment (v0.2.1, #199, #207).** Each row keeps its part id on one
+  line in mono with Change… after it; when the column is narrow Change… wraps
+  under the id. A changed part shows the new id with the Changed marker and
+  "Was X". The Role column shows whole names.
+- **Settings › General (v0.2.1, #207).** The catalogue brands sit in a two-column
+  form; the first option of each select names the resolved brand, "Same as the
+  project (Schneider Acti9 2P)", and for the DC MCB set "Same as AC branches".
+- **Settings › Documents.** The register select shows the document key only; the
+  number, revision and date of the chosen document appear in the row's cells.
+- **Settings › Design constants.** The Default column reads a muted "Default" on
+  unchanged rows and "Changed from X" on rows that differ from the project.
+- **Project › Documents (v0.2, #192).** Register rows are editable in place; an
+  assumed issue date gets an "Assumed date" badge with a Confirm action on the
+  same line, and Used by lists the panels and sheets without repeating the
+  substation prefix inside its group.
 - **Network pin.** "Use this one" and "Unpin" are not offered; the pin is written
   in `substation.yaml`. The ranking table's last column is "Use".
 - **Panels board.** The banner for hand-written panels is one line ("Hand-written
