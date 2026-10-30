@@ -431,6 +431,27 @@ def test_ids_in_a_sub_line_never_break_and_tab_panels_keep_their_offset() -> Non
     assert '<div role="tabpanel" aria-labelledby="tab-devEdit-${t}">' in libedit
 
 
+def test_the_app_ships_none_of_the_prototypes_illustrative_data() -> None:
+    """Audit 2026-10-30, finding 1: the installed app must never show the design prototype's
+    example substation as if it were real. The data and the stub stay in docs/ui/prototype."""
+    names = {p.name for p in UI_DIR.glob("*.js")}
+    assert names.isdisjoint({"data.js", "engine-stub.js"})
+    for path in TEXT_FILES:
+        text = path.read_text(encoding="utf-8")
+        assert not re.search(r"\bDB\.", text), path.name
+        assert not re.search(r"\bEngine\.", text), path.name
+        assert "psa-devices 1.4.0" not in text, path.name
+
+
+def test_without_its_bridge_the_app_says_so_instead_of_showing_example_pages() -> None:
+    """The same finding: a missing bridge is reported as an error, never papered over."""
+    ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    assert "S.backend === 'no'" in ui
+    assert "could not reach its engine" in ui
+    app = (UI_DIR / "app.js").read_text(encoding="utf-8")
+    assert "err.kind === 'no_backend'" in app
+
+
 def test_the_deprecated_minimum_branch_mcb_is_shown_read_only_with_why() -> None:
     """Audit 2026-10-30, finding 3: ADR 0019 point 4 deprecates ``min_branch_mcb_a``; it no
     longer sets a rating, so the editor must not invite an engineer to type one."""

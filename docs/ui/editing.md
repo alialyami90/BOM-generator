@@ -112,6 +112,16 @@ network or equipment changes. It is the user-facing word for a layout override.
   deleted device with **Restore**.
 - **Reset to automatic** releases every pin and deletion, after a confirmation that counts them. It can be undone.
 
+### Hand-written panels
+
+When a substation keeps hand-written panel files (`manual_panels`), the board is **read-only**:
+no grips, no drop targets, no Pin, Unpin or Delete, and no Move… dialog. Build reads the panel
+files, not the layout, so a pin would change the board and not the BOM; offering one would
+promise an effect it cannot have. The board still shows what `bomgen layout` would write, so
+the person can compare, under one banner line: "Hand-written panels. The board shows what
+`bomgen layout` would write; Build uses your panel files." with a "Show N problem(s)" button
+that lists what running the layout would report.
+
 ### Drag and drop contract
 
 The board never draws an affordance that does not act. The grip, the grab cursor and the drop targets exist

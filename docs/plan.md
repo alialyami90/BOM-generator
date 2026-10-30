@@ -1,7 +1,8 @@
 # Plan: Substation SCADA BOM generator
 
-Status: implemented. M0–M11 are on main (v0.1.1); M12–M18 are the next version, tracked in
-[`backlog.md`](backlog.md). Changes go through the review flow in `CLAUDE.md`.
+Status: implemented. M0–M18 are on main (v0.2.1, released 2026-10-29); the v0.2 points they
+answered are in [`backlog.md`](backlog.md). The next milestone is M19, from Ali's feedback on
+v0.2.1. Changes go through the review flow in `CLAUDE.md`.
 Spec: [`docs/spec/generator-spec-v2.md`](spec/generator-spec-v2.md). Sections are
 cited by name; this plan does not restate them.
 
@@ -51,52 +52,77 @@ design they cite.
 ```
 src/bomgen/
   models/
-    library.py      DeviceType, PortGroup, ChildRule, TerminalRule, LooseItem,
-                    commodity catalogues (MCB, aux contact, terminal blocks,
-                    busbars, housekeeping kits)
-    panel.py        Panel, Enclosure, DeviceInstance, PortPlan, PanelOptions,
-                    DocumentInfo, RevisionMarks
-    project.py      Project, DesignConstants, OutputSettings, LooseExtra
-    bom.py          Group (A–H), BomLine, Qty (int | "1 Lot" | formula), MergeSpan
-    calc.py         PowerLine, HeatLine, ForcedVentCheck, NaturalConvCheck
+    _base.py        shared base class and field types
+    library.py      DeviceType, ports, kit and terminal rules, loose items; the commodity
+                    catalogues (MCB, aux contact, terminal blocks, busbars, housekeeping) and
+                    the brand sets (ADR 0017, ADR 0023)
+    panel.py        Panel, Enclosure, DeviceInstance, PortPlan, options, DocumentInfo, mirrors
+    project.py      Project, document register, defaults (ADR 0012)
+    substation.py   Substation: settings, equipment, network, spares, layout (ADR 0013)
+    output.py       base for the engine's outputs (ADR 0005, ADR 0014)
+    bom.py          Group (A–H), BomLine, Qty, merge spans
+    calc.py         PowerLine, HeatLine, the MCB sizing record, vent checks
+    report.py       step 15 check report, OUT-8 revision comparison
     sheet.py        SheetModel, Cell, StyleToken, PrintSetup, SheetHeaderFooter
   io/
-    loader.py       YAML → models; resolves file references and panel mirroring
-    errors.py       readable validation errors (file, path, message)
+    yaml_source.py  YAML with the line of every key
+    loader.py       project → library → substations → panels; file references
+    mirror.py       mirror panel files
+    references.py   cross-file checks (duplicate and dangling ids)
+    errors.py       located input errors (file, path, line)
+    schema.py       JSON Schemas for the input files
+    round_trip.py   edit a YAML file keeping comments, order and style (ADR 0021)
+    edit.py, fields.py, panel_edit.py, loose_edit.py, lifecycle.py
+                    writers behind the app's editors: substation, fields, hand-written
+                    panels, loose material, create/delete (M17, M18; ADR 0021, 0022)
   engine/
-    units.py        step 1  expand instances into units (multi-qty, mirroring)
-    tags.py         step 1  tag + description building ("Tag naming conventions")
-    kits.py         step 2  child kit rows, loose items
-    network.py      step 3  SFPs per host switch, FOPP pigtails, cable managers,
-                            serial cables
-    power.py        step 4a per-device power, current, MCB sizing columns (N–R)
-    thermal.py      step 4b forced-vent and natural-convection checks, ventilation choice
+    units.py        step 1  expand instances into tagged rows
+    tags.py         step 1  tags ("Tag naming conventions")
+    enclosure.py    step 1  group A row
+    kits.py         step 2  kit children, loose-material table
+    items.py        a line with its children; flattening into table order
+    network.py      step 3  group C: SFPs, cable managers, serial cables
+    power.py        step 4a Power Consumption rows and totals
+    thermal.py      step 4b heat checks, ventilation choice
     housekeeping.py step 5  group D kit
     ac_dist.py      step 6  group E
-    dc_dist.py      step 7  group F (mains from ΣQ, branches, spares, QCOD, aux)
+    dc_dist.py      step 7  group F: branches sized from running and inrush current
+                            (ADR 0019), mains from ΣQ, spares, QCOD, aux contacts
+    mcb.py          breaker and aux-contact rows from a catalogue (AC and DC sets, ADR 0023)
     terminals.py    step 8  group G
     grounding.py    step 9  group H
-    hwio.py         step 10 HWIO per row, per panel, DI capacity
     assemble.py     step 11 order A→H, separators, SR.NO, parent/child merges
-    pipeline.py     runs steps 1–11 per panel, then 12, 15; returns BuildResult
+    pipeline.py     runs steps 1–11 per panel, sums HWIO (step 10), returns BuildResult
+    sizing.py       L1/L2 switch counts and port plans (ADR 0013, R1–R4)
+    layout.py       automatic panel layout and overrides (ADR 0013, R5–R9)
+    errors.py       engine errors
   sheets/
-    styles.py       style tokens from "Formatting" (fonts, fills, borders, sizes)
-    bom_sheet.py    step 12 panel BOM sheet (+ loose-material table on the WS sheet)
+    styles.py       style tokens from "Formatting"
+    grid.py         one sheet's cells and cross-sheet references
+    bom_sheet.py    step 12 panel BOM sheets and the Loose Material sheet (ADR 0020)
     power_sheet.py  step 12 Power Consumption
     heat_diss_sheet.py  step 12 Heat Dissipation
     heat_calc_sheet.py  step 12 Heat Calculations
     header_footer.py    step 13 page header / footer per sheet
+    workbook.py     every sheet of one substation's workbook
   writer/
-    xlsx.py         step 14 SheetModel → .xlsx (only module importing XlsxWriter)
-  checks.py         step 15 check report
+    xlsx.py         step 14 WorkbookModel → .xlsx (only module importing XlsxWriter)
+  build.py          one substation's build, shared by `bomgen build` and the app
+  checks.py         step 15 check report (DI capacity, airflow, ΣQ, …)
   revision.py       OUT-8 revised-cell highlighting
-  library_store/    M8  .bomlib pack/import/verify, installed-library store, diff, rollback
+  bundle/           zip container, path safety and review lines shared by .bomlib and .bomproj
+  library_store/    M8, M16: .bomlib pack/import/verify, installed store, diff, rollback;
+                    CSV export/import, local versions, device records, alternatives (ADR 0018)
+  project_store/    M8b: .bomproj export, import, backup, workspace (ADR 0012)
   app/              M10 Windows desktop app: pywebview window + Python API for the UI
-    __init__.py     import-free (ADR 0009), so launcher.py never pulls in the window
-    launcher.py     M11 frozen-app entry points (app_main, cli_main, --self-test);
-                    M10 plugs the window in here, M8 the .bomlib import
+    api.py          the endpoints the UI calls (ADR 0015)
+    projects.py, substations.py, network.py, preview.py, output.py, loose.py,
+    catalogues.py, library_edit.py, library_csv.py, editing.py
+                    one module per screen area, each a thin view over the engine and writers
+    launcher.py     M11 frozen-app entry points (app_main, cli_main, --self-test)
+    window.py       the pywebview window
     ui/             M9 HTML/CSS/JS from the impeccable design
-  cli.py            typer app: build, validate, library pack/import/list/rollback
+  cli.py            typer app: build, validate, schema, layout; `library` and `project` groups
 packaging/          M11 PyInstaller spec, Inno Setup script, icons
 ```
 
@@ -109,12 +135,13 @@ packaging/          M11 PyInstaller spec, Inno Setup script, icons
 | 2 | child kit rows, loose items | `engine/kits.py` | child `BomLine`s (parent link), loose list |
 | 3 | network accessories | `engine/network.py` | group C `BomLine`s |
 | 4 | device power, heat checks, ventilation | `engine/power.py`, `engine/thermal.py` | `PowerLine`s, `HeatLine`s, checks, ventilation mode |
+| 7 (sizing) | branch MCB rating from running and inrush current (ADR 0019) | `engine/dc_dist.py`, `engine/mcb.py` | `BranchSizing` per branch |
 | 5 | housekeeping kit | `engine/housekeeping.py` | group D |
 | 6 | AC distribution | `engine/ac_dist.py` | group E |
 | 7 | DC distribution, mains from ΣQ | `engine/dc_dist.py` | group F |
 | 8 | terminal strips | `engine/terminals.py` | group G |
 | 9 | grounding busbars | `engine/grounding.py` | group H |
-| 10 | HWIO sums, DI coverage | `engine/hwio.py` | per-row `hwio`, panel totals |
+| 10 | HWIO sums, DI coverage | `engine/pipeline.py`, `checks.py` | per-row `hwio`, panel totals, the DI-capacity check |
 | 11 | ordering, SR.NO, separators, merges | `engine/assemble.py` | ordered `BomLine`s with `sr_no`, `merge span` |
 | 12 | calc sheets, loose-material table | `sheets/*.py` | `SheetModel`s |
 | 13 | page header/footer | `sheets/header_footer.py` | `SheetHeaderFooter` per sheet |
@@ -919,53 +946,6 @@ section's details are written when the work starts.
 
 Each has a proposed default that the plan assumes until Ali answers.
 
-**Q41 — FGR-60F below the DC float voltage** (M14, M15; #171). *Resolved 2026-10-28:* Ali
-chose "Keep it, accept the warning". The FortiGate FGR-60F's datasheet DC input stops at 125 V,
-below the 140 V float, so `dc_float` warns for it on every build that uses it, as for the iC60N
-under Q37. It stays the default firewall in the shipped library; no DC-rated alternative is
-researched.
-
-**Q40 — Power footnote in the print area** (M5–M6; #157). *Resolved 2026-10-28:* Ali chose
-"Print it". The printer footnote rows under the NOTES on the Power Consumption sheet are inside
-the print area, which now ends after the last footnote row instead of at the reference
-workbook's A1:L97. This corrects the reference, where the footnote is on the sheet but does not
-print.
-
-**Q35 — Branch MCB sizing rule** (M15; backlog point 3). *Resolved 2026-10-28:* Ali chose
-"Computed, 2 A floor". A branch MCB is the smallest catalogue rating that meets all three:
-at least 1.3 × the running current, at least the inrush current divided by the MCB set's
-magnetic trip multiple (C curve: 5) when the device has an inrush figure, and at least 2 A.
-This replaces the per-device `min_branch_mcb_a` as the floor (ADR 0019).
-Ali also chose "Ignore spikes under 10 ms": the inrush counts only when it lasts at least
-`inrush_min_ms` (10 ms) or no duration is given, and a DC load uses the set's DC trip multiple when
-it has one. A device with no inrush figure is sized by the running current and the floor.
-
-**Q39 — Separate AC and DC MCB brands** (M13, M15; backlog point 3). *Resolved 2026-10-28:*
-Ali chose "Separate AC and DC choices". A project or substation can choose the DC MCB brand set
-apart from the AC one, so a DC-only range (for example C60H-DC under Q37) can feed the DC branches
-while the AC branches keep an AC-rated set. The proposed shape, for ADR 0023: a
-`catalogue_choice` key `mcb_dc` that falls back to `mcb` when unset, so existing projects and the
-golden values do not change; `mcb` still refuses a brand that is not AC-rated (#145). The model, loader and
-schema take the key; the engine sizes DC branches, mains and CINC from the DC set.
-
-**Q38 — Datasheet data in the shipped library** (M14; backlog point 3). *Resolved 2026-10-28:*
-Ali chose "Real data in shipped library only". The researched datasheet inrush (SEL originals) and
-DC input ranges go into the library the installer ships (psa-devices 1.1.0), so real projects size
-their branch MCBs from them under Q35. `examples/library.yaml` stays the spec's example project
-without them, so the golden values do not change. Both libraries are generated from
-`data/device-db`; `release.yml` points at the shipped one.
-
-**Q37 — Default MCB set for the 125 V DC feeds** (M14, M15). *Resolved 2026-10-28:* Ali chose
-"Keep iC60N as default". The Schneider iC60N 2P (A9F742xx) is rated to exactly 125 V DC, while the
-battery floats at about 135–140 V. It stays the default; the DC-rated ranges (Schneider C60H-DC,
-ABB S200M UC, Siemens 5SY5) become selectable brand sets (M14). The check report warns when a
-DC MCB's `dc_rating_v` or a DC-fed device's `input_v_max` is below `dc_float_v` (140 V).
-
-**Q36 — Where loose material goes** (M18; backlog point 6). *Resolved 2026-10-28:* Ali chose
-"Its own sheet". Loose material moves off the WS console sheet onto a "Loose Material" sheet,
-placed after the cabinet BOM sheets and before Power Consumption. This overrides the spec's
-OUT-3 and its loose-material table on sheet 4 (ADR 0020).
-
 **Q1 — Example data is not in the spec (blocks M1 and the golden tests).**
 *Resolved 2026-10-28:* Ali uploaded the example workbook; `examples/` is transcribed
 from it (ADR 0010). The workbook itself stays out of git.
@@ -1094,7 +1074,6 @@ records the library name and version; when sharing a project with someone on
 an older library, the app tells them which `.bomlib` to import. Alternatively
 a project can be exported as a bundle that includes its library snapshot.
 
-
 **Q22 — Mistakes in the example workbook.** *Resolved 2026-10-28:* Ali: "fix it". The
 generator writes the corrected values and the golden tests expect them: cabinet-1
 Power Consumption AC rows reference cabinet 1's own BOM (the workbook points at
@@ -1123,38 +1102,6 @@ the A/B pairs, not in their own panel (ADR 0013, rule R6).
 **Q28 — L1 uplinks in a star.** *Resolved 2026-10-28:* Ali: one uplink from each L1
 switch to its own L2 side, and the A and B switches of a pair interconnected
 (ADR 0013, rule R1).
-
-**Q32 — Cable managers against the usable 32U.** Cable managers are 1U each,
-nine per network cabinet today (spec: "roughly one per rack-mounted switch/patch
-panel"). *Resolved 2026-10-28:* Ali: they count against the 32U. Each rack switch,
-firewall or patch panel unit carries a 1U cable manager directly under it as one
-block with no blank plate inside (ADR 0013); generated panels take the
-cable-manager count from the layout.
-
-**Q33 — FOPP-96SM rack height.** The datasheet was not found; the device database
-assumed 2U from Hubbell's 48-fibre 1U unit (`data/device-db/`, PR #18).
-*Resolved 2026-10-28:* Ali: 1U. The device database and the example library are updated
-(done in #33: FOPP-96SM `height_u: 1`).
-
-**Q34 — Group E–H rules the spec states only by example** (M3; ADR 0014).
-*Resolved 2026-10-28:* Ali accepted all four defaults below, including no XDIN row
-when the HWIO total is 0 and no override is set:
-1. Strips follow the order of the example's group G rows ('Panel 1', 'Panel 3'): the
-   fixed strips, then the device strips (library `terminals`) after X-ANN and before
-   XIP: the per-unit strips (Axion DI slots XDIPD–XDIPG) in group B order, then
-   XDIN, then the per-serial-port strips (XRTAC-C1…C6). A rule without `{n}` or
-   `{slot}` gives one strip of count × units.
-2. XDIN appears with the DI slot strips. *Default:* its quantity is the
-   substation's HWIO total (17 + 17 + 6 = 40, the spec's "hardwired DI count");
-   `terminal_overrides` wins. Its text is fixed: "Knife Disconnect Terminal Blocks
-   For DI Negative". With an HWIO total of 0 and no override, no XDIN row is written.
-3. The console's aux contacts carry HWIO 0 (`Aux`!H21 and H31 are blank); other
-   kinds count 1 per AC aux contact and 2 for the DC mains.
-4. Descriptions are written one way in every cabinet: MCBs "2A, 2P MCB For …"
-   (the spec's example reads "2A,2P", the workbook mixes both), spares "SPARE",
-   one text per terminal strip, the console's CINC "Main Auxiliary AC Supply"
-   (`Aux` reads "Non-UPS AC Supply"), and a branch load named by its tag without the
-   prefix ("SRV/OAS/EAS PS1"; `Aux` reads "OAS PS1").
 
 **Q29 — Thermostat load and fan airflow in the library defaults.** The device
 research (`docs/device-db-findings.md`, items 1 and 2) found that the SK 3110.000
@@ -1188,3 +1135,82 @@ stand as written:
    none.
 4. Natural ventilation takes 2 vent filters (the workbook's WS console); the spec
    says "vent filters" without a count.
+
+**Q32 — Cable managers against the usable 32U.** Cable managers are 1U each,
+nine per network cabinet today (spec: "roughly one per rack-mounted switch/patch
+panel"). *Resolved 2026-10-28:* Ali: they count against the 32U. Each rack switch,
+firewall or patch panel unit carries a 1U cable manager directly under it as one
+block with no blank plate inside (ADR 0013); generated panels take the
+cable-manager count from the layout.
+
+**Q33 — FOPP-96SM rack height.** The datasheet was not found; the device database
+assumed 2U from Hubbell's 48-fibre 1U unit (`data/device-db/`, PR #18).
+*Resolved 2026-10-28:* Ali: 1U. The device database and the example library are updated
+(done in #33: FOPP-96SM `height_u: 1`).
+
+**Q34 — Group E–H rules the spec states only by example** (M3; ADR 0014).
+*Resolved 2026-10-28:* Ali accepted all four defaults below, including no XDIN row
+when the HWIO total is 0 and no override is set:
+1. Strips follow the order of the example's group G rows ('Panel 1', 'Panel 3'): the
+   fixed strips, then the device strips (library `terminals`) after X-ANN and before
+   XIP: the per-unit strips (Axion DI slots XDIPD–XDIPG) in group B order, then
+   XDIN, then the per-serial-port strips (XRTAC-C1…C6). A rule without `{n}` or
+   `{slot}` gives one strip of count × units.
+2. XDIN appears with the DI slot strips. *Default:* its quantity is the
+   substation's HWIO total (17 + 17 + 6 = 40, the spec's "hardwired DI count");
+   `terminal_overrides` wins. Its text is fixed: "Knife Disconnect Terminal Blocks
+   For DI Negative". With an HWIO total of 0 and no override, no XDIN row is written.
+3. The console's aux contacts carry HWIO 0 (`Aux`!H21 and H31 are blank); other
+   kinds count 1 per AC aux contact and 2 for the DC mains.
+4. Descriptions are written one way in every cabinet: MCBs "2A, 2P MCB For …"
+   (the spec's example reads "2A,2P", the workbook mixes both), spares "SPARE",
+   one text per terminal strip, the console's CINC "Main Auxiliary AC Supply"
+   (`Aux` reads "Non-UPS AC Supply"), and a branch load named by its tag without the
+   prefix ("SRV/OAS/EAS PS1"; `Aux` reads "OAS PS1").
+
+**Q35 — Branch MCB sizing rule** (M15; backlog point 3). *Resolved 2026-10-28:* Ali chose
+"Computed, 2 A floor". A branch MCB is the smallest catalogue rating that meets all three:
+at least 1.3 × the running current, at least the inrush current divided by the MCB set's
+magnetic trip multiple (C curve: 5) when the device has an inrush figure, and at least 2 A.
+This replaces the per-device `min_branch_mcb_a` as the floor (ADR 0019).
+Ali also chose "Ignore spikes under 10 ms": the inrush counts only when it lasts at least
+`inrush_min_ms` (10 ms) or no duration is given, and a DC load uses the set's DC trip multiple when
+it has one. A device with no inrush figure is sized by the running current and the floor.
+
+**Q36 — Where loose material goes** (M18; backlog point 6). *Resolved 2026-10-28:* Ali chose
+"Its own sheet". Loose material moves off the WS console sheet onto a "Loose Material" sheet,
+placed after the cabinet BOM sheets and before Power Consumption. This overrides the spec's
+OUT-3 and its loose-material table on sheet 4 (ADR 0020).
+
+**Q37 — Default MCB set for the 125 V DC feeds** (M14, M15). *Resolved 2026-10-28:* Ali chose
+"Keep iC60N as default". The Schneider iC60N 2P (A9F742xx) is rated to exactly 125 V DC, while the
+battery floats at about 135–140 V. It stays the default; the DC-rated ranges (Schneider C60H-DC,
+ABB S200M UC, Siemens 5SY5) become selectable brand sets (M14). The check report warns when a
+DC MCB's `dc_rating_v` or a DC-fed device's `input_v_max` is below `dc_float_v` (140 V).
+
+**Q38 — Datasheet data in the shipped library** (M14; backlog point 3). *Resolved 2026-10-28:*
+Ali chose "Real data in shipped library only". The researched datasheet inrush (SEL originals) and
+DC input ranges go into the library the installer ships (psa-devices 1.1.0), so real projects size
+their branch MCBs from them under Q35. `examples/library.yaml` stays the spec's example project
+without them, so the golden values do not change. Both libraries are generated from
+`data/device-db`; `release.yml` points at the shipped one.
+
+**Q39 — Separate AC and DC MCB brands** (M13, M15; backlog point 3). *Resolved 2026-10-28:*
+Ali chose "Separate AC and DC choices". A project or substation can choose the DC MCB brand set
+apart from the AC one, so a DC-only range (for example C60H-DC under Q37) can feed the DC branches
+while the AC branches keep an AC-rated set. The proposed shape, for ADR 0023: a
+`catalogue_choice` key `mcb_dc` that falls back to `mcb` when unset, so existing projects and the
+golden values do not change; `mcb` still refuses a brand that is not AC-rated (#145). The model, loader and
+schema take the key; the engine sizes DC branches, mains and CINC from the DC set.
+
+**Q40 — Power footnote in the print area** (M5–M6; #157). *Resolved 2026-10-28:* Ali chose
+"Print it". The printer footnote rows under the NOTES on the Power Consumption sheet are inside
+the print area, which now ends after the last footnote row instead of at the reference
+workbook's A1:L97. This corrects the reference, where the footnote is on the sheet but does not
+print.
+
+**Q41 — FGR-60F below the DC float voltage** (M14, M15; #171). *Resolved 2026-10-28:* Ali
+chose "Keep it, accept the warning". The FortiGate FGR-60F's datasheet DC input stops at 125 V,
+below the 140 V float, so `dc_float` warns for it on every build that uses it, as for the iC60N
+under Q37. It stays the default firewall in the shipped library; no DC-rated alternative is
+researched.

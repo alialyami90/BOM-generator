@@ -13,13 +13,14 @@ Builds the per-user Windows installer (plan M11, ADR 0007, ADR 0009).
 
 ## Release
 
-A release is one ordinary PR; nobody pushes a tag.
+A release is two ordinary PRs; nobody pushes a tag (ADR 0009; the steps in
+detail are in `docs/handoff/STATE.md`, "How a release happens").
 
-1. When Ali says a release is due, open a PR that sets the new
-   version in `__version__` (`src/bomgen/__init__.py`), `version` in
-   `pyproject.toml` and `tests/test_package.py`, and moves the `[Unreleased]`
-   entries in `CHANGELOG.md` under `## [<version>] - <date>`.
-2. Review and merge it.
+1. A docs PR moves the `[Unreleased]` entries in `CHANGELOG.md` under
+   `## [<version>] - <date>` and updates the compare links.
+2. After it merges, a bump PR sets the new version in `__version__`
+   (`src/bomgen/__init__.py`), `version` in `pyproject.toml` and
+   `tests/test_package.py`, and nothing else. Merging it publishes.
 3. On that push to main, `.github/workflows/release.yml` sees that
    `v<version>` doesn't exist yet. It builds and smoke-tests the installer
    (install, window start, first-start library, build of the example,
@@ -42,9 +43,9 @@ an artifact without releasing.
 ```powershell
 pip install ".[app]" -r packaging/requirements.txt
 pyinstaller packaging/bomgen.spec --noconfirm --clean
-& "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" /DAppVersion=0.1.1 packaging\bomgen.iss
+& "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" /DAppVersion=<version> packaging\bomgen.iss
 ```
 
-Output: `out\installer\bomgen-setup-0.1.1.exe` (`out/`, `build/` and `dist/`
+Output: `out\installer\bomgen-setup-<version>.exe` (`out/`, `build/` and `dist/`
 are git-ignored). PyInstaller also runs on Linux and macOS for checking the
 spec, but the installer is Windows-only.

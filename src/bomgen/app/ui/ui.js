@@ -8,19 +8,14 @@
     theme: 'light',            // light | dark | system
     firstRun: false,           // true: nothing installed yet, no projects
     launch: 'normal',          // normal | bomproj (app was started by double-clicking a .bomproj file)
-    proj: 'ep132',             // open project id, or null
-    sub: 'gis01',              // open substation id, or null
-    checks: 'errors',          // errors | clean
+    proj: null,                // open project id, or null
+    sub: null,                 // open substation id, or null
     dirty: false,
     libTab: 'import',
-    build: 'ready',            // ready | building | success | locked
-    buildStep: 0,
     tab: { project: 'info', settings: 'general', panel: 'devices', panels: 'board', lib: 'overview', preview: 'psa1', libdetail: 'overview', panelsel: 'psa1' },
-    layout: { overrides: [], removed: [], history: [], selected: '', openOverrides: false },
-    selectedDevice: 'RST2228-L1-24MM',
-    yamlError: true,
+    selectedDevice: '',
     density: 'default',
-    backend: 'unknown',        // unknown | yes | no (opened in a plain browser: the prototype's illustrative data)
+    backend: 'unknown',        // unknown | yes | no (no bridge: the app says so, see noBackend)
     project: null,             // the open project's page from open_project, shaped for the screens
     app: null,                 // app_info from Python: version, project_file, workspace, libraries
     library: null,             // the active library { name, version }, or null
@@ -28,9 +23,9 @@
   };
   const ACTIONS = {};
   const SCREENS = {};
-  /* Real state from bomgen.app.api.app_info; screens not connected yet still read the illustrative DB. */
+  /* Real state from bomgen.app.api.app_info. */
   function setAppInfo(info) {
-    if (S.backend !== 'yes') { S.backend = 'yes'; S.proj = null; S.sub = null; }  // real projects replace the example
+    S.backend = 'yes';
     S.app = info;
     const active = info.libraries.find((l) => l.active);
     S.library = active ? { name: active.name, version: active.active } : null;
@@ -40,9 +35,8 @@
     render();
     info.libraries.filter((l) => l.problem).forEach((l) => toast(`Library ${l.name} needs attention: ${l.problem}`, 'warn'));
   }
-  const lib = () => S.library || { name: DB.library.name, version: DB.library.version };
+  const lib = () => S.library || { name: '', version: '' };
   const noActive = () => !!S.app && !S.library;  // libraries installed, none usable (see the toast)
-  const counts = () => ({ errors: S.checks === 'errors' ? DB.problems.filter((p) => p.sev === 'error').length : 0, warnings: DB.problems.filter((p) => p.sev === 'warning').length });
 
   /* ---------- components ---------- */
   const badge = (kind, text, ic) => `<span class="badge badge--${kind}">${ic ? icon(ic) : ''}${esc(text)}</span>`;
@@ -67,7 +61,6 @@
   const select = (id, opts, value, o = {}) => `<select class="select ${o.cls || ''}" id="${id}" ${o.invalid ? 'aria-invalid="true"' : ''} data-dirty="1">${opts.map((x) => { const [v, t] = Array.isArray(x) ? x : [x, x]; return `<option value="${esc(v)}" ${v === value ? 'selected' : ''}>${esc(t)}</option>`; }).join('')}</select>`;
   /* `note`: one muted line under the lede, the same place on every page (what the app cannot do yet). */
   const pageHead = (title, lede = '', actions = '', crumbs = '', note = '') => `<div class="page-head"><div class="page-head-main">${crumbs ? `<div class="crumbs">${crumbs}</div>` : ''}<h1>${title}</h1>${lede ? `<p class="lede">${lede}</p>` : ''}${note ? `<p class="page-note" title="${esc(note)}">${icon('info')}<span>${esc(note)}</span></p>` : ''}</div>${actions ? `<div class="actions">${actions}</div>` : ''}</div>`;
-  const illus = () => `<span class="illus">${icon('info')}Illustrative data: not connected yet</span>`;
 
   /* Import reviews (library and project): every check; after a failure the later ones collapse to one line. */
   const CHECK = { ok: ['ok', 'check'], warning: ['warn', 'warn'], failed: ['bad', 'error'], skipped: ['info', 'info'] };
@@ -105,7 +98,7 @@
     return { a, b, c };
   };
   const go = (hash) => { if (location.hash === hash) render(); else location.hash = hash; };
-  const curProject = () => (S.backend === 'no' ? DB.projects.find((p) => p.id === S.proj) || null : S.project);
+  const curProject = () => S.project;
   const curSub = () => { const p = curProject(); return p ? p.substations.find((s) => s.id === S.sub) || null : null; };
   const hasProject = () => !S.firstRun && !!curProject();
   const hasSub = () => hasProject() && !!curSub();
@@ -116,8 +109,8 @@
       <div class="brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>BOM Generator</div>
       ${hasProject() ? `<span class="bar-divider"></span><div class="bar-project"><b title="${esc(p.name)}">${esc(p.name)}</b><span>${s ? esc(s.name) : 'No substation open'}</span></div>` : ''}
       <div class="bar-spacer"></div>
-      <a class="bar-btn" href="#/library" style="text-decoration:none" aria-label="Device library ${S.firstRun ? 'not installed' : noActive() ? 'needs attention' : esc(lib().name + ' ' + lib().version)}">
-        <span class="dot ${S.firstRun || noActive() ? 'dot--bad' : 'dot--ok'}" aria-hidden="true"></span>${S.firstRun ? 'No library installed' : noActive() ? 'No active library' : `${esc(lib().name)} ${esc(lib().version)}`}</a>
+      <a class="bar-btn" href="#/library" style="text-decoration:none" aria-label="Device library ${S.backend !== 'yes' ? 'unknown' : S.firstRun ? 'not installed' : noActive() ? 'needs attention' : esc(lib().name + ' ' + lib().version)}">
+        <span class="dot ${S.backend !== 'yes' || S.firstRun || noActive() ? 'dot--bad' : 'dot--ok'}" aria-hidden="true"></span>${S.backend !== 'yes' ? 'Library unknown' : S.firstRun ? 'No library installed' : noActive() ? 'No active library' : `${esc(lib().name)} ${esc(lib().version)}`}</a>
       <button class="bar-btn bar-btn--icon" data-action="theme" aria-label="Theme: ${S.theme}. Change theme" title="Theme: ${S.theme}">${icon(S.theme === 'dark' ? 'moon' : 'sun')}</button>
       <button class="bar-btn bar-btn--icon" data-action="help" aria-label="Help" title="Help">${icon('help')}</button>`;
   }
@@ -125,45 +118,44 @@
     return `<a href="${disabled ? '#' : href}" ${cur ? 'aria-current="page"' : ''} ${disabled ? 'aria-disabled="true" tabindex="-1" style="opacity:.45;pointer-events:none"' : ''}>${icon(ic)}<span>${label}</span>${tail ? `<span class="tail ${tailCls}">${tail}</span>` : ''}</a>`;
   }
   function renderNav() {
-    const r = route().a, c = counts(), np = hasProject(), p = curProject();
-    const ns = hasSub(), ex = ns && S.backend !== 'yes';  // ex: the example substation's figures (M10c and M10d connect the real ones)
-    const v = ns && S.backend === 'yes' && S.verify && S.verify.key === `${S.project.file}#${S.sub}` ? S.verify : null;  // the last checks of a real substation
-    const buildTail = v ? (v.errors ? `${icon('error')}Blocked` : `${icon('check')}Ready`) : !ex ? '' : c.errors ? `${icon('error')}Blocked` : `${icon('check')}Ready`;
-    const checksTail = v ? (v.errors ? `${icon('error')}${v.errors} ${v.errors === 1 ? 'error' : 'errors'}` : v.failed ? `${icon('error')}Failed` : `${icon('check')}Clear`) : ex ? (c.errors ? `${icon('error')}${c.errors} errors` : `${icon('check')}Clear`) : '';
-    const bad = v ? v.errors > 0 || v.failed : c.errors > 0;
+    const r = route().a, np = hasProject(), p = curProject();
+    const ns = hasSub();
+    const v = ns && S.verify && S.verify.key === `${S.project.file}#${S.sub}` ? S.verify : null;  // the last checks of the open substation
+    const buildTail = v ? (v.errors ? `${icon('error')}Blocked` : `${icon('check')}Ready`) : '';
+    const checksTail = v ? (v.errors ? `${icon('error')}${v.errors} ${v.errors === 1 ? 'error' : 'errors'}` : v.failed ? `${icon('error')}Failed` : `${icon('check')}Clear`) : '';
+    const bad = !!v && (v.errors > 0 || v.failed);
     const projTail = !np ? '' : p.status === 'bad' ? `${icon('error')}${p.statusText}` : p.status === 'warn' ? `${icon('warn')}1` : `${icon('check')}`;
     const switcher = np ? `<div class="nav-switch"><label class="sr-only" for="sub-switch">Substation</label><select class="select" id="sub-switch" data-action="sub-switch">${S.sub ? '' : '<option value="">Choose a substation…</option>'}${p.substations.map((x) => `<option value="${x.id}" ${x.id === S.sub ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>` : '';
     $('#nav').innerHTML = `
       ${navItem('#/home', 'home', 'Home', '', '', false, r === 'home')}
       ${navItem('#/library', 'library', 'Library', S.firstRun || noActive() ? '' : esc(lib().version), '', false, r === 'library')}
       ${np ? `<div class="nav-group">Project</div>
-      ${navItem('#/project', 'project', esc(p.name.replace(' (example)', '')), projTail, p.status === 'bad' ? 'bad' : p.status === 'warn' ? 'warn' : 'ok', false, r === 'project')}
+      ${navItem('#/project', 'project', esc(p.name), projTail, p.status === 'bad' ? 'bad' : p.status === 'warn' ? 'warn' : 'ok', false, r === 'project')}
       <div class="nav-group">Substation</div>${switcher}
-      ${navItem('#/settings', 'file', 'Settings', ex ? icon('check') : '', 'ok', !ns, r === 'settings')}
-      ${navItem('#/network', 'network', 'Network', ex ? (S.sub === 'cb03' ? `${icon('warn')}Not set up` : icon('check')) : '', S.sub === 'cb03' ? 'warn' : 'ok', !ns, r === 'network')}
-      ${navItem('#/panels', 'panels', 'Panels', ex ? String(S.sub === 'cb03' ? 0 : DB.panels.length) : ns ? esc(curSub().panels) : '', '', !ns, r === 'panels')}
-      ${ex ? '' : navItem('#/loose', 'pkg', 'Loose material', App.looseCount && App.looseCount() != null ? String(App.looseCount()) : '', '', !ns, r === 'loose')}
+      ${navItem('#/settings', 'file', 'Settings', '', 'ok', !ns, r === 'settings')}
+      ${navItem('#/network', 'network', 'Network', '', 'ok', !ns, r === 'network')}
+      ${navItem('#/panels', 'panels', 'Panels', ns ? esc(curSub().panels) : '', '', !ns, r === 'panels')}
+      ${navItem('#/loose', 'pkg', 'Loose material', App.looseCount && App.looseCount() != null ? String(App.looseCount()) : '', '', !ns, r === 'loose')}
       <div class="nav-group">Verify and issue</div>
       ${navItem('#/checks', 'checks', 'Checks', checksTail, bad ? 'bad' : 'ok', !ns, r === 'checks')}
       ${navItem('#/preview', 'preview', 'Preview', '', '', !ns, r === 'preview')}
-      ${navItem('#/build', 'build', 'Build', buildTail, (v ? v.errors : c.errors) ? 'bad' : 'ok', !ns, r === 'build')}` : ''}
+      ${navItem('#/build', 'build', 'Build', buildTail, v && v.errors ? 'bad' : 'ok', !ns, r === 'build')}` : ''}
       <div class="nav-foot">App ${S.app ? esc(S.app.version) : ''}<br>Works offline. Nothing leaves this PC.</div>`;
   }
   function renderStatus() {
-    const c = counts(), ns = hasSub(), np = hasProject(), p = curProject();
-    $('#status').innerHTML = ns && S.backend === 'yes' ? `<span class="mono" style="font-size:12px">${esc(curSub().file)}</span><span class="sp"></span>`
-      : ns ? `
-      <span>${S.dirty ? `<b style="color:var(--color-warning)">Unsaved changes</b>` : `Substation saved ${esc(DB.sub.savedAt)}`}</span>
-      <span class="mono" style="font-size:12px">${esc(DB.sub.path)}</span>
-      <span class="sp"></span>
-      <button data-action="goto" data-to="#/checks" aria-label="${c.errors} errors, ${c.warnings} warnings in ${esc(curSub().name)}. Open checks">
-        ${c.errors ? `<span class="bad">${icon('error')} ${c.errors} errors</span>` : `<span class="ok">${icon('check')} No errors</span>`}
-        <span>${icon('warn')} ${c.warnings} warnings</span></button>`
+    const ns = hasSub(), np = hasProject(), p = curProject();
+    $('#status').innerHTML = S.backend === 'no' ? `<span class="bad">${icon('error')} Engine not reachable</span>`
+      : ns ? `<span class="mono" style="font-size:12px">${esc(curSub().file)}</span><span class="sp"></span>`
       : np ? `<span>${esc(p.path)}</span><span class="sp"></span><span>${p.substations.length} ${p.substations.length === 1 ? 'substation' : 'substations'}</span>`
       : `<span>No project open</span><span class="sp"></span><span>${S.firstRun ? 'Library: none installed' : ''}</span>`;
   }
+  /* No bridge: the UI must never stand in for the engine, so every page says so (audit 2026-10-30, finding 1). */
+  const noBackend = () => `<div class="page">${pageHead('BOM Generator could not reach its engine', 'The window opened, but the part of the app that reads projects and builds workbooks did not answer.')}
+      <div class="empty"><h3>Nothing can be shown or saved until it does.</h3><p>Close this window and start BOM Generator again from the Start menu. If this keeps happening, run the installer again; the repair keeps your projects and libraries.</p>
+      <div class="row"><button class="btn btn--primary" data-action="retry-backend">${icon('refresh')}Try again</button></div></div></div>`;
   function renderMain() {
     const { a } = route();
+    if (S.backend === 'no') { $('#main').innerHTML = noBackend(); document.title = 'BOM Generator'; return; }
     const key = ({ home: 'home', project: 'project', settings: 'settings', network: 'network', panels: 'panels', loose: 'loose', library: 'library', checks: 'checks', preview: 'preview', build: 'build' })[a] || 'home';
     const needsProject = key === 'project', needsSub = ['settings', 'network', 'panels', 'loose', 'checks', 'preview', 'build'].includes(key);
     const m = $('#main');
@@ -193,7 +185,7 @@
     if (ACTIONS[name]) { ACTIONS[name](el, e); }
   });
   document.addEventListener('input', (e) => { if (e.target.dataset && e.target.dataset.dirty && !S.dirty) { S.dirty = true; renderStatus(); } });
-  document.addEventListener('change', (e) => { const g = e.target.closest('select[data-action="grp"]'); if (g) ACTIONS.grp(g); const sw = e.target.closest('select[data-action="sub-switch"]'); if (sw) ACTIONS['sub-switch'](sw); });
+  document.addEventListener('change', (e) => { const sw = e.target.closest('select[data-action="sub-switch"]'); if (sw) ACTIONS['sub-switch'](sw); });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && $('#overlay').innerHTML) { e.preventDefault(); closeDialog(); }
     if (e.key === 'Tab' && $('#overlay .dialog')) {
@@ -211,10 +203,11 @@
 
   ACTIONS.tab = (el) => { S.tab[el.dataset.group] = el.dataset.value; if (el.dataset.group === 'project') history.replaceState(null, '', '#/project/' + el.dataset.value); if (el.dataset.group === 'settings') history.replaceState(null, '', '#/settings/' + el.dataset.value); if (el.dataset.group === 'panel') history.replaceState(null, '', '#/panels/' + route().b + '/' + el.dataset.value); const keep = $('#main').scrollTop; renderMain(); $('#main').scrollTop = keep; const nt = document.getElementById(el.id); nt && nt.focus(); };
   ACTIONS.goto = (el) => go(el.dataset.to);
-  ACTIONS['sub-switch'] = (el) => { S.sub = el.value || null; S.dirty = false; S.layout = { overrides: [], removed: [], history: [], selected: '', openOverrides: false }; const { a } = route(); go(['settings', 'network', 'panels', 'loose', 'checks', 'preview', 'build'].includes(a) ? '#/' + a : '#/panels'); };
+  ACTIONS['sub-switch'] = (el) => { S.sub = el.value || null; S.dirty = false; const { a } = route(); go(['settings', 'network', 'panels', 'loose', 'checks', 'preview', 'build'].includes(a) ? '#/' + a : '#/panels'); };
   ACTIONS.theme = () => { S.theme = { light: 'dark', dark: 'system', system: 'light' }[S.theme]; render(); toast(`Theme: ${S.theme}`, 'info'); };
   ACTIONS.help = () => dialog({ title: 'Help', body: '<p>The user guide is not written yet.</p>', actions: '<button class="btn btn--primary" data-action="close">Close</button>' });
   ACTIONS.close = () => closeDialog();
+  ACTIONS['retry-backend'] = () => { S.backend = 'unknown'; render(); Bridge.call('app_info').then(setAppInfo).catch((err) => { if (err.kind === 'no_backend') { S.backend = 'no'; render(); } else toast(`Could not read the app's state: ${err.message}`, 'error'); }); };
   ACTIONS.scrim = () => closeDialog();
   window.addEventListener('hashchange', () => { closeDialog(); render(); $('#main').scrollTop = 0; });
 
@@ -297,5 +290,5 @@
     return D;
   }
 
-  window.App = { $, $$, esc, S, ACTIONS, SCREENS, counts, badge, verified, banner, tabs, field, input, select, pageHead, illus, dialog, closeDialog, toast, go, render, setAppInfo, checkList, route, hasProject, hasSub, curProject, curSub, renderStatus, draftForm, changedField, changedCell, fixLine };
+  window.App = { $, $$, esc, S, ACTIONS, SCREENS, badge, verified, banner, tabs, field, input, select, pageHead, dialog, closeDialog, toast, go, render, setAppInfo, checkList, route, hasProject, hasSub, curProject, curSub, renderStatus, draftForm, changedField, changedCell, fixLine };
 })();

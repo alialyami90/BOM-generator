@@ -1,14 +1,14 @@
 /* Screens: Library (browse, detail) and import / installed versions, on bomgen.app.api (plan M10b). */
 (function () {
-  const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, field, input, select, pageHead, illus, dialog, closeDialog, toast, go, verified, $ } = App;
+  const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, field, input, select, pageHead, dialog, closeDialog, toast, go, verified, $ } = App;
   /* "SEL SEL-2730M" reads as a stutter: when the model starts with the make, the model alone says both. */
   const makeModel = (d) => (d.model && d.make && d.model.toLowerCase().startsWith(d.make.toLowerCase()) ? esc(d.model) : `${esc(d.make)} <span class="muted">${esc(d.model)}</span>`);
   const ACRONYMS = { io: 'IO', gps: 'GPS', rtac: 'RTAC', sfp: 'SFP' };
   const catName = (c) => c.split('_').map((w) => ACRONYMS[w] || w).join(' ').replace(/^./, (m) => m.toUpperCase());
   const F = { q: '', cat: '', ver: '', alt: false };
 
-  /* ---------- data from Python; the illustrative DB only when opened outside the app ---------- */
-  const LIB = { state: 'idle', overview: null, versions: null, projects: [], errors: {}, offline: false };
+  /* ---------- data from Python ---------- */
+  const LIB = { state: 'idle', overview: null, versions: null, projects: [], errors: {} };
   function loadLibrary() {
     LIB.state = 'loading';
     // Loaded independently: a damaged active version must not hide the versions that can repair it.
@@ -17,12 +17,11 @@
     const projects = Bridge.call('list_projects').then((list) => { LIB.projects = list; }).catch(() => { LIB.projects = []; });  // only for the Projects column
     return Promise.all([load(Bridge.call('library_overview'), 'overview'), load(Bridge.call('library_versions'), 'versions'), projects]).then(() => {
       LIB.state = 'loaded';
-      LIB.offline = Object.values(LIB.errors).some((e) => e && e.kind === 'no_backend');
       App.render();
     });
   }
   const loadError = (key, what) => {
-    const err = !LIB.offline && LIB.errors[key];
+    const err = LIB.errors[key];
     return err ? `<div style="margin-bottom:var(--space-4)">${banner('bad', `<b>${what}</b> ${esc(err.message)}`, key === 'overview' && LIB.versions && LIB.versions.versions.length ? '<button class="btn btn--primary btn--sm" data-action="show-versions">Installed versions…</button>' : '')}</div>` : '';
   };
   const reloadLibrary = () => { LIB.state = 'idle'; return Bridge.call('app_info').then(App.setAppInfo).catch(() => {}).then(loadLibrary); };
@@ -59,13 +58,9 @@
       verified: r ? r.verified : null, ds: r ? datasheet(r) : null, alt: r && r.alternatives.length ? alternatives(r) : null, src: r ? r.sources : null
     };
   };
-  const lib = () => LIB.offline
-    ? { name: DB.library.name, version: DB.library.version, date: DB.library.installed, notes: DB.library.notes }
-    : LIB.overview && LIB.overview.library ? { name: LIB.overview.library.name, version: LIB.overview.library.version, date: day(LIB.overview.library.created), notes: LIB.overview.library.notes } : null;
-  const devices = () => (LIB.offline ? DB.devices : LIB.overview ? LIB.overview.devices.map((d) => row(d, LIB.overview.records)) : []);
-  const versions = () => (LIB.offline
-    ? DB.library.versions.map((v) => ({ version: v.v, released: v.date, notes: v.notes, active: v.active, problem: null, projects: v.projects }))
-    : LIB.versions ? LIB.versions.versions.map((v) => ({ ...v, projects: builtWith(LIB.versions.name, v.version) })) : []);
+  const lib = () => (LIB.overview && LIB.overview.library ? { name: LIB.overview.library.name, version: LIB.overview.library.version, date: day(LIB.overview.library.created), notes: LIB.overview.library.notes } : null);
+  const devices = () => (LIB.overview ? LIB.overview.devices.map((d) => row(d, LIB.overview.records)) : []);
+  const versions = () => (LIB.versions ? LIB.versions.versions.map((v) => ({ ...v, projects: builtWith(LIB.versions.name, v.version) })) : []);
   const builtWith = (name, version) => LIB.projects.filter((p) => p.library && !p.library.local_file && p.library.name === name && p.library.version === version).length;
   /* Data quality, datasheets and alternatives come from the device database a package may carry. */
   const hasDeviceDb = () => devices().some((d) => d.verified);
@@ -79,20 +74,20 @@
 
   function browse() {
     const L = lib();
-    const lede = L ? `${esc(L.name)} ${esc(L.version)}${released(L)}. Device edits wait as pending changes; the library changes when you apply them or import an update package. Spreadsheet imports go to pending changes too.` : LIB.errors.overview && !LIB.offline ? 'Make an installed version active, or import the package again.' : 'No library is active.';
+    const lede = L ? `${esc(L.name)} ${esc(L.version)}${released(L)}. Device edits wait as pending changes; the library changes when you apply them or import an update package. Spreadsheet imports go to pending changes too.` : LIB.errors.overview ? 'Make an installed version active, or import the package again.' : 'No library is active.';
     return `<div class="page">${pageHead('Device library', lede,
-      `${L && !LIB.offline ? `<button class="btn btn--secondary" data-action="lib-export">${icon('download')}Export…</button><button class="btn btn--secondary" data-action="lib-import">${icon('upload')}Import…</button><button class="btn btn--primary" data-action="add-device">${icon('plus')}Add device…</button>` : `<button class="btn btn--secondary" data-action="goto" data-to="#/library/import">${icon('upload')}Import update…</button>`}`)}
+      `${L ? `<button class="btn btn--secondary" data-action="lib-export">${icon('download')}Export…</button><button class="btn btn--secondary" data-action="lib-import">${icon('upload')}Import…</button><button class="btn btn--primary" data-action="add-device">${icon('plus')}Add device…</button>` : `<button class="btn btn--secondary" data-action="goto" data-to="#/library/import">${icon('upload')}Import update…</button>`}`)}
       ${loadError('overview', 'The active library could not be read.')}
       ${LIB.overview && LIB.overview.library && LIB.overview.library.problem ? `<div style="margin-bottom:var(--space-4)">${banner('warn', `<b>Part of the active library is damaged.</b> ${esc(LIB.overview.library.problem)}`)}</div>` : ''}
       ${LIB.overview && LIB.overview.records_problem ? `<div style="margin-bottom:var(--space-4)">${banner('warn', `<b>Datasheets and alternatives could not be read.</b> ${esc(LIB.overview.records_problem)}`)}</div>` : ''}
-      ${L ? contents() : LIB.errors.overview && !LIB.offline ? '' : versions().length
+      ${L ? contents() : LIB.errors.overview ? '' : versions().length
         ? banner('warn', '<b>No library version is active.</b> Make an installed version active, or import a package.', '<button class="btn btn--primary btn--sm" data-action="show-versions">Installed versions…</button>')
         : banner('warn', '<b>No library is installed.</b> Import a <span class="mono">.bomlib</span> file to see devices here.', '<a class="btn btn--primary btn--sm" href="#/library/import">Import…</a>')}</div>`;
   }
 
   /* Devices, and the commodity catalogues the engine picks MCBs, terminal blocks and busbars from. */
   function contents() {
-    const cat = !LIB.offline && LIB.overview && LIB.overview.catalogues;
+    const cat = LIB.overview && LIB.overview.catalogues;
     if (!cat) return devicesView();
     const t = S.tab.libview === 'catalogues' ? 'catalogues' : 'devices';
     return `${tabs('libview', [['devices', 'Devices', badge('plain', devices().length)], ['catalogues', 'Catalogues']], t, 'Library contents')}
@@ -115,7 +110,7 @@
       <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,400px);gap:var(--space-5);align-items:start">
         <div><div class="table-wrap"><table class="table"><thead><tr><th>Part ID</th><th>Make and model</th><th>Supply</th>${quality ? '<th>Data</th>' : ''}</tr></thead><tbody>
           ${list.map((d) => `<tr class="clickable" tabindex="0" data-action="lib-select" data-id="${esc(d.id)}" aria-selected="${sel && sel.id === d.id}"><td><span class="mono">${esc(d.id)}</span><span class="cell-sub">${esc(catName(d.cat))}</span></td><td>${makeModel(d)}</td><td class="nowrap">${esc(d.supply)}${d.w ? `<span class="cell-sub">${d.w} W</span>` : ''}</td>${quality ? `<td style="white-space:nowrap">${d.verified ? verified(d.verified) : ''}</td>` : ''}</tr>`).join('') || `<tr class="empty-row"><td colspan="${quality ? 4 : 3}">No device matches these filters. Clear a filter or search for a different part.</td></tr>`}
-        </tbody></table><div class="table-foot"><span>Select a row to see its details</span>${LIB.offline ? `<span>${illus()}</span>` : ''}</div></div></div>
+        </tbody></table><div class="table-foot"><span>Select a row to see its details</span></div></div></div>
         ${sel ? detail(sel) : ''}
       </div>`;
   }
@@ -142,10 +137,10 @@
     if (t === 'overview') body = o ? o.kv : `<dl class="kv"><dt>Part ID</dt><dd class="mono">${esc(d.id)}</dd><dt>Make</dt><dd>${esc(d.make)}</dd><dt>Model</dt><dd>${esc(d.model)}</dd><dt>Ordering code</dt><dd class="mono">${esc(d.code || '—')}</dd><dt>Category</dt><dd>${esc(catName(d.cat))}</dd><dt>Tag</dt><dd class="mono">${d.tagType ? esc(d.tagType) + (d.level ? ' · ' + esc(d.level) : '') : '—'}</dd><dt>Supply</dt><dd>${esc(d.supply)}</dd><dt>Power</dt><dd>${esc(d.power || '—')}</dd><dt>Rated power</dt><dd class="num" style="text-align:left">${d.w != null ? d.w + ' W' : '—'}</dd><dt>Branch MCB</dt><dd>Sized by the engine${d.mcb ? ` <span class="muted">(the library's ${esc(d.mcb)} is deprecated, ADR 0019)</span>` : ''}</dd></dl>`;
     else if (t === 'datasheet') body = d.ds ? `${d.ds.summary ? `<p style="margin-bottom:var(--space-3)">${esc(d.ds.summary)}</p>` : ''}<dl class="kv"><dt>Supply range</dt><dd>${esc(d.ds.supply)}</dd><dt>Typical power</dt><dd>${esc(d.ds.typical)}</dd><dt>Maximum power</dt><dd>${esc(d.ds.max)}</dd><dt>Ports</dt><dd>${esc(d.ds.ports)}</dd><dt>Dimensions</dt><dd>${esc(d.ds.dims)}</dd><dt>Weight</dt><dd>${esc(d.ds.weight)}</dd><dt>Operating temperature</dt><dd>${esc(d.ds.temp)}</dd><dt>Certifications</dt><dd>${esc(d.ds.certs)}</dd>${d.ds.url ? `<dt>Datasheet</dt><dd class="row" style="gap:4px;flex-wrap:nowrap"><span class="mono small" style="overflow-wrap:anywhere">${esc(d.ds.url)}</span><button class="btn btn--ghost btn--icon btn--sm" data-action="copy" data-v="${esc(d.ds.url)}" aria-label="Copy the datasheet link">${icon('copy')}</button></dd>` : ''}</dl>
       ${(d.src || []).length ? `<div class="section" style="margin-top:var(--space-4);padding-bottom:0"><h3>Sources</h3><ul style="margin:var(--space-2) 0 0;padding-left:18px">${d.src.map((x) => `<li style="overflow-wrap:anywhere">${esc(x)}</li>`).join('')}</ul></div>` : ''}` : `<p class="muted">No datasheet recorded for this device.</p>`;
-    else body = `${o || LIB.offline ? '' : altCompact(d.id)}${d.alt ? `<details class="section" style="margin-top:var(--space-4)"><summary>Researched brands <span class="muted small">(device database)</span></summary>
+    else body = `${o ? '' : altCompact(d.id)}${d.alt ? `<details class="section" style="margin-top:var(--space-4)"><summary>Researched brands <span class="muted small">(device database)</span></summary>
       ${d.alt.map((a) => `<h3 style="margin-top:var(--space-4)">${esc(a.brand)}</h3><div class="table-wrap" style="margin-top:6px"><table class="table"><thead><tr><th style="width:56px">Tier</th><th>Model</th><th>Data</th><th style="width:40px"><span class="sr-only">Copy</span></th></tr></thead><tbody>${a.rows.map((r) => `<tr><td>${esc(r.tier)}</td><td><span class="mono nowrap">${esc(r.model)}</span><span class="cell-sub">${r.same_as ? `Same as ${esc(r.same_as)}` : esc(r.sub || '')}</span></td><td>${verified(r.verified)}</td><td style="width:40px"><button class="btn btn--ghost btn--icon btn--sm" data-action="copy" data-v="${esc(r.model)}" aria-label="Copy ${esc(r.model)}">${icon('copy')}</button></td></tr>`).join('')}</tbody></table></div>`).join('')}</details>` : ''}`;
     const what = o ? 'Catalogue entry detail' : 'Device detail';
-    return `<aside class="detail" aria-label="${what}"><h2 class="mono" style="font-size:18px;font-family:var(--font-mono)">${o ? o.title : esc(d.id)}</h2><p class="muted" style="margin-bottom:var(--space-3)">${o ? o.sub : makeModel(d)}</p>${o || LIB.offline ? '' : `<a class="btn btn--secondary btn--sm" style="margin-bottom:var(--space-3)" href="#/library/device/${encodeURIComponent(d.id)}">${icon('edit')}Edit device</a>`}
+    return `<aside class="detail" aria-label="${what}"><h2 class="mono" style="font-size:18px;font-family:var(--font-mono)">${o ? o.title : esc(d.id)}</h2><p class="muted" style="margin-bottom:var(--space-3)">${o ? o.sub : makeModel(d)}</p>${o ? '' : `<a class="btn btn--secondary btn--sm" style="margin-bottom:var(--space-3)" href="#/library/device/${encodeURIComponent(d.id)}">${icon('edit')}Edit device</a>`}
       ${tabs('libdetail', tabsList, t, what)}<div role="tabpanel" aria-labelledby="tab-libdetail-${t}">${body}</div></aside>`;
   }
 
@@ -228,7 +223,7 @@
   function importFlow() {
     const L = lib();
     if (IMP.step === 'choose') return `<div class="drop" data-action="pick-file" id="drop" tabindex="0" role="button" aria-label="Choose a library package">${icon('pkg', 'i--lg')}<h3 style="margin:8px 0 2px">Choose a .bomlib file</h3><p>The package is checked before anything is installed.</p><button class="btn btn--primary" data-action="pick-file">${icon('folder')}Choose package…</button></div>
-      <p class="muted small" style="margin-top:var(--space-3)">You can also double-click a .bomlib file in Windows to import it. ${L ? `Currently installed: ${esc(L.name)} ${esc(L.version)}.` : LIB.errors.overview && !LIB.offline ? 'The active library could not be read; see Installed versions.' : 'No library is installed yet.'}</p>`;
+      <p class="muted small" style="margin-top:var(--space-3)">You can also double-click a .bomlib file in Windows to import it. ${L ? `Currently installed: ${esc(L.name)} ${esc(L.version)}.` : LIB.errors.overview ? 'The active library could not be read; see Installed versions.' : 'No library is installed yet.'}</p>`;
     if (IMP.step === 'checking') return `<div class="stack" style="max-width:520px"><h3>Checking ${esc(IMP.path.split(/[\\/]/).pop())}</h3><div class="progress" role="progressbar" aria-label="Checking"><i style="width:40%"></i></div><p class="muted">Verifying checksums, the library and its version. Nothing is installed.</p></div>`;
     const p = IMP.preview, m = p.manifest;
     if (IMP.step === 'importing') return `<div class="stack" style="max-width:520px"><h3>Installing ${esc(m.name)} ${esc(m.version)}</h3><div class="progress" role="progressbar" aria-label="Installing"><i style="width:60%"></i></div><p class="muted">Copying files and keeping the previous version for rollback…</p></div>`;
@@ -297,7 +292,7 @@
 
   function versionsView() {
     const L = lib(), list = versions();
-    if (LIB.errors.versions && !LIB.offline) return loadError('versions', 'The installed versions could not be read.');
+    if (LIB.errors.versions) return loadError('versions', 'The installed versions could not be read.');
     if (!L && !list.length) return `<p class="muted">No library is installed yet.</p>`;
     return `<div class="table-wrap" style="max-width:980px"><table class="table table--comfort"><thead><tr><th>Version</th><th>Released</th><th>Notes</th><th class="num">Projects</th><th>State</th><th style="width:130px"><span class="sr-only">Actions</span></th></tr></thead><tbody>
       ${list.map((v) => `<tr><td class="mono">${esc(v.version)}${localOf(v.version) ? ` ${badge('info', 'Local')}` : ''}</td><td class="nowrap">${localOf(v.version) ? `Applied ${esc(day(v.released))}` : esc(day(v.released))}</td><td class="wrap">${esc(v.notes || '')}</td><td class="num">${v.projects}</td><td>${v.active ? badge('ok', 'Active', 'check') : ''} ${v.problem ? `${badge('bad', 'Problem', 'error')}<span class="cell-sub">${esc(v.problem)}</span>` : v.active ? '' : badge('plain', 'Installed')}</td><td>${v.active ? '' : `<button class="btn btn--secondary btn--sm" data-action="rollback" data-v="${esc(v.version)}" ${v.problem ? 'disabled' : ''}>Make active</button>`}</td></tr>`).join('')}</tbody></table></div>

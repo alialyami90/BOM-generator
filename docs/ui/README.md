@@ -1,11 +1,14 @@
 # UI design (M9)
 
 Design for the Windows desktop app (ADR 0007, library updates per ADR 0008).
-Design only: the app itself is M10. Status: the first prototype was accepted (#8). This
-revision reworks it for projects and substations (Home lists projects; a project holds
-substations and the document register; `.bomproj` export, import and backups) and adds the
-Network screen and the Panels board from the substations and auto-layout design
-(`docs/superpowers/specs/2026-10-28-substations-and-auto-layout-design.md`). Ready for Ali's review.
+Status: the design is accepted and built. The first prototype was accepted (#8), reworked
+for projects and substations (Home lists projects; a project holds substations and the document
+register; `.bomproj` export, import and backups) with the Network screen and the Panels board
+from the substations and auto-layout design
+(`docs/superpowers/specs/2026-10-28-substations-and-auto-layout-design.md`), and extended for
+v0.2 editing (`editing.md`). The app (M10, M16–M18, v0.2.1) implements it; where the built app
+differs, `screens.md` "Departures in the built app" says so, and the prototype is not changed
+to match.
 
 ## Read in this order
 
@@ -61,7 +64,8 @@ device picker keys (↑ ↓ Enter Esc). They are in `components.md` and `screens
   listing and an "opened from a .bomproj file" state (see `screens.md`, "What the app needs
   from the engine").
 
-- Alternatives are browse-only. Swapping a part needs a schema change and device data.
+- Alternatives are library parts since M13 (ADR 0017); "Use this instead" on the Alternatives
+  tab puts one on an equipment row (#194).
 - `verified` levels are confirmed/partial/unverified; `same_as` means a tier reuses a lower tier's part number and is shown as one spanning row.
 - Located errors (`file:line: path: message`) come from ADR 0010; the Checks screen
   assumes the engine returns them as data.

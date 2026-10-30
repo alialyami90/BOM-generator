@@ -1,9 +1,7 @@
 /* Screens: substation Settings and the Network inputs on bomgen.app.api (plan M10c).
-   Settings and the Network inputs are edited here (M17c). The L1 ranking and the Result card come from screens-panels.js.
-   Opened in a plain browser, the prototype's screens in screens-project.js and screens-layout.js are used instead. */
+   Settings and the Network inputs are edited here (M17c). The L1 ranking and the Result card come from screens-panels.js. */
 (function () {
   const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, field, input, select, pageHead, toast } = App;
-  const example = { settings: SCREENS.settings, network: SCREENS.network };
   const ro = (html) => html.replace('data-dirty="1"', 'readonly').replace('class="input', 'class="ctl input');
   const fixed = (v, unit) => `<div class="input-affix">${ro(input('x', v, { num: true, mono: true }))}${unit ? `<span class="affix">${esc(unit)}</span>` : ''}</div>`;
   const plural = (n, one) => `${n} ${one}${n === 1 ? '' : 's'}`;
@@ -48,7 +46,7 @@
   };
   const tabsSettings = [['general', 'General'], ['documents', 'Documents'], ['output', 'Output'], ['constants', 'Design constants'], ['yaml', 'YAML']];
   SCREENS.settings = () => {
-    if (!real()) return example.settings();
+    if (!real()) return `<div class="page">${pageHead('Settings')}<div class="empty"><b>Open a substation first.</b></div></div>`;
     const p = page(); if (!p) return waiting('Settings');
     const rb = App.route().b; if (tabsSettings.some(([k]) => k === rb)) S.tab.settings = rb;
     const t = p.calculations || S.tab.settings === 'yaml' ? S.tab.settings : 'yaml';
@@ -328,7 +326,7 @@
   };
   ACTIONS['net-focus-ied'] = () => { const el = document.getElementById('n-ied_count'); if (el) { el.scrollIntoView({ block: 'center' }); el.focus(); } };
   SCREENS.network = () => {
-    if (!real()) return example.network();
+    if (!real()) return `<div class="page">${pageHead('Network')}<div class="empty"><b>Open a substation first.</b></div></div>`;
     const p = page(); if (!p) return waiting('Network');
     if (!p.network) return `<div class="page">${pageHead('Network', 'What the substation contains and how the network is sized.')}${problems(p)}</div>`;
     const eq = p.equipment, unset = !p.network.ied_count && !('ied_count' in NET.draft), topo = netShown(p, 'topology'), dirty = Object.keys(NET.draft).length > 0;

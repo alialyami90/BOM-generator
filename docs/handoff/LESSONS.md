@@ -476,6 +476,10 @@ The rules are in ADR 0013 and the design spec (R1–R10).
 
 ### E2E and checking
 
+- **Dead-code scan:** `pip install vulture && vulture src --min-confidence 80` is clean except
+  `api.py` `FileDialogWindow.create_file_dialog(file_types=...)`, a Protocol parameter it cannot see
+  used (audit 2026-10-30). Don't re-investigate it.
+
 - E2E on the example needs generated panels: edit `fed_from: psa3` to `psa1` first.
 - **E2E without the window:** pack `examples/library.yaml` with `bomgen library pack … --name
   psa-devices --version 1.0.0` and import it into `BOMGEN_LIBRARY_HOME`, or Home shows the first-run
