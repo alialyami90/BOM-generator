@@ -7,11 +7,19 @@ Stable knowledge stays where it lives ([`CLAUDE.md`](../../CLAUDE.md), [`docs/pl
 [`docs/spec/`](../spec/), the ADRs in [`docs/decisions/`](../decisions/)); these files link to it
 rather than copy it.
 
-## 1. Overview (2026-10-29)
+## 1. Overview (2026-10-30)
 
-- Repo `alialyami90/BOM-generator`, default branch `main`, at `032bbea` (#212, README status for
-  v0.2.1) plus docs-only commits.
+- Repo `alialyami90/BOM-generator`, default branch `main`, at `723507a` (#228, the last of the
+  audit fix PRs).
 - **Open PRs: none. Unmerged or uncommitted work: none.**
+- **Audit of 2026-10-30** ([Claude Doc "Repo audit after v0.2.1"](https://claude.ai/artifact/DXyJnufrHguPCCVWgeLGPh)): no code defect; 14
+  findings, one a product risk (the installed app fell back to the prototype's illustrative data when
+  the bridge was missing) and the rest documents behind the code. Fixed in #227 (app fallback
+  removed), #228 (`min_branch_mcb_a` read-only in the device editor), #229 (plan status, module tree,
+  question order, backlog intake table), #230 (UI departures and status), #231 (release steps,
+  README versions, handoff numbers). Finding 2 (spec behind the code) is drafted as
+  [Spec v2.1 draft](https://claude.ai/artifact/Q2SsFCKM4y7vHhAJjkir43) and waits for Ali; finding 14 stays on NEXT.md §7. The doc also
+  recommends a four-role agent team (NEXT.md §1).
 - **Releases.** v0.1.0 (tag on `2064227`), v0.1.1 (`135d7ee`), v0.2.0 (`f65a5fe`, #195, the first
   release from main) and **v0.2.1** (`1678343`, #211, published 2026-10-29 03:17 UTC with
   `bomgen-setup-0.2.1.exe`, 29.7 MB, and `default.bomlib` built from psa-devices 1.1.0):
@@ -28,16 +36,16 @@ rather than copy it.
   #194, #198–#201.
 - **Numbers.** ADRs 0001–0023 are all Accepted; next free ADR **0024**. Open questions Q1–Q41 are
   resolved; next free question **Q42**. Next milestone after M18 is **M19**.
-- **Changelog** is current through #211; `[Unreleased]` is empty.
+- **Changelog** is current through #228; `[Unreleased]` holds #228 (Changed) and #227 (Fixed).
 - **Next feature work waits on Ali's testing feedback on v0.2.1** (README "Status" says so).
 
-### Verification (`032bbea`)
+### Verification (`f2234f7`, after #227)
 
 | Command | Result |
 | --- | --- |
 | `ruff check . && ruff format --check .` | All checks passed; 291 files formatted (2026-10-30 count) |
 | `python -m mypy` | no issues in 224 source files |
-| `python -m pytest -q -p no:cacheprovider` | 2672 passed, 0 failed, 0 skipped (5–7 min) |
+| `python -m pytest -q -p no:cacheprovider` | 2669 passed, 0 failed, 0 skipped (5–7 min; 2672 before #227 dropped five cases for deleted UI files and added two) |
 | `python -m pytest -q tests/golden` | 95 passed |
 | `pytest tests/unit/library_store tests/unit/test_bundle_container.py` | 378 passed |
 | `pytest` on the sizing/layout tests and `tests/golden/layout` | 99 passed |
@@ -52,16 +60,21 @@ installer" is the check for the first two.
 
 ### Waiting on Ali
 
-- **What comes after v0.2.1:** test it and send feedback, or describe v0.3. No answer yet.
+- **What comes after v0.2.1:** test it and send feedback, or describe v0.3. No answer yet; Ali asked
+  for the repo audit first.
+- **Spec v2.1 draft review** ([Claude Doc](https://claude.ai/artifact/Q2SsFCKM4y7vHhAJjkir43)): Ali edits or comments, then the text goes into
+  `docs/spec/generator-spec-v2.md` as v2.1 (NEXT.md §3 item 3).
 - **Q11 header fit:** does the calc-sheet header overlap the table in Excel's Print Preview?
 - **Q23** (issued sheets vs masters, plan §6): the default is the masters.
 - **ASSUMED seed values** for a new substation (see "Known gaps").
 
 ### Known gaps and risks
 
-- **The spec is behind the code.** The spec master is a Claude Doc ([`docs/spec/`](../spec/) says how
-  to update it). The v0.2 overrides live only in ADRs 0017, 0019, 0020, 0022, 0023 and Q35, Q37–Q41.
-  Updating the spec needs Ali's go-ahead (CLAUDE.md).
+- **The spec is behind the code.** The v0.2 overrides live only in ADRs 0017, 0019, 0020, 0022, 0023
+  and Q35, Q37–Q41. Ali gave the go-ahead on 2026-10-30 to catch the spec up to v2.1; the draft
+  ([Claude Doc](https://claude.ai/artifact/Q2SsFCKM4y7vHhAJjkir43)) covers branch sizing (ADR 0019), catalogues and brand sets (ADRs 0017,
+  0023), the Loose Material sheet (ADRs 0020, 0022), the new input fields and the generation order.
+  No rule or golden moves. It lands only after Ali's review ([`docs/spec/`](../spec/) says how).
 - **ASSUMED seeds.** `src/bomgen/io/lifecycle.py` `_blank` seeds a new substation with
   `generated_panels`, a cabinet number pattern `f"{substation_id.upper()}-PSA-{{n:04d}}"`, the
   example's Rawabi Fixed Frame enclosure and document numbers/dates, each with an `# ASSUMED` YAML
@@ -274,14 +287,12 @@ Polish fixes were screen-checked in the real app: #205 passed (and found a dialo
 mid-id, brand names clipped) and then passed at `e4b5294`. **#208 has not been screen-checked.** All 16
 `polish-v02.md` items are done.
 
-Drift between the design docs and the built app:
-1. `screens.md` "Departures in the built app" is v0.1-only; its first bullet ("Projects, substations
-   and settings are read-only") is wrong since v0.2, and the v0.2 departures are not recorded.
-2. The Panels board is read-only for hand-written panels (Build uses the panel files, so a pin would
-   not change the BOM); `editing.md` "Panels board: drag, drop, pin, delete" doesn't say so.
-3. The prototype shows v0.2 as designed, not as built (no Changed marker, no #205–#208 polish). By the
+#230 recorded the v0.2 departures in `screens.md`, the hand-written-panels rule in `editing.md` and
+the design's current status in `docs/ui/README.md` (audit findings 6 and 9). Drift that remains:
+1. The prototype shows v0.2 as designed, not as built (no Changed marker, no #205–#208 polish). By the
    house rule in `screens.md` "Departures" the prototype isn't changed; the departures list records it.
-4. Unfiled nits: the device editor save bar reads "1 unsaved change · added to pending changes" before
+   The prototype's `data.js` and `engine-stub.js` now live only under `docs/ui/prototype/` (#227).
+2. Unfiled nits: the device editor save bar reads "1 unsaved change · added to pending changes" before
    saving; Project › Overview showed "psa-devices 1.1.0" in the Home table while the header badge said
    1.0.0 (seen after a local library edit, maybe correct, not investigated); "Same as the project
    (Library default)" has a capital L mid-sentence.
@@ -380,9 +391,10 @@ v0.2.0 run 40797286698, v0.1.1 run 40773272092, v0.1.0 run 40736513114 (attempt 
 - `README.md`: overview, Status (v0.2.1 released, next work waits on Ali's feedback; "Done in v0.1"
   M0–M11, "Done in v0.2" M12–M18), Usage (validate, build, layout, library, CSV editing, project
   sharing), Development, CI. Every command was run on a scratch copy of `examples/`.
-- `CHANGELOG.md`: Keep a Changelog with `[Unreleased]` (empty), `[0.2.1]`, `[0.2.0]`, `[0.1.1]`,
-  `[0.1.0]` and compare links. The last commit covered is `1678343` (#211). Every non-docs PR up to
-  #212 has an entry or was ruled out (#195 and #211 bumps, #197 refactor).
+- `CHANGELOG.md`: Keep a Changelog with `[Unreleased]` (#228 under Changed, #227 under Fixed),
+  `[0.2.1]`, `[0.2.0]`, `[0.1.1]`, `[0.1.0]` and compare links. The last commit covered is `723507a`
+  (#228). Every non-docs PR up to #228 has an entry or was ruled out (#195 and #211 bumps, #197
+  refactor, #213–#226 and #229–#231 docs).
 - Both test READMEs have one row per test module; the row and link loops (LESSONS.md) print nothing.
 
 ## 9. Sizing and layout engine
