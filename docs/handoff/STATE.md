@@ -596,14 +596,13 @@ project import, backup restore.
   `insert_item`, `remove_item`, `move_item`, `validate_field`, `confirm_field`, `part_users`,
   `document_users`; each goes through `io.edit.edit_file`.
 - **UI** (`src/bomgen/app/ui/`): plain scripts, no build step, loaded by `index.html` in order:
-  `bridge.js icons.js data.js engine-stub.js ui.js screens-projects.js screens-project.js
-  screens-layout.js screens-substation.js screens-panels.js screens-loose.js screens-library.js
-  screens-libcsv.js screens-libedit.js screens-output.js screens-verify.js screens-preview.js app.js`.
-  A later script overrides an earlier `SCREENS.x` (`screens-substation.js` replaces
-  `screens-layout.js`'s `SCREENS.network`; `screens-libedit.js` wraps `SCREENS.library`). `ui.js` holds
-  `App` helpers (`draftForm`, `changedField`, `changedCell`, `fixLine`, `route`, dialogs, toasts); `icon`
-  is a global. `data.js` + `engine-stub.js` drive the no-project example pages. Styles: `tokens.css`
-  and `styles.css`.
+  `bridge.js icons.js ui.js screens-projects.js screens-substation.js screens-panels.js screens-loose.js
+  screens-library.js screens-libcsv.js screens-libedit.js screens-verify.js screens-preview.js app.js`.
+  A later script may wrap an earlier `SCREENS.x` (`screens-libedit.js` wraps `SCREENS.library`). `ui.js`
+  holds `App` helpers (`draftForm`, `changedField`, `changedCell`, `fixLine`, `route`, dialogs, toasts);
+  `icon` is a global. The prototype's `data.js`, `engine-stub.js` and example screens are no longer
+  shipped (audit 2026-10-30): without a bridge every page is `noBackend()`, "could not reach its
+  engine". Styles: `tokens.css` and `styles.css`.
 - **Tests** (`tests/unit/app/`): `test_app_*_api.py` per endpoint group; `test_app_ui_assets.py`
   asserts strings in the UI files; `test_every_endpoint_the_screens_call_exists` parses literal
   `Bridge.call('name', …)` calls.

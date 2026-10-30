@@ -429,3 +429,24 @@ def test_ids_in_a_sub_line_never_break_and_tab_panels_keep_their_offset() -> Non
     assert ".table .cell-sub .mono { white-space: nowrap; }" in css
     libedit = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
     assert '<div role="tabpanel" aria-labelledby="tab-devEdit-${t}">' in libedit
+
+
+def test_the_app_ships_none_of_the_prototypes_illustrative_data() -> None:
+    """Audit 2026-10-30, finding 1: the installed app must never show the design prototype's
+    example substation as if it were real. The data and the stub stay in docs/ui/prototype."""
+    names = {p.name for p in UI_DIR.glob("*.js")}
+    assert names.isdisjoint({"data.js", "engine-stub.js"})
+    for path in TEXT_FILES:
+        text = path.read_text(encoding="utf-8")
+        assert not re.search(r"\bDB\.", text), path.name
+        assert not re.search(r"\bEngine\.", text), path.name
+        assert "psa-devices 1.4.0" not in text, path.name
+
+
+def test_without_its_bridge_the_app_says_so_instead_of_showing_example_pages() -> None:
+    """The same finding: a missing bridge is reported as an error, never papered over."""
+    ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    assert "S.backend === 'no'" in ui
+    assert "could not reach its engine" in ui
+    app = (UI_DIR / "app.js").read_text(encoding="utf-8")
+    assert "err.kind === 'no_backend'" in app
