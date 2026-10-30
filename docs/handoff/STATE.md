@@ -17,9 +17,9 @@ rather than copy it.
   the bridge was missing) and the rest documents behind the code. Fixed in #227 (app fallback
   removed), #228 (`min_branch_mcb_a` read-only in the device editor), #229 (plan status, module tree,
   question order, backlog intake table), #230 (UI departures and status), #231 (release steps,
-  README versions, handoff numbers). Finding 2 (spec behind the code) is drafted as
-  [Spec v2.1 draft](https://claude.ai/artifact/Q2SsFCKM4y7vHhAJjkir43) and waits for Ali; finding 14 stays on NEXT.md §7. The doc also
-  recommends a four-role agent team (NEXT.md §1).
+  README versions, handoff numbers) and #234 (spec v2.1, finding 2); finding 14 stays on NEXT.md §7.
+  The doc also recommends a four-role agent team (NEXT.md §1). Ali's behavioural commandments are
+  the first section of `CLAUDE.md` (#233).
 - **Releases.** v0.1.0 (tag on `2064227`), v0.1.1 (`135d7ee`), v0.2.0 (`f65a5fe`, #195, the first
   release from main) and **v0.2.1** (`1678343`, #211, published 2026-10-29 03:17 UTC with
   `bomgen-setup-0.2.1.exe`, 29.7 MB, and `default.bomlib` built from psa-devices 1.1.0):
@@ -62,19 +62,16 @@ installer" is the check for the first two.
 
 - **What comes after v0.2.1:** test it and send feedback, or describe v0.3. No answer yet; Ali asked
   for the repo audit first.
-- **Spec v2.1 draft review** ([Claude Doc](https://claude.ai/artifact/Q2SsFCKM4y7vHhAJjkir43)): Ali edits or comments, then the text goes into
-  `docs/spec/generator-spec-v2.md` as v2.1 (NEXT.md §3 item 3).
 - **Q11 header fit:** does the calc-sheet header overlap the table in Excel's Print Preview?
 - **Q23** (issued sheets vs masters, plan §6): the default is the masters.
 - **ASSUMED seed values** for a new substation (see "Known gaps").
 
 ### Known gaps and risks
 
-- **The spec is behind the code.** The v0.2 overrides live only in ADRs 0017, 0019, 0020, 0022, 0023
-  and Q35, Q37–Q41. Ali gave the go-ahead on 2026-10-30 to catch the spec up to v2.1; the draft
-  ([Claude Doc](https://claude.ai/artifact/Q2SsFCKM4y7vHhAJjkir43)) covers branch sizing (ADR 0019), catalogues and brand sets (ADRs 0017,
-  0023), the Loose Material sheet (ADRs 0020, 0022), the new input fields and the generation order.
-  No rule or golden moves. It lands only after Ali's review ([`docs/spec/`](../spec/) says how).
+- **The spec master is behind the Markdown.** `docs/spec/generator-spec-v2.md` is v2.1 (#234,
+  hand-edited from the [Spec v2.1 draft](https://claude.ai/artifact/Q2SsFCKM4y7vHhAJjkir43)) and matches the code, but the master Claude Doc
+  still reads v2. The next spec change must either bring the master to v2.1 first and export, or
+  continue hand-editing the Markdown and say so ([`docs/spec/`](../spec/)).
 - **ASSUMED seeds.** `src/bomgen/io/lifecycle.py` `_blank` seeds a new substation with
   `generated_panels`, a cabinet number pattern `f"{substation_id.upper()}-PSA-{{n:04d}}"`, the
   example's Rawabi Fixed Frame enclosure and document numbers/dates, each with an `# ASSUMED` YAML

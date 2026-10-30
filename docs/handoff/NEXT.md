@@ -57,19 +57,10 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
    them, change `_blank` in `src/bomgen/io/lifecycle.py` and
    `test_a_blank_substation_seeds_generated_panels_so_equipment_can_be_added`, and drop `# ASSUMED` on
    any value he confirms.
-3. **Spec v2.1 review.** Ali chose "Catch up the spec now" on 2026-10-30. The draft is the Claude Doc
-   [Spec v2.1 draft](https://claude.ai/artifact/Q2SsFCKM4y7vHhAJjkir43): group F branch rating per ADR 0019, catalogues and brand sets (ADRs
-   0017, 0023), the Loose Material sheet (ADRs 0020, 0022), new input fields (`inrush_a`, `inrush_ms`,
-   `input_v_max`, `alt_group`, `catalogue_choice`, `loose_material`, deprecated `min_branch_mcb_a`),
-   design constants and the generation order. No rule or golden moves. When Ali has edited or
-   commented: apply his changes, hand-edit `docs/spec/generator-spec-v2.md` to v2.1 (title and date,
-   the version row in `docs/spec/README.md`), say in the `docs(spec): …` commit that it was hand-edited
-   rather than exported, list the affected rules and goldens in the PR body (none move), then add a
-   note under Q35, Q37 and Q39 in plan §6 that the spec now carries them.
-4. **Excel header fit (Q11):** "Does the header on Power Consumption and Heat Dissipation overlap the
+3. **Excel header fit (Q11):** "Does the header on Power Consumption and Heat Dissipation overlap the
    table in Excel's Print Preview?" Options "It fits" (recommended: the size is computed to fit at the
    print scale) and "It overlaps". See section 14 for what each answer means.
-5. **Q23** (issued sheets vs masters): keep the default (the masters) until he answers.
+4. **Q23** (issued sheets vs masters): keep the default (the masters) until he answers.
 
 ## 4. When Ali's feedback arrives
 
@@ -271,8 +262,6 @@ iC60N `dc_float` warnings (Q37, Q41); put CINC on the DC set (group E's AC main,
      `fitting_size` floors, so at 1.4 the sizes become 15 pt at 49 %, 14 pt at 50 % and 9 pt at 78 %
      (checked 2026-10-29).
    - Fits: no code change; record the answer in Q11.
-2. If the spec gets updated for ADR 0020 or Q40, check the sheet docstrings still cite the right section
-   names.
 
 Don't hard-code project text (such as a footnote) in the sheets; it comes from inputs. Don't judge print
 layout from LibreOffice PDFs. `tests/unit/writer/test_no_xlsx_in_repo.py` enforces no committed `.xlsx`.
