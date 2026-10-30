@@ -7,6 +7,12 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- The device editor shows "Minimum branch MCB" read-only, marked deprecated,
+  with the reason: branch MCBs are sized from the rated power and inrush
+  current (ADR 0019), so typing a value there changed nothing (#TBD).
+
 ## [0.2.1] - 2026-10-29
 
 ### Added
