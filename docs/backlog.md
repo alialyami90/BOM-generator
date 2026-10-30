@@ -1,12 +1,25 @@
-# Backlog: v0.2 (shipped in v0.2.0)
+# Backlog
+
+Ali's feedback after each release, point by point, and the work done for each point. Keep this file
+current: when a point's status or milestone changes, update its row here.
+
+## v0.3: Ali's feedback on v0.2.1
+
+Nothing yet. When the feedback arrives, number the points below (1, 2, …), propose a milestone for
+each in [`plan.md`](plan.md) (from M19), and record decisions as ADRs (from 0024) or plan questions
+(from Q42).
+
+| # | Point (Ali) | Milestone | Status |
+| --- | --- | --- | --- |
+
+## v0.2 (shipped in v0.2.0)
 
 Ali's feedback after testing v0.1.0 (2026-10-28), and the work done for each
-point; all ten shipped in [v0.2.0](https://github.com/alialyami90/BOM-generator/releases/tag/v0.2.0) (2026-10-29). Keep this file current: when a point's status or milestone
-changes, update its row here. The milestones' details are in
+point; all ten shipped in [v0.2.0](https://github.com/alialyami90/BOM-generator/releases/tag/v0.2.0) (2026-10-29). The milestones' details are in
 [`plan.md`](plan.md) → "M12–M18 (v0.2)". The terms MCB, catalogue and loose
 material are as in the spec.
 
-## Ali's points
+### Ali's points
 
 | # | Point (Ali, 2026-10-28) | Milestone | Status |
 | --- | --- | --- | --- |
@@ -21,6 +34,6 @@ material are as in the spec.
 | 9 | Drag and drop on the Panels board doesn't work. | M17 | Done in v0.2.0. Drag and drop with pins, deletes and undo (#126), and keyboard moves (#129). |
 | 10 | Add and edit devices in the app, with every field editable. Export the library as a backup, and import one. Use CSV for both so engineers can work in Excel. Link alternatives in the CSV with a unique key, and show a list of all the alternatives for a device so they can be compared. | M16 | Done in v0.2.0. The library editor, CSV export and import, `.bomlib` backup and the alternatives comparison (#155, #166, #175, #178, #179, #180). |
 
-## Order
+### Order
 
-All of it shipped in v0.2.0. Work after v0.2.0 waits on Ali's feedback from testing it.
+All of it shipped in v0.2.0; v0.2.1 added the UI polish pass (`docs/ui/polish-v02.md`).
