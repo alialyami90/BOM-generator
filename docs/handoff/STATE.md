@@ -35,7 +35,7 @@ rather than copy it.
 
 | Command | Result |
 | --- | --- |
-| `ruff check . && ruff format --check .` | All checks passed; 345 files formatted |
+| `ruff check . && ruff format --check .` | All checks passed; 291 files formatted (2026-10-30 count) |
 | `python -m mypy` | no issues in 224 source files |
 | `python -m pytest -q -p no:cacheprovider` | 2672 passed, 0 failed, 0 skipped (5–7 min) |
 | `python -m pytest -q tests/golden` | 95 passed |
