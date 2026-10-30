@@ -3,6 +3,30 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-10-30: repo audit done, five fix PRs merged, spec v2.1 draft with Ali
+
+- **Base:** origin/main `723507a` (#228). Gate at `f2234f7` (#227): ruff and format pass (291 files),
+  mypy pass (224 files), pytest 2669 passed; `python data/library/build.py` no diff; every UI script
+  parses; Playwright walk of every screen with and without the bridge, no console errors.
+- **Open PRs, unmerged branches, uncommitted work: none.**
+- **Done today:**
+  - Audit of code and documents ([Claude Doc](https://claude.ai/artifact/DXyJnufrHguPCCVWgeLGPh)): 14 findings, a six-PR plan, a four-role
+    team recommendation with models and effort (NEXT.md §1).
+  - #227 app: the prototype's `data.js`, `engine-stub.js` and example screens no longer ship; no
+    bridge means "could not reach its engine", never illustrative data.
+  - #228 app: `min_branch_mcb_a` read-only in the device editor with the ADR 0019 note; Library card
+    says "Sized by the engine".
+  - #229 plan: status after v0.2.1, §2 tree from the code, Q1–Q41 in order; backlog v0.3 intake table.
+  - #230 UI docs: v0.2 departures, hand-written-panels rule, `docs/ui/README.md` status.
+  - #231 docs: two-PR release steps in `packaging/README.md`, README library version 1.1.0, ruff count,
+    vulture note in LESSONS.md.
+  - Ali's decisions (cards): remove the prototype fallback from the app; catch the spec up now; start
+    the fix PRs now.
+- **Waiting on Ali:** review of the [Spec v2.1 draft](https://claude.ai/artifact/Q2SsFCKM4y7vHhAJjkir43); what comes after v0.2.1; Q11; Q23;
+  the ASSUMED seeds.
+- **Next:** land the spec as v2.1 once reviewed (NEXT.md §3 item 3); then NEXT.md §3 and the open items
+  by area. Smallest ready tasks: screen-check #208; finding 30 power figures; the `mcb_dc` fallback.
+
 ## 2026-10-29: v0.2.1 released, everything merged
 
 - **Base:** origin/main `032bbea` (#212), v0.2.1 released (#211, tag on `1678343`). Gate on that tree:

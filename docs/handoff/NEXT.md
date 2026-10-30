@@ -22,6 +22,13 @@ either waiting on Ali or ready to start.
 **Keeping these files current.** When work stops, update STATE.md and NEXT.md in place, append to
 LESSONS.md, and add a dated entry at the top of CHECKPOINT.md, in a docs-only PR.
 
+**Team.** The audit of 2026-10-30 ([Claude Doc](https://claude.ai/artifact/DXyJnufrHguPCCVWgeLGPh), "Agent team") recommends four roles, each
+owning the areas below: a lead and reviewer (plan milestones, ADRs, PR review and merge, releases, these
+files, cards to Ali; Opus 5.5, high effort), engine, models and writers (sections 6, 12–14; Opus 5.5,
+high), desktop app and UI (sections 8, 10, 15; Sonnet 5.5, high; Opus 5.5 only for a new screen designed
+from scratch) and data and docs (sections 7, 11; Sonnet 5.5, medium). Haiku 5.5 at low effort only for
+mechanical loops run inside a role. The lead hands one milestone to one role as one PR.
+
 ## 2. Working rules
 
 - One milestone per PR, a conventional commit, TDD with tests named after the rule, the gate green
@@ -44,14 +51,21 @@ LESSONS.md, and add a dated entry at the top of CHECKPOINT.md, in a docs-only PR
 
 1. **What comes after v0.2.1?** "What should we do after v0.2.1?" Options "Test v0.2.1, send feedback"
    (recommended: everything asked for in v0.2 shipped and nobody has used it in the field yet) and
-   "I'll describe v0.3 now".
+   "I'll describe v0.3 now". Ali asked for the repo audit first (done, 2026-10-30); the question stands.
 2. **ASSUMED seeds:** show the cabinet number pattern, the enclosure and the document number/date
    defaults a new substation gets; recommend "Keep them, edit per project in the app". If he changes
    them, change `_blank` in `src/bomgen/io/lifecycle.py` and
    `test_a_blank_substation_seeds_generated_panels_so_equipment_can_be_added`, and drop `# ASSUMED` on
    any value he confirms.
-3. **Spec catch-up:** offer to bring the spec in line with ADRs 0017, 0019, 0020, 0022, 0023 and
-   Q35–Q41 through the process in `docs/spec/`.
+3. **Spec v2.1 review.** Ali chose "Catch up the spec now" on 2026-10-30. The draft is the Claude Doc
+   [Spec v2.1 draft](https://claude.ai/artifact/Q2SsFCKM4y7vHhAJjkir43): group F branch rating per ADR 0019, catalogues and brand sets (ADRs
+   0017, 0023), the Loose Material sheet (ADRs 0020, 0022), new input fields (`inrush_a`, `inrush_ms`,
+   `input_v_max`, `alt_group`, `catalogue_choice`, `loose_material`, deprecated `min_branch_mcb_a`),
+   design constants and the generation order. No rule or golden moves. When Ali has edited or
+   commented: apply his changes, hand-edit `docs/spec/generator-spec-v2.md` to v2.1 (title and date,
+   the version row in `docs/spec/README.md`), say in the `docs(spec): …` commit that it was hand-edited
+   rather than exported, list the affected rules and goldens in the PR body (none move), then add a
+   note under Q35, Q37 and Q39 in plan §6 that the spec now carries them.
 4. **Excel header fit (Q11):** "Does the header on Power Consumption and Heat Dissipation overlap the
    table in Excel's Print Preview?" Options "It fits" (recommended: the size is computed to fit at the
    print scale) and "It overlaps". See section 14 for what each answer means.
@@ -142,23 +156,8 @@ and `release.yml` together.
    Library › any device › Electrical: the first field row sits as close under the tabs as on other tabs;
    the save bar meets the window bottom on short and long tabs. On failure, fix it with the exact symptom
    and CSS in mind.
-2. **Record the v0.2 departures in `docs/ui/screens.md` "Departures in the built app"** (one docs PR,
-   #82 pattern). Remove or rewrite the first bullet ("Projects, substations and settings are
-   read-only"). Add, after checking each on main: Panels board read-only for hand-written panels (with
-   the reason line the app shows); Move… dialog Position is top, bottom or where the layout puts it, not
-   a numbered select; unsaved edits use the Changed marker, never revision yellow (yellow only in Preview
-   for revised cells); Network *Change…* at the end of the part-id line, wrapping under it when narrow;
-   Settings › General catalogue brands in a 2-column form, each "Same as the project (…)" naming the
-   resolved brand; Settings › Documents register select shows the key only; Project › Documents register
-   rows are two lines (Confirm on the *Assumed date* line) and Used by drops the substation prefix inside
-   its group; Design constants Default column empty on unchanged rows; anything else found walking every
-   v0.2 screen against `editing.md`, `screens.md` and the prototype. Done when the gate is green and
-   `impeccable detect --json docs/ui/prototype` returns `[]`.
-3. **Add the hand-written-panels rule to `docs/ui/editing.md` "Panels board: drag, drop, pin,
-   delete"**: the board is read-only, why (Build uses the panel files, so a pin wouldn't change the BOM)
-   and how it says so (one-line banner, no grips, no pin or delete actions). Can share task 2's PR.
-4. **Fix the wording nits** in STATE.md section 5, drift item 4, if they are still there.
-5. **New screens or flows** start with the `impeccable` skill, a section in
+2. **Fix the wording nits** in STATE.md section 5, drift item 2, if they are still there.
+3. **New screens or flows** start with the `impeccable` skill, a section in
    `editing.md`/`screens.md`/`components.md` and a prototype screen (CLAUDE.md "UI work").
 
 Setup: gate venv `uv venv /tmp/venv && uv pip install -p /tmp/venv -e ".[dev]"`; impeccable via
@@ -220,7 +219,7 @@ release, and never make the launcher bundle or import any library but the one de
 
 ## 11. Documentation and changelog
 
-After every non-docs merge (`git log --oneline 1678343..origin/main`; move this sha forward after each
+After every non-docs merge (`git log --oneline 723507a..origin/main`; move this sha forward after each
 pass):
 1. For each non-docs PR: `pull_request_read get` for its description and `git show -s --format=%B <sha>`
    for the squash message. One entry under `[Unreleased]` in Added/Changed/Fixed, newest first, PR
@@ -281,7 +280,9 @@ layout from LibreOffice PDFs. `tests/unit/writer/test_no_xlsx_in_repo.py` enforc
 ## 15. Desktop app
 
 No task is open; Ali's v0.2.1 feedback decides the next app work. If he reports an app bug, fix it
-test-first in a small PR.
+test-first in a small PR. Since the audit: the app never shows the prototype's data; without a bridge
+every page is "BOM Generator could not reach its engine" with *Try again* (#227), and the device
+editor shows `min_branch_mcb_a` read-only as deprecated (#228).
 
 How to work: TDD (for UI-only changes, an asserting test in `test_app_ui_assets.py`); conventional
 commits (`fix(app): …`); never commit scratch scripts or screenshots. For UI PRs run a Playwright E2E
