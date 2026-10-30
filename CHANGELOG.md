@@ -7,6 +7,13 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- The installed app no longer carries the design prototype's illustrative
+  substation, library and checks. When the window cannot reach the Python
+  engine it says so on every page, with Try again, instead of showing example
+  figures as if they were real (#TBD).
+
 ## [0.2.1] - 2026-10-29
 
 ### Added

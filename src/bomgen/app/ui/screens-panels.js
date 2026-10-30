@@ -1,15 +1,13 @@
 /* Screens: the Network result and L1 ranking, and the Panels board and list, on bomgen.app.api (plan M10c).
    Every figure comes from substation_layout, which flattens M1c's layout_preview; this file only draws it.
    Moves, pins and deletes write layout.overrides and layout.removed at once through the bridge's
-   writers, which refuse what the layout cannot take (docs/ui/editing.md, Panels board).
-   Opened in a plain browser, screens-layout.js shows the prototype. */
+   writers, which refuse what the layout cannot take (docs/ui/editing.md, Panels board). */
 (function () {
   const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, pageHead, toast, dialog, closeDialog, $ } = App;
   const $$ = (q) => [...document.querySelectorAll(q)];
-  const example = SCREENS.panels;
   const real = () => S.backend === 'yes' && S.project && S.project.real && S.sub;
   const plural = (n, one) => `${n} ${one}${n === 1 ? '' : 's'}`;
-  const U = 18; // px per rack unit on the board, as in the prototype
+  const U = 18; // px per rack unit on the board, as in the design prototype
   /* Only generated panels follow pins and deletes; Build uses hand-written panel files as they are. */
   const editable = () => !!(LAY.data && LAY.data.generated);
   const READ_ONLY = 'These panels are hand-written, so Build uses your panel files and a pin or delete here would not change the BOM.';
@@ -81,7 +79,7 @@
   ACTIONS['pv-issues'] = () => { showIssues = !showIssues; App.render(); };
 
   SCREENS.panels = () => {
-    if (!real()) return example();
+    if (!real()) return `<div class="page">${pageHead('Panels')}<div class="empty"><b>Open a substation first.</b></div></div>`;
     const { b } = App.route();
     if (b) return `<div class="page">${pageHead('Panel', 'The panel editor comes with the substation writers.')}<a class="btn btn--secondary" href="#/panels">Back to the panels</a></div>`;
     const l = layout();

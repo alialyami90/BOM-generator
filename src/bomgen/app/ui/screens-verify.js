@@ -1,9 +1,8 @@
 /* Screens: Checks and Build on bomgen.app.api (plan M10d).
    Checks lists the loader's located problems, then the engine's check report. Build writes the workbook
-   the way `bomgen build` does. Opened in a plain browser, the prototype's screens in screens-output.js are used. */
+   the way `bomgen build` does. */
 (function () {
   const { esc, S, ACTIONS, SCREENS, badge, banner, field, input, pageHead, dialog, closeDialog, toast, go, $ } = App;
-  const example = { checks: SCREENS.checks, build: SCREENS.build };
   const real = () => S.backend === 'yes' && S.project && S.project.real && S.sub;
   const plural = (n, one) => `${n} ${one}${n === 1 ? '' : 's'}`;
   const editable = (html) => html.replace('data-dirty="1"', 'data-dirty="0"');
@@ -47,7 +46,7 @@
   /* ---------- Checks ---------- */
   let level = 'all'; let levelKey = ''; let running = false;
   SCREENS.checks = () => {
-    if (!real()) return example.checks();
+    if (!real()) return `<div class="page">${pageHead('Checks')}<div class="empty"><b>Open a substation first.</b></div></div>`;
     const c = cache('checks', () => Bridge.call('run_checks', S.project.file, S.sub)
       .finally(() => { if (running) { running = false; toast('Checks finished'); } }));
     if (!c || !c.data) return waiting('Checks', c, 'Loading the files and running the checks…');
@@ -92,7 +91,7 @@
   /* ---------- Build ---------- */
   const B = { state: 'ready', result: null, error: null, name: null, folder: null, compare: false, previous: '', open: true };
   SCREENS.build = () => {
-    if (!real()) return example.build();
+    if (!real()) return `<div class="page">${pageHead('Build')}<div class="empty"><b>Open a substation first.</b></div></div>`;
     const c = cache('target', () => Bridge.call('build_target', S.project.file, S.sub));
     if (!c || !c.data) return waiting('Build', c, 'Reading the substation…');
     const t = c.data;

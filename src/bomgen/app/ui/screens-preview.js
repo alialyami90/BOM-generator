@@ -1,11 +1,10 @@
 /* Screen: Preview on bomgen.app.api (plan M10d). Every figure comes from preview_substation, which flattens the
-   engine's build result; this file only lays the rows out. Opened in a plain browser, screens-output.js shows the prototype. */
+   engine's build result; this file only lays the rows out. */
 (function () {
   const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, pageHead, toast, go, $ } = App;
-  const example = SCREENS.preview;
   const LOOSE = 'loose-material';  // not a panel id: those name panel files
   const real = () => S.backend === 'yes' && S.project && S.project.real && S.sub;
-  const GROUPS = DB.groupNames;  // the spec's group names, labels only
+  const GROUPS = { A: 'Enclosure', B: 'Main equipment', C: 'Network and IO accessories', D: 'Cabinet housekeeping', E: 'AC distribution', F: 'DC distribution', G: 'Terminal blocks', H: 'Grounding' };  // the spec's group names, labels only
   const fmt = (n, d = 1) => Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
   const seg = (code) => esc(code || '').replace(/([+\-])/g, '$1<wbr>');  // long codes break between segments
   const plural = (n, one) => `${n} ${one}${n === 1 ? '' : 's'}`;
@@ -26,7 +25,7 @@
 
   let grp = 'all'; let q = ''; let showHwio = false; let viewKey = '';
   SCREENS.preview = () => {
-    if (!real()) return example();
+    if (!real()) return `<div class="page">${pageHead('Preview')}<div class="empty"><b>Open a substation first.</b></div></div>`;
     const p = page();
     if (!p || !p.data) return `<div class="page">${pageHead('Preview', p && p.error ? esc(p.error.message) : 'Running the engine…')}</div>`;
     const d = p.data;

@@ -1,16 +1,14 @@
 /* Screens: Home (all projects) and the Project page (overview, substations, documents, backup and share),
-   on bomgen.app.api (plan M10b). Opened in a plain browser they show the prototype's illustrative projects. */
+   on bomgen.app.api (plan M10b). */
 (function () {
-  const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, field, input, select, pageHead, illus, dialog, closeDialog, toast, go, $, curProject } = App;
+  const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, field, input, select, pageHead, dialog, closeDialog, toast, go, $, curProject } = App;
   const statusIcon = { ok: 'check', bad: 'error', warn: 'warn' };
   const ro = (html) => html.replace('data-dirty="1"', 'readonly').replace('class="input', 'class="ctl input');
-  const offline = () => S.backend === 'no';
   const fail = (err) => toast(err.kind === 'no_backend' ? 'This works in the app, not in a browser.' : err.message, 'error');
   const day = (iso) => (iso ? String(iso).replace('T', ' ').slice(0, 16) : '—');
   const kb = (b) => (b == null ? '—' : b < 1024 ? `${b} bytes` : `${Math.round(b / 1024)} KB`);
   const inside = (file, folder) => (file.startsWith(folder) ? file.slice(folder.length).replace(/^[\\/]/, '') : file);
   const count = (n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`;
-  const live = () => (offline() ? `disabled title="${esc('This works in the app, not in a browser.')}"` : '');
 
   /* ---------- the screens' view of a project (the prototype's shape) ---------- */
   const PROJECTS = { state: 'idle', rows: [], once: false };  // once: the list has been read at least once
@@ -34,7 +32,7 @@
     { label: 'Spare DC branches per feed', value: d.spares.dc_branches_per_feed, unit: 'per feed' },
     { label: 'Spare AC branches', value: d.spares.ac_branches, unit: '' }
   ];
-  const projects = () => (offline() ? DB.projects : PROJECTS.rows.map(view));
+  const projects = () => PROJECTS.rows.map(view);
   function loadProjects() {
     PROJECTS.state = 'loading';
     return Bridge.call('list_projects').then((rows) => { PROJECTS.rows = rows; }).catch(fail)
@@ -66,12 +64,12 @@
         <p class="muted small" style="margin-top:var(--space-4)">New project and Import are unavailable until a library is installed.</p>
       </div>`;
     }
-    if (!offline() && S.backend === 'yes' && PROJECTS.state === 'idle') loadProjects();
+    if (S.backend === 'yes' && PROJECTS.state === 'idle') loadProjects();
     const rows = projects();
-    const loading = !offline() && !PROJECTS.once;
+    const loading = !PROJECTS.once;
     return `<div class="page">
       ${pageHead('Projects', 'Every project on this PC. A project holds several substations, each with its own panels and workbook.',
-        `<button class="btn btn--secondary" data-action="import-project">${icon('download')}Import project file…</button><button class="btn btn--secondary" data-action="open-project">${icon('folder')}Open folder…</button><button class="btn btn--primary" data-action="new-project" ${live()}>${icon('plus')}New project…</button>`)}
+        `<button class="btn btn--secondary" data-action="import-project">${icon('download')}Import project file…</button><button class="btn btn--secondary" data-action="open-project">${icon('folder')}Open folder…</button><button class="btn btn--primary" data-action="new-project">${icon('plus')}New project…</button>`)}
       ${S.launch === 'bomproj' ? `<div style="margin-bottom:var(--space-4)">${banner('info', `<b>You opened a project file.</b> <span class="mono">${esc(S.launchFile)}</span> is not added yet. Review what it contains before it is imported.`, `<button class="btn btn--primary btn--sm" data-action="import-launched">Review import…</button>`)}</div>` : ''}
       ${loading ? '<p class="muted">Reading the projects on this PC…</p>' : rows.length ? `<div class="table-wrap"><table class="table table--comfort">
         <thead><tr><th>Project</th><th>Client</th><th class="num">Substations</th><th>Library</th><th>Last changed</th><th>Status</th></tr></thead>
@@ -79,7 +77,7 @@
           <td><b style="font-weight:500">${esc(r.name)}</b><span class="cell-sub mono">${esc(r.path)}</span></td>
           <td>${esc(r.client || '—')}</td><td class="num">${r.substations.length}</td><td>${esc(r.library.name)} ${esc(r.library.builtWith)}</td><td>${esc(r.opened)}</td>
           <td>${badge(r.status, r.statusText, statusIcon[r.status])}</td></tr>`).join('')}</tbody></table>
-        <div class="table-foot table-foot--plain"><span>Select a project to open it</span>${offline() ? `<span>${illus()}</span>` : ''}</div></div>`
+        <div class="table-foot table-foot--plain"><span>Select a project to open it</span></div></div>`
         : `<div class="empty"><h3>No projects yet</h3><p class="muted">Import a project file from a colleague, or open a folder that holds a <span class="mono">project.yaml</span>.${S.app ? ` New projects go in <span class="mono">${esc(S.app.workspace)}</span>.` : ''}</p></div>`}
       <div class="section" style="margin-top:var(--space-5);border:0;padding-top:0">
         <div class="banner banner--info">${icon('info')}<div class="grow"><b>Got a device library update?</b><div class="small">Update packages are .bomlib files. Import one to review what it changes before it is installed.</div></div><a class="btn btn--secondary" href="#/library/import">Import update…</a></div>
@@ -88,7 +86,6 @@
   };
   ACTIONS['open-proj'] = (el) => {
     closeDialog();
-    if (offline()) { if (S.proj !== el.dataset.id) { S.proj = el.dataset.id; S.sub = null; } S.tab.project = 'substations'; go('#/project/substations'); return; }
     openProject(el.dataset.file);
   };
   ACTIONS['open-project'] = () => {
@@ -104,7 +101,7 @@
     const rb = App.route().b; if (tabList.some(([k]) => k === rb)) S.tab.project = rb;
     const t = S.tab.project;
     const actions = {
-      substations: `<button class="btn btn--primary" data-action="new-substation" ${live()}>${icon('plus')}New substation…</button>`,
+      substations: `<button class="btn btn--primary" data-action="new-substation">${icon('plus')}New substation…</button>`,
       share: `<button class="btn btn--primary" data-action="export-project">${icon('upload')}Export project…</button>` }[t] || '';
     const body = { info: projectInfo, substations: projectSubs, documents: projectDocs, share: projectShare }[t](p);
     const problems = p.problems && p.problems.length ? `<div style="margin-bottom:var(--space-4)">${banner('bad', `<b>${p.problems.length} ${p.problems.length === 1 ? 'problem' : 'problems'} in the project files.</b> ${problemList(p.problems)}`)}</div>` : '';
@@ -156,7 +153,7 @@
     return PO.mark(key, field(esc(label), select('po-' + key, opts.length ? opts : [['', 'Library default']], shown(p, key) || '', { invalid: !!PO.errors[key] }), '', PO.err(key)));
   }
   const projectInfo = (p) => `<div class="form form--2">
-    <div class="span-2">${field('Project name', `<div class="row" style="flex-wrap:nowrap">${ro(input('p-name', p.name))}<button class="btn btn--secondary" data-action="rename-project" ${live()}>Rename…</button></div>`, 'Printed in bold at the top of every sheet header, for every substation. The folder keeps its name.')}</div>
+    <div class="span-2">${field('Project name', `<div class="row" style="flex-wrap:nowrap">${ro(input('p-name', p.name))}<button class="btn btn--secondary" data-action="rename-project">Rename…</button></div>`, 'Printed in bold at the top of every sheet header, for every substation. The folder keeps its name.')}</div>
     ${p.real ? ovControl(p, OV[0]) : field('Client', ro(input('p-client', p.client, { placeholder: 'Not set' })))}
     ${field('Logo', `<div class="row" style="flex-wrap:nowrap">${ro(input('p-logo', p.logo, { mono: true, placeholder: 'No logo chosen' }))}${p.real ? `<button class="btn btn--secondary" data-action="po-logo">Choose…</button>${p.logo ? '<button class="btn btn--ghost" data-action="po-logo-remove">Remove</button>' : ''}` : ''}</div>`, p.logo ? 'PNG, copied into the project. Appears in the left of the page header.' : 'PNG, copied into the project. Appears in the left of the page header. <span style="color:var(--color-warning)">Not set: the header will have no picture.</span>')}
     <div class="span-2 section" style="margin:0">
@@ -178,7 +175,7 @@
     <div class="span-2 section" style="margin:0">
       <h3>Delete project</h3>
       <p class="lede">Removes the project folder with all its substations. A copy is saved first as a <span class="mono">.bomproj</span> file, which Import project file brings back.</p>
-      <button class="btn btn--danger" data-action="delete-project" ${live()}>${icon('trash')}Delete project…</button>
+      <button class="btn btn--danger" data-action="delete-project">${icon('trash')}Delete project…</button>
     </div></div>${p.real ? PO.bar() : ''}`;
   const relogo = (call) => call.then((page) => { if (!page) return; S.project = view(page); S.tab.project = 'info'; App.render(); toast('Logo updated', 'check'); }).catch(fail);
   ACTIONS['po-logo'] = () => relogo(Bridge.call('set_project_logo', curProject().file));
@@ -189,9 +186,9 @@
       <tbody>${p.substations.map((s) => `<tr class="clickable" tabindex="0" data-action="open-sub" data-id="${esc(s.id)}">
         <td><b style="font-weight:500">${esc(s.name)}</b><span class="cell-sub mono">${esc(s.folder)}</span>${s.from ? `<span class="cell-sub">Created from ${esc(s.from)}</span>` : ''}</td>
         <td class="num">${esc(s.panels)}</td><td>${esc(s.changed)}</td><td>${badge(s.status, s.statusText, statusIcon[s.status])}</td>
-        <td><div class="row-actions"><button class="btn btn--secondary btn--sm" data-action="open-sub" data-id="${esc(s.id)}">Open</button><button class="btn btn--ghost btn--sm" data-action="new-substation" data-from="${esc(s.id)}" ${live()}>${icon('copy')}Create from this…</button><button class="btn btn--ghost btn--sm" data-action="rename-substation" data-id="${esc(s.id)}" ${live()}>Rename…</button><button class="btn btn--ghost btn--sm" data-action="delete-substation" data-id="${esc(s.id)}" ${live()}>${icon('trash')}Delete…</button></div></td></tr>`).join('')}</tbody></table>
-      <div class="table-foot"><span>${count(p.substations.length, 'substation')}</span>${p.real ? '' : `<span>${illus()}</span>`}</div></div>`;
-  ACTIONS['open-sub'] = (el, e) => { if (e && e.target.closest('button') && e.target.closest('button') !== el) return; S.sub = el.dataset.id; S.dirty = false; S.layout = { overrides: [], removed: [], history: [], selected: '', openOverrides: false }; go('#/panels'); };
+        <td><div class="row-actions"><button class="btn btn--secondary btn--sm" data-action="open-sub" data-id="${esc(s.id)}">Open</button><button class="btn btn--ghost btn--sm" data-action="new-substation" data-from="${esc(s.id)}">${icon('copy')}Create from this…</button><button class="btn btn--ghost btn--sm" data-action="rename-substation" data-id="${esc(s.id)}">Rename…</button><button class="btn btn--ghost btn--sm" data-action="delete-substation" data-id="${esc(s.id)}">${icon('trash')}Delete…</button></div></td></tr>`).join('')}</tbody></table>
+      <div class="table-foot"><span>${count(p.substations.length, 'substation')}</span></div></div>`;
+  ACTIONS['open-sub'] = (el, e) => { if (e && e.target.closest('button') && e.target.closest('button') !== el) return; S.sub = el.dataset.id; S.dirty = false; go('#/panels'); };
 
   /* ---------- Documents: the register, edited in place (docs/ui/editing.md, Project › Documents) ---------- */
   const RG_FIELDS = ['doc_no', 'rev', 'issue_date', 'title'];
@@ -217,26 +214,15 @@
       <td><button class="btn btn--ghost btn--sm btn--icon btn--del" data-action="rg-remove" data-i="${d.index}" aria-label="Remove ${esc(d.key)}" title="${esc(why || (RG.dirty() ? 'Save or discard the changes first' : 'Remove'))}" ${why || RG.dirty() ? 'disabled' : ''}>${icon('trash')}</button></td></tr>`;
   }
   const projectDocs = (p) => {
-    if (p.real) {
-      const ids = [...new Set([...p.substations.map((s) => s.id), ...p.register.map((d) => d.substation)])];
-      const groups = ids.map((id) => ({ s: p.substations.find((x) => x.id === id) || { id, name: id }, rows: p.register.filter((d) => d.substation === id) }));
-      const assumed = p.register.filter((d) => d.assumed.includes('issue_date')).length;
-      return `<p class="lede muted" style="max-width:68ch;margin-bottom:var(--space-4)">One register for the whole project. Each panel and calculation sheet picks a document from it, so a single transmittal list drives every header.</p>
-        ${assumed ? banner('warn', `<b>The issue date${assumed === 1 ? '' : 's'} of ${count(assumed, 'document')} ${assumed === 1 ? 'is' : 'are'} assumed.</b> Confirm the dates before issuing.`) : ''}
-        <div class="table-wrap" style="margin-top:var(--space-4)"><table class="table"><caption class="sr-only">Document register</caption><thead><tr><th>Document</th><th style="width:220px">Document no.</th><th style="width:76px">Rev</th><th style="width:170px">Issue date</th><th>Used by</th><th style="width:44px"><span class="sr-only">Remove</span></th></tr></thead>
-        <tbody>${groups.map((g) => `<tr class="band"><td colspan="6"><div class="row"><b>${esc(g.s.name)}</b> <span class="muted">· ${count(g.rows.length, 'document')}</span><span class="sp" style="flex:1"></span><button class="btn btn--ghost btn--sm" data-action="rg-add" data-sub="${esc(g.s.id)}" ${RG.dirty() ? 'disabled title="Save or discard the changes first"' : ''}>${icon('plus')}Add</button></div></td></tr>
-          ${g.rows.map((d) => rgRow(p, d)).join('')}`).join('')}</tbody></table>
-        <div class="table-foot"><span>${count(p.register.length, 'document')} in ${count(groups.filter((g) => g.rows.length).length, 'substation')} · issue dates are written as YYYY-MM-DD</span></div></div>${RG.bar()}`;
-    }
-    const ids = [...new Set([...p.substations.map((s) => s.id), ...p.documents.map((d) => d.sub)])];
-    const groups = ids.map((id) => ({ s: p.substations.find((x) => x.id === id) || { id, name: id }, rows: p.documents.filter((d) => d.sub === id) })).filter((g) => g.rows.length);
-    const assumed = p.documents.filter((d) => d.assumed).length;
+    const ids = [...new Set([...p.substations.map((s) => s.id), ...p.register.map((d) => d.substation)])];
+    const groups = ids.map((id) => ({ s: p.substations.find((x) => x.id === id) || { id, name: id }, rows: p.register.filter((d) => d.substation === id) }));
+    const assumed = p.register.filter((d) => d.assumed.includes('issue_date')).length;
     return `<p class="lede muted" style="max-width:68ch;margin-bottom:var(--space-4)">One register for the whole project. Each panel and calculation sheet picks a document from it, so a single transmittal list drives every header.</p>
       ${assumed ? banner('warn', `<b>The issue date${assumed === 1 ? '' : 's'} of ${count(assumed, 'document')} ${assumed === 1 ? 'is' : 'are'} assumed.</b> Confirm the dates before issuing.`) : ''}
-      ${groups.length ? `<div class="table-wrap" style="margin-top:var(--space-4)"><table class="table"><thead><tr><th>Document</th><th>Document no.</th><th style="width:70px">Rev</th><th style="width:150px">Issue date</th><th>Used by</th><th style="width:110px">State</th></tr></thead>
-      <tbody>${groups.map((g) => `<tr class="band"><td colspan="6"><b>${esc(g.s.name)}</b> <span class="muted">· ${count(g.rows.length, 'document')}</span></td></tr>
-        ${g.rows.map((d) => `<tr><td>${esc(d.label)}${d.label !== d.key ? `<span class="cell-sub mono">${esc(d.key)}</span>` : ''}</td><td>${ro(input('dn-' + d.key, d.docNo, { mono: true }))}</td><td>${ro(input('dr-' + d.key, d.rev, { mono: true }))}</td><td>${ro(input('di-' + d.key, d.issue, { mono: true }))}</td><td>${esc(d.usedBy)}</td><td>${d.assumed ? badge('warn', 'Assumed date', 'warn') : '<span class="muted small">Confirmed</span>'}</td></tr>`).join('')}`).join('')}</tbody></table>
-      <div class="table-foot"><span>${count(p.documents.length, 'document')} in ${count(groups.length, 'substation')}</span><span>${illus()}</span></div></div>` : '<div class="empty"><b>No documents in the register.</b></div>'}`;
+      <div class="table-wrap" style="margin-top:var(--space-4)"><table class="table"><caption class="sr-only">Document register</caption><thead><tr><th>Document</th><th style="width:220px">Document no.</th><th style="width:76px">Rev</th><th style="width:170px">Issue date</th><th>Used by</th><th style="width:44px"><span class="sr-only">Remove</span></th></tr></thead>
+      <tbody>${groups.map((g) => `<tr class="band"><td colspan="6"><div class="row"><b>${esc(g.s.name)}</b> <span class="muted">· ${count(g.rows.length, 'document')}</span><span class="sp" style="flex:1"></span><button class="btn btn--ghost btn--sm" data-action="rg-add" data-sub="${esc(g.s.id)}" ${RG.dirty() ? 'disabled title="Save or discard the changes first"' : ''}>${icon('plus')}Add</button></div></td></tr>
+        ${g.rows.map((d) => rgRow(p, d)).join('')}`).join('')}</tbody></table>
+      <div class="table-foot"><span>${count(p.register.length, 'document')} in ${count(groups.filter((g) => g.rows.length).length, 'substation')} · issue dates are written as YYYY-MM-DD</span></div></div>${RG.bar()}`;
   };
   const reregister = (page) => { S.project = view(page); S.tab.project = 'documents'; App.render(); };
   ACTIONS['rg-confirm'] = (el) => Bridge.call('confirm_project_field', curProject().file, ['documents', Number(el.dataset.i), 'issue_date'])
@@ -266,7 +252,7 @@
   /* ---------- Create, rename and delete (docs/ui/editing.md "Creating", plan M17d) ---------- */
   const err = (id, e) => { const el = $('#' + id); if (el) el.innerHTML = banner('bad', esc(e.message)); };
   const settle = () => { S.dirty = false; };  // dialog inputs are not unsaved page edits
-  const openSub = (id) => { S.sub = id; S.layout = { overrides: [], removed: [], history: [], selected: '', openOverrides: false }; go('#/network'); };
+  const openSub = (id) => { S.sub = id; go('#/network'); };
   ACTIONS['new-project'] = () => Bridge.call('new_project_form', '').then((f) => {
     dialog({ title: 'New project', body: `<div class="stack">
       ${field('Project name', input('np-name', '', { placeholder: 'e.g. North Gas Plant' }), `<span id="np-folder">The folder is made from the name in <span class="mono">${esc(f.workspace)}</span>.</span>`)}
