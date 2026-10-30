@@ -3,9 +3,9 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
-## 2026-10-30: repo audit done, five fix PRs merged, spec v2.1 draft with Ali
+## 2026-10-30: repo audit done, fix PRs merged, spec at v2.1
 
-- **Base:** origin/main `723507a` (#228). Gate at `f2234f7` (#227): ruff and format pass (291 files),
+- **Base:** origin/main `d7841e4` (#234). Gate at `f2234f7` (#227): ruff and format pass (291 files),
   mypy pass (224 files), pytest 2669 passed; `python data/library/build.py` no diff; every UI script
   parses; Playwright walk of every screen with and without the bridge, no console errors.
 - **Open PRs, unmerged branches, uncommitted work: none.**
@@ -21,11 +21,12 @@ keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detai
   - #231 docs: two-PR release steps in `packaging/README.md`, README library version 1.1.0, ruff count,
     vulture note in LESSONS.md.
   - Ali's decisions (cards): remove the prototype fallback from the app; catch the spec up now; start
-    the fix PRs now.
-- **Waiting on Ali:** review of the [Spec v2.1 draft](https://claude.ai/artifact/Q2SsFCKM4y7vHhAJjkir43); what comes after v0.2.1; Q11; Q23;
-  the ASSUMED seeds.
-- **Next:** land the spec as v2.1 once reviewed (NEXT.md §3 item 3); then NEXT.md §3 and the open items
-  by area. Smallest ready tasks: screen-check #208; finding 30 power figures; the `mcb_dc` fallback.
+    the fix PRs now. Later in words: add his four behavioural commandments to `CLAUDE.md` (#233);
+    re-review the spec draft and land it if it holds (#234, hand-edited `generator-spec-v2.md` to
+    v2.1; the master Claude Doc still reads v2).
+- **Waiting on Ali:** what comes after v0.2.1; Q11; Q23; the ASSUMED seeds.
+- **Next:** NEXT.md §3 and the open items by area. Smallest ready tasks: screen-check #208; finding 30
+  power figures; the `mcb_dc` fallback.
 
 ## 2026-10-29: v0.2.1 released, everything merged
 

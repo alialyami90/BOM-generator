@@ -1176,17 +1176,19 @@ This replaces the per-device `min_branch_mcb_a` as the floor (ADR 0019).
 Ali also chose "Ignore spikes under 10 ms": the inrush counts only when it lasts at least
 `inrush_min_ms` (10 ms) or no duration is given, and a DC load uses the set's DC trip multiple when
 it has one. A device with no inrush figure is sized by the running current and the floor.
+Spec v2.1 carries this rule (Derivation rules → DC distribution, Branch rating; #234).
 
 **Q36 — Where loose material goes** (M18; backlog point 6). *Resolved 2026-10-28:* Ali chose
 "Its own sheet". Loose material moves off the WS console sheet onto a "Loose Material" sheet,
-placed after the cabinet BOM sheets and before Power Consumption. This overrides the spec's
-OUT-3 and its loose-material table on sheet 4 (ADR 0020).
+placed after the cabinet BOM sheets and before Power Consumption. This overrode the spec's
+OUT-3 and its loose-material table on sheet 4 (ADR 0020); spec v2.1 says so itself (#234).
 
 **Q37 — Default MCB set for the 125 V DC feeds** (M14, M15). *Resolved 2026-10-28:* Ali chose
 "Keep iC60N as default". The Schneider iC60N 2P (A9F742xx) is rated to exactly 125 V DC, while the
 battery floats at about 135–140 V. It stays the default; the DC-rated ranges (Schneider C60H-DC,
 ABB S200M UC, Siemens 5SY5) become selectable brand sets (M14). The check report warns when a
 DC MCB's `dc_rating_v` or a DC-fed device's `input_v_max` is below `dc_float_v` (140 V).
+Spec v2.1 carries the float-voltage check (Derivation rules → DC distribution, Float voltage; #234).
 
 **Q38 — Datasheet data in the shipped library** (M14; backlog point 3). *Resolved 2026-10-28:*
 Ali chose "Real data in shipped library only". The researched datasheet inrush (SEL originals) and
@@ -1202,6 +1204,7 @@ while the AC branches keep an AC-rated set. The proposed shape, for ADR 0023: a
 `catalogue_choice` key `mcb_dc` that falls back to `mcb` when unset, so existing projects and the
 golden values do not change; `mcb` still refuses a brand that is not AC-rated (#145). The model, loader and
 schema take the key; the engine sizes DC branches, mains and CINC from the DC set.
+Spec v2.1 describes `mcb_dc` (Derivation rules → Breaker part numbers; Inputs, 2; #234).
 
 **Q40 — Power footnote in the print area** (M5–M6; #157). *Resolved 2026-10-28:* Ali chose
 "Print it". The printer footnote rows under the NOTES on the Power Consumption sheet are inside
