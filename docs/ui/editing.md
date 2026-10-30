@@ -322,7 +322,7 @@ Tabs and fields, mapped to the model's `DeviceType`:
 | Tab | Fields |
 | --- | --- |
 | Identity | Part ID (fixed once saved: projects refer to it), Category, Make, Model, Ordering code, Description in the BOM (with `{placeholders}`), Tag type, Purdue level |
-| Electrical | Supply type, Voltage, Power supplies, Rated power (W), Inrush current (A), Load type, Minimum branch MCB (A), HWIO points, Digital inputs, Alarm on the branch MCB, Leave out of the power total |
+| Electrical | Supply type, Voltage, Power supplies, Rated power (W), Inrush current (A), Load type, Minimum branch MCB (A; read-only, deprecated by ADR 0019), HWIO points, Digital inputs, Alarm on the branch MCB, Leave out of the power total |
 | Ports and mounting | Height (U), Fibre cores, port groups (count, speed, media, kind, used for) with add and remove |
 | Parts it brings | Child parts (part, qty), Terminals (strip, block, count, per), Loose items (part, qty, tag) |
 | Datasheet | Supply range, Operating temperature, Typical and Maximum power, Ports, Dimensions, Weight, Certifications, Datasheet link, Data quality, Sources. A datasheet height is labelled **Height in the datasheet** with the help "The layout uses Ports and mounting › Height.", so the two heights never read as one field |

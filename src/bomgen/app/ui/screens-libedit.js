@@ -82,7 +82,7 @@
       ['tag_type', 'Tag type', 'mono', 'First part of the generated tag, e.g. ESW.'], ['purdue_level', 'Purdue level', 'choice']]],
     electrical: ['Electrical', [['supply_type', 'Supply type', 'choice'], ['voltage_v', 'Voltage', 'int', '', 0, 'V'], ['power_supplies', 'Power supplies', 'feeds'],
       ['unit_power_w', 'Rated power', 'num', 'What the power sheet uses.', 0, 'W'], ['inrush_a', 'Inrush current', 'num', 'The branch MCB is sized to clear it.', 0, 'A'], ['load_type', 'Load type', 'choice'],
-      ['min_branch_mcb_a', 'Minimum branch MCB', 'int', '', 0, 'A'], ['hwio_points', 'HWIO points', 'int', 'Hardwired points one unit gives.'], ['di_inputs', 'Digital inputs', 'int'],
+      ['min_branch_mcb_a', 'Minimum branch MCB (deprecated)', 'fixed', 'Kept from older libraries; it no longer sets a rating. Branch MCBs are sized from the rated power and the inrush current (ADR 0019).', 0, 'A'], ['hwio_points', 'HWIO points', 'int', 'Hardwired points one unit gives.'], ['di_inputs', 'Digital inputs', 'int'],
       ['alarm_on_branch_mcb', 'Alarm on the branch MCB', 'bool'], ['excluded_from_power', 'Leave out of the power total', 'bool']]],
     ports: ['Ports and mounting', [['height_u', 'Height', 'int', '0 for a DIN-rail part; empty if not known yet.', 0, 'U'], ['cores', 'Fibre cores', 'int', 'For patch panels.']]],
     parts: ['Parts it brings', []],

@@ -450,3 +450,14 @@ def test_without_its_bridge_the_app_says_so_instead_of_showing_example_pages() -
     assert "could not reach its engine" in ui
     app = (UI_DIR / "app.js").read_text(encoding="utf-8")
     assert "err.kind === 'no_backend'" in app
+
+
+def test_the_deprecated_minimum_branch_mcb_is_shown_read_only_with_why() -> None:
+    """Audit 2026-10-30, finding 3: ADR 0019 point 4 deprecates ``min_branch_mcb_a``; it no
+    longer sets a rating, so the editor must not invite an engineer to type one."""
+    edit = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
+    row = re.search(r"\['min_branch_mcb_a', '([^']*)', '(\w+)', '([^']*)'", edit)
+    assert row
+    assert row.group(2) == "fixed"
+    assert "ADR 0019" in row.group(3)
+    assert "no longer" in row.group(3)
