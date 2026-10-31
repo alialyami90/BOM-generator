@@ -9,6 +9,7 @@ import pytest
 
 from bomgen.app import api
 from bomgen.app.parts import parts_page
+from bomgen.library_store.package import pack
 from bomgen.library_store.store import LibraryStore
 
 EXAMPLES = Path(__file__).parents[3] / "examples"
@@ -253,3 +254,31 @@ def test_the_cable_manager_endpoint_returns_the_page(app: api.Api, project: Path
     page = ok(app.set_cable_manager(str(project), "gis01", 4, True))  # the gateway
 
     assert row(page["parts"], "gw")["cable_manager"] == {"on": True, "default": False}
+
+
+def test_options_carry_what_the_device_picker_shows(project: Path, store: LibraryStore) -> None:
+    switches = parts(project, store)["options"]["network_switch"]
+
+    l2 = next(o for o in switches if o["part_id"] == "RST2228-L2")
+    assert l2 == {
+        "part_id": "RST2228-L2",
+        "make": "Ruggedcom",
+        "model": "RST-2228",
+        "supply_type": "VDC",
+        "unit_power_w": 77,
+        "data_quality": None,  # a library file has no device records
+    }
+
+
+def test_options_carry_the_data_quality_of_the_installed_library(
+    project: Path, store: LibraryStore, tmp_path: Path
+) -> None:
+    package = tmp_path / "lib.bomlib"
+    db = Path(__file__).parents[3] / "data" / "device-db"
+    pack(EXAMPLES / "library.yaml", package, name="psa-devices", version="1.1.0", extra_dirs=[db])
+    store.import_package(package)
+    edit(project, "  file: library.yaml\n", "")
+
+    rtacs = parts(project, store)["options"]["rtac"]
+
+    assert next(o for o in rtacs if o["part_id"] == "SEL-3555-RTAC")["data_quality"] == "partial"

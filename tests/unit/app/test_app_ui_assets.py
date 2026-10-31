@@ -570,3 +570,25 @@ def test_device_preview_rail_item_follows_parts() -> None:
     assert "!ns || noParts()" in ui
     index = (UI_DIR / "index.html").read_text(encoding="utf-8")
     assert index.index('src="drag.js"') < index.index('src="screens-device-preview.js"')
+
+
+def test_parts_rows_collapse_to_a_one_line_summary_at_20_or_more() -> None:
+    """components.md "Part row", state Collapsed (20 or more rows)."""
+    js = (UI_DIR / "screens-parts.js").read_text(encoding="utf-8")
+    assert "rows.length >= 20" in js
+    assert 'data-action="pp-expand"' in js
+    assert "ACTIONS['pp-expand']" in js
+    assert "override${n === 1 ? '' : 's'}" in js  # "1 U · 15 W · 125 VDC · 2 overrides"
+
+
+def test_a_category_with_more_than_12_parts_opens_the_device_picker() -> None:
+    """components.md "Device picker (combobox)" and "Part row"."""
+    js = (UI_DIR / "screens-parts.js").read_text(encoding="utf-8")
+    assert "opts.length > 12" in js
+    assert 'role="combobox"' in js
+    assert 'role="listbox"' in js
+    assert ".slice(0, 8)" in js  # up to 8 matches
+    assert "App.verified(o.data_quality)" in js
+    assert "No device matches. Check the spelling, or install a library that has it." in js
+    # the pick goes through the same change handlers as the select it replaces
+    assert "dispatchEvent(new Event('change', { bubbles: true }))" in js

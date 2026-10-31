@@ -3,6 +3,17 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-10-31: M23 follow-ups, rows collapse and Device picker (A2, app)
+
+- **Base:** main after #247 (M24 app). PR for review by A1.
+- **Done:** Parts rows collapse to a summary line at 20 or more; a category with more than 12 parts
+  (the shipped library's network switches) opens the Device picker in the part select's place; Parts
+  options carry supply, power and data quality.
+- **Checked:** gate passes; E2E on the example covers the picker (search, no match, Esc, ↓ Enter pick
+  into the save bar, Discard, L1 "The sizing picks the switch", outside click) and collapse with 20
+  rows, with no console errors. Screens in `/mnt/project-files/a11-screens/m23-followups/`.
+- **Next:** after A3's M25 (#248), the real AC MCB in the Device preview table.
+
 ## 2026-10-31: M24 Device preview page (A2, app)
 
 - **Base:** main after #245 (M24 engine). PR for review by A1.
