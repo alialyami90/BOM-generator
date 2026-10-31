@@ -9,6 +9,13 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Device preview engine (M24): `engine.preview.device_preview` lays out the
+  substation, builds it in memory and lists every generated unit with its
+  panel, top U, branch MCBs, terminal strips and overridden values, plus the
+  layout and check issues; nothing is written. A layout override can pin a
+  unit by its top U (`top_u`, exclusive with `position`); a pin that leaves
+  the rack or overlaps another is a layout error (ADR 0013 amended). Branch
+  MCB records name the unit and feed they serve.
 - A switch, patch panel, firewall or gateway can have or not have a cable
   manager (`cable_manager` on the equipment entry or panel row): the layout
   gives or drops its 1U manager and the BOM counts it accordingly; unset keeps

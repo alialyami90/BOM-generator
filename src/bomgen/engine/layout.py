@@ -788,18 +788,23 @@ def _size(loaded: LoadedSubstation) -> tuple[NetworkPlan, NetworkInputs, list[L1
     return size_network(net, l1, l2, busiest), net, candidates
 
 
+def runs(panel: PanelFill) -> list[list[Unit]]:
+    """The panel's units grouped as its generated rows: one run per row, in row order."""
+    result: list[list[Unit]] = []
+    for unit in sorted(panel.units, key=lambda x: (x.rank, x.side.value, x.n)):
+        last = result[-1][-1] if result else None
+        if last and (last.device, last.side, last.n + 1) == (unit.device, unit.side, unit.n):
+            result[-1].append(unit)
+        else:
+            result.append([unit])
+    return result
+
+
 def _rows(panel: PanelFill, loaded: LoadedSubstation) -> list[DeviceInstance]:
     devices = {d.part_id: d for d in loaded.library.devices}
     entries = {e.id: e for e in loaded.substation.equipment}
-    runs: list[list[Unit]] = []
-    for unit in sorted(panel.units, key=lambda x: (x.rank, x.side.value, x.n)):
-        last = runs[-1][-1] if runs else None
-        if last and (last.device, last.side, last.n + 1) == (unit.device, unit.side, unit.n):
-            runs[-1].append(unit)
-        else:
-            runs.append([unit])
     rows = []
-    for run in runs:
+    for run in runs(panel):
         first = run[0]
         entry = entries[first.device]
         start = first_number(devices[first.part_id]) + first.n - 1 if first.n > 1 else None
