@@ -106,3 +106,4 @@ def test_an_issue_about_an_equipment_row_can_go_to_that_row(tmp_path: Path, proj
 
     no_number = next(i for i in page["issues"] if i["kind"] == "part_number")
     assert no_number["device"] == "hwio"  # its subject is the equipment id
+    assert no_number["message"] == "I/O rack: no part number; the BOM prints the library model"
