@@ -162,3 +162,15 @@ def test_the_hager_mcb_sets_are_ac_only_and_give_hagers_codes(shipped: Library) 
         assert brand.dc_rating_v is None  # Hager's ordering pages give no DC rating
         assert brand.ratings_a == shipped.catalogues.mcb.ratings_a
         assert brand.code_for(16) == code
+
+
+def test_the_fortigate_401g_and_701g_list_their_5g_and_25g_ports(shipped: Library) -> None:
+    by_id = {d.part_id: d for d in shipped.devices}
+
+    for part_id in ("FG-401G", "FG-701G"):
+        part = by_id[part_id]
+        speeds = [(p.count, p.speed.value, p.kind.value) for p in part.ports]
+        assert (8, "5G", "fixed") in speeds, part_id
+        assert (1, "2.5G", "fixed") in speeds, part_id
+        assert (4, "25G", "sfp_slot") in speeds, part_id
+        assert (part.category, part.supply_type, part.unit_power_w) == ("firewall", "VAC", 295)

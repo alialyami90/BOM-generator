@@ -424,7 +424,7 @@ def test_the_app_ships_none_of_the_prototypes_illustrative_data() -> None:
         text = path.read_text(encoding="utf-8")
         assert not re.search(r"\bDB\.", text), path.name
         assert not re.search(r"\bEngine\.", text), path.name
-        assert "psa-devices 1.5.0" not in text, path.name
+        assert "psa-devices 1.6.0" not in text, path.name
 
 
 def test_without_its_bridge_the_app_says_so_instead_of_showing_example_pages() -> None:
