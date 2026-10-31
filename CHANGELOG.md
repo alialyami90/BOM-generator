@@ -13,7 +13,7 @@ project uses [Semantic Versioning](https://semver.org/).
   equipment". After a confirmation it writes the generated panel files as
   `bomgen layout --force` does, copying each file it replaces to
   `panels/hand-written-<date-time>/` first, and the board becomes draggable
-  (M19).
+  (M19, #238).
 
 ### Changed
 
