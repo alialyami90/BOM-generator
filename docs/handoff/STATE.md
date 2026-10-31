@@ -591,7 +591,9 @@ edited on the board (generated panels) and read-only for hand-written ones. Form
 (draft of changed fields, each checked by a `check_*` endpoint, one save bar, Ctrl+S, reset on route
 change; prefixes `po-` Overview, `st-` Settings, `p-` Parts, `rg-` register); Loose material and the
 device editor keep their own bars. Library pending set → Review and apply writes a new local version.
-Alternatives, and Use this instead, which holds the other part on Parts rows. Checks, Preview, Build, Backup and share, CSV,
+Alternatives, and Use this instead, which holds the other part on Parts rows. Device preview (M24)
+shows the engine's front views and device table and pins units by drag or Up/Down, through the
+board's `set_layout_overrides`; both views drag through `drag.js`. Checks, Preview, Build, Backup and share, CSV,
 project import, backup restore.
 
 ### Code map
@@ -599,7 +601,8 @@ project import, backup restore.
 - **Python** (`src/bomgen/app/`): `api.py` is the pywebview `js_api`; each public `Api` method is an
   endpoint returning `{"ok": true, "data": …}` or `{"ok": false, "error": {"kind", "message"}}`,
   reshaping engine results with no business rules. `projects.py` (Home, Project, Settings, `brands`),
-  `substations.py`, `parts.py` (Parts page rows), `network.py` (sizing result and board), `loose.py`, `library_edit.py` (device
+  `substations.py`, `parts.py` (Parts page rows), `device_preview.py` (Device preview, M24), `network.py`
+  (sizing result and board), `loose.py`, `library_edit.py` (device
   editor, pending set, `in_words`), `library_csv.py`, `output.py` (Checks and Build), `preview.py`,
   `editing.py` (edit replies `{written, issues, page}`, layout pre-checks), `catalogues.py`, `window.py`
   (the WebView2 window). Writers live in `bomgen.io.fields`: `set_field`, `remove_field`,

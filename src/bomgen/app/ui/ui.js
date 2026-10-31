@@ -120,6 +120,7 @@
   function renderNav() {
     const r = route().a, np = hasProject(), p = curProject();
     const ns = hasSub();
+    const noParts = () => { const sp = App.sub && App.sub.peek(); return !!sp && !!sp.equipment && !sp.equipment.length; };  // Device preview waits for the first parts
     const v = ns && S.verify && S.verify.key === `${S.project.file}#${S.sub}` ? S.verify : null;  // the last checks of the open substation
     const buildTail = v ? (v.errors ? `${icon('error')}Blocked` : `${icon('check')}Ready`) : '';
     const checksTail = v ? (v.errors ? `${icon('error')}${v.errors} ${v.errors === 1 ? 'error' : 'errors'}` : v.failed ? `${icon('error')}Failed` : `${icon('check')}Clear`) : '';
@@ -134,6 +135,7 @@
       <div class="nav-group">Substation</div>${switcher}
       ${navItem('#/settings', 'file', 'Settings', '', 'ok', !ns, r === 'settings')}
       ${navItem('#/parts', 'parts', 'Parts', '', 'ok', !ns, r === 'parts')}
+      ${navItem('#/device-preview', 'elevation', 'Device preview', '', '', !ns || noParts(), r === 'device-preview')}
       ${navItem('#/panels', 'panels', 'Panels', ns ? esc(curSub().panels) : '', '', !ns, r === 'panels')}
       ${navItem('#/loose', 'pkg', 'Loose material', App.looseCount && App.looseCount() != null ? String(App.looseCount()) : '', '', !ns, r === 'loose')}
       <div class="nav-group">Verify and issue</div>
@@ -157,8 +159,8 @@
     const { a } = route();
     if (a === 'network') { location.replace('#/parts'); return; }  // Network became Parts (M23)
     if (S.backend === 'no') { $('#main').innerHTML = noBackend(); document.title = 'BOM Generator'; return; }
-    const key = ({ home: 'home', project: 'project', settings: 'settings', parts: 'parts', panels: 'panels', loose: 'loose', library: 'library', checks: 'checks', preview: 'preview', build: 'build' })[a] || 'home';
-    const needsProject = key === 'project', needsSub = ['settings', 'parts', 'panels', 'loose', 'checks', 'preview', 'build'].includes(key);
+    const key = ({ home: 'home', project: 'project', settings: 'settings', parts: 'parts', 'device-preview': 'device-preview', panels: 'panels', loose: 'loose', library: 'library', checks: 'checks', preview: 'preview', build: 'build' })[a] || 'home';
+    const needsProject = key === 'project', needsSub = ['settings', 'parts', 'device-preview', 'panels', 'loose', 'checks', 'preview', 'build'].includes(key);
     const m = $('#main');
     m.innerHTML = (needsProject && !hasProject()) || (needsSub && !hasSub()) ? SCREENS.home() : SCREENS[key]();
     if (SCREENS[key + 'After']) SCREENS[key + 'After']();
@@ -204,7 +206,7 @@
 
   ACTIONS.tab = (el) => { S.tab[el.dataset.group] = el.dataset.value; if (el.dataset.group === 'project') history.replaceState(null, '', '#/project/' + el.dataset.value); if (el.dataset.group === 'settings') history.replaceState(null, '', '#/settings/' + el.dataset.value); if (el.dataset.group === 'panel') history.replaceState(null, '', '#/panels/' + route().b + '/' + el.dataset.value); const keep = $('#main').scrollTop; renderMain(); $('#main').scrollTop = keep; const nt = document.getElementById(el.id); nt && nt.focus(); };
   ACTIONS.goto = (el) => go(el.dataset.to);
-  ACTIONS['sub-switch'] = (el) => { S.sub = el.value || null; S.dirty = false; const { a } = route(); go(['settings', 'parts', 'panels', 'loose', 'checks', 'preview', 'build'].includes(a) ? '#/' + a : '#/panels'); };
+  ACTIONS['sub-switch'] = (el) => { S.sub = el.value || null; S.dirty = false; const { a } = route(); go(['settings', 'parts', 'device-preview', 'panels', 'loose', 'checks', 'preview', 'build'].includes(a) ? '#/' + a : '#/panels'); };
   ACTIONS.theme = () => { S.theme = { light: 'dark', dark: 'system', system: 'light' }[S.theme]; render(); toast(`Theme: ${S.theme}`, 'info'); };
   ACTIONS.help = () => dialog({ title: 'Help', body: '<p>The user guide is not written yet.</p>', actions: '<button class="btn btn--primary" data-action="close">Close</button>' });
   ACTIONS.close = () => closeDialog();

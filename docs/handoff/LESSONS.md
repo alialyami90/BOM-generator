@@ -498,3 +498,9 @@ The rules are in ADR 0013 and the design spec (R1–R10).
   the next block mapping came out on one line. `_PaddedEmitter` resets `no_newline` on "{" (M23).
 - `test_every_endpoint_the_screens_call_exists` needs a literal endpoint name in every `Bridge.call`;
   a helper that passes the name in a variable fails it.
+- Raising `rack_u_reserved` adds panels; it does not overflow one. To show "Not placed", hand-write
+  moves (`- { device: rtac, panel: 1 }`) into a panel with little room left.
+- Re-renders after an async load drop focus. To land focus on a row after navigation, put it back
+  for a short while after landing (Parts `goRow`).
+- In a shell, `pkill -f "serve.py 8765"` also matches the shell running it. Kill the server by
+  reading `/proc/*/cmdline` instead.
