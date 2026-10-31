@@ -24,7 +24,7 @@ from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.errors import LibraryPackageError
 from bomgen.library_store.store import LibraryRef, LibraryStore, library_mismatch
 from bomgen.models.library import DEFAULT_BRAND, CatalogueBrands, Library
-from bomgen.models.project import Project
+from bomgen.models.project import LayoutDefaults, Project
 
 RECENT_FILE = "recent-projects.json"
 MAX_RECENT = 50
@@ -154,13 +154,22 @@ def _substations(
         ]
     if project is None:
         return []
+
+    def name_in(file: Path) -> str:  # the name as written, so a file that does not load keeps it
+        with contextlib.suppress(InputError):
+            data = read_yaml(file).data
+            name = data.get("substation", {}).get("name") if isinstance(data, dict) else None
+            if isinstance(name, str) and name:
+                return name
+        return file.parent.name
+
     rows = []
     for path in project.substations:
         file = project_file.parent / path
         rows.append(
             {
                 "id": file.parent.name,
-                "name": file.parent.name,
+                "name": name_in(file),
                 "file": file,
                 "panels": None,
                 "changed": _changed(file),
@@ -240,6 +249,21 @@ def register(
     ]
 
 
+def layout_assumed(project_file: Path) -> dict[str, str]:
+    """The layout heights still assumed: not in the file, so the model's ``ASSUMED`` default
+    applies ("default"), or written with an ``ASSUMED`` mark ("marked")."""
+    data = read_yaml(project_file).data
+    defaults = data.get("defaults") if isinstance(data, dict) else None
+    written = (defaults or {}).get("layout") if isinstance(defaults, dict) else None
+    written = written if isinstance(written, dict) else {}
+    marked = {loc[2] for loc in assumed_fields(project_file) if loc[:2] == ("defaults", "layout")}
+    return {
+        key: "marked" if key in marked else "default"
+        for key in LayoutDefaults.model_fields
+        if key not in written or key in marked
+    }
+
+
 def summarize(project_file: Path, store: LibraryStore, *, details: bool = False) -> dict[str, Any]:
     """One project as Home lists it; with ``details`` also what the Project page shows."""
     loaded, issues = load_with_issues(project_file, store)
@@ -272,6 +296,7 @@ def summarize(project_file: Path, store: LibraryStore, *, details: bool = False)
             "defaults": project.defaults if project else None,
             "documents": project.documents if project else [],
             "register": register(project_file, project, loaded) if project else [],
+            "layout_assumed": layout_assumed(project_file) if project else {},
             "problems": issues,
         }
     return summary

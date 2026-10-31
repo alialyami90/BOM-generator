@@ -155,7 +155,7 @@
         draft.rows.forEach((x) => { if (x.orig != null && x.orig >= i) x.orig += 1; });
         r.orig = i; r.base = { ...r.item };
       }))));
-    steps.push(() => (draft.host === LM.data.host_panel || LM.data.host_panel == null ? null : step((f, s) => Bridge.call('set_loose_host_panel', f, s, draft.host), () => {})));
+    steps.push(() => (draft.host == null || draft.host === LM.data.host_panel || LM.data.host_panel == null ? null : step((f, s) => Bridge.call('set_loose_host_panel', f, s, draft.host), () => {})));
     return steps;
   }
   function save() {  // resolves true once everything is written

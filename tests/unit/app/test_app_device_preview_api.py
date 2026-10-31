@@ -124,3 +124,22 @@ def test_an_ac_unit_shows_its_ac_branch_mcb(tmp_path: Path, project: Path) -> No
     assert gw["supply"] == "230 VAC"
     assert gw["ps1"]["tag"].startswith("PSA1-C")
     assert gw["ps2"] is None
+
+
+def test_the_page_counts_the_panel_files_so_no_panels_is_not_called_hand_written(
+    tmp_path: Path, project: Path
+) -> None:
+    """Audit 2026-10-31 APP-15: with no panel files the screen offers to lay them out."""
+    store = LibraryStore(tmp_path / "libraries")
+    assert device_preview_page(project, "gis01", store)["panel_files"] == 4
+
+    file = project.parent / "substations" / "gis01" / "substation.yaml"
+    text = file.read_text("utf-8")
+    start, end = text.index("panels:  #"), text.index("output:  #")
+    text = text[:start] + text[end:]
+    file.write_text(text[: text.index("\nloose_material:") + 1], "utf-8")  # it is hosted on ws
+
+    page = device_preview_page(project, "gis01", store)
+    assert page["panel_files"] == 0
+    assert page["generated"] is False
+    assert page["panels"]  # what the layout would place

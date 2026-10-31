@@ -13,7 +13,8 @@
   const CHECKS = {
     sfp_slots: 'SFPs fit the port plans', dc_main: 'Main MCB covers the feed current', airflow: 'Fans cover the heat load',
     line_up: 'Line-up airflow', natural_convection: 'Natural convection', di_capacity: 'Digital inputs cover the hardwired points',
-    library_version: 'Library version'
+    library_version: 'Library version', branch_mcb: 'Branch MCB covers the device', dc_float: 'Rated for the battery float voltage',
+    part_number: 'Part number on the BOM'
   };
   const STATUS = { pass: ['ok', 'Pass', 'check'], warn: ['warn', 'Flag', 'warn'], fail: ['bad', 'Fail', 'error'] };
   const status = (s) => badge(...STATUS[s]);
@@ -130,7 +131,7 @@
       <p class="mono small path-line">${breakable(r.path)}</p>
       <div class="stack" style="margin-top:var(--space-4)"><h3>Check report</h3>
         <p class="muted small">${plural(r.checks.items.length, 'check')}: ${r.checks.items.length - notPass.length} pass${notPass.length ? `, ${notPass.length} to read` : ''}. Saved next to the workbook as <span class="mono">.checks.json</span>.</p>
-        ${notPass.length ? `<ul class="checklist">${notPass.slice(0, 6).map((i) => `<li class="${i.status === 'fail' ? 'bad' : ''}">${icon(i.status === 'fail' ? 'error' : 'warn')}<span>${esc(CHECKS[i.check] || i.check)}${i.panel_id ? ` · <span class="mono">${esc(i.panel_id)}</span>` : ''}: ${esc(i.message)}</span></li>`).join('')}</ul>${notPass.length > 6 ? '<a href="#/checks">All of them under Checks</a>' : ''}` : ''}</div>`;
+        ${notPass.length ? `<ul class="checklist">${notPass.slice(0, 6).map((i) => `<li class="${i.status === 'fail' ? 'bad' : ''}">${icon(i.status === 'fail' ? 'error' : 'warn')}<span>${esc(CHECKS[i.check] || i.check)}${i.subject ? ` · ${esc(i.subject)}` : ''}${i.panel_id ? ` · <span class="mono">${esc(i.panel_id)}</span>` : ''}: ${esc(i.message)}</span></li>`).join('')}</ul>${notPass.length > 6 ? '<a href="#/checks">All of them under Checks</a>' : ''}` : ''}</div>`;
   }
   const keep = () => { const n = $('#b-name'), d = $('#b-dir'); if (n) B.name = n.value.trim(); if (d) B.folder = d.value.trim(); };
   function build(replace = false) {
