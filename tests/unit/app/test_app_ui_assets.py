@@ -1,6 +1,9 @@
 """The desktop app's UI files: complete, offline and in step with the M9 design (ADR 0011, 0015)."""
 
+import json
 import re
+import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -692,3 +695,136 @@ def test_project_overview_edits_the_layout_heights_and_marks_them_assumed() -> N
     assert "['defaults', 'layout', 'rack_start_mm']" in js
     assert "p.layoutAssumed" in js
     assert 'data-action="po-confirm"' in js
+
+
+def _where_to_fix(problems: list[dict[str, object]]) -> list[dict[str, object]]:
+    """Runs ui.js's whereToFix on each problem in node, with generated panel n named psa<n>."""
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("node is not installed")
+    js = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    source = js[js.index("  const SETTINGS_TAB") : js.index("  /* A banner's buttons")]
+    script = (
+        "const App = { generatedPanelId: (n) => 'psa' + n };\n"
+        f"{source}\nconsole.log(JSON.stringify({json.dumps(problems)}.map(whereToFix)));"
+    )
+    run = subprocess.run([node, "-e", script], capture_output=True, text=True, check=True)
+    return json.loads(run.stdout)  # type: ignore[no-any-return]
+
+
+def test_where_to_fix_leads_each_located_problem_to_its_page() -> None:
+    """APP-7: one action per problem, labelled with where it goes (the M32 design brief)."""
+    sub = "C:\\work\\gis01\\substation.yaml"
+    cases: list[tuple[dict[str, object], str, str, str | None]] = [
+        (
+            {"file": sub, "location": "equipment[4].part_id"},
+            "Go to the row",
+            "#/parts",
+            "p-e.4.part_id",
+        ),
+        (
+            {"file": sub, "location": "network.ied_count"},
+            "Go to the field",
+            "#/parts",
+            "p-n.ied_count",
+        ),
+        (
+            {"file": sub, "location": "spares.port_fraction"},
+            "Go to the field",
+            "#/parts",
+            "p-s.port_fraction",
+        ),
+        (
+            {"file": sub, "location": "generated_panels.options_by_panel[2].aux_socket_a"},
+            "Open the panel",
+            "#/panels/psa2/options",
+            "pe-o.2.aux_socket_a",
+        ),
+        (
+            {"file": sub, "location": "generated_panels.enclosure.h_mm"},
+            "Open the panel",
+            "#/panels/psa1/enclosure",
+            "pe-e.h_mm",
+        ),
+        (
+            {"file": sub, "location": "generated_panels.document"},
+            "Open the panel",
+            "#/panels/psa1/document",
+            "pe-doc",
+        ),
+        (
+            {"file": "/w/gis01/panels/ws.yaml", "location": "devices[0].part_id"},
+            "Open the panel",
+            "#/panels/ws/devices",
+            None,
+        ),
+        ({"file": sub, "location": "layout.overrides[0]"}, "Open the board", "#/panels", None),
+        (
+            {"file": sub, "location": "loose_material.items[0].fed_from"},
+            "Open loose material",
+            "#/loose",
+            None,
+        ),
+        (
+            {"file": sub, "location": "constants.t_max_c"},
+            "Go to the field",
+            "#/settings/constants",
+            "st-c_t_max_c",
+        ),
+        (
+            {"file": sub, "location": "output.file_name"},
+            "Go to the field",
+            "#/settings/output",
+            "st-file_name",
+        ),
+        ({"file": sub, "location": "equipment"}, "Open Parts", "#/parts", None),
+        (
+            {"file": sub, "location": "something_else", "line": 9},
+            "Show the line",
+            "#/settings/yaml",
+            None,
+        ),
+        ({"file": "/w/project.yaml", "location": "library"}, "Open the project", "#/project", None),
+    ]
+    got = _where_to_fix([case[0] for case in cases])
+    for (problem, label, hash_, focus), fix in zip(cases, got, strict=True):
+        assert (fix["label"], fix["hash"]) == (label, hash_), problem
+        assert fix["focus"] == (f'[id="{focus}"]' if focus else None), problem
+
+
+def test_checks_panels_and_device_preview_use_where_to_fix() -> None:
+    """APP-7: Checks' action, and the banner when Panels or Device preview cannot show."""
+    verify = (UI_DIR / "screens-verify.js").read_text(encoding="utf-8")
+    assert "App.whereToFix(p).label" in verify
+    assert "App.fix(cache.checks.data.problems[+el.dataset.i])" in verify
+    for name in ("screens-panels.js", "screens-device-preview.js"):
+        assert "App.fixButtons(d.problems)" in (UI_DIR / name).read_text(encoding="utf-8")
+
+
+def test_panels_header_has_undo_and_reset_and_rows_open_the_editor() -> None:
+    """APP-4 and APP-3: Undo and Reset to automatic stay in the header, disabled with
+    nothing to do; list rows and board columns open the panel editor."""
+    panels = (UI_DIR / "screens-panels.js").read_text(encoding="utf-8")
+    head = panels[panels.index("function headActions(d)") : panels.index("function board(d)")]
+    assert 'data-action="pv-undo"' in head
+    assert "history.length && !busy ? '' : 'disabled'" in head
+    assert 'data-action="pv-reset"' in head
+    assert 'href="#/panels/${esc(p.id)}"' in panels
+    assert "if (b) return App.panelEditor(b);" in panels
+    assert "The panel editor comes with the substation writers." not in panels
+
+
+def test_the_panel_editor_writes_generated_panels_through_the_save_bar() -> None:
+    """APP-3: enclosure, document, options (all or one panel) and port plans are drafted and
+    saved to substation.yaml; Devices and YAML stay read-only."""
+    editor = (UI_DIR / "screens-panel-editor.js").read_text(encoding="utf-8")
+    assert "App.draftForm({" in editor
+    assert "['generated_panels', 'enclosure', ...f.split('.')]" in editor
+    assert "['generated_panels', 'options_by_panel', Number(a), r[0]]" in editor
+    assert "['equipment', Number(a), 'port_plan', r[0], Number(r[1]), r[2]]" in editor
+    assert "Bridge.call('set_port_plan'" in editor
+    assert "Bridge.call('panel_page'" in editor
+    assert "Use the shared value" in editor
+    assert "Show on Device preview" in editor
+    index = (UI_DIR / "index.html").read_text(encoding="utf-8")
+    assert index.index('src="screens-panels.js"') < index.index('src="screens-panel-editor.js"')

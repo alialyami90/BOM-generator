@@ -2,7 +2,7 @@
    Checks lists the loader's located problems, then the engine's check report. Build writes the workbook
    the way `bomgen build` does. */
 (function () {
-  const { esc, S, ACTIONS, SCREENS, badge, banner, field, input, pageHead, dialog, closeDialog, toast, go, $ } = App;
+  const { esc, S, ACTIONS, SCREENS, badge, banner, field, input, pageHead, dialog, closeDialog, toast, $ } = App;
   const real = () => S.backend === 'yes' && S.project && S.project.real && S.sub;
   const plural = (n, one) => `${n} ${one}${n === 1 ? '' : 's'}`;
   const editable = (html) => html.replace('data-dirty="1"', 'data-dirty="0"');
@@ -64,11 +64,11 @@
       ${head}
       <div class="toolbar" style="margin-top:var(--space-5)"><h2 style="margin-right:var(--space-3)">Problems</h2>
         ${problems.length < 2 ? '' : [['all', `All ${problems.length}`], ['errors', `Errors ${errors}`], ['warnings', `Warnings ${warnings}`]].map(([k, t]) => `<button class="chip" aria-pressed="${level === k}" data-action="checks-level" data-v="${k}">${t}</button>`).join('')}</div>
-      ${!problems.length ? '<p class="muted">The input files load without problems.</p>' : `<div class="table-wrap"><table class="table"><thead><tr><th style="width:100px">Level</th><th>Where</th><th>What is wrong</th><th style="width:110px"><span class="sr-only">Action</span></th></tr></thead><tbody>
+      ${!problems.length ? '<p class="muted">The input files load without problems.</p>' : `<div class="table-wrap"><table class="table"><thead><tr><th style="width:100px">Level</th><th>Where</th><th>What is wrong</th><th style="width:170px"><span class="sr-only">Action</span></th></tr></thead><tbody>
         ${shown.map((p) => `<tr><td style="vertical-align:top;padding-top:8px">${p.level === 'error' ? badge('bad', 'Error', 'error') : badge('warn', 'Warning', 'warn')}</td>
           <td class="wrap" style="vertical-align:top"><span class="mono small">${esc(tail(p.file))}${p.line ? ':' + p.line : ''}</span>${p.location ? `<span class="cell-sub mono">${esc(p.location)}</span>` : ''}</td>
           <td class="wrap" style="vertical-align:top">${esc(p.message)}</td>
-          <td style="vertical-align:top;padding-top:5px"><button class="btn btn--secondary btn--sm" data-action="checks-goto" data-i="${problems.indexOf(p)}">${/substation\.yaml$/.test(p.file) ? 'Show the line' : 'Open'}</button></td></tr>`).join('')
+          <td style="vertical-align:top;padding-top:5px"><button class="btn btn--secondary btn--sm" data-action="checks-goto" data-i="${problems.indexOf(p)}">${esc(App.whereToFix(p).label)}</button></td></tr>`).join('')
           || '<tr class="empty-row"><td colspan="4">Nothing to show with this filter.</td></tr>'}</tbody></table></div>`}
       <div class="toolbar" style="margin-top:var(--space-6)"><h2>Engine checks</h2></div>
       ${engine.run ? engineTable(engine.items) : `<p class="muted">${esc(engine.reason)} Then run the checks again.</p>`}</div>`;
@@ -85,8 +85,7 @@
   ACTIONS['checks-level'] = (el) => { level = el.dataset.v; App.render(); };
   ACTIONS['checks-rerun'] = () => { running = true; reload('checks'); reload('target'); App.render(); };
   ACTIONS['checks-goto'] = (el) => {
-    const p = cache.checks.data.problems[+el.dataset.i];
-    if (/substation\.yaml$/.test(p.file)) { S.tab.settings = 'yaml'; go('#/settings/yaml'); } else go('#/project');
+    App.fix(cache.checks.data.problems[+el.dataset.i]);
   };
 
   /* ---------- Build ---------- */

@@ -194,7 +194,10 @@ def load_project(project_file: Path, *, store: LibraryStore | None = None) -> Lo
             source,
             panel_sources[source.path],
             library,
-            library_file.name,
+            # the file a project names, else the installed library by name and version
+            library_file.name
+            if project.library.file is not None
+            else f"{project.library.name} {project.library.version}",
             issues,
         )
         if result is not None:

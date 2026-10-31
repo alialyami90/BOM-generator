@@ -29,6 +29,18 @@ project uses [Semantic Versioning](https://semver.org/).
 - Device preview on a substation with no panel files offers "Lay out panels"
   (APP-15). The project Overview edits the waist height and rack start, each
   marked Assumed with Confirm until it is written (APP-19).
+- The panel editor for generated panels (M32a; APP-3, APP-4). Each panel opens
+  from the Panels list or its board column, with Enclosure, Options (for every
+  generated panel or this one only, with Own value and "Use the shared
+  value"), Port plans (the device's own, with the engine's SFPs and cables
+  under each; the L1 and L2 switch plans are read-only) and Document, saved to
+  `substation.yaml` through the save bar. Devices lists each unit with its
+  origin and "Show on Device preview"; YAML is read-only. The Panels header
+  has Undo and Reset to automatic. A located problem now opens where it is
+  fixed: Checks, and Panels and Device preview when they cannot show, say
+  "Go to the row", "Go to the field", "Open the panel" and so on (APP-7), and
+  an unknown part names the installed library by name and version instead of
+  `library.yaml`.
 
 ### Changed
 
