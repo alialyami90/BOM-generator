@@ -19,8 +19,8 @@ from bomgen.models.report import CheckReport, CheckStatus
 REPO = Path(__file__).resolve().parents[3]
 SHIPPED = REPO / "data" / "library" / "psa-devices.yaml"
 SEL_LOADS = {
-    ("psa1", "DHPCC_GW_1"),  # SEL-3555-GW
-    ("psa2", "DHPCC_GW_2"),
+    ("psa1", "GW_1"),  # SEL-3555-GW, with the shipped library's neutral tag
+    ("psa2", "GW_2"),
     ("psa3", "RTAC"),  # SEL-3555-RTAC
     ("ws", "SRV/OAS/EAS"),  # SEL-3355
 }

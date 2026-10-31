@@ -1151,7 +1151,8 @@ SK 3243.100 fan's free-blowing 60 Hz figure. *Resolved 2026-10-28:* Ali: the exa
 and golden values stay as the issued workbook. Future library default: SK 3110
 thermostat 0 W; SK 3243.100 fan 460 m³/h with the SK 3243.200 outlet filter (60 Hz),
 so the per-fan airflow changes from 358. Applied when the library defaults are next
-revised, not to the example.
+revised, not to the example. *Applied 2026-10-31* in the shipped library, psa-devices 1.9.0
+(overrides in `data/library/additions.yaml`).
 
 **Q30 — Where a device's loose items go in the loose-material table.** *Resolved 2026-10-28:* Ali chose
 "Keep all the defaults": the default below stands. The workbook
