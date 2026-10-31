@@ -26,6 +26,8 @@ from bomgen.engine.layout import (
     waist_u,
     with_layout,
 )
+from bomgen.engine.network import accessories
+from bomgen.engine.units import expand_devices
 from bomgen.io.derived import derive_parts
 from bomgen.io.loader import LoadedSubstation, load_substation
 from bomgen.models.library import Category, PurdueLevel
@@ -740,3 +742,38 @@ def test_waist_height_error_reaches_the_layout_report(example: LoadedSubstation)
     short = replace(example, library=library, substation=substation, spares=spares)
     kinds = [i.kind for i in layout_preview(short).report.issues]
     assert "waist-height" in kinds
+
+
+def test_a_switch_without_a_cable_manager_takes_no_manager_u(example: LoadedSubstation) -> None:
+    result = layout_preview(with_entry(example, "l2", cable_manager=False))
+    l2 = [x for f in result.fills for x in f.units if x.device == "l2"]
+    assert {x.cable_manager_u for x in l2} == {0}
+    l2_rows = [d for p in result.panels for d in p.devices if d.part_id == "RST2228-L2"]
+    assert {d.cable_manager for d in l2_rows} == {False}
+
+
+def test_a_gateway_with_a_cable_manager_takes_a_manager_u(example: LoadedSubstation) -> None:
+    result = layout_preview(with_entry(example, "gw", cable_manager=True))
+    gw = [x for f in result.fills for x in f.units if x.device == "gw"]
+    assert {x.cable_manager_u for x in gw} == {1}
+
+
+def test_generated_rows_say_whether_a_network_device_has_a_cable_manager(
+    example: LoadedSubstation,
+) -> None:
+    rows = {d.part_id: d.cable_manager for d in layout_preview(example).panels[0].devices}
+    assert (rows["RST2228-L2"], rows["FGR-60F"], rows["SEL-3555-GW"]) == (True, False, False)
+    assert rows["SEL-2240"] is None  # not a network device
+
+
+def test_r5_a_rack_firewall_in_a_generated_panel_counts_its_cable_manager(
+    example: LoadedSubstation,
+) -> None:
+    result = layout_preview(with_entry(example, "ext-fw", overrides={"height_u": 1}))
+    panel = result.panels[0]
+    fw = next(d for d in panel.devices if d.part_id == "FGR-60F+ext-fw")
+    assert fw.cable_manager is True
+    library = with_entry(example, "ext-fw", overrides={"height_u": 1}).library
+    rows = expand_devices(panel, library)
+    (manager,) = [i for i in accessories(panel, rows, library) if i.line.tag == "Cable Manager"]
+    assert manager.line.qty == 7  # FOPP, L2, 3 x L1, EXT switch and now the firewall

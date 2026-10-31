@@ -381,6 +381,18 @@
       "additionalProperties": false,
       "description": "A device the substation needs, before any panel exists (ADR 0013).",
       "properties": {
+        "cable_manager": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cable Manager"
+        },
         "hwio_points": {
           "anyOf": [
             {

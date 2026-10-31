@@ -25,6 +25,12 @@ from bomgen.models.panel import Panel, PanelMirror
 from bomgen.models.project import Project, RegisterEntry
 from bomgen.models.substation import Equipment, EquipmentRole, PairMove, Substation, UnitRef
 
+# The parts a cable_manager choice may switch on or off (ADR 0013, amended)
+NETWORK_DEVICES = frozenset(
+    {Category.NETWORK_SWITCH, Category.PATCH_PANEL, Category.FIREWALL, Category.GATEWAY}
+)
+NO_CABLE_MANAGER = "only network devices have a cable manager"
+
 
 def _issue(source: YamlSource, loc: Loc, message: str) -> Issue:
     return Issue(source.path, format_location(loc), message, source.line_for(loc))
@@ -149,6 +155,11 @@ def panel_issues(
         if device.part_id not in known_parts:
             loc = ("devices", index, "part_id")
             issues.append(_unknown_part(source, loc, device.part_id, library_name))
+        elif device.cable_manager is not None:
+            part = library.get(device.part_id)
+            if part is not None and part.category not in NETWORK_DEVICES:
+                loc = ("devices", index, "cable_manager")
+                issues.append(_issue(source, loc, NO_CABLE_MANAGER))
     keys = {device.part_id for device in panel.devices}
     keys |= {device.tag for device in panel.devices if device.tag is not None}
     for key in panel.port_plans:
@@ -309,6 +320,8 @@ def equipment_issues(
         if device.height_u is None:
             message = f"height_u is needed for the panel layout ('{item.part_id}' has none)"
             issues.append(_issue(source, loc, message))
+        if item.cable_manager is not None and device.category not in NETWORK_DEVICES:
+            issues.append(_issue(source, ("equipment", index, "cable_manager"), NO_CABLE_MANAGER))
         switch_roles = (EquipmentRole.L1_SWITCH, EquipmentRole.L2_SWITCH)
         if item.role in switch_roles and device.category is not Category.NETWORK_SWITCH:
             message = f"an {item.role.value} must be a network_switch part, not {device.category}"
