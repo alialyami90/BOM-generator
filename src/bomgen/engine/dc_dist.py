@@ -13,7 +13,7 @@ from bomgen.engine.mcb import (
     mcb_line,
     rating_at_least,
 )
-from bomgen.engine.tags import without_prefix
+from bomgen.engine.tags import short_tag
 from bomgen.engine.units import DeviceRow, lookup
 from bomgen.models.bom import BomLine, Group
 from bomgen.models.calc import BranchCondition, BranchMcb, BranchSizing
@@ -150,7 +150,7 @@ def dc_distribution(
             continue
         sizing = branch_sizing(row.device, library, constants)
         for unit_tag in row.unit_tags:
-            name = _unit_name(unit_tag, row.device, panel.tag_prefix)
+            name = short_tag(unit_tag, row.device, panel.tag_prefix)
             alarm = row.device.alarm_on_branch_mcb
             branches.append(_Branch(name, sizing.rating_a, alarm, sizing, unit_tag))
     if not branches and not fed:
@@ -205,10 +205,3 @@ def dc_distribution(
         rule_main_a=rule_main_a,
         branch_mcbs=sized,
     )
-
-
-def _unit_name(unit_tag: str | None, device: DeviceType, prefix: str) -> str:
-    """The load as named inside MCB descriptions: no panel prefix, underscores."""
-    if unit_tag is None:
-        return device.model or device.part_id
-    return without_prefix(unit_tag, prefix).replace("-", "_")
