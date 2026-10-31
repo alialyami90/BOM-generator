@@ -62,6 +62,9 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
    print scale) and "It overlaps". See section 14 for what each answer means.
 4. **Q23** (issued sheets vs masters): keep the default (the masters) until he answers.
 
+**Next work:** the part-picking milestones M19–M24 (Q42–Q50), designed in
+[`part-picking-design`](../superpowers/specs/2026-10-31-part-picking-design.md).
+
 ## 4. When Ali's feedback arrives
 
 Write it into `docs/backlog.md` as numbered points (as for v0.2), propose milestones in `docs/plan.md`
