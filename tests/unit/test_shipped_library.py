@@ -14,7 +14,7 @@ import yaml
 
 from bomgen.build import build_substation
 from bomgen.io.loader import load_library, load_substation
-from bomgen.models.library import DeviceType, Library
+from bomgen.models.library import DeviceType, Library, McbBrand
 
 REPO = Path(__file__).resolve().parents[2]
 SHIPPED = REPO / "data" / "library" / "psa-devices.yaml"
@@ -60,7 +60,8 @@ def test_the_shipped_library_is_the_example_plus_the_originals_datasheet_figures
 
     assert [d.part_id for d in originals] == [d.part_id for d in example.devices]
     assert shipped.catalogues == example.catalogues
-    assert shipped.catalogue_brands == example.catalogue_brands
+    brands = shipped.catalogue_brands.model_dump(exclude={"mcb"})  # mcb: the next tests
+    assert brands == example.catalogue_brands.model_dump(exclude={"mcb"})
     for ours, theirs in zip(originals, example.devices, strict=True):
         assert ours.model_dump(exclude=keys) == theirs.model_dump(exclude=keys), ours.part_id
         if ours.tier is not None:
@@ -140,3 +141,24 @@ def test_the_c60h_dc_brand_is_dc_only_in_both_libraries(shipped: Library) -> Non
         brand = next(b for b in library.catalogue_brands.mcb if b.id == "schneider-c60h-dc")
         assert brand.ac_rated is False
         assert all(b.ac_rated for b in library.catalogue_brands.mcb if b is not brand)
+
+
+def test_the_shipped_mcb_brand_sets_are_the_examples_then_the_additions(shipped: Library) -> None:
+    example = load_library(EXAMPLE).catalogue_brands.mcb
+    additions = yaml.safe_load(ADDITIONS.read_text(encoding="utf-8"))["catalogue_brands"]["mcb"]
+
+    assert shipped.catalogue_brands.mcb[: len(example)] == example
+    added = shipped.catalogue_brands.mcb[len(example) :]
+    assert added == [McbBrand.model_validate(entry) for entry in additions]
+
+
+def test_the_hager_mcb_sets_are_ac_only_and_give_hagers_codes(shipped: Library) -> None:
+    sets = {b.id: b for b in shipped.catalogue_brands.mcb}
+
+    for brand_id, code in (("hager-mcn-2p", "MCN216"), ("hager-ncn-2p", "NCN216A")):
+        brand = sets[brand_id]
+        assert brand.make == "Hager"
+        assert brand.ac_rated
+        assert brand.dc_rating_v is None  # Hager's ordering pages give no DC rating
+        assert brand.ratings_a == shipped.catalogues.mcb.ratings_a
+        assert brand.code_for(16) == code
