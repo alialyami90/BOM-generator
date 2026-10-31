@@ -23,13 +23,21 @@ from bomgen.engine.layout import (
     reconcile_panels_list,
     render_panel_yaml,
     used_u,
+    waist_u,
     with_layout,
 )
 from bomgen.io.derived import derive_parts
 from bomgen.io.loader import LoadedSubstation, load_substation
 from bomgen.models.library import Category, PurdueLevel
 from bomgen.models.panel import Panel, PortAllocation
-from bomgen.models.substation import DeviceMove, EquipmentRole, PairMove, Side, UnitRef
+from bomgen.models.project import LayoutDefaults
+from bomgen.models.substation import (
+    DeviceMove,
+    EquipmentRole,
+    PairMove,
+    Side,
+    UnitRef,
+)
 from bomgen.models.substation import Layout as LayoutInputs
 
 RULES = LayoutRules(capacity_u=32, blank_plate_u=1)
@@ -639,3 +647,59 @@ def test_units_carry_priority_and_waist_from_the_category(example: LoadedSubstat
     units = {x.device: x for f in layout_preview(example).fills for x in f.units}
     assert (units["gps"].priority, units["rtac"].priority, units["l2"].priority) == (1, 4, 2)
     assert not any(x.waist for x in units.values())
+
+
+WAIST_RULES = LayoutRules(capacity_u=32, blank_plate_u=1, waist_u=18)
+
+
+def kvm(rank: int, device: str = "kvm", h: int = 1) -> Unit:
+    return replace(u(device, 1, NONE, h=h, rank=rank), waist=True)
+
+
+def tops(panel: PanelFill, rules: LayoutRules = WAIST_RULES) -> dict[str, int] | None:
+    placed = panel.place(rules)
+    return None if placed is None else {x.device: top for x, top in placed.items()}
+
+
+def test_waist_u_from_the_project_heights() -> None:
+    assert waist_u(LayoutDefaults()) == 18
+    assert waist_u(LayoutDefaults(waist_height_mm=1100, rack_start_mm=100)) == 22
+
+
+def test_units_stack_from_the_top_without_a_kvm() -> None:
+    panel = PanelFill(1, [u("a", 1, NONE, rank=0), u("b", 1, NONE, h=2, rank=1)])
+    assert tops(panel) == {"a": 32, "b": 30}
+
+
+def test_kvm_bottom_sits_at_waist_height() -> None:
+    panel = PanelFill(1, [replace(u("sw", 1, NONE, h=2, rank=0), priority=2), kvm(rank=1)])
+    assert tops(panel) == {"sw": 32, "kvm": 18}
+    assert panel.top_u(panel.units[1], WAIST_RULES) == 18
+
+
+def test_units_that_do_not_fit_above_the_kvm_go_below_it() -> None:
+    panel = PanelFill(1, [*(u(f"d{i:02}", 1, NONE, rank=i) for i in range(13)), kvm(rank=13)])
+    assert tops(panel) == {
+        **{f"d{i:02}": 32 - 2 * i for i in range(7)},
+        "kvm": 18,
+        **{f"d{i:02}": 16 - 2 * (i - 7) for i in range(7, 13)},
+    }
+
+
+def test_a_console_stacks_above_the_kvm_at_waist_height() -> None:
+    panel = PanelFill(1, [kvm(rank=0), kvm(rank=1, device="console")])
+    assert tops(panel) == {"kvm": 18, "console": 20}
+
+
+def test_a_panel_that_overflows_below_the_kvm_does_not_fit() -> None:
+    tall = [u(f"t{i}", 1, NONE, h=10, rank=i) for i in range(3)]
+    panel = PanelFill(1, [*tall[:2], kvm(rank=3)])
+    assert tops(panel) == {"t0": 32, "kvm": 18, "t1": 16}
+    assert not panel.fits(tall[2], WAIST_RULES)
+    assert PanelFill(1, [*tall, kvm(rank=3)]).place(WAIST_RULES) is None
+
+
+def test_a_pinned_kvm_ignores_waist_height() -> None:
+    unit = kvm(rank=1)
+    panel = PanelFill(1, [u("a", 1, NONE, rank=0), unit], pins={unit: 1})
+    assert tops(panel) == {"kvm": 32, "a": 30}

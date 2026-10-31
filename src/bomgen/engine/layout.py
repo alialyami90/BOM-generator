@@ -42,6 +42,7 @@ from bomgen.models.panel import (
     PortAllocation,
     PortPlan,
 )
+from bomgen.models.project import LayoutDefaults
 from bomgen.models.substation import DeviceMove, Equipment, EquipmentRole, PairMove, Side, UnitRef
 from bomgen.models.substation import Layout as LayoutInputs
 
@@ -92,6 +93,15 @@ class Unit:
 class LayoutRules:
     capacity_u: int = 32
     blank_plate_u: int = 1
+    waist_u: int | None = None  # where a KVM or console's bottom edge goes; None: no anchor
+
+
+RACK_UNIT_MM = 44.45
+
+
+def waist_u(layout: LayoutDefaults) -> int:
+    """The rack U, counted from 1 at the bottom, nearest the project's waist height."""
+    return round((layout.waist_height_mm - layout.rack_start_mm) / RACK_UNIT_MM)
 
 
 @dataclass(frozen=True)
@@ -175,7 +185,44 @@ class PanelFill:
 
     def fits(self, unit: Unit, rules: LayoutRules) -> bool:
         trial = PanelFill(self.number, [*self.units, unit], dict(self.pins))
-        return trial.used_u(rules) <= rules.capacity_u
+        return trial.place(rules) is not None
+
+    def place(self, rules: LayoutRules) -> dict[Unit, int] | None:
+        """Each rack unit's top U (U1 at the bottom), or None when the stack does not fit.
+
+        Units fill from the top in stack order. Unpinned KVM and console units are anchored
+        with the first one's bottom edge at ``waist_u``; units that do not fit above the
+        anchor go below it, in stack order (ADR 0013, amended M21).
+        """
+        rack = [x for x in self.stack() if x.block_u > 0]
+        waist = rules.waist_u
+        anchored = [x for x in rack if x.waist and self.pins.get(x) is None]
+        if waist is None or not anchored:
+            return _from_top(rack, rules.capacity_u, rules)
+        others = [x for x in rack if x not in anchored]
+        tops: dict[Unit, int] = {}
+        top = waist - 1
+        for unit in anchored:  # bottom up: the first in stack order sits at waist_u
+            bottom = top + 1 + (_clearance(unit, rules) if tops else 0)
+            top = bottom + unit.block_u - 1
+            tops[unit] = top
+        if top > rules.capacity_u:
+            return None
+        anchor_top, above, count = top, rules.capacity_u, 0
+        for unit in others:
+            bottom = above - unit.block_u + 1
+            if bottom < anchor_top + 1 + _clearance(unit, rules):
+                break
+            tops[unit] = above
+            above = bottom - 1 - _clearance(unit, rules)
+            count += 1
+        below = _from_top(others[count:], waist - 1 - _clearance(anchored[0], rules), rules)
+        return None if below is None else tops | below
+
+    def top_u(self, unit: Unit, rules: LayoutRules) -> int | None:
+        """The unit's top U in the panel; None on DIN rail or when the panel overflows."""
+        placed = self.place(rules)
+        return None if placed is None else placed.get(unit)
 
     def add(self, unit: Unit) -> None:
         self.units.append(unit)
@@ -189,6 +236,22 @@ class PanelFill:
         """The unit's place among the panel's rack devices, 1 = top; None on DIN rail."""
         rack = [x for x in self.stack() if x.block_u > 0]
         return rack.index(unit) + 1 if unit in rack else None
+
+
+def _clearance(upper: Unit, rules: LayoutRules) -> int:
+    """Space under a block: a blank plate unless it ends in its cable manager (R5)."""
+    return 0 if upper.cable_manager_u else rules.blank_plate_u
+
+
+def _from_top(units: Sequence[Unit], top: int, rules: LayoutRules) -> dict[Unit, int] | None:
+    tops: dict[Unit, int] = {}
+    for unit in units:
+        bottom = top - unit.block_u + 1
+        if bottom < 1:
+            return None
+        tops[unit] = top
+        top = bottom - 1 - _clearance(unit, rules)
+    return tops
 
 
 @dataclass
@@ -740,7 +803,11 @@ def layout_preview(loaded: LoadedSubstation, overrides: LayoutInputs | None = No
     The UI's Panels board calls this with the dragged overrides before saving them.
     """
     inputs = overrides if overrides is not None else loaded.substation.layout
-    rules = LayoutRules(capacity_u=loaded.panel_capacity_u, blank_plate_u=inputs.blank_plate_u)
+    rules = LayoutRules(
+        capacity_u=loaded.panel_capacity_u,
+        blank_plate_u=inputs.blank_plate_u,
+        waist_u=waist_u(loaded.project.defaults.layout),
+    )
     plan, net, candidates = _size(loaded)
     issues: list[LayoutIssue] = []
     units = _units(loaded, plan, issues)
