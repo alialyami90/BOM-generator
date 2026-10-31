@@ -9,6 +9,7 @@ import pytest
 
 from bomgen.app import api
 from bomgen.app.parts import parts_page
+from bomgen.io import lifecycle
 from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.package import pack
 from bomgen.library_store.store import LibraryStore
@@ -70,6 +71,16 @@ def test_parts_rows_follow_the_equipment_order(project: Path, store: LibraryStor
 
     assert ids == ["fopp", "l2", "l1", "ext-esw", "gw", "ext-fw", "gps", "rtac", "hwio"]
     assert [r["index"] for r in parts(project, store)["rows"]] == list(range(9))
+
+
+def test_a_new_blank_substation_opens_its_parts_page(project: Path, store: LibraryStore) -> None:
+    """Settings and Parts both load this page; a blank substation has no switches to size."""
+    lifecycle.create_substation(project, "b", "b", store=store)
+
+    found = parts_page(project, "b", store)["parts"]
+
+    assert found["rows"] == []
+    assert found["default_rows"]
 
 
 def test_a_row_is_named_by_its_role_or_else_by_its_part_category(

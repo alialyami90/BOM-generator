@@ -1,6 +1,6 @@
 # 0027. Port speeds 2.5G, 5G and 25G
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-10-31)
 - Date: 2026-10-31
 - Spec sections: Inputs the tool needs (device library, ports)
 

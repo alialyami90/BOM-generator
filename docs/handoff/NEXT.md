@@ -49,7 +49,7 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
 
 ## 3. Questions for Ali (one card each, recommendation marked)
 
-1. **What comes after v0.3.0?** Options "Test v0.3.0, send feedback" (recommended: part picking
+1. **What comes after v0.3.1?** Options "Test v0.3.1, send feedback" (recommended: part picking
    shipped and nobody has used it in the field yet) and "I'll describe the next work now".
 2. **ASSUMED seeds:** show the cabinet number pattern, the enclosure and the document number/date
    defaults a new substation gets; recommend "Keep them, edit per project in the app". If he changes
@@ -62,9 +62,8 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
 4. **Q23** (issued sheets vs masters): keep the default (the masters) until he answers.
 5. **Q51** (annunciator mounted in a panel), **Q54** (power of the -2 SEL computers) and **Q55**
    (categories for the contractor's other part types) are open in plan §6.
-6. **ADR 0027** (port speeds 2.5G, 5G and 25G): the lead has it on a card for acceptance.
 
-**Next work:** M19–M26 shipped in v0.3.0 (STATE.md §1). Engine model changes (step 4) come from A4's plan.
+**Next work:** M19–M26 shipped in v0.3.0, and v0.3.1 fixed the blank-substation crash (STATE.md §1). Engine model changes (step 4) come from A4's plan.
 
 ## 4. When Ali's feedback arrives
 

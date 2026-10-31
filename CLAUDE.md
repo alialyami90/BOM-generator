@@ -107,6 +107,11 @@ keep them current when work stops.
 2. Review it against its milestone's scope in `docs/plan.md`, the spec and this file.
 3. Squash-merge it once CI is green and the branch has no conflict with `main`.
 4. A dependent PR rebases on `main` after the PR it depends on merges.
+5. A docs-only PR (only `docs/**`, `*.md` or `LICENSE`) skips lint, type-check and tests,
+   and the release workflow does not build the installer for it; `ci-status` still goes
+   green, so it merges as above. `docs/ui/**` and `data/**` are not docs-only: tests and
+   the shipped library read them (ADR 0006). Running the checks below locally is optional
+   for a docs-only commit.
 
 ## Before every commit
 

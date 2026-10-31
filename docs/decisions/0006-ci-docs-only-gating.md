@@ -13,8 +13,10 @@ via `paths-ignore` reports no status, so a required check would hang.
 ## Decision
 
 `.github/workflows/ci.yml`: a `changes` job runs `dorny/paths-filter` and
-outputs `code`; `lint`, `typecheck` and `test` run only when `code == 'true'`;
-a final `ci-status` job runs with `if: always()` and passes when every job
+outputs `code`; `lint`, `typecheck` and `test` run only when `code == 'true'`.
+`docs/ui/**` and `data/**` always count as code, markdown included: the app tests read
+the design files in `docs/ui`, and the device-db markdown ships in the default
+`.bomlib` (Ali, 2026-10-31). A final `ci-status` job runs with `if: always()` and passes when every job
 succeeded or was skipped. Branch protection should require only `ci-status`.
 
 ## Consequences

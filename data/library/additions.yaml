@@ -6,6 +6,7 @@
 # every value); the comment names the document behind its model and power.
 # purdue_level is left out where the datasheet does not state it, so these switches are not
 # L1/L2 candidates until an engineer sets it. Ports as delivered, management ports included.
+# The delivery's fiber_patch_panel parts take the library's patch_panel category.
 devices:
   - part_id: C9300-24T-A  # Cisco Catalyst 9300 Series Switches Data Sheet C78-738977 C78-738977-46 09/26, p. 65
     category: "network_switch"
@@ -275,6 +276,174 @@ devices:
       - { count: 16, speed: 1G, kind: sfp_slot }
       - { count: 4, speed: 10G, kind: sfp_slot }
       - { count: 4, speed: 25G, kind: sfp_slot }
+  - part_id: HUBBELL-FEUR12LCDM  # FEUR fiber enclosures, p. 1
+    category: "patch_panel"
+    alt_group: "HUBBELL-FEUR12LCDM"
+    make: "Hubbell"
+    model: "FEUR12LCDM"
+    ordering_code: "FEUR12LCDM"
+    description_template: "Loaded fiber shelf, 12 fiber positions, LC duplex, MM"
+    height_u: 1
+  - part_id: HUBBELL-FEUR12LCDOM3  # FEUR fiber enclosures, p. 1
+    category: "patch_panel"
+    alt_group: "HUBBELL-FEUR12LCDOM3"
+    make: "Hubbell"
+    model: "FEUR12LCDOM3"
+    ordering_code: "FEUR12LCDOM3"
+    description_template: "Loaded fiber shelf, 12 fiber positions, LC duplex, OM3"
+    height_u: 1
+  - part_id: HUBBELL-FEUR12LCDSM  # FEUR fiber enclosures, p. 1
+    category: "patch_panel"
+    alt_group: "HUBBELL-FEUR12LCDSM"
+    make: "Hubbell"
+    model: "FEUR12LCDSM"
+    ordering_code: "FEUR12LCDSM"
+    description_template: "Loaded fiber shelf, 12 fiber positions, LC duplex, SM"
+    height_u: 1
+  - part_id: HUBBELL-FEUR12SCM  # FEUR fiber enclosures, p. 1
+    category: "patch_panel"
+    alt_group: "HUBBELL-FEUR12SCM"
+    make: "Hubbell"
+    model: "FEUR12SCM"
+    ordering_code: "FEUR12SCM"
+    description_template: "Loaded fiber shelf, 12 fiber positions, SC duplex, MM"
+    height_u: 1
+  - part_id: HUBBELL-FEUR12SCOM3  # FEUR fiber enclosures, p. 1
+    category: "patch_panel"
+    alt_group: "HUBBELL-FEUR12SCOM3"
+    make: "Hubbell"
+    model: "FEUR12SCOM3"
+    ordering_code: "FEUR12SCOM3"
+    description_template: "Loaded fiber shelf, 12 fiber positions, SC duplex, OM3"
+    height_u: 1
+  - part_id: HUBBELL-FEUR12SCSM  # FEUR fiber enclosures, p. 1
+    category: "patch_panel"
+    alt_group: "HUBBELL-FEUR12SCSM"
+    make: "Hubbell"
+    model: "FEUR12SCSM"
+    ordering_code: "FEUR12SCSM"
+    description_template: "Loaded fiber shelf, 12 fiber positions, SC duplex, SM"
+    height_u: 1
+  - part_id: HUBBELL-FEUR12STM  # FEUR fiber enclosures, p. 1
+    category: "patch_panel"
+    alt_group: "HUBBELL-FEUR12STM"
+    make: "Hubbell"
+    model: "FEUR12STM"
+    ordering_code: "FEUR12STM"
+    description_template: "Loaded fiber shelf, 12 fiber positions, ST, MM"
+    height_u: 1
+  - part_id: HUBBELL-FEUR24LCDM  # FEUR fiber enclosures, p. 1
+    category: "patch_panel"
+    alt_group: "HUBBELL-FEUR24LCDM"
+    make: "Hubbell"
+    model: "FEUR24LCDM"
+    ordering_code: "FEUR24LCDM"
+    description_template: "Loaded fiber shelf, 24 fiber positions, LC duplex, MM"
+    height_u: 1
+  - part_id: HUBBELL-FEUR24LCDOM3  # FEUR fiber enclosures, p. 1
+    category: "patch_panel"
+    alt_group: "HUBBELL-FEUR24LCDOM3"
+    make: "Hubbell"
+    model: "FEUR24LCDOM3"
+    ordering_code: "FEUR24LCDOM3"
+    description_template: "Loaded fiber shelf, 24 fiber positions, LC duplex, OM3"
+    height_u: 1
+  - part_id: HUBBELL-FEUR24LCDSM  # FEUR fiber enclosures, p. 1
+    category: "patch_panel"
+    alt_group: "HUBBELL-FEUR24LCDSM"
+    make: "Hubbell"
+    model: "FEUR24LCDSM"
+    ordering_code: "FEUR24LCDSM"
+    description_template: "Loaded fiber shelf, 24 fiber positions, LC duplex, SM"
+    height_u: 1
+  - part_id: HUBBELL-FEUR24SCM  # FEUR fiber enclosures, p. 1
+    category: "patch_panel"
+    alt_group: "HUBBELL-FEUR24SCM"
+    make: "Hubbell"
+    model: "FEUR24SCM"
+    ordering_code: "FEUR24SCM"
+    description_template: "Loaded fiber shelf, 24 fiber positions, SC duplex, MM"
+    height_u: 1
+  - part_id: HUBBELL-FEUR24SCOM3  # FEUR fiber enclosures, p. 1
+    category: "patch_panel"
+    alt_group: "HUBBELL-FEUR24SCOM3"
+    make: "Hubbell"
+    model: "FEUR24SCOM3"
+    ordering_code: "FEUR24SCOM3"
+    description_template: "Loaded fiber shelf, 24 fiber positions, SC duplex, OM3"
+    height_u: 1
+  - part_id: HUBBELL-FEUR24SCSM  # FEUR fiber enclosures, p. 1
+    category: "patch_panel"
+    alt_group: "HUBBELL-FEUR24SCSM"
+    make: "Hubbell"
+    model: "FEUR24SCSM"
+    ordering_code: "FEUR24SCSM"
+    description_template: "Loaded fiber shelf, 24 fiber positions, SC duplex, SM"
+    height_u: 1
+  - part_id: HUBBELL-FEUR24STM  # FEUR fiber enclosures, p. 1
+    category: "patch_panel"
+    alt_group: "HUBBELL-FEUR24STM"
+    make: "Hubbell"
+    model: "FEUR24STM"
+    ordering_code: "FEUR24STM"
+    description_template: "Loaded fiber shelf, 24 fiber positions, ST, MM"
+    height_u: 1
+  - part_id: HUBBELL-FEUR48LCDM  # FEUR fiber enclosures, p. 1
+    category: "patch_panel"
+    alt_group: "HUBBELL-FEUR48LCDM"
+    make: "Hubbell"
+    model: "FEUR48LCDM"
+    ordering_code: "FEUR48LCDM"
+    description_template: "Loaded fiber shelf, 48 fiber positions, LC duplex, MM"
+    height_u: 1
+  - part_id: HUBBELL-FEUR48LCDOM3  # FEUR fiber enclosures, p. 1
+    category: "patch_panel"
+    alt_group: "HUBBELL-FEUR48LCDOM3"
+    make: "Hubbell"
+    model: "FEUR48LCDOM3"
+    ordering_code: "FEUR48LCDOM3"
+    description_template: "Loaded fiber shelf, 48 fiber positions, LC duplex, OM3"
+    height_u: 1
+  - part_id: HUBBELL-FEUR48LCDSM  # FEUR fiber enclosures, p. 1
+    category: "patch_panel"
+    alt_group: "HUBBELL-FEUR48LCDSM"
+    make: "Hubbell"
+    model: "FEUR48LCDSM"
+    ordering_code: "FEUR48LCDSM"
+    description_template: "Loaded fiber shelf, 48 fiber positions, LC duplex, SM"
+    height_u: 1
+  - part_id: HUBBELL-FEUR48SCM  # FEUR fiber enclosures, p. 1
+    category: "patch_panel"
+    alt_group: "HUBBELL-FEUR48SCM"
+    make: "Hubbell"
+    model: "FEUR48SCM"
+    ordering_code: "FEUR48SCM"
+    description_template: "Loaded fiber shelf, 48 fiber positions, SC duplex, MM"
+    height_u: 1
+  - part_id: HUBBELL-FEUR48SCOM3  # FEUR fiber enclosures, p. 1
+    category: "patch_panel"
+    alt_group: "HUBBELL-FEUR48SCOM3"
+    make: "Hubbell"
+    model: "FEUR48SCOM3"
+    ordering_code: "FEUR48SCOM3"
+    description_template: "Loaded fiber shelf, 48 fiber positions, SC duplex, OM3"
+    height_u: 1
+  - part_id: HUBBELL-FEUR48SCSM  # FEUR fiber enclosures, p. 1
+    category: "patch_panel"
+    alt_group: "HUBBELL-FEUR48SCSM"
+    make: "Hubbell"
+    model: "FEUR48SCSM"
+    ordering_code: "FEUR48SCSM"
+    description_template: "Loaded fiber shelf, 48 fiber positions, SC duplex, SM"
+    height_u: 1
+  - part_id: HUBBELL-FEURFSPD  # FEUR fiber enclosures, p. 1
+    category: "patch_panel"
+    alt_group: "HUBBELL-FEURFSPD"
+    make: "Hubbell"
+    model: "FEURFSPD"
+    ordering_code: "FEURFSPD"
+    description_template: "Unloaded FSP adapter-panel fiber shelf, maximum 72 LC fiber positions"
+    height_u: 1
 catalogue_brands:
   mcb:
     - id: hager-mcn-2p  # AC set: Hager gives no DC rating, so no dc_rating_v

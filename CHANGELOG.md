@@ -7,6 +7,22 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-31
+
+### Added
+
+- The installer ships psa-devices 1.7.0 with 21 Hubbell FEUR fibre shelves
+  from the contractor's 2026-10-31 delivery (12, 24 and 48 positions, LC, SC
+  and ST, MM, OM3 and SM, plus the unloaded FEURFSPD), each its own
+  alternative group. The delivery's `fiber_patch_panel` becomes the library's
+  `patch_panel` (#265).
+
+### Fixed
+
+- Settings and Parts open on a new, blank substation again; in 0.3.0 they
+  showed "StopIteration:" because the Parts page sized SFPs for switches the
+  substation did not have yet (#267).
+
 ## [0.3.0] - 2026-10-31
 
 ### Added
@@ -531,7 +547,8 @@ project uses [Semantic Versioning](https://semver.org/).
   airflow; future library defaults use 0 W for the SK 3110 thermostat and
   460 m³/h for the SK 3243.100 fan with its outlet filter (#12).
 
-[Unreleased]: https://github.com/alialyami90/BOM-generator/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/alialyami90/BOM-generator/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/alialyami90/BOM-generator/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/alialyami90/BOM-generator/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/alialyami90/BOM-generator/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/alialyami90/BOM-generator/compare/v0.1.1...v0.2.0
