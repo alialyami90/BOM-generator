@@ -49,6 +49,7 @@ generator, `build.py` or `pack`, which take only the YAML files above. The 82 so
 220 MB) and the review workbook stay out of git; `pdf_manifest.csv` lists each PDF with its SHA-256.
 Its parts reach the library only through the records above, one reviewed step at a time
 ([review](https://claude.ai/artifact/AZ8CXFEtk6a91J1uDTy745)).
+`contractor-return-2026-10-31.md` and its CSV list what still goes back to the contractor.
 
 ## Record format
 
