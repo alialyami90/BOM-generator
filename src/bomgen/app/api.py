@@ -42,6 +42,7 @@ from bomgen.app.library_edit import EditRefusedError, LibraryEditor, PendingEdit
 from bomgen.app.loose import loose_page
 from bomgen.app.network import layout_page
 from bomgen.app.output import OutputRefusedError, build_file, build_target, checks_page
+from bomgen.app.parts import parts_page
 from bomgen.app.preview import preview_page
 from bomgen.app.projects import RecentProjects, free_id, project_files, summarize
 from bomgen.app.substations import (
@@ -53,13 +54,14 @@ from bomgen.app.substations import (
 from bomgen.bundle.errors import LibraryPackageError, RefusalKind
 from bomgen.engine.errors import EngineError
 from bomgen.engine.layout import write_generated_panels
-from bomgen.io import edit, lifecycle, loose_edit
+from bomgen.io import edit, lifecycle, loose_edit, parts_edit
 from bomgen.io.edit import EditError, EditResult
 from bomgen.io.errors import InputError
 from bomgen.io.fields import (
     PartUse,
     confirm_field,
     insert_item,
+    move_item,
     part_users,
     remove_field,
     remove_item,
@@ -1007,6 +1009,94 @@ class Api:
             )
         _written(result)
         return {"page": substation_page(project, substation_id, store), "row": row}
+
+    # -- Parts (plan M23; docs/ui/screens.md, Parts) --
+
+    @endpoint
+    def parts_page(self, project_file: str, substation_id: str) -> dict[str, Any]:
+        """The substation page with its Parts rows, part options and default rows."""
+        with self._substation(substation_id):
+            return parts_page(Path(project_file), substation_id, self._library_store())
+
+    def _parts_write(
+        self, project_file: str, substation_id: str, write: Callable[..., EditResult]
+    ) -> dict[str, Any]:
+        store = self._library_store()
+        with self._substation(substation_id), _edit_refusals():
+            result = write(Path(project_file), substation_id, store=store)
+        _written(result)
+        return parts_page(Path(project_file), substation_id, store)
+
+    @endpoint
+    def set_part_override(
+        self, project_file: str, substation_id: str, index: int, field: str, value: Any
+    ) -> dict[str, Any]:
+        """Override one library value of equipment row ``index``; ``None`` or the library's
+        own value removes the override. Returns the Parts page."""
+        return self._parts_write(
+            project_file,
+            substation_id,
+            functools.partial(parts_edit.set_override, index=index, field=field, value=value),
+        )
+
+    @endpoint
+    def set_sfp_choice(
+        self,
+        project_file: str,
+        substation_id: str,
+        index: int,
+        speed: str,
+        media: str,
+        part_id: str | None,
+    ) -> dict[str, Any]:
+        """Choose the SFP for one speed and media of a switch row; ``None`` is automatic."""
+        return self._parts_write(
+            project_file,
+            substation_id,
+            functools.partial(
+                parts_edit.set_sfp_choice, index=index, speed=speed, media=media, part_id=part_id
+            ),
+        )
+
+    @endpoint
+    def set_equipment_part(
+        self, project_file: str, substation_id: str, index: int, part_id: str
+    ) -> dict[str, Any]:
+        """Give equipment row ``index`` another part; ``cleared`` names what described the
+        old part and went with it (overrides, sfp, ordering_code)."""
+        store = self._library_store()
+        with self._substation(substation_id), _edit_refusals():
+            result, cleared = parts_edit.set_equipment_part(
+                Path(project_file), substation_id, index, part_id, store=store
+            )
+        if not result.written and result.issues:
+            _written(result)
+        return {
+            "page": parts_page(Path(project_file), substation_id, store),
+            "cleared": list(cleared) if result.written else [],
+        }
+
+    @endpoint
+    def move_equipment(
+        self, project_file: str, substation_id: str, index: int, to: int
+    ) -> dict[str, Any]:
+        """Move equipment row ``index`` to ``to``: the order panels are filled in."""
+        return self._parts_write(
+            project_file,
+            substation_id,
+            lambda project, sub, store: move_item(
+                project, ("equipment",), index, to, substation=sub, store=store
+            ),
+        )
+
+    @endpoint
+    def start_parts(
+        self, project_file: str, substation_id: str, rows: list[dict[str, Any]]
+    ) -> dict[str, Any]:
+        """A new substation's first rows, written with its sized L1 switch."""
+        return self._parts_write(
+            project_file, substation_id, functools.partial(parts_edit.start_parts, rows=rows)
+        )
 
     # -- Checks and Build (docs/ui/screens.md: Checks, Build) --
 

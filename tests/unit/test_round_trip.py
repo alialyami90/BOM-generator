@@ -121,3 +121,10 @@ def test_removing_a_top_level_key_keeps_one_blank_line() -> None:
 
 def test_an_end_of_line_comment_keeps_its_distance() -> None:
     assert "  k: 1234  # kc\n" in edited(lambda d: set_entry(d["b"], "k", 1234))
+
+
+def test_a_commented_flow_item_first_in_a_commented_list_keeps_the_next_items_lines() -> None:
+    # ruamel 0.19 joined "id: a" and "x: 1" onto one line here (found moving a Parts row up)
+    text = "k:  # head\n  - { id: b, x: 2 }  # bee\n  - id: a\n    x: 1\n"
+
+    assert dump_text(load_text(text)) == text
