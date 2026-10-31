@@ -2,8 +2,9 @@
 
 The shipped library is examples/library.yaml with each original part's datasheet inrush
 and input voltage range from data/device-db added (plan Q38), and its make as the device
-database records it, followed by the parts in data/library/additions.yaml. The example
-library leaves them out so the golden values stay those of the spec's example workbook.
+database records it, followed by the parts and MCB brand sets in
+data/library/additions.yaml. The example library leaves them out so the golden values
+stay those of the spec's example workbook.
 
 Usage, from the repository root: ``python data/library/build.py``. It rewrites
 data/library/psa-devices.yaml; tests/unit/test_shipped_library.py fails while the file
@@ -35,7 +36,8 @@ HEADER = """\
 #
 # The shipped psa-devices library: examples/library.yaml plus each original part's
 # datasheet inrush and input voltage range from data/device-db/ (plan Q38), and its make
-# as the device database records it, then the parts in data/library/additions.yaml.
+# as the device database records it, then the parts and MCB brand sets in
+# data/library/additions.yaml.
 """
 
 
@@ -55,7 +57,7 @@ def datasheets(device_db: Path = DEVICE_DB) -> dict[str, dict[str, Any]]:
 
 def build(example: str, figures: dict[str, dict[str, Any]], additions: str) -> str:
     """The shipped library's text: ``example`` with ``figures`` added to its originals and
-    the ``additions`` file's devices appended."""
+    the ``additions`` file's devices and MCB brand sets appended."""
     data = load_text(example)
     for device in data["devices"]:
         if device.get("tier") is not None or device["part_id"] not in figures:
@@ -71,7 +73,9 @@ def build(example: str, figures: dict[str, dict[str, Any]], additions: str) -> s
             device.insert(at + offset, key, value)
             if offset == 0:
                 device.yaml_add_eol_comment("datasheet (data/device-db)", key)
-    data["devices"].extend(load_text(additions)["devices"])
+    extra = load_text(additions)
+    data["devices"].extend(extra["devices"])
+    data["catalogue_brands"]["mcb"].extend(extra["catalogue_brands"]["mcb"])
     text = dump_text(data)
     body = text.split("\n", 1)[1] if text.startswith("# yaml-language-server") else text
     lines = body.splitlines(keepends=True)

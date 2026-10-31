@@ -9,6 +9,11 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- The installer ships psa-devices 1.5.0 with two Hager MCB brand sets from the
+  contractor's 2026-10-31 delivery: `hager-mcn-2p` (MCN 2P C, 6 kA) and
+  `hager-ncn-2p` (NCN 2P C, 10 kA), 1 to 16 A. Hager gives no DC rating, so
+  they are AC sets: a project refuses one as `mcb_dc`, and the check report
+  warns when one feeds the DC branches through `mcb`.
 - Device nameplates (M26, ADR 0026 proposed): each panel BOM ends with one
   nameplate row whose quantity is its tagged devices, and a new Nameplates sheet
   after Loose Material lists every plate's text (the tag as the MCB rows print

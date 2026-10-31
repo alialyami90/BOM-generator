@@ -5,7 +5,8 @@
 #
 # The shipped psa-devices library: examples/library.yaml plus each original part's
 # datasheet inrush and input voltage range from data/device-db/ (plan Q38), and its make
-# as the device database records it, then the parts in data/library/additions.yaml.
+# as the device database records it, then the parts and MCB brand sets in
+# data/library/additions.yaml.
 
 devices:
   # --- Group B: network cabinets (example workbook, 'Panel 1'!B4:H12) -----------------
@@ -4880,6 +4881,11 @@ devices:
     height_u: 1
     input_v_min: 18
     input_v_max: 300
+
+# MCB brand sets the shipped library adds to the example's (contractor delivery, mcbs.csv:
+# Hager MCB catalogue in VD-EL0009-007, pp. 345-363). Hager's ordering pages give no DC
+# rating, so these sets have no dc_rating_v: a project refuses one as mcb_dc, and one chosen
+# as mcb with mcb_dc unset also feeds the DC branches, which the check report warns about.
 catalogues:
   enclosure_u: 42  # rack units of the standard enclosure (ADR 0013)
   mcb:  # spec: Derivation rules -> Breaker part numbers
@@ -4978,6 +4984,20 @@ catalogue_brands:
       magnetic_trip_multiple: 5
       magnetic_trip_multiple_dc: 7
       dc_rating_v: 440
+    - id: hager-mcn-2p
+      family: MCN 2P C 6 kA  # VD-EL0009-007 p. 347 (MCN201 to MCN216)
+      make: Hager
+      poles: 2
+      ratings_a: [1, 2, 6, 10, 16]
+      code_pattern: "MCN2{rating:02d}"
+      trip_curve: C
+    - id: hager-ncn-2p
+      family: NCN 2P C 10 kA  # VD-EL0009-007 p. 356 (NCN201A to NCN216A)
+      make: Hager
+      poles: 2
+      ratings_a: [1, 2, 6, 10, 16]
+      code_pattern: "NCN2{rating:02d}A"
+      trip_curve: C
   aux_contact:
     - id: schneider-c60h-dc
       make: Schneider
