@@ -944,9 +944,9 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
 - **M23 — Parts page in the app.** *Done (#244).* Replaces the Network page; writers for the
   new fields and the cable manager switch. Plan:
   [`superpowers/plans/2026-10-31-m23-parts-page.md`](superpowers/plans/2026-10-31-m23-parts-page.md).
-  Follow-ups from A1's review: rows collapse to one line at 20 or more (components.md "Part row"), and
-  the Device picker replaces the part select when a category has more than 12 parts.
-- **M24 — Device preview page.** *Engine done (#245); app in review.* Engine API for per-unit MCBs and
+  Follow-ups from A1's review, *done*: rows collapse to one line at 20 or more (components.md "Part
+  row"), and the Device picker replaces the part select when a category has more than 12 parts.
+- **M24 — Device preview page.** *Done (engine #245, app #247).* Engine API for per-unit MCBs and
   positions, the device table, and the panel elevation with dragging. Plan:
   [`superpowers/plans/2026-10-31-m24-device-preview-engine.md`](superpowers/plans/2026-10-31-m24-device-preview-engine.md).
 

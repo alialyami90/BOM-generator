@@ -62,8 +62,8 @@
       if (cleared) { toast(cleared, 'info'); cleared = ''; }
     }
   });
-  const UI = { tuning: null, editing: '', menu: -1, addOpen: false, fresh: null };  // fresh: a new substation's rows before the first save
-  sub().resets.push(() => { PF.reset(); Object.assign(UI, { tuning: null, editing: '', menu: -1, addOpen: false, fresh: null }); });
+  const UI = { tuning: null, editing: '', menu: -1, addOpen: false, fresh: null, expanded: new Set() };  // fresh: a new substation's rows before the first save
+  sub().resets.push(() => { PF.reset(); Object.assign(UI, { tuning: null, editing: '', menu: -1, addOpen: false, fresh: null, expanded: new Set() }); });
   const shown = (key) => { const v = PF.shown(key); return v == null ? '' : String(v); };
   const mark = (key, html) => PF.mark(key, html);
   const err = (key) => (PF.errors[key] ? `<span class="err small" id="p-${key}-err">${icon('error')}<span>${PF.err(key)}</span></span>` : '');
@@ -83,6 +83,12 @@
     if (!r.library) return '<div class="prow-strip"></div>';
     if (!r.library.supply_type && !r.library.height_u) return '<div class="prow-strip"><span class="muted small">Passive part: no rack space, no power.</span></div>';
     const fields = r.library.supply_type ? VALUES : VALUES.filter(([f]) => f === 'height_u');  // an unpowered part has only a height
+    const open = UI.expanded.has(r.index) || fields.some(([f]) => UI.editing === `o.${r.index}.${f}` || PF.errors[`o.${r.index}.${f}`]);
+    if (sub().page().parts.rows.length >= 20 && !open) {  // 20 or more rows: one line per row; clicking it opens the strip
+      const at = (f) => shown(`o.${r.index}.${f}`), n = fields.filter(([f]) => at(f) !== libValue(r, f)).length;
+      const line = [FMT.height_u(at('height_u')), ...(r.library.supply_type ? [FMT.unit_power_w(at('unit_power_w')), at('voltage_v') ? `${at('voltage_v')} ${at('supply_type')}` : FMT.supply_type(at('supply_type'))] : [])].join(' · ');
+      return `<div class="prow-strip"><button class="link-btn small prow-summary" data-action="pp-expand" data-i="${r.index}" aria-label="Show the data of ${esc(r.label)}: ${esc(line)}${n ? `, ${plural(n, 'override')}` : ''}">${esc(line)}${n ? ` · <i class="ov-dot" aria-hidden="true"></i>${n} override${n === 1 ? '' : 's'}` : ''}</button></div>`;
+    }
     let overridden = 0;
     const vals = fields.map(([f, label, kind]) => {
       const key = `o.${r.index}.${f}`, id = `p-${key}`, v = shown(key), lib = libValue(r, f), ov = v !== lib, changed = key in PF.draft;
@@ -109,6 +115,11 @@
     if (!opts.length && !r.part_id) return emptyLine(p, r.category, r.label);
     const missing = r.part_id && !r.known && v === r.part_id, picked = opts.find((o) => o.part_id === v);
     const first = r.sized && r.role === 'l1_switch' ? `<option value="" ${!v ? 'selected' : ''}>The sizing picks the switch</option>` : '';
+    if (opts.length > 12) {  // a long category opens the Device picker instead of a select
+      const text = picked ? partText(picked) : v || (first ? 'The sizing picks the switch' : 'Pick a part');
+      return `<div class="prow-partwrap">${mark(key, pickButton(id, r.category, r.label, v, text, { first: !!first, missing, title: picked ? partText(picked) : '', unset: !v }))}
+        ${missing ? `<span class="err small" id="${id}-missing">${icon('error')}<span>Not in ${esc(p.project.library.name)} ${esc(p.project.library.version)}. Pick another part.</span></span>` : ''}${err(key)}</div>`;
+    }
     return `<div class="prow-partwrap">${mark(key, `<select class="select prow-part${missing ? ' is-missing' : ''}" id="${id}" data-dirty="1" aria-label="Part for ${esc(r.label)}" ${picked ? `title="${esc(partText(picked))}"` : ''} ${missing ? `aria-invalid="true" aria-describedby="${id}-missing"` : ''}>
         ${first}${missing ? `<option value="${esc(r.part_id)}" selected>${esc(r.part_id)}</option>` : ''}${opts.map((o) => `<option value="${esc(o.part_id)}" ${o.part_id === v ? 'selected' : ''}>${esc(partText(o))}</option>`).join('')}</select>`)}
       ${missing ? `<span class="err small" id="${id}-missing">${icon('error')}<span>Not in ${esc(p.project.library.name)} ${esc(p.project.library.version)}. Pick another part.</span></span>` : ''}${err(key)}</div>`;
@@ -154,6 +165,72 @@
     </div>`;
   }
 
+  /* ---------- the Device picker (components.md "Device picker (combobox)") ----------
+     A button in the select's place; the pick is set as its value and sent as a change, so the draft form
+     and the part-change handlers below treat it as the select it replaces. */
+  function pickButton(id, category, label, value, text, o) {
+    return `<button type="button" class="select prow-part prow-pick${o.missing ? ' is-missing' : ''}${o.unset ? ' is-unset' : ''}" id="${id}" value="${esc(value || '')}" data-action="pp-pick" data-cat="${esc(category)}" data-label="${esc(label)}" ${o.first ? 'data-first="1"' : ''} ${o.fresh != null ? `data-fresh="${o.fresh}"` : 'data-dirty="1"'}
+      aria-haspopup="listbox" aria-expanded="false" aria-label="Part for ${esc(label)}: ${esc(text)}" ${o.title ? `title="${esc(o.title)}"` : ''} ${o.missing ? `aria-invalid="true" aria-describedby="${id}-missing"` : ''}>${esc(text)}</button>`;
+  }
+  let pk = null;  // the open picker: { btn, pop }
+  function closePicker(focus) {
+    if (!pk) return;
+    const { btn, pop } = pk; pk = null;
+    pop.remove(); btn.setAttribute('aria-expanded', 'false');
+    if (focus && btn.isConnected) btn.focus();
+  }
+  function openPicker(btn) {
+    const p = sub().page(), lib = p.project.library, opts = p.parts.options[btn.dataset.cat] || [], label = btn.dataset.label;
+    const pop = document.createElement('div');
+    pop.className = 'popover pk';
+    pop.innerHTML = `<div class="input-wrap">${icon('search')}<input class="input" id="pk-q" role="combobox" aria-expanded="true" aria-controls="pk-list" aria-autocomplete="list" aria-label="Search the ${esc(label)} parts" placeholder="Search part, make or model" autocomplete="off"></div>
+      <div class="listbox" id="pk-list" role="listbox" aria-label="${esc(label)} parts in ${esc(lib.name)} ${esc(lib.version)}"></div>
+      <div class="pk-hint small muted" id="pk-hint"></div>`;
+    btn.after(pop); btn.setAttribute('aria-expanded', 'true');
+    pk = { btn, pop };
+    const q = pop.querySelector('#pk-q'), list = pop.querySelector('#pk-list'), hint = pop.querySelector('#pk-hint');
+    let active = 0;
+    const draw = () => {
+      const t = q.value.trim().toLowerCase();
+      const all = t ? opts.filter((o) => `${o.part_id} ${o.make || ''} ${o.model || ''}`.toLowerCase().includes(t))
+        : [...opts.filter((o) => o.part_id === btn.value), ...opts.filter((o) => o.part_id !== btn.value)];  // the current part first
+      const shown = all.slice(0, 8), first = !t && btn.dataset.first ? [{ part_id: '', sizing: true }] : [];
+      const items = [...first, ...shown];
+      list.innerHTML = items.map((o, i) => o.sizing
+        ? `<div role="option" id="pk-${i}" data-v="" aria-selected="false"><span>The sizing picks the switch</span><span class="sub">The engine picks the L1 switch from the IED count.</span></div>`
+        : `<div role="option" id="pk-${i}" data-v="${esc(o.part_id)}" aria-selected="false"><span class="mono">${esc(o.part_id)}${o.part_id === btn.value ? ` <span class="muted small">current</span>` : ''}</span>
+          <span class="sub">${esc([[o.make, o.model].filter(Boolean).join(' '), FMT.supply_type(o.supply_type), o.unit_power_w != null ? `${o.unit_power_w} W` : ''].filter((x) => x && x !== '—').join(' · '))}</span><span class="right">${App.verified(o.data_quality) || ''}</span></div>`).join('')
+        || '<div class="pk-none muted small">No device matches. Check the spelling, or install a library that has it.</div>';
+      hint.innerHTML = `${all.length > shown.length ? `Showing ${shown.length} of ${all.length}. Type to narrow the list. ` : ''}From ${esc(lib.name)} ${esc(lib.version)}. <kbd class="kbd">↑</kbd> <kbd class="kbd">↓</kbd> to move, <kbd class="kbd">Enter</kbd> to pick, <kbd class="kbd">Esc</kbd> to close.`;
+      active = 0; markActive();
+    };
+    const options = () => [...list.querySelectorAll('[role="option"]')];
+    const markActive = () => options().forEach((o, i) => {
+      o.setAttribute('aria-selected', String(i === active));
+      if (i === active) { q.setAttribute('aria-activedescendant', o.id); o.scrollIntoView({ block: 'nearest' }); }
+    });
+    const pick = (v) => {
+      closePicker(false);
+      btn.value = v;
+      btn.dispatchEvent(new Event('change', { bubbles: true }));
+      queueMicrotask(() => { const b = document.getElementById(btn.id); if (b) b.focus(); });  // after the re-render
+    };
+    q.addEventListener('input', draw);
+    q.addEventListener('keydown', (e) => {
+      const n = options().length;
+      if (e.key === 'ArrowDown') { e.preventDefault(); active = Math.min(active + 1, n - 1); markActive(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); active = Math.max(active - 1, 0); markActive(); }
+      else if (e.key === 'Enter') { e.preventDefault(); if (n) pick(options()[active].dataset.v); }
+      else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closePicker(true); }
+      else if (e.key === 'Tab') closePicker(false);
+    });
+    list.addEventListener('mousedown', (e) => e.preventDefault());  // keep the focus in the search
+    list.addEventListener('click', (e) => { const o = e.target.closest('[role="option"]'); if (o) pick(o.dataset.v); });
+    draw(); q.focus();
+  }
+  ACTIONS['pp-pick'] = (el) => { const again = pk && pk.btn === el; closePicker(false); if (!again) openPicker(el); };
+  document.addEventListener('mousedown', (e) => { if (pk && !pk.pop.contains(e.target) && e.target !== pk.btn) closePicker(false); });
+
   /* ---------- a new substation: the default rows, saved together with the sized L1 switch ---------- */
   function freshRows(p) {
     if (!UI.fresh) UI.fresh = p.parts.default_rows.map((d) => ({ ...d, part_id: '', redundant: ['l1_switch', 'l2_switch'].includes(d.role) }));
@@ -162,7 +239,9 @@
   function freshRow(p, d, j) {
     const opts = p.parts.options[d.category] || [];
     const l1 = d.role === 'l1_switch';
+    const picked = opts.find((o) => o.part_id === d.part_id);
     const ctl = !opts.length ? emptyLine(p, d.category, d.label)
+      : opts.length > 12 ? `<div class="prow-partwrap">${pickButton(`pn-part-${j}`, d.category, d.label, d.part_id, picked ? partText(picked) : l1 ? 'The sizing picks the switch' : 'Pick a part', { first: l1, title: picked ? partText(picked) : '', unset: !d.part_id, fresh: j })}</div>`
       : `<select class="select prow-part" id="pn-part-${j}" data-fresh="${j}" aria-label="Part for ${esc(d.label)}">${l1 ? `<option value="" ${!d.part_id ? 'selected' : ''}>The sizing picks the switch</option>` : `<option value="" ${!d.part_id ? 'selected' : ''}>Pick a part</option>`}${opts.map((o) => `<option value="${esc(o.part_id)}" ${o.part_id === d.part_id ? 'selected' : ''}>${esc(partText(o))}</option>`).join('')}</select>`;
     return `<div class="prow" role="group" aria-label="${esc(d.label)}"><div class="prow-top"><span class="prow-role">${esc(d.label)}</span><span class="sp"></span>
         ${opts.length ? `<label class="check prow-ab"><input type="checkbox" data-fresh-ab="${j}" ${d.redundant ? 'checked' : ''}> A and B</label>` : ''}</div>
@@ -261,6 +340,7 @@
   ACTIONS['pp-tuning'] = () => keep(() => { const p = sub().page(); UI.tuning = !(UI.tuning == null ? !p.equipment.length : UI.tuning); });
   ACTIONS['pp-edit'] = (el) => { keep(() => { UI.editing = el.dataset.key; }); const c = document.getElementById('p-' + el.dataset.key); if (c) { c.focus(); if (c.select) c.select(); } };
   const resetTo = (key) => { const r = rowAt(Number(key.split('.')[1])); PF.set(key, libValue(r, key.split('.')[2])); S.dirty = PF.dirty(); };
+  ACTIONS['pp-expand'] = (el) => { const i = +el.dataset.i; keep(() => UI.expanded.add(i)); const b = document.querySelector(`[data-action="pp-edit"][data-key^="o.${i}."]`); if (b) b.focus(); };
   ACTIONS['pp-reset'] = (el) => keep(() => resetTo(el.dataset.key));
   ACTIONS['pp-reset-all'] = (el) => keep(() => VALUES.forEach(([f]) => { const key = `o.${el.dataset.i}.${f}`, r = rowAt(Number(el.dataset.i)); if (r.library && shown(key) !== libValue(r, f)) resetTo(key); }));
   ACTIONS['pp-menu'] = (el) => keep(() => { UI.menu = UI.menu === +el.dataset.i ? -1 : +el.dataset.i; UI.addOpen = false; });

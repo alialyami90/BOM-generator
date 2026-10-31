@@ -9,6 +9,11 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- App: Parts rows collapse to a one-line summary at 20 or more rows ("1 U ·
+  77 W · 125 VDC · 2 overrides"), and a category with more than 12 parts picks
+  its part with the Device picker: search, up to 8 matches with make, model,
+  supply, power and data quality, keyboard ↑ ↓ Enter Esc. Parts options carry
+  the supply, rated power and data quality (M23 follow-ups).
 - App: the Device preview page (M24), after Parts in the rail. It draws a
   front view of each panel from the engine's device preview, with cable
   managers, the waist line and DIN-rail parts. A table lists each unit with

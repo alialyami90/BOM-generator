@@ -13,6 +13,7 @@ from typing import Any
 
 from pydantic import ValidationError
 
+from bomgen.app.loose import _records
 from bomgen.app.substations import _library, resolve, substation_page
 from bomgen.engine.errors import EngineError
 from bomgen.engine.layout import CABLE_MANAGED, layout_preview
@@ -22,6 +23,7 @@ from bomgen.io.loader import LoadedSubstation
 from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.store import LibraryStore
 from bomgen.models.library import Category, DeviceType, Library, Media
+from bomgen.models.project import Project
 from bomgen.models.substation import Equipment, EquipmentRole, Substation
 
 ROLE_LABEL = {
@@ -236,23 +238,23 @@ def _row(
 
 def _source(
     project_file: Path, substation_id: str, store: LibraryStore
-) -> tuple[Substation | None, Library | None, LoadedSubstation | None]:
+) -> tuple[Substation | None, Library | None, LoadedSubstation | None, Project]:
     found = resolve(project_file, substation_id, store)
     loaded = found.source or found.loaded
     if loaded is not None:
-        return loaded.substation, loaded.library, loaded
+        return loaded.substation, loaded.library, loaded, found.project
     try:
         substation: Substation | None = Substation.model_validate(read_yaml(found.file).data)
     except (InputError, ValidationError):
         substation = None
-    return substation, _library(project_file, found.project, store), None
+    return substation, _library(project_file, found.project, store), None, found.project
 
 
 def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> dict[str, Any]:
     """The substation page plus ``parts``: the rows, the options per category and the
     default rows; ``parts`` is ``None`` when the substation file cannot be read."""
     page = substation_page(project_file, substation_id, store)
-    substation, library, loaded = _source(project_file, substation_id, store)
+    substation, library, loaded, project = _source(project_file, substation_id, store)
     if substation is None:
         return page | {"parts": None}
     needs = _sfp_needs(loaded) if loaded is not None else {}
@@ -265,6 +267,7 @@ def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
         if x.part_id is not None
     ]
     own = _parts(library) if library is not None else []
+    records = _records(project, store)  # the data quality the Device picker shows
     categories = {*ROLE_CATEGORY.values(), *ADD_CATEGORIES, Category.ACCESSORY}
     return page | {
         "parts": {
@@ -274,7 +277,16 @@ def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
             ],
             "options": {
                 c.value: [
-                    {"part_id": d.part_id, "make": d.make, "model": d.model}
+                    {
+                        "part_id": d.part_id,
+                        "make": d.make,
+                        "model": d.model,
+                        "supply_type": d.supply_type.value if d.supply_type else None,
+                        "unit_power_w": d.unit_power_w,
+                        "data_quality": records[d.part_id].verified
+                        if d.part_id in records
+                        else None,
+                    }
                     for d in own
                     if d.category is c
                 ]

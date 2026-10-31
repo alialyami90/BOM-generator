@@ -395,9 +395,9 @@ reviewed by the design owner and is the intended behaviour; the prototype in
   under the id. A changed part shows the new id with the Changed marker and
   "Was X". The Role column shows whole names. Parts replaced this screen in M23.
 - **Parts (M23).** The app differs from the M22 prototype in these ways:
-  - The part select is always a select: a category with more than 12 parts does not
-    open the Device picker. A long part name is cut at the select's edge, and the full
-    name is its tooltip.
+  - A long part name is cut at the edge of the part select (or the Device picker's
+    button), and the full name is its tooltip. The picker lists the row's current part
+    first and says how many matches it hides ("Showing 8 of 20").
   - *Add a device* opens a dialog that picks the part. The model takes no equipment
     row without one, so a row cannot be added empty.
   - A category the library has no parts for (KVM, console) shows "The library has no
@@ -407,7 +407,8 @@ reviewed by the design owner and is the intended behaviour; the prototype in
     option reads "Automatic: same make first".
   - Time accessories write at once, not through the save bar. *Add accessory* needs
     the loose material's host panel; without one the row points to Loose material.
-  - Rows do not collapse at 20 or more.
+  - At 20 or more rows a row's strip stays open while one of its values is being edited
+    or refused, and an opened row stays open until the page is left.
   - The annunciator's "Mount in panel" switch is not built (Q51).
 - **Device preview (M24).** The app differs from the M22 prototype in these ways:
   - The Strip column shows a unit's own terminal strips as the engine gives them, not
