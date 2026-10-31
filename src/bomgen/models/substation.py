@@ -12,7 +12,9 @@ from typing import Any, Literal
 
 from pydantic import (
     Field,
+    NonNegativeFloat,
     NonNegativeInt,
+    PositiveFloat,
     PositiveInt,
     TypeAdapter,
     ValidationError,
@@ -21,7 +23,14 @@ from pydantic import (
 )
 
 from bomgen.models._base import DocumentKey, ExcelSheetName, InputModel, PartId
-from bomgen.models.library import CatalogueChoice, Media, PortSpeed
+from bomgen.models.library import (
+    CatalogueChoice,
+    LoadType,
+    Media,
+    PortSpeed,
+    SfpChoice,
+    SupplyType,
+)
 from bomgen.models.panel import Enclosure, PanelId, PanelKind, PortPlan, TagPrefix
 from bomgen.models.project import ConstantOverrides, LooseMaterial, OutputSettings, Spares
 
@@ -51,12 +60,37 @@ class EquipmentRole(StrEnum):
     FIREWALL = "firewall"
     FOPP = "fopp"
     OTHER = "other"
+    # Parts page rows (ADR 0024): sized as other
+    TIME_SERVER = "time_server"
+    OPERATOR_WS = "operator_ws"
+    ENGINEERING_WS = "engineering_ws"
+    DA_SERVER = "da_server"
+    KVM = "kvm"
+    CONSOLE = "console"
+    ANNUNCIATOR = "annunciator"
+    TIME_ACCESSORY = "time_accessory"
 
 
 class Side(StrEnum):
     NONE = "none"
     A = "a"
     B = "b"
+
+
+class PartOverrides(InputModel):
+    """Library values replaced for one equipment entry (ADR 0024)."""
+
+    height_u: NonNegativeInt | None = None
+    unit_power_w: NonNegativeFloat | None = None
+    supply_type: SupplyType | None = None
+    voltage_v: PositiveInt | None = None
+    power_supplies: Literal[0, 1, 2] | None = None
+    inrush_a: PositiveFloat | None = None
+    load_type: LoadType | None = None
+
+    def values(self) -> dict[str, object]:
+        """The overridden values only."""
+        return {name: getattr(self, name) for name in self.model_fields_set}
 
 
 class Equipment(InputModel):
@@ -75,12 +109,20 @@ class Equipment(InputModel):
     purpose: str | None = None
     hwio_points: NonNegativeInt | None = None  # a row's HWIO total, overriding the library's
     port_plan: PortPlan | None = None  # per unit; the layout scales it by the row's qty
+    ordering_code: str | None = None  # the BOM's ordering code instead of the library's
+    overrides: PartOverrides | None = None
+    sfp: list[SfpChoice] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def _consistent(self) -> "Equipment":
         if self.part_id is None and self.role is not EquipmentRole.L1_SWITCH:
             raise ValueError(f"part_id is needed for a {self.role.value}")
+        changed = self.ordering_code is not None or self.overrides is not None or self.sfp
+        if self.part_id is None and changed:
+            raise ValueError("pick the switch to override its data (set part_id)")
         sized = (EquipmentRole.L1_SWITCH, EquipmentRole.L2_SWITCH)
+        if self.sfp and self.role not in sized:
+            raise ValueError("sfp is for L1 and L2 switches; leave it out")
         if self.role in sized and self.port_plan is not None:
             raise ValueError(
                 f"the {self.role.value} port plan is computed by the switch sizing; "

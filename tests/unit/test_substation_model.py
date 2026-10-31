@@ -13,6 +13,7 @@ from bomgen.models.substation import (
     GeneratedPanels,
     Network,
     PairMove,
+    PartOverrides,
     Substation,
 )
 
@@ -261,3 +262,41 @@ def test_override_position_is_optional_and_one_based() -> None:
     assert move.position == 2
     with pytest.raises(ValidationError):
         DeviceMove.model_validate({"device": "gps", "panel": 1, "position": 0})
+
+
+def test_overrides_need_a_part_id_on_a_sized_switch() -> None:
+    with pytest.raises(ValidationError, match="pick the switch to override its data"):
+        Equipment(id="l1", role="l1_switch", redundant=True, overrides={"height_u": 2})
+
+
+def test_a_part_number_needs_a_part_id_on_a_sized_switch() -> None:
+    with pytest.raises(ValidationError, match="pick the switch to override its data"):
+        Equipment(id="l1", role="l1_switch", redundant=True, ordering_code="X-1")
+
+
+def test_sfp_choice_is_for_l1_and_l2_switches_only() -> None:
+    sfp = [{"speed": "1G", "media": "MM", "part_id": "SFP-1"}]
+    with pytest.raises(ValidationError, match="sfp is for L1 and L2 switches"):
+        Equipment(id="gw", part_id="X", role="other", sfp=sfp)
+    assert Equipment(id="l2", part_id="X", role="l2_switch", redundant=True, sfp=sfp).sfp
+
+
+def test_partoverrides_values_lists_only_what_was_set() -> None:
+    assert PartOverrides(height_u=2).values() == {"height_u": 2}
+
+
+@pytest.mark.parametrize(
+    "role",
+    [
+        "time_server",
+        "operator_ws",
+        "engineering_ws",
+        "da_server",
+        "kvm",
+        "console",
+        "annunciator",
+        "time_accessory",
+    ],
+)
+def test_parts_page_roles_parse(role: str) -> None:
+    assert Equipment(id="x", part_id="X", role=role).role.value == role

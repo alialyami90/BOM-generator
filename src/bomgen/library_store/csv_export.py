@@ -57,6 +57,7 @@ _CHILD_MODELS: dict[str, type[BaseModel]] = {
     "terminals": TerminalRule,
     "loose_items": LooseItem,
 }
+LOADER_ONLY = ("derived_from", "sfp_choice")  # set on derived parts, never in a library (ADR 0024)
 _REFERENCE_COLUMN = {"children": "child_part_id", "loose_items": "item_part_id"}
 
 HOUSEKEEPING_ROLES = tuple(
@@ -81,7 +82,9 @@ def _child_columns(field: str) -> tuple[str, ...]:
 
 TABLES: dict[str, tuple[str, ...]] = {
     "library.csv": ("key", "value"),
-    "devices.csv": tuple(name for name in DeviceType.model_fields if name not in CHILD_TABLES),
+    "devices.csv": tuple(
+        name for name in DeviceType.model_fields if name not in {*CHILD_TABLES, *LOADER_ONLY}
+    ),
     **{file: _child_columns(field) for field, file in CHILD_TABLES.items()},
     "mcb.csv": (
         "catalogue_id",

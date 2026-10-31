@@ -257,7 +257,9 @@
         "annunciator",
         "software",
         "cable",
-        "accessory"
+        "accessory",
+        "kvm",
+        "console"
       ],
       "title": "Category",
       "type": "string"

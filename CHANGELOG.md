@@ -14,6 +14,14 @@ project uses [Semantic Versioning](https://semver.org/).
   `bomgen layout --force` does, copying each file it replaces to
   `panels/hand-written-<date-time>/` first, and the board becomes draggable
   (M19, #238).
+- A substation's equipment entry can carry its own BOM part number
+  (`ordering_code`), overrides of the library part's height, power, supply,
+  voltage, power supplies, inrush and load type, and an SFP choice per port
+  speed and media on the L1 and L2 switches. The loader builds a derived part
+  for that substation only, so the layout, MCB sizing, power and heat use the
+  overridden values; the library is not changed. The check report warns about
+  a device with no part number. New Parts page roles, the `kvm` and `console`
+  categories, and `defaults.layout` waist height and rack start (ADR 0024).
 
 ### Changed
 

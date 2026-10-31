@@ -9,7 +9,9 @@ from pydantic import ValidationError
 from bomgen.models.library import LooseItem
 from bomgen.models.project import (
     ConstantOverrides,
+    Defaults,
     DesignConstants,
+    LayoutDefaults,
     LibrarySelection,
     LooseExtra,
     OutputSettings,
@@ -259,3 +261,7 @@ def test_power_footnotes_keep_order_and_line_breaks() -> None:
 def test_a_power_footnote_is_not_blank(bad: str) -> None:
     with pytest.raises(ValidationError, match="power footnote must not be blank"):
         OutputSettings(power_footnotes=["ok", bad])
+
+
+def test_layout_defaults_are_1000_and_200_mm() -> None:
+    assert Defaults().layout == LayoutDefaults(waist_height_mm=1000, rack_start_mm=200)

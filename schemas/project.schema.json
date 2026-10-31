@@ -96,6 +96,9 @@
         "constants": {
           "$ref": "#/$defs/DesignConstants"
         },
+        "layout": {
+          "$ref": "#/$defs/LayoutDefaults"
+        },
         "spares": {
           "$ref": "#/$defs/Spares"
         }
@@ -185,6 +188,26 @@
         }
       },
       "title": "DesignConstants",
+      "type": "object"
+    },
+    "LayoutDefaults": {
+      "additionalProperties": false,
+      "description": "Heights for placing units in a panel (ADR 0024).",
+      "properties": {
+        "rack_start_mm": {
+          "default": 200,
+          "minimum": 0,
+          "title": "Rack Start Mm",
+          "type": "integer"
+        },
+        "waist_height_mm": {
+          "default": 1000,
+          "exclusiveMinimum": 0,
+          "title": "Waist Height Mm",
+          "type": "integer"
+        }
+      },
+      "title": "LayoutDefaults",
       "type": "object"
     },
     "LibrarySelection": {
