@@ -413,8 +413,7 @@ reviewed by the design owner and is the intended behaviour; the prototype in
 - **Device preview (M24).** The app differs from the M22 prototype in these ways:
   - The Strip column shows a unit's own terminal strips as the engine gives them, not
     the X1/X2 feed strips the prototype shows, and only when some unit has strips.
-  - AC units have no branch MCB until Ali answers the AC-MCB question: their PS1 and
-    PS2 cells show "—" with the title "AC devices have no branch MCB in this design".
+  - An AC unit's own AC branch MCB (ADR 0025) shows as its PS1, and its PS2 is "—".
   - With hand-written panels the page shows what the layout would place, with a banner
     pointing to Panels, and nothing can be dragged or pinned: pins reach only
     generated panels.

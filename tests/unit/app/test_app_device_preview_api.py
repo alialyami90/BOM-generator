@@ -107,3 +107,20 @@ def test_an_issue_about_an_equipment_row_can_go_to_that_row(tmp_path: Path, proj
     no_number = next(i for i in page["issues"] if i["kind"] == "part_number")
     assert no_number["device"] == "hwio"  # its subject is the equipment id
     assert no_number["message"] == "I/O rack: no part number; the BOM prints the library model"
+
+
+def test_an_ac_unit_shows_its_ac_branch_mcb(tmp_path: Path, project: Path) -> None:
+    """ADR 0025: each VAC unit gets its own AC branch MCB, shown as its PS1."""
+    yaml = project.parent / "substations" / "gis01" / "substation.yaml"
+    text = yaml.read_text("utf-8")
+    old = "    part_id: SEL-3555-GW\n"
+    assert old in text
+    ac = old + "    overrides: { supply_type: VAC, voltage_v: 230, power_supplies: 0 }\n"
+    yaml.write_text(text.replace(old, ac, 1), "utf-8")
+
+    page = device_preview_page(project, "gis01", LibraryStore(tmp_path / "libraries"))
+
+    gw = next(u for p in page["panels"] for u in p["units"] if u["device"] == "gw")
+    assert gw["supply"] == "230 VAC"
+    assert gw["ps1"]["tag"].startswith("PSA1-C")
+    assert gw["ps2"] is None

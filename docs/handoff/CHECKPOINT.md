@@ -3,6 +3,13 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-10-31: Device preview shows the AC branch MCB (A2, app)
+
+- **Base:** main after #250. PR for review by A1.
+- **Done:** an AC unit's PS1 cell shows its own AC branch MCB from M25 (#248), no more AC-only "—".
+- **Checked:** gate passes; E2E with the gateway overridden to 230 VAC shows PSA1-C5 and PSA2-C6, no
+  console errors. Screen in `/mnt/project-files/a11-screens/m25-ac-mcb/`.
+
 ## 2026-10-31: M23 follow-ups, rows collapse and Device picker (A2, app)
 
 - **Base:** main after #247 (M24 app). PR for review by A1.

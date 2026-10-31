@@ -9,6 +9,8 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- App: Device preview shows an AC unit's own AC branch MCB (M25, ADR 0025) as
+  its PS1, in place of the "—" it showed before.
 - App: Parts rows collapse to a one-line summary at 20 or more rows ("1 U ·
   77 W · 125 VDC · 2 overrides"), and a category with more than 12 parts picks
   its part with the Device picker: search, up to 8 matches with make, model,
