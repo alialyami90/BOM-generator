@@ -176,7 +176,7 @@ app (WebView2). Plan:
 | M19 | Panels board drag fix (section 6a): pointer-event drag, Windows reproduction, test. Ships first; it is independent. |
 | M20 | ADR 0024; `Equipment.ordering_code`, `overrides`, `sfp`, new roles and categories, `defaults.layout`; derived parts in the loader; schemas; spec update. TDD, golden test unchanged. |
 | M21 | Panel priority and waist-height placement in `engine/layout.py`; ADR 0013 amendment; layout preview gives top U per unit. |
-| M22 | Parts page design in `docs/ui/` with the impeccable skill (CLAUDE.md "UI work"). |
+| M22 | Parts page and device preview design in `docs/ui/` with the impeccable skill (CLAUDE.md "UI work"); the new step is named "Device preview". |
 | M23 | Parts page in the app, replacing Network; writers for the new fields. |
 | M24 | Preview page (engine API for per-unit MCBs and positions, table, elevation with dragging). |
 

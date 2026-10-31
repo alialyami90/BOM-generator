@@ -937,10 +937,12 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
 - **M21 — Panel priority and waist-height placement.** `engine/layout.py` stacks each panel by
   priority and places KVM and console screens at waist height; amends ADR 0013; the layout
   preview gives a top U per unit.
-- **M22 — Parts page design.** Tokens, component specs and prototype in `docs/ui/`, made with
-  the impeccable skill (CLAUDE.md "UI work").
+- **M22 — Parts page and device preview design.** Component specs and prototype in `docs/ui/` for
+  both screens (the new step is called **Device preview**, so the rail does not have two "Preview"
+  items), made with the impeccable skill (CLAUDE.md "UI work"). Plan:
+  [`superpowers/plans/2026-10-31-m22-parts-and-device-preview-design.md`](superpowers/plans/2026-10-31-m22-parts-and-device-preview-design.md).
 - **M23 — Parts page in the app.** Replaces the Network page; writers for the new fields.
-- **M24 — Preview page.** Engine API for per-unit MCBs and positions, the device table, and the
+- **M24 — Device preview page.** Engine API for per-unit MCBs and positions, the device table, and the
   panel elevation with dragging.
 
 ## 5. Testing strategy
