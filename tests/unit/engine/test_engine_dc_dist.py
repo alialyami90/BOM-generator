@@ -141,6 +141,30 @@ def test_inrush_without_a_trip_curve_is_not_sized_for() -> None:
     assert (sizing.rating_a, sizing.trip_multiple, sizing.inrush_need_a) == (2, None, None)
 
 
+def ac_sized(**fields: Any) -> BranchSizing:
+    """A 230 V AC unit sized against an AC set that differs from the DC set."""
+    part = powered("VAC", "workstation", supply_type="VAC", voltage_v=None, power_supplies=0)
+    lib = library(part | fields, mcb=C_CURVE)
+    dc_set = lib.catalogues.mcb.model_copy(update={"ratings_a": [3, 20], "dc_rating_v": 250})
+    lib = lib.model_copy(
+        update={"catalogues": lib.catalogues.model_copy(update={"mcb_dc": dc_set})}
+    )
+    return branch_sizing(get(lib, "VAC"), lib, DesignConstants())
+
+
+def test_an_ac_branch_is_sized_from_the_ac_catalogue() -> None:
+    # 1.3 x 250 W / 230 V = 1.41 A -> 2 A in the AC set (the DC set would give 3 A).
+    sizing = ac_sized(unit_power_w=250)
+    assert sizing.running_a == pytest.approx(1.413, abs=0.001)
+    assert sizing.rating_a == 2
+
+
+def test_an_ac_branch_uses_the_ac_magnetic_multiple() -> None:
+    # 40 A inrush / 5 (C curve on AC) = 8 A -> 10 A.
+    sizing = ac_sized(inrush_a=40)
+    assert (sizing.trip_multiple, sizing.rating_a, sizing.set_by) == (5, 10, ("inrush",))
+
+
 def test_branch_mcb_floor_is_2a() -> None:
     # Q35 (c): 10 W needs 0.1 A and the catalogue has 1 A, but the floor is 2 A.
     sizing = sized(C_CURVE, min_branch_mcb_a=None)

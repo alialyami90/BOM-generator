@@ -136,6 +136,7 @@ Only groups A–C are chosen by the engineer; groups D–H and the HWIO column a
 - CINC = 6A normally; 16A when the cabinet has a 10A auxiliary socket (Cabinet 002).
 - Branches in this order: C1 lamp 1A; C2 fan-1 + TH-1 2A; C3 fan-2 + TH-2 2A; C4 TH-3 1A; socket 10A if present; one 2A spare. The WS console (no fans) has C1 lamp, C2 TH-1, C3 spare, all 1A.
 - AC auxiliary contacts: one on CINC and one on each fan circuit (C2, C3) → 3; WS console 1 (CINC only).
+- AC-powered devices (ADR 0025): each unit of a group B part with `supply_type: VAC` (not `excluded_from_power`) gets its own branch after the socket and before the spare, in group B order, named by its tag without the panel prefix and sized as the DC branches are (group F, ADR 0019) from the AC catalogue at the part's voltage or the AC system voltage. The spare stays the largest housekeeping branch. CINC is raised to the smallest rating above the largest such branch and to at least the panel's AC design current (Σ current factor × W ÷ V over those units). A part with `alarm_on_branch_mcb` adds its branch to the AC auxiliary contacts. The example has no such device.
 
 **Breaker part numbers.** Breaker part numbers come from the library's catalogues (ADR 0017, ADR 0023). The default MCB catalogue is Schneider Acti9 iC60N 2-pole, `A9F742` + 2-digit rating (1A = A9F74201, 2A = A9F74202, 6A = A9F74206, 10A = A9F74210, 16A = A9F74216), with aux contact A9A26924; each catalogue gives its codes per rating (`code_pattern` or `codes`), its trip curve and magnetic multiples, and `dc_rating_v`. The library may carry further brand sets (`catalogue_brands`) for MCBs, aux contacts, terminal blocks, busbars and housekeeping parts, and a project or substation picks one per catalogue with `catalogue_choice`; the substation's choice wins over the project's. `catalogue_choice.mcb` sizes the AC branches (group E, including CINC) and, unless `mcb_dc` is set, the DC branches too; `mcb_dc` names a separate DC-rated set for group F and must have `dc_rating_v`. Alternatives of a device are library parts that share its `alt_group` key, optionally ranked `tier: low | mid | high`.
 
@@ -426,7 +427,7 @@ Build one BOM sheet per cabinet with the HWIO column hidden, and let the calcula
 3. Size network accessories from each switch's port plan: SFPs by speed and media (the switch's SFP choice for that speed and media, else the first matching SFP of the switch's make), FOPP pigtails = cores, cable managers.
 4. Compute device power, then run the heat checks and choose ventilation (fans + 3 thermostats, or filters + 1).
 5. Add the housekeeping kit (lamp, ventilation parts, IPR kit, socket, change-over diodes if any single-supply DC loads).
-6. Build AC distribution: CINC, branches in fixed order, spare, aux contacts.
+6. Build AC distribution: CINC, branches in fixed order, one branch per AC-powered unit, spare, aux contacts.
 7. Build DC distribution: Q1/Q2 mains, one branch per supply unit, spares, QCOD circuits, aux contacts; size each branch from running current, inrush and the 2 A floor (Derivation rules, group F) and the mains from ΣQ, with codes from the DC catalogue.
 8. Build terminal strips from the rules table plus each device's own terminal needs.
 9. Add grounding busbars.
