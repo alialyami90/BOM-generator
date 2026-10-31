@@ -4881,6 +4881,52 @@ devices:
     height_u: 1
     input_v_min: 18
     input_v_max: 300
+  - part_id: FG-401G  # FortiGate 400G Series Data Sheet FG-400G-DAT FG-400G-DAT-R06-20261013, p. 10
+    category: "firewall"
+    alt_group: "FG-401G"
+    make: "Fortinet"
+    model: "FortiGate 401G"
+    ordering_code: "FG-401G"
+    description_template: "FortiGate 401G next-generation firewall, 960 GB SSD, dual AC supplies, 1U rack mount"
+    supply_type: "VAC"
+    voltage_v: 230
+    unit_power_w: 295
+    load_type: "CONTINUOUS"
+    power_supplies: 0
+    hwio_points: 0
+    height_u: 1
+    input_v_min: 100
+    input_v_max: 240
+    ports:
+      - { count: 8, speed: 5G, media: RJ45, kind: fixed }
+      - { count: 1, speed: 2.5G, media: RJ45, kind: fixed }
+      - { count: 1, speed: 1G, media: RJ45, kind: fixed }
+      - { count: 16, speed: 1G, kind: sfp_slot }
+      - { count: 4, speed: 10G, kind: sfp_slot }
+      - { count: 4, speed: 25G, kind: sfp_slot }
+  - part_id: FG-701G  # FortiGate 700G Series Data Sheet FG-700G-DAT FG-700G-DAT-R15-20260929, p. 10
+    category: "firewall"
+    alt_group: "FG-701G"
+    make: "Fortinet"
+    model: "FortiGate 701G"
+    ordering_code: "FG-701G"
+    description_template: "FortiGate 701G next-generation firewall, 960 GB SSD, dual AC supplies, 1U rack mount"
+    supply_type: "VAC"
+    voltage_v: 230
+    unit_power_w: 295
+    load_type: "CONTINUOUS"
+    power_supplies: 0
+    hwio_points: 0
+    height_u: 1
+    input_v_min: 100
+    input_v_max: 240
+    ports:
+      - { count: 8, speed: 5G, media: RJ45, kind: fixed }
+      - { count: 1, speed: 2.5G, media: RJ45, kind: fixed }
+      - { count: 1, speed: 1G, media: RJ45, kind: fixed }
+      - { count: 16, speed: 1G, kind: sfp_slot }
+      - { count: 4, speed: 10G, kind: sfp_slot }
+      - { count: 4, speed: 25G, kind: sfp_slot }
 catalogues:
   enclosure_u: 42  # rack units of the standard enclosure (ADR 0013)
   mcb:  # spec: Derivation rules -> Breaker part numbers

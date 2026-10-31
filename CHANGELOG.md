@@ -9,6 +9,10 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- The installer ships psa-devices 1.6.0 with the FortiGate 401G and 701G
+  firewalls from the contractor's 2026-10-31 delivery, each its own
+  alternative group. Their 2.5G, 5G and 25G ports are listed as on the
+  datasheet and are never sized for SFPs (ADR 0027).
 - A port group can give 2.5G, 5G and 25G ports (ADR 0027 proposed). They are
   descriptive only: an equipment entry's `l2_speed` and an SFP choice refuse
   them, so they never become an SFP pick.
