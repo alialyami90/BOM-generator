@@ -9,6 +9,13 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Device preview engine (M24): `engine.preview.device_preview` lays out the
+  substation, builds it in memory and lists every generated unit with its
+  panel, top U, branch MCBs, terminal strips and overridden values, plus the
+  layout and check issues; nothing is written. A layout override can pin a
+  unit by its top U (`top_u`, exclusive with `position`); a pin that leaves
+  the rack or overlaps another is a layout error (ADR 0013 amended). Branch
+  MCB records name the unit and feed they serve.
 - App: the Parts page replaces Network (M23). Each device row picks its
   library part and can carry a BOM part number, this design's overrides of the
   part's height, power, supply, voltage, supplies, inrush and load type (a value

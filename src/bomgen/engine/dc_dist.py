@@ -3,6 +3,7 @@ Data model and generation order, step 7)."""
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import Literal
 
 from bomgen.engine.errors import EngineError
 from bomgen.engine.items import BomItem
@@ -20,7 +21,7 @@ from bomgen.models.library import DeviceType, Library, McbCatalogue, SupplyType
 from bomgen.models.panel import Panel
 from bomgen.models.project import DesignConstants, LooseExtra
 
-FEEDS = (1, 2)
+FEEDS: tuple[Literal[1, 2], ...] = (1, 2)
 QCOD_SPARES = 1  # "QCOD-2 spare"
 
 
@@ -30,6 +31,7 @@ class FedLoad:
 
     name: str
     device: DeviceType
+    unit_tag: str | None = None  # a panel unit's tag; None for a loose item
 
 
 @dataclass(frozen=True)
@@ -49,19 +51,20 @@ class _Branch:
     rating: int
     alarmed: bool
     sizing: BranchSizing | None  # None for a spare
+    unit_tag: str | None = None
 
 
 def single_fed_loads(
     panel: Panel, rows: Sequence[DeviceRow], library: Library, loose: Sequence[LooseExtra]
 ) -> list[FedLoad]:
     """Group B units with one supply, then loose items fed from this panel."""
-    devices = [row.device for row in rows for _ in range(row.instance.qty)]
-    devices += [
-        lookup(library, item.part_id)
+    units = [(row.device, tag) for row in rows for tag in row.unit_tags]
+    units += [
+        (lookup(library, item.part_id), None)
         for item in loose
         if item.part_id is not None and item.fed_from == panel.id
     ]
-    return [FedLoad(_load_name(d), d) for d in devices if d.power_supplies == 1]
+    return [FedLoad(_load_name(d), d, tag) for d, tag in units if d.power_supplies == 1]
 
 
 def _load_name(device: DeviceType) -> str:
@@ -143,7 +146,8 @@ def dc_distribution(
         sizing = branch_sizing(row.device, library, constants)
         for unit_tag in row.unit_tags:
             name = _unit_name(unit_tag, row.device, panel.tag_prefix)
-            branches.append(_Branch(name, sizing.rating_a, row.device.alarm_on_branch_mcb, sizing))
+            alarm = row.device.alarm_on_branch_mcb
+            branches.append(_Branch(name, sizing.rating_a, alarm, sizing, unit_tag))
     if not branches and not fed:
         return DcCircuits([], 0, 0, 0.0, 0, 0, [])
 
@@ -158,24 +162,29 @@ def dc_distribution(
     lines: list[BomLine] = []
     sized: list[BranchMcb] = []
 
-    def branch_line(tag: str, branch: _Branch, load: str) -> None:
+    def branch_line(tag: str, branch: _Branch, load: str, feed: Literal[1, 2] | None) -> None:
         lines.append(mcb_line(mcb, Group.F, tag, branch.rating, load))
         if branch.sizing is not None:
             fields = branch.sizing.model_dump()
-            sized.append(BranchMcb(panel_id=panel.id, tag=tag, load=load, **fields))
+            unit = branch.unit_tag
+            sized.append(
+                BranchMcb(panel_id=panel.id, tag=tag, load=load, unit_tag=unit, feed=feed, **fields)
+            )
 
     for feed in FEEDS:
         lines.append(mcb_line(mcb, Group.F, f"{prefix}-Q{feed}", main_a, f"Main DC supply-{feed}"))
         for n, branch in enumerate(branches, start=1):
             load = branch.load if branch.load == "SPARE" else f"{branch.load} PS{feed}"
-            branch_line(f"{prefix}-Q{feed}.{n}", branch, load)
+            branch_line(f"{prefix}-Q{feed}.{n}", branch, load, feed)
 
-    qcod_sizings = [(load.name, branch_sizing(load.device, library, constants)) for load in fed]
-    qcod = [_Branch(name, sizing.rating_a, False, sizing) for name, sizing in qcod_sizings]
+    qcod: list[_Branch] = []
+    for single in fed:
+        sizing = branch_sizing(single.device, library, constants)
+        qcod.append(_Branch(single.name, sizing.rating_a, False, sizing, single.unit_tag))
     if qcod:
         qcod += [_Branch("SPARE", max(b.rating for b in qcod), False, None)] * QCOD_SPARES
     for n, branch in enumerate(qcod, start=1):
-        branch_line(f"{prefix}-QCOD-{n}", branch, branch.load)
+        branch_line(f"{prefix}-QCOD-{n}", branch, branch.load, None)
 
     alarmed = [f"Q{feed}" for feed in FEEDS]
     alarmed += [f"Q{f}.{n}" for n, b in enumerate(branches, 1) if b.alarmed for f in FEEDS]

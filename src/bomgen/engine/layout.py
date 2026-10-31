@@ -62,6 +62,8 @@ IssueKind = Literal[
     "port-capacity",
     "replaced-panel",
     "waist-height",
+    "pin-overlaps",
+    "pin-outside-rack",
 ]
 WARNING_KINDS: frozenset[IssueKind] = frozenset(
     {"stale-override", "stale-removal", "replaced-panel"}
@@ -154,11 +156,20 @@ def _stack_order(unit: Unit) -> tuple[int, int, str, int]:
     return (unit.priority, *_order(unit))
 
 
+@dataclass(frozen=True)
+class Placement:
+    tops: dict[Unit, int]  # placed rack units
+    unplaced: list[Unit]  # rack units that do not fit, in stack order
+    used_u: int  # placed blocks and the blank plates between them
+    overflow_u: int  # the unplaced units' blocks
+
+
 @dataclass
 class PanelFill:
     number: int
     units: list[Unit] = field(default_factory=list)
     pins: dict[Unit, int | None] = field(default_factory=dict)  # pinned units, position (R7)
+    fixed: dict[Unit, int] = field(default_factory=dict)  # units pinned by top U
 
     def stack(self) -> list[Unit]:
         """The units top to bottom: priority, then group order, with positioned pins at
@@ -186,40 +197,59 @@ class PanelFill:
         return sum(1 for x in self.units if x.block_u == 0)
 
     def fits(self, unit: Unit, rules: LayoutRules) -> bool:
-        trial = PanelFill(self.number, [*self.units, unit], dict(self.pins))
+        trial = PanelFill(self.number, [*self.units, unit], dict(self.pins), dict(self.fixed))
         return trial.place(rules) is not None
 
     def place(self, rules: LayoutRules) -> dict[Unit, int] | None:
-        """Each rack unit's top U (U1 at the bottom), or None when the stack does not fit.
+        """Each rack unit's top U (U1 at the bottom), or None when the stack does not fit."""
+        placement = self.placement(rules)
+        return None if placement.unplaced else placement.tops
 
-        Units fill from the top in stack order. Unpinned KVM and console units are anchored
-        with the first one's bottom edge at ``waist_u``; units that do not fit above the
-        anchor go below it, in stack order (ADR 0013, amended M21).
+    def placement(self, rules: LayoutRules) -> Placement:
+        """Each rack unit's top U (U1 at the bottom), and the units that do not fit.
+
+        Units pinned by top U sit there, and unpinned KVM and console units are anchored
+        with the first one's bottom edge at ``waist_u``. The other units fill from the top
+        in stack order, each going below a fixed block it would overlap or touch without
+        its clearance (ADR 0013, amended M21 and M24).
         """
-        rack = [x for x in self.stack() if x.block_u > 0]
-        waist = rules.waist_u
+        tops = self.blocks(rules)
+        unplaced: list[Unit] = []
+        cursor = rules.capacity_u
+        for unit in self.stack():
+            if unit.block_u == 0 or unit in tops:
+                continue
+            top = _free_top(unit, cursor, self.blocks(rules), rules)
+            bottom = top - unit.block_u + 1
+            if bottom < 1:
+                unplaced.append(unit)
+                continue
+            tops[unit] = top
+            cursor = bottom - 1 - _clearance(unit, rules)
+        placed = [x for x in self.stack() if x in tops]
+        return Placement(
+            tops,
+            unplaced,
+            used_u(placed, rules.blank_plate_u),
+            sum(x.block_u for x in unplaced),
+        )
+
+    def blocks(self, rules: LayoutRules) -> dict[Unit, int]:
+        """The units placed before the fill: top U pins, then the waist anchor."""
+        rack = {x for x in self.units if x.block_u > 0}
+        tops = {x: top for x, top in self.fixed.items() if x in rack}
         anchored = self._anchored()
-        if waist is None or not anchored:
-            return _from_top(rack, rules.capacity_u, rules)
-        others = [x for x in rack if x not in anchored]
-        tops = _anchor(anchored, waist, rules)
-        top = max(tops.values())
-        if top > rules.capacity_u:  # reported as waist-height; stack from the top instead
-            return _from_top(rack, rules.capacity_u, rules)
-        anchor_top, above, count = top, rules.capacity_u, 0
-        for unit in others:
-            bottom = above - unit.block_u + 1
-            if bottom < anchor_top + 1 + _clearance(unit, rules):
-                break
-            tops[unit] = above
-            above = bottom - 1 - _clearance(unit, rules)
-            count += 1
-        below = _from_top(others[count:], waist - 1 - _clearance(anchored[0], rules), rules)
-        return None if below is None else tops | below
+        if rules.waist_u is not None and anchored and self.waist_short(rules) is None:
+            tops |= _anchor(anchored, rules.waist_u, rules)
+        return tops
 
     def _anchored(self) -> list[Unit]:
         """The KVM and console units held at waist height: rack units with no pinned place."""
-        return [x for x in self.stack() if x.waist and x.block_u > 0 and self.pins.get(x) is None]
+        return [
+            x
+            for x in self.stack()
+            if x.waist and x.block_u > 0 and self.pins.get(x) is None and x not in self.fixed
+        ]
 
     def waist_short(self, rules: LayoutRules) -> int | None:
         """The anchor's top U when the panel is too short to hold it at waist height."""
@@ -264,15 +294,27 @@ def _anchor(anchored: Sequence[Unit], waist: int, rules: LayoutRules) -> dict[Un
     return tops
 
 
-def _from_top(units: Sequence[Unit], top: int, rules: LayoutRules) -> dict[Unit, int] | None:
-    tops: dict[Unit, int] = {}
-    for unit in units:
-        bottom = top - unit.block_u + 1
-        if bottom < 1:
-            return None
-        tops[unit] = top
-        top = bottom - 1 - _clearance(unit, rules)
-    return tops
+def _free_top(unit: Unit, top: int, blocks: dict[Unit, int], rules: LayoutRules) -> int:
+    """The highest top U at or below ``top`` where ``unit`` clears every fixed block."""
+    moved = True
+    while moved:
+        moved = False
+        for other, other_top in blocks.items():
+            under = other_top - other.block_u - _clearance(other, rules)
+            if under >= top or top - unit.block_u - _clearance(unit, rules) >= other_top:
+                continue
+            top, moved = under, True
+            break
+    return top
+
+
+def _label(unit: Unit) -> str:
+    return unit.key if unit.side is Side.NONE else f"{unit.key}/{unit.side.value}"
+
+
+def _span(unit: Unit, top: int) -> str:
+    bottom = top - unit.block_u + 1
+    return f"U{top}" if bottom == top else f"U{top} to U{bottom}"
 
 
 @dataclass
@@ -339,7 +381,12 @@ class _Builder:
             best.add(unit)
 
     def move(
-        self, units: Sequence[Unit], number: int, what: str, position: int | None = None
+        self,
+        units: Sequence[Unit],
+        number: int,
+        what: str,
+        position: int | None = None,
+        top_u: int | None = None,
     ) -> None:
         target = self.panel(number)
         if target is None:
@@ -356,8 +403,11 @@ class _Builder:
                 if unit in panel.units:
                     panel.units.remove(unit)
                     panel.pins.pop(unit, None)
+                    panel.fixed.pop(unit, None)
             target.add(unit)
             target.pins[unit] = position
+            if top_u is not None:
+                target.fixed[unit] = top_u
         if target.used_u(self.rules) > self.rules.capacity_u:
             self.issues.append(
                 LayoutIssue(
@@ -386,6 +436,7 @@ class _Builder:
                         f"console at waist height needs {span}",
                     )
                 )
+            self.issues += _pin_issues(panel, self.rules)
             if not panel.units:
                 self.issues.append(
                     LayoutIssue(
@@ -396,6 +447,39 @@ class _Builder:
                     )
                 )
         return Layout(self.panels, self.issues)
+
+
+def _pin_issues(panel: PanelFill, rules: LayoutRules) -> list[LayoutIssue]:
+    """A top U pin that leaves the rack or overlaps another fixed block (ADR 0013, M24)."""
+    issues: list[LayoutIssue] = []
+    where = f"panel {panel.number}"
+    blocks = panel.blocks(rules)
+    order = [x for x in panel.stack() if x in blocks]
+    for i, unit in enumerate(order):
+        top = blocks[unit]
+        if unit in panel.fixed and (top > rules.capacity_u or top - unit.block_u < 0):
+            issues.append(
+                LayoutIssue(
+                    "pin-outside-rack",
+                    where,
+                    f"{_label(unit)} at {_span(unit, top)} leaves the rack of {where} "
+                    f"(U1 to U{rules.capacity_u})",
+                )
+            )
+        for other in order[i + 1 :]:
+            if unit not in panel.fixed and other not in panel.fixed:
+                continue
+            other_top = blocks[other]
+            if top - unit.block_u < other_top and other_top - other.block_u < top:
+                issues.append(
+                    LayoutIssue(
+                        "pin-overlaps",
+                        where,
+                        f"{_label(unit)} at {_span(unit, top)} overlaps {_label(other)} at "
+                        f"{_span(other, other_top)} in {where}",
+                    )
+                )
+    return issues
 
 
 def fill(units: Sequence[Unit], rules: LayoutRules) -> Layout:
@@ -479,7 +563,7 @@ def auto_layout(
             if not group:
                 continue
             what = _describe(ref) if side is None else f"{_describe(ref)} side {side.upper()}"
-            builder.move(group, number, what, move.position)
+            builder.move(group, number, what, move.position, move.top_u)
     return builder.finish()
 
 
@@ -704,18 +788,23 @@ def _size(loaded: LoadedSubstation) -> tuple[NetworkPlan, NetworkInputs, list[L1
     return size_network(net, l1, l2, busiest), net, candidates
 
 
+def runs(panel: PanelFill) -> list[list[Unit]]:
+    """The panel's units grouped as its generated rows: one run per row, in row order."""
+    result: list[list[Unit]] = []
+    for unit in sorted(panel.units, key=lambda x: (x.rank, x.side.value, x.n)):
+        last = result[-1][-1] if result else None
+        if last and (last.device, last.side, last.n + 1) == (unit.device, unit.side, unit.n):
+            result[-1].append(unit)
+        else:
+            result.append([unit])
+    return result
+
+
 def _rows(panel: PanelFill, loaded: LoadedSubstation) -> list[DeviceInstance]:
     devices = {d.part_id: d for d in loaded.library.devices}
     entries = {e.id: e for e in loaded.substation.equipment}
-    runs: list[list[Unit]] = []
-    for unit in sorted(panel.units, key=lambda x: (x.rank, x.side.value, x.n)):
-        last = runs[-1][-1] if runs else None
-        if last and (last.device, last.side, last.n + 1) == (unit.device, unit.side, unit.n):
-            runs[-1].append(unit)
-        else:
-            runs.append([unit])
     rows = []
-    for run in runs:
+    for run in runs(panel):
         first = run[0]
         entry = entries[first.device]
         start = first_number(devices[first.part_id]) + first.n - 1 if first.n > 1 else None

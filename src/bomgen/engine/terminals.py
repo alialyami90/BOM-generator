@@ -151,6 +151,22 @@ def _device_strips(
     return [*per_unit, *xdin, *per_port]
 
 
+def unit_strips(row: DeviceRow, library: Library, index: int) -> tuple[str, ...]:
+    """The strip codes of the row's ``index``-th unit (0-based), as group G names them;
+    a strip shared by the row's units counts for each, serial-port strips are left out."""
+    codes: list[str] = []
+    for rule, units in _rules(row, library):
+        if rule.per == "serial_port":
+            continue
+        strips = _expand(rule, units)
+        if len(strips) < units:  # one strip holds every unit's terminals
+            codes += [x.code for x in strips]
+            continue
+        per = units // row.instance.qty
+        codes += [x.code for x in strips[index * per : (index + 1) * per]]
+    return tuple(dict.fromkeys(codes))
+
+
 def _rules(row: DeviceRow, library: Library) -> list[tuple[TerminalRule, int]]:
     """The row's terminal rules and its kit children's, each with its unit count."""
     device, qty = row.device, row.instance.qty

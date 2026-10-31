@@ -8,7 +8,7 @@ substation file); the loader resolves them and applies the project defaults.
 from enum import StrEnum
 from pathlib import Path
 from string import Formatter
-from typing import Any, Literal
+from typing import Any, Literal, Self
 
 from pydantic import (
     Field,
@@ -163,15 +163,27 @@ class UnitRef(InputModel):
     side: UnitSide | None = None
 
 
+def _one_place(position: int | None, top_u: int | None) -> None:
+    if position is not None and top_u is not None:
+        raise ValueError("give position or top_u, not both")
+
+
 class DeviceMove(UnitRef):
     """Move single units into a panel; a redundant entry's move names its side.
 
-    ``position`` (1 = top) is the unit's place among the panel's rack devices; without
-    it the unit takes its automatic place in the panel (ADR 0013, R7).
+    ``position`` (1 = top) is the unit's place among the panel's rack devices; ``top_u``
+    fixes the top of its block at that rack U (1 = bottom). Without either the unit takes
+    its automatic place in the panel (ADR 0013, R7).
     """
 
     panel: PositiveInt
     position: PositiveInt | None = None
+    top_u: PositiveInt | None = None
+
+    @model_validator(mode="after")
+    def _one_place(self) -> Self:
+        _one_place(self.position, self.top_u)
+        return self
 
 
 class PairMove(InputModel):
@@ -181,6 +193,12 @@ class PairMove(InputModel):
     unit: PositiveInt | None = None
     panel: tuple[PositiveInt, PositiveInt]
     position: PositiveInt | None = None  # in both panels, as on DeviceMove
+    top_u: PositiveInt | None = None  # in both panels, as on DeviceMove
+
+    @model_validator(mode="after")
+    def _one_place(self) -> Self:
+        _one_place(self.position, self.top_u)
+        return self
 
     @field_validator("panel")
     @classmethod
