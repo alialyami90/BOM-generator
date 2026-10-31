@@ -43,6 +43,13 @@ project uses [Semantic Versioning](https://semver.org/).
   Checks lists. A device's own loose items, such as the SEL-2488 antenna kit,
   reach the Loose Material sheet without a loose material block. New
   substations' panels get the spec's 40 XIP terminals.
+- Power Consumption agrees with the BOM: the "MCB rating per device" column
+  shows the rating of the row's own branch MCB (2 A in the example, where it
+  showed 1 A), and each row is drawn at its part's own voltage (ADR 0028,
+  Proposed). The check report names AC loose loads, which the DC-only
+  External Equipment block leaves out of the totals. When no cabinet has
+  fans, the steel coefficient box no longer lands on the constants box. The
+  device nameplate row is a normal BOM row, not a tall white grounding row.
 - Leaving Parts, Settings or the project Overview with unsaved changes asks
   first: Keep editing, Discard changes or Save and leave. This applies to a
   link, another substation and another project, and the status bar says

@@ -214,3 +214,13 @@ def test_loose_material_print_setup_matches_the_panel_sheets(loose: BomSheet) ->
 def test_panel_sheet_holds_only_its_own_table(model: SheetModel) -> None:
     assert model.rows[2].height == 26.25
     assert max(row for row, _ in model.cells) == 13
+
+
+def test_nameplate_row_is_a_body_row_not_a_grounding_row() -> None:
+    # Formatting -> Panel BOM sheets: grounding rows are tall and white; the device
+    # nameplate row (ADR 0026) is group H too, but it is an ordinary part row.
+    plate = line(Group.H, None, description="Device nameplate", qty=28, part_id="NAMEPLATE")
+    m = bom_sheet(panel(LINES[-1], plate)).model
+    assert m.rows[4].height == 131.25  # the busbar row
+    assert m.rows[5].height == 30
+    assert style(m, 5, 3).fill is None
