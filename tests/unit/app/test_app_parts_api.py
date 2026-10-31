@@ -9,6 +9,7 @@ import pytest
 
 from bomgen.app import api
 from bomgen.app.parts import parts_page
+from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.package import pack
 from bomgen.library_store.store import LibraryStore
 
@@ -275,7 +276,14 @@ def test_options_carry_the_data_quality_of_the_installed_library(
 ) -> None:
     package = tmp_path / "lib.bomlib"
     db = Path(__file__).parents[3] / "data" / "device-db"
-    pack(EXAMPLES / "library.yaml", package, name="psa-devices", version="1.2.0", extra_dirs=[db])
+    library = read_yaml(project).data["library"]  # the version the example asks for
+    pack(
+        EXAMPLES / "library.yaml",
+        package,
+        name=library["name"],
+        version=library["version"],
+        extra_dirs=[db],
+    )
     store.import_package(package)
     edit(project, "  file: library.yaml\n", "")
 
