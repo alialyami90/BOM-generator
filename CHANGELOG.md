@@ -9,6 +9,12 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Generated panels stack their devices by priority: time server on top, then
+  network, then servers and workstations, then the rest, keeping equipment
+  order within each. A KVM or console sits with its bottom edge at waist
+  height (`defaults.layout`, U18 with the assumed 1000 mm and 200 mm), and
+  every unit gets a top U. A panel too short for that is a layout error (M21,
+  ADR 0013 amended).
 - Panels: a board of hand-written panels has "Lay out panels from the
   equipment". After a confirmation it writes the generated panel files as
   `bomgen layout --force` does, copying each file it replaces to
