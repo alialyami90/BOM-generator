@@ -9,6 +9,10 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- `data/device-db/contractor-return-2026-10-31.md` and its CSV list what goes
+  back to the contractor after the 2026-10-31 delivery: 270 asks over
+  undelivered worklist parts, missing fields, configured ordering codes, three
+  SEL management-port speeds, the Q54 power figures and Hager DC ratings.
 - The installer ships psa-devices 1.6.0 with the FortiGate 401G and 701G
   firewalls from the contractor's 2026-10-31 delivery, each its own
   alternative group. Their 2.5G, 5G and 25G ports are listed as on the

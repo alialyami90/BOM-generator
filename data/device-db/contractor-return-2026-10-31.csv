@@ -1,0 +1,271 @@
+part_id,ask,detail
+RST2228-L2,not_delivered,worklist part with no row in devices.csv
+RST2228-L1-24MM,not_delivered,worklist part with no row in devices.csv
+SEL-2730M-EXT,missing_fields,inrush_ms
+SEL-3555-GW,not_delivered,worklist part with no row in devices.csv
+FGR-60F,missing_fields,"inrush_a, inrush_ms"
+SEL-2488,missing_fields,inrush_ms
+SEL-3555-RTAC,not_delivered,worklist part with no row in devices.csv
+SEL-2240,missing_fields,"inrush_ms, ordering_code"
+SEL-3355,not_delivered,worklist part with no row in devices.csv
+NAP-F23,not_delivered,worklist part with no row in devices.csv
+SZ2500-LAMP,not_delivered,worklist part with no row in devices.csv
+SK3243-FAN,missing_fields,"inrush_a, inrush_ms, input_v_min, input_v_max, height_u"
+SK3110-TH,missing_fields,"inrush_a, inrush_ms, input_v_min, input_v_max, height_u"
+IPR-2903685,missing_fields,"inrush_a, inrush_ms, height_u"
+NAP-K55,missing_fields,"inrush_a, inrush_ms, height_u"
+FOPP-PIGTAIL-LC-SM.CORNING-LOW,not_delivered,worklist part with no row in devices.csv
+FOPP-PIGTAIL-LC-SM.CORNING-MID,not_delivered,worklist part with no row in devices.csv
+FOPP-PIGTAIL-LC-SM.PANDUIT-MID,not_delivered,worklist part with no row in devices.csv
+FOPP-PIGTAIL-LC-SM.PANDUIT-HIGH,not_delivered,worklist part with no row in devices.csv
+RST2228-L2.MOXA-LOW,not_delivered,worklist part with no row in devices.csv
+RST2228-L2.MOXA-MID,not_delivered,worklist part with no row in devices.csv
+RST2228-L2.MOXA-HIGH,not_delivered,worklist part with no row in devices.csv
+RST2228-L2.CISCO-LOW,not_delivered,worklist part with no row in devices.csv
+RST2228-L2.CISCO-MID,missing_fields,inrush_ms
+RST2228-L2.CISCO-HIGH,not_delivered,worklist part with no row in devices.csv
+RST2228-L1-24MM.MOXA-LOW,not_delivered,worklist part with no row in devices.csv
+RST2228-L1-24MM.MOXA-MID,not_delivered,worklist part with no row in devices.csv
+RST2228-L1-24MM.MOXA-HIGH,not_delivered,worklist part with no row in devices.csv
+RST2228-L1-24MM.CISCO-LOW,not_delivered,worklist part with no row in devices.csv
+RST2228-L1-24MM.CISCO-MID,not_delivered,worklist part with no row in devices.csv
+RST2228-L1-24MM.CISCO-HIGH,not_delivered,worklist part with no row in devices.csv
+SEL-2730M-EXT.MOXA-LOW,not_delivered,worklist part with no row in devices.csv
+SEL-2730M-EXT.MOXA-MID,not_delivered,worklist part with no row in devices.csv
+SEL-2730M-EXT.MOXA-HIGH,not_delivered,worklist part with no row in devices.csv
+SEL-2730M-EXT.SIEMENS-MID,not_delivered,worklist part with no row in devices.csv
+SEL-2730M-EXT.SIEMENS-HIGH,not_delivered,worklist part with no row in devices.csv
+SEL-3555-GW.SIEMENS-LOW,not_delivered,worklist part with no row in devices.csv
+SEL-3555-GW.SIEMENS-MID,not_delivered,worklist part with no row in devices.csv
+SEL-3555-GW.SIEMENS-HIGH,not_delivered,worklist part with no row in devices.csv
+SEL-3555-GW.HITACHI-ENERGY-MID,not_delivered,worklist part with no row in devices.csv
+FGR-60F.CISCO-LOW,not_delivered,worklist part with no row in devices.csv
+FGR-60F.CISCO-MID,not_delivered,worklist part with no row in devices.csv
+FGR-60F.CISCO-HIGH,not_delivered,worklist part with no row in devices.csv
+FGR-60F.MOXA-LOW,not_delivered,worklist part with no row in devices.csv
+FGR-60F.MOXA-MID,not_delivered,worklist part with no row in devices.csv
+FGR-60F.MOXA-HIGH,not_delivered,worklist part with no row in devices.csv
+SEL-2488.MEINBERG-LOW,not_delivered,worklist part with no row in devices.csv
+SEL-2488.MEINBERG-MID,not_delivered,worklist part with no row in devices.csv
+SEL-2488.MEINBERG-HIGH,not_delivered,worklist part with no row in devices.csv
+SEL-2488.ARBITER-SYSTEMS-LOW,not_delivered,worklist part with no row in devices.csv
+SEL-2488.ARBITER-SYSTEMS-HIGH,not_delivered,worklist part with no row in devices.csv
+SEL-3555-RTAC.SIEMENS-LOW,not_delivered,worklist part with no row in devices.csv
+SEL-3555-RTAC.SIEMENS-MID,not_delivered,worklist part with no row in devices.csv
+SEL-3555-RTAC.SIEMENS-HIGH,not_delivered,worklist part with no row in devices.csv
+SEL-3555-RTAC.HITACHI-ENERGY-MID,not_delivered,worklist part with no row in devices.csv
+SEL-2240.SIEMENS-LOW,not_delivered,worklist part with no row in devices.csv
+SEL-2240.SIEMENS-MID,not_delivered,worklist part with no row in devices.csv
+SEL-2240.SIEMENS-HIGH,not_delivered,worklist part with no row in devices.csv
+SEL-2240.HITACHI-ENERGY-MID,not_delivered,worklist part with no row in devices.csv
+SEL-2242.SIEMENS-LOW,not_delivered,worklist part with no row in devices.csv
+SEL-2242.HITACHI-ENERGY-LOW,not_delivered,worklist part with no row in devices.csv
+SEL-2242.HITACHI-ENERGY-MID,not_delivered,worklist part with no row in devices.csv
+SEL-2242.HITACHI-ENERGY-HIGH,not_delivered,worklist part with no row in devices.csv
+SEL-2241.HITACHI-ENERGY-LOW,not_delivered,worklist part with no row in devices.csv
+SEL-2241.HITACHI-ENERGY-HIGH,not_delivered,worklist part with no row in devices.csv
+SEL-2243.HITACHI-ENERGY-LOW,not_delivered,worklist part with no row in devices.csv
+SEL-2243.HITACHI-ENERGY-MID,not_delivered,worklist part with no row in devices.csv
+SEL-2243.HITACHI-ENERGY-HIGH,not_delivered,worklist part with no row in devices.csv
+SEL-2244-2.HITACHI-ENERGY-LOW,not_delivered,worklist part with no row in devices.csv
+SEL-2244-2.HITACHI-ENERGY-MID,not_delivered,worklist part with no row in devices.csv
+SEL-2244-2.HITACHI-ENERGY-HIGH,not_delivered,worklist part with no row in devices.csv
+SEL-3355.ADVANTECH-LOW,not_delivered,worklist part with no row in devices.csv
+SEL-3355.ADVANTECH-MID,not_delivered,worklist part with no row in devices.csv
+SEL-3355.ADVANTECH-HIGH,not_delivered,worklist part with no row in devices.csv
+NAP-F23.ADVANTECH-LOW,not_delivered,worklist part with no row in devices.csv
+NAP-F23.ADVANTECH-MID,not_delivered,worklist part with no row in devices.csv
+NAP-F23.ADVANTECH-HIGH,not_delivered,worklist part with no row in devices.csv
+NAP-F23.SIEMENS-LOW,not_delivered,worklist part with no row in devices.csv
+NAP-F23.SIEMENS-MID,not_delivered,worklist part with no row in devices.csv
+NAP-F23.SIEMENS-HIGH,not_delivered,worklist part with no row in devices.csv
+KEYTEK-KBM.GETT-FORMERLY-INDUKEY-HIGH,not_delivered,worklist part with no row in devices.csv
+SZ2500-LAMP.STEGO-LOW,not_delivered,worklist part with no row in devices.csv
+SZ2500-LAMP.STEGO-MID,not_delivered,worklist part with no row in devices.csv
+SZ2500-LAMP.STEGO-HIGH,not_delivered,worklist part with no row in devices.csv
+SZ2500-LAMP.NVENT-HOFFMAN-LOW,not_delivered,worklist part with no row in devices.csv
+SZ2500-LAMP.NVENT-HOFFMAN-MID,not_delivered,worklist part with no row in devices.csv
+SZ2500-LAMP.NVENT-HOFFMAN-HIGH,not_delivered,worklist part with no row in devices.csv
+SK3243-FAN.PFANNENBERG-LOW,not_delivered,worklist part with no row in devices.csv
+SK3243-FAN.PFANNENBERG-MID,not_delivered,worklist part with no row in devices.csv
+SK3243-FAN.PFANNENBERG-HIGH,not_delivered,worklist part with no row in devices.csv
+SK3243-FAN.STEGO-LOW,not_delivered,worklist part with no row in devices.csv
+SK3243-FAN.STEGO-MID,not_delivered,worklist part with no row in devices.csv
+SK3243-FAN.STEGO-HIGH,not_delivered,worklist part with no row in devices.csv
+SK3110-TH.PFANNENBERG-LOW,not_delivered,worklist part with no row in devices.csv
+SK3110-TH.STEGO-HIGH,not_delivered,worklist part with no row in devices.csv
+IPR-2903685.FINDER-LOW,not_delivered,worklist part with no row in devices.csv
+IPR-2903685.FINDER-MID,not_delivered,worklist part with no row in devices.csv
+IPR-2903685.FINDER-HIGH,not_delivered,worklist part with no row in devices.csv
+IPR-2903685.WEIDMULLER-LOW,not_delivered,worklist part with no row in devices.csv
+IPR-2903685.WEIDMULLER-MID,not_delivered,worklist part with no row in devices.csv
+IPR-2903685.WEIDMULLER-HIGH,not_delivered,worklist part with no row in devices.csv
+IPR-SUPP-2900944.WEIDMULLER-MID,not_delivered,worklist part with no row in devices.csv
+IPR-BRACKET-2900954.FINDER-HIGH,not_delivered,worklist part with no row in devices.csv
+NAP-K55.ADVANTECH-LOW,not_delivered,worklist part with no row in devices.csv
+NAP-K55.ADVANTECH-MID,not_delivered,worklist part with no row in devices.csv
+NAP-K55.ADVANTECH-HIGH,not_delivered,worklist part with no row in devices.csv
+NAP-K55.SAMSUNG-LOW,not_delivered,worklist part with no row in devices.csv
+NAP-K55.SAMSUNG-MID,not_delivered,worklist part with no row in devices.csv
+NAP-K55.SAMSUNG-HIGH,not_delivered,worklist part with no row in devices.csv
+ZENON-V12.SIEMENS-LOW,not_delivered,worklist part with no row in devices.csv
+ZENON-V12.SIEMENS-MID,not_delivered,worklist part with no row in devices.csv
+ZENON-V12.SIEMENS-HIGH,not_delivered,worklist part with no row in devices.csv
+ZENON-V12.HITACHI-ENERGY-LOW,not_delivered,worklist part with no row in devices.csv
+ZENON-V12.HITACHI-ENERGY-MID,not_delivered,worklist part with no row in devices.csv
+ZENON-V12.HITACHI-ENERGY-HIGH,not_delivered,worklist part with no row in devices.csv
+SEL-9524B.MEINBERG-LOW,not_delivered,worklist part with no row in devices.csv
+SEL-9524B.MEINBERG-MID,not_delivered,worklist part with no row in devices.csv
+SEL-9524B.MEINBERG-HIGH,not_delivered,worklist part with no row in devices.csv
+SEL-9524B.ARBITER-SYSTEMS-MID,not_delivered,worklist part with no row in devices.csv
+SEL-9524B.ARBITER-SYSTEMS-HIGH,not_delivered,worklist part with no row in devices.csv
+SEL-C961-050.TIMES-MICROWAVE-SYSTEMS-LOW,not_delivered,worklist part with no row in devices.csv
+SEL-C961-050.MEINBERG-LOW,not_delivered,worklist part with no row in devices.csv
+SEL-C961-050.MEINBERG-MID,not_delivered,worklist part with no row in devices.csv
+SEL-C961-050.MEINBERG-HIGH,not_delivered,worklist part with no row in devices.csv
+SEL-915900139.POLYPHASER-LOW,not_delivered,worklist part with no row in devices.csv
+SEL-915900139.MEINBERG-LOW,not_delivered,worklist part with no row in devices.csv
+SEL-915900139.MEINBERG-HIGH,not_delivered,worklist part with no row in devices.csv
+SEL-C961-025.TIMES-MICROWAVE-SYSTEMS-LOW,not_delivered,worklist part with no row in devices.csv
+SEL-C961-025.MEINBERG-LOW,not_delivered,worklist part with no row in devices.csv
+SEL-C961-025.MEINBERG-MID,not_delivered,worklist part with no row in devices.csv
+SEL-C961-025.MEINBERG-HIGH,not_delivered,worklist part with no row in devices.csv
+SEL-915900043.MEINBERG-LOW,not_delivered,worklist part with no row in devices.csv
+SEL-915900043.MEINBERG-MID,not_delivered,worklist part with no row in devices.csv
+SEL-915900043.ARBITER-SYSTEMS-LOW,not_delivered,worklist part with no row in devices.csv
+FO-PATCH-CORDS.CORNING-LOW,not_delivered,worklist part with no row in devices.csv
+FO-PATCH-CORDS.CORNING-MID,not_delivered,worklist part with no row in devices.csv
+SEL-2407,missing_fields,ordering_code
+SEL-2731,missing_fields,ordering_code
+SEL-2740S,missing_fields,ordering_code
+SEL-2741,missing_fields,ordering_code
+SEL-2743,missing_fields,ordering_code
+SEL-2744,missing_fields,ordering_code
+SEL-311L,missing_fields,ordering_code
+SEL-400G,missing_fields,ordering_code
+SEL-411L,missing_fields,ordering_code
+SEL-451-5,missing_fields,ordering_code
+SEL-751,missing_fields,ordering_code
+SEL-787-2,missing_fields,ordering_code
+SEL-787-3,missing_fields,ordering_code
+SEL-787-4,missing_fields,ordering_code
+SEL-3350-1,missing_fields,ordering_code
+SEL-3505,missing_fields,ordering_code
+SEL-3505-3,missing_fields,ordering_code
+SEL-3530-4,missing_fields,ordering_code
+SEL-3355-2,missing_fields,ordering_code
+SEL-3555-2,missing_fields,ordering_code
+SEL-3560S,missing_fields,ordering_code
+SEL-3560E,missing_fields,ordering_code
+SEL-2241,missing_fields,ordering_code
+SEL-2242,missing_fields,ordering_code
+SEL-2243,missing_fields,ordering_code
+SEL-2244-2,missing_fields,ordering_code
+SEL-2244-3,missing_fields,ordering_code
+SEL-2244-5,missing_fields,ordering_code
+SEL-2245-2,missing_fields,ordering_code
+SEL-2245-22,missing_fields,ordering_code
+SEL-2245-221,missing_fields,ordering_code
+SEL-2245-3,missing_fields,ordering_code
+SEL-2245-4,missing_fields,ordering_code
+SEL-2245-411,missing_fields,ordering_code
+SEL-2245-42,missing_fields,ordering_code
+SEL-2440,missing_fields,ordering_code
+DELL-R750XS,missing_fields,ordering_code
+HPE-MSA2060,missing_fields,ordering_code
+NOZOMI-NSG-HS-3500,missing_fields,ordering_code
+NOZOMI-NSG-HS-3000,missing_fields,ordering_code
+NOZOMI-NSG-H-2500,missing_fields,ordering_code
+NOZOMI-NSG-H-2000,missing_fields,ordering_code
+NOZOMI-NSG-M-1000,missing_fields,ordering_code
+NOZOMI-NSG-M-750,missing_fields,ordering_code
+NOZOMI-NS20-1000,missing_fields,ordering_code
+NOZOMI-NS20-750,missing_fields,ordering_code
+NOZOMI-NS1-250,missing_fields,ordering_code
+NOZOMI-NS1-100,missing_fields,ordering_code
+NOZOMI-NG-500R,missing_fields,ordering_code
+NOZOMI-NS1R,missing_fields,ordering_code
+NOZOMI-P550,missing_fields,ordering_code
+NOZOMI-V1000,missing_fields,ordering_code
+NOZOMI-V750,missing_fields,ordering_code
+NOZOMI-V250,missing_fields,ordering_code
+NOZOMI-V100,missing_fields,ordering_code
+NOZOMI-APE1808,missing_fields,ordering_code
+NOZOMI-LPE,missing_fields,ordering_code
+ULTRAVIEW-H-K55,missing_fields,ordering_code
+ULTRAVIEW-H-K43,missing_fields,ordering_code
+CYBERVIEW-F119,missing_fields,ordering_code
+SIEMENS-RST2228P,missing_fields,ordering_code
+SEL-2240,ordering_code,configuration required: the configured code a panel orders
+SEL-2241,ordering_code,configuration required: the configured code a panel orders
+SEL-2242,ordering_code,configuration required: the configured code a panel orders
+SEL-2243,ordering_code,configuration required: the configured code a panel orders
+SEL-2244-2,ordering_code,configuration required: the configured code a panel orders
+SEL-2244-3,ordering_code,configuration required: the configured code a panel orders
+SEL-2244-5,ordering_code,configuration required: the configured code a panel orders
+SEL-2245-2,ordering_code,configuration required: the configured code a panel orders
+SEL-2245-22,ordering_code,configuration required: the configured code a panel orders
+SEL-2245-221,ordering_code,configuration required: the configured code a panel orders
+SEL-2245-3,ordering_code,configuration required: the configured code a panel orders
+SEL-2245-4,ordering_code,configuration required: the configured code a panel orders
+SEL-2245-411,ordering_code,configuration required: the configured code a panel orders
+SEL-2245-42,ordering_code,configuration required: the configured code a panel orders
+SEL-2440,ordering_code,configuration required: the configured code a panel orders
+DELL-R750XS,ordering_code,configuration required: the configured code a panel orders
+HPE-MSA2060,ordering_code,configuration required: the configured code a panel orders
+NOZOMI-NSG-HS-3500,ordering_code,configuration required: the configured code a panel orders
+NOZOMI-NSG-HS-3000,ordering_code,configuration required: the configured code a panel orders
+NOZOMI-NSG-H-2500,ordering_code,configuration required: the configured code a panel orders
+NOZOMI-NSG-H-2000,ordering_code,configuration required: the configured code a panel orders
+NOZOMI-NSG-M-1000,ordering_code,configuration required: the configured code a panel orders
+NOZOMI-NSG-M-750,ordering_code,configuration required: the configured code a panel orders
+NOZOMI-NS20-1000,ordering_code,configuration required: the configured code a panel orders
+NOZOMI-NS20-750,ordering_code,configuration required: the configured code a panel orders
+NOZOMI-NS1-250,ordering_code,configuration required: the configured code a panel orders
+NOZOMI-NS1-100,ordering_code,configuration required: the configured code a panel orders
+NOZOMI-NG-500R,ordering_code,configuration required: the configured code a panel orders
+NOZOMI-NS1R,ordering_code,configuration required: the configured code a panel orders
+NOZOMI-P550,ordering_code,configuration required: the configured code a panel orders
+NOZOMI-V1000,ordering_code,configuration required: the configured code a panel orders
+NOZOMI-V750,ordering_code,configuration required: the configured code a panel orders
+NOZOMI-V250,ordering_code,configuration required: the configured code a panel orders
+NOZOMI-V100,ordering_code,configuration required: the configured code a panel orders
+NOZOMI-APE1808,ordering_code,configuration required: the configured code a panel orders
+NOZOMI-LPE,ordering_code,configuration required: the configured code a panel orders
+ULTRAVIEW-H-K55,ordering_code,configuration required: the configured code a panel orders
+ULTRAVIEW-H-K43,ordering_code,configuration required: the configured code a panel orders
+CYBERVIEW-F119,ordering_code,configuration required: the configured code a panel orders
+SIEMENS-RST2228P,ordering_code,configuration required: the configured code a panel orders
+SEL-2407,ordering_code,configuration unselected: the configured code a panel orders
+SEL-2731,ordering_code,configuration unselected: the configured code a panel orders
+SEL-2740S,ordering_code,configuration unselected: the configured code a panel orders
+SEL-2741,ordering_code,configuration unselected: the configured code a panel orders
+SEL-2743,ordering_code,configuration unselected: the configured code a panel orders
+SEL-2744,ordering_code,configuration unselected: the configured code a panel orders
+SEL-311L,ordering_code,configuration unselected: the configured code a panel orders
+SEL-400G,ordering_code,configuration unselected: the configured code a panel orders
+SEL-411L,ordering_code,configuration unselected: the configured code a panel orders
+SEL-451-5,ordering_code,configuration unselected: the configured code a panel orders
+SEL-751,ordering_code,configuration unselected: the configured code a panel orders
+SEL-787-2,ordering_code,configuration unselected: the configured code a panel orders
+SEL-787-3,ordering_code,configuration unselected: the configured code a panel orders
+SEL-787-4,ordering_code,configuration unselected: the configured code a panel orders
+SEL-3350-1,ordering_code,configuration unselected: the configured code a panel orders
+SEL-3505,ordering_code,configuration unselected: the configured code a panel orders
+SEL-3505-3,ordering_code,configuration unselected: the configured code a panel orders
+SEL-3530-4,ordering_code,configuration unselected: the configured code a panel orders
+SEL-3355-2,ordering_code,configuration unselected: the configured code a panel orders
+SEL-3555-2,ordering_code,configuration unselected: the configured code a panel orders
+SEL-3560S,ordering_code,configuration unselected: the configured code a panel orders
+SEL-3560E,ordering_code,configuration unselected: the configured code a panel orders
+FG-600F,missing_fields,"voltage_v, load_type"
+FG-601F,missing_fields,"voltage_v, load_type"
+SEL-2731,port_speed,management RJ45 port has no speed in device_ports.csv
+SEL-2740S,port_speed,management RJ45 port has no speed in device_ports.csv
+SEL-2741,port_speed,management RJ45 port has no speed in device_ports.csv
+SEL-3555-2,power,typical or measured consumption; the delivery gives the supply's peak burden (plan Q54)
+SEL-3355-2,power,typical or measured consumption; the delivery gives the supply's peak burden (plan Q54)
+SEL-3560E,power,typical or measured consumption; the delivery gives the supply's peak burden (plan Q54)
+SEL-3560S,power,typical or measured consumption; the delivery gives the supply's peak burden (plan Q54)
+Hager MCN 2P C,dc_rating,"DC rating with 2 poles in series, if Hager publishes one"
+Hager NCN 2P C,dc_rating,"DC rating with 2 poles in series, if Hager publishes one"
