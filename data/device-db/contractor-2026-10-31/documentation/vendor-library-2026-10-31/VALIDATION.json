@@ -1,0 +1,40 @@
+{
+  "status": "Passed local structural/source coverage checks; generator import not run",
+  "device_count": 11,
+  "port_group_count": 34,
+  "physical_ethernet_ports": 249,
+  "source_rows": 244,
+  "pdf_count": 20,
+  "missing_inrush_peak": [
+    "RST2228-28SFP-HV",
+    "C9300-24T-A",
+    "FG-60F",
+    "FG-70F",
+    "FGR-60F",
+    "FGR-70F",
+    "FG-121G",
+    "FG-401G",
+    "FG-701G"
+  ],
+  "missing_inrush_duration": [
+    "RST2228-28SFP-HV",
+    "IE-4010-16S12P",
+    "RST2228-L2.CISCO-MID",
+    "C9300-24T-A",
+    "FG-60F",
+    "FG-70F",
+    "FGR-60F",
+    "FGR-70F",
+    "FG-121G",
+    "FG-401G",
+    "FG-701G"
+  ],
+  "missing_maximum_power": [
+    "RST2228-L2.CISCO-MID"
+  ],
+  "requires_speed_enum_extension": [
+    "2.5G",
+    "5G",
+    "25G"
+  ]
+}

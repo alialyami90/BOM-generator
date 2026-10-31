@@ -1,0 +1,2 @@
+﻿part_id,keys,width_mm,depth_mm,height_mm,interface,current_typical_ma,touchpad_active_ma,ip_rating,temp_min_c,temp_max_c,source_pdf,source_page,source_bundle,bundle_page,notes
+KEYTEK-KBM,97,420,175,37,USB or PS/2,30,17,IP65 top panel,-20,60,pdfs/Key Technology_Keyboard_VD-EL0009-007_p342-344.pdf,2,VD-EL0009-007.pdf,343,Approximate 30 mA electrical rating and 17 mA touchpad rating are separate; do not sum without confirmation. Host-powered peripheral.

@@ -1,0 +1,182 @@
+[
+  {
+    "file": "Siemens_RST2228_C79000-G8976-1359-20_202403.pdf",
+    "pages": 72,
+    "doc_title": "RUGGEDCOM RST2228 Equipment Manual",
+    "doc_number": "C79000-G8976-1359-20",
+    "doc_revision": "03/2024",
+    "doc_date": "",
+    "url": "https://cache.industry.siemens.com/dl/files/997/109825997/att_1267100/v1/C79000-G8976-1359-20_RST2228_EquipmentManual.pdf"
+  },
+  {
+    "file": "Cisco_IE4010_C78-737279.pdf",
+    "pages": 18,
+    "doc_title": "Cisco Industrial Ethernet 4010 Series Switches Data Sheet",
+    "doc_number": "C78-737279",
+    "doc_revision": "C78-737279-13 10/24",
+    "doc_date": "",
+    "url": "https://www.cisco.com/c/en/us/products/collateral/switches/industrial-ethernet-4010-series-switches/datasheet-c78-737279.pdf"
+  },
+  {
+    "file": "Cisco_IR8300_DataSheet.pdf",
+    "pages": 23,
+    "doc_title": "Cisco Catalyst IR8300 Rugged Series Router Data Sheet",
+    "doc_number": "C78-2451473",
+    "doc_revision": "C78-2451473-03 10/26",
+    "doc_date": "",
+    "url": "https://www.cisco.com/c/en/us/products/collateral/routers/catalyst-ir8300-rugged-series-router/nb-06-cat-ir8340-rugged-ser-rout-ds-cte-en.pdf"
+  },
+  {
+    "file": "Cisco_IE9300_DataSheet.pdf",
+    "pages": 28,
+    "doc_title": "Cisco Catalyst IE9300 Rugged Series Data Sheet",
+    "doc_number": "C78-2778848",
+    "doc_revision": "C78-2778848-10 07/26",
+    "doc_date": "",
+    "url": "https://www.cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.pdf"
+  },
+  {
+    "file": "Cisco_C9300_DataSheet.pdf",
+    "pages": 83,
+    "doc_title": "Cisco Catalyst 9300 Series Switches Data Sheet",
+    "doc_number": "C78-738977",
+    "doc_revision": "C78-738977-46 09/26",
+    "doc_date": "",
+    "url": "https://www.cisco.com/c/en/us/products/collateral/switches/catalyst-9300-series-switches/nb-06-cat9300-ser-data-sheet-cte-en.pdf"
+  },
+  {
+    "file": "Cisco_C9300_TechnicalSpecifications.pdf",
+    "pages": 14,
+    "doc_title": "Cisco Catalyst 9300 Series Switches Hardware Installation Guide: Technical Specifications",
+    "doc_number": "",
+    "doc_revision": "No revision/date printed in chapter",
+    "doc_date": "",
+    "url": "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/hardware/install/b_c9300_hig/technical-specs.pdf"
+  },
+  {
+    "file": "Cisco_C9300_ProductOverview.pdf",
+    "pages": 34,
+    "doc_title": "Cisco Catalyst 9300 Series Switches Hardware Installation Guide: Product Overview",
+    "doc_number": "",
+    "doc_revision": "No revision/date printed in chapter",
+    "doc_date": "",
+    "url": "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/hardware/install/b_c9300_hig/Product-overview.pdf"
+  },
+  {
+    "file": "fg-60f-qsg-alt.pdf",
+    "pages": 27,
+    "doc_title": "FortiGate 40F and 60F Series QuickStart Guide",
+    "doc_number": "FG-40F-3G4G-60F-Series-QSG",
+    "doc_revision": "20200413",
+    "doc_date": "2020-04-13",
+    "url": "https://fortinetweb.s3.amazonaws.com/docs.fortinet.com/v2/attachments/fd70142f-ff2f-11e9-8977-00505692583a/FG-40F-3G4G-60F-Series-QSG.pdf"
+  },
+  {
+    "file": "fg-60f.pdf",
+    "pages": 12,
+    "doc_title": "FortiGate 60F Series Data Sheet",
+    "doc_number": "FG-60F-DAT",
+    "doc_revision": "R51",
+    "doc_date": "2026-10-01",
+    "url": "https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/fortigate-fortiwifi-60f-series.pdf"
+  },
+  {
+    "file": "fg-70f-qsg.pdf",
+    "pages": 13,
+    "doc_title": "FortiGate 70F Series Quickstart Guide",
+    "doc_number": "FG-70F-Series-QSG",
+    "doc_revision": "20260827",
+    "doc_date": "2026-08-27",
+    "url": "https://fortinetweb.s3.amazonaws.com/docs.fortinet.com/v2/attachments/19f0e644-700b-11ed-8e6d-fa163e15d75b/FG-70F-Series-QSG.pdf"
+  },
+  {
+    "file": "fg-70f-archived-newegg.pdf",
+    "pages": 11,
+    "doc_title": "FortiGate 70F Series Data Sheet",
+    "doc_number": "FG-70F-DAT",
+    "doc_revision": "R14",
+    "doc_date": "2025-04-07",
+    "url": "https://c1.neweggimages.com/IMAttachment/Datasheet/Data%20Sheet-1766507068472.pdf"
+  },
+  {
+    "file": "fgr-60f-qsg-alt.pdf",
+    "pages": 15,
+    "doc_title": "FortiGate Rugged 60F Series QuickStart Guide",
+    "doc_number": "FGR-60F-3G4G-QSG",
+    "doc_revision": "20250129",
+    "doc_date": "2025-01-29",
+    "url": "https://fortinetweb.s3.amazonaws.com/docs.fortinet.com/v2/attachments/7ce61dd2-c2a7-11ea-8b7d-00505692583a/FGR-60F-3G4G-QSG.pdf"
+  },
+  {
+    "file": "rugged-series.pdf",
+    "pages": 28,
+    "doc_title": "FortiGate Rugged Series Data Sheet",
+    "doc_number": "FGR-DAT",
+    "doc_revision": "R59",
+    "doc_date": "2026-09-24",
+    "url": "https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/FortiGate_Rugged_Series.pdf"
+  },
+  {
+    "file": "fgr-70f-qsg-alt.pdf",
+    "pages": 24,
+    "doc_title": "FortiGate Rugged 70F Series Quickstart Guide",
+    "doc_number": "FGR-70F-Series-QSG",
+    "doc_revision": "20260408",
+    "doc_date": "2026-04-08",
+    "url": "https://fortinetweb.s3.amazonaws.com/docs.fortinet.com/v2/attachments/8b28e316-a37b-11ed-8e6d-fa163e15d75b/FGR-70F-Series-QSG.pdf"
+  },
+  {
+    "file": "Fortinet_FortiGate-120G_QuickStart.pdf",
+    "pages": 9,
+    "doc_title": "FortiGate 120G Series QuickStart Guide",
+    "doc_number": "FG-120G-QSG",
+    "doc_revision": "FG-120G-QSG-20250627",
+    "doc_date": "2025-06-27",
+    "url": "https://fortinetweb.s3.amazonaws.com/docs.fortinet.com/v2/attachments/f9fb064a-a672-11ee-8673-fa163e15d75b/FG-120G-QSG.pdf"
+  },
+  {
+    "file": "Fortinet_FortiGate-120G_DataSheet.pdf",
+    "pages": 11,
+    "doc_title": "FortiGate 120G Series Data Sheet",
+    "doc_number": "FG-120G-DAT",
+    "doc_revision": "FG-120G-DAT-R19-20260929",
+    "doc_date": "2026-09-29",
+    "url": "https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/fortigate-120g-series.pdf"
+  },
+  {
+    "file": "Fortinet_FortiGate-400G_QuickStart.pdf",
+    "pages": 9,
+    "doc_title": "FortiGate 400G Series QuickStart Guide",
+    "doc_number": "FG-400G-Series-QSG",
+    "doc_revision": "FG-400G-Series-QSG-20260928",
+    "doc_date": "2026-09-28",
+    "url": "https://fortinetweb.s3.amazonaws.com/docs.fortinet.com/v2/attachments/b659f32f-2d3f-11f1-b31d-02356ffb40d9/FG-400G-Series-QSG.pdf"
+  },
+  {
+    "file": "Fortinet_FortiGate-400G_DataSheet.pdf",
+    "pages": 11,
+    "doc_title": "FortiGate 400G Series Data Sheet",
+    "doc_number": "FG-400G-DAT",
+    "doc_revision": "FG-400G-DAT-R06-20261013",
+    "doc_date": "2026-10-13",
+    "url": "https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/pdf/fortigate-400g-series.pdf"
+  },
+  {
+    "file": "Fortinet_FortiGate-700G_QuickStart.pdf",
+    "pages": 9,
+    "doc_title": "FortiGate 700G Series QuickStart Guide",
+    "doc_number": "FG-700G-Series-QSG",
+    "doc_revision": "FG-700G-Series-QSG-20260928",
+    "doc_date": "2026-09-28",
+    "url": "https://fortinetweb.s3.amazonaws.com/docs.fortinet.com/v2/attachments/60b7c7f8-4173-11f0-a9d0-d2b0d2e22f7d/FG-700G-Series-QSG.pdf"
+  },
+  {
+    "file": "Fortinet_FortiGate-700G_DataSheet.pdf",
+    "pages": 11,
+    "doc_title": "FortiGate 700G Series Data Sheet",
+    "doc_number": "FG-700G-DAT",
+    "doc_revision": "FG-700G-DAT-R15-20260929",
+    "doc_date": "2026-09-29",
+    "url": "https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/pdf/fortigate-700g-series.pdf"
+  }
+]

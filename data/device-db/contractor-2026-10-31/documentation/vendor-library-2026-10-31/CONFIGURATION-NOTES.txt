@@ -1,0 +1,127 @@
+RST2228-28SFP-HV | RUGGEDCOM RST2228
+Order: 6GK6222-6AB00-5CC0-Z A00+B06+C06+D06+E06+F06+G06
+Feed: 125 VDC; operating range 88–300; power field: 77 W.
+Power basis: Published maximum power consumption at125 VDC, based on60 W output load. Table gives77 W at125 VDC and76 W at250 VDC. Dual supplies share load45/55 percent perpage10, so their output ratings are not simply doubled. Exact fully populated transceiver-dependent dual-feed input draw is not separately measured in this table.
+Ethernet ports: 28
+24 x 1G SFP cage (Six RMM2972-4SFP modules selected in slots1-6, four100/1000Mbps cages each; all24 available. Slot options continue onpages14-15. SFP optics remain separately selectable; no alternative copper modules double-counted.)
+4 x 10G SFP cage (Four fixed slot0 SFP/SFP+ cages support1G or10G; highest speed10G. USB service console is not an Ethernet port and adds no network capacity.)
+Open/source notes: {"unresolved": ["Exact combined order code is constructed from vendor ordering pattern, not independently seen as a configured listing.", "Inrush peak and duration are unpublished in reviewed vendor documentation.", "Optical transceiver part numbers depend on link media/distance and are not specified by this switch-cage inventory."]}
+
+IE-4010-16S12P | IE-4010-16S12P
+Order: IE-4010-16S12P + 2 x PWR-RGD-AC-DC-H
+Feed: 125 VDC; operating range 88–300; power field: 70 W.
+Power basis: Published maximum switch consumption excluding PoE. Proposed configuration disables PoE on all 12 RJ45 ports; the ports remain usable for Ethernet data. Do not use 70 W when supplying PoE loads.
+Ethernet ports: 28
+12 x 1G SFP cage (100/1000 Mbps downlink cages.)
+4 x 1G SFP cage (100/1000 Mbps uplink cages.)
+12 x 1G RJ45 (10/100/1000 Mbps RJ45; PoE disabled in this configuration.)
+Open/source notes: {"identity_note": "User family name IE-4010E interpreted as Cisco IE4010 series; exact selected orderable chassis is IE-4010-16S12P.", "unresolved": ["Inrush duration is not published in reviewed official sources.", "Optical transceiver models, fiber type and reach remain application-dependent; SFP cages are inventoried without inventing optics."], "port_exclusions": "Mini-USB and RJ45 serial consoles are not Ethernet ports. No separate Ethernet management port is listed in the hardware specification; none added.", "source_notes": "PDF page numbers are one-based. Revision/month exactly transcribed; doc_date left blank when no full calendar date is printed. Per-field source overrides identify secondary PDFs."}
+
+RST2228-L2.CISCO-MID | IE-9320-22S2C4X-E
+Order: IE-9320-22S2C4X-E + 2 x PWR-RGD-AC-DC-H
+Feed: 125 VDC; operating range 88–300; power field: maximum not published W.
+Power basis: Maximum for all fitted optics and dual supplies is not specified. Published 73 W on page 9 is indicative; page 10 says consumption varies with optics and supplies. Do not use it as a guaranteed maximum.
+Ethernet ports: 28
+22 x 1G SFP cage (100/1000 Mbps fixed downlink cages.)
+2 x 1G SFP cage (Two combo ports selected as 100/1000 Mbps SFP. Their alternative 10/100/1000 RJ45 connectors are NOT counted again.)
+4 x 10G SFP cage (1/10G SFP+ uplink cages.)
+Open/source notes: {"identity_note": "User corrected IE-9010E to IE-9300. Selected documented fiber-heavy IE9300-series chassis IE-9320-22S2C4X-E, not an invented IE-9300E SKU.", "unresolved": ["Published 73 W is indicative, not a guaranteed maximum for all SFPs and two PSUs. Confirm input maximum for actual optical population.", "Inrush duration is not published in reviewed official sources.", "Optical transceiver models, fiber type and reach remain application-dependent."], "port_exclusions": "Two proprietary StackWise ports, RS232 RJ45 console and Micro USB console are not ordinary Ethernet data ports. No dedicated Ethernet management port is listed in the hardware specification; none added. Two RJ45 combo alternatives excluded because corresponding SFP paths are selected.", "source_notes": "PDF page numbers are one-based. Revision/month exactly transcribed; doc_date left blank when no full calendar date is printed. Per-field source overrides identify secondary PDFs."}
+
+C9300-24T-A | C9300-24T-A
+Order: C9300-24T-A + C9300-NM-8X + PWR-C1-350WAC-P
+Feed: 230 VAC; operating range 100–240; power field: 395 W.
+Power basis: Conservative one-PSU published total INPUT rating, not 350 W output rating and not measured switch consumption. Page 7 footnote states rating based on 100 VAC. Used as planning envelope for one fitted PWR-C1-350WAC-P at proposed 230 VAC; actual measured C9300-24T + NM-8X full-port 100% traffic consumption is 99 W at 230 VAC in data-sheet page 60, IOS XE 16.8.1.
+Ethernet ports: 33
+24 x 1G RJ45 (24 data-only 10/100/1000 Mbps ports.)
+8 x 10G SFP cage (All eight 1/10G SFP+ cages provided by selected C9300-NM-8X.)
+1 x 1G RJ45 (Separate 10/100/1000 management port; not part of 24 data ports.)
+Open/source notes: {"identity_note": "User specified C9300 family. Proposed specific non-PoE modular-uplink model C9300-24T-A; no claim that all C9300 variants share this configuration.", "unresolved": ["Inrush current and duration are not published in reviewed official sources.", "Optical transceiver models, fiber type and reach remain application-dependent."], "port_exclusions": "StackWise/StackPower connectors, RJ45 serial console and USB connectors are excluded from ordinary Ethernet port inventory. One Ethernet management port is separately marked.", "source_notes": "PDF page numbers are one-based. Revision/month exactly transcribed; doc_date left blank when no full calendar date is printed. Per-field source overrides identify secondary PDFs."}
+
+FG-60F — included_adapter: 1 external DC power adapter and AC power cable. fg-60f-qsg-alt.pdf, PDF page 8. Included package contents; regional mains plug/cable selection should be checked at procurement.
+
+FG-60F | FortiGate 60F
+Order: FG-60F
+Feed: 230 VAC; operating range 100–240; power field: 12.43 W.
+Power basis: Published maximum consumption for this exact model, not 3 A x 12 V adapter rating. Datasheet does not separately quantify adapter conversion loss.
+Ethernet ports: 10
+10 x 1G RJ45 (All 10 GE Ethernet ports available: 2 WAN, 1 DMZ, 5 internal and 2 FortiLink default ports. FortiLink defaults do not add ports. Console RJ45 and USB excluded. No separate Ethernet management port.)
+Open/source notes: {"unresolved": ["Peak inrush and inrush duration are unpublished in searched documents.", "Regional mains plug/cable choice is not encoded in the base SKU.", "Separate adapter conversion loss is not specified."]}
+
+FG-70F — included_adapter: 1 external DC power adapter and AC power cable. fg-70f-qsg.pdf, PDF page 3. Included package contents; regional mains plug/cable selection should be checked at procurement.
+
+FG-70F | FortiGate 70F
+Order: FG-70F
+Feed: 230 VAC; operating range 100–240; power field: 12.43 W.
+Power basis: Published maximum consumption for this exact model, not 3 A x 12 V adapter rating. Datasheet does not separately quantify adapter conversion loss.
+Ethernet ports: 10
+10 x 1G RJ45 (All 10 GE Ethernet ports available: 2 WAN, 1 DMZ, 5 internal and 2 FortiLink default ports. FortiLink defaults do not add ports. Console RJ45 and USB excluded. No separate Ethernet management port.)
+Open/source notes: {"unresolved": ["Peak inrush and inrush duration are unpublished in searched documents.", "Regional mains plug/cable choice is not encoded in the base SKU.", "Separate adapter conversion loss is not specified.", "Principal datasheet is an archived vendor document hosted on a mirror; current official datasheet path omits FG-70F."], "provenance_note": "Manufacturer-authored archived Fortinet datasheet R14 dated 2025-04-07, downloaded from Newegg mirror. Current official fortigate-70f-series.pdf and ja_jp path returned FG-71F-only R18 dated 2026-10-01, so those downloads were not used for FG-70F values. Current official FG-70F QSG dated 2026-08-27 independently confirms ports and AC adapter."}
+
+FGR-60F | FortiGate Rugged 60F
+Order: FGR-60F
+Feed: 125 VDC; operating range 12–125; power field: 21 W.
+Power basis: Published maximum for complete non-cellular base appliance; redundant inputs do not double the published device consumption.
+Ethernet ports: 6
+4 x 1G RJ45 (Four dedicated GE LAN copper ports. PORT4 bypass function is part of this count.)
+2 x 1G SFP cage (Select SFP side of both GE WAN shared-media pairs; corresponding RJ45 sides are mutually exclusive and not counted again. Six total logical Ethernet ports. PORT4-WAN1 copper bypass cannot be assumed available when WAN1 uses SFP. Transceiver media/type remains unspecified.)
+Open/source notes: {"unresolved": ["125 VDC is the maximum supported voltage, not a tolerance around a nominal 125 V station battery; check highest charger/equalization voltage.", "Peak inrush and inrush duration are unpublished in searched documents.", "SFP side selected for both combo WAN ports; if copper bypass is required, revise WAN1 media selection.", "SFP transceiver optical types and DC cables are separate selections."], "management_inventory": [], "non_ethernet_inventory": ["One serial data interface (DB9), one RJ45 console and USB are excluded from Ethernet port capacity. No separate Ethernet management port."]}
+
+FGR-70F | FortiGate Rugged 70F
+Order: FGR-70F
+Feed: 125 VDC; operating range 12–125; power field: 18 W.
+Power basis: Published maximum for complete non-cellular base appliance; redundant inputs do not double the published device consumption.
+Ethernet ports: 8
+6 x 1G RJ45 (Six GE LAN/WAN copper ports including the PORT3-4 bypass pair; bypass pair is not added to the six.)
+2 x 1G SFP cage (Two dedicated GE SFP slots. Eight total Ethernet interfaces. Transceiver media/type remains unspecified.)
+Open/source notes: {"unresolved": ["125 VDC is the maximum supported voltage, not a tolerance around a nominal 125 V station battery; check highest charger/equalization voltage.", "Peak inrush and inrush duration are unpublished in searched documents.", "SFP transceiver optical types and DC cables are separate selections."], "management_inventory": [], "non_ethernet_inventory": ["One serial data interface (RJ45), one RJ45 console and USB are excluded from Ethernet port capacity. No separate Ethernet management port."]}
+
+FG-121G | FortiGate 121G
+Order: FG-121G
+Feed: 230 VAC; operating range 100–240; power field: 47 W.
+Power basis: Maximum whole-appliance consumption from the FG-121G storage-model column, not the non-storage base model. Average is 43 W; maximum 47 W. Dual supplies are standard; do not double this whole-unit figure or substitute PSU input-current ratings.
+Ethernet ports: 30
+16 x 1G RJ45 (Data ports 1–16; highest speed 1 Gbps.)
+1 x 1G RJ45 (Dedicated MGMT Ethernet port; console RJ45 excluded.)
+1 x 1G RJ45 (Dedicated HA Ethernet port.)
+8 x 1G SFP cage (SFP ports 17–24; empty pluggable cages, not fixed fiber. Media depends on fitted transceiver.)
+4 x 10G SFP cage (SFP+ X1–X4; maximum10Gbps, also supports1Gbps. Each cage counted once.)
+Open/source notes: {"warnings": ["Datasheet AC maximum-current rating differs from hardware guide (1.0A@100V versus1.5A maximum). These are input/nameplate ratings, not inrush and not a reason to replace the model-specific measured maximum wattage."], "limitations": ["Manufacturer does not publish inrush peak or duration in these official PDFs; both remain explicitly not_given."], "unresolved": ["inrush_a", "inrush_ms"]}
+
+FG-401G | FortiGate 401G
+Order: FG-401G
+Feed: 230 VAC; operating range 100–240; power field: 295 W.
+Power basis: Maximum whole-appliance consumption from the FG-401G storage-model column, not the non-storage base model. Average is 240 W; maximum 295 W. Dual supplies are standard; do not double this whole-unit figure or substitute PSU input-current ratings.
+Ethernet ports: 34
+8 x 5G RJ45 (WAN1/WAN2 and LAN1–LAN6; highest supported speed 5 Gbps. Requires speed-enum extension; do not downgrade to1G or10G.)
+1 x 2.5G RJ45 (Dedicated HA Ethernet; highest2.5Gbps. Requires speed-enum extension.)
+1 x 1G RJ45 (Dedicated MGMT Ethernet; console RJ45 excluded.)
+16 x 1G SFP cage (LAN7–LAN22 SFP cages. Two bundled SFP SX modules are included accessories, not extra physical ports; no assumed fitted positions.)
+4 x 10G SFP cage (X1–X4 SFP+ cages; maximum10Gbps; each physical cage counted once.)
+4 x 25G SFP cage (X5–X8 SFP28/SFP+ cages; maximum25Gbps; also supports10Gbps, counted once. SFP28 form factor. Requires speed-enum extension.)
+Open/source notes: {"warnings": ["Datasheet AC maximum-current rating differs from hardware guide (6A@100V versus5A maximum). These are input/nameplate ratings, not inrush and not a reason to replace the model-specific measured maximum wattage."], "limitations": ["Manufacturer does not publish inrush peak or duration in these official PDFs; both remain explicitly not_given.", "Current library speed enum cannot represent 2.5G, 5G or25G. All true speeds retained; requires schema extension before importing complete port groups."], "unresolved": ["inrush_a", "inrush_ms"]}
+
+FG-701G | FortiGate 701G
+Order: FG-701G
+Feed: 230 VAC; operating range 100–240; power field: 295 W.
+Power basis: Maximum whole-appliance consumption from the FG-701G storage-model column, not the non-storage base model. Average is 240 W; maximum 295 W. Dual supplies are standard; do not double this whole-unit figure or substitute PSU input-current ratings.
+Ethernet ports: 34
+8 x 5G RJ45 (WAN1/WAN2 and LAN1–LAN6; highest supported speed 5 Gbps. Requires speed-enum extension; do not downgrade to1G or10G.)
+1 x 2.5G RJ45 (Dedicated HA Ethernet; highest2.5Gbps. Requires speed-enum extension.)
+1 x 1G RJ45 (Dedicated MGMT Ethernet; console RJ45 excluded.)
+16 x 1G SFP cage (LAN7–LAN22 SFP cages. Two bundled SFP SX modules are included accessories, not extra physical ports; no assumed fitted positions.)
+4 x 10G SFP cage (X1–X4 SFP+ cages; maximum10Gbps; each physical cage counted once.)
+4 x 25G SFP cage (X5–X8 SFP28/SFP+ cages; maximum25Gbps; also supports10Gbps, counted once. SFP28 form factor. Requires speed-enum extension.)
+Open/source notes: {"warnings": ["Datasheet AC maximum-current rating differs from hardware guide (6A@100V versus5A maximum). These are input/nameplate ratings, not inrush and not a reason to replace the model-specific measured maximum wattage."], "limitations": ["Manufacturer does not publish inrush peak or duration in these official PDFs; both remain explicitly not_given.", "Current library speed enum cannot represent 2.5G, 5G or25G. All true speeds retained; requires schema extension before importing complete port groups.", "Datasheet PDF page8 labels data RJ45 as GE, but its ordering table page10 and newer hardware guide PDF page5 explicitly specify5G. Use5G based on matching SKU order description and connector specification."], "unresolved": ["inrush_a", "inrush_ms"]}
+
+COMPONENTS IE-4010-16S12P
+1 x IE-4010-16S12P — Cisco_IE4010_C78-737279.pdf, PDF page 15. 
+2 x PWR-RGD-AC-DC-H — Cisco_IE4010_C78-737279.pdf, PDF page 5. 
+
+COMPONENTS RST2228-L2.CISCO-MID
+1 x IE-9320-22S2C4X-E — Cisco_IE9300_DataSheet.pdf, PDF page 24. 
+2 x PWR-RGD-AC-DC-H — Cisco_IE9300_DataSheet.pdf, PDF page 25. 
+
+COMPONENTS C9300-24T-A
+1 x C9300-24T-A — Cisco_C9300_DataSheet.pdf, PDF page 65. 
+1 x C9300-NM-8X — Cisco_C9300_DataSheet.pdf, PDF page 70. 
+1 x PWR-C1-350WAC-P — Cisco_C9300_DataSheet.pdf, PDF page 16. One fitted PSU total, standard included PSU; do not order a second accidentally.

@@ -1,0 +1,13 @@
+﻿part_id,match_type,note,source_pdf,source_page,bundle_page
+SEL-3355-2,family_or_existing,Already in delivery; retain newer 2026 data.,pdfs/SEL_SEL3355-2024_ES028480_DCS_GEN_DTA_001_p002-013.pdf,1,2
+SEL-3555-2,family_or_existing,Already in delivery; older bundle edition.,pdfs/SEL_SEL3555-2023_VD-EL0009-007_p015-030.pdf,1,15
+SEL-3350-1,family_or_existing,Already in delivery; retain newer 2026 data.,pdfs/SEL_SEL3350_ES028480_DCS_GEN_DTA_001_p038-057.pdf,1,38
+SEL-2488,family_or_existing,Already in worklist/delivery; retain newer edition.,pdfs/SEL_Clock-2024-ES_ES028480_DCS_GEN_DTA_001_p058-069.pdf,1,58
+SEL-2731,family_or_existing,Already in delivery; older 2024 manual.,pdfs/SEL_SEL2731_ES028480_DCS_GEN_DTA_001_p070-095.pdf,1,70
+RST2228-L2,family_or_existing,Family matches. Brochure does not decode configured worklist options.,pdfs/Siemens_RST2228_VD-EL0009-007_p095-106.pdf,1,95
+RST2228-L1-24MM,family_or_existing,Family matches. Brochure does not decode configured worklist options.,pdfs/Siemens_RST2228_VD-EL0009-007_p095-106.pdf,1,95
+SEL-3355,family_or_existing,Worklist generation not confirmed by -2 datasheet.,pdfs/SEL_SEL3355-2024_ES028480_DCS_GEN_DTA_001_p002-013.pdf,1,2
+SEL-3555-GW,family_or_existing,Worklist generation/configured code not confirmed by -2 datasheet.,pdfs/SEL_SEL3555-2023_VD-EL0009-007_p015-030.pdf,1,15
+SEL-3555-RTAC,family_or_existing,Worklist generation/configured code not confirmed by -2 datasheet.,pdfs/SEL_SEL3555-2023_VD-EL0009-007_p015-030.pdf,1,15
+SZ2500-LAMP,family_or_existing,Only SZ2500.470 switch supplied; SZ2500.210 lamp remains missing.,pdfs/Rittal_DoorSwitch_VD-EL0009-007_p269-271.pdf,2,270
+NAP-F23,family_or_existing,Only F23 family-list mention. No F23-specific technical sheet; do not apply K55 specifications.,pdfs/Austin Hughes_UltraView_VD-EL0009-007_p329-336.pdf,8,336

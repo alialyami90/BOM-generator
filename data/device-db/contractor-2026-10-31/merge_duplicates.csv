@@ -1,0 +1,3 @@
+﻿part_id,input_rows,output_rows,removed_rows,deliveries,rule
+FGR-60F,2,1,1,vendor-library-2026-10-31; delivery-2026-10-31-bundles,"Same part_id, manufacturer and ordering code"
+FGR-70F,2,1,1,vendor-library-2026-10-31; delivery-2026-10-31-bundles,"Same part_id, manufacturer and ordering code"

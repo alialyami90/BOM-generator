@@ -1,0 +1,2 @@
+﻿part_id,dc_min_v,dc_max_v,ac_min_v,ac_max_v,dc_power_upper_w,dc_power_operator,ac_apparent_power_upper_va,inrush_upper_a,inrush_operator,ethernet_ports,ethernet_speed_mbps,source_pdf,source_page,source_bundle,bundle_page,notes
+SEL-2440,19.2,275,85,264,20,<,50,20,<,2,100,pdfs/SEL_DPAC_VD-EL0009-007_p067-082.pdf,14,VD-EL0009-007.pdf,80,Ride-through times are not inrush duration. Ethernet media and I/O combination are optional. No nominal panel voltage assumed.
