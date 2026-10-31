@@ -1313,3 +1313,10 @@ supply's peak burden, PDS3560-01 p. 11), all basis computed or assumed. The libr
 73 W, SEL-3555-RTAC 62 W and SEL-3355 91 W. These four parts stay out of the shipped library and in
 `data/device-db/contractor-2026-10-31/`. To ask Ali: use the supply-burden ceilings as unit power,
 or wait for measured or typical consumption figures?
+
+**Q55 — Categories for the contractor's other part types** (contractor delivery 2026-10-31).
+*Open.* Five of the delivery's categories have no library category: security_sensor (15 parts),
+fibre_channel_switch (4), storage (3), data_diode (2) and server (1). A category decides a part's
+BOM group (spec: How each panel BOM groups its materials; Inputs the tool needs, `category`).
+Recommendation: no change until a project needs one; the 25 parts stay in
+`data/device-db/contractor-2026-10-31/`. Ask Ali when a project does.

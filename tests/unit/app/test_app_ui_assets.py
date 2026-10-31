@@ -424,7 +424,7 @@ def test_the_app_ships_none_of_the_prototypes_illustrative_data() -> None:
         text = path.read_text(encoding="utf-8")
         assert not re.search(r"\bDB\.", text), path.name
         assert not re.search(r"\bEngine\.", text), path.name
-        assert "psa-devices 1.4.0" not in text, path.name
+        assert "psa-devices 1.6.0" not in text, path.name
 
 
 def test_without_its_bridge_the_app_says_so_instead_of_showing_example_pages() -> None:
@@ -598,3 +598,13 @@ def test_device_preview_shows_the_ac_branch_mcb_like_any_other() -> None:
     """ADR 0025: AC units have their own branch MCB, so no AC-only dash."""
     js = (UI_DIR / "screens-device-preview.js").read_text(encoding="utf-8")
     assert "AC devices have no branch MCB" not in js
+
+
+def test_preview_shows_the_nameplates_sheet_after_loose_material() -> None:
+    """ADR 0026: the Nameplates sheet comes after Loose Material, before the calculations."""
+    js = (UI_DIR / "screens-preview.js").read_text(encoding="utf-8")
+    loose, plates, power = (js.index(s) for s in ("[LOOSE, ", "[PLATES, ", "['power', 'Power'"))
+    assert loose < plates < power
+    assert "function nameplatesView(n)" in js
+    for head in ("<th>Panel</th>", "<th>Plate text</th>", "<th>Device</th>"):
+        assert head in js

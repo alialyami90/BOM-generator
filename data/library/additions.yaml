@@ -1,6 +1,7 @@
-# Parts the shipped psa-devices library adds to the example library (plan Q38: the example
-# stays the spec's example project). data/library/build.py appends them after the example's
-# devices. Each part comes from the contractor's 2026-10-31 delivery
+# Parts and MCB brand sets the shipped psa-devices library adds to the example library
+# (plan Q38: the example stays the spec's example project). data/library/build.py appends
+# them after the example's. The MCB sets come from the delivery's mcbs.csv (Hager MCB
+# catalogue in VD-EL0009-007). Each part comes from the contractor's 2026-10-31 delivery
 # (data/device-db/contractor-2026-10-31/: devices.csv, device_ports.csv, and sources.csv for
 # every value); the comment names the document behind its model and power.
 # purdue_level is left out where the datasheet does not state it, so these switches are not
@@ -228,3 +229,65 @@ devices:
     height_u: 1
     input_v_min: 18
     input_v_max: 300
+  - part_id: FG-401G  # FortiGate 400G Series Data Sheet FG-400G-DAT FG-400G-DAT-R06-20261013, p. 10
+    category: "firewall"
+    alt_group: "FG-401G"
+    make: "Fortinet"
+    model: "FortiGate 401G"
+    ordering_code: "FG-401G"
+    description_template: "FortiGate 401G next-generation firewall, 960 GB SSD, dual AC supplies, 1U rack mount"
+    supply_type: "VAC"
+    voltage_v: 230
+    unit_power_w: 295
+    load_type: "CONTINUOUS"
+    power_supplies: 0
+    hwio_points: 0
+    height_u: 1
+    input_v_min: 100
+    input_v_max: 240
+    ports:
+      - { count: 8, speed: 5G, media: RJ45, kind: fixed }
+      - { count: 1, speed: 2.5G, media: RJ45, kind: fixed }
+      - { count: 1, speed: 1G, media: RJ45, kind: fixed }
+      - { count: 16, speed: 1G, kind: sfp_slot }
+      - { count: 4, speed: 10G, kind: sfp_slot }
+      - { count: 4, speed: 25G, kind: sfp_slot }
+  - part_id: FG-701G  # FortiGate 700G Series Data Sheet FG-700G-DAT FG-700G-DAT-R15-20260929, p. 10
+    category: "firewall"
+    alt_group: "FG-701G"
+    make: "Fortinet"
+    model: "FortiGate 701G"
+    ordering_code: "FG-701G"
+    description_template: "FortiGate 701G next-generation firewall, 960 GB SSD, dual AC supplies, 1U rack mount"
+    supply_type: "VAC"
+    voltage_v: 230
+    unit_power_w: 295
+    load_type: "CONTINUOUS"
+    power_supplies: 0
+    hwio_points: 0
+    height_u: 1
+    input_v_min: 100
+    input_v_max: 240
+    ports:
+      - { count: 8, speed: 5G, media: RJ45, kind: fixed }
+      - { count: 1, speed: 2.5G, media: RJ45, kind: fixed }
+      - { count: 1, speed: 1G, media: RJ45, kind: fixed }
+      - { count: 16, speed: 1G, kind: sfp_slot }
+      - { count: 4, speed: 10G, kind: sfp_slot }
+      - { count: 4, speed: 25G, kind: sfp_slot }
+catalogue_brands:
+  mcb:
+    - id: hager-mcn-2p  # AC set: Hager gives no DC rating, so no dc_rating_v
+      family: MCN 2P C 6 kA  # VD-EL0009-007 p. 347 (MCN201 to MCN216)
+      make: Hager
+      poles: 2
+      ratings_a: [1, 2, 6, 10, 16]
+      code_pattern: "MCN2{rating:02d}"
+      trip_curve: C
+    - id: hager-ncn-2p  # AC set: Hager gives no DC rating, so no dc_rating_v
+      family: NCN 2P C 10 kA  # VD-EL0009-007 p. 356 (NCN201A to NCN216A)
+      make: Hager
+      poles: 2
+      ratings_a: [1, 2, 6, 10, 16]
+      code_pattern: "NCN2{rating:02d}A"
+      trip_curve: C

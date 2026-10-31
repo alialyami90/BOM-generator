@@ -87,7 +87,7 @@ records:
       '01': rated current 1 A
     datasheet_url: https://docs.rs-online.com/791b/A700000015875337.pdf
     product_url: https://www.se.com/ww/en/product/A9F74201/
-    notes: 'Values taken from the Schneider datasheet of A9F74201W (same breaker, ''W'' variant); DC:
+    notes: 'The contractor delivery of 2026-10-31 confirms 10 kA at 125 V DC with the 2 poles in series (contractor-2026-10-31/mcb_ratings.csv, Schneider iC60N catalogue VD-EL0009-007 pp. 364-366). Values taken from the Schneider datasheet of A9F74201W (same breaker, ''W'' variant); DC:
       the Schneider datasheet for this 2P device gives Icu = Ics = 10 kA at <=125 V DC (72-125 V DC) under
       IEC 60947-2. Wiring the two poles in series for DC is the usual practice but is not stated in the
       sources read. A nominal 125 V DC station battery floats at about 135-140 V and equalises higher,
@@ -389,7 +389,7 @@ records:
       '02': rated current 2 A
     datasheet_url: https://www.all4sps.com/mediafiles/Sonstiges/A9F74202.pdf
     product_url: https://www.se.com/ww/en/product/A9F74202/
-    notes: 'DC: the Schneider datasheet for this 2P device gives Icu = Ics = 10 kA at <=125 V DC (72-125
+    notes: 'The contractor delivery of 2026-10-31 confirms 10 kA at 125 V DC with the 2 poles in series (contractor-2026-10-31/mcb_ratings.csv, Schneider iC60N catalogue VD-EL0009-007 pp. 364-366). DC: the Schneider datasheet for this 2P device gives Icu = Ics = 10 kA at <=125 V DC (72-125
       V DC) under IEC 60947-2. Wiring the two poles in series for DC is the usual practice but is not
       stated in the sources read. A nominal 125 V DC station battery floats at about 135-140 V and equalises
       higher, which is above the 125 V DC breaking-capacity voltage. Check the battery maximum against
@@ -690,7 +690,7 @@ records:
       '06': rated current 6 A
     datasheet_url: https://cdn.contentspeed.ro/pimromstal.websales.ro/cs-content/cs-docs/products/55sb15052021fisatehnicaacti9ic60a9f74206_37589_41_1784571189.pdf
     product_url: https://www.se.com/ww/en/product/A9F74206/
-    notes: 'DC: the Schneider datasheet for this 2P device gives Icu = Ics = 10 kA at <=125 V DC (72-125
+    notes: 'The contractor delivery of 2026-10-31 confirms 10 kA at 125 V DC with the 2 poles in series (contractor-2026-10-31/mcb_ratings.csv, Schneider iC60N catalogue VD-EL0009-007 pp. 364-366). DC: the Schneider datasheet for this 2P device gives Icu = Ics = 10 kA at <=125 V DC (72-125
       V DC) under IEC 60947-2. Wiring the two poles in series for DC is the usual practice but is not
       stated in the sources read. A nominal 125 V DC station battery floats at about 135-140 V and equalises
       higher, which is above the 125 V DC breaking-capacity voltage. Check the battery maximum against
@@ -991,7 +991,7 @@ records:
       '10': rated current 10 A
     datasheet_url: https://prof-elec.com/a9f74210-en/
     product_url: https://www.se.com/ww/en/product/A9F74210/
-    notes: 'DC: the Schneider datasheet for this 2P device gives Icu = Ics = 10 kA at <=125 V DC (72-125
+    notes: 'The contractor delivery of 2026-10-31 confirms 10 kA at 125 V DC with the 2 poles in series (contractor-2026-10-31/mcb_ratings.csv, Schneider iC60N catalogue VD-EL0009-007 pp. 364-366). DC: the Schneider datasheet for this 2P device gives Icu = Ics = 10 kA at <=125 V DC (72-125
       V DC) under IEC 60947-2. Wiring the two poles in series for DC is the usual practice but is not
       stated in the sources read. A nominal 125 V DC station battery floats at about 135-140 V and equalises
       higher, which is above the 125 V DC breaking-capacity voltage. Check the battery maximum against
@@ -1293,7 +1293,7 @@ records:
       '16': rated current 16 A
     datasheet_url: https://docs.rs-online.com/7f16/A700000014392453.pdf
     product_url: https://www.se.com/ww/en/product/A9F74216/
-    notes: 'DC: the Schneider datasheet for this 2P device gives Icu = Ics = 10 kA at <=125 V DC (72-125
+    notes: 'The contractor delivery of 2026-10-31 confirms 10 kA at 125 V DC with the 2 poles in series (contractor-2026-10-31/mcb_ratings.csv, Schneider iC60N catalogue VD-EL0009-007 pp. 364-366). DC: the Schneider datasheet for this 2P device gives Icu = Ics = 10 kA at <=125 V DC (72-125
       V DC) under IEC 60947-2. Wiring the two poles in series for DC is the usual practice but is not
       stated in the sources read. A nominal 125 V DC station battery floats at about 135-140 V and equalises
       higher, which is above the 125 V DC breaking-capacity voltage. Check the battery maximum against

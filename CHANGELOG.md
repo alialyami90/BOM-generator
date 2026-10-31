@@ -7,32 +7,53 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-31
+
 ### Added
 
-- Device nameplates (M26, ADR 0026 proposed): each panel BOM ends with one
+- `data/device-db/contractor-return-2026-10-31.md` and its CSV list what goes
+  back to the contractor after the 2026-10-31 delivery: 270 asks over
+  undelivered worklist parts, missing fields, configured ordering codes, three
+  SEL management-port speeds, the Q54 power figures and Hager DC ratings (#260).
+- The installer ships psa-devices 1.6.0 with the FortiGate 401G and 701G
+  firewalls from the contractor's 2026-10-31 delivery, each its own
+  alternative group. Their 2.5G, 5G and 25G ports are listed as on the
+  datasheet and are never sized for SFPs (ADR 0027, #259).
+- A port group can give 2.5G, 5G and 25G ports (ADR 0027 proposed). They are
+  descriptive only: an equipment entry's `l2_speed` and an SFP choice refuse
+  them, so they never become an SFP pick (#258).
+- The installer ships psa-devices 1.5.0 with two Hager MCB brand sets from the
+  contractor's 2026-10-31 delivery: `hager-mcn-2p` (MCN 2P C, 6 kA) and
+  `hager-ncn-2p` (NCN 2P C, 10 kA), 1 to 16 A. Hager gives no DC rating, so
+  they are AC sets: a project refuses one as `mcb_dc`, and the check report
+  warns when one feeds the DC branches through `mcb` (#257).
+- App: the Preview page shows the Nameplates sheet (M26, ADR 0026) as a tab
+  after Loose Material, one row per plate with its panel, plate text and
+  device (#256).
+- Device nameplates (M26, ADR 0026): each panel BOM ends with one
   nameplate row whose quantity is its tagged devices, and a new Nameplates sheet
   after Loose Material lists every plate's text (the tag as the MCB rows print
   it) per panel. The library names the part as the housekeeping role
   `nameplate`; the example uses Phoenix Contact US-EMLP (60X30). The example's
   BOM sheets each gain that row, and the installer ships psa-devices 1.4.0
-  with the part and the role.
+  with the part and the role (#253).
 - The installer ships psa-devices 1.3.0 with twelve parts researched in the
   contractor's 2026-10-31 delivery, each its own alternative group:
   C9300-24T-A, IE-4010-16S12P, RST2228-28SFP-HV, SEL-2743 and SEL-2744
   switches, FG-121G, FG-60F, FG-70F and FGR-70F firewalls, SEL-3530-4 and
   SEL-3350-1 RTACs and the SEL-2407 clock (`data/library/additions.yaml`).
-  The switches have no Purdue level yet, so they are not L1/L2 picks.
+  The switches have no Purdue level yet, so they are not L1/L2 picks (#251).
 - App: Device preview shows an AC unit's own AC branch MCB (M25, ADR 0025) as
-  its PS1, in place of the "—" it showed before.
+  its PS1, in place of the "—" it showed before (#252).
 - App: Parts rows collapse to a one-line summary at 20 or more rows ("1 U ·
   77 W · 125 VDC · 2 overrides"), and a category with more than 12 parts picks
   its part with the Device picker: search, up to 8 matches with make, model,
   supply, power and data quality, keyboard ↑ ↓ Enter Esc. Parts options carry
-  the supply, rated power and data quality (M23 follow-ups).
+  the supply, rated power and data quality (M23 follow-ups, #250).
 - Every AC-powered device unit in a panel gets its own AC branch MCB in group E,
   after the socket and before the spare, sized like the DC branches from the AC
-  catalogue; CINC is raised to carry them (M25, ADR 0025 proposed). The
-  example has no AC device, so its BOM is unchanged.
+  catalogue; CINC is raised to carry them (M25, ADR 0025). The
+  example has no AC device, so its BOM is unchanged (#248).
 - App: the Device preview page (M24), after Parts in the rail. It draws a
   front view of each panel from the engine's device preview, with cable
   managers, the waist line and DIN-rail parts. A table lists each unit with
@@ -40,14 +61,14 @@ project uses [Semantic Versioning](https://semver.org/).
   can be pinned by dragging it, or with Up 1 U and Down 1 U, and unpinned;
   each move is checked live and can be undone. Parts gets "Generate preview",
   and a warning's "Go to the row" lands on that row. The Panels board and the
-  preview share one pointer-drag helper.
+  preview share one pointer-drag helper (#247).
 - Device preview engine (M24): `engine.preview.device_preview` lays out the
   substation, builds it in memory and lists every generated unit with its
   panel, top U, branch MCBs, terminal strips and overridden values, plus the
   layout and check issues; nothing is written. A layout override can pin a
   unit by its top U (`top_u`, exclusive with `position`); a pin that leaves
   the rack or overlaps another is a layout error (ADR 0013 amended). Branch
-  MCB records name the unit and feed they serve.
+  MCB records name the unit and feed they serve (#245).
 - App: the Parts page replaces Network (M23). Each device row picks its
   library part and can carry a BOM part number, this design's overrides of the
   part's height, power, supply, voltage, supplies, inrush and load type (a value
@@ -56,17 +77,17 @@ project uses [Semantic Versioning](https://semver.org/).
   written as loose material items. Changing a part clears its overrides, SFP
   choices and part number. Rows move up or down, are added by category and
   removed with Undo; a new substation starts from a setup card. `#/network`
-  opens Parts. The L1 ranking and the Change… dialog are gone.
+  opens Parts. The L1 ranking and the Change… dialog are gone (#244).
 - A switch, patch panel, firewall or gateway can have or not have a cable
   manager (`cable_manager` on the equipment entry or panel row): the layout
   gives or drops its 1U manager and the BOM counts it accordingly; unset keeps
-  today's rule.
+  today's rule (#243).
 - Generated panels stack their devices by priority: time server on top, then
   network, then servers and workstations, then the rest, keeping equipment
   order within each. A KVM or console sits with its bottom edge at waist
   height (`defaults.layout`, U18 with the assumed 1000 mm and 200 mm), and
   every unit gets a top U. A panel too short for that is a layout error (M21,
-  ADR 0013 amended).
+  ADR 0013 amended, #241).
 - Panels: a board of hand-written panels has "Lay out panels from the
   equipment". After a confirmation it writes the generated panel files as
   `bomgen layout --force` does, copying each file it replaces to
@@ -79,7 +100,8 @@ project uses [Semantic Versioning](https://semver.org/).
   for that substation only, so the layout, MCB sizing, power and heat use the
   overridden values; the library is not changed. The check report warns about
   a device with no part number. New Parts page roles, the `kvm` and `console`
-  categories, and `defaults.layout` waist height and rack start (ADR 0024).
+  categories, and `defaults.layout` waist height and rack start (ADR 0024,
+  #239).
 
 ### Changed
 
@@ -89,7 +111,8 @@ project uses [Semantic Versioning](https://semver.org/).
   Original parts take their make from the device database: IPR-2903685,
   IPR-BASE-2900934, IPR-SUPP-2900944 and IPR-BRACKET-2900954 print Phoenix
   Contact, FGR-60F and FR-TRAN-SX Fortinet, ZENON-V12 COPA-DATA and
-  MS-OFFICE-2021 Microsoft. The example library and the goldens are unchanged.
+  MS-OFFICE-2021 Microsoft. The example library and the goldens are unchanged
+  (#249).
 - The device editor shows "Minimum branch MCB" read-only, marked deprecated,
   with the reason: branch MCBs are sized from the rated power and inrush
   current (ADR 0019), so typing a value there changed nothing (#228).
@@ -97,7 +120,7 @@ project uses [Semantic Versioning](https://semver.org/).
 ### Fixed
 
 - A rack-mounted firewall in a generated panel gets its cable manager row on
-  the BOM; the layout already gave it the 1U (ADR 0013, Q32).
+  the BOM; the layout already gave it the 1U (ADR 0013, Q32, #243).
 - Dragging a device on the Panels board works in the installed app. The board
   now drags with pointer events instead of HTML5 drag-and-drop, which never
   reached the page in the Windows app; the drop rules, the live green or red
@@ -508,7 +531,8 @@ project uses [Semantic Versioning](https://semver.org/).
   airflow; future library defaults use 0 W for the SK 3110 thermostat and
   460 m³/h for the SK 3243.100 fan with its outlet filter (#12).
 
-[Unreleased]: https://github.com/alialyami90/BOM-generator/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/alialyami90/BOM-generator/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/alialyami90/BOM-generator/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/alialyami90/BOM-generator/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/alialyami90/BOM-generator/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/alialyami90/BOM-generator/compare/v0.1.0...v0.1.1
