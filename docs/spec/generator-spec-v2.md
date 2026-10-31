@@ -31,6 +31,7 @@ The workbook holds hidden master BOMs that drive the calculations, visible issue
 | 3 | Visible | Issued BOM for Cabinet 003 | Copy of Panel 3 |
 | 4 | Visible | Issued BOM for WS Console | Copy of Aux |
 | Loose Material | Visible | Items not mounted in any cabinet, one table with the panel BOM layout and the hidden HWIO column | Feeds the Power Consumption "External Equipment" block |
+| Nameplates | Visible | Every device nameplate's text per panel (ADR 0026) | Fed by the panels' group B tags |
 | Power Consumption | Visible | DC and AC load per cabinet, 25% margin totals, plus hidden MCB/COR sizing columns | Reads master BOMs; feeds Heat Dissipation |
 | Heat Dissipation | Visible | W and BTU/h per powered device per cabinet | Reads Power Consumption; feeds Heat Calculations |
 | Heat Calculations | Visible | Fan airflow check for the 3 PSA cabinets, natural-convection check for the WS console | Reads Heat Dissipation totals |
@@ -50,7 +51,7 @@ Every cabinet BOM lists the same eight groups in the same order, top to bottom. 
 | E | AC distribution | Incoming AC MCB (CINC), one branch MCB per AC load or load pair, spares, AC MCB auxiliary contacts | CINC 6A, C1 lamp, C2 fan-1+TH-1, C3 fan-2+TH-2, C4 TH-3, C5 spare, 3 aux contacts |
 | F | DC distribution | DC1 main (Q1) then one Q1.n per device PS1, spares; DC2 main (Q2) then Q2.n per device PS2, spares; change-over MCBs (QCOD) where diodes exist; DC aux contacts | Q1 16A + Q1.1–Q1.13; Q2 16A + Q2.1–Q2.13; 4 aux contacts |
 | G | Terminal blocks | One row per terminal strip: AC input, AC distribution, lighting, fan/thermostat, smoke detector, socket, DC1/DC2 input, DC1/DC2 distribution, change-over, annunciator, IO knife-disconnect per IO slot, DI negative, RTAC COM, inter-panel | X-AC, X3-AC, TBL, THF, XSD, X-DC1, X-DC2, X4-DC1, X4-DC2, XIP |
-| H | Grounding | AC safety ground busbar and instrument ground busbar (description only, no make/model) | AC SAFETY POWER-GROUND, INSTRUMENT-GROUND |
+| H | Grounding | AC safety ground busbar and instrument ground busbar (description only, no make/model), then the device nameplate row (ADR 0026) | AC SAFETY POWER-GROUND, INSTRUMENT-GROUND, 11 device nameplates |
 
 **What changes by panel type**
 
@@ -168,9 +169,13 @@ Part numbers come from the chosen catalogue brand (ADR 0017).
 - Cable managers: 9 per network cabinet (roughly one per rack-mounted switch/patch panel).
 - RTAC serial cables (SEL-C607): one per used COM port (6), matching the 6 XRTAC strips.
 
+**Device nameplates (last row of group H, ADR 0026).** When the library names a `nameplate` housekeeping part, each panel BOM ends with one row of it whose quantity is the panel's tagged group B units: one per unit, DIN rail included, kit children, housekeeping parts, MCBs, strips and loose items excluded. The plate text is the unit's tag as its MCB rows print it, without the panel prefix and with underscores (L2_ESW_A01, DHPCC_GW_1); a tag override is printed as written. In the example: 11 in Cabinets 001/002, 3 in Cabinet 003 and the WS console. The row has no HWIO and no power line.
+
 **Housekeeping kit (group D).** Every cabinet gets lamp + door switch, interposing relay kit (relay, base, suppression module, bracket) for the high-temperature alarm, and either 2 fans + 3 thermostats (forced ventilation) or vent filters + 1 thermostat (natural convection). The choice follows from Heat Calculations. Part numbers come from the chosen catalogue brand (ADR 0017).
 
 **HWIO points (hidden column H).** Each row contributes its hardwired alarm inputs: 1 per L2/EXT switch, 1 for the GPS clock, 3 for the AC aux contacts, 2 for the DC aux contacts on the mains. Panel totals in the example are 17, 17 and 6. Summed across panels, they give the hardwired DI count that the Axion DI modules in Cabinet 003 must cover.
+
+**Nameplates sheet (ADR 0026).** After Loose Material, laid out and printed like a panel BOM (merged title over A:D, the substation name above "Device Nameplates", header row, rows 1–2 repeated, A4 portrait, the BOM header and footer under the first panel's document): columns SR.NO, PANEL (cabinet number), PLATE TEXT and DEVICE (the unit's group B description), one row per plate in panel and group B order, SR.NO continuing across panels.
 
 ## Power Consumption sheet
 
@@ -318,7 +323,7 @@ The tool shall write a single Excel workbook in which every printed sheet has a 
 | --- | --- |
 | OUT-1 | Output is one .xlsx file (Office Open XML, no macros) that opens in Excel 2016 or later without a repair prompt. |
 | OUT-2 | File name is configurable; default `<project doc no.>_PSA_BOM_Rev<rev>.xlsx`. |
-| OUT-3 | Sheet order: one BOM sheet per cabinet in panel order, then Loose Material when the substation has any, then Power Consumption, Heat Dissipation, Heat Calculations. Sheet names are configurable (`output.sheet_names`, including `loose_material`). |
+| OUT-3 | Sheet order: one BOM sheet per cabinet in panel order, then Loose Material when the substation has any, then Nameplates when any panel has a nameplate row (ADR 0026), then Power Consumption, Heat Dissipation, Heat Calculations. Sheet names are configurable (`output.sheet_names`, including `loose_material` and `nameplates`). |
 | OUT-4 | Each BOM sheet carries the HWIO column hidden, so no separate master sheets are needed. |
 | OUT-5 | Calculated cells are live Excel formulas, not pasted values: SR.NO, Power Consumption references to BOM cells, J = F × I, block totals × 1.25, summary sums, Heat Dissipation references and heat formulas, Heat Calculations airflow and ΔT. The workbook is set to recalculate fully on open. |
 | OUT-6 | Formatting follows the Formatting section: fonts, fills, borders, column widths, row heights, merges, number formats. |
@@ -379,7 +384,7 @@ Three input sets rebuild the whole workbook: a device library (one record per pa
 | loose\_items | Parts shipped loose, not in the panel | – (GPS clock: antenna, LMR-400 cables, surge kit, mount) |
 | excluded\_from\_power | True for SFPs, FOPP, cables, passives | false |
 
-The library also holds the commodity catalogues: MCBs by rating (1/2/6/10/16 A → A9F742xx), aux contact, terminal blocks by type (UT-16, UT-2.5-MTD, UT-2.5-MT → order codes), busbars, and housekeeping kits (lamp, fan with m³/h, filter, thermostat with W, IPR kit, change-over diodes, socket). Each MCB catalogue also gives its trip curve (B, C, D, K or Z), the magnetic trip multiple for AC and, when known, for DC, and `dc_rating_v`, the voltage the whole breaker is rated for with its poles in series. `catalogue_brands` lists further brand sets per catalogue (ABB S200M, Siemens 5SY, Schneider C60H-DC, Wago and Weidmüller terminal blocks, nVent Erico and Phoenix busbars, and so on), each with an id the project or substation can choose; the default set is the one named `catalogues`. The library may name its own default DC set as `catalogues.mcb_dc`.
+The library also holds the commodity catalogues: MCBs by rating (1/2/6/10/16 A → A9F742xx), aux contact, terminal blocks by type (UT-16, UT-2.5-MTD, UT-2.5-MT → order codes), busbars, and housekeeping kits (lamp, fan with m³/h, filter, thermostat with W, IPR kit, change-over diodes, socket, and optionally the device nameplate, ADR 0026). Each MCB catalogue also gives its trip curve (B, C, D, K or Z), the magnetic trip multiple for AC and, when known, for DC, and `dc_rating_v`, the voltage the whole breaker is rated for with its poles in series. `catalogue_brands` lists further brand sets per catalogue (ABB S200M, Siemens 5SY, Schneider C60H-DC, Wago and Weidmüller terminal blocks, nVent Erico and Phoenix busbars, and so on), each with an id the project or substation can choose; the default set is the one named `catalogues`. The library may name its own default DC set as `catalogues.mcb_dc`.
 
 **2. Substation and its panels – one substation file, one record per cabinet**
 
@@ -430,10 +435,10 @@ Build one BOM sheet per cabinet with the HWIO column hidden, and let the calcula
 6. Build AC distribution: CINC, branches in fixed order, one branch per AC-powered unit, spare, aux contacts.
 7. Build DC distribution: Q1/Q2 mains, one branch per supply unit, spares, QCOD circuits, aux contacts; size each branch from running current, inrush and the 2 A floor (Derivation rules, group F) and the mains from ΣQ, with codes from the DC catalogue.
 8. Build terminal strips from the rules table plus each device's own terminal needs.
-9. Add grounding busbars.
+9. Add grounding busbars, then the device nameplate row (ADR 0026).
 10. Sum HWIO per panel and confirm the Axion DI modules cover the total.
 11. Number SR.NO, order rows by group A→H with a separator row before groups E, F, G and H, and apply merges for parent/child rows.
-12. Generate the Loose Material sheet when the substation has loose material, then Power Consumption, Heat Dissipation and Heat Calculations.
+12. Generate the Loose Material sheet when the substation has loose material, the Nameplates sheet when any panel has plates, then Power Consumption, Heat Dissipation and Heat Calculations.
 13. Build each sheet's page header and footer from project and panel data.
 14. Write the .xlsx with live formulas, the formatting and print setup in this spec, and the headers and footers (Output requirements).
 15. Produce a check report: SFP counts against port plans, main MCB ratings against ΣQ, fan airflow against required airflow, DI capacity against HWIO total, one line per branch MCB with the numbers behind its rating, and the float-voltage checks on the DC catalogue and the DC-fed devices.

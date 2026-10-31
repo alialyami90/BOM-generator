@@ -952,6 +952,9 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
 - **M25 — AC branch MCB per VAC device.** One group E branch per VAC unit after the socket, sized
   like the DC branches; CINC carries them (ADR 0025, Q52). Plan:
   [`superpowers/plans/2026-10-31-m25-ac-device-branches.md`](superpowers/plans/2026-10-31-m25-ac-device-branches.md).
+- **M26 — Device nameplates.** One nameplate row per panel (its tagged group B units, last in group
+  H) and a Nameplates sheet with every plate's text (ADR 0026, Q53). Plan:
+  [`superpowers/plans/2026-10-31-m26-device-nameplates.md`](superpowers/plans/2026-10-31-m26-device-nameplates.md).
 
 ## 5. Testing strategy
 
@@ -1296,3 +1299,9 @@ order before the spares, sized by `branch_sizing` on the AC set; the spare stays
 housekeeping branch; CINC is raised above the largest VAC branch and to the panel's AC design
 current (to confirm with Ali); an alarmed part adds an AC aux contact; the load text is the
 unit's short tag.
+
+**Q53 — Device nameplates** (M26). *Resolved 2026-10-31:* Ali chose one "Device nameplate" row per
+panel whose quantity is the panel's tagged devices, and a sheet listing every plate's text. A1
+approved the rest (ADR 0026, Proposed): group B units with a tag only; the last row of group H;
+the part from a new optional housekeeping role (NAMEPLATE-0828805, researched by A4); the sheet
+after Loose Material.

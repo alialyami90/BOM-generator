@@ -9,6 +9,12 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Device nameplates (M26, ADR 0026 proposed): each panel BOM ends with one
+  nameplate row whose quantity is its tagged devices, and a new Nameplates sheet
+  after Loose Material lists every plate's text (the tag as the MCB rows print
+  it) per panel. The library names the part as the housekeeping role
+  `nameplate`; the example uses Phoenix Contact US-EMLP (60X30). The example's
+  BOM sheets each gain that row.
 - Every AC-powered device unit in a panel gets its own AC branch MCB in group E,
   after the socket and before the spare, sized like the DC branches from the AC
   catalogue; CINC is raised to carry them (M25, ADR 0025 proposed). The
