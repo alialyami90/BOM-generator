@@ -920,6 +920,29 @@ section's details are written when the work starts.
     description with make, model and ordering code left empty. `io/loose_edit.py` adds,
     replaces, removes and moves items, sets `host_panel`, and validates an item by field.
 
+### M19–M24 — Part picking, panel priority and preview
+
+Ali's request "Replace network section with part picking" (2026-10-31). The design is
+[`superpowers/specs/2026-10-31-part-picking-design.md`](superpowers/specs/2026-10-31-part-picking-design.md);
+its section 8 is the milestone table. Each milestone is one PR, and Ali's answers are Q42–Q50.
+
+- **M19 — Panels board drag and drop fix.** Pointer-event drag in place of HTML5 drag and drop,
+  a Windows reproduction, and a "Lay out panels" button for hand-written panels. Independent of
+  the rest, so it ships first. Plan:
+  [`superpowers/plans/2026-10-31-m19-panels-drag.md`](superpowers/plans/2026-10-31-m19-panels-drag.md).
+- **M20 — Part overrides and derived parts (ADR 0024).** `Equipment.ordering_code`, `overrides`
+  and `sfp`, the new roles and categories, `defaults.layout`, derived parts in the loader,
+  schemas and the spec update. The golden test is unchanged. Plan:
+  [`superpowers/plans/2026-10-31-m20-part-overrides.md`](superpowers/plans/2026-10-31-m20-part-overrides.md).
+- **M21 — Panel priority and waist-height placement.** `engine/layout.py` stacks each panel by
+  priority and places KVM and console screens at waist height; amends ADR 0013; the layout
+  preview gives a top U per unit.
+- **M22 — Parts page design.** Tokens, component specs and prototype in `docs/ui/`, made with
+  the impeccable skill (CLAUDE.md "UI work").
+- **M23 — Parts page in the app.** Replaces the Network page; writers for the new fields.
+- **M24 — Preview page.** Engine API for per-unit MCBs and positions, the device table, and the
+  panel elevation with dragging.
+
 ## 5. Testing strategy
 
 - **Unit (TDD):** one test per rule, named after it, in `tests/unit/`.
@@ -1217,3 +1240,37 @@ chose "Keep it, accept the warning". The FortiGate FGR-60F's datasheet DC input 
 below the 140 V float, so `dc_float` warns for it on every build that uses it, as for the iC60N
 under Q37. It stays the default firewall in the shipped library; no DC-rated alternative is
 researched.
+
+**Q42 — What sets a device's data** (M20, M23). *Resolved 2026-10-31:* Ali chose "The dropdown
+pick". Height, power, supply and the other values come from the library part picked in the
+Parts page row and are shown next to it; any of them can be overridden for this design (ADR 0024).
+
+**Q43 — The part number box** (M20, M23). *Resolved 2026-10-31:* Ali chose "Free text printed on
+the BOM". The text goes in the ORDERING CODE column in place of the library's `ordering_code` or
+`model`, because the library has the model but not the project's part number.
+
+**Q44 — Network fine tuning** (M23). *Resolved 2026-10-31:* Ali chose "A subsection under the IED
+count and topology". Ring size, uplinks, interlink, L3 uplinks and the spares move to the Parts
+page; the L1 ranking table goes, and the L1 switch is picked in its row.
+
+**Q45 — KVM and console height** (M21). *Resolved 2026-10-31:* Ali chose "A project setting,
+height in mm from the floor". Default 1000 mm, marked ASSUMED.
+
+**Q46 — Where the lowest rack U sits** (M21). *Resolved 2026-10-31:* Ali chose "A project setting
+in mm above the floor, base frame included". Default 200 mm, marked ASSUMED.
+
+**Q47 — Does priority choose the panel** (M21). *Resolved 2026-10-31:* Ali chose "No". Devices go
+to panels as today, in equipment order (ADR 0013); priority only orders the stack inside each
+panel.
+
+**Q48 — Preview content** (M24). *Resolved 2026-10-31:* Ali chose "A per-device table and a front
+view of each panel". The table shows panel, position, watts, supply and the MCBs; the front view
+is an elevation per panel.
+
+**Q49 — SFP selection** (M20, M23). *Resolved 2026-10-31:* Ali chose "One SFP model per media and
+speed the switch needs". The sizing still computes the counts; a missing choice keeps today's
+automatic pick.
+
+**Q50 — Drag and drop in the panel views** (M19, M24). *Resolved 2026-10-31:* Ali chose "Both".
+The Panels board's dragging does not work in the installed app and is fixed (M19), and the
+Preview's panel elevation gets dragging too (M24).
