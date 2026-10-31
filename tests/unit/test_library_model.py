@@ -387,3 +387,22 @@ def test_terminal_rule_description_uses_strip_placeholders() -> None:
 def test_busbar_tag_is_optional() -> None:
     assert Busbar(description="PE").tag is None
     assert Busbar(description="PE", tag="AC SAFETY POWER-GROUND").tag == "AC SAFETY POWER-GROUND"
+
+
+@pytest.mark.parametrize("category", ["kvm", "console"])
+def test_kvm_and_console_categories_parse(category: str) -> None:
+    assert DeviceType.model_validate({**switch_dict(), "category": category}).category == category
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        {"derived_from": "RST2228-L1-24MM"},
+        {"sfp_choice": [{"speed": "1G", "media": "MM", "part_id": "SFP-1"}]},
+    ],
+)
+def test_a_library_file_cannot_hold_derived_parts(field: dict[str, Any]) -> None:
+    data = minimal_library_dict()
+    data["devices"][0] = {**data["devices"][0], **field}
+    with pytest.raises(ValidationError, match="is set by the loader"):
+        Library.model_validate(data)

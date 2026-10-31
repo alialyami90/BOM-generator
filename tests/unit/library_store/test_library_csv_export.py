@@ -11,6 +11,7 @@ import pytest
 from bomgen.io.loader import load_library
 from bomgen.library_store.csv_export import (
     CHILD_TABLES,
+    LOADER_ONLY,
     TABLES,
     export_csv,
     library_tables,
@@ -60,12 +61,12 @@ def test_every_device_field_is_a_column_or_a_child_table() -> None:
     nested = {
         name
         for name, info in DeviceType.model_fields.items()
-        if str(info.annotation).startswith("list[")
+        if str(info.annotation).startswith("list[") and name not in LOADER_ONLY
     }
     columns = set(TABLES["devices.csv"])
 
     assert nested == set(CHILD_TABLES)
-    assert columns | nested == set(DeviceType.model_fields)
+    assert columns | nested | set(LOADER_ONLY) == set(DeviceType.model_fields)
     assert columns.isdisjoint(nested)
 
 

@@ -19,6 +19,7 @@ from pydantic import (
     field_validator,
     model_validator,
 )
+from pydantic.json_schema import SkipJsonSchema
 
 from bomgen.models._base import (
     ChildQuantity,
@@ -57,6 +58,8 @@ class Category(StrEnum):
     SOFTWARE = "software"
     CABLE = "cable"
     ACCESSORY = "accessory"
+    KVM = "kvm"
+    CONSOLE = "console"
 
 
 class PurdueLevel(StrEnum):
@@ -163,6 +166,14 @@ class LooseItem(InputModel):
     tag: str | None = None
 
 
+class SfpChoice(InputModel):
+    """The SFP model picked for one port speed and media of a switch (ADR 0024)."""
+
+    speed: PortSpeed
+    media: Media
+    part_id: PartId
+
+
 AltGroup = Annotated[str, StringConstraints(pattern=r"^[A-Z0-9][A-Z0-9-]*$")]
 Tier = Literal["low", "mid", "high"]
 
@@ -204,6 +215,9 @@ class DeviceType(InputModel):
     inrush_ms: PositiveFloat | None = None  # inrush duration
     input_v_min: PositiveFloat | None = None  # rated input voltage range, V
     input_v_max: PositiveFloat | None = None
+    # set by the loader on a part derived from an equipment entry, never in a file (ADR 0024)
+    derived_from: SkipJsonSchema[PartId | None] = None
+    sfp_choice: SkipJsonSchema[list[SfpChoice]] = Field(default_factory=list)
 
     @model_validator(mode="before")
     @classmethod
@@ -495,6 +509,10 @@ class Library(InputModel):
 
     @model_validator(mode="after")
     def _groups_and_brands(self) -> "Library":
+        for device in self.devices:
+            for name in ("derived_from", "sfp_choice"):
+                if getattr(device, name):
+                    raise ValueError(f"{device.part_id}: {name} is set by the loader")
         categories: dict[str, Category] = {}
         for device in self.devices:
             if device.alt_group is None:

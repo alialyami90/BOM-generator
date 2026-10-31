@@ -413,6 +413,29 @@
           "$ref": "#/$defs/PortSpeed",
           "default": "1G"
         },
+        "ordering_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ordering Code"
+        },
+        "overrides": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PartOverrides"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "part_id": {
           "anyOf": [
             {
@@ -463,6 +486,13 @@
         "role": {
           "$ref": "#/$defs/EquipmentRole"
         },
+        "sfp": {
+          "items": {
+            "$ref": "#/$defs/SfpChoice"
+          },
+          "title": "Sfp",
+          "type": "array"
+        },
         "side": {
           "$ref": "#/$defs/Side",
           "default": "none"
@@ -482,7 +512,15 @@
         "ext_switch",
         "firewall",
         "fopp",
-        "other"
+        "other",
+        "time_server",
+        "operator_ws",
+        "engineering_ws",
+        "da_server",
+        "kvm",
+        "console",
+        "annunciator",
+        "time_accessory"
       ],
       "title": "EquipmentRole",
       "type": "string"
@@ -583,6 +621,14 @@
       },
       "title": "Layout",
       "type": "object"
+    },
+    "LoadType": {
+      "enum": [
+        "CONTINUOUS",
+        "INTERMITTENT"
+      ],
+      "title": "LoadType",
+      "type": "string"
     },
     "LooseExtra": {
       "additionalProperties": false,
@@ -828,6 +874,105 @@
       "title": "PanelKind",
       "type": "string"
     },
+    "PartOverrides": {
+      "additionalProperties": false,
+      "description": "Library values replaced for one equipment entry (ADR 0024).",
+      "properties": {
+        "height_u": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Height U"
+        },
+        "inrush_a": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Inrush A"
+        },
+        "load_type": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LoadType"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "power_supplies": {
+          "anyOf": [
+            {
+              "enum": [
+                0,
+                1,
+                2
+              ],
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Power Supplies"
+        },
+        "supply_type": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SupplyType"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "unit_power_w": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit Power W"
+        },
+        "voltage_v": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Voltage V"
+        }
+      },
+      "title": "PartOverrides",
+      "type": "object"
+    },
     "PortAllocation": {
       "additionalProperties": false,
       "description": "A count of ports of one speed and media used for one purpose, plus spares.",
@@ -902,6 +1047,30 @@
       ],
       "title": "PortSpeed",
       "type": "string"
+    },
+    "SfpChoice": {
+      "additionalProperties": false,
+      "description": "The SFP model picked for one port speed and media of a switch (ADR 0024).",
+      "properties": {
+        "media": {
+          "$ref": "#/$defs/Media"
+        },
+        "part_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+          "title": "Part Id",
+          "type": "string"
+        },
+        "speed": {
+          "$ref": "#/$defs/PortSpeed"
+        }
+      },
+      "required": [
+        "speed",
+        "media",
+        "part_id"
+      ],
+      "title": "SfpChoice",
+      "type": "object"
     },
     "SheetNames": {
       "additionalProperties": false,
@@ -1021,6 +1190,14 @@
       ],
       "title": "SubstationInfo",
       "type": "object"
+    },
+    "SupplyType": {
+      "enum": [
+        "VDC",
+        "VAC"
+      ],
+      "title": "SupplyType",
+      "type": "string"
     },
     "Topology": {
       "enum": [

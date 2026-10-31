@@ -186,12 +186,20 @@ class RegisterEntry(DocumentInfo):
     title: str | None = None
 
 
+class LayoutDefaults(InputModel):
+    """Heights for placing units in a panel (ADR 0024)."""
+
+    waist_height_mm: PositiveInt = 1000  # ASSUMED: KVM and console bottom edge
+    rack_start_mm: NonNegativeInt = 200  # ASSUMED: lowest rack U above the floor, base frame in
+
+
 class Defaults(InputModel):
     """Values every substation inherits key by key."""
 
     constants: DesignConstants = Field(default_factory=DesignConstants)
     spares: Spares = Field(default_factory=Spares)
     catalogue_choice: CatalogueChoice = Field(default_factory=CatalogueChoice)
+    layout: LayoutDefaults = Field(default_factory=LayoutDefaults)
 
 
 class Project(InputModel):
