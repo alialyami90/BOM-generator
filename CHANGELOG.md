@@ -15,6 +15,8 @@ project uses [Semantic Versioning](https://semver.org/).
   switches, FG-121G, FG-60F, FG-70F and FGR-70F firewalls, SEL-3530-4 and
   SEL-3350-1 RTACs and the SEL-2407 clock (`data/library/additions.yaml`).
   The switches have no Purdue level yet, so they are not L1/L2 picks.
+- App: Device preview shows an AC unit's own AC branch MCB (M25, ADR 0025) as
+  its PS1, in place of the "—" it showed before.
 - App: Parts rows collapse to a one-line summary at 20 or more rows ("1 U ·
   77 W · 125 VDC · 2 overrides"), and a category with more than 12 parts picks
   its part with the Device picker: search, up to 8 matches with make, model,

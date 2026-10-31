@@ -107,9 +107,8 @@
   /* ---------- the device table ---------- */
   const flag = (title) => ` <span class="flag" title="${esc(title)}" aria-label="${esc(title)}">${icon('warn')}</span>`;
   const ov = (u, fields, text) => (fields.some((f) => u.overridden.includes(f)) ? `<span class="ov-cell" title="Overridden for this design"><i class="ov-dot" aria-hidden="true"></i>${text}<span class="sr-only"> (overridden)</span></span>` : text);
-  const ac = (u) => !!u.supply && /VAC/.test(u.supply);
-  const mcb = (u, m) => (m ? `<span class="mono">${esc(m.tag)}</span> ${m.rating_a} A${m.at_minimum ? flag('At the branch minimum. Check the running and inrush current.') : ''}`
-    : ac(u) ? '<span class="muted" title="AC devices have no branch MCB in this design">—</span>' : '<span class="muted">—</span>');
+  const mcb = (m) => (m ? `<span class="mono">${esc(m.tag)}</span> ${m.rating_a} A${m.at_minimum ? flag('At the branch minimum. Check the running and inrush current.') : ''}`
+    : '<span class="muted">—</span>');
   function table() {
     const list = all().filter(({ p }) => !DP.filter || p.number === DP.filter), strips = all().some(({ u }) => u.strips.length);
     return `<p class="muted small dp-legend"><span class="flag">${icon('warn')}</span> an MCB at the branch minimum, a 0 W part or a missing part number · <i class="ov-dot" aria-hidden="true"></i> a value overridden on Parts</p>
@@ -123,7 +122,7 @@
         <td class="num nowrap">${u.pinned ? '<span class="pin-tag">Pinned</span> ' : ''}${u.din_rail ? '<span class="muted small">DIN rail</span>' : !u.placed ? '<span class="elev-need small">Not placed</span>' : ov(u, ['height_u'], span(u))}</td>
         <td class="num">${u.watts == null ? '<span class="muted">—</span>' : ov(u, ['unit_power_w'], String(u.watts))}${u.watts === 0 ? flag("0 W: check the part's power") : ''}</td>
         <td class="nowrap">${u.supply ? ov(u, ['supply_type', 'voltage_v'], esc(u.supply)) : '<span class="muted">—</span>'}</td>
-        <td class="nowrap">${mcb(u, u.ps1)}</td><td class="nowrap">${mcb(u, u.ps2)}</td>${strips ? `<td class="mono">${esc(u.strips.join(', '))}</td>` : ''}</tr>`; }).join('')}</tbody></table>
+        <td class="nowrap">${mcb(u.ps1)}</td><td class="nowrap">${mcb(u.ps2)}</td>${strips ? `<td class="mono">${esc(u.strips.join(', '))}</td>` : ''}</tr>`; }).join('')}</tbody></table>
       <div class="table-foot"><span>${plural(list.length, 'unit')}${DP.filter ? ` in panel ${DP.filter}` : ''} · positions, MCBs and strips come from the engine</span></div></div>`;
   }
 
