@@ -15,6 +15,11 @@ project uses [Semantic Versioning](https://semver.org/).
   switches, FG-121G, FG-60F, FG-70F and FGR-70F firewalls, SEL-3530-4 and
   SEL-3350-1 RTACs and the SEL-2407 clock (`data/library/additions.yaml`).
   The switches have no Purdue level yet, so they are not L1/L2 picks.
+- App: Parts rows collapse to a one-line summary at 20 or more rows ("1 U ·
+  77 W · 125 VDC · 2 overrides"), and a category with more than 12 parts picks
+  its part with the Device picker: search, up to 8 matches with make, model,
+  supply, power and data quality, keyboard ↑ ↓ Enter Esc. Parts options carry
+  the supply, rated power and data quality (M23 follow-ups).
 - Every AC-powered device unit in a panel gets its own AC branch MCB in group E,
   after the socket and before the spare, sized like the DC branches from the AC
   catalogue; CINC is raised to carry them (M25, ADR 0025 proposed). The
