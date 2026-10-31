@@ -88,7 +88,7 @@ def test_starting_a_blank_substations_parts_lays_out_its_panels(
 ) -> None:
     """Panels follow the equipment with no manual step (Ali, 2026-10-28; audit ALI-3)."""
     lifecycle.create_substation(project, "b", "b", store=store)
-    rows = [
+    rows: list[dict[str, Any]] = [
         {"role": "time_server", "part_id": "SEL-2488"},
         {"role": "l2_switch", "part_id": "RST2228-L2", "redundant": True},
     ]
