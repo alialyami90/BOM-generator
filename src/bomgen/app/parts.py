@@ -257,7 +257,8 @@ def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
     substation, library, loaded, project = _source(project_file, substation_id, store)
     if substation is None:
         return page | {"parts": None}
-    needs = _sfp_needs(loaded) if loaded is not None else {}
+    # a blank substation has no switches to size yet (the model takes both or none, ADR 0013)
+    needs = _sfp_needs(loaded) if loaded is not None and loaded.substation.equipment else {}
     items = substation.loose_material.items if substation.loose_material else []
     # loose material starts with its host panel, so accessories can be added only then
     host = substation.loose_material.host_panel if substation.loose_material else None
