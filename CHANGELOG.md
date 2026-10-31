@@ -15,6 +15,12 @@ project uses [Semantic Versioning](https://semver.org/).
   alternative group. The delivery's `fiber_patch_panel` becomes the library's
   `patch_panel`.
 
+### Fixed
+
+- Settings and Parts open on a new, blank substation again; in 0.3.0 they
+  showed "StopIteration:" because the Parts page sized SFPs for switches the
+  substation did not have yet.
+
 ## [0.3.0] - 2026-10-31
 
 ### Added
