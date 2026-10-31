@@ -34,6 +34,8 @@ def _housekeeping(catalogues: Catalogues) -> list[tuple[str, str, str | None]]:
         ("change_over_diode_positive", kit.change_over_diodes.positive, None),
         ("socket", kit.socket.part_id, f"{kit.socket.rating_a} A"),
     ]
+    if kit.nameplate is not None:
+        roles.append(("nameplate", kit.nameplate.part_id, None))
     return roles
 
 

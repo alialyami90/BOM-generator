@@ -21,7 +21,7 @@ EXAMPLES = Path(__file__).resolve().parents[2] / "examples"
 # gis01-bom entry is VD-EL0009-861GISPSA-001 rev 02.
 FILE_NAME = "VD-EL0009-861GISPSA-001_PSA_BOM_Rev02.xlsx"
 SHEETS = [
-    "1", "2", "3", "4", "Loose Material",  # ADR 0020
+    "1", "2", "3", "4", "Loose Material", "Nameplates",  # ADR 0020, ADR 0026
     "Power Consumption", "Heat Dissipation", "Heat Calculations",
 ]  # fmt: skip
 

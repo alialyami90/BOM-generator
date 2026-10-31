@@ -41,8 +41,10 @@ def formulas(path: Path) -> openpyxl.Workbook:
 
 
 # Formula cells in the example workbook; the count changes only if the layout does. The
-# Loose Material sheet (ADR 0020) added its own HWIO total.
-FORMULA_COUNT = 924
+# Loose Material sheet (ADR 0020) added its own HWIO total; the device nameplate row
+# (ADR 0026) adds one SR.NO formula per panel, and the Nameplates sheet one per plate
+# after the first (28 plates).
+FORMULA_COUNT = 955
 
 
 def formula_cells(book: openpyxl.Workbook) -> list[tuple[str, str]]:
@@ -82,10 +84,11 @@ def row_of(sheet: Worksheet, column: str, label: str) -> int:
 
 
 def test_sheet_order(formulas: openpyxl.Workbook) -> None:
-    # Output requirements (OUT-3) as amended by ADR 0020 (Q36): a BOM sheet per cabinet,
-    # the Loose Material sheet, then the three calculation sheets.
+    # Output requirements (OUT-3) as amended by ADR 0020 (Q36) and ADR 0026: a BOM sheet
+    # per cabinet, the Loose Material sheet, the Nameplates sheet, then the three
+    # calculation sheets.
     assert formulas.sheetnames == [
-        "1", "2", "3", "4", "Loose Material",
+        "1", "2", "3", "4", "Loose Material", "Nameplates",
         "Power Consumption", "Heat Dissipation", "Heat Calculations",
     ]  # fmt: skip
 
@@ -99,10 +102,11 @@ def test_bom_sheet_merges(formulas: openpyxl.Workbook) -> None:
 
 def test_loose_material_sheet(formulas: openpyxl.Workbook) -> None:
     # ADR 0020 (Q36): the loose table leaves the WS console sheet (now A1:G45, was
-    # A1:G62) for its own sheet, which is laid out and printed like a panel BOM.
+    # A1:G62) for its own sheet, which is laid out and printed like a panel BOM; the
+    # device nameplate row (ADR 0026) adds one row, A1:G46.
     console, loose = formulas["4"], formulas["Loose Material"]
-    assert console.print_area == "'4'!$A$1:$G$45"
-    assert console.max_row == 45
+    assert console.print_area == "'4'!$A$1:$G$46"
+    assert console.max_row == 46
     assert loose.print_area == "'Loose Material'!$A$1:$G$16"
     assert loose["A1"].value == "GIS Substation\nPSA Panels Loose Material and Auxiliary Equipment"
     assert loose["B2"].value == "ITEM DESIGNATION"
@@ -115,6 +119,38 @@ def test_loose_material_sheet(formulas: openpyxl.Workbook) -> None:
     assert fit is not None
     assert fit.fitToPage
     assert loose.print_options.horizontalCentered
+
+
+def test_nameplates_sheet(formulas: openpyxl.Workbook) -> None:
+    # ADR 0026: every plate's text per panel, laid out and printed like a panel BOM.
+    sheet = formulas["Nameplates"]
+    assert sheet["A1"].value == "GIS Substation\nDevice Nameplates"
+    assert "A1:D1" in {str(m) for m in sheet.merged_cells.ranges}
+    assert [sheet.cell(2, c).value for c in range(1, 5)] == [
+        "SR.NO",
+        "PANEL",
+        "PLATE TEXT",
+        "DEVICE",
+    ]
+    assert [sheet.cell(3, c).value for c in range(1, 4)] == [
+        1,
+        "861-GIS01-PSA-0001",
+        "FOPP_CCR_A01",
+    ]
+    assert sheet["A4"].value == "=A3+1"
+    assert [sheet.cell(r, 3).value for r in range(28, 31)] == [
+        "SRV/OAS/EAS",
+        "MONITOR",
+        "Keyboard & Mouse",
+    ]
+    assert sheet.print_area == "'Nameplates'!$A$1:$D$30"
+    assert sheet.print_title_rows == "$1:$2"
+    setup = sheet.page_setup
+    assert (setup.orientation, setup.paperSize, setup.fitToHeight) == ("portrait", 9, 0)
+    assert zone(sheet, "oddHeader", "center").splitlines()[1:] == [
+        "Bill of Materials for Nameplates",
+        "Supplier Doc # VD-EL0009-861GISPSA-001",
+    ]
 
 
 def test_power_consumption_footnote(formulas: openpyxl.Workbook) -> None:

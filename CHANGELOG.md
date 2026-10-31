@@ -9,6 +9,13 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Device nameplates (M26, ADR 0026 proposed): each panel BOM ends with one
+  nameplate row whose quantity is its tagged devices, and a new Nameplates sheet
+  after Loose Material lists every plate's text (the tag as the MCB rows print
+  it) per panel. The library names the part as the housekeeping role
+  `nameplate`; the example uses Phoenix Contact US-EMLP (60X30). The example's
+  BOM sheets each gain that row, and the installer ships psa-devices 1.4.0
+  with the part and the role.
 - The installer ships psa-devices 1.3.0 with twelve parts researched in the
   contractor's 2026-10-31 delivery, each its own alternative group:
   C9300-24T-A, IE-4010-16S12P, RST2228-28SFP-HV, SEL-2743 and SEL-2744

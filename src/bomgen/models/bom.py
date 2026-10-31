@@ -97,6 +97,18 @@ class LooseTable(BomTable):
     host_panel: str
 
 
+class Nameplate(OutputModel):
+    text: str  # the unit's short tag, as its MCB rows name it
+    device: str  # the unit's group B description
+
+
+class PanelNameplates(OutputModel):
+    """The plates of one panel's tagged group B units, in row order (ADR 0026)."""
+
+    panel_id: str
+    plates: tuple[Nameplate, ...]
+
+
 class BuildResult(OutputModel):
     """Everything the engine derives from a loaded substation: the BOM tables and the
     calculation sheets' power and heat results (``None`` only in hand-built results)."""
@@ -107,3 +119,4 @@ class BuildResult(OutputModel):
     heat: HeatResult | None = None
     mains: tuple[DcMains, ...] = ()
     branch_mcbs: tuple[BranchMcb, ...] = ()
+    nameplates: tuple[PanelNameplates, ...] = ()  # empty when the library has no nameplate

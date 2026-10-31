@@ -17,6 +17,7 @@ from bomgen.engine.grounding import grounding
 from bomgen.engine.housekeeping import FORCED_FANS, housekeeping, needs_change_over
 from bomgen.engine.items import BomItem, flatten
 from bomgen.engine.kits import loose_table, main_equipment
+from bomgen.engine.nameplates import nameplate_item, nameplates
 from bomgen.engine.network import accessories
 from bomgen.engine.power import power_consumption
 from bomgen.engine.terminals import StripInputs, terminal_strips
@@ -55,7 +56,13 @@ def build(loaded: LoadedSubstation) -> BuildResult:
     substation = loaded.substation.substation.name
     drafts = [_draft(p, library, loaded.constants, loose_items) for p in loaded.panels]
     hwio_total = sum(draft.hwio for draft in drafts)
-    panels = tuple(_finish(draft, library, substation, hwio_total) for draft in drafts)
+    plates = [nameplates(d.panel, d.rows) for d in drafts]
+    panels = tuple(
+        _finish(draft, library, substation, hwio_total, len(panel_plates.plates))
+        for draft, panel_plates in zip(drafts, plates, strict=True)
+    )
+    if library.catalogues.housekeeping.nameplate is None:
+        plates = []
     loose = loose_table(material, substation, [(d.panel, d.rows) for d in drafts], library)
     power = power_consumption(panels, loose, library, loaded.constants)
     fan_pair_m3h = FORCED_FANS * library.catalogues.housekeeping.fan.airflow_m3h
@@ -69,6 +76,7 @@ def build(loaded: LoadedSubstation) -> BuildResult:
         heat=heat,
         mains=tuple(d.mains for d in drafts),
         branch_mcbs=tuple(b for d in drafts for b in d.branch_mcbs),
+        nameplates=tuple(p for p in plates if p.plates),
     )
 
 
@@ -119,13 +127,21 @@ def _draft(
     return _PanelDraft(panel, rows, ventilation, items, strip_inputs, mains, branch_mcbs)
 
 
-def _finish(draft: _PanelDraft, library: Library, substation: str, hwio_total: int) -> PanelBom:
+def _finish(
+    draft: _PanelDraft,
+    library: Library,
+    substation: str,
+    hwio_total: int,
+    plates: int,
+) -> PanelBom:
     panel = draft.panel
     strip_inputs = replace(draft.strip_inputs, xdin_default=hwio_total)
+    nameplate = nameplate_item(panel, library, plates)
     items = [
         *draft.items,
         *terminal_strips(panel, library, draft.rows, strip_inputs),
         *grounding(panel, library),
+        *([nameplate] if nameplate is not None else []),
     ]
     return PanelBom(
         panel_id=panel.id,

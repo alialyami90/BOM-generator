@@ -194,5 +194,18 @@ def preview_page(project_file: Path, substation_id: str, store: LibraryStore) ->
             "rows": _rows(result.loose),
             "hwio_total": sum(line.hwio for line in result.loose.lines),
         },
+        "nameplates": None  # ADR 0026
+        if not result.nameplates
+        else {
+            "sheet": sheet_names.nameplates,
+            "panels": [
+                {
+                    "panel_id": p.panel_id,
+                    "cabinet": names.get(p.panel_id),
+                    "plates": [plate.model_dump(mode="json") for plate in p.plates],
+                }
+                for p in result.nameplates
+            ],
+        },
         **_sheets(result, names),
     }

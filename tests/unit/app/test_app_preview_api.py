@@ -104,6 +104,7 @@ def test_the_tabs_follow_the_workbooks_sheet_order(app: api.Api, project: Path, 
 
     calc = page["calc_sheets"]
     tabs = [p["sheet"] for p in page["panels"]] + [page["loose"]["sheet"]]
+    tabs += [page["nameplates"]["sheet"]]  # ADR 0026
     tabs += [calc["power"], calc["heat_dissipation"], calc["heat_calculations"]]
     assert tabs == [s["name"] for s in target["sheets"]]
 
@@ -117,3 +118,11 @@ def test_a_substation_with_errors_has_no_sheets(app: api.Api, project: Path) -> 
     assert page["reason"].startswith("1 error")
     assert "panels" not in page
     assert page["problems"][0]["level"] == "error"
+
+
+def test_the_page_lists_each_panels_nameplates(page: Any) -> None:
+    # ADR 0026: the Nameplates sheet's plates, panel by panel.
+    plates = page["nameplates"]["panels"][0]
+    assert plates["panel_id"] == "psa1"
+    assert plates["plates"][0]["text"] == "FOPP_CCR_A01"
+    assert len(plates["plates"]) == 11
