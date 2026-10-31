@@ -7,6 +7,14 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- The installer ships psa-devices 1.7.0 with 21 Hubbell FEUR fibre shelves
+  from the contractor's 2026-10-31 delivery (12, 24 and 48 positions, LC, SC
+  and ST, MM, OM3 and SM, plus the unloaded FEURFSPD), each its own
+  alternative group. The delivery's `fiber_patch_panel` becomes the library's
+  `patch_panel`.
+
 ## [0.3.0] - 2026-10-31
 
 ### Added

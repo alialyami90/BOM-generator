@@ -191,8 +191,8 @@ jobs:
           # in examples/project.yaml (tests/unit/test_packaging.py).
           New-Item -ItemType Directory -Force out | Out-Null
           & "dist\bomgen\bomgen.exe" library pack data\library\psa-devices.yaml `
-            --name psa-devices --version 1.6.0 --add data\device-db --out out\default.bomlib `
-            --notes "FortiGate 401G and 701G firewalls with 2.5G, 5G and 25G ports (ADR 0027; contractor delivery 2026-10-31). 1.5.0: Hager MCN and NCN 2P C MCB brand sets (AC). 1.4.0: device nameplate part NAMEPLATE-0828805 (Phoenix Contact) and its housekeeping role (ADR 0026). 1.3.0: twelve researched parts (Cisco, Siemens and SEL switches, FortiGate firewalls, SEL RTACs and the SEL-2407 clock). 1.2.0: cited inrush for the SEL-2730M-EXT and coil range for the IPR-2903685 relay; manufacturer makes for eight original parts (contractor delivery 2026-10-31). Builds on 1.1.0: alternatives as library parts, datasheet inrush and input voltage ranges, DC-rated brand sets."
+            --name psa-devices --version 1.7.0 --add data\device-db --out out\default.bomlib `
+            --notes "21 Hubbell FEUR fibre shelves as patch panels (contractor delivery 2026-10-31). 1.6.0: FortiGate 401G and 701G firewalls with 2.5G, 5G and 25G ports (ADR 0027). 1.5.0: Hager MCN and NCN 2P C MCB brand sets (AC). 1.4.0: device nameplate part NAMEPLATE-0828805 (Phoenix Contact) and its housekeeping role (ADR 0026). 1.3.0: twelve researched parts (Cisco, Siemens and SEL switches, FortiGate firewalls, SEL RTACs and the SEL-2407 clock). 1.2.0: cited inrush for the SEL-2730M-EXT and coil range for the IPR-2903685 relay; manufacturer makes for eight original parts (contractor delivery 2026-10-31). Builds on 1.1.0: alternatives as library parts, datasheet inrush and input voltage ranges, DC-rated brand sets."
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           if (-not (Test-Path out\default.bomlib)) { Write-Error "out\default.bomlib was not written"; exit 1 }
 
@@ -253,7 +253,7 @@ jobs:
           $env:BOMGEN_NO_DIALOGS = "1"
           Show-Window "First start"
           $listing = (& "$dir\bomgen.exe" library list) -join "`n"
-          if ($listing -notmatch "psa-devices\s+1\.6\.0 \(active\)") { Fail "Default library missing after the first start: $listing" }
+          if ($listing -notmatch "psa-devices\s+1\.7\.0 \(active\)") { Fail "Default library missing after the first start: $listing" }
           $before = Snapshot $env:BOMGEN_LIBRARY_HOME
           # Reinstall over the top and start again: the store must stay exactly as it was.
           $again = Start-Process "out\installer\bomgen-setup-$env:VERSION.exe" -Wait -PassThru -ArgumentList $silent
