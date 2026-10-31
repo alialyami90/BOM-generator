@@ -29,6 +29,7 @@ from bomgen.models.library import (
     Media,
     PortSpeed,
     SfpChoice,
+    SizedSpeed,
     SupplyType,
 )
 from bomgen.models.panel import Enclosure, PanelId, PanelKind, PortPlan, TagPrefix
@@ -103,7 +104,7 @@ class Equipment(InputModel):
     side: Side = Side.NONE
     qty: PositiveInt = 1
     l2_ports: NonNegativeInt = 0
-    l2_speed: PortSpeed = PortSpeed.G1
+    l2_speed: SizedSpeed = PortSpeed.G1
     l2_media: Media = Media.MM
     # copied onto every panel row the layout writes for this entry (as on DeviceInstance)
     purpose: str | None = None

@@ -10,6 +10,7 @@ from itertools import pairwise
 from typing import Annotated, Literal
 
 from pydantic import (
+    AfterValidator,
     Field,
     NonNegativeFloat,
     NonNegativeInt,
@@ -83,7 +84,22 @@ class PortSpeed(StrEnum):
     M10 = "10M"
     M100 = "100M"
     G1 = "1G"
+    G2_5 = "2.5G"  # 2.5G, 5G and 25G describe a port; they are never sized (ADR 0027)
+    G5 = "5G"
     G10 = "10G"
+    G25 = "25G"
+
+
+SFP_SPEEDS = frozenset({PortSpeed.M10, PortSpeed.M100, PortSpeed.G1, PortSpeed.G10})
+
+
+def _sized(value: PortSpeed) -> PortSpeed:
+    if value not in SFP_SPEEDS:
+        raise ValueError(f"{value.value} ports are not sized for SFPs (ADR 0027)")
+    return value
+
+
+SizedSpeed = Annotated[PortSpeed, AfterValidator(_sized)]  # a speed SFP sizing can use
 
 
 class Media(StrEnum):
@@ -169,7 +185,7 @@ class LooseItem(InputModel):
 class SfpChoice(InputModel):
     """The SFP model picked for one port speed and media of a switch (ADR 0024)."""
 
-    speed: PortSpeed
+    speed: SizedSpeed
     media: Media
     part_id: PartId
 

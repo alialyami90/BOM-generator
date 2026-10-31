@@ -105,8 +105,9 @@ Readers (the tests, and the app's loader) can rely on these:
   `operating_temp_c.*`, `rack_units`, `weight_kg` and a tier's `unit_power_w` are int or
   float; `power.redundant_psu` and a tier's `verified` are booleans. Anything uncertain
   about a figure goes in `notes`, not in the value.
-- **Port groups:** `ports` (label), `count` (positive int), `speed` (`100M | 1G | 10G`),
-  `media`, `kind` (`fixed | sfp_slot`) and `usable_for` (`ied | uplink | any`) are all
+- **Port groups:** `ports` (label), `count` (positive int), `speed`
+  (`10M | 100M | 1G | 2.5G | 5G | 10G | 25G`; 2.5G, 5G and 25G are never sized for SFPs,
+  ADR 0027), `media`, `kind` (`fixed | sfp_slot`) and `usable_for` (`ied | uplink | any`) are all
   given; `note` is optional. `media` is `MM`, `SM` or `RJ45` on fixed ports and the cage
   type (`SFP`, `SFP+`) on SFP slots.
 - `height_u` is a whole number, at least 1 for `rack` and 0 for every other mounting.

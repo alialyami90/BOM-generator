@@ -12,6 +12,7 @@ from bomgen.models.library import (
     Library,
     McbCatalogue,
     PortGroup,
+    SfpChoice,
     TerminalRule,
 )
 
@@ -406,3 +407,16 @@ def test_a_library_file_cannot_hold_derived_parts(field: dict[str, Any]) -> None
     data["devices"][0] = {**data["devices"][0], **field}
     with pytest.raises(ValidationError, match="is set by the loader"):
         Library.model_validate(data)
+
+
+@pytest.mark.parametrize("speed", ["2.5G", "5G", "25G"])
+def test_a_port_group_can_describe_2_5g_5g_and_25g_ports(speed: str) -> None:
+    group = PortGroup.model_validate({"count": 4, "speed": speed, "kind": "sfp_slot"})
+
+    assert group.speed == speed
+
+
+@pytest.mark.parametrize("speed", ["2.5G", "5G", "25G"])
+def test_new_port_speeds_are_never_sfp_picks(speed: str) -> None:
+    with pytest.raises(ValidationError, match="not sized for SFPs"):
+        SfpChoice.model_validate({"speed": speed, "media": "MM", "part_id": "SFP-X"})
