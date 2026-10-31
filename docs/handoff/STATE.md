@@ -51,9 +51,10 @@ rather than copy it.
   round-trip writers (ADR 0021), and the loose material sheet and page (ADR 0020, ADR 0022). v0.2.1 is
   the UI polish pass from [`docs/ui/polish-v02.md`](../ui/polish-v02.md) (items 1–16, #205–#208) plus
   #194, #198–#201.
-- **Numbers.** ADRs 0001–0026 are Accepted. Next free ADR **0027**. Q51 (annunciator) and Q54 (power of the -2 SEL computers) are open; the
-  next free question is **Q55**. The next milestone is **M27**.
-- **Changelog** `[Unreleased]` holds every PR through #253.
+- **Numbers.** ADRs 0001–0026 are Accepted; next free ADR **0027**. Q51 (annunciator) and Q54
+  (power of the -2 SEL computers) are open; the next free question is **Q55**. The next milestone
+  is **M27**.
+- **Changelog** `[Unreleased]` holds every PR through #254.
 - **Next engine work:** the model changes (step 4) from A4's plan.
 
 ### Verification (`f2234f7`, after #227)
