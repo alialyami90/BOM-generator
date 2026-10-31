@@ -389,8 +389,10 @@ side.
 ### Part row
 One device type on the Parts page. A bordered row on `surface`, 4 px radius, 8 px between rows, three lines:
 
-1. **Top line:** the role label in medium weight (Time server clock, L2 switch…), then at the right the
-   **A and B** checkbox and the row menu.
+1. **Top line:** the role label in medium weight (Time server clock, L2 switch…), then at the right a
+   **Cable manager** switch on network rows (switch, patch panel, firewall, gateway; Ali, 2026-10-31),
+   the **A and B** checkbox and the row menu. The switch starts at the part category's default: on for
+   switches, firewalls and patch panels, off for gateways (ADR 0013, amended).
 2. **Fields line**, a three-column grid shared by every row so the columns line up under one muted header
    ("Library part · Part number on the BOM · Qty"):
    the **part select**, a select of the library parts of the row's category, each as "part id · make
@@ -462,7 +464,8 @@ waist-height lines meet across panels.
   PSA2-ANN-01 · no rack space").
 - **Units:** blocks as tall as their U, placed at their top U, showing tag (mono) and height. A unit
   with a cable manager reads "1 U + CM" and draws the manager as a 16 px muted band at the bottom of
-  the block labelled "Cable manager", so the part's height matches Parts. Selected, pinned, dragging
+  the block labelled "Cable manager", so the part's height matches Parts. A unit whose Cable manager
+  switch is off on Parts has no band. Selected, pinned, dragging
   and drop states are the board's (Device block, Panel column).
 - **Blank space:** empty rack units, drawn as the well with no fill. Blank space has no BOM row.
 - **Waist-height line:** a 1 px dashed `action` line across the frame at the waist height, starting in

@@ -393,7 +393,22 @@ reviewed by the design owner and is the intended behaviour; the prototype in
 - **Network › Equipment (v0.2.1, #199, #207).** Each row keeps its part id on one
   line in mono with Change… after it; when the column is narrow Change… wraps
   under the id. A changed part shows the new id with the Changed marker and
-  "Was X". The Role column shows whole names.
+  "Was X". The Role column shows whole names. Parts replaced this screen in M23.
+- **Parts (M23).** The app differs from the M22 prototype in these ways:
+  - The part select is always a select: a category with more than 12 parts does not
+    open the Device picker. A long part name is cut at the select's edge, and the full
+    name is its tooltip.
+  - *Add a device* opens a dialog that picks the part. The model takes no equipment
+    row without one, so a row cannot be added empty.
+  - A category the library has no parts for (KVM, console) shows "The library has no
+    KVM parts yet." on its row instead of a select, and is disabled in the *Add a
+    device* menu with the same sentence.
+  - SFP sub-rows show the media and speed without the engine's count, and the first
+    option reads "Automatic: same make first".
+  - Time accessories write at once, not through the save bar. *Add accessory* needs
+    the loose material's host panel; without one the row points to Loose material.
+  - Rows do not collapse at 20 or more.
+  - The annunciator's "Mount in panel" switch is not built (Q51).
 - **Settings › General (v0.2.1, #207).** The catalogue brands sit in a two-column
   form; the first option of each select names the resolved brand, "Same as the
   project (Schneider Acti9 2P)", and for the DC MCB set "Same as AC branches".

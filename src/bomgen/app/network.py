@@ -76,37 +76,31 @@ def _board(loaded: LoadedSubstation, result: LayoutResult) -> list[Any]:
     ]
 
 
+def _base(loaded: LoadedSubstation, part_id: str) -> str:
+    """The library part a derived part (ADR 0024) was made from, as the person picked it."""
+    found = loaded.library.get(part_id)
+    return found.derived_from if found and found.derived_from else part_id
+
+
 def _network(loaded: LoadedSubstation, page: dict[str, Any]) -> None:
     result = layout_preview(loaded)
     plan = result.plan
-    devices = {d.part_id: d for d in loaded.library.devices}
     l1 = next(e for e in loaded.substation.equipment if e.role is EquipmentRole.L1_SWITCH)
     page |= {
         "plan": {
             "ied_count": plan.ied_count,
             "topology": loaded.substation.network.topology,
-            "l1_part_id": plan.l1_part_id,
+            "l1_part_id": _base(loaded, plan.l1_part_id),
             "l1_pinned": l1.part_id is not None,
             "l1_per_side": plan.l1_per_side,
             "l1_usable_ports": plan.l1_usable_ports,
             "l1_links_per_side": plan.l1_links_per_side,
             "rings_per_side": plan.rings_per_side,
-            "l2_part_id": plan.l2_part_id,
+            "l2_part_id": _base(loaded, plan.l2_part_id),
             "l2_per_side": plan.l2_per_side,
             "l2_usable_ports": plan.l2_usable_ports,
             "l2_demand_per_side": plan.l2_demand_per_side,
         },
-        "l1_ranking": [
-            {
-                "part_id": c.ports.part_id,
-                "make": devices[c.ports.part_id].make,
-                "model": devices[c.ports.part_id].model,
-                "ports": c.ports.total,
-                "per_side": c.per_side,
-                "usable_ports": c.usable_ports,
-            }
-            for c in result.l1_candidates
-        ],
         "panels": _board(loaded, result),
         "issues": [
             {
@@ -128,7 +122,6 @@ def layout_page(project_file: Path, substation_id: str, store: LibraryStore) -> 
         "generated": False,
         "reserved_u": None,
         "plan": None,
-        "l1_ranking": [],
         "panels": [],
         "issues": [],
         "overrides": [],
