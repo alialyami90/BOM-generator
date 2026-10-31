@@ -191,8 +191,8 @@ jobs:
           # in examples/project.yaml (tests/unit/test_packaging.py).
           New-Item -ItemType Directory -Force out | Out-Null
           & "dist\bomgen\bomgen.exe" library pack data\library\psa-devices.yaml `
-            --name psa-devices --version 1.1.0 --add data\device-db --out out\default.bomlib `
-            --notes "Alternatives as library parts (alt groups, low/mid/high); datasheet inrush and input voltage ranges; DC-rated MCB, aux contact, terminal block, busbar and housekeeping brand sets."
+            --name psa-devices --version 1.2.0 --add data\device-db --out out\default.bomlib `
+            --notes "Cited inrush for the SEL-2730M-EXT and coil range for the IPR-2903685 relay; manufacturer makes for eight original parts (contractor delivery 2026-10-31). Builds on 1.1.0: alternatives as library parts, datasheet inrush and input voltage ranges, DC-rated brand sets."
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           if (-not (Test-Path out\default.bomlib)) { Write-Error "out\default.bomlib was not written"; exit 1 }
 
@@ -253,7 +253,7 @@ jobs:
           $env:BOMGEN_NO_DIALOGS = "1"
           Show-Window "First start"
           $listing = (& "$dir\bomgen.exe" library list) -join "`n"
-          if ($listing -notmatch "psa-devices\s+1\.1\.0 \(active\)") { Fail "Default library missing after the first start: $listing" }
+          if ($listing -notmatch "psa-devices\s+1\.2\.0 \(active\)") { Fail "Default library missing after the first start: $listing" }
           $before = Snapshot $env:BOMGEN_LIBRARY_HOME
           # Reinstall over the top and start again: the store must stay exactly as it was.
           $again = Start-Process "out\installer\bomgen-setup-$env:VERSION.exe" -Wait -PassThru -ArgumentList $silent
