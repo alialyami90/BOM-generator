@@ -8,9 +8,8 @@
 
 A library part's port groups give each group's speed, for SFP sizing (spec: Inputs the tool
 needs, the `ports` row). The model took 10M, 100M, 1G and 10G. The contractor's 2026-10-31
-delivery has seven parts with 2.5G, 5G or 25G ports: the FortiGate FG-401G, FG-701G, FG-600F
-and FG-601F firewalls and the SEL-2731, SEL-2740S and SEL-2741 switches. They cannot be
-imported while their ports cannot be written down.
+delivery has four FortiGate firewalls with 2.5G, 5G or 25G ports: FG-401G, FG-701G, FG-600F
+and FG-601F. They cannot be imported while their ports cannot be written down.
 
 The SFP sizing (spec: Derivation rules: what follows from the devices, the SFP bullet) only
 ever allocates 1G and 100M links: 1G SM uplinks to L3, 1G MM downlinks and L1 uplinks, and
@@ -29,6 +28,7 @@ ever allocates 1G and 100M links: 1G SM uplinks to L3, 1G MM downlinks and L1 up
 
 ## Consequences
 
-- The seven parts can come in by a data PR. Their 3 blank speeds go back to the contractor.
+- FG-401G and FG-701G can then come in by a data PR. FG-600F and FG-601F also wait on a
+  voltage and load type from the contractor.
 - Nothing changes for existing libraries and projects, and the goldens don't move.
 - A design that needs 25G uplinks sized for SFPs needs a new sizing rule and a new ADR first.
