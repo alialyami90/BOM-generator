@@ -138,6 +138,7 @@
     const head = pageHead('Device preview', 'Where each device goes and what feeds it, before the workbook is built. Drag a device on a front view to pin it.', '<a class="btn btn--secondary" href="#/parts">Back to Parts</a>');
     if (!real()) return `<div class="page page--wide">${head}<div class="empty"><b>Open a substation first.</b></div></div>`;
     const d = load(); if (!d) return `<div class="page page--wide">${head}<p class="muted" aria-busy="true">Generating the preview…</p></div>`;
+    if (d.blank) return `<div class="page page--wide">${head}<div class="empty" style="max-width:640px"><b>No parts yet</b><div class="muted small" style="margin:4px 0 12px">Pick this substation's parts first; the preview then draws its panels.</div><a class="btn btn--primary" href="#/parts">Go to Parts</a></div></div>`;
     if (d.reason) return `<div class="page page--wide">${head}${banner('bad', `<b>No preview.</b> ${esc(d.reason)}. Checks lists them.`, '<a class="btn btn--secondary btn--sm" href="#/checks">Open Checks</a>')}</div>`;
     const errs = issuesOf('error'), warns = issuesOf('warning');
     const goto = (i) => (i.device ? `<button class="link-btn small" data-action="dp-goto" data-device="${esc(i.device)}">Go to the row</button>` : '');

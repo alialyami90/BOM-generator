@@ -196,6 +196,7 @@ def test_a_blank_substation_seeds_generated_panels_so_equipment_can_be_added(
     assert seeded is not None
     assert seeded.document == "gis02-bom"
     assert seeded.cabinet_number.format(n=1) == "GIS02-PSA-0001"
+    assert seeded.options == {"inter_panel_terminals": 40}  # network cabinets (spec, XIP)
     assert [e.id for e in target.substation.equipment] == ["l2", "l1"]
     substation_file = project_file.parent / "substations" / "gis02" / "substation.yaml"
     assumed = fields.assumed_fields(substation_file)

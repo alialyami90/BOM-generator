@@ -21,6 +21,7 @@ from bomgen.engine.pipeline import build as build_bom
 from bomgen.io.errors import InputError
 from bomgen.library_store.store import LibraryStore
 from bomgen.models.project import _FILE_NAME_FORBIDDEN
+from bomgen.models.report import CheckStatus
 from bomgen.revision import read_previous_issue
 from bomgen.sheets.workbook import build_workbook
 from bomgen.writer import WriterError
@@ -53,12 +54,29 @@ def _errors(found: Resolved) -> str:
     return f"{count} error{'' if count == 1 else 's'} in the input files"
 
 
+def _not_ready(found: Resolved) -> list[dict[str, Any]]:
+    """What a substation that loads still lacks before it can be built: parts, then panels."""
+    loaded = found.loaded
+    if loaded is None:
+        return []
+    if not loaded.substation.equipment:
+        location, message = "equipment", "No parts yet: pick this substation's parts on Parts."
+    elif not loaded.panels:
+        location, message = "panels", "No panels yet: lay them out on Panels."
+    else:
+        return []
+    return [{"level": "error", "file": found.file, "location": location, "message": message}]
+
+
 def checks_page(project_file: Path, substation_id: str, store: LibraryStore) -> dict[str, Any]:
     """The located problems, then the engine checks; these run only when the files load."""
     found = resolve(project_file, substation_id, store)
     engine: dict[str, Any] = {"run": False, "reason": None, "failed": False, "items": []}
+    missing = _not_ready(found)
     if found.loaded is None:
         engine["reason"] = f"{_errors(found)} must be fixed before the engine checks run."
+    elif missing:
+        engine["reason"] = missing[0]["message"]
     else:
         try:
             report = check_report(found.loaded, build_bom(found.loaded))
@@ -66,7 +84,7 @@ def checks_page(project_file: Path, substation_id: str, store: LibraryStore) -> 
             engine["reason"] = f"The engine stopped: {exc}"
         else:
             engine = {"run": True, "reason": None, "failed": report.failed, "items": report.items}
-    return {"problems": problems_of(project_file, found, store), "engine": engine}
+    return {"problems": problems_of(project_file, found, store) + missing, "engine": engine}
 
 
 def build_target(project_file: Path, substation_id: str, store: LibraryStore) -> dict[str, Any]:
@@ -75,14 +93,18 @@ def build_target(project_file: Path, substation_id: str, store: LibraryStore) ->
     folder = found.file.parent / OUT_FOLDER
     loaded = found.loaded
     name = sheets = revision = None
+    flags = 0
     if loaded is not None:
         name = workbook_name(loaded)
         revision = loaded.documents[loaded.substation.document].rev
         try:
-            workbook = build_workbook(loaded, build_bom(loaded))
+            bom = build_bom(loaded)
+            workbook = build_workbook(loaded, bom)
+            report = check_report(loaded, bom)
         except EngineError:
             pass  # Checks names the engine's problem; Build refuses with it
         else:
+            flags = sum(1 for item in report.items if item.status is CheckStatus.WARN)
             cabinets = {panel.sheet_name: panel.cabinet_name for panel in loaded.panels}
             sheets = [{"name": s.name, "cabinet": cabinets.get(s.name)} for s in workbook.sheets]
     library = found.project.library
@@ -93,7 +115,8 @@ def build_target(project_file: Path, substation_id: str, store: LibraryStore) ->
         "sheets": sheets,
         "library": {"name": library.name, "version": library.version},
         "revision": revision,
-        "problems": problems_of(project_file, found, store),
+        "flags": flags,  # the engine checks' warnings, as Checks lists them
+        "problems": problems_of(project_file, found, store) + _not_ready(found),
     }
 
 

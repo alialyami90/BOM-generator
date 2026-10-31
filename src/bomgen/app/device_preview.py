@@ -32,6 +32,8 @@ def device_preview_page(
     if loaded is None:
         count = len(found.problems)
         return page | {"reason": f"{count} error{'' if count == 1 else 's'} in the input files"}
+    if not loaded.substation.equipment:  # a blank substation: nothing to lay out yet
+        return page | {"blank": True}
     preview = device_preview(loaded).model_dump(mode="json")
     labels = {e.id: row_label(e, loaded.library) for e in loaded.substation.equipment}
     for panel in preview["panels"]:

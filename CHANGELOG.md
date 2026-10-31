@@ -9,6 +9,11 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- The installer ships psa-devices 1.8.0 from v2 of the contractor's library:
+  the FortiGate 600F and 601F firewalls (230 V AC, now with their voltage and
+  load type), and the Hager NCN 2P set is DC rated, 250 V with the two poles
+  in series (6 kA; 15 kA at 125 V) and a DC magnetic multiple of 7, so it can
+  be chosen as `mcb_dc`. Hager MCN stays an AC set.
 - Device preview on a substation with no panel files offers "Lay out panels"
   (APP-15). The project Overview edits the waist height and rack start, each
   marked Assumed with Confirm until it is written (APP-19).
@@ -23,6 +28,13 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- A new substation works from its first parts to Build (audit 2026-10-31,
+  M27). Device preview no longer hangs on a blank substation. Saving its
+  first parts lays out its panels. Checks and Build say what is missing, parts
+  or panels, instead of "You can build". Build counts the engine warnings that
+  Checks lists. A device's own loose items, such as the SEL-2488 antenna kit,
+  reach the Loose Material sheet without a loose material block. New
+  substations' panels get the spec's 40 XIP terminals.
 - Leaving Parts, Settings or the project Overview with unsaved changes asks
   first: Keep editing, Discard changes or Save and leave. This applies to a
   link, another substation and another project, and the status bar says

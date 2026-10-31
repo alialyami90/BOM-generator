@@ -152,16 +152,34 @@ def test_the_shipped_mcb_brand_sets_are_the_examples_then_the_additions(shipped:
     assert added == [McbBrand.model_validate(entry) for entry in additions]
 
 
-def test_the_hager_mcb_sets_are_ac_only_and_give_hagers_codes(shipped: Library) -> None:
+def test_the_hager_mcb_sets_give_hagers_codes(shipped: Library) -> None:
     sets = {b.id: b for b in shipped.catalogue_brands.mcb}
 
     for brand_id, code in (("hager-mcn-2p", "MCN216"), ("hager-ncn-2p", "NCN216A")):
         brand = sets[brand_id]
         assert brand.make == "Hager"
         assert brand.ac_rated
-        assert brand.dc_rating_v is None  # Hager's ordering pages give no DC rating
         assert brand.ratings_a == shipped.catalogues.mcb.ratings_a
         assert brand.code_for(16) == code
+
+
+def test_only_the_hager_ncn_set_is_dc_rated(shipped: Library) -> None:
+    sets = {b.id: b for b in shipped.catalogue_brands.mcb}
+
+    assert sets["hager-mcn-2p"].dc_rating_v is None  # MCN 2P has no 125 V DC rating
+    ncn = sets["hager-ncn-2p"]  # NCNxxxA 2P in series: 250 V DC at 6 kA (contractor v2)
+    assert (ncn.dc_rating_v, ncn.magnetic_trip_multiple_dc) == (250, 7)
+
+
+def test_the_fortigate_600f_and_601f_come_in_as_ac_firewalls(shipped: Library) -> None:
+    by_id = {d.part_id: d for d in shipped.devices}
+
+    for part_id, watts in (("FG-600F", 255), ("FG-601F", 260)):
+        part = by_id[part_id]
+        assert (part.category, part.supply_type, part.voltage_v) == ("firewall", "VAC", 230)
+        assert (part.unit_power_w, part.load_type, part.height_u) == (watts, "CONTINUOUS", 1)
+        ports = [(p.count, p.speed.value, p.kind.value) for p in part.ports]
+        assert (4, "25G", "sfp_slot") in ports
 
 
 def test_the_fortigate_401g_and_701g_list_their_5g_and_25g_ports(shipped: Library) -> None:

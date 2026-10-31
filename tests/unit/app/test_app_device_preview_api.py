@@ -9,6 +9,7 @@ import pytest
 
 from bomgen.app import api
 from bomgen.app.device_preview import device_preview_page
+from bomgen.io import lifecycle
 from bomgen.library_store.store import LibraryStore
 
 EXAMPLES = Path(__file__).parents[3] / "examples"
@@ -49,6 +50,16 @@ def test_device_preview_page_labels_each_unit_by_its_row(tmp_path: Path, project
     assert unit(page, "PSA1-L2-ESW-A01")["label"] == "L2 switch"
     assert page["waist_u"] == 18
     assert page["saved_at"]
+
+
+def test_a_blank_substation_shows_why_there_is_no_preview(tmp_path: Path, project: Path) -> None:
+    store = LibraryStore(tmp_path / "libraries")
+    lifecycle.create_substation(project, "b", "b", store=store)
+
+    page = device_preview_page(project, "b", store)
+
+    assert page["blank"] is True
+    assert page["reason"] is None
 
 
 def test_a_pin_by_top_u_is_written_and_the_page_shows_it_pinned(
