@@ -39,11 +39,12 @@ from bomgen.app.editing import (
     layout_issues,
     panel_options_page,
 )
+from bomgen.app.hand_panels import new_panel
 from bomgen.app.library_edit import EditRefusedError, LibraryEditor, PendingEdits
 from bomgen.app.loose import loose_page
 from bomgen.app.network import layout_page
 from bomgen.app.output import OutputRefusedError, build_file, build_target, checks_page
-from bomgen.app.panel_page import PanelNotFoundError, panel_page
+from bomgen.app.panel_page import PanelNotFoundError, panel_page, part_list
 from bomgen.app.parts import parts_page
 from bomgen.app.preview import preview_page
 from bomgen.app.projects import RecentProjects, free_id, project_files, summarize
@@ -56,7 +57,7 @@ from bomgen.app.substations import (
 from bomgen.bundle.errors import LibraryPackageError, RefusalKind
 from bomgen.engine.errors import EngineError
 from bomgen.engine.layout import write_generated_panels
-from bomgen.io import edit, lifecycle, loose_edit, parts_edit
+from bomgen.io import edit, lifecycle, loose_edit, panel_edit, parts_edit
 from bomgen.io.edit import EditError, EditResult
 from bomgen.io.errors import InputError
 from bomgen.io.fields import (
@@ -1137,6 +1138,123 @@ class Api:
                 )
             except PanelNotFoundError:
                 raise AppError("not_found", f"The substation has no panel {panel_id!r}") from None
+
+    # -- Hand-written panels (plan M32b; writers in bomgen.io.panel_edit) --
+
+    def _panel_reply(
+        self, project_file: str, substation_id: str, panel_id: str, result: EditResult
+    ) -> dict[str, Any]:
+        page = (
+            panel_page(Path(project_file), substation_id, panel_id, self._library_store())
+            if result.written
+            else None
+        )
+        issues = (
+            [dataclasses.asdict(issue) for issue in result.issues] if not result.written else []
+        )
+        return {"written": result.written, "issues": issues, "id": panel_id, "page": page}
+
+    @endpoint
+    def add_panel(
+        self, project_file: str, substation_id: str, fields: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Add a hand-written panel (name, cabinet_number, kind, part_id of its first device),
+        listed last in ``manual_panels``; refused, and nothing written, when it causes a
+        problem. Returns its id and page."""
+        store = self._library_store()
+        with self._substation(substation_id), _edit_refusals():
+            found = resolve(Path(project_file), substation_id, store)
+            if found.loaded is None:
+                raise EditError("the substation's files have errors; fix them on Checks first")
+            panel = new_panel(found.loaded, fields)
+            result = panel_edit.create_panel(Path(project_file), substation_id, panel, store=store)
+            return self._panel_reply(project_file, substation_id, panel["id"], result)
+
+    @endpoint
+    def panel_parts(self, project_file: str, substation_id: str) -> list[dict[str, str]]:
+        """The library's parts, for the first device of a new hand-written panel."""
+        with self._substation(substation_id), _edit_refusals():
+            found = resolve(Path(project_file), substation_id, self._library_store())
+            if found.loaded is None:
+                raise EditError("the substation's files have errors; fix them on Checks first")
+            return part_list(found.loaded)
+
+    @endpoint
+    def restore_panel(
+        self, project_file: str, substation_id: str, panel: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Write back a panel ``delete_panel`` returned, listed last in ``manual_panels``."""
+        store = self._library_store()
+        with self._substation(substation_id), _edit_refusals():
+            result = panel_edit.create_panel(Path(project_file), substation_id, panel, store=store)
+            return self._panel_reply(project_file, substation_id, str(panel["id"]), result)
+
+    @endpoint
+    def delete_panel(self, project_file: str, substation_id: str, panel_id: str) -> dict[str, Any]:
+        """Delete a hand-written panel's file and entry; refused while something still names
+        it, with the problems that would cause. Returns the panel's contents, for Undo."""
+        store = self._library_store()
+        with self._substation(substation_id), _edit_refusals():
+            file = panel_edit.panel_file(Path(project_file), substation_id, panel_id)
+            panel = read_yaml(file).data
+            result = panel_edit.delete_panel(
+                Path(project_file), substation_id, panel_id, store=store
+            )
+        return {
+            "written": result.written,
+            "issues": [] if result.written else [dataclasses.asdict(i) for i in result.issues],
+            "panel": panel,
+        }
+
+    @endpoint
+    def set_panel_field(
+        self,
+        project_file: str,
+        substation_id: str,
+        panel_id: str,
+        path: Sequence[str | int],
+        value: Any,
+    ) -> dict[str, Any]:
+        """Write one field of a hand-written panel's file (None or "" removes it, so the
+        default applies); refused with the model's message. Returns the panel page."""
+        store = self._library_store()
+        project = Path(project_file)
+        with self._substation(substation_id), _edit_refusals():
+            if value is None or value == "":
+                result = remove_field(
+                    project, tuple(path), substation=substation_id, panel=panel_id, store=store
+                )
+            else:
+                result = set_field(
+                    project,
+                    tuple(path),
+                    value,
+                    substation=substation_id,
+                    panel=panel_id,
+                    store=store,
+                )
+        _written(result)
+        return panel_page(project, substation_id, panel_id, store)
+
+    @endpoint
+    def check_panel_field(
+        self,
+        project_file: str,
+        substation_id: str,
+        panel_id: str,
+        path: Sequence[str | int],
+        value: Any,
+    ) -> str | None:
+        """The model's message for setting a hand-written panel's field to ``value``, or None."""
+        with self._substation(substation_id), _edit_refusals():
+            return validate_field(
+                Path(project_file),
+                tuple(path),
+                value,
+                substation=substation_id,
+                panel=panel_id,
+                store=self._library_store(),
+            )
 
     # -- Editing (docs/ui/editing.md; writers in bomgen.io.edit, ADR 0021) --
 
