@@ -5,13 +5,13 @@ keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detai
 
 ## 2026-10-31: M19–M26 merged, handoff updated (A3, engine)
 
-- **Base:** main `628ff1c` (#253). Docs-only PR.
+- **Base:** main `dfcf810` (#254). Docs-only PR.
 - **Done:** part picking M19–M26 is merged: #238–#241, #243–#245, #247, #248, #250, #252 and #253. The
   shipped library is psa-devices 1.4.0. STATE.md §1, §9–§11 and NEXT.md §2–§4, §13 and §15 are
   updated.
 - **Checked:** gate on `628ff1c`: ruff and format pass (319 files), mypy passes (240 files), pytest has
   2852 passed.
-- **Waiting:** ADR 0026 on a card to Ali, and Q51 and Q54 open. Next engine work is the model changes
+- **Waiting:** Q51 and Q54 are open. Next engine work is the model changes
   (step 4) in A4's plan.
 
 ## 2026-10-31: Device preview shows the AC branch MCB (A2, app)

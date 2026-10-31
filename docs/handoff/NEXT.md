@@ -61,8 +61,7 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
    table in Excel's Print Preview?" Options "It fits" (recommended: the size is computed to fit at the
    print scale) and "It overlaps". See section 14 for what each answer means.
 4. **Q23** (issued sheets vs masters): keep the default (the masters) until he answers.
-5. **ADR 0026** (device nameplates): the lead has it on a card for acceptance.
-6. **Q51** (annunciator mounted in a panel) and **Q54** (power of the -2 SEL computers) are open in
+5. **Q51** (annunciator mounted in a panel) and **Q54** (power of the -2 SEL computers) are open in
    plan §6.
 
 **Next work:** M19–M26 are merged (STATE.md §1). Engine model changes (step 4) come from A4's plan.

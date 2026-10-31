@@ -9,8 +9,8 @@ rather than copy it.
 
 ## 1. Overview (2026-10-31)
 
-- Repo `alialyami90/BOM-generator`, default branch `main`, at `628ff1c` (#253, M26 device
-  nameplates). Check open PRs with `list_pull_requests` before starting.
+- Repo `alialyami90/BOM-generator`, default branch `main`, at `dfcf810` (#254, ADRs 0025 and
+  0026 accepted). Check open PRs with `list_pull_requests` before starting.
 - **Part picking, M19–M26 (2026-10-31).** Ali's feedback on v0.2.1, designed in
   [`part-picking-design`](../superpowers/specs/2026-10-31-part-picking-design.md), questions Q42–Q53.
   All merged:
@@ -51,9 +51,7 @@ rather than copy it.
   round-trip writers (ADR 0021), and the loose material sheet and page (ADR 0020, ADR 0022). v0.2.1 is
   the UI polish pass from [`docs/ui/polish-v02.md`](../ui/polish-v02.md) (items 1–16, #205–#208) plus
   #194, #198–#201.
-- **Numbers.** ADRs 0001–0024 are Accepted. Ali accepted 0025 on 2026-10-31, but its file and
-  README row may still say Proposed until the lead records it. 0026 is Proposed and on a card to Ali.
-  Next free ADR **0027**. Q51 (annunciator) and Q54 (power of the -2 SEL computers) are open; the
+- **Numbers.** ADRs 0001–0026 are Accepted. Next free ADR **0027**. Q51 (annunciator) and Q54 (power of the -2 SEL computers) are open; the
   next free question is **Q55**. The next milestone is **M27**.
 - **Changelog** `[Unreleased]` holds every PR through #253.
 - **Next engine work:** the model changes (step 4) from A4's plan.
