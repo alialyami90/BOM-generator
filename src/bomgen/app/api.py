@@ -1037,6 +1037,17 @@ class Api:
         )
 
     @endpoint
+    def set_cable_manager(
+        self, project_file: str, substation_id: str, index: int, on: bool
+    ) -> dict[str, Any]:
+        """A network row has a cable manager or not; returns the refreshed Parts page."""
+        return self._parts_write(
+            project_file,
+            substation_id,
+            functools.partial(parts_edit.set_cable_manager, index=index, on=on),
+        )
+
+    @endpoint
     def set_equipment_part(
         self, project_file: str, substation_id: str, index: int, part_id: str
     ) -> dict[str, Any]:

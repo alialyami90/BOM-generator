@@ -15,7 +15,7 @@ from pydantic import ValidationError
 
 from bomgen.app.substations import _library, resolve, substation_page
 from bomgen.engine.errors import EngineError
-from bomgen.engine.layout import layout_preview
+from bomgen.engine.layout import CABLE_MANAGED, layout_preview
 from bomgen.io.derived import effective_part_id
 from bomgen.io.errors import InputError
 from bomgen.io.loader import LoadedSubstation
@@ -180,6 +180,7 @@ def _row(
 ) -> dict[str, Any]:
     part = library.get(entry.part_id) if library and entry.part_id else None
     category = _category(entry, part)
+    default = category in CABLE_MANAGED  # the layout's rule (ADR 0013, amended)
     chosen = {(c.speed.value, c.media.value): c.part_id for c in entry.sfp}
     sfp = [
         {
@@ -218,6 +219,12 @@ def _row(
         "overrides": entry.overrides.values() if entry.overrides is not None else {},
         "sfp": sfp,
         "accessories": accessories,
+        "cable_manager": {
+            "on": entry.cable_manager if entry.cable_manager is not None else default,
+            "default": default,
+        }
+        if category in NETWORK_CATEGORIES
+        else None,
     }
 
 

@@ -15,11 +15,12 @@ from typing import TYPE_CHECKING, Any
 from pydantic import ValidationError
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 
+from bomgen.engine.layout import CABLE_MANAGED
 from bomgen.io.edit import EditError, EditResult, edit_substation, substation_file
 from bomgen.io.errors import InputError
 from bomgen.io.loader import load_project
 from bomgen.io.round_trip import insert_entry, load_text, remove_entry, set_entry
-from bomgen.models.library import DeviceType
+from bomgen.models.library import Category, DeviceType
 from bomgen.models.substation import EquipmentRole, PartOverrides
 
 if TYPE_CHECKING:
@@ -159,6 +160,33 @@ def set_sfp_choice(
             insert_entry(choices, len(choices), choice)
         else:
             set_entry(choices[at], "part_id", part_id)
+
+    return edit_substation(project_file, substation_id, change, store=store)
+
+
+def set_cable_manager(
+    project_file: Path,
+    substation_id: str,
+    index: int,
+    on: bool,
+    *,
+    store: LibraryStore | None = None,
+) -> EditResult:
+    """Give network row ``index`` a cable manager or not. The key is written only when
+    ``on`` differs from the part category's default (ADR 0013, amended)."""
+    row = _row_of(project_file, substation_id, index)
+    base = _base_part(project_file, row.get("part_id"), store)
+    switch = row.get("role") in (EquipmentRole.L1_SWITCH, EquipmentRole.L2_SWITCH)
+    category = base.category if base is not None else Category.NETWORK_SWITCH if switch else None
+    default = category in CABLE_MANAGED
+
+    def change(data: CommentedMap) -> None:
+        target = _entry(data, index)
+        if on == default:
+            if "cable_manager" in target:
+                remove_entry(target, "cable_manager")
+        else:
+            set_entry(target, "cable_manager", on)
 
     return edit_substation(project_file, substation_id, change, store=store)
 

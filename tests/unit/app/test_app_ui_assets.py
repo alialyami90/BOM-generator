@@ -517,3 +517,11 @@ def test_time_accessories_on_parts_write_loose_material_items() -> None:
     for name in ("add_loose_item", "remove_loose_item", "set_loose_item"):
         assert f"Bridge.call('{name}'" in js
     assert "To add accessories, set the loose material's host panel first." in js
+
+
+def test_network_rows_have_a_cable_manager_switch_written_through_its_endpoint() -> None:
+    """Ali's change to the M22 design (2026-10-31); components.md "Part row"."""
+    js = PARTS.read_text(encoding="utf-8")
+    assert "Bridge.call('set_cable_manager'" in js
+    assert '<label class="switch prow-cm"' in js
+    assert "${r.cable_manager ? " in js  # network rows only

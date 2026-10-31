@@ -224,3 +224,32 @@ def test_moving_a_row_changes_the_order(app: api.Api, project: Path) -> None:
     page = ok(app.move_equipment(str(project), "gis01", 6, 0))
 
     assert page["parts"]["rows"][0]["id"] == "gps"
+
+
+def test_a_network_row_shows_its_cable_manager_and_the_category_default(
+    project: Path, store: LibraryStore
+) -> None:
+    found = parts(project, store)
+
+    assert row(found, "l2")["cable_manager"] == {"on": True, "default": True}
+    assert row(found, "ext-fw")["cable_manager"] == {"on": True, "default": True}
+    assert row(found, "gw")["cable_manager"] == {"on": False, "default": False}
+    assert row(found, "rtac")["cable_manager"] is None  # not a network device
+
+
+def test_a_cable_manager_choice_is_shown_over_the_default(
+    project: Path, substation: Path, store: LibraryStore
+) -> None:
+    edit(
+        substation,
+        "{ id: l2, part_id: RST2228-L2,",
+        "{ id: l2, cable_manager: false, part_id: RST2228-L2,",
+    )
+
+    assert row(parts(project, store), "l2")["cable_manager"] == {"on": False, "default": True}
+
+
+def test_the_cable_manager_endpoint_returns_the_page(app: api.Api, project: Path) -> None:
+    page = ok(app.set_cable_manager(str(project), "gis01", 4, True))  # the gateway
+
+    assert row(page["parts"], "gw")["cable_manager"] == {"on": True, "default": False}

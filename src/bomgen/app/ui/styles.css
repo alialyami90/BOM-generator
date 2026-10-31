@@ -489,6 +489,7 @@ body.is-dragging-dev { user-select: none; }
 .prow-qty { display: flex; align-items: center; justify-content: flex-end; min-height: var(--size-control-height); }
 .prow-qty .input { width: 100%; }
 .prow-ab { white-space: nowrap; font-size: 13px; }
+.prow-cm { white-space: nowrap; font-size: 13px; gap: 8px; }
 .prow-menu-wrap { position: relative; }
 .prow-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--space-1); margin: var(--space-1) 0 0 -7px; min-height: 26px; }
 .prow-err { margin-top: 2px; }

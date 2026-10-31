@@ -189,3 +189,37 @@ def test_start_parts_without_an_l2_switch_is_refused(project: Path) -> None:
 def test_start_parts_on_a_substation_with_equipment_is_refused(project: Path) -> None:
     with pytest.raises(EditError, match="already has equipment"):
         parts_edit.start_parts(project, "gis01", [{"role": "l2_switch", "part_id": "RST2228-L2"}])
+
+
+def test_turning_the_cable_manager_off_writes_false(project: Path) -> None:
+    assert parts_edit.set_cable_manager(project, "gis01", L2, False).written
+
+    assert equipment(project)[L2].cable_manager is False
+
+
+def test_turning_it_back_to_the_category_default_removes_the_key(project: Path) -> None:
+    before = text(project)
+    parts_edit.set_cable_manager(project, "gis01", L2, False)
+
+    assert parts_edit.set_cable_manager(project, "gis01", L2, True).written
+
+    assert equipment(project)[L2].cable_manager is None
+    assert text(project) == before
+
+
+def test_a_gateway_gets_a_cable_manager_only_when_asked(project: Path) -> None:
+    before = text(project)
+    parts_edit.set_cable_manager(project, "gis01", GW, False)  # its default: nothing to write
+    assert text(project) == before
+
+    assert parts_edit.set_cable_manager(project, "gis01", GW, True).written
+
+    assert equipment(project)[GW].cable_manager is True
+
+
+def test_a_sized_l1_without_a_part_takes_the_switch_default(project: Path) -> None:
+    assert fields.remove_field(project, ("equipment", L1, "part_id"), substation="gis01").written
+
+    assert parts_edit.set_cable_manager(project, "gis01", L1, False).written
+
+    assert equipment(project)[L1].cable_manager is False

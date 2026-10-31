@@ -11,7 +11,7 @@
   const NET = { ied_count: 'int', topology: 'choice', ring_max_switches: 'int', l1_uplinks_per_switch: 'int', l1_interlink: 'bool', l3_uplinks_per_l2: 'int' };
   const SPARES = { port_fraction: ['Ports kept free on each switch', '%', 'pct'], sfp_per_l1: ['Spare SFPs on each L1', '', 'int'], dc_branches_per_feed: ['Spare DC branches per feed', '', 'int'], ac_branches: ['Spare AC branches', '', 'int'], rack_u_reserved: ['Rack space kept free', 'U', 'int'] };
   const VALUES = [['height_u', 'Height', 'int'], ['unit_power_w', 'Power', 'num'], ['supply_type', 'Supply', 'choice'], ['voltage_v', 'Voltage', 'int'], ['power_supplies', 'Supplies', 'int'], ['inrush_a', 'Inrush', 'num'], ['load_type', 'Load', 'choice']];
-  const EQ = { part_id: 'choice', ordering_code: 'text', qty: 'int', redundant: 'bool' };
+  const EQ = { part_id: 'choice', ordering_code: 'text', qty: 'int', redundant: 'bool', cable_manager: 'bool' };
   const BRANDS = [['mcb', 'MCB make and series, AC'], ['mcb_dc', 'MCB make and series, DC'], ['terminal_blocks', 'Terminal blocks']];
   const pct = (v) => Math.round(v * 1000) / 10;
   function spec(key) {  // [path, kind]; keys are n.<field>, s.<spare>, b.<brand>, e.<row>.<field>, o.<row>.<value>, f.<row>.<speed>.<media>
@@ -32,6 +32,7 @@
     if (kind === 's') { const r = p.spares.find((x) => x.key === a); return r ? (a === 'port_fraction' ? pct(r.value) : r.value) : ''; }
     if (kind === 'b') return p.catalogue_choice[a] || '';
     const r = rowAt(Number(a)); if (!r) return '';
+    if (kind === 'e' && b === 'cable_manager') return r.cable_manager ? String(r.cable_manager.on) : '';
     if (kind === 'e') { const v = r[b]; return v == null ? '' : typeof v === 'boolean' ? String(v) : v; }
     if (kind === 'o') { const v = b in r.overrides ? r.overrides[b] : r.library ? r.library[b] : null; return v == null ? '' : v; }
     if (kind === 'f') { const f = r.sfp.find((x) => x.speed === b && x.media === c); return (f && f.choice) || ''; }
@@ -41,6 +42,7 @@
   function write(path, value) {
     const f = S.project.file, sid = S.sub;
     if (path[0] === 'equipment' && path[2] === 'overrides') return Bridge.call('set_part_override', f, sid, path[1], path[3], value);
+    if (path[0] === 'equipment' && path[2] === 'cable_manager') return Bridge.call('set_cable_manager', f, sid, path[1], value === true);  // written only when it differs from the default
     if (path[0] === 'equipment' && path[2] === 'sfp') return Bridge.call('set_sfp_choice', f, sid, path[1], path[3], path[4], value || null);
     if (path[0] === 'equipment' && path[2] === 'part_id' && value) {
       return Bridge.call('set_equipment_part', f, sid, path[1], value).then((r) => {
@@ -52,7 +54,7 @@
   }
   const PF = App.draftForm({
     prefix: 'p-', screen: 'parts', file: 'substation.yaml', label: 'Save parts', spec, saved,
-    check: (path, value) => (path[2] === 'sfp' ? Promise.resolve(null) : Bridge.call('check_substation_field', S.project.file, S.sub, path, value)),
+    check: (path, value) => (path[2] === 'sfp' || path[2] === 'cable_manager' ? Promise.resolve(null) : Bridge.call('check_substation_field', S.project.file, S.sub, path, value)),
     write,
     done: (page) => {
       if (page && page.parts) sub().set(page); else sub().reload();
@@ -105,9 +107,9 @@
   function partSelect(p, r) {
     const key = `e.${r.index}.part_id`, id = `p-${key}`, v = shown(key), opts = p.parts.options[r.category] || [];
     if (!opts.length && !r.part_id) return emptyLine(p, r.category, r.label);
-    const missing = r.part_id && !r.known && v === r.part_id;
+    const missing = r.part_id && !r.known && v === r.part_id, picked = opts.find((o) => o.part_id === v);
     const first = r.sized && r.role === 'l1_switch' ? `<option value="" ${!v ? 'selected' : ''}>The sizing picks the switch</option>` : '';
-    return `<div class="prow-partwrap">${mark(key, `<select class="select prow-part${missing ? ' is-missing' : ''}" id="${id}" data-dirty="1" aria-label="Part for ${esc(r.label)}" ${missing ? `aria-invalid="true" aria-describedby="${id}-missing"` : ''}>
+    return `<div class="prow-partwrap">${mark(key, `<select class="select prow-part${missing ? ' is-missing' : ''}" id="${id}" data-dirty="1" aria-label="Part for ${esc(r.label)}" ${picked ? `title="${esc(partText(picked))}"` : ''} ${missing ? `aria-invalid="true" aria-describedby="${id}-missing"` : ''}>
         ${first}${missing ? `<option value="${esc(r.part_id)}" selected>${esc(r.part_id)}</option>` : ''}${opts.map((o) => `<option value="${esc(o.part_id)}" ${o.part_id === v ? 'selected' : ''}>${esc(partText(o))}</option>`).join('')}</select>`)}
       ${missing ? `<span class="err small" id="${id}-missing">${icon('error')}<span>Not in ${esc(p.project.library.name)} ${esc(p.project.library.version)}. Pick another part.</span></span>` : ''}${err(key)}</div>`;
   }
@@ -133,11 +135,12 @@
     const changed = Object.keys(PF.draft).some((k) => k.split('.')[1] === String(r.index) && 'eof'.includes(k[0]));
     const opts = p.parts.options[r.category] || [], empty = !opts.length && !r.part_id;
     const fixed = r.sized, dirty = PF.dirty();
-    const pn = `e.${r.index}.ordering_code`, qty = `e.${r.index}.qty`, ab = `e.${r.index}.redundant`;
+    const pn = `e.${r.index}.ordering_code`, qty = `e.${r.index}.qty`, ab = `e.${r.index}.redundant`, cm = `e.${r.index}.cable_manager`;
     return `<div class="prow" role="group" aria-label="${esc(r.label)}${r.part_id ? ', ' + esc(r.part_id) : ', no part yet'}">
       <div class="prow-top">
         <span class="prow-role">${changed ? '<span class="chg-dot" aria-hidden="true"></span><span class="sr-only">changed, </span>' : ''}${esc(r.label)} <span class="muted small mono">${esc(r.id)}</span></span>
         <span class="sp"></span>
+        ${r.cable_manager ? `<label class="switch prow-cm" title="${r.cable_manager.default ? 'On by default for this part' : 'Off by default for this part'}"><input type="checkbox" id="p-${cm}" ${shown(cm) === 'true' ? 'checked' : ''} data-dirty="1">Cable manager</label>` : ''}
         ${empty ? '' : `<label class="check prow-ab"><input type="checkbox" id="p-${ab}" ${shown(ab) === 'true' ? 'checked' : ''} data-dirty="1"> A and B</label>`}
         <div class="prow-menu-wrap"><button class="btn btn--ghost btn--icon btn--sm" data-action="pp-menu" data-i="${r.index}" aria-haspopup="menu" aria-expanded="${UI.menu === r.index}" aria-label="More for ${esc(r.label)}" ${dirty ? 'disabled title="Save or discard the changes first"' : ''}>${icon('dots')}</button>
           ${UI.menu === r.index ? `<div class="menu" role="menu" style="right:0;top:34px"><button role="menuitem" data-action="pp-move" data-i="${r.index}" data-d="-1" ${r.index === 0 ? 'disabled' : ''}>Move up</button><button role="menuitem" data-action="pp-move" data-i="${r.index}" data-d="1" ${last ? 'disabled' : ''}>Move down</button>${fixed ? '' : `<hr><button role="menuitem" class="danger" data-action="pp-remove" data-i="${r.index}">${icon('trash')}Remove</button>`}</div>` : ''}</div>
