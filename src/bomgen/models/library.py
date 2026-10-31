@@ -414,6 +414,7 @@ class Housekeeping(InputModel):
     lamp: HousekeepingRef
     door_switch: HousekeepingRef | None = None
     fan: FanRef
+    larger_fans: list[FanRef] = Field(default_factory=list)  # stepped up to by airflow
     vent_filter: HousekeepingRef
     thermostat: HousekeepingRef
     ipr_kit: HousekeepingRef

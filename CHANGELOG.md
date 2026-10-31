@@ -9,6 +9,13 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- A library can list `larger_fans` in its housekeeping catalogue. A cabinet
+  that the catalogue fan pair can't cool gets the smallest larger fan whose
+  pair can, still two fans with the same AC branches and terminals (ADR 0029,
+  Proposed). A library without the list builds as before.
+
+### Added
+
 - The installer ships psa-devices 1.8.0 from v2 of the contractor's library:
   the FortiGate 600F and 601F firewalls (230 V AC, now with their voltage and
   load type), and the Hager NCN 2P set is DC rated, 250 V with the two poles
@@ -25,6 +32,9 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- `data/device-db/contractor-return-v2-2026-10-31.md` and its CSV list what v2
+  of the contractor's library leaves open: 10 asks for the contractor, and 193
+  configured codes, code identities and the Q54 power choice that are ours.
 - `data/device-db/contractor-2026-10-31/` holds v2 of the contractor's
   library, their answer to the return list: 1045 devices (was 991), 112 port
   groups, `contractor_responses.csv` with a status for each of the 270 asks,

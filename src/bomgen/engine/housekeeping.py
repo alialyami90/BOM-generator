@@ -8,7 +8,7 @@ from bomgen.engine.items import BomItem
 from bomgen.engine.kits import device_item
 from bomgen.engine.units import expand_devices, lookup
 from bomgen.models.bom import Group
-from bomgen.models.library import Library
+from bomgen.models.library import FanRef, Library
 from bomgen.models.panel import DeviceInstance, Panel, Ventilation
 from bomgen.models.project import LooseExtra
 
@@ -30,10 +30,16 @@ def needs_change_over(panel: Panel, library: Library, loose: Sequence[LooseExtra
 
 
 def housekeeping(
-    panel: Panel, library: Library, ventilation: Ventilation, change_over: bool
+    panel: Panel,
+    library: Library,
+    ventilation: Ventilation,
+    change_over: bool,
+    fan: FanRef | None = None,
 ) -> list[BomItem]:
-    """Lamp (+ door switch), fans or filters, thermostats, IPR kit, diodes, socket."""
+    """Lamp (+ door switch), fans (``fan``, else the catalogue fan) or filters,
+    thermostats, IPR kit, diodes, socket."""
     kit = library.catalogues.housekeeping
+    fan = fan or kit.fan
     parts: list[tuple[str, int]] = [(kit.lamp.part_id, 1)]
     if kit.door_switch is not None:
         parts.append((kit.door_switch.part_id, 1))
@@ -41,7 +47,7 @@ def housekeeping(
         parts += [(kit.vent_filter.part_id, NATURAL_FILTERS)]
         parts += [(kit.thermostat.part_id, NATURAL_THERMOSTATS)]
     else:
-        parts += [(kit.fan.part_id, FORCED_FANS), (kit.thermostat.part_id, FORCED_THERMOSTATS)]
+        parts += [(fan.part_id, FORCED_FANS), (kit.thermostat.part_id, FORCED_THERMOSTATS)]
     parts.append((kit.ipr_kit.part_id, 1))
     if change_over:
         diodes = kit.change_over_diodes

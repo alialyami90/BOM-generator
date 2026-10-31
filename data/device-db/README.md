@@ -52,7 +52,8 @@ generator, `build.py` or `pack`, which take only the YAML files above. The 131 s
 Its parts reach the shipped library only through `data/library/additions.yaml`, one reviewed step
 at a time ([review](https://claude.ai/artifact/AZ8CXFEtk6a91J1uDTy745)).
 `contractor-return-2026-10-31.md` and its CSV list what went back to the contractor after the
-first version.
+first version. `contractor-return-v2-2026-10-31.md` and its CSV list what v2 leaves open, and
+whether the contractor or we owe each item.
 
 ## Record format
 

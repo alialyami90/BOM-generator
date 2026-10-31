@@ -66,6 +66,8 @@ HOUSEKEEPING_ROLES = tuple(
     for role in (
         ("change_over_diode_negative", "change_over_diode_positive")
         if field == "change_over_diodes"
+        else ("larger_fan",)  # a row per fan
+        if field == "larger_fans"
         else (field,)
     )
 )
@@ -214,6 +216,13 @@ def _housekeeping_rows(brand_id: str, name: str | None, housekeeping: Housekeepi
     columns = TABLES["housekeeping.csv"]
     rows: list[Row] = []
     for role in HOUSEKEEPING_ROLES:
+        if role == "larger_fan":
+            rows += [
+                {c: cell(fan.part_id if c == "part_id" else getattr(fan, c, None)) for c in columns}
+                | {"catalogue_id": brand_id, "name": cell(name), "role": role}
+                for fan in housekeeping.larger_fans
+            ]
+            continue
         if role.startswith("change_over_diode_"):
             part_id: str | None = getattr(
                 housekeeping.change_over_diodes, role.removeprefix("change_over_diode_")

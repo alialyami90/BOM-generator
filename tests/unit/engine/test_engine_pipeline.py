@@ -271,6 +271,27 @@ def test_auto_ventilation_picks_fans_for_a_hot_cabinet() -> None:
     assert result.heat.line_up is not None
 
 
+def test_a_cabinet_the_catalogue_fans_cannot_cool_gets_larger_fans() -> None:
+    # Heat Calculations, "Rule for the tool": fans whose throughput >= required airflow.
+    # (800 + 2 x 100) W x 0.41 = 410 m³/h > 200 of the catalogue pair, <= 1200 of BIG's.
+    big = powered("BIG", "fan", supply_type="VAC", voltage_v=230, unit_power_w=100,
+                  power_supplies=0, tag_type="FAN")  # fmt: skip
+    lib = library(
+        switch("L2", "L2", unit_power_w=800),
+        device("CM", "cable_manager", tag_pattern="Cable Manager"),
+        big,
+        fan={"part_id": "FAN", "airflow_m3h": 100},
+        larger_fans=[{"part_id": "BIG", "airflow_m3h": 600}],
+    )
+    p1 = panel([{"part_id": "L2"}], id="p1", options={"ventilation": "auto"})
+    result = build(loaded(lib=lib, panels=(p1,)))
+    (fans,) = [line for line in result.panels[0].lines if line.tag == "PSA1-FAN-1,2"]
+    assert (fans.part_id, fans.qty) == ("BIG", 2)
+    assert result.heat is not None
+    forced = result.heat.cabinets[0].forced
+    assert (forced.fan_m3h, forced.passes) == (1200, True)
+
+
 def test_build_result_carries_the_dc_mains_per_panel() -> None:
     (main, _p2) = build(loaded()).mains
     assert (main.panel_id, main.rating_a, main.rule_rating_a) == ("p1", 6, 6)
