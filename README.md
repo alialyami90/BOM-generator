@@ -113,7 +113,7 @@ preview"):
   (ADR 0026).
 - The installer ships psa-devices 1.6.0: researched switches, firewalls,
   RTACs and a clock, Hager AC MCB sets, and the nameplate part. 2.5G, 5G and
-  25G ports are listed but never sized for SFPs (ADR 0027 proposed).
+  25G ports are listed but never sized for SFPs (ADR 0027).
 
 The terms project, substation, side and stream are defined in `docs/plan.md` →
 "Glossary".

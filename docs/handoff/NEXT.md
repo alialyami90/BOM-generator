@@ -62,7 +62,6 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
 4. **Q23** (issued sheets vs masters): keep the default (the masters) until he answers.
 5. **Q51** (annunciator mounted in a panel), **Q54** (power of the -2 SEL computers) and **Q55**
    (categories for the contractor's other part types) are open in plan §6.
-6. **ADR 0027** (port speeds 2.5G, 5G and 25G): the lead has it on a card for acceptance.
 
 **Next work:** M19–M26 shipped in v0.3.0 (STATE.md §1). Engine model changes (step 4) come from A4's plan.
 
