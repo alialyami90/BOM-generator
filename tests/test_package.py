@@ -2,4 +2,4 @@ import bomgen
 
 
 def test_package_exposes_version() -> None:
-    assert bomgen.__version__ == "0.2.1"
+    assert bomgen.__version__ == "0.3.0"
