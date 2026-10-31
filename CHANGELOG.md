@@ -28,6 +28,9 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- `data/device-db/contractor-return-v2-2026-10-31.md` and its CSV list what v2
+  of the contractor's library leaves open: 10 asks for the contractor, and 193
+  configured codes, code identities and the Q54 power choice that are ours.
 - `data/device-db/contractor-2026-10-31/` holds v2 of the contractor's
   library, their answer to the return list: 1045 devices (was 991), 112 port
   groups, `contractor_responses.csv` with a status for each of the 270 asks,
