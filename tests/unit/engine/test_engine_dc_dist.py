@@ -327,3 +327,25 @@ def test_branch_sizing_uses_the_dc_sets_trip_multiple() -> None:
     # The AC set has no trip curve; the DC set trips from 7 x In: 21 A / 7 = 3 A -> 4 A.
     sizing = sized_dc(inrush_a=21)
     assert (sizing.trip_multiple, sizing.rating_a) == (7, 4)
+
+
+def test_each_branch_mcb_names_its_unit_and_feed() -> None:
+    circuits = build([{"part_id": "L1", "qty": 2}])
+    assert [(b.tag, b.unit_tag, b.feed) for b in circuits.branch_mcbs] == [
+        ("PSA1-Q1.1", "PSA1-L1-ESW-A11", 1),
+        ("PSA1-Q1.2", "PSA1-L1-ESW-A12", 1),
+        ("PSA1-Q2.1", "PSA1-L1-ESW-A11", 2),
+        ("PSA1-Q2.2", "PSA1-L1-ESW-A12", 2),
+    ]
+
+
+def test_a_qcod_names_its_single_fed_unit() -> None:
+    lib = library(*PARTS)
+    p = panel([{"part_id": "MON"}])
+    rows = expand_devices(p, lib)
+    fed = single_fed_loads(p, rows, lib, [loose("ANN", fed_from="psa1")])
+    circuits = dc_distribution(p, lib, DesignConstants(), rows, fed, True)
+    assert [(b.tag, b.unit_tag, b.feed) for b in circuits.branch_mcbs] == [
+        ("PSA1-QCOD-1", "PSA1-MONITOR", None),
+        ("PSA1-QCOD-2", None, None),  # the loose annunciator has no panel tag
+    ]

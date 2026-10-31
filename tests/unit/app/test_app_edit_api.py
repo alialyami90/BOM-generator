@@ -52,7 +52,7 @@ def refused(envelope: dict[str, object]) -> dict[str, str]:
 def test_a_pin_is_written_and_the_board_comes_back(
     app: api.Api, project: Path, substation: Path
 ) -> None:
-    pin = {"device": "gps", "panel": 2, "unit": None, "side": None, "position": None}
+    pin = {"device": "gps", "panel": 2, "unit": None, "side": None, "position": None, "top_u": None}
 
     reply = ok(app.set_layout_overrides(str(project), "gis01", [pin]))
 

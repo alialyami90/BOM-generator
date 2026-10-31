@@ -250,7 +250,7 @@
     },
     "DeviceMove": {
       "additionalProperties": false,
-      "description": "Move single units into a panel; a redundant entry's move names its side.\n\n``position`` (1 = top) is the unit's place among the panel's rack devices; without\nit the unit takes its automatic place in the panel (ADR 0013, R7).",
+      "description": "Move single units into a panel; a redundant entry's move names its side.\n\n``position`` (1 = top) is the unit's place among the panel's rack devices; ``top_u``\nfixes the top of its block at that rack U (1 = bottom). Without either the unit takes\nits automatic place in the panel (ADR 0013, R7).",
       "properties": {
         "device": {
           "pattern": "^[a-z0-9][a-z0-9_-]*$",
@@ -290,6 +290,19 @@
           ],
           "default": null,
           "title": "Side"
+        },
+        "top_u": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Top U"
         },
         "unit": {
           "anyOf": [
@@ -855,6 +868,19 @@
           ],
           "default": null,
           "title": "Position"
+        },
+        "top_u": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Top U"
         },
         "unit": {
           "anyOf": [

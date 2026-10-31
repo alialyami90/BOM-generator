@@ -101,6 +101,17 @@ R1–R10 are in the design document named in ADR 0012.
   the BOM counts the managers from those rows, as Q32 says. This fixes a rack firewall
   in a generated panel, which took the manager's U but got no BOM row. Hand-written
   panels keep the M2 count (switches and patch panels) unless a row sets the flag.
+
+  *Amended (2026-10-31, M24, the Device preview's drag):* `DeviceMove` and `PairMove`
+  also take `top_u`, the rack U the top of the unit's block (manager included) sits
+  on, counted from 1 at the bottom (the same U in both panels of a pair). It is
+  exclusive with `position` ("give position or top_u, not both"). A `top_u` unit is
+  placed first and wins over the priority and the waist anchor; the anchor comes next;
+  the other units, `position` pins included, fill from the top in stack order and go
+  below a fixed block they would overlap or touch without their clearance. A `top_u`
+  block that leaves the rack (`pin-outside-rack`) or overlaps another fixed block or
+  the anchor (`pin-overlaps`) is a layout error naming the panel; the units still get
+  their U.
 - **Pipeline**: a step 0 (`engine/sizing.py`, `engine/layout.py`,
   `bomgen layout`) runs before the existing steps 1–15; `bomgen build
   --no-layout` keeps hand-written panels working.
