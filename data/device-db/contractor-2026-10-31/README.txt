@@ -1,3 +1,8 @@
+CURRENT RESEARCH UPDATE - 1 NOVEMBER 2026
+1045 devices, 112 port groups, 20767 distinct evidence rows, and 131 PDFs.
+Read CONTRACTOR-RESPONSE.txt and contractor_responses.csv for all 270 returned requests.
+The merge figures below are historical, before this research update.
+
 CONSOLIDATED DEVICE LIBRARY
 31 October 2026
 

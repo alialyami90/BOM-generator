@@ -7416,3 +7416,736 @@ SIEMENS-6GK6297-2SA00-4AA1,model,RMM2972C-4SFP,RMM2972C-4SFP,delivery-2026-10-31
 SIEMENS-6GK6297-2SA00-4AA1,ordering_code,6GK6297-2SA00-4AA1,6GK6297-2SA00-4AA1,delivery-2026-10-31-bundles,959
 SIEMENS-6GK6297-2SA00-4AA1,description_template,"4 x SFP-slot, supporting 100BASE-FX, 1000BASE-X SFPs, SFPs are not included, with conformal coating","4 x SFP-slot, supporting 100BASE-FX, 1000BASE-X SFPs, SFPs are not included, with conformal coating",delivery-2026-10-31-bundles,959
 SIEMENS-6GK6297-2SA00-4AA1,alt_group,SIEMENS-6GK6297-2SA00-4AA1,SIEMENS-6GK6297-2SA00-4AA1,delivery-2026-10-31-bundles,959
+FG-600F,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,2
+FG-600F,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,2
+FG-601F,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,3
+FG-601F,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,3
+RST2228-L2.CISCO-LOW,category,network_switch,network_switch,consolidated-library/documentation/contractor-research-2026-10-31,4
+RST2228-L2.CISCO-LOW,make,Cisco,Cisco,consolidated-library/documentation/contractor-research-2026-10-31,4
+RST2228-L2.CISCO-LOW,model,Catalyst IE9320,Catalyst IE9320,consolidated-library/documentation/contractor-research-2026-10-31,4
+RST2228-L2.CISCO-LOW,ordering_code,IE-9320-26S2C-E + 2 x PWR-RGD-AC-DC-H,IE-9320-26S2C-E + 2 x PWR-RGD-AC-DC-H,consolidated-library/documentation/contractor-research-2026-10-31,4
+RST2228-L2.CISCO-LOW,description_template,"Catalyst IE9320, 28 GE SFP cages, two high-voltage DC feeds","Catalyst IE9320, 28 GE SFP cages, two high-voltage DC feeds",consolidated-library/documentation/contractor-research-2026-10-31,4
+RST2228-L2.CISCO-LOW,supply_type,VDC,VDC,consolidated-library/documentation/contractor-research-2026-10-31,4
+RST2228-L2.CISCO-LOW,voltage_v,125,125,consolidated-library/documentation/contractor-research-2026-10-31,4
+RST2228-L2.CISCO-LOW,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,4
+RST2228-L2.CISCO-LOW,power_supplies,2,2,consolidated-library/documentation/contractor-research-2026-10-31,4
+RST2228-L2.CISCO-LOW,hwio_points,1,1,consolidated-library/documentation/contractor-research-2026-10-31,4
+RST2228-L2.CISCO-LOW,di_inputs,4,4,consolidated-library/documentation/contractor-research-2026-10-31,4
+RST2228-L2.CISCO-LOW,height_u,1,1,consolidated-library/documentation/contractor-research-2026-10-31,4
+RST2228-L2.CISCO-LOW,alt_group,RST2228-L2,RST2228-L2,consolidated-library/documentation/contractor-research-2026-10-31,4
+RST2228-L2.CISCO-LOW,tier,low,low,consolidated-library/documentation/contractor-research-2026-10-31,4
+RST2228-L2.CISCO-LOW,inrush_a,30,30,consolidated-library/documentation/contractor-research-2026-10-31,4
+RST2228-L2.CISCO-LOW,input_v_min,88,88,consolidated-library/documentation/contractor-research-2026-10-31,4
+RST2228-L2.CISCO-LOW,input_v_max,300,300,consolidated-library/documentation/contractor-research-2026-10-31,4
+RST2228-L2.CISCO-HIGH,category,network_switch,network_switch,consolidated-library/documentation/contractor-research-2026-10-31,5
+RST2228-L2.CISCO-HIGH,make,Cisco,Cisco,consolidated-library/documentation/contractor-research-2026-10-31,5
+RST2228-L2.CISCO-HIGH,model,Catalyst IE9320,Catalyst IE9320,consolidated-library/documentation/contractor-research-2026-10-31,5
+RST2228-L2.CISCO-HIGH,ordering_code,IE-9320-22S2C4X-A + 2 x PWR-RGD-AC-DC-H,IE-9320-22S2C4X-A + 2 x PWR-RGD-AC-DC-H,consolidated-library/documentation/contractor-research-2026-10-31,5
+RST2228-L2.CISCO-HIGH,description_template,"Catalyst IE9320, 24 GE SFP and 4 10GE SFP+ cages, two high-voltage DC feeds","Catalyst IE9320, 24 GE SFP and 4 10GE SFP+ cages, two high-voltage DC feeds",consolidated-library/documentation/contractor-research-2026-10-31,5
+RST2228-L2.CISCO-HIGH,supply_type,VDC,VDC,consolidated-library/documentation/contractor-research-2026-10-31,5
+RST2228-L2.CISCO-HIGH,voltage_v,125,125,consolidated-library/documentation/contractor-research-2026-10-31,5
+RST2228-L2.CISCO-HIGH,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,5
+RST2228-L2.CISCO-HIGH,power_supplies,2,2,consolidated-library/documentation/contractor-research-2026-10-31,5
+RST2228-L2.CISCO-HIGH,hwio_points,1,1,consolidated-library/documentation/contractor-research-2026-10-31,5
+RST2228-L2.CISCO-HIGH,di_inputs,4,4,consolidated-library/documentation/contractor-research-2026-10-31,5
+RST2228-L2.CISCO-HIGH,height_u,1,1,consolidated-library/documentation/contractor-research-2026-10-31,5
+RST2228-L2.CISCO-HIGH,alt_group,RST2228-L2,RST2228-L2,consolidated-library/documentation/contractor-research-2026-10-31,5
+RST2228-L2.CISCO-HIGH,tier,high,high,consolidated-library/documentation/contractor-research-2026-10-31,5
+RST2228-L2.CISCO-HIGH,inrush_a,30,30,consolidated-library/documentation/contractor-research-2026-10-31,5
+RST2228-L2.CISCO-HIGH,input_v_min,88,88,consolidated-library/documentation/contractor-research-2026-10-31,5
+RST2228-L2.CISCO-HIGH,input_v_max,300,300,consolidated-library/documentation/contractor-research-2026-10-31,5
+FGR-60F.CISCO-HIGH,category,firewall,firewall,consolidated-library/documentation/contractor-research-2026-10-31,6
+FGR-60F.CISCO-HIGH,make,Cisco,Cisco,consolidated-library/documentation/contractor-research-2026-10-31,6
+FGR-60F.CISCO-HIGH,model,Catalyst IR8340,Catalyst IR8340,consolidated-library/documentation/contractor-research-2026-10-31,6
+FGR-60F.CISCO-HIGH,ordering_code,IR8340-K9 + 2 x PWR-RGD-AC-DC-H,IR8340-K9 + 2 x PWR-RGD-AC-DC-H,consolidated-library/documentation/contractor-research-2026-10-31,6
+FGR-60F.CISCO-HIGH,description_template,"Cisco IR8340 rugged router with security capability, 14 gigabit interfaces, dual high-voltage DC, 2U","Cisco IR8340 rugged router with security capability, 14 gigabit interfaces, dual high-voltage DC, 2U",consolidated-library/documentation/contractor-research-2026-10-31,6
+FGR-60F.CISCO-HIGH,supply_type,VDC,VDC,consolidated-library/documentation/contractor-research-2026-10-31,6
+FGR-60F.CISCO-HIGH,voltage_v,125,125,consolidated-library/documentation/contractor-research-2026-10-31,6
+FGR-60F.CISCO-HIGH,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,6
+FGR-60F.CISCO-HIGH,power_supplies,2,2,consolidated-library/documentation/contractor-research-2026-10-31,6
+FGR-60F.CISCO-HIGH,height_u,2,2,consolidated-library/documentation/contractor-research-2026-10-31,6
+FGR-60F.CISCO-HIGH,alt_group,FGR-60F,FGR-60F,consolidated-library/documentation/contractor-research-2026-10-31,6
+FGR-60F.CISCO-HIGH,tier,high,high,consolidated-library/documentation/contractor-research-2026-10-31,6
+FGR-60F.CISCO-HIGH,inrush_a,30,30,consolidated-library/documentation/contractor-research-2026-10-31,6
+FGR-60F.CISCO-HIGH,input_v_min,88,88,consolidated-library/documentation/contractor-research-2026-10-31,6
+FGR-60F.CISCO-HIGH,input_v_max,300,300,consolidated-library/documentation/contractor-research-2026-10-31,6
+RST2228-L2,category,network_switch,network_switch,consolidated-library/documentation/contractor-research-2026-10-31,7
+RST2228-L2,make,Ruggedcom,Ruggedcom,consolidated-library/documentation/contractor-research-2026-10-31,7
+RST2228-L2,model,RST-2228,RST-2228,consolidated-library/documentation/contractor-research-2026-10-31,7
+RST2228-L2,ordering_code,6GK6222-6AB00-5CC0-Z A00+B06+C06+D06+E06+F06+G00,6GK6222-6AB00-5CC0-Z A00+B06+C06+D06+E06+F06+G00,consolidated-library/documentation/contractor-research-2026-10-31,7
+RST2228-L2,description_template,"RUGGEDCOM RST2228, 20 gigabit SFP cages, 4 10G uplinks, dual 125 VDC feeds","RUGGEDCOM RST2228, 20 gigabit SFP cages, 4 10G uplinks, dual 125 VDC feeds",consolidated-library/documentation/contractor-research-2026-10-31,7
+RST2228-L2,supply_type,VDC,VDC,consolidated-library/documentation/contractor-research-2026-10-31,7
+RST2228-L2,voltage_v,125,125,consolidated-library/documentation/contractor-research-2026-10-31,7
+RST2228-L2,unit_power_w,77,77,consolidated-library/documentation/contractor-research-2026-10-31,7
+RST2228-L2,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,7
+RST2228-L2,power_supplies,2,2,consolidated-library/documentation/contractor-research-2026-10-31,7
+RST2228-L2,hwio_points,1,1,consolidated-library/documentation/contractor-research-2026-10-31,7
+RST2228-L2,height_u,1,1,consolidated-library/documentation/contractor-research-2026-10-31,7
+RST2228-L2,alt_group,RST2228-L2,RST2228-L2,consolidated-library/documentation/contractor-research-2026-10-31,7
+RST2228-L2,input_v_min,88,88,consolidated-library/documentation/contractor-research-2026-10-31,7
+RST2228-L2,input_v_max,300,300,consolidated-library/documentation/contractor-research-2026-10-31,7
+SEL-2730M-EXT.SIEMENS-HIGH,category,network_switch,network_switch,consolidated-library/documentation/contractor-research-2026-10-31,8
+SEL-2730M-EXT.SIEMENS-HIGH,make,Siemens,Siemens,consolidated-library/documentation/contractor-research-2026-10-31,8
+SEL-2730M-EXT.SIEMENS-HIGH,model,RUGGEDCOM RST2228,RUGGEDCOM RST2228,consolidated-library/documentation/contractor-research-2026-10-31,8
+SEL-2730M-EXT.SIEMENS-HIGH,ordering_code,6GK6222-6AB00-5CC0-Z A00+B05+C05+D05+E05+F01+G00,6GK6222-6AB00-5CC0-Z A00+B05+C05+D05+E05+F01+G00,consolidated-library/documentation/contractor-research-2026-10-31,8
+SEL-2730M-EXT.SIEMENS-HIGH,description_template,"RUGGEDCOM RST2228, 16 MM 100M and 4 copper gigabit ports, 4 10G uplinks, dual 125 VDC feeds","RUGGEDCOM RST2228, 16 MM 100M and 4 copper gigabit ports, 4 10G uplinks, dual 125 VDC feeds",consolidated-library/documentation/contractor-research-2026-10-31,8
+SEL-2730M-EXT.SIEMENS-HIGH,supply_type,VDC,VDC,consolidated-library/documentation/contractor-research-2026-10-31,8
+SEL-2730M-EXT.SIEMENS-HIGH,voltage_v,125,125,consolidated-library/documentation/contractor-research-2026-10-31,8
+SEL-2730M-EXT.SIEMENS-HIGH,unit_power_w,77,77,consolidated-library/documentation/contractor-research-2026-10-31,8
+SEL-2730M-EXT.SIEMENS-HIGH,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,8
+SEL-2730M-EXT.SIEMENS-HIGH,power_supplies,2,2,consolidated-library/documentation/contractor-research-2026-10-31,8
+SEL-2730M-EXT.SIEMENS-HIGH,hwio_points,1,1,consolidated-library/documentation/contractor-research-2026-10-31,8
+SEL-2730M-EXT.SIEMENS-HIGH,height_u,1,1,consolidated-library/documentation/contractor-research-2026-10-31,8
+SEL-2730M-EXT.SIEMENS-HIGH,alt_group,SEL-2730M-EXT,SEL-2730M-EXT,consolidated-library/documentation/contractor-research-2026-10-31,8
+SEL-2730M-EXT.SIEMENS-HIGH,tier,high,high,consolidated-library/documentation/contractor-research-2026-10-31,8
+SEL-2730M-EXT.SIEMENS-HIGH,input_v_min,88,88,consolidated-library/documentation/contractor-research-2026-10-31,8
+SEL-2730M-EXT.SIEMENS-HIGH,input_v_max,300,300,consolidated-library/documentation/contractor-research-2026-10-31,8
+RST2228-L2.MOXA-LOW,category,network_switch,network_switch,consolidated-library/documentation/contractor-research-2026-10-31,9
+RST2228-L2.MOXA-LOW,make,Moxa,Moxa,consolidated-library/documentation/contractor-research-2026-10-31,9
+RST2228-L2.MOXA-LOW,model,PT-7528 series,PT-7528 series,consolidated-library/documentation/contractor-research-2026-10-31,9
+RST2228-L2.MOXA-LOW,ordering_code,PT-7528-20MSC-4TX-4GSFP-HV-HV,PT-7528-20MSC-4TX-4GSFP-HV-HV,consolidated-library/documentation/contractor-research-2026-10-31,9
+RST2228-L2.MOXA-LOW,description_template,"PT-7528 switch, 20 multimode 100M SC, 4 copper 100M and four gigabit SFP cages, dual HV DC","PT-7528 switch, 20 multimode 100M SC, 4 copper 100M and four gigabit SFP cages, dual HV DC",consolidated-library/documentation/contractor-research-2026-10-31,9
+RST2228-L2.MOXA-LOW,supply_type,VDC,VDC,consolidated-library/documentation/contractor-research-2026-10-31,9
+RST2228-L2.MOXA-LOW,voltage_v,125,125,consolidated-library/documentation/contractor-research-2026-10-31,9
+RST2228-L2.MOXA-LOW,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,9
+RST2228-L2.MOXA-LOW,power_supplies,2,2,consolidated-library/documentation/contractor-research-2026-10-31,9
+RST2228-L2.MOXA-LOW,height_u,1,1,consolidated-library/documentation/contractor-research-2026-10-31,9
+RST2228-L2.MOXA-LOW,alt_group,RST2228-L2,RST2228-L2,consolidated-library/documentation/contractor-research-2026-10-31,9
+RST2228-L2.MOXA-LOW,tier,low,low,consolidated-library/documentation/contractor-research-2026-10-31,9
+RST2228-L2.MOXA-LOW,input_v_min,88,88,consolidated-library/documentation/contractor-research-2026-10-31,9
+RST2228-L2.MOXA-LOW,input_v_max,300,300,consolidated-library/documentation/contractor-research-2026-10-31,9
+RST2228-L1-24MM.MOXA-LOW,category,network_switch,network_switch,consolidated-library/documentation/contractor-research-2026-10-31,10
+RST2228-L1-24MM.MOXA-LOW,make,Moxa,Moxa,consolidated-library/documentation/contractor-research-2026-10-31,10
+RST2228-L1-24MM.MOXA-LOW,model,PT-7528 series,PT-7528 series,consolidated-library/documentation/contractor-research-2026-10-31,10
+RST2228-L1-24MM.MOXA-LOW,ordering_code,PT-7528-12MSC-12TX-4GSFP-HV-HV,PT-7528-12MSC-12TX-4GSFP-HV-HV,consolidated-library/documentation/contractor-research-2026-10-31,10
+RST2228-L1-24MM.MOXA-LOW,description_template,"PT-7528 switch, 12 multimode 100M SC, 12 copper 100M and four gigabit SFP cages, dual HV DC","PT-7528 switch, 12 multimode 100M SC, 12 copper 100M and four gigabit SFP cages, dual HV DC",consolidated-library/documentation/contractor-research-2026-10-31,10
+RST2228-L1-24MM.MOXA-LOW,supply_type,VDC,VDC,consolidated-library/documentation/contractor-research-2026-10-31,10
+RST2228-L1-24MM.MOXA-LOW,voltage_v,125,125,consolidated-library/documentation/contractor-research-2026-10-31,10
+RST2228-L1-24MM.MOXA-LOW,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,10
+RST2228-L1-24MM.MOXA-LOW,power_supplies,2,2,consolidated-library/documentation/contractor-research-2026-10-31,10
+RST2228-L1-24MM.MOXA-LOW,height_u,1,1,consolidated-library/documentation/contractor-research-2026-10-31,10
+RST2228-L1-24MM.MOXA-LOW,alt_group,RST2228-L1-24MM,RST2228-L1-24MM,consolidated-library/documentation/contractor-research-2026-10-31,10
+RST2228-L1-24MM.MOXA-LOW,tier,low,low,consolidated-library/documentation/contractor-research-2026-10-31,10
+RST2228-L1-24MM.MOXA-LOW,input_v_min,88,88,consolidated-library/documentation/contractor-research-2026-10-31,10
+RST2228-L1-24MM.MOXA-LOW,input_v_max,300,300,consolidated-library/documentation/contractor-research-2026-10-31,10
+RST2228-L2.MOXA-MID,category,network_switch,network_switch,consolidated-library/documentation/contractor-research-2026-10-31,11
+RST2228-L2.MOXA-MID,make,Moxa,Moxa,consolidated-library/documentation/contractor-research-2026-10-31,11
+RST2228-L2.MOXA-MID,model,PT-G7728,PT-G7728,consolidated-library/documentation/contractor-research-2026-10-31,11
+RST2228-L2.MOXA-MID,ordering_code,PT-G7728 + 6 x LM-7000H-4GSFP + 2 x PWR-HV-NP,PT-G7728 + 6 x LM-7000H-4GSFP + 2 x PWR-HV-NP,consolidated-library/documentation/contractor-research-2026-10-31,11
+RST2228-L2.MOXA-MID,description_template,"Moxa modular switch with 26 gigabit SFP cages and 2 gigabit copper ports, two HV DC feeds","Moxa modular switch with 26 gigabit SFP cages and 2 gigabit copper ports, two HV DC feeds",consolidated-library/documentation/contractor-research-2026-10-31,11
+RST2228-L2.MOXA-MID,supply_type,VDC,VDC,consolidated-library/documentation/contractor-research-2026-10-31,11
+RST2228-L2.MOXA-MID,voltage_v,125,125,consolidated-library/documentation/contractor-research-2026-10-31,11
+RST2228-L2.MOXA-MID,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,11
+RST2228-L2.MOXA-MID,power_supplies,2,2,consolidated-library/documentation/contractor-research-2026-10-31,11
+RST2228-L2.MOXA-MID,height_u,1,1,consolidated-library/documentation/contractor-research-2026-10-31,11
+RST2228-L2.MOXA-MID,alt_group,RST2228-L2,RST2228-L2,consolidated-library/documentation/contractor-research-2026-10-31,11
+RST2228-L2.MOXA-MID,tier,mid,mid,consolidated-library/documentation/contractor-research-2026-10-31,11
+RST2228-L2.MOXA-MID,input_v_min,88,88,consolidated-library/documentation/contractor-research-2026-10-31,11
+RST2228-L2.MOXA-MID,input_v_max,300,300,consolidated-library/documentation/contractor-research-2026-10-31,11
+RST2228-L2.MOXA-HIGH,category,network_switch,network_switch,consolidated-library/documentation/contractor-research-2026-10-31,12
+RST2228-L2.MOXA-HIGH,make,Moxa,Moxa,consolidated-library/documentation/contractor-research-2026-10-31,12
+RST2228-L2.MOXA-HIGH,model,PT-G7828,PT-G7828,consolidated-library/documentation/contractor-research-2026-10-31,12
+RST2228-L2.MOXA-HIGH,ordering_code,PT-G7828 + 6 x LM-7000H-4GSFP + 2 x PWR-HV-NP,PT-G7828 + 6 x LM-7000H-4GSFP + 2 x PWR-HV-NP,consolidated-library/documentation/contractor-research-2026-10-31,12
+RST2228-L2.MOXA-HIGH,description_template,"Moxa modular switch with 26 gigabit SFP cages and 2 gigabit copper ports, two HV DC feeds","Moxa modular switch with 26 gigabit SFP cages and 2 gigabit copper ports, two HV DC feeds",consolidated-library/documentation/contractor-research-2026-10-31,12
+RST2228-L2.MOXA-HIGH,supply_type,VDC,VDC,consolidated-library/documentation/contractor-research-2026-10-31,12
+RST2228-L2.MOXA-HIGH,voltage_v,125,125,consolidated-library/documentation/contractor-research-2026-10-31,12
+RST2228-L2.MOXA-HIGH,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,12
+RST2228-L2.MOXA-HIGH,power_supplies,2,2,consolidated-library/documentation/contractor-research-2026-10-31,12
+RST2228-L2.MOXA-HIGH,height_u,1,1,consolidated-library/documentation/contractor-research-2026-10-31,12
+RST2228-L2.MOXA-HIGH,alt_group,RST2228-L2,RST2228-L2,consolidated-library/documentation/contractor-research-2026-10-31,12
+RST2228-L2.MOXA-HIGH,tier,high,high,consolidated-library/documentation/contractor-research-2026-10-31,12
+RST2228-L2.MOXA-HIGH,input_v_min,88,88,consolidated-library/documentation/contractor-research-2026-10-31,12
+RST2228-L2.MOXA-HIGH,input_v_max,300,300,consolidated-library/documentation/contractor-research-2026-10-31,12
+SEL-2730M-EXT.MOXA-HIGH,category,network_switch,network_switch,consolidated-library/documentation/contractor-research-2026-10-31,13
+SEL-2730M-EXT.MOXA-HIGH,make,Moxa,Moxa,consolidated-library/documentation/contractor-research-2026-10-31,13
+SEL-2730M-EXT.MOXA-HIGH,model,PT-G7728,PT-G7728,consolidated-library/documentation/contractor-research-2026-10-31,13
+SEL-2730M-EXT.MOXA-HIGH,ordering_code,PT-G7728 + 4 x LM-7000H-4GSFP + 1 x LM-7000H-4GTX + 2 x PWR-HV-NP,PT-G7728 + 4 x LM-7000H-4GSFP + 1 x LM-7000H-4GTX + 2 x PWR-HV-NP,consolidated-library/documentation/contractor-research-2026-10-31,13
+SEL-2730M-EXT.MOXA-HIGH,description_template,"Moxa modular switch with 18 gigabit SFP cages and 6 gigabit copper ports, two HV DC feeds","Moxa modular switch with 18 gigabit SFP cages and 6 gigabit copper ports, two HV DC feeds",consolidated-library/documentation/contractor-research-2026-10-31,13
+SEL-2730M-EXT.MOXA-HIGH,supply_type,VDC,VDC,consolidated-library/documentation/contractor-research-2026-10-31,13
+SEL-2730M-EXT.MOXA-HIGH,voltage_v,125,125,consolidated-library/documentation/contractor-research-2026-10-31,13
+SEL-2730M-EXT.MOXA-HIGH,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,13
+SEL-2730M-EXT.MOXA-HIGH,power_supplies,2,2,consolidated-library/documentation/contractor-research-2026-10-31,13
+SEL-2730M-EXT.MOXA-HIGH,height_u,1,1,consolidated-library/documentation/contractor-research-2026-10-31,13
+SEL-2730M-EXT.MOXA-HIGH,alt_group,SEL-2730M-EXT,SEL-2730M-EXT,consolidated-library/documentation/contractor-research-2026-10-31,13
+SEL-2730M-EXT.MOXA-HIGH,tier,high,high,consolidated-library/documentation/contractor-research-2026-10-31,13
+SEL-2730M-EXT.MOXA-HIGH,input_v_min,88,88,consolidated-library/documentation/contractor-research-2026-10-31,13
+SEL-2730M-EXT.MOXA-HIGH,input_v_max,300,300,consolidated-library/documentation/contractor-research-2026-10-31,13
+FGR-60F.MOXA-LOW,category,firewall,firewall,consolidated-library/documentation/contractor-research-2026-10-31,14
+FGR-60F.MOXA-LOW,make,Moxa,Moxa,consolidated-library/documentation/contractor-research-2026-10-31,14
+FGR-60F.MOXA-LOW,model,EDR-G9010 series,EDR-G9010 series,consolidated-library/documentation/contractor-research-2026-10-31,14
+FGR-60F.MOXA-LOW,ordering_code,EDR-G9010-VPN-2MGSFP-T,EDR-G9010-VPN-2MGSFP-T,consolidated-library/documentation/contractor-research-2026-10-31,14
+FGR-60F.MOXA-LOW,description_template,"Moxa EDR-G9010 firewall, eight gigabit RJ45 and two 2.5G SFP cages, dual 24 VDC, needs converter","Moxa EDR-G9010 firewall, eight gigabit RJ45 and two 2.5G SFP cages, dual 24 VDC, needs converter",consolidated-library/documentation/contractor-research-2026-10-31,14
+FGR-60F.MOXA-LOW,supply_type,VDC,VDC,consolidated-library/documentation/contractor-research-2026-10-31,14
+FGR-60F.MOXA-LOW,voltage_v,24,24,consolidated-library/documentation/contractor-research-2026-10-31,14
+FGR-60F.MOXA-LOW,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,14
+FGR-60F.MOXA-LOW,power_supplies,2,2,consolidated-library/documentation/contractor-research-2026-10-31,14
+FGR-60F.MOXA-LOW,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,14
+FGR-60F.MOXA-LOW,alt_group,FGR-60F,FGR-60F,consolidated-library/documentation/contractor-research-2026-10-31,14
+FGR-60F.MOXA-LOW,tier,low,low,consolidated-library/documentation/contractor-research-2026-10-31,14
+FGR-60F.MOXA-LOW,input_v_min,9.6,9.6,consolidated-library/documentation/contractor-research-2026-10-31,14
+FGR-60F.MOXA-LOW,input_v_max,60,60,consolidated-library/documentation/contractor-research-2026-10-31,14
+FGR-60F.MOXA-MID,category,firewall,firewall,consolidated-library/documentation/contractor-research-2026-10-31,15
+FGR-60F.MOXA-MID,make,Moxa,Moxa,consolidated-library/documentation/contractor-research-2026-10-31,15
+FGR-60F.MOXA-MID,model,EDR-G9010 series,EDR-G9010 series,consolidated-library/documentation/contractor-research-2026-10-31,15
+FGR-60F.MOXA-MID,ordering_code,EDR-G9010-VPN-2MGSFP-HV-T,EDR-G9010-VPN-2MGSFP-HV-T,consolidated-library/documentation/contractor-research-2026-10-31,15
+FGR-60F.MOXA-MID,description_template,"Moxa EDR-G9010 firewall, eight gigabit RJ45 and two 2.5G SFP cages, dual HV DC","Moxa EDR-G9010 firewall, eight gigabit RJ45 and two 2.5G SFP cages, dual HV DC",consolidated-library/documentation/contractor-research-2026-10-31,15
+FGR-60F.MOXA-MID,supply_type,VDC,VDC,consolidated-library/documentation/contractor-research-2026-10-31,15
+FGR-60F.MOXA-MID,voltage_v,125,125,consolidated-library/documentation/contractor-research-2026-10-31,15
+FGR-60F.MOXA-MID,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,15
+FGR-60F.MOXA-MID,power_supplies,2,2,consolidated-library/documentation/contractor-research-2026-10-31,15
+FGR-60F.MOXA-MID,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,15
+FGR-60F.MOXA-MID,alt_group,FGR-60F,FGR-60F,consolidated-library/documentation/contractor-research-2026-10-31,15
+FGR-60F.MOXA-MID,tier,mid,mid,consolidated-library/documentation/contractor-research-2026-10-31,15
+FGR-60F.MOXA-MID,input_v_min,88,88,consolidated-library/documentation/contractor-research-2026-10-31,15
+FGR-60F.MOXA-MID,input_v_max,300,300,consolidated-library/documentation/contractor-research-2026-10-31,15
+FGR-60F.CISCO-LOW,category,firewall,firewall,consolidated-library/documentation/contractor-research-2026-10-31,16
+FGR-60F.CISCO-LOW,make,Cisco,Cisco,consolidated-library/documentation/contractor-research-2026-10-31,16
+FGR-60F.CISCO-LOW,model,Secure Firewall ISA3000,Secure Firewall ISA3000,consolidated-library/documentation/contractor-research-2026-10-31,16
+FGR-60F.CISCO-LOW,ordering_code,ISA-3000-4C-K9,ISA-3000-4C-K9,consolidated-library/documentation/contractor-research-2026-10-31,16
+FGR-60F.CISCO-LOW,description_template,"Cisco ISA3000 firewall, 4 copper gigabit data ports, separate gigabit management, dual24 VDC","Cisco ISA3000 firewall, 4 copper gigabit data ports, separate gigabit management, dual24 VDC",consolidated-library/documentation/contractor-research-2026-10-31,16
+FGR-60F.CISCO-LOW,supply_type,VDC,VDC,consolidated-library/documentation/contractor-research-2026-10-31,16
+FGR-60F.CISCO-LOW,voltage_v,24,24,consolidated-library/documentation/contractor-research-2026-10-31,16
+FGR-60F.CISCO-LOW,unit_power_w,24,24,consolidated-library/documentation/contractor-research-2026-10-31,16
+FGR-60F.CISCO-LOW,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,16
+FGR-60F.CISCO-LOW,power_supplies,2,2,consolidated-library/documentation/contractor-research-2026-10-31,16
+FGR-60F.CISCO-LOW,hwio_points,3,3,consolidated-library/documentation/contractor-research-2026-10-31,16
+FGR-60F.CISCO-LOW,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,16
+FGR-60F.CISCO-LOW,alt_group,FGR-60F,FGR-60F,consolidated-library/documentation/contractor-research-2026-10-31,16
+FGR-60F.CISCO-LOW,tier,low,low,consolidated-library/documentation/contractor-research-2026-10-31,16
+FGR-60F.CISCO-LOW,input_v_min,9.6,9.6,consolidated-library/documentation/contractor-research-2026-10-31,16
+FGR-60F.CISCO-LOW,input_v_max,60,60,consolidated-library/documentation/contractor-research-2026-10-31,16
+FGR-60F.CISCO-MID,category,firewall,firewall,consolidated-library/documentation/contractor-research-2026-10-31,17
+FGR-60F.CISCO-MID,make,Cisco,Cisco,consolidated-library/documentation/contractor-research-2026-10-31,17
+FGR-60F.CISCO-MID,model,Secure Firewall ISA3000,Secure Firewall ISA3000,consolidated-library/documentation/contractor-research-2026-10-31,17
+FGR-60F.CISCO-MID,ordering_code,ISA-3000-2C2F-K9,ISA-3000-2C2F-K9,consolidated-library/documentation/contractor-research-2026-10-31,17
+FGR-60F.CISCO-MID,description_template,"Cisco ISA3000 firewall, 2 copper +2 SFP gigabit data ports, separate gigabit management, dual24 VDC","Cisco ISA3000 firewall, 2 copper +2 SFP gigabit data ports, separate gigabit management, dual24 VDC",consolidated-library/documentation/contractor-research-2026-10-31,17
+FGR-60F.CISCO-MID,supply_type,VDC,VDC,consolidated-library/documentation/contractor-research-2026-10-31,17
+FGR-60F.CISCO-MID,voltage_v,24,24,consolidated-library/documentation/contractor-research-2026-10-31,17
+FGR-60F.CISCO-MID,unit_power_w,24,24,consolidated-library/documentation/contractor-research-2026-10-31,17
+FGR-60F.CISCO-MID,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,17
+FGR-60F.CISCO-MID,power_supplies,2,2,consolidated-library/documentation/contractor-research-2026-10-31,17
+FGR-60F.CISCO-MID,hwio_points,3,3,consolidated-library/documentation/contractor-research-2026-10-31,17
+FGR-60F.CISCO-MID,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,17
+FGR-60F.CISCO-MID,alt_group,FGR-60F,FGR-60F,consolidated-library/documentation/contractor-research-2026-10-31,17
+FGR-60F.CISCO-MID,tier,mid,mid,consolidated-library/documentation/contractor-research-2026-10-31,17
+FGR-60F.CISCO-MID,input_v_min,9.6,9.6,consolidated-library/documentation/contractor-research-2026-10-31,17
+FGR-60F.CISCO-MID,input_v_max,60,60,consolidated-library/documentation/contractor-research-2026-10-31,17
+SEL-2730M-EXT.SIEMENS-MID,category,network_switch,network_switch,consolidated-library/documentation/contractor-research-2026-10-31,18
+SEL-2730M-EXT.SIEMENS-MID,make,Siemens,Siemens,consolidated-library/documentation/contractor-research-2026-10-31,18
+SEL-2730M-EXT.SIEMENS-MID,model,RUGGEDCOM RSG2300,RUGGEDCOM RSG2300,consolidated-library/documentation/contractor-research-2026-10-31,18
+SEL-2730M-EXT.SIEMENS-MID,ordering_code,6GK6023-0AS23-3DC0-Z A05+B05+C08+D08,6GK6023-0AS23-3DC0-Z A05+B05+C08+D08,consolidated-library/documentation/contractor-research-2026-10-31,18
+SEL-2730M-EXT.SIEMENS-MID,description_template,"RSG2300 switch,24 copper100M,4 multimode100M LC and4 gigabit SFP SX interfaces, dual125 VDC","RSG2300 switch,24 copper100M,4 multimode100M LC and4 gigabit SFP SX interfaces, dual125 VDC",consolidated-library/documentation/contractor-research-2026-10-31,18
+SEL-2730M-EXT.SIEMENS-MID,supply_type,VDC,VDC,consolidated-library/documentation/contractor-research-2026-10-31,18
+SEL-2730M-EXT.SIEMENS-MID,voltage_v,125,125,consolidated-library/documentation/contractor-research-2026-10-31,18
+SEL-2730M-EXT.SIEMENS-MID,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,18
+SEL-2730M-EXT.SIEMENS-MID,power_supplies,2,2,consolidated-library/documentation/contractor-research-2026-10-31,18
+SEL-2730M-EXT.SIEMENS-MID,hwio_points,1,1,consolidated-library/documentation/contractor-research-2026-10-31,18
+SEL-2730M-EXT.SIEMENS-MID,height_u,1,1,consolidated-library/documentation/contractor-research-2026-10-31,18
+SEL-2730M-EXT.SIEMENS-MID,alt_group,SEL-2730M-EXT,SEL-2730M-EXT,consolidated-library/documentation/contractor-research-2026-10-31,18
+SEL-2730M-EXT.SIEMENS-MID,tier,mid,mid,consolidated-library/documentation/contractor-research-2026-10-31,18
+SEL-2730M-EXT.SIEMENS-MID,input_v_min,88,88,consolidated-library/documentation/contractor-research-2026-10-31,18
+SEL-2730M-EXT.SIEMENS-MID,input_v_max,300,300,consolidated-library/documentation/contractor-research-2026-10-31,18
+SZ2500-LAMP.NVENT-HOFFMAN-LOW,category,lamp,lamp,consolidated-library/documentation/contractor-research-2026-10-31,19
+SZ2500-LAMP.NVENT-HOFFMAN-LOW,make,nVent Hoffman,nVent Hoffman,consolidated-library/documentation/contractor-research-2026-10-31,19
+SZ2500-LAMP.NVENT-HOFFMAN-LOW,model,EL LED enclosure light 900 lm,EL LED enclosure light 900 lm,consolidated-library/documentation/contractor-research-2026-10-31,19
+SZ2500-LAMP.NVENT-HOFFMAN-LOW,ordering_code,EL900D,EL900D,consolidated-library/documentation/contractor-research-2026-10-31,19
+SZ2500-LAMP.NVENT-HOFFMAN-LOW,description_template,EL900D enclosure-mounted lamp; published consumption 9 W (not explicitly guaranteed maximum); Connection and mounting accessories ordered separately.,EL900D enclosure-mounted lamp; published consumption 9 W (not explicitly guaranteed maximum); Connection and mounting accessories ordered separately.,consolidated-library/documentation/contractor-research-2026-10-31,19
+SZ2500-LAMP.NVENT-HOFFMAN-LOW,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,19
+SZ2500-LAMP.NVENT-HOFFMAN-LOW,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,19
+SZ2500-LAMP.NVENT-HOFFMAN-LOW,load_type,INTERMITTENT,INTERMITTENT,consolidated-library/documentation/contractor-research-2026-10-31,19
+SZ2500-LAMP.NVENT-HOFFMAN-LOW,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,19
+SZ2500-LAMP.NVENT-HOFFMAN-LOW,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,19
+SZ2500-LAMP.NVENT-HOFFMAN-LOW,alt_group,SZ2500-LAMP,SZ2500-LAMP,consolidated-library/documentation/contractor-research-2026-10-31,19
+SZ2500-LAMP.NVENT-HOFFMAN-LOW,tier,low,low,consolidated-library/documentation/contractor-research-2026-10-31,19
+SZ2500-LAMP.NVENT-HOFFMAN-LOW,input_v_min,100,100,consolidated-library/documentation/contractor-research-2026-10-31,19
+SZ2500-LAMP.NVENT-HOFFMAN-LOW,input_v_max,240,240,consolidated-library/documentation/contractor-research-2026-10-31,19
+SZ2500-LAMP.NVENT-HOFFMAN-MID,category,lamp,lamp,consolidated-library/documentation/contractor-research-2026-10-31,20
+SZ2500-LAMP.NVENT-HOFFMAN-MID,make,nVent Hoffman,nVent Hoffman,consolidated-library/documentation/contractor-research-2026-10-31,20
+SZ2500-LAMP.NVENT-HOFFMAN-MID,model,EL LED enclosure light with socket 1200 lm,EL LED enclosure light with socket 1200 lm,consolidated-library/documentation/contractor-research-2026-10-31,20
+SZ2500-LAMP.NVENT-HOFFMAN-MID,ordering_code,EL1200DS-BF,EL1200DS-BF,consolidated-library/documentation/contractor-research-2026-10-31,20
+SZ2500-LAMP.NVENT-HOFFMAN-MID,description_template,EL1200DS-BF enclosure-mounted lamp; published consumption 12 W (not explicitly guaranteed maximum); Type E socket; external socket loads separate.,EL1200DS-BF enclosure-mounted lamp; published consumption 12 W (not explicitly guaranteed maximum); Type E socket; external socket loads separate.,consolidated-library/documentation/contractor-research-2026-10-31,20
+SZ2500-LAMP.NVENT-HOFFMAN-MID,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,20
+SZ2500-LAMP.NVENT-HOFFMAN-MID,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,20
+SZ2500-LAMP.NVENT-HOFFMAN-MID,load_type,INTERMITTENT,INTERMITTENT,consolidated-library/documentation/contractor-research-2026-10-31,20
+SZ2500-LAMP.NVENT-HOFFMAN-MID,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,20
+SZ2500-LAMP.NVENT-HOFFMAN-MID,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,20
+SZ2500-LAMP.NVENT-HOFFMAN-MID,alt_group,SZ2500-LAMP,SZ2500-LAMP,consolidated-library/documentation/contractor-research-2026-10-31,20
+SZ2500-LAMP.NVENT-HOFFMAN-MID,tier,mid,mid,consolidated-library/documentation/contractor-research-2026-10-31,20
+SZ2500-LAMP.NVENT-HOFFMAN-MID,input_v_min,100,100,consolidated-library/documentation/contractor-research-2026-10-31,20
+SZ2500-LAMP.NVENT-HOFFMAN-MID,input_v_max,240,240,consolidated-library/documentation/contractor-research-2026-10-31,20
+SZ2500-LAMP.NVENT-HOFFMAN-HIGH,category,lamp,lamp,consolidated-library/documentation/contractor-research-2026-10-31,21
+SZ2500-LAMP.NVENT-HOFFMAN-HIGH,make,nVent Hoffman,nVent Hoffman,consolidated-library/documentation/contractor-research-2026-10-31,21
+SZ2500-LAMP.NVENT-HOFFMAN-HIGH,model,EL LED enclosure light with motion sensor 1200 lm,EL LED enclosure light with motion sensor 1200 lm,consolidated-library/documentation/contractor-research-2026-10-31,21
+SZ2500-LAMP.NVENT-HOFFMAN-HIGH,ordering_code,EL1200M,EL1200M,consolidated-library/documentation/contractor-research-2026-10-31,21
+SZ2500-LAMP.NVENT-HOFFMAN-HIGH,description_template,EL1200M enclosure-mounted lamp; published consumption 12 W (not explicitly guaranteed maximum); Connection and mounting accessories ordered separately.,EL1200M enclosure-mounted lamp; published consumption 12 W (not explicitly guaranteed maximum); Connection and mounting accessories ordered separately.,consolidated-library/documentation/contractor-research-2026-10-31,21
+SZ2500-LAMP.NVENT-HOFFMAN-HIGH,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,21
+SZ2500-LAMP.NVENT-HOFFMAN-HIGH,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,21
+SZ2500-LAMP.NVENT-HOFFMAN-HIGH,load_type,INTERMITTENT,INTERMITTENT,consolidated-library/documentation/contractor-research-2026-10-31,21
+SZ2500-LAMP.NVENT-HOFFMAN-HIGH,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,21
+SZ2500-LAMP.NVENT-HOFFMAN-HIGH,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,21
+SZ2500-LAMP.NVENT-HOFFMAN-HIGH,alt_group,SZ2500-LAMP,SZ2500-LAMP,consolidated-library/documentation/contractor-research-2026-10-31,21
+SZ2500-LAMP.NVENT-HOFFMAN-HIGH,tier,high,high,consolidated-library/documentation/contractor-research-2026-10-31,21
+SZ2500-LAMP.NVENT-HOFFMAN-HIGH,input_v_min,100,100,consolidated-library/documentation/contractor-research-2026-10-31,21
+SZ2500-LAMP.NVENT-HOFFMAN-HIGH,input_v_max,240,240,consolidated-library/documentation/contractor-research-2026-10-31,21
+SZ2500-LAMP.STEGO-LOW,category,lamp,lamp,consolidated-library/documentation/contractor-research-2026-10-31,22
+SZ2500-LAMP.STEGO-LOW,make,STEGO,STEGO,consolidated-library/documentation/contractor-research-2026-10-31,22
+SZ2500-LAMP.STEGO-LOW,model,"LED 025 (magnetic, on/off switch)","LED 025 (magnetic, on/off switch)",consolidated-library/documentation/contractor-research-2026-10-31,22
+SZ2500-LAMP.STEGO-LOW,ordering_code,02540.0-00,02540.0-00,consolidated-library/documentation/contractor-research-2026-10-31,22
+SZ2500-LAMP.STEGO-LOW,description_template,"LED 025 magnet mount; published lamp consumption <4 W; common 4 W is an upper planning bound, not exact measured consumption.","LED 025 magnet mount; published lamp consumption <4 W; common 4 W is an upper planning bound, not exact measured consumption.",consolidated-library/documentation/contractor-research-2026-10-31,22
+SZ2500-LAMP.STEGO-LOW,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,22
+SZ2500-LAMP.STEGO-LOW,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,22
+SZ2500-LAMP.STEGO-LOW,unit_power_w,4,4,consolidated-library/documentation/contractor-research-2026-10-31,22
+SZ2500-LAMP.STEGO-LOW,load_type,INTERMITTENT,INTERMITTENT,consolidated-library/documentation/contractor-research-2026-10-31,22
+SZ2500-LAMP.STEGO-LOW,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,22
+SZ2500-LAMP.STEGO-LOW,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,22
+SZ2500-LAMP.STEGO-LOW,alt_group,SZ2500-LAMP,SZ2500-LAMP,consolidated-library/documentation/contractor-research-2026-10-31,22
+SZ2500-LAMP.STEGO-LOW,tier,low,low,consolidated-library/documentation/contractor-research-2026-10-31,22
+SZ2500-LAMP.STEGO-LOW,input_v_min,100,100,consolidated-library/documentation/contractor-research-2026-10-31,22
+SZ2500-LAMP.STEGO-LOW,input_v_max,240,240,consolidated-library/documentation/contractor-research-2026-10-31,22
+SZ2500-LAMP.STEGO-MID,category,lamp,lamp,consolidated-library/documentation/contractor-research-2026-10-31,23
+SZ2500-LAMP.STEGO-MID,make,STEGO,STEGO,consolidated-library/documentation/contractor-research-2026-10-31,23
+SZ2500-LAMP.STEGO-MID,model,"LED 025 (screw mount, on/off switch)","LED 025 (screw mount, on/off switch)",consolidated-library/documentation/contractor-research-2026-10-31,23
+SZ2500-LAMP.STEGO-MID,ordering_code,02540.0-01,02540.0-01,consolidated-library/documentation/contractor-research-2026-10-31,23
+SZ2500-LAMP.STEGO-MID,description_template,"LED 025 screw mount; published lamp consumption <4 W; common 4 W is an upper planning bound, not exact measured consumption.","LED 025 screw mount; published lamp consumption <4 W; common 4 W is an upper planning bound, not exact measured consumption.",consolidated-library/documentation/contractor-research-2026-10-31,23
+SZ2500-LAMP.STEGO-MID,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,23
+SZ2500-LAMP.STEGO-MID,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,23
+SZ2500-LAMP.STEGO-MID,unit_power_w,4,4,consolidated-library/documentation/contractor-research-2026-10-31,23
+SZ2500-LAMP.STEGO-MID,load_type,INTERMITTENT,INTERMITTENT,consolidated-library/documentation/contractor-research-2026-10-31,23
+SZ2500-LAMP.STEGO-MID,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,23
+SZ2500-LAMP.STEGO-MID,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,23
+SZ2500-LAMP.STEGO-MID,alt_group,SZ2500-LAMP,SZ2500-LAMP,consolidated-library/documentation/contractor-research-2026-10-31,23
+SZ2500-LAMP.STEGO-MID,tier,mid,mid,consolidated-library/documentation/contractor-research-2026-10-31,23
+SZ2500-LAMP.STEGO-MID,input_v_min,100,100,consolidated-library/documentation/contractor-research-2026-10-31,23
+SZ2500-LAMP.STEGO-MID,input_v_max,240,240,consolidated-library/documentation/contractor-research-2026-10-31,23
+SZ2500-LAMP.STEGO-HIGH,category,lamp,lamp,consolidated-library/documentation/contractor-research-2026-10-31,24
+SZ2500-LAMP.STEGO-HIGH,make,STEGO,STEGO,consolidated-library/documentation/contractor-research-2026-10-31,24
+SZ2500-LAMP.STEGO-HIGH,model,SL 025 LED light,SL 025 LED light,consolidated-library/documentation/contractor-research-2026-10-31,24
+SZ2500-LAMP.STEGO-HIGH,ordering_code,02533.1-00,02533.1-00,consolidated-library/documentation/contractor-research-2026-10-31,24
+SZ2500-LAMP.STEGO-HIGH,description_template,"SL 025 screw/magnet mount, GB/IRE socket and motion sensor; published lamp consumption 4 W rated; socket load is separate.","SL 025 screw/magnet mount, GB/IRE socket and motion sensor; published lamp consumption 4 W rated; socket load is separate.",consolidated-library/documentation/contractor-research-2026-10-31,24
+SZ2500-LAMP.STEGO-HIGH,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,24
+SZ2500-LAMP.STEGO-HIGH,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,24
+SZ2500-LAMP.STEGO-HIGH,load_type,INTERMITTENT,INTERMITTENT,consolidated-library/documentation/contractor-research-2026-10-31,24
+SZ2500-LAMP.STEGO-HIGH,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,24
+SZ2500-LAMP.STEGO-HIGH,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,24
+SZ2500-LAMP.STEGO-HIGH,alt_group,SZ2500-LAMP,SZ2500-LAMP,consolidated-library/documentation/contractor-research-2026-10-31,24
+SZ2500-LAMP.STEGO-HIGH,tier,high,high,consolidated-library/documentation/contractor-research-2026-10-31,24
+SZ2500-LAMP.STEGO-HIGH,input_v_min,100,100,consolidated-library/documentation/contractor-research-2026-10-31,24
+SZ2500-LAMP.STEGO-HIGH,input_v_max,240,240,consolidated-library/documentation/contractor-research-2026-10-31,24
+SK3243-FAN.STEGO-LOW,category,fan,fan,consolidated-library/documentation/contractor-research-2026-10-31,25
+SK3243-FAN.STEGO-LOW,make,STEGO,STEGO,consolidated-library/documentation/contractor-research-2026-10-31,25
+SK3243-FAN.STEGO-LOW,model,FPI 018,FPI 018,consolidated-library/documentation/contractor-research-2026-10-31,25
+SK3243-FAN.STEGO-LOW,ordering_code,01873.0-30,01873.0-30,consolidated-library/documentation/contractor-research-2026-10-31,25
+SK3243-FAN.STEGO-LOW,description_template,"FPI 018 filter fan; 230 VAC 50 Hz, rated 64 W. Airflow into enclosure; requires outlet filter.","FPI 018 filter fan; 230 VAC 50 Hz, rated 64 W. Airflow into enclosure; requires outlet filter.",consolidated-library/documentation/contractor-research-2026-10-31,25
+SK3243-FAN.STEGO-LOW,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,25
+SK3243-FAN.STEGO-LOW,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,25
+SK3243-FAN.STEGO-LOW,load_type,INTERMITTENT,INTERMITTENT,consolidated-library/documentation/contractor-research-2026-10-31,25
+SK3243-FAN.STEGO-LOW,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,25
+SK3243-FAN.STEGO-LOW,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,25
+SK3243-FAN.STEGO-LOW,alt_group,SK3243-FAN,SK3243-FAN,consolidated-library/documentation/contractor-research-2026-10-31,25
+SK3243-FAN.STEGO-LOW,tier,low,low,consolidated-library/documentation/contractor-research-2026-10-31,25
+SK3243-FAN.STEGO-MID,category,fan,fan,consolidated-library/documentation/contractor-research-2026-10-31,26
+SK3243-FAN.STEGO-MID,make,STEGO,STEGO,consolidated-library/documentation/contractor-research-2026-10-31,26
+SK3243-FAN.STEGO-MID,model,FPI 018,FPI 018,consolidated-library/documentation/contractor-research-2026-10-31,26
+SK3243-FAN.STEGO-MID,ordering_code,01874.0-30,01874.0-30,consolidated-library/documentation/contractor-research-2026-10-31,26
+SK3243-FAN.STEGO-MID,description_template,"FPI 018 filter fan; 230 VAC 50 Hz, rated 95 W. Airflow into enclosure; requires outlet filter.","FPI 018 filter fan; 230 VAC 50 Hz, rated 95 W. Airflow into enclosure; requires outlet filter.",consolidated-library/documentation/contractor-research-2026-10-31,26
+SK3243-FAN.STEGO-MID,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,26
+SK3243-FAN.STEGO-MID,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,26
+SK3243-FAN.STEGO-MID,load_type,INTERMITTENT,INTERMITTENT,consolidated-library/documentation/contractor-research-2026-10-31,26
+SK3243-FAN.STEGO-MID,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,26
+SK3243-FAN.STEGO-MID,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,26
+SK3243-FAN.STEGO-MID,alt_group,SK3243-FAN,SK3243-FAN,consolidated-library/documentation/contractor-research-2026-10-31,26
+SK3243-FAN.STEGO-MID,tier,mid,mid,consolidated-library/documentation/contractor-research-2026-10-31,26
+SK3243-FAN.STEGO-HIGH,category,fan,fan,consolidated-library/documentation/contractor-research-2026-10-31,27
+SK3243-FAN.STEGO-HIGH,make,STEGO,STEGO,consolidated-library/documentation/contractor-research-2026-10-31,27
+SK3243-FAN.STEGO-HIGH,model,FPO 018,FPO 018,consolidated-library/documentation/contractor-research-2026-10-31,27
+SK3243-FAN.STEGO-HIGH,ordering_code,01884.0-01,01884.0-01,consolidated-library/documentation/contractor-research-2026-10-31,27
+SK3243-FAN.STEGO-HIGH,description_template,"FPO 018 filter fan; 230 VAC 50 Hz, rated 140 W. Airflow out of enclosure; requires inlet filter.","FPO 018 filter fan; 230 VAC 50 Hz, rated 140 W. Airflow out of enclosure; requires inlet filter.",consolidated-library/documentation/contractor-research-2026-10-31,27
+SK3243-FAN.STEGO-HIGH,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,27
+SK3243-FAN.STEGO-HIGH,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,27
+SK3243-FAN.STEGO-HIGH,load_type,INTERMITTENT,INTERMITTENT,consolidated-library/documentation/contractor-research-2026-10-31,27
+SK3243-FAN.STEGO-HIGH,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,27
+SK3243-FAN.STEGO-HIGH,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,27
+SK3243-FAN.STEGO-HIGH,alt_group,SK3243-FAN,SK3243-FAN,consolidated-library/documentation/contractor-research-2026-10-31,27
+SK3243-FAN.STEGO-HIGH,tier,high,high,consolidated-library/documentation/contractor-research-2026-10-31,27
+SK3110-TH.STEGO-HIGH,category,thermostat,thermostat,consolidated-library/documentation/contractor-research-2026-10-31,28
+SK3110-TH.STEGO-HIGH,make,STEGO,STEGO,consolidated-library/documentation/contractor-research-2026-10-31,28
+SK3110-TH.STEGO-HIGH,model,ETR 011 electronic thermostat,ETR 011 electronic thermostat,consolidated-library/documentation/contractor-research-2026-10-31,28
+SK3110-TH.STEGO-HIGH,ordering_code,01131.0-00,01131.0-00,consolidated-library/documentation/contractor-research-2026-10-31,28
+SK3110-TH.STEGO-HIGH,description_template,"Electronic thermostat, 230 VAC, 1 W rated, -20 to +60 C adjustment. Published 16 A inrush not established as supply inrush; do not transfer contact capability to supply.","Electronic thermostat, 230 VAC, 1 W rated, -20 to +60 C adjustment. Published 16 A inrush not established as supply inrush; do not transfer contact capability to supply.",consolidated-library/documentation/contractor-research-2026-10-31,28
+SK3110-TH.STEGO-HIGH,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,28
+SK3110-TH.STEGO-HIGH,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,28
+SK3110-TH.STEGO-HIGH,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,28
+SK3110-TH.STEGO-HIGH,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,28
+SK3110-TH.STEGO-HIGH,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,28
+SK3110-TH.STEGO-HIGH,alt_group,SK3110-TH,SK3110-TH,consolidated-library/documentation/contractor-research-2026-10-31,28
+SK3110-TH.STEGO-HIGH,tier,high,high,consolidated-library/documentation/contractor-research-2026-10-31,28
+SK3243-FAN.PFANNENBERG-MID,category,fan,fan,consolidated-library/documentation/contractor-research-2026-10-31,29
+SK3243-FAN.PFANNENBERG-MID,make,Pfannenberg,Pfannenberg,consolidated-library/documentation/contractor-research-2026-10-31,29
+SK3243-FAN.PFANNENBERG-MID,model,PF 66.000 230 V,PF 66.000 230 V,consolidated-library/documentation/contractor-research-2026-10-31,29
+SK3243-FAN.PFANNENBERG-MID,ordering_code,11666102055,11666102055,consolidated-library/documentation/contractor-research-2026-10-31,29
+SK3243-FAN.PFANNENBERG-MID,description_template,"PF 66.000 filter fan; 230 VAC +/-10%, 120 W at 50 Hz / 160 W at 60 Hz rated. Select frequency; values are not a guaranteed maximum.","PF 66.000 filter fan; 230 VAC +/-10%, 120 W at 50 Hz / 160 W at 60 Hz rated. Select frequency; values are not a guaranteed maximum.",consolidated-library/documentation/contractor-research-2026-10-31,29
+SK3243-FAN.PFANNENBERG-MID,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,29
+SK3243-FAN.PFANNENBERG-MID,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,29
+SK3243-FAN.PFANNENBERG-MID,load_type,INTERMITTENT,INTERMITTENT,consolidated-library/documentation/contractor-research-2026-10-31,29
+SK3243-FAN.PFANNENBERG-MID,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,29
+SK3243-FAN.PFANNENBERG-MID,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,29
+SK3243-FAN.PFANNENBERG-MID,alt_group,SK3243-FAN,SK3243-FAN,consolidated-library/documentation/contractor-research-2026-10-31,29
+SK3243-FAN.PFANNENBERG-MID,tier,mid,mid,consolidated-library/documentation/contractor-research-2026-10-31,29
+SK3243-FAN.PFANNENBERG-MID,input_v_min,207,207,consolidated-library/documentation/contractor-research-2026-10-31,29
+SK3243-FAN.PFANNENBERG-MID,input_v_max,253,253,consolidated-library/documentation/contractor-research-2026-10-31,29
+SK3243-FAN.PFANNENBERG-HIGH,category,fan,fan,consolidated-library/documentation/contractor-research-2026-10-31,30
+SK3243-FAN.PFANNENBERG-HIGH,make,Pfannenberg,Pfannenberg,consolidated-library/documentation/contractor-research-2026-10-31,30
+SK3243-FAN.PFANNENBERG-HIGH,model,PF 67.000 230 V,PF 67.000 230 V,consolidated-library/documentation/contractor-research-2026-10-31,30
+SK3243-FAN.PFANNENBERG-HIGH,ordering_code,11667103055,11667103055,consolidated-library/documentation/contractor-research-2026-10-31,30
+SK3243-FAN.PFANNENBERG-HIGH,description_template,"PF 67.000 filter fan; 230 VAC +/-10%, 140 W at 50 Hz / 197 W at 60 Hz rated. Select frequency; values are not a guaranteed maximum.","PF 67.000 filter fan; 230 VAC +/-10%, 140 W at 50 Hz / 197 W at 60 Hz rated. Select frequency; values are not a guaranteed maximum.",consolidated-library/documentation/contractor-research-2026-10-31,30
+SK3243-FAN.PFANNENBERG-HIGH,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,30
+SK3243-FAN.PFANNENBERG-HIGH,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,30
+SK3243-FAN.PFANNENBERG-HIGH,load_type,INTERMITTENT,INTERMITTENT,consolidated-library/documentation/contractor-research-2026-10-31,30
+SK3243-FAN.PFANNENBERG-HIGH,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,30
+SK3243-FAN.PFANNENBERG-HIGH,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,30
+SK3243-FAN.PFANNENBERG-HIGH,alt_group,SK3243-FAN,SK3243-FAN,consolidated-library/documentation/contractor-research-2026-10-31,30
+SK3243-FAN.PFANNENBERG-HIGH,tier,high,high,consolidated-library/documentation/contractor-research-2026-10-31,30
+SK3243-FAN.PFANNENBERG-HIGH,input_v_min,207,207,consolidated-library/documentation/contractor-research-2026-10-31,30
+SK3243-FAN.PFANNENBERG-HIGH,input_v_max,253,253,consolidated-library/documentation/contractor-research-2026-10-31,30
+SK3110-TH.PFANNENBERG-LOW,category,thermostat,thermostat,consolidated-library/documentation/contractor-research-2026-10-31,31
+SK3110-TH.PFANNENBERG-LOW,make,Pfannenberg,Pfannenberg,consolidated-library/documentation/contractor-research-2026-10-31,31
+SK3110-TH.PFANNENBERG-LOW,model,"FLZ 530 (NO, 0-60 C)","FLZ 530 (NO, 0-60 C)",consolidated-library/documentation/contractor-research-2026-10-31,31
+SK3110-TH.PFANNENBERG-LOW,ordering_code,17121000000,17121000000,consolidated-library/documentation/contractor-research-2026-10-31,31
+SK3110-TH.PFANNENBERG-LOW,description_template,"FLZ530 thermostat 0 to +60 C, normally open contact, DIN rail mount. Switching voltage/current are load capability, not an independent supply load.","FLZ530 thermostat 0 to +60 C, normally open contact, DIN rail mount. Switching voltage/current are load capability, not an independent supply load.",consolidated-library/documentation/contractor-research-2026-10-31,31
+SK3110-TH.PFANNENBERG-LOW,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,31
+SK3110-TH.PFANNENBERG-LOW,alt_group,SK3110-TH,SK3110-TH,consolidated-library/documentation/contractor-research-2026-10-31,31
+SK3110-TH.PFANNENBERG-LOW,tier,low,low,consolidated-library/documentation/contractor-research-2026-10-31,31
+SEL-3355.ADVANTECH-LOW,category,workstation,workstation,consolidated-library/documentation/contractor-research-2026-10-31,32
+SEL-3355.ADVANTECH-LOW,make,Advantech,Advantech,consolidated-library/documentation/contractor-research-2026-10-31,32
+SEL-3355.ADVANTECH-LOW,model,ECU-4553,ECU-4553,consolidated-library/documentation/contractor-research-2026-10-31,32
+SEL-3355.ADVANTECH-LOW,ordering_code,ECU-4553-R12SAE,ECU-4553-R12SAE,consolidated-library/documentation/contractor-research-2026-10-31,32
+SEL-3355.ADVANTECH-LOW,description_template,"Cortex A8, 1 GB DDR3L, 4x10/100 Ethernet, 16 serial ports. Standard single high-voltage supply; optional second supply/expansion/storage must be selected separately.","Cortex A8, 1 GB DDR3L, 4x10/100 Ethernet, 16 serial ports. Standard single high-voltage supply; optional second supply/expansion/storage must be selected separately.",consolidated-library/documentation/contractor-research-2026-10-31,32
+SEL-3355.ADVANTECH-LOW,supply_type,VDC,VDC,consolidated-library/documentation/contractor-research-2026-10-31,32
+SEL-3355.ADVANTECH-LOW,voltage_v,125,125,consolidated-library/documentation/contractor-research-2026-10-31,32
+SEL-3355.ADVANTECH-LOW,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,32
+SEL-3355.ADVANTECH-LOW,power_supplies,1,1,consolidated-library/documentation/contractor-research-2026-10-31,32
+SEL-3355.ADVANTECH-LOW,height_u,1,1,consolidated-library/documentation/contractor-research-2026-10-31,32
+SEL-3355.ADVANTECH-LOW,alt_group,SEL-3355,SEL-3355,consolidated-library/documentation/contractor-research-2026-10-31,32
+SEL-3355.ADVANTECH-LOW,tier,low,low,consolidated-library/documentation/contractor-research-2026-10-31,32
+SEL-3355.ADVANTECH-LOW,input_v_min,100,100,consolidated-library/documentation/contractor-research-2026-10-31,32
+SEL-3355.ADVANTECH-LOW,input_v_max,240,240,consolidated-library/documentation/contractor-research-2026-10-31,32
+SEL-3355.ADVANTECH-MID,category,workstation,workstation,consolidated-library/documentation/contractor-research-2026-10-31,33
+SEL-3355.ADVANTECH-MID,make,Advantech,Advantech,consolidated-library/documentation/contractor-research-2026-10-31,33
+SEL-3355.ADVANTECH-MID,model,ECU-4784,ECU-4784,consolidated-library/documentation/contractor-research-2026-10-31,33
+SEL-3355.ADVANTECH-MID,ordering_code,ECU-4784-D55SBE,ECU-4784-D55SBE,consolidated-library/documentation/contractor-research-2026-10-31,33
+SEL-3355.ADVANTECH-MID,description_template,"Core i7-4650U, 8 GB, 8 Gigabit Ethernet and 10 serial ports; 25 W is typical, not maximum. Standard single high-voltage supply; optional second supply/expansion/storage must be selected separately.","Core i7-4650U, 8 GB, 8 Gigabit Ethernet and 10 serial ports; 25 W is typical, not maximum. Standard single high-voltage supply; optional second supply/expansion/storage must be selected separately.",consolidated-library/documentation/contractor-research-2026-10-31,33
+SEL-3355.ADVANTECH-MID,supply_type,VDC,VDC,consolidated-library/documentation/contractor-research-2026-10-31,33
+SEL-3355.ADVANTECH-MID,voltage_v,125,125,consolidated-library/documentation/contractor-research-2026-10-31,33
+SEL-3355.ADVANTECH-MID,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,33
+SEL-3355.ADVANTECH-MID,power_supplies,1,1,consolidated-library/documentation/contractor-research-2026-10-31,33
+SEL-3355.ADVANTECH-MID,height_u,2,2,consolidated-library/documentation/contractor-research-2026-10-31,33
+SEL-3355.ADVANTECH-MID,alt_group,SEL-3355,SEL-3355,consolidated-library/documentation/contractor-research-2026-10-31,33
+SEL-3355.ADVANTECH-MID,tier,mid,mid,consolidated-library/documentation/contractor-research-2026-10-31,33
+SEL-3355.ADVANTECH-MID,input_v_min,100,100,consolidated-library/documentation/contractor-research-2026-10-31,33
+SEL-3355.ADVANTECH-MID,input_v_max,240,240,consolidated-library/documentation/contractor-research-2026-10-31,33
+SEL-3355.ADVANTECH-HIGH,category,workstation,workstation,consolidated-library/documentation/contractor-research-2026-10-31,34
+SEL-3355.ADVANTECH-HIGH,make,Advantech,Advantech,consolidated-library/documentation/contractor-research-2026-10-31,34
+SEL-3355.ADVANTECH-HIGH,model,ECU-4784 (alternative build),ECU-4784 (alternative build),consolidated-library/documentation/contractor-research-2026-10-31,34
+SEL-3355.ADVANTECH-HIGH,ordering_code,ECU-4784-E56SAE,ECU-4784-E56SAE,consolidated-library/documentation/contractor-research-2026-10-31,34
+SEL-3355.ADVANTECH-HIGH,description_template,"Xeon E3-1505L, 16 GB DDR4, 8 Gigabit Ethernet and 10 serial ports; 35 W at 220 VAC is typical, not maximum. Manufacturer 2025 change notice offers E56SAU; requested E56SAE identity retained. Standard single high-voltage supply; optional second supply/expansion/storage must be selected separately.","Xeon E3-1505L, 16 GB DDR4, 8 Gigabit Ethernet and 10 serial ports; 35 W at 220 VAC is typical, not maximum. Manufacturer 2025 change notice offers E56SAU; requested E56SAE identity retained. Standard single high-voltage supply; optional second supply/expansion/storage must be selected separately.",consolidated-library/documentation/contractor-research-2026-10-31,34
+SEL-3355.ADVANTECH-HIGH,supply_type,VDC,VDC,consolidated-library/documentation/contractor-research-2026-10-31,34
+SEL-3355.ADVANTECH-HIGH,voltage_v,125,125,consolidated-library/documentation/contractor-research-2026-10-31,34
+SEL-3355.ADVANTECH-HIGH,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,34
+SEL-3355.ADVANTECH-HIGH,power_supplies,1,1,consolidated-library/documentation/contractor-research-2026-10-31,34
+SEL-3355.ADVANTECH-HIGH,height_u,2,2,consolidated-library/documentation/contractor-research-2026-10-31,34
+SEL-3355.ADVANTECH-HIGH,alt_group,SEL-3355,SEL-3355,consolidated-library/documentation/contractor-research-2026-10-31,34
+SEL-3355.ADVANTECH-HIGH,tier,high,high,consolidated-library/documentation/contractor-research-2026-10-31,34
+SEL-3355.ADVANTECH-HIGH,input_v_min,100,100,consolidated-library/documentation/contractor-research-2026-10-31,34
+SEL-3355.ADVANTECH-HIGH,input_v_max,240,240,consolidated-library/documentation/contractor-research-2026-10-31,34
+NAP-F23.ADVANTECH-MID,category,monitor,monitor,consolidated-library/documentation/contractor-research-2026-10-31,35
+NAP-F23.ADVANTECH-MID,make,Advantech,Advantech,consolidated-library/documentation/contractor-research-2026-10-31,35
+NAP-F23.ADVANTECH-MID,model,FPM-7211W,FPM-7211W,consolidated-library/documentation/contractor-research-2026-10-31,35
+NAP-F23.ADVANTECH-MID,ordering_code,FPM-7211W-P3AE,FPM-7211W-P3AE,consolidated-library/documentation/contractor-research-2026-10-31,35
+NAP-F23.ADVANTECH-MID,description_template,21.5-inch FHD PCAP industrial monitor; panel/wall/VESA mount; 24 VDC Phoenix input requires panel converter. Published 25 W +20% => 30 W planning upper bound.,21.5-inch FHD PCAP industrial monitor; panel/wall/VESA mount; 24 VDC Phoenix input requires panel converter. Published 25 W +20% => 30 W planning upper bound.,consolidated-library/documentation/contractor-research-2026-10-31,35
+NAP-F23.ADVANTECH-MID,supply_type,VDC,VDC,consolidated-library/documentation/contractor-research-2026-10-31,35
+NAP-F23.ADVANTECH-MID,voltage_v,24,24,consolidated-library/documentation/contractor-research-2026-10-31,35
+NAP-F23.ADVANTECH-MID,unit_power_w,30,30,consolidated-library/documentation/contractor-research-2026-10-31,35
+NAP-F23.ADVANTECH-MID,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,35
+NAP-F23.ADVANTECH-MID,power_supplies,1,1,consolidated-library/documentation/contractor-research-2026-10-31,35
+NAP-F23.ADVANTECH-MID,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,35
+NAP-F23.ADVANTECH-MID,alt_group,NAP-F23,NAP-F23,consolidated-library/documentation/contractor-research-2026-10-31,35
+NAP-F23.ADVANTECH-MID,tier,mid,mid,consolidated-library/documentation/contractor-research-2026-10-31,35
+NAP-K55.ADVANTECH-LOW,category,annunciator,annunciator,consolidated-library/documentation/contractor-research-2026-10-31,36
+NAP-K55.ADVANTECH-LOW,make,Advantech,Advantech,consolidated-library/documentation/contractor-research-2026-10-31,36
+NAP-K55.ADVANTECH-LOW,model,DSD-3055N,DSD-3055N,consolidated-library/documentation/contractor-research-2026-10-31,36
+NAP-K55.ADVANTECH-LOW,ordering_code,DSD-3055N-40FHA1E,DSD-3055N-40FHA1E,consolidated-library/documentation/contractor-research-2026-10-31,36
+NAP-K55.ADVANTECH-LOW,description_template,"55-inch FHD non-touch signage display, VESA mount. Preliminary 2018 datasheet states maximum145 W; current eStore lists150 W, so guaranteed latest maximum needs vendor confirmation.","55-inch FHD non-touch signage display, VESA mount. Preliminary 2018 datasheet states maximum145 W; current eStore lists150 W, so guaranteed latest maximum needs vendor confirmation.",consolidated-library/documentation/contractor-research-2026-10-31,36
+NAP-K55.ADVANTECH-LOW,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,36
+NAP-K55.ADVANTECH-LOW,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,36
+NAP-K55.ADVANTECH-LOW,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,36
+NAP-K55.ADVANTECH-LOW,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,36
+NAP-K55.ADVANTECH-LOW,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,36
+NAP-K55.ADVANTECH-LOW,alt_group,NAP-K55,NAP-K55,consolidated-library/documentation/contractor-research-2026-10-31,36
+NAP-K55.ADVANTECH-LOW,tier,low,low,consolidated-library/documentation/contractor-research-2026-10-31,36
+NAP-K55.ADVANTECH-LOW,input_v_min,100,100,consolidated-library/documentation/contractor-research-2026-10-31,36
+NAP-K55.ADVANTECH-LOW,input_v_max,240,240,consolidated-library/documentation/contractor-research-2026-10-31,36
+NAP-K55.ADVANTECH-MID,category,annunciator,annunciator,consolidated-library/documentation/contractor-research-2026-10-31,37
+NAP-K55.ADVANTECH-MID,make,Advantech,Advantech,consolidated-library/documentation/contractor-research-2026-10-31,37
+NAP-K55.ADVANTECH-MID,model,DSD-3055T,DSD-3055T,consolidated-library/documentation/contractor-research-2026-10-31,37
+NAP-K55.ADVANTECH-MID,ordering_code,DSD-3055T-40FHA1E,DSD-3055T-40FHA1E,consolidated-library/documentation/contractor-research-2026-10-31,37
+NAP-K55.ADVANTECH-MID,description_template,"55-inch FHD optical touch signage display, VESA mount. Preliminary 2018 datasheet states maximum145 W; current eStore lists150 W, so guaranteed latest maximum needs vendor confirmation.","55-inch FHD optical touch signage display, VESA mount. Preliminary 2018 datasheet states maximum145 W; current eStore lists150 W, so guaranteed latest maximum needs vendor confirmation.",consolidated-library/documentation/contractor-research-2026-10-31,37
+NAP-K55.ADVANTECH-MID,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,37
+NAP-K55.ADVANTECH-MID,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,37
+NAP-K55.ADVANTECH-MID,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,37
+NAP-K55.ADVANTECH-MID,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,37
+NAP-K55.ADVANTECH-MID,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,37
+NAP-K55.ADVANTECH-MID,alt_group,NAP-K55,NAP-K55,consolidated-library/documentation/contractor-research-2026-10-31,37
+NAP-K55.ADVANTECH-MID,tier,mid,mid,consolidated-library/documentation/contractor-research-2026-10-31,37
+NAP-K55.ADVANTECH-MID,input_v_min,100,100,consolidated-library/documentation/contractor-research-2026-10-31,37
+NAP-K55.ADVANTECH-MID,input_v_max,240,240,consolidated-library/documentation/contractor-research-2026-10-31,37
+NAP-K55.ADVANTECH-HIGH,category,annunciator,annunciator,consolidated-library/documentation/contractor-research-2026-10-31,38
+NAP-K55.ADVANTECH-HIGH,make,Advantech,Advantech,consolidated-library/documentation/contractor-research-2026-10-31,38
+NAP-K55.ADVANTECH-HIGH,model,DSD-3055T (UHD),DSD-3055T (UHD),consolidated-library/documentation/contractor-research-2026-10-31,38
+NAP-K55.ADVANTECH-HIGH,ordering_code,DSD-3055T-50UHA1,DSD-3055T-50UHA1,consolidated-library/documentation/contractor-research-2026-10-31,38
+NAP-K55.ADVANTECH-HIGH,description_template,"55-inch UHD optical touch signage display, VESA mount. Maximum102 W.","55-inch UHD optical touch signage display, VESA mount. Maximum102 W.",consolidated-library/documentation/contractor-research-2026-10-31,38
+NAP-K55.ADVANTECH-HIGH,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,38
+NAP-K55.ADVANTECH-HIGH,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,38
+NAP-K55.ADVANTECH-HIGH,unit_power_w,102,102,consolidated-library/documentation/contractor-research-2026-10-31,38
+NAP-K55.ADVANTECH-HIGH,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,38
+NAP-K55.ADVANTECH-HIGH,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,38
+NAP-K55.ADVANTECH-HIGH,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,38
+NAP-K55.ADVANTECH-HIGH,alt_group,NAP-K55,NAP-K55,consolidated-library/documentation/contractor-research-2026-10-31,38
+NAP-K55.ADVANTECH-HIGH,tier,high,high,consolidated-library/documentation/contractor-research-2026-10-31,38
+NAP-K55.ADVANTECH-HIGH,input_v_min,100,100,consolidated-library/documentation/contractor-research-2026-10-31,38
+NAP-K55.ADVANTECH-HIGH,input_v_max,240,240,consolidated-library/documentation/contractor-research-2026-10-31,38
+FO-PATCH-CORDS.CORNING-LOW,category,cable,cable,consolidated-library/documentation/contractor-research-2026-10-31,39
+FO-PATCH-CORDS.CORNING-LOW,make,Corning,Corning,consolidated-library/documentation/contractor-research-2026-10-31,39
+FO-PATCH-CORDS.CORNING-LOW,model,"Fiber Optic Jumper, 2 F, LC Duplex to LC Duplex, zipcord, riser, 2.0 mm, OM3, 3 m","Fiber Optic Jumper, 2 F, LC Duplex to LC Duplex, zipcord, riser, 2.0 mm, OM3, 3 m",consolidated-library/documentation/contractor-research-2026-10-31,39
+FO-PATCH-CORDS.CORNING-LOW,ordering_code,050502T5120003M,050502T5120003M,consolidated-library/documentation/contractor-research-2026-10-31,39
+FO-PATCH-CORDS.CORNING-LOW,description_template,"3 m, 2-fibre LC duplex to LC duplex, OM3, riser zipcord patch cord. Fibre count is not the common patch-panel cores field.","3 m, 2-fibre LC duplex to LC duplex, OM3, riser zipcord patch cord. Fibre count is not the common patch-panel cores field.",consolidated-library/documentation/contractor-research-2026-10-31,39
+FO-PATCH-CORDS.CORNING-LOW,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,39
+FO-PATCH-CORDS.CORNING-LOW,alt_group,FO-PATCH-CORDS,FO-PATCH-CORDS,consolidated-library/documentation/contractor-research-2026-10-31,39
+FO-PATCH-CORDS.CORNING-LOW,tier,low,low,consolidated-library/documentation/contractor-research-2026-10-31,39
+FO-PATCH-CORDS.CORNING-MID,category,cable,cable,consolidated-library/documentation/contractor-research-2026-10-31,40
+FO-PATCH-CORDS.CORNING-MID,make,Corning,Corning,consolidated-library/documentation/contractor-research-2026-10-31,40
+FO-PATCH-CORDS.CORNING-MID,model,"Fiber Optic Jumper, 2 F, LC Duplex to LC Duplex, zipcord, riser, 2.0 mm, OM4, 3 m","Fiber Optic Jumper, 2 F, LC Duplex to LC Duplex, zipcord, riser, 2.0 mm, OM4, 3 m",consolidated-library/documentation/contractor-research-2026-10-31,40
+FO-PATCH-CORDS.CORNING-MID,ordering_code,050502Q5120003M,050502Q5120003M,consolidated-library/documentation/contractor-research-2026-10-31,40
+FO-PATCH-CORDS.CORNING-MID,description_template,"3 m, 2-fibre LC duplex to LC duplex, OM4, riser zipcord patch cord. Fibre count is not the common patch-panel cores field.","3 m, 2-fibre LC duplex to LC duplex, OM4, riser zipcord patch cord. Fibre count is not the common patch-panel cores field.",consolidated-library/documentation/contractor-research-2026-10-31,40
+FO-PATCH-CORDS.CORNING-MID,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,40
+FO-PATCH-CORDS.CORNING-MID,alt_group,FO-PATCH-CORDS,FO-PATCH-CORDS,consolidated-library/documentation/contractor-research-2026-10-31,40
+FO-PATCH-CORDS.CORNING-MID,tier,mid,mid,consolidated-library/documentation/contractor-research-2026-10-31,40
+SEL-915900043.ARBITER-SYSTEMS-LOW,category,accessory,accessory,consolidated-library/documentation/contractor-research-2026-10-31,41
+SEL-915900043.ARBITER-SYSTEMS-LOW,make,Arbiter Systems,Arbiter Systems,consolidated-library/documentation/contractor-research-2026-10-31,41
+SEL-915900043.ARBITER-SYSTEMS-LOW,model,AS0044600 GNSS antenna mounting bracket,AS0044600 GNSS antenna mounting bracket,consolidated-library/documentation/contractor-research-2026-10-31,41
+SEL-915900043.ARBITER-SYSTEMS-LOW,ordering_code,AS0044600,AS0044600,consolidated-library/documentation/contractor-research-2026-10-31,41
+SEL-915900043.ARBITER-SYSTEMS-LOW,description_template,"AS0044600 mounting kit for Arbiter GNSS antennas, 2-inch pipe or flat surface. Verify target antenna mechanical fit; no claim of SEL interchangeability.","AS0044600 mounting kit for Arbiter GNSS antennas, 2-inch pipe or flat surface. Verify target antenna mechanical fit; no claim of SEL interchangeability.",consolidated-library/documentation/contractor-research-2026-10-31,41
+SEL-915900043.ARBITER-SYSTEMS-LOW,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,41
+SEL-915900043.ARBITER-SYSTEMS-LOW,alt_group,SEL-915900043,SEL-915900043,consolidated-library/documentation/contractor-research-2026-10-31,41
+SEL-915900043.ARBITER-SYSTEMS-LOW,tier,low,low,consolidated-library/documentation/contractor-research-2026-10-31,41
+IPR-2903685.FINDER-LOW,category,relay,relay,consolidated-library/documentation/contractor-research-2026-10-31,42
+IPR-2903685.FINDER-LOW,make,Finder,Finder,consolidated-library/documentation/contractor-research-2026-10-31,42
+IPR-2903685.FINDER-LOW,model,"40.52 2CO 8 A, 230 V AC coil","40.52 2CO 8 A, 230 V AC coil",consolidated-library/documentation/contractor-research-2026-10-31,42
+IPR-2903685.FINDER-LOW,ordering_code,40.52.8.230.0000,40.52.8.230.0000,consolidated-library/documentation/contractor-research-2026-10-31,42
+IPR-2903685.FINDER-LOW,description_template,"40.52 2CO 8 A, standard AgNi; 230 VAC coil. Full code appears in manufacturer ordering example; socket not included. AC coil VA is not consumption W.","40.52 2CO 8 A, standard AgNi; 230 VAC coil. Full code appears in manufacturer ordering example; socket not included. AC coil VA is not consumption W.",consolidated-library/documentation/contractor-research-2026-10-31,42
+IPR-2903685.FINDER-LOW,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,42
+IPR-2903685.FINDER-LOW,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,42
+IPR-2903685.FINDER-LOW,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,42
+IPR-2903685.FINDER-LOW,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,42
+IPR-2903685.FINDER-LOW,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,42
+IPR-2903685.FINDER-LOW,alt_group,IPR-2903685,IPR-2903685,consolidated-library/documentation/contractor-research-2026-10-31,42
+IPR-2903685.FINDER-LOW,tier,low,low,consolidated-library/documentation/contractor-research-2026-10-31,42
+IPR-2903685.FINDER-LOW,input_v_min,184,184,consolidated-library/documentation/contractor-research-2026-10-31,42
+IPR-2903685.FINDER-LOW,input_v_max,253,253,consolidated-library/documentation/contractor-research-2026-10-31,42
+IPR-2903685.FINDER-MID,category,relay,relay,consolidated-library/documentation/contractor-research-2026-10-31,43
+IPR-2903685.FINDER-MID,make,Finder,Finder,consolidated-library/documentation/contractor-research-2026-10-31,43
+IPR-2903685.FINDER-MID,model,"55.34 4CO 7 A, 230 V AC coil, gold contacts","55.34 4CO 7 A, 230 V AC coil, gold contacts",consolidated-library/documentation/contractor-research-2026-10-31,43
+IPR-2903685.FINDER-MID,ordering_code,55.34.8.230.5040,55.34.8.230.5040,consolidated-library/documentation/contractor-research-2026-10-31,43
+IPR-2903685.FINDER-MID,description_template,"55.34 4CO 7 A, AgNi+Au with lockable test button/mechanical flag; 230 VAC coil. Full code decoded from ordering matrix, not independently printed; socket not included. AC coil VA is not consumption W.","55.34 4CO 7 A, AgNi+Au with lockable test button/mechanical flag; 230 VAC coil. Full code decoded from ordering matrix, not independently printed; socket not included. AC coil VA is not consumption W.",consolidated-library/documentation/contractor-research-2026-10-31,43
+IPR-2903685.FINDER-MID,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,43
+IPR-2903685.FINDER-MID,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,43
+IPR-2903685.FINDER-MID,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,43
+IPR-2903685.FINDER-MID,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,43
+IPR-2903685.FINDER-MID,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,43
+IPR-2903685.FINDER-MID,alt_group,IPR-2903685,IPR-2903685,consolidated-library/documentation/contractor-research-2026-10-31,43
+IPR-2903685.FINDER-MID,tier,mid,mid,consolidated-library/documentation/contractor-research-2026-10-31,43
+IPR-2903685.FINDER-MID,input_v_min,184,184,consolidated-library/documentation/contractor-research-2026-10-31,43
+IPR-2903685.FINDER-MID,input_v_max,253,253,consolidated-library/documentation/contractor-research-2026-10-31,43
+IPR-2903685.FINDER-HIGH,category,relay,relay,consolidated-library/documentation/contractor-research-2026-10-31,44
+IPR-2903685.FINDER-HIGH,make,Finder,Finder,consolidated-library/documentation/contractor-research-2026-10-31,44
+IPR-2903685.FINDER-HIGH,model,55.34 4CO 230 V AC with LED + test button,55.34 4CO 230 V AC with LED + test button,consolidated-library/documentation/contractor-research-2026-10-31,44
+IPR-2903685.FINDER-HIGH,ordering_code,55.34.8.230.0050,55.34.8.230.0050,consolidated-library/documentation/contractor-research-2026-10-31,44
+IPR-2903685.FINDER-HIGH,description_template,"55.34 4CO 7 A, standard AgNi with LED/test button/mechanical flag; 230 VAC coil. Full code decoded from ordering matrix, not independently printed; socket not included. AC coil VA is not consumption W.","55.34 4CO 7 A, standard AgNi with LED/test button/mechanical flag; 230 VAC coil. Full code decoded from ordering matrix, not independently printed; socket not included. AC coil VA is not consumption W.",consolidated-library/documentation/contractor-research-2026-10-31,44
+IPR-2903685.FINDER-HIGH,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,44
+IPR-2903685.FINDER-HIGH,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,44
+IPR-2903685.FINDER-HIGH,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,44
+IPR-2903685.FINDER-HIGH,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,44
+IPR-2903685.FINDER-HIGH,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,44
+IPR-2903685.FINDER-HIGH,alt_group,IPR-2903685,IPR-2903685,consolidated-library/documentation/contractor-research-2026-10-31,44
+IPR-2903685.FINDER-HIGH,tier,high,high,consolidated-library/documentation/contractor-research-2026-10-31,44
+IPR-2903685.FINDER-HIGH,input_v_min,184,184,consolidated-library/documentation/contractor-research-2026-10-31,44
+IPR-2903685.FINDER-HIGH,input_v_max,253,253,consolidated-library/documentation/contractor-research-2026-10-31,44
+IPR-BRACKET-2900954.FINDER-HIGH,category,component,component,consolidated-library/documentation/contractor-research-2026-10-31,45
+IPR-BRACKET-2900954.FINDER-HIGH,make,Finder,Finder,consolidated-library/documentation/contractor-research-2026-10-31,45
+IPR-BRACKET-2900954.FINDER-HIGH,model,094.00.4 marker tag,094.00.4 marker tag,consolidated-library/documentation/contractor-research-2026-10-31,45
+IPR-BRACKET-2900954.FINDER-HIGH,ordering_code,094.00.4,094.00.4,consolidated-library/documentation/contractor-research-2026-10-31,45
+IPR-BRACKET-2900954.FINDER-HIGH,description_template,094.00.4 identification tag for94-series sockets; NOT a relay retaining bracket. Retaining clips094.71/094.91.3 are separate accessories.,094.00.4 identification tag for94-series sockets; NOT a relay retaining bracket. Retaining clips094.71/094.91.3 are separate accessories.,consolidated-library/documentation/contractor-research-2026-10-31,45
+IPR-BRACKET-2900954.FINDER-HIGH,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,45
+IPR-BRACKET-2900954.FINDER-HIGH,alt_group,IPR-BRACKET-2900954,IPR-BRACKET-2900954,consolidated-library/documentation/contractor-research-2026-10-31,45
+IPR-BRACKET-2900954.FINDER-HIGH,tier,high,high,consolidated-library/documentation/contractor-research-2026-10-31,45
+SK3243-FAN,load_type,INTERMITTENT,INTERMITTENT,consolidated-library/documentation/contractor-research-2026-10-31,46
+SK3243-FAN,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,46
+SK3110-TH,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,47
+IPR-2903685,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,48
+IPR-2903685,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,48
+NAP-K55,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,49
+NAP-K55,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,49
+NAP-K55,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,49
+NAP-K55,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,49
+NAP-K55.SAMSUNG-LOW,category,annunciator,annunciator,consolidated-library/documentation/contractor-research-2026-10-31,50
+NAP-K55.SAMSUNG-LOW,make,Samsung,Samsung,consolidated-library/documentation/contractor-research-2026-10-31,50
+NAP-K55.SAMSUNG-LOW,model,QB55C,QB55C,consolidated-library/documentation/contractor-research-2026-10-31,50
+NAP-K55.SAMSUNG-LOW,ordering_code,LH55QBCEBGCXEN,LH55QBCEBGCXEN,consolidated-library/documentation/contractor-research-2026-10-31,50
+NAP-K55.SAMSUNG-LOW,description_template,"55-inch 4K commercial display, VESA mounting. Published on-mode 154 W and sleep0.5 W; on-mode power is not a guaranteed maximum.","55-inch 4K commercial display, VESA mounting. Published on-mode 154 W and sleep0.5 W; on-mode power is not a guaranteed maximum.",consolidated-library/documentation/contractor-research-2026-10-31,50
+NAP-K55.SAMSUNG-LOW,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,50
+NAP-K55.SAMSUNG-LOW,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,50
+NAP-K55.SAMSUNG-LOW,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,50
+NAP-K55.SAMSUNG-LOW,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,50
+NAP-K55.SAMSUNG-LOW,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,50
+NAP-K55.SAMSUNG-LOW,alt_group,NAP-K55,NAP-K55,consolidated-library/documentation/contractor-research-2026-10-31,50
+NAP-K55.SAMSUNG-LOW,tier,low,low,consolidated-library/documentation/contractor-research-2026-10-31,50
+NAP-K55.SAMSUNG-LOW,input_v_min,100,100,consolidated-library/documentation/contractor-research-2026-10-31,50
+NAP-K55.SAMSUNG-LOW,input_v_max,240,240,consolidated-library/documentation/contractor-research-2026-10-31,50
+NAP-K55.SAMSUNG-MID,category,annunciator,annunciator,consolidated-library/documentation/contractor-research-2026-10-31,51
+NAP-K55.SAMSUNG-MID,make,Samsung,Samsung,consolidated-library/documentation/contractor-research-2026-10-31,51
+NAP-K55.SAMSUNG-MID,model,QM55C,QM55C,consolidated-library/documentation/contractor-research-2026-10-31,51
+NAP-K55.SAMSUNG-MID,ordering_code,LH55QMCEBGCXEN,LH55QMCEBGCXEN,consolidated-library/documentation/contractor-research-2026-10-31,51
+NAP-K55.SAMSUNG-MID,description_template,"55-inch 4K commercial display, VESA mounting. Published on-mode 154 W and sleep0.5 W; on-mode power is not a guaranteed maximum.","55-inch 4K commercial display, VESA mounting. Published on-mode 154 W and sleep0.5 W; on-mode power is not a guaranteed maximum.",consolidated-library/documentation/contractor-research-2026-10-31,51
+NAP-K55.SAMSUNG-MID,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,51
+NAP-K55.SAMSUNG-MID,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,51
+NAP-K55.SAMSUNG-MID,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,51
+NAP-K55.SAMSUNG-MID,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,51
+NAP-K55.SAMSUNG-MID,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,51
+NAP-K55.SAMSUNG-MID,alt_group,NAP-K55,NAP-K55,consolidated-library/documentation/contractor-research-2026-10-31,51
+NAP-K55.SAMSUNG-MID,tier,mid,mid,consolidated-library/documentation/contractor-research-2026-10-31,51
+NAP-K55.SAMSUNG-MID,input_v_min,100,100,consolidated-library/documentation/contractor-research-2026-10-31,51
+NAP-K55.SAMSUNG-MID,input_v_max,240,240,consolidated-library/documentation/contractor-research-2026-10-31,51
+NAP-K55.SAMSUNG-HIGH,category,annunciator,annunciator,consolidated-library/documentation/contractor-research-2026-10-31,52
+NAP-K55.SAMSUNG-HIGH,make,Samsung,Samsung,consolidated-library/documentation/contractor-research-2026-10-31,52
+NAP-K55.SAMSUNG-HIGH,model,QM55B-T,QM55B-T,consolidated-library/documentation/contractor-research-2026-10-31,52
+NAP-K55.SAMSUNG-HIGH,ordering_code,LH55QMBTBGCXEN,LH55QMBTBGCXEN,consolidated-library/documentation/contractor-research-2026-10-31,52
+NAP-K55.SAMSUNG-HIGH,description_template,"55-inch 4K commercial display, VESA mounting. Published on-mode 143 W and sleep0.5 W; on-mode power is not a guaranteed maximum.","55-inch 4K commercial display, VESA mounting. Published on-mode 143 W and sleep0.5 W; on-mode power is not a guaranteed maximum.",consolidated-library/documentation/contractor-research-2026-10-31,52
+NAP-K55.SAMSUNG-HIGH,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,52
+NAP-K55.SAMSUNG-HIGH,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,52
+NAP-K55.SAMSUNG-HIGH,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,52
+NAP-K55.SAMSUNG-HIGH,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,52
+NAP-K55.SAMSUNG-HIGH,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,52
+NAP-K55.SAMSUNG-HIGH,alt_group,NAP-K55,NAP-K55,consolidated-library/documentation/contractor-research-2026-10-31,52
+NAP-K55.SAMSUNG-HIGH,tier,high,high,consolidated-library/documentation/contractor-research-2026-10-31,52
+NAP-K55.SAMSUNG-HIGH,input_v_min,100,100,consolidated-library/documentation/contractor-research-2026-10-31,52
+NAP-K55.SAMSUNG-HIGH,input_v_max,240,240,consolidated-library/documentation/contractor-research-2026-10-31,52
+NAP-F23.ADVANTECH-LOW,category,monitor,monitor,consolidated-library/documentation/contractor-research-2026-10-31,53
+NAP-F23.ADVANTECH-LOW,make,Advantech,Advantech,consolidated-library/documentation/contractor-research-2026-10-31,53
+NAP-F23.ADVANTECH-LOW,model,FPM-221W,FPM-221W,consolidated-library/documentation/contractor-research-2026-10-31,53
+NAP-F23.ADVANTECH-LOW,ordering_code,FPM-221W-P4AE,FPM-221W-P4AE,consolidated-library/documentation/contractor-research-2026-10-31,53
+NAP-F23.ADVANTECH-LOW,description_template,"21.5-inch FHD PCAP industrial HDMI monitor. Included adapter accepts100–240VAC and outputs12VDC5A;60W is adapter capacity, not monitor consumption. Selected panel feed is230VAC through included adapter.","21.5-inch FHD PCAP industrial HDMI monitor. Included adapter accepts100–240VAC and outputs12VDC5A;60W is adapter capacity, not monitor consumption. Selected panel feed is230VAC through included adapter.",consolidated-library/documentation/contractor-research-2026-10-31,53
+NAP-F23.ADVANTECH-LOW,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,53
+NAP-F23.ADVANTECH-LOW,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,53
+NAP-F23.ADVANTECH-LOW,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,53
+NAP-F23.ADVANTECH-LOW,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,53
+NAP-F23.ADVANTECH-LOW,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,53
+NAP-F23.ADVANTECH-LOW,alt_group,NAP-F23,NAP-F23,consolidated-library/documentation/contractor-research-2026-10-31,53
+NAP-F23.ADVANTECH-LOW,tier,low,low,consolidated-library/documentation/contractor-research-2026-10-31,53
+NAP-F23.ADVANTECH-LOW,input_v_min,100,100,consolidated-library/documentation/contractor-research-2026-10-31,53
+NAP-F23.ADVANTECH-LOW,input_v_max,240,240,consolidated-library/documentation/contractor-research-2026-10-31,53
+NAP-F23.ADVANTECH-HIGH,category,monitor,monitor,consolidated-library/documentation/contractor-research-2026-10-31,54
+NAP-F23.ADVANTECH-HIGH,make,Advantech,Advantech,consolidated-library/documentation/contractor-research-2026-10-31,54
+NAP-F23.ADVANTECH-HIGH,model,FPM-724W,FPM-724W,consolidated-library/documentation/contractor-research-2026-10-31,54
+NAP-F23.ADVANTECH-HIGH,ordering_code,FPM-724W-P9AE,FPM-724W-P9AE,consolidated-library/documentation/contractor-research-2026-10-31,54
+NAP-F23.ADVANTECH-HIGH,description_template,"23.8-inch FHD PCAP monitor.24VDC +/-20% input;25.47W maximum,0.158W standby. Requires24VDC panel converter; converter losses excluded. Direct PDF bytes unavailable (404); indexed official document inspected.","23.8-inch FHD PCAP monitor.24VDC +/-20% input;25.47W maximum,0.158W standby. Requires24VDC panel converter; converter losses excluded. Direct PDF bytes unavailable (404); indexed official document inspected.",consolidated-library/documentation/contractor-research-2026-10-31,54
+NAP-F23.ADVANTECH-HIGH,supply_type,VDC,VDC,consolidated-library/documentation/contractor-research-2026-10-31,54
+NAP-F23.ADVANTECH-HIGH,voltage_v,24,24,consolidated-library/documentation/contractor-research-2026-10-31,54
+NAP-F23.ADVANTECH-HIGH,unit_power_w,25.47,25.47,consolidated-library/documentation/contractor-research-2026-10-31,54
+NAP-F23.ADVANTECH-HIGH,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,54
+NAP-F23.ADVANTECH-HIGH,power_supplies,1,1,consolidated-library/documentation/contractor-research-2026-10-31,54
+NAP-F23.ADVANTECH-HIGH,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,54
+NAP-F23.ADVANTECH-HIGH,alt_group,NAP-F23,NAP-F23,consolidated-library/documentation/contractor-research-2026-10-31,54
+NAP-F23.ADVANTECH-HIGH,tier,high,high,consolidated-library/documentation/contractor-research-2026-10-31,54
+NAP-F23.ADVANTECH-HIGH,input_v_min,19.2,19.2,consolidated-library/documentation/contractor-research-2026-10-31,54
+NAP-F23.ADVANTECH-HIGH,input_v_max,28.8,28.8,consolidated-library/documentation/contractor-research-2026-10-31,54
+SEL-3555-GW.SIEMENS-LOW,category,gateway,gateway,consolidated-library/documentation/contractor-research-2026-10-31,55
+SEL-3555-GW.SIEMENS-LOW,make,Siemens,Siemens,consolidated-library/documentation/contractor-research-2026-10-31,55
+SEL-3555-GW.SIEMENS-LOW,model,SICAM A8000 CP-8031,SICAM A8000 CP-8031,consolidated-library/documentation/contractor-research-2026-10-31,55
+SEL-3555-GW.SIEMENS-LOW,ordering_code,6MF2803-1AA00 + PS-8622 6MF2862-2AA00,6MF2803-1AA00 + PS-8622 6MF2862-2AA00,consolidated-library/documentation/contractor-research-2026-10-31,55
+SEL-3555-GW.SIEMENS-LOW,description_template,"SICAM A8000 CP-8031+PS-8622, DIN rail hardware assembly. PSU DC110–220V nominal family;12W is PSU output capacity, not input consumption. Protocol/application licence and SD-card configuration require separate confirmation.","SICAM A8000 CP-8031+PS-8622, DIN rail hardware assembly. PSU DC110–220V nominal family;12W is PSU output capacity, not input consumption. Protocol/application licence and SD-card configuration require separate confirmation.",consolidated-library/documentation/contractor-research-2026-10-31,55
+SEL-3555-GW.SIEMENS-LOW,supply_type,VDC,VDC,consolidated-library/documentation/contractor-research-2026-10-31,55
+SEL-3555-GW.SIEMENS-LOW,voltage_v,125,125,consolidated-library/documentation/contractor-research-2026-10-31,55
+SEL-3555-GW.SIEMENS-LOW,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,55
+SEL-3555-GW.SIEMENS-LOW,power_supplies,1,1,consolidated-library/documentation/contractor-research-2026-10-31,55
+SEL-3555-GW.SIEMENS-LOW,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,55
+SEL-3555-GW.SIEMENS-LOW,alt_group,SEL-3555-GW,SEL-3555-GW,consolidated-library/documentation/contractor-research-2026-10-31,55
+SEL-3555-GW.SIEMENS-LOW,tier,low,low,consolidated-library/documentation/contractor-research-2026-10-31,55
+SEL-3555-GW.SIEMENS-MID,category,gateway,gateway,consolidated-library/documentation/contractor-research-2026-10-31,56
+SEL-3555-GW.SIEMENS-MID,make,Siemens,Siemens,consolidated-library/documentation/contractor-research-2026-10-31,56
+SEL-3555-GW.SIEMENS-MID,model,SICAM A8000 CP-8050,SICAM A8000 CP-8050,consolidated-library/documentation/contractor-research-2026-10-31,56
+SEL-3555-GW.SIEMENS-MID,ordering_code,6MF2805-0AA00 + PS-8642 6MF2864-2AA00,6MF2805-0AA00 + PS-8642 6MF2864-2AA00,consolidated-library/documentation/contractor-research-2026-10-31,56
+SEL-3555-GW.SIEMENS-MID,description_template,"SICAM A8000 CP-8050+PS-8642, DIN rail hardware assembly. PSU DC110–220V nominal family;45W is PSU output capacity, not input consumption. Protocol/application licence and SD-card configuration require separate confirmation.","SICAM A8000 CP-8050+PS-8642, DIN rail hardware assembly. PSU DC110–220V nominal family;45W is PSU output capacity, not input consumption. Protocol/application licence and SD-card configuration require separate confirmation.",consolidated-library/documentation/contractor-research-2026-10-31,56
+SEL-3555-GW.SIEMENS-MID,supply_type,VDC,VDC,consolidated-library/documentation/contractor-research-2026-10-31,56
+SEL-3555-GW.SIEMENS-MID,voltage_v,125,125,consolidated-library/documentation/contractor-research-2026-10-31,56
+SEL-3555-GW.SIEMENS-MID,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,56
+SEL-3555-GW.SIEMENS-MID,power_supplies,1,1,consolidated-library/documentation/contractor-research-2026-10-31,56
+SEL-3555-GW.SIEMENS-MID,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,56
+SEL-3555-GW.SIEMENS-MID,alt_group,SEL-3555-GW,SEL-3555-GW,consolidated-library/documentation/contractor-research-2026-10-31,56
+SEL-3555-GW.SIEMENS-MID,tier,mid,mid,consolidated-library/documentation/contractor-research-2026-10-31,56
+SZ2500-LAMP,category,lamp,lamp,consolidated-library/documentation/contractor-research-2026-10-31,57
+SZ2500-LAMP,make,Rittal,Rittal,consolidated-library/documentation/contractor-research-2026-10-31,57
+SZ2500-LAMP,model,"SZ 2500.210, SZ 2500.470","SZ 2500.210, SZ 2500.470",consolidated-library/documentation/contractor-research-2026-10-31,57
+SZ2500-LAMP,ordering_code,"SZ 2500.210, SZ 2500.470","SZ 2500.210, SZ 2500.470",consolidated-library/documentation/contractor-research-2026-10-31,57
+SZ2500-LAMP,description_template,"Composite request: SZ2500.210 LED lamp plus SZ2500.470 door switch (existing RITTAL-SZ2500-470). Lamp11W rated,100–230VAC; separate socket loads excluded. Connection accessories must be ordered.","Composite request: SZ2500.210 LED lamp plus SZ2500.470 door switch (existing RITTAL-SZ2500-470). Lamp11W rated,100–230VAC; separate socket loads excluded. Connection accessories must be ordered.",consolidated-library/documentation/contractor-research-2026-10-31,57
+SZ2500-LAMP,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,57
+SZ2500-LAMP,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,57
+SZ2500-LAMP,load_type,INTERMITTENT,INTERMITTENT,consolidated-library/documentation/contractor-research-2026-10-31,57
+SZ2500-LAMP,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,57
+SZ2500-LAMP,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,57
+SZ2500-LAMP,alt_group,SZ2500-LAMP,SZ2500-LAMP,consolidated-library/documentation/contractor-research-2026-10-31,57
+SZ2500-LAMP,input_v_min,100,100,consolidated-library/documentation/contractor-research-2026-10-31,57
+SZ2500-LAMP,input_v_max,230,230,consolidated-library/documentation/contractor-research-2026-10-31,57
+IPR-2903685.WEIDMULLER-LOW,category,relay,relay,consolidated-library/documentation/contractor-research-2026-10-31,58
+IPR-2903685.WEIDMULLER-LOW,make,Weidmuller,Weidmuller,consolidated-library/documentation/contractor-research-2026-10-31,58
+IPR-2903685.WEIDMULLER-LOW,model,DRM570730,DRM570730,consolidated-library/documentation/contractor-research-2026-10-31,58
+IPR-2903685.WEIDMULLER-LOW,ordering_code,7760056086,7760056086,consolidated-library/documentation/contractor-research-2026-10-31,58
+IPR-2903685.WEIDMULLER-LOW,description_template,"Plug-in relay, 4 CO, 230 VAC coil, 5 A contacts, AgNi flash gold-plated, no status LED","Plug-in relay, 4 CO, 230 VAC coil, 5 A contacts, AgNi flash gold-plated, no status LED",consolidated-library/documentation/contractor-research-2026-10-31,58
+IPR-2903685.WEIDMULLER-LOW,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,58
+IPR-2903685.WEIDMULLER-LOW,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,58
+IPR-2903685.WEIDMULLER-LOW,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,58
+IPR-2903685.WEIDMULLER-LOW,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,58
+IPR-2903685.WEIDMULLER-LOW,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,58
+IPR-2903685.WEIDMULLER-LOW,alt_group,IPR-2903685,IPR-2903685,consolidated-library/documentation/contractor-research-2026-10-31,58
+IPR-2903685.WEIDMULLER-LOW,tier,low,low,consolidated-library/documentation/contractor-research-2026-10-31,58
+IPR-2903685.WEIDMULLER-MID,category,relay,relay,consolidated-library/documentation/contractor-research-2026-10-31,59
+IPR-2903685.WEIDMULLER-MID,make,Weidmuller,Weidmuller,consolidated-library/documentation/contractor-research-2026-10-31,59
+IPR-2903685.WEIDMULLER-MID,model,DRM570730LT,DRM570730LT,consolidated-library/documentation/contractor-research-2026-10-31,59
+IPR-2903685.WEIDMULLER-MID,ordering_code,7760056104,7760056104,consolidated-library/documentation/contractor-research-2026-10-31,59
+IPR-2903685.WEIDMULLER-MID,description_template,"Plug-in relay, 4 CO, 230 VAC coil, 5 A contacts, AgNi flash gold-plated, red LED and test button","Plug-in relay, 4 CO, 230 VAC coil, 5 A contacts, AgNi flash gold-plated, red LED and test button",consolidated-library/documentation/contractor-research-2026-10-31,59
+IPR-2903685.WEIDMULLER-MID,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,59
+IPR-2903685.WEIDMULLER-MID,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,59
+IPR-2903685.WEIDMULLER-MID,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,59
+IPR-2903685.WEIDMULLER-MID,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,59
+IPR-2903685.WEIDMULLER-MID,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,59
+IPR-2903685.WEIDMULLER-MID,alt_group,IPR-2903685,IPR-2903685,consolidated-library/documentation/contractor-research-2026-10-31,59
+IPR-2903685.WEIDMULLER-MID,tier,mid,mid,consolidated-library/documentation/contractor-research-2026-10-31,59
+IPR-2903685.WEIDMULLER-HIGH,category,relay,relay,consolidated-library/documentation/contractor-research-2026-10-31,60
+IPR-2903685.WEIDMULLER-HIGH,make,Weidmuller,Weidmuller,consolidated-library/documentation/contractor-research-2026-10-31,60
+IPR-2903685.WEIDMULLER-HIGH,model,DRM570730LT AU,DRM570730LT AU,consolidated-library/documentation/contractor-research-2026-10-31,60
+IPR-2903685.WEIDMULLER-HIGH,ordering_code,7760056190,7760056190,consolidated-library/documentation/contractor-research-2026-10-31,60
+IPR-2903685.WEIDMULLER-HIGH,description_template,"Plug-in relay, 4 CO, 230 VAC coil, 5 A contacts, AgNi gold-plated, red LED and test button","Plug-in relay, 4 CO, 230 VAC coil, 5 A contacts, AgNi gold-plated, red LED and test button",consolidated-library/documentation/contractor-research-2026-10-31,60
+IPR-2903685.WEIDMULLER-HIGH,supply_type,VAC,VAC,consolidated-library/documentation/contractor-research-2026-10-31,60
+IPR-2903685.WEIDMULLER-HIGH,voltage_v,230,230,consolidated-library/documentation/contractor-research-2026-10-31,60
+IPR-2903685.WEIDMULLER-HIGH,load_type,CONTINUOUS,CONTINUOUS,consolidated-library/documentation/contractor-research-2026-10-31,60
+IPR-2903685.WEIDMULLER-HIGH,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,60
+IPR-2903685.WEIDMULLER-HIGH,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,60
+IPR-2903685.WEIDMULLER-HIGH,alt_group,IPR-2903685,IPR-2903685,consolidated-library/documentation/contractor-research-2026-10-31,60
+IPR-2903685.WEIDMULLER-HIGH,tier,high,high,consolidated-library/documentation/contractor-research-2026-10-31,60
+IPR-SUPP-2900944.WEIDMULLER-MID,category,component,component,consolidated-library/documentation/contractor-research-2026-10-31,61
+IPR-SUPP-2900944.WEIDMULLER-MID,make,Weidmuller,Weidmuller,consolidated-library/documentation/contractor-research-2026-10-31,61
+IPR-SUPP-2900944.WEIDMULLER-MID,model,RIM 3 110/230VAC LED,RIM 3 110/230VAC LED,consolidated-library/documentation/contractor-research-2026-10-31,61
+IPR-SUPP-2900944.WEIDMULLER-MID,ordering_code,7760056045,7760056045,consolidated-library/documentation/contractor-research-2026-10-31,61
+IPR-SUPP-2900944.WEIDMULLER-MID,description_template,"Plug-in RC suppression module, 110-230 VAC, green LED, 100 ohm / 220 nF, for compatible D-SERIES relay socket","Plug-in RC suppression module, 110-230 VAC, green LED, 100 ohm / 220 nF, for compatible D-SERIES relay socket",consolidated-library/documentation/contractor-research-2026-10-31,61
+IPR-SUPP-2900944.WEIDMULLER-MID,power_supplies,0,0,consolidated-library/documentation/contractor-research-2026-10-31,61
+IPR-SUPP-2900944.WEIDMULLER-MID,height_u,0,0,consolidated-library/documentation/contractor-research-2026-10-31,61
+IPR-SUPP-2900944.WEIDMULLER-MID,alt_group,IPR-SUPP-2900944,IPR-SUPP-2900944,consolidated-library/documentation/contractor-research-2026-10-31,61
+IPR-SUPP-2900944.WEIDMULLER-MID,tier,mid,mid,consolidated-library/documentation/contractor-research-2026-10-31,61

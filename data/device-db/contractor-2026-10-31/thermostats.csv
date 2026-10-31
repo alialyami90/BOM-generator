@@ -1,2 +1,3 @@
 ﻿part_id,setpoint_min_c,setpoint_max_c,switching_difference_k,switching_tolerance_k,contact_form,ac_min_v,ac_max_v,dc_min_v,dc_max_v,heating_resistive_a,cooling_resistive_a,inductive_a,dc_contact_max_w,width_mm,height_mm,depth_mm,mounting,source_pdf,source_page,source_bundle,bundle_page,notes
 SK3110-TH,5,60,1,0.8,SPDT,24,230,24,60,10,5,4,30,71,71,33.5,35 mm DIN rail or supplied adapter,pdfs/Rittal_Thermostat_VD-EL0009-007_p266-268.pdf,2,VD-EL0009-007.pdf,267,Voltage/contact ratings are not a measured supply consumption. Inductive rating at cos phi 0.6.
+SK3110-TH.STEGO-HIGH,-20,60,4,1,SPDT,,,,,,,,,42,64.5,38,35 mm DIN rail,pdfs/STEGO_ETR01131.pdf,2,,,Electronic thermostat; supply consumption published 1 W rated. 16 A is not established as supply startup current.

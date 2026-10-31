@@ -7,6 +7,14 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- `data/device-db/contractor-2026-10-31/` holds v2 of the contractor's
+  library, their answer to the return list: 1045 devices (was 991), 112 port
+  groups, `contractor_responses.csv` with a status for each of the 270 asks,
+  and a new `power_measurements.csv`. Reference only; nothing the generator
+  reads changes.
+
 ## [0.3.1] - 2026-10-31
 
 ### Added

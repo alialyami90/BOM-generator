@@ -9,11 +9,11 @@ SEL-3555-RTAC,rtac,SEL,SEL-3555,3555#F2R2,SEL-3555-RTAC,,inrush_ms,false
 SEL-2240,io_chassis,SEL,SEL-2240,,SEL-2240,,inrush_ms|ordering_code,false
 SEL-3355,workstation,SEL,SEL-3355,3355#F5P8,SEL-3355,,inrush_ms,false
 NAP-F23,monitor,Ultraview,NAP-F23,NAP-F23-125VDC,NAP-F23,,inrush_a|inrush_ms,false
-SZ2500-LAMP,lamp,Rittal,"SZ 2500.210, SZ 2500.470","SZ 2500.210, SZ 2500.470",SZ2500-LAMP,,inrush_a|inrush_ms|input_v_min|input_v_max|height_u,false
-SK3243-FAN,fan,Rittal,SK 3243.100,SK 3243.100,SK3243-FAN,,inrush_a|inrush_ms|input_v_min|input_v_max|height_u,false
-SK3110-TH,thermostat,Rittal,SK 3110.000,SK 3110.000,SK3110-TH,,inrush_a|inrush_ms|input_v_min|input_v_max|height_u,false
-IPR-2903685,relay,Phoenix Contact,REL-IR4/L-230AC/4X21AU,2903685,IPR-2903685,,inrush_a|inrush_ms|height_u,false
-NAP-K55,annunciator,Ultraview,NAP-K55,NAP-K55,NAP-K55,,inrush_a|inrush_ms|height_u,false
+SZ2500-LAMP,lamp,Rittal,"SZ 2500.210, SZ 2500.470","SZ 2500.210, SZ 2500.470",SZ2500-LAMP,,inrush_a|inrush_ms,false
+SK3243-FAN,fan,Rittal,SK 3243.100,SK 3243.100,SK3243-FAN,,inrush_a|inrush_ms|input_v_min|input_v_max,false
+SK3110-TH,thermostat,Rittal,SK 3110.000,SK 3110.000,SK3110-TH,,inrush_a|inrush_ms|input_v_min|input_v_max,false
+IPR-2903685,relay,Phoenix Contact,REL-IR4/L-230AC/4X21AU,2903685,IPR-2903685,,inrush_a|inrush_ms,false
+NAP-K55,annunciator,Ultraview,NAP-K55,NAP-K55,NAP-K55,,inrush_a|inrush_ms,false
 FOPP-PIGTAIL-LC-SM.CORNING-LOW,component,Corning,"LC UPC SM pigtail, 2 m",Corning 12-fibre LC SM pigtail (part number not verified),FOPP-PIGTAIL-LC-SM,low,,true
 FOPP-PIGTAIL-LC-SM.CORNING-MID,component,Corning,LC UPC SM pigtail,Corning LC SM pigtail (part number not verified),FOPP-PIGTAIL-LC-SM,mid,,true
 FOPP-PIGTAIL-LC-SM.PANDUIT-MID,component,Panduit,Opticom 12-fibre LC SM pigtail,Panduit 12F LC OS2 pigtail (part number not verified),FOPP-PIGTAIL-LC-SM,mid,,true
@@ -73,41 +73,41 @@ SEL-2244-2.HITACHI-ENERGY-HIGH,component,Hitachi Energy,"RTU560 binary input boa
 SEL-3355.ADVANTECH-LOW,workstation,Advantech,ECU-4553,ECU-4553-R12SAE,SEL-3355,low,inrush_a|inrush_ms,false
 SEL-3355.ADVANTECH-MID,workstation,Advantech,ECU-4784,ECU-4784-D55SBE,SEL-3355,mid,inrush_a|inrush_ms,false
 SEL-3355.ADVANTECH-HIGH,workstation,Advantech,ECU-4784 (alternative build),ECU-4784-E56SAE,SEL-3355,high,inrush_a|inrush_ms,false
-NAP-F23.ADVANTECH-LOW,monitor,Advantech,FPM-221W,FPM-221W-P4AE,NAP-F23,low,inrush_a|inrush_ms|input_v_min|input_v_max,false
+NAP-F23.ADVANTECH-LOW,monitor,Advantech,FPM-221W,FPM-221W-P4AE,NAP-F23,low,inrush_a|inrush_ms,false
 NAP-F23.ADVANTECH-MID,monitor,Advantech,FPM-7211W,FPM-7211W-P3AE,NAP-F23,mid,inrush_a|inrush_ms|input_v_min|input_v_max,false
-NAP-F23.ADVANTECH-HIGH,monitor,Advantech,FPM-724W,FPM-724W-P9AE,NAP-F23,high,inrush_a|inrush_ms|input_v_min|input_v_max,false
+NAP-F23.ADVANTECH-HIGH,monitor,Advantech,FPM-724W,FPM-724W-P9AE,NAP-F23,high,inrush_a|inrush_ms,false
 NAP-F23.SIEMENS-LOW,monitor,Siemens,SIMATIC IFP2400 V2,6AV7863-7MA00-2AA0,NAP-F23,low,inrush_a|inrush_ms,false
 NAP-F23.SIEMENS-MID,monitor,Siemens,SIMATIC IFP2400 V2 extended,6AV7863-7MA10-2AA0,NAP-F23,mid,inrush_a|inrush_ms,true
 NAP-F23.SIEMENS-HIGH,monitor,Siemens,SIMATIC IFP2400 V2 PRO,6AV7863-7MA14-2NA0,NAP-F23,high,inrush_a|inrush_ms,true
 KEYTEK-KBM.GETT-FORMERLY-INDUKEY-HIGH,peripheral,GETT (formerly InduKey),TKG-104-TOUCH-IP68,TKG-104-TOUCH-IP68,KEYTEK-KBM,high,,true
-SZ2500-LAMP.STEGO-LOW,lamp,STEGO,"LED 025 (magnetic, on/off switch)",02540.0-00,SZ2500-LAMP,low,inrush_a|inrush_ms|input_v_min|input_v_max,false
-SZ2500-LAMP.STEGO-MID,lamp,STEGO,"LED 025 (screw mount, on/off switch)",02540.0-01,SZ2500-LAMP,mid,inrush_a|inrush_ms|input_v_min|input_v_max,false
-SZ2500-LAMP.STEGO-HIGH,lamp,STEGO,SL 025 LED light,02533.1-00,SZ2500-LAMP,high,inrush_a|inrush_ms|input_v_min|input_v_max,false
-SZ2500-LAMP.NVENT-HOFFMAN-LOW,lamp,nVent Hoffman,EL LED enclosure light 900 lm,EL900D,SZ2500-LAMP,low,inrush_a|inrush_ms|input_v_min|input_v_max,false
-SZ2500-LAMP.NVENT-HOFFMAN-MID,lamp,nVent Hoffman,EL LED enclosure light with socket 1200 lm,EL1200DS-BF,SZ2500-LAMP,mid,inrush_a|inrush_ms|input_v_min|input_v_max,false
-SZ2500-LAMP.NVENT-HOFFMAN-HIGH,lamp,nVent Hoffman,EL LED enclosure light with motion sensor 1200 lm,EL1200M,SZ2500-LAMP,high,inrush_a|inrush_ms|input_v_min|input_v_max,false
+SZ2500-LAMP.STEGO-LOW,lamp,STEGO,"LED 025 (magnetic, on/off switch)",02540.0-00,SZ2500-LAMP,low,inrush_a|inrush_ms,false
+SZ2500-LAMP.STEGO-MID,lamp,STEGO,"LED 025 (screw mount, on/off switch)",02540.0-01,SZ2500-LAMP,mid,inrush_a|inrush_ms,false
+SZ2500-LAMP.STEGO-HIGH,lamp,STEGO,SL 025 LED light,02533.1-00,SZ2500-LAMP,high,inrush_a|inrush_ms,false
+SZ2500-LAMP.NVENT-HOFFMAN-LOW,lamp,nVent Hoffman,EL LED enclosure light 900 lm,EL900D,SZ2500-LAMP,low,inrush_a|inrush_ms,false
+SZ2500-LAMP.NVENT-HOFFMAN-MID,lamp,nVent Hoffman,EL LED enclosure light with socket 1200 lm,EL1200DS-BF,SZ2500-LAMP,mid,inrush_a|inrush_ms,false
+SZ2500-LAMP.NVENT-HOFFMAN-HIGH,lamp,nVent Hoffman,EL LED enclosure light with motion sensor 1200 lm,EL1200M,SZ2500-LAMP,high,inrush_a|inrush_ms,false
 SK3243-FAN.PFANNENBERG-LOW,fan,Pfannenberg,PF 65.000 230 V,11665104055,SK3243-FAN,low,inrush_a|inrush_ms|input_v_min|input_v_max,false
-SK3243-FAN.PFANNENBERG-MID,fan,Pfannenberg,PF 66.000 230 V,11666102055,SK3243-FAN,mid,inrush_a|inrush_ms|input_v_min|input_v_max,false
-SK3243-FAN.PFANNENBERG-HIGH,fan,Pfannenberg,PF 67.000 230 V,11667103055,SK3243-FAN,high,inrush_a|inrush_ms|input_v_min|input_v_max,false
-SK3243-FAN.STEGO-LOW,fan,STEGO,Filter Fan Plus FPI 230 V (257 mm),01873.0-30,SK3243-FAN,low,inrush_a|inrush_ms|input_v_min|input_v_max,false
-SK3243-FAN.STEGO-MID,fan,STEGO,Filter Fan Plus FPI 230 V (322 mm),01874.0-30,SK3243-FAN,mid,inrush_a|inrush_ms|input_v_min|input_v_max,false
-SK3243-FAN.STEGO-HIGH,fan,STEGO,FPI/FPO 018 230 V,01884.0-01,SK3243-FAN,high,inrush_a|inrush_ms|input_v_min|input_v_max,false
+SK3243-FAN.PFANNENBERG-MID,fan,Pfannenberg,PF 66.000 230 V,11666102055,SK3243-FAN,mid,inrush_a|inrush_ms,false
+SK3243-FAN.PFANNENBERG-HIGH,fan,Pfannenberg,PF 67.000 230 V,11667103055,SK3243-FAN,high,inrush_a|inrush_ms,false
+SK3243-FAN.STEGO-LOW,fan,STEGO,FPI 018,01873.0-30,SK3243-FAN,low,inrush_a|inrush_ms|input_v_min|input_v_max,false
+SK3243-FAN.STEGO-MID,fan,STEGO,FPI 018,01874.0-30,SK3243-FAN,mid,inrush_a|inrush_ms|input_v_min|input_v_max,false
+SK3243-FAN.STEGO-HIGH,fan,STEGO,FPO 018,01884.0-01,SK3243-FAN,high,inrush_a|inrush_ms|input_v_min|input_v_max,false
 SK3110-TH.PFANNENBERG-LOW,thermostat,Pfannenberg,"FLZ 530 (NO, 0-60 C)",17121000000,SK3110-TH,low,,true
 SK3110-TH.STEGO-HIGH,thermostat,STEGO,ETR 011 electronic thermostat,01131.0-00,SK3110-TH,high,inrush_a|inrush_ms|input_v_min|input_v_max,false
-IPR-2903685.FINDER-LOW,relay,Finder,"40.52 2CO 8 A, 230 V AC coil",40.52.8.230.0000,IPR-2903685,low,inrush_a|inrush_ms|input_v_min|input_v_max,false
-IPR-2903685.FINDER-MID,relay,Finder,"55.34 4CO 7 A, 230 V AC coil, gold contacts",55.34.8.230.5040,IPR-2903685,mid,inrush_a|inrush_ms|input_v_min|input_v_max,true
-IPR-2903685.FINDER-HIGH,relay,Finder,55.34 4CO 230 V AC with LED + test button,55.34.8.230.0050,IPR-2903685,high,inrush_a|inrush_ms|input_v_min|input_v_max,false
-IPR-2903685.WEIDMULLER-LOW,relay,Weidmuller,D-SERIES DRM570730 (4CO 230 V AC),7760056086,IPR-2903685,low,inrush_a|inrush_ms|input_v_min|input_v_max,true
-IPR-2903685.WEIDMULLER-MID,relay,Weidmuller,D-SERIES DRM570730LT,7760056104,IPR-2903685,mid,inrush_a|inrush_ms|input_v_min|input_v_max,true
-IPR-2903685.WEIDMULLER-HIGH,relay,Weidmuller,D-SERIES DRM570730LT AU (gold),7760056190,IPR-2903685,high,inrush_a|inrush_ms|input_v_min|input_v_max,false
+IPR-2903685.FINDER-LOW,relay,Finder,"40.52 2CO 8 A, 230 V AC coil",40.52.8.230.0000,IPR-2903685,low,inrush_a|inrush_ms,false
+IPR-2903685.FINDER-MID,relay,Finder,"55.34 4CO 7 A, 230 V AC coil, gold contacts",55.34.8.230.5040,IPR-2903685,mid,inrush_a|inrush_ms,true
+IPR-2903685.FINDER-HIGH,relay,Finder,55.34 4CO 230 V AC with LED + test button,55.34.8.230.0050,IPR-2903685,high,inrush_a|inrush_ms,false
+IPR-2903685.WEIDMULLER-LOW,relay,Weidmuller,DRM570730,7760056086,IPR-2903685,low,inrush_a|inrush_ms|input_v_min|input_v_max,true
+IPR-2903685.WEIDMULLER-MID,relay,Weidmuller,DRM570730LT,7760056104,IPR-2903685,mid,inrush_a|inrush_ms|input_v_min|input_v_max,true
+IPR-2903685.WEIDMULLER-HIGH,relay,Weidmuller,DRM570730LT AU,7760056190,IPR-2903685,high,inrush_a|inrush_ms|input_v_min|input_v_max,false
 IPR-SUPP-2900944.WEIDMULLER-MID,component,Weidmuller,RIM 3 110/230VAC LED,7760056045,IPR-SUPP-2900944,mid,,true
 IPR-BRACKET-2900954.FINDER-HIGH,component,Finder,094.00.4 marker tag,094.00.4,IPR-BRACKET-2900954,high,,true
-NAP-K55.ADVANTECH-LOW,annunciator,Advantech,DSD-3055N,DSD-3055N-40FHA1E,NAP-K55,low,inrush_a|inrush_ms|input_v_min|input_v_max,false
-NAP-K55.ADVANTECH-MID,annunciator,Advantech,DSD-3055T,DSD-3055T-40FHA1E,NAP-K55,mid,inrush_a|inrush_ms|input_v_min|input_v_max,false
-NAP-K55.ADVANTECH-HIGH,annunciator,Advantech,DSD-3055T (UHD),DSD-3055T-50UHA1,NAP-K55,high,inrush_a|inrush_ms|input_v_min|input_v_max,false
-NAP-K55.SAMSUNG-LOW,annunciator,Samsung,QB55C,LH55QBCEBGCXEN,NAP-K55,low,inrush_a|inrush_ms|input_v_min|input_v_max,false
-NAP-K55.SAMSUNG-MID,annunciator,Samsung,QM55C,LH55QMCEBGCXEN,NAP-K55,mid,inrush_a|inrush_ms|input_v_min|input_v_max,false
-NAP-K55.SAMSUNG-HIGH,annunciator,Samsung,QM55B-T,LH55QMBTBGCXEN,NAP-K55,high,inrush_a|inrush_ms|input_v_min|input_v_max,false
+NAP-K55.ADVANTECH-LOW,annunciator,Advantech,DSD-3055N,DSD-3055N-40FHA1E,NAP-K55,low,inrush_a|inrush_ms,false
+NAP-K55.ADVANTECH-MID,annunciator,Advantech,DSD-3055T,DSD-3055T-40FHA1E,NAP-K55,mid,inrush_a|inrush_ms,false
+NAP-K55.ADVANTECH-HIGH,annunciator,Advantech,DSD-3055T (UHD),DSD-3055T-50UHA1,NAP-K55,high,inrush_a|inrush_ms,false
+NAP-K55.SAMSUNG-LOW,annunciator,Samsung,QB55C,LH55QBCEBGCXEN,NAP-K55,low,inrush_a|inrush_ms,false
+NAP-K55.SAMSUNG-MID,annunciator,Samsung,QM55C,LH55QMCEBGCXEN,NAP-K55,mid,inrush_a|inrush_ms,false
+NAP-K55.SAMSUNG-HIGH,annunciator,Samsung,QM55B-T,LH55QMBTBGCXEN,NAP-K55,high,inrush_a|inrush_ms,false
 ZENON-V12.SIEMENS-LOW,software,Siemens,SICAM SCC runtime (small station),,ZENON-V12,low,,true
 ZENON-V12.SIEMENS-MID,software,Siemens,SICAM SCC server + engineering,,ZENON-V12,mid,,true
 ZENON-V12.SIEMENS-HIGH,software,Siemens,SIMATIC WinCC Open Architecture,,ZENON-V12,high,,true
@@ -132,7 +132,7 @@ SEL-C961-025.MEINBERG-MID,cable,Meinberg,Meinberg low-loss antenna cable (per le
 SEL-C961-025.MEINBERG-HIGH,cable,Meinberg,Meinberg fiber-optic antenna link,,SEL-C961-025,high,,true
 SEL-915900043.MEINBERG-LOW,accessory,Meinberg,Meinberg antenna mounting kit (supplied with antenna),,SEL-915900043,low,,true
 SEL-915900043.MEINBERG-MID,accessory,Meinberg,Meinberg antenna mounting kit,,SEL-915900043,mid,,true
-SEL-915900043.ARBITER-SYSTEMS-LOW,accessory,Arbiter Systems,Arbiter antenna mounting kit,,SEL-915900043,low,,true
+SEL-915900043.ARBITER-SYSTEMS-LOW,accessory,Arbiter Systems,AS0044600 GNSS antenna mounting bracket,AS0044600,SEL-915900043,low,,true
 FO-PATCH-CORDS.CORNING-LOW,cable,Corning,"Fiber Optic Jumper, 2 F, LC Duplex to LC Duplex, zipcord, riser, 2.0 mm, OM3, 3 m",050502T5120003M,FO-PATCH-CORDS,low,,true
 FO-PATCH-CORDS.CORNING-MID,cable,Corning,"Fiber Optic Jumper, 2 F, LC Duplex to LC Duplex, zipcord, riser, 2.0 mm, OM4, 3 m",050502Q5120003M,FO-PATCH-CORDS,mid,,true
 SEL-2407,gps_clock,SEL,SEL-2407,,SEL-2407,,ordering_code,true
