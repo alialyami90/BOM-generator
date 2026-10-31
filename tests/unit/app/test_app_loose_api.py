@@ -148,7 +148,7 @@ def test_library_parts_carry_their_data_quality_from_the_installed_library(
 ) -> None:
     package = tmp_path / "lib.bomlib"
     db = Path(__file__).parents[3] / "data" / "device-db"
-    pack(EXAMPLES / "library.yaml", package, name="psa-devices", version="1.2.0", extra_dirs=[db])
+    pack(EXAMPLES / "library.yaml", package, name="psa-devices", version="1.3.0", extra_dirs=[db])
     LibraryStore(tmp_path / "libraries").import_package(package)
     text = project.read_text(encoding="utf-8").replace("  file: library.yaml\n", "")
     project.write_text(text, encoding="utf-8")
