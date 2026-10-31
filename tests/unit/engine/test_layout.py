@@ -11,6 +11,7 @@ from bomgen.engine.layout import (
     Layout,
     LayoutResult,
     LayoutRules,
+    PanelFill,
     Unit,
     auto_layout,
     blank_plates,
@@ -22,13 +23,24 @@ from bomgen.engine.layout import (
     reconcile_panels_list,
     render_panel_yaml,
     used_u,
+    waist_u,
     with_layout,
 )
+from bomgen.engine.network import accessories
+from bomgen.engine.units import expand_devices
 from bomgen.io.derived import derive_parts
 from bomgen.io.loader import LoadedSubstation, load_substation
 from bomgen.models.library import Category, PurdueLevel
 from bomgen.models.panel import Panel, PortAllocation
-from bomgen.models.substation import DeviceMove, EquipmentRole, PairMove, Side, UnitRef
+from bomgen.models.project import LayoutDefaults
+from bomgen.models.substation import (
+    DeviceMove,
+    Equipment,
+    EquipmentRole,
+    PairMove,
+    Side,
+    UnitRef,
+)
 from bomgen.models.substation import Layout as LayoutInputs
 
 RULES = LayoutRules(capacity_u=32, blank_plate_u=1)
@@ -614,3 +626,154 @@ def test_an_l1_override_applies_to_the_sized_switch(example: LoadedSubstation) -
     assert l1_rows
     assert set(l1_rows) == {"RST2228-L1-24MM+l1"}
     assert result.plan.l1_part_id == "RST2228-L1-24MM+l1"
+
+
+def test_time_server_stacks_above_network_in_a_panel() -> None:
+    gw = replace(u("gw", 1, NONE, rank=0), priority=2)
+    gps = replace(u("gps", 1, NONE, rank=1), priority=1)
+    assert [x.device for x in PanelFill(1, [gw, gps]).stack()] == ["gps", "gw"]
+
+
+def test_priority_ties_keep_equipment_order() -> None:
+    late = replace(u("late", 1, NONE, rank=1), priority=2)
+    early = replace(u("early", 1, NONE, rank=0), priority=2)
+    assert [x.device for x in PanelFill(1, [late, early]).stack()] == ["early", "late"]
+
+
+def test_priority_does_not_choose_the_panel() -> None:
+    units = [*pair("sw", 1, h=20, rank=0), *pair("gps", 1, h=20, rank=1)]
+    ranked = [replace(x, priority=1) if x.device == "gps" else x for x in units]
+    assert where(fill(ranked, RULES)) == where(fill(units, RULES))
+
+
+def test_units_carry_priority_and_waist_from_the_category(example: LoadedSubstation) -> None:
+    units = {x.device: x for f in layout_preview(example).fills for x in f.units}
+    assert (units["gps"].priority, units["rtac"].priority, units["l2"].priority) == (1, 4, 2)
+    assert not any(x.waist for x in units.values())
+
+
+WAIST_RULES = LayoutRules(capacity_u=32, blank_plate_u=1, waist_u=18)
+
+
+def kvm(rank: int, device: str = "kvm", h: int = 1) -> Unit:
+    return replace(u(device, 1, NONE, h=h, rank=rank), waist=True)
+
+
+def tops(panel: PanelFill, rules: LayoutRules = WAIST_RULES) -> dict[str, int] | None:
+    placed = panel.place(rules)
+    return None if placed is None else {x.device: top for x, top in placed.items()}
+
+
+def test_waist_u_from_the_project_heights() -> None:
+    assert waist_u(LayoutDefaults()) == 18
+    assert waist_u(LayoutDefaults(waist_height_mm=1100, rack_start_mm=100)) == 22
+
+
+def test_units_stack_from_the_top_without_a_kvm() -> None:
+    panel = PanelFill(1, [u("a", 1, NONE, rank=0), u("b", 1, NONE, h=2, rank=1)])
+    assert tops(panel) == {"a": 32, "b": 30}
+
+
+def test_kvm_bottom_sits_at_waist_height() -> None:
+    panel = PanelFill(1, [replace(u("sw", 1, NONE, h=2, rank=0), priority=2), kvm(rank=1)])
+    assert tops(panel) == {"sw": 32, "kvm": 18}
+    assert panel.top_u(panel.units[1], WAIST_RULES) == 18
+
+
+def test_units_that_do_not_fit_above_the_kvm_go_below_it() -> None:
+    panel = PanelFill(1, [*(u(f"d{i:02}", 1, NONE, rank=i) for i in range(13)), kvm(rank=13)])
+    assert tops(panel) == {
+        **{f"d{i:02}": 32 - 2 * i for i in range(7)},
+        "kvm": 18,
+        **{f"d{i:02}": 16 - 2 * (i - 7) for i in range(7, 13)},
+    }
+
+
+def test_a_console_stacks_above_the_kvm_at_waist_height() -> None:
+    panel = PanelFill(1, [kvm(rank=0), kvm(rank=1, device="console")])
+    assert tops(panel) == {"kvm": 18, "console": 20}
+
+
+def test_a_panel_that_overflows_below_the_kvm_does_not_fit() -> None:
+    tall = [u(f"t{i}", 1, NONE, h=10, rank=i) for i in range(3)]
+    panel = PanelFill(1, [*tall[:2], kvm(rank=3)])
+    assert tops(panel) == {"t0": 32, "kvm": 18, "t1": 16}
+    assert not panel.fits(tall[2], WAIST_RULES)
+    assert PanelFill(1, [*tall, kvm(rank=3)]).place(WAIST_RULES) is None
+
+
+def test_a_pinned_kvm_ignores_waist_height() -> None:
+    unit = kvm(rank=1)
+    panel = PanelFill(1, [u("a", 1, NONE, rank=0), unit], pins={unit: 1})
+    assert tops(panel) == {"kvm": 32, "a": 30}
+
+
+def test_a_panel_too_short_for_waist_height_is_an_error() -> None:
+    rules = LayoutRules(capacity_u=16, blank_plate_u=1, waist_u=18)
+    layout = fill([kvm(rank=0)], rules)
+    assert [(i.kind, i.subject, i.message, i.is_error) for i in layout.issues] == [
+        (
+            "waist-height",
+            "panel 1",
+            "panel 1 has 16 U; a KVM or console at waist height needs U18",
+            True,
+        )
+    ]
+    assert layout.panels[0].top_u(layout.panels[0].units[0], rules) == 16
+
+
+def test_a_taller_anchor_names_its_top_u() -> None:
+    rules = LayoutRules(capacity_u=19, blank_plate_u=1, waist_u=18)
+    (issue,) = fill([kvm(rank=0, h=3)], rules).issues
+    assert issue.message == "panel 1 has 19 U; a KVM or console at waist height needs U18 to U20"
+
+
+def test_waist_height_error_reaches_the_layout_report(example: LoadedSubstation) -> None:
+    base = example.library.get("SEL-3355")
+    assert base is not None
+    console = base.model_copy(update={"part_id": "KVM-1", "category": Category.KVM, "height_u": 1})
+    library = example.library.model_copy(update={"devices": [*example.library.devices, console]})
+    entry = Equipment(id="kvm", part_id="KVM-1", role="kvm")
+    substation = example.substation.model_copy(
+        update={"equipment": [*example.substation.equipment, entry]}
+    )
+    enclosure_u = example.library.catalogues.enclosure_u
+    spares = example.spares.model_copy(update={"rack_u_reserved": enclosure_u - 16})
+    short = replace(example, library=library, substation=substation, spares=spares)
+    kinds = [i.kind for i in layout_preview(short).report.issues]
+    assert "waist-height" in kinds
+
+
+def test_a_switch_without_a_cable_manager_takes_no_manager_u(example: LoadedSubstation) -> None:
+    result = layout_preview(with_entry(example, "l2", cable_manager=False))
+    l2 = [x for f in result.fills for x in f.units if x.device == "l2"]
+    assert {x.cable_manager_u for x in l2} == {0}
+    l2_rows = [d for p in result.panels for d in p.devices if d.part_id == "RST2228-L2"]
+    assert {d.cable_manager for d in l2_rows} == {False}
+
+
+def test_a_gateway_with_a_cable_manager_takes_a_manager_u(example: LoadedSubstation) -> None:
+    result = layout_preview(with_entry(example, "gw", cable_manager=True))
+    gw = [x for f in result.fills for x in f.units if x.device == "gw"]
+    assert {x.cable_manager_u for x in gw} == {1}
+
+
+def test_generated_rows_say_whether_a_network_device_has_a_cable_manager(
+    example: LoadedSubstation,
+) -> None:
+    rows = {d.part_id: d.cable_manager for d in layout_preview(example).panels[0].devices}
+    assert (rows["RST2228-L2"], rows["FGR-60F"], rows["SEL-3555-GW"]) == (True, False, False)
+    assert rows["SEL-2240"] is None  # not a network device
+
+
+def test_r5_a_rack_firewall_in_a_generated_panel_counts_its_cable_manager(
+    example: LoadedSubstation,
+) -> None:
+    result = layout_preview(with_entry(example, "ext-fw", overrides={"height_u": 1}))
+    panel = result.panels[0]
+    fw = next(d for d in panel.devices if d.part_id == "FGR-60F+ext-fw")
+    assert fw.cable_manager is True
+    library = with_entry(example, "ext-fw", overrides={"height_u": 1}).library
+    rows = expand_devices(panel, library)
+    (manager,) = [i for i in accessories(panel, rows, library) if i.line.tag == "Cable Manager"]
+    assert manager.line.qty == 7  # FOPP, L2, 3 x L1, EXT switch and now the firewall

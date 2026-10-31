@@ -9,6 +9,16 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- A switch, patch panel, firewall or gateway can have or not have a cable
+  manager (`cable_manager` on the equipment entry or panel row): the layout
+  gives or drops its 1U manager and the BOM counts it accordingly; unset keeps
+  today's rule.
+- Generated panels stack their devices by priority: time server on top, then
+  network, then servers and workstations, then the rest, keeping equipment
+  order within each. A KVM or console sits with its bottom edge at waist
+  height (`defaults.layout`, U18 with the assumed 1000 mm and 200 mm), and
+  every unit gets a top U. A panel too short for that is a layout error (M21,
+  ADR 0013 amended).
 - Panels: a board of hand-written panels has "Lay out panels from the
   equipment". After a confirmation it writes the generated panel files as
   `bomgen layout --force` does, copying each file it replaces to
@@ -31,6 +41,8 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- A rack-mounted firewall in a generated panel gets its cable manager row on
+  the BOM; the layout already gave it the 1U (ADR 0013, Q32).
 - Dragging a device on the Panels board works in the installed app. The board
   now drags with pointer events instead of HTML5 drag-and-drop, which never
   reached the page in the Windows app; the drop rules, the live green or red

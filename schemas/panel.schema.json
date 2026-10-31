@@ -40,6 +40,18 @@
       "additionalProperties": false,
       "description": "A device placed in a panel, in group B display order.",
       "properties": {
+        "cable_manager": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cable Manager"
+        },
         "first_nn": {
           "anyOf": [
             {

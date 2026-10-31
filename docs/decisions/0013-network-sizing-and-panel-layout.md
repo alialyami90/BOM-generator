@@ -74,6 +74,33 @@ R1–R10 are in the design document named in ADR 0012.
   group-order place. The blank-plate rule applies to the pinned order. Overrides
   still apply after the fill, in order, and a later override of a unit replaces
   an earlier one.
+
+  *Amended (Ali, 2026-10-31, part-picking design §5, M21):* panel choice is
+  unchanged (equipment order). Inside a panel the rack units stack top to bottom
+  by priority: 1 time server (`gps_clock`); 2 network (`network_switch`,
+  `patch_panel`, `firewall`, `gateway`); 3 servers and workstations
+  (`workstation`); 4 the rest; ties keep equipment order. A KVM or console
+  (`kvm`, `console`) is placed with its bottom edge at `waist_u = round((waist_height_mm
+  − rack_start_mm) / 44.45)`, U counted from 1 at the bottom of the rack space, from the
+  project's `defaults.layout` (ASSUMED 1000 and 200 mm, U18); a second one sits
+  directly above it with the normal clearance. The other units fill from the top
+  down to it, and those that do not fit above go below it in stack order. A panel
+  fits only when every unit gets a place, so the space the anchor leaves counts.
+  Each rack unit gets a top U (`PanelFill.place`, `top_u`); blank space still has
+  no BOM row (Q25). A pinned `position` wins over the priority and the anchor. A
+  panel too short for the anchor is a layout error naming the panel, and its units
+  stack from the top. The BOM row order (group B) stays equipment order.
+
+  *Amended (Ali, 2026-10-31, M22 review):* a network device can have or not have its
+  cable manager. `cable_manager` on an equipment entry (and on a panel row) is true,
+  false or unset; unset keeps the rule above (a rack switch, firewall or patch panel
+  has one, a gateway does not), true or false overrides it for a switch, patch panel,
+  firewall or gateway and is refused on any other part. The layout gives the unit its
+  1U manager only when it has one (without it the R5 plate rule applies as for any
+  device) and writes the answer on every generated row of those four categories, and
+  the BOM counts the managers from those rows, as Q32 says. This fixes a rack firewall
+  in a generated panel, which took the manager's U but got no BOM row. Hand-written
+  panels keep the M2 count (switches and patch panels) unless a row sets the flag.
 - **Pipeline**: a step 0 (`engine/sizing.py`, `engine/layout.py`,
   `bomgen layout`) runs before the existing steps 1–15; `bomgen build
   --no-layout` keeps hand-written panels working.

@@ -204,3 +204,17 @@ def test_an_sfp_choice_that_does_not_fit_the_ports_is_an_engine_error() -> None:
     choice = [{"speed": "1G", "media": "MM", "part_id": "SFP-FX"}]
     with pytest.raises(EngineError, match=r"^PSA1-L2-ESW-A01: SFP SFP-FX is not 1G MM$"):
         build_with_choice(choice, MM_DOWNLINKS)
+
+
+def test_a_switch_without_a_cable_manager_adds_no_manager_row() -> None:
+    devices: list[dict[str, Any]] = [
+        {"part_id": "L2", "cable_manager": False},
+        {"part_id": "L1", "qty": 2},
+    ]
+    (item,) = build(devices, {})
+    assert item.line.qty == 2
+
+
+def test_a_firewall_with_a_cable_manager_adds_a_manager_row() -> None:
+    (item,) = build([{"part_id": "FW", "cable_manager": True}], {})
+    assert (item.line.tag, item.line.qty) == ("Cable Manager", 1)
