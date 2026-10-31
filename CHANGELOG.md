@@ -13,9 +13,6 @@ project uses [Semantic Versioning](https://semver.org/).
   that the catalogue fan pair can't cool gets the smallest larger fan whose
   pair can, still two fans with the same AC branches and terminals (ADR 0029,
   Proposed). A library without the list builds as before.
-
-### Added
-
 - The installer ships psa-devices 1.8.0 from v2 of the contractor's library:
   the FortiGate 600F and 601F firewalls (230 V AC, now with their voltage and
   load type), and the Hager NCN 2P set is DC rated, 250 V with the two poles
