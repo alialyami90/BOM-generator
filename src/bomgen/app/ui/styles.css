@@ -388,8 +388,9 @@ fieldset.readonly .btn, fieldset.readonly .grip { opacity: .5; cursor: default; 
 .plate { flex: none; display: grid; place-items: center; }
 .plate::after { content: ""; width: 60%; height: 2px; background: var(--color-border); border-radius: 1px; }
 .dev { flex: none; display: flex; align-items: center; gap: 6px; padding: 0 6px; background: var(--color-surface); border: 1px solid var(--color-border-control); border-radius: var(--radius-sm); font-size: 12.5px; line-height: 1.2; cursor: pointer; overflow: hidden; user-select: none; }
-.dev[draggable="true"] { cursor: grab; }  /* only a board that can write draws the grab cursor */
-.dev[draggable="true"]:active { cursor: grabbing; }
+.dev.is-movable { cursor: grab; touch-action: none; }  /* only a board that can write draws the grab cursor */
+.dev.is-movable:active, body.is-dragging-dev, body.is-dragging-dev .dev { cursor: grabbing; }
+body.is-dragging-dev { user-select: none; }
 .dev:hover { border-color: var(--color-action-text); }
 .dev-grip { color: var(--color-text-muted); display: inline-flex; }
 .dev-grip svg.i { width: 12px; height: 12px; }
@@ -407,7 +408,7 @@ fieldset.readonly .btn, fieldset.readonly .grip { opacity: .5; cursor: default; 
 .reserve { flex: none; display: grid; place-items: center; margin-top: 2px; font-size: 11.5px; color: var(--color-text-muted); background: var(--color-surface); border: 1px dotted var(--color-border-control); border-radius: var(--radius-sm); }
 .bcol.drop-ok { border-color: var(--color-success); background: var(--color-success-soft); }
 .bcol.drop-bad { border-color: var(--color-danger); background: var(--color-danger-soft); }
-.bcol.drop-bad, .bcol.drop-bad .dev { cursor: not-allowed; }
+.bcol.drop-bad, .bcol.drop-bad .dev, body.is-drop-bad, body.is-drop-bad .dev { cursor: not-allowed; }
 /* the insertion line: where the dragged block will land */
 .dev.ins-before { box-shadow: 0 -3px 0 0 var(--color-action); }
 .dev.ins-after { box-shadow: 0 3px 0 0 var(--color-action); }

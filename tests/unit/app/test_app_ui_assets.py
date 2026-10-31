@@ -461,3 +461,18 @@ def test_the_deprecated_minimum_branch_mcb_is_shown_read_only_with_why() -> None
     assert row.group(2) == "fixed"
     assert "ADR 0019" in row.group(3)
     assert "no longer" in row.group(3)
+
+
+def test_the_panels_board_drags_with_pointer_events_not_html5_drag_and_drop() -> None:
+    """M19: HTML5 drag-and-drop does not reach the board in the installed app (WebView2), so the
+    board drags with pointer events and pointer capture, and a cancel or lost capture ends it."""
+    js = (UI_DIR / "screens-panels.js").read_text(encoding="utf-8")
+    for html5 in ("draggable", "dragstart", "dragover", "dataTransfer"):
+        assert html5 not in js, html5
+    for event in ("pointerdown", "pointermove", "pointerup", "pointercancel", "lostpointercapture"):
+        assert f"'{event}'" in js, event
+    assert "setPointerCapture" in js
+    assert "elementFromPoint" in js
+    css = (UI_DIR / "styles.css").read_text(encoding="utf-8")
+    assert re.search(r"\.dev\.is-movable \{[^}]*touch-action: none", css)
+    assert re.search(r"body\.is-dragging-dev[^{]*\{[^}]*user-select: none", css)
