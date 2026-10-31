@@ -31,6 +31,7 @@ from pydantic import BaseModel, ValidationError
 from bomgen import __version__
 from bomgen.app import library_csv
 from bomgen.app.catalogues import catalogues_page
+from bomgen.app.device_preview import device_preview_page
 from bomgen.app.editing import (
     Page,
     edit_reply,
@@ -1106,6 +1107,12 @@ class Api:
         """The engine's network sizing, L1 ranking and panel layout, for Network and Panels."""
         with self._substation(substation_id):
             return layout_page(Path(project_file), substation_id, self._library_store())
+
+    @endpoint
+    def device_preview(self, project_file: str, substation_id: str) -> dict[str, Any]:
+        """Every generated unit with its panel, top U, MCBs and strips, for Device preview."""
+        with self._substation(substation_id):
+            return device_preview_page(Path(project_file), substation_id, self._library_store())
 
     # -- Editing (docs/ui/editing.md; writers in bomgen.io.edit, ADR 0021) --
 
