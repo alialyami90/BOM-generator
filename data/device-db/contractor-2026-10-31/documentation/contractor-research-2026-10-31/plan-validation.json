@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "errors": [],
+  "proposed_new_devices": 54,
+  "device_patches": 60,
+  "new_evidence_occurrences": 2105,
+  "requests_reconciled": 270
+}

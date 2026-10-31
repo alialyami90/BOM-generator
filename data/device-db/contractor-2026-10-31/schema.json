@@ -5,7 +5,7 @@
   "tables": {
     "devices": {
       "file": "devices.csv",
-      "rows": 991,
+      "rows": 1045,
       "fields": [
         {
           "name": "part_id",
@@ -175,7 +175,7 @@
     },
     "device_ports": {
       "file": "device_ports.csv",
-      "rows": 77,
+      "rows": 112,
       "fields": [
         {
           "name": "part_id",
@@ -221,11 +221,12 @@
         }
       ],
       "cardinality": "see table key and source context",
-      "template": "templates/device_ports.csv"
+      "template": "templates/device_ports.csv",
+      "media_note": "SFP cages remain kind=sfp_slot. Media is blank unless optics are explicitly selected/included and evidenced. RSG2300 C08/D08 include SFP1122-1SX optics, so those four cages retain MM without extra port counts. Importer must support this selected-optics distinction."
     },
     "sources": {
       "file": "sources.csv",
-      "rows": 18998,
+      "rows": 20767,
       "fields": [
         {
           "name": "part_id",
@@ -311,7 +312,7 @@
     },
     "fans": {
       "file": "fans.csv",
-      "rows": 1,
+      "rows": 6,
       "fields": [
         {
           "name": "part_id",
@@ -499,7 +500,7 @@
     },
     "thermostats": {
       "file": "thermostats.csv",
-      "rows": 1,
+      "rows": 2,
       "fields": [
         {
           "name": "part_id",
@@ -767,7 +768,7 @@
     },
     "relays": {
       "file": "relays.csv",
-      "rows": 1,
+      "rows": 4,
       "fields": [
         {
           "name": "part_id",
@@ -1109,7 +1110,7 @@
     },
     "suppressors": {
       "file": "suppressors.csv",
-      "rows": 1,
+      "rows": 2,
       "fields": [
         {
           "name": "part_id",
@@ -1671,7 +1672,7 @@
     },
     "mcb_ratings": {
       "file": "mcb_ratings.csv",
-      "rows": 1035,
+      "rows": 1101,
       "fields": [
         {
           "name": "part_id",
@@ -2989,7 +2990,7 @@
     },
     "device_review": {
       "file": "device_review.csv",
-      "rows": 991,
+      "rows": 1045,
       "fields": [
         {
           "name": "part_id",
@@ -3357,7 +3358,7 @@
     },
     "device_lineage": {
       "file": "device_lineage.csv",
-      "rows": 993,
+      "rows": 1053,
       "fields": [
         {
           "name": "part_id",
@@ -3395,7 +3396,7 @@
     },
     "field_lineage": {
       "file": "field_lineage.csv",
-      "rows": 7417,
+      "rows": 8150,
       "fields": [
         {
           "name": "part_id",
@@ -3439,7 +3440,7 @@
     },
     "port_lineage": {
       "file": "port_lineage.csv",
-      "rows": 81,
+      "rows": 116,
       "fields": [
         {
           "name": "part_id",
@@ -3471,7 +3472,7 @@
     },
     "source_lineage": {
       "file": "source_lineage.csv",
-      "rows": 22334,
+      "rows": 24439,
       "fields": [
         {
           "name": "delivery",
@@ -3581,7 +3582,7 @@
     },
     "related_records": {
       "file": "related_records.csv",
-      "rows": 16,
+      "rows": 27,
       "fields": [
         {
           "name": "part_id",
@@ -3608,12 +3609,12 @@
           "nullable": true
         }
       ],
-      "cardinality": "see table key and source context",
+      "cardinality": "one-to-many relationships; part_id is a canonical device, related_part_id may be another canonical device or a preserved worklist identity when relationship=same_ordering_code_worklist_reference",
       "template": null
     },
     "pdf_aliases": {
       "file": "pdf_aliases.csv",
-      "rows": 155,
+      "rows": 208,
       "fields": [
         {
           "name": "delivery",
@@ -3645,7 +3646,7 @@
     },
     "pdf_manifest": {
       "file": "pdf_manifest.csv",
-      "rows": 82,
+      "rows": 131,
       "fields": [
         {
           "name": "pdf_file",
@@ -3674,6 +3675,179 @@
       ],
       "cardinality": "see table key and source context",
       "template": null
+    },
+    "power_measurements": {
+      "file": "power_measurements.csv",
+      "rows": 35,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": false
+        },
+        {
+          "name": "measurement_id",
+          "type": "string",
+          "unit": "",
+          "nullable": false
+        },
+        {
+          "name": "scope",
+          "type": "string",
+          "unit": "",
+          "nullable": false
+        },
+        {
+          "name": "component",
+          "type": "string",
+          "unit": "",
+          "nullable": false
+        },
+        {
+          "name": "minimum_w",
+          "type": "number",
+          "unit": "W",
+          "nullable": true
+        },
+        {
+          "name": "typical_w",
+          "type": "number",
+          "unit": "W",
+          "nullable": true
+        },
+        {
+          "name": "maximum_w",
+          "type": "number",
+          "unit": "W",
+          "nullable": true
+        },
+        {
+          "name": "basis",
+          "type": "string",
+          "unit": "",
+          "nullable": false
+        },
+        {
+          "name": "conditions",
+          "type": "string",
+          "unit": "",
+          "nullable": false
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": false
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": false
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "key": [
+        "part_id",
+        "measurement_id"
+      ],
+      "cardinality": "one-to-many; each row is a baseline, optional increment, or mutually exclusive temperature scenario, not a device or selected quantity",
+      "template": "templates/power_measurements.csv",
+      "description": "Published conditional component consumption. Do not import typical_w into devices.unit_power_w. Do not sum all options or heater scenarios. Project measured/as-ordered power remains unknown."
+    },
+    "contractor_responses": {
+      "file": "contractor_responses.csv",
+      "rows": 270,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "ask",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "response",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "evidence",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "one row per part_id and ask",
+      "template": null
+    },
+    "research_changes": {
+      "file": "research_changes.csv",
+      "rows": 859,
+      "fields": [
+        {
+          "name": "table",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "column",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "old_value",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "new_value",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "reason",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "delivery",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "one row per changed field or technical row",
+      "template": null
     }
   },
   "description": "Consolidated three-delivery library; source row numbers are one-based CSV rows including header.",
@@ -3693,5 +3867,10 @@
     "5G",
     "10G",
     "25G"
-  ]
+  ],
+  "research_update": {
+    "date": "2026-11-01",
+    "delivery": "contractor-research-2026-10-31",
+    "notes": "Current canonical CSVs were patched directly. Historical consolidation inputs were not rerun."
+  }
 }

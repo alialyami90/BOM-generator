@@ -990,3 +990,57 @@ FG-70F,prior_research_delivery,researched_device_or_configuration,recorded_in_pr
 FG-121G,prior_research_delivery,researched_device_or_configuration,recorded_in_prior_delivery,review_required,Preserve original review/configuration limitations in documentation/vendor-library-2026-10-31/.
 FG-401G,prior_research_delivery,researched_device_or_configuration,recorded_in_prior_delivery,review_required,Preserve original review/configuration limitations in documentation/vendor-library-2026-10-31/.
 FG-701G,prior_research_delivery,researched_device_or_configuration,recorded_in_prior_delivery,review_required,Preserve original review/configuration limitations in documentation/vendor-library-2026-10-31/.
+SK3110-TH.STEGO-HIGH,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+SEL-3555-GW.SIEMENS-MID,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+SZ2500-LAMP.NVENT-HOFFMAN-MID,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+SEL-915900043.ARBITER-SYSTEMS-LOW,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+NAP-K55.SAMSUNG-HIGH,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+SK3243-FAN.STEGO-HIGH,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+RST2228-L2.CISCO-LOW,existing_worklist,configured_assembly,constructed_from_verified_options,not_selected,All selected physical ports available; optics unselected. Network Essentials tier in worklist retained.
+SEL-3355.ADVANTECH-LOW,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+SK3243-FAN.STEGO-MID,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+FGR-60F.MOXA-LOW,existing_worklist,device_or_component,printed_code,not_selected,IPS requires additional license; worklist does not select an IPS license. MXsecurity is separately selected management software.
+NAP-K55.ADVANTECH-HIGH,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+SK3243-FAN.STEGO-LOW,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+SZ2500-LAMP.NVENT-HOFFMAN-HIGH,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+SEL-3355.ADVANTECH-MID,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+RST2228-L2.MOXA-HIGH,existing_worklist,configured_assembly,constructed_from_verified_options,not_selected,Only worklist-selected modules counted. Empty sixth module slot in 4GSFP+1GTX build remains empty.
+IPR-2903685.WEIDMULLER-MID,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+FO-PATCH-CORDS.CORNING-LOW,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+FGR-60F.MOXA-MID,existing_worklist,device_or_component,printed_code,not_selected,IPS requires additional license; worklist does not select an IPS license. MXsecurity is separately selected management software.
+SZ2500-LAMP,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+NAP-K55.SAMSUNG-MID,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+RST2228-L2.MOXA-MID,existing_worklist,configured_assembly,constructed_from_verified_options,not_selected,Only worklist-selected modules counted. Empty sixth module slot in 4GSFP+1GTX build remains empty.
+RST2228-L2.MOXA-LOW,existing_worklist,device_or_component,printed_code,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+SZ2500-LAMP.STEGO-HIGH,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+SK3243-FAN.PFANNENBERG-HIGH,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+NAP-K55.SAMSUNG-LOW,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+RST2228-L2,existing_worklist,configured_assembly,constructed_from_verified_options,not_selected,"G00 is a blank module, not four usable ports. Supply and media options are a constructed worklist configuration."
+SEL-2730M-EXT.SIEMENS-HIGH,existing_worklist,configured_assembly,constructed_from_verified_options,not_selected,"G00 is a blank module, not four usable ports. Supply and media options are a constructed worklist configuration."
+NAP-F23.ADVANTECH-LOW,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+RST2228-L1-24MM.MOXA-LOW,existing_worklist,device_or_component,printed_code,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+SK3110-TH.PFANNENBERG-LOW,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+NAP-F23.ADVANTECH-HIGH,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+NAP-K55.ADVANTECH-LOW,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+NAP-F23.ADVANTECH-MID,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+IPR-2903685.FINDER-MID,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+FGR-60F.CISCO-MID,existing_worklist,device_or_component,printed_code,not_selected,Official HTML/PDF web text preserved as labeled generated evidence extract after raw PDF download failures. Hardware identity confirmed; security license and converter selections remain open.
+IPR-2903685.WEIDMULLER-HIGH,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+SEL-3355.ADVANTECH-HIGH,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+FO-PATCH-CORDS.CORNING-MID,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+IPR-2903685.WEIDMULLER-LOW,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+SK3243-FAN.PFANNENBERG-MID,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+IPR-2903685.FINDER-HIGH,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+NAP-K55.ADVANTECH-MID,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+IPR-SUPP-2900944.WEIDMULLER-MID,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+FGR-60F.CISCO-LOW,existing_worklist,device_or_component,printed_code,not_selected,Official HTML/PDF web text preserved as labeled generated evidence extract after raw PDF download failures. Hardware identity confirmed; security license and converter selections remain open.
+SEL-3555-GW.SIEMENS-LOW,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+SZ2500-LAMP.STEGO-LOW,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+SEL-2730M-EXT.SIEMENS-MID,existing_worklist,configured_assembly,constructed_from_verified_options,not_selected,"Full worklist assembly constructed from documented options. Exact configured SKU not independently observed. Selected C08/D08 include MM SX optics, so media is known, unlike empty cages."
+SEL-2730M-EXT.MOXA-HIGH,existing_worklist,configured_assembly,constructed_from_verified_options,not_selected,Only worklist-selected modules counted. Empty sixth module slot in 4GSFP+1GTX build remains empty.
+IPR-BRACKET-2900954.FINDER-HIGH,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+IPR-2903685.FINDER-LOW,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+SZ2500-LAMP.NVENT-HOFFMAN-LOW,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+SZ2500-LAMP.STEGO-MID,contractor_research,device_or_component,see_sources,not_selected,Research update 2026-11-01; review contractor_responses.csv.
+RST2228-L2.CISCO-HIGH,existing_worklist,configured_assembly,constructed_from_verified_options,not_selected,All selected physical ports available; optics unselected. Network Advantage tier in worklist retained.
+FGR-60F.CISCO-HIGH,existing_worklist,configured_assembly,constructed_from_verified_options,not_selected,"Hardware configuration only. Firewall functional equivalence, licenses, software mode and PoE budgets remain engineering selections. No optional modules or optics invented."

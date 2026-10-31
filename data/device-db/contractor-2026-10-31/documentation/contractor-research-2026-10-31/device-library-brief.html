@@ -1,0 +1,329 @@
+<title>Device Library Data Brief</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single reading column like a technical specification, with wide reference tables that scroll inside their own frames. */
+:root {
+  --bg: #f6f7f8;
+  --surface: #ffffff;
+  --ink: #1b2129;
+  --muted: #56606d;
+  --rule: #d9dde3;
+  --accent: #1d5c96;
+  --accent-soft: #e5eef7;
+  --fill: #186a3b;
+  --fill-soft: #e3f2e8;
+  --maybe: #8a5a00;
+  --maybe-soft: #fbf0d9;
+  --blank: #6b7380;
+  --blank-soft: #eceef1;
+  --code-bg: #eef1f4;
+  --font-display: "Barlow Semi Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161b; --surface: #1a1f26; --ink: #e4e8ed; --muted: #9aa4b1; --rule: #2e3540;
+    --accent: #7db4ea; --accent-soft: #1d2b3b; --fill: #7fd19d; --fill-soft: #183223;
+    --maybe: #e9be6c; --maybe-soft: #352a14; --blank: #a2aab5; --blank-soft: #252b33; --code-bg: #222831;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12161b; --surface: #1a1f26; --ink: #e4e8ed; --muted: #9aa4b1; --rule: #2e3540;
+  --accent: #7db4ea; --accent-soft: #1d2b3b; --fill: #7fd19d; --fill-soft: #183223;
+  --maybe: #e9be6c; --maybe-soft: #352a14; --blank: #a2aab5; --blank-soft: #252b33; --code-bg: #222831;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 15.5px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 72px;
+}
+main { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 44px; }
+section { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(2rem, 5vw, 2.7rem); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 1.6rem; font-weight: 600; padding-top: 18px; border-top: 2px solid var(--ink); }
+h3 { font-size: 1.2rem; font-weight: 600; margin-top: 6px; }
+p, ul, ol { margin: 0; max-width: 68ch; }
+ul, ol { padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; }
+a { color: var(--accent); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+code, .mono { font-family: var(--font-mono); font-size: 0.88em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; overflow-wrap: anywhere; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 1.1rem; color: var(--ink); max-width: 64ch; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 22px; color: var(--muted); font-size: 0.9rem; }
+.meta b { color: var(--ink); font-weight: 600; }
+.muted { color: var(--muted); }
+
+.tree {
+  font-family: var(--font-mono); font-size: 0.88rem; line-height: 1.7;
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 16px 18px; overflow-x: auto; white-space: pre; margin: 0;
+}
+.tree .c { color: var(--muted); }
+
+.frame { overflow-x: auto; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--rule); }
+tr:last-child td { border-bottom: 0; }
+th { font-family: var(--font-display); font-weight: 600; font-size: 0.95rem; letter-spacing: 0.02em; background: var(--blank-soft); white-space: nowrap; }
+td:first-child { white-space: nowrap; }
+td.col { font-family: var(--font-mono); font-size: 0.85rem; font-weight: 500; }
+tr.group td { background: var(--accent-soft); font-family: var(--font-display); font-weight: 600; font-size: 0.95rem; color: var(--accent); letter-spacing: 0.02em; }
+.cols { min-width: 720px; }
+.cols td:nth-child(3) { min-width: 180px; }
+.cols td:nth-child(4) { min-width: 260px; }
+.num { font-variant-numeric: tabular-nums; }
+
+.chip { display: inline-block; font-family: var(--font-mono); font-size: 0.74rem; font-weight: 500; letter-spacing: 0.02em; padding: 1px 7px; border-radius: 999px; white-space: nowrap; }
+.chip.fill { color: var(--fill); background: var(--fill-soft); }
+.chip.maybe { color: var(--maybe); background: var(--maybe-soft); }
+.chip.blank { color: var(--blank); background: var(--blank-soft); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 0.9rem; color: var(--muted); }
+
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.rule { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.rule b { font-family: var(--font-display); font-weight: 600; font-size: 1.02rem; }
+.rule span { color: var(--muted); font-size: 0.92rem; }
+
+.callout { border-left: 3px solid var(--maybe); background: var(--maybe-soft); padding: 12px 16px; border-radius: 0 6px 6px 0; max-width: 72ch; }
+.callout p + p { margin-top: 6px; }
+
+.example td:nth-child(2) { font-family: var(--font-mono); font-size: 0.85rem; overflow-wrap: anywhere; }
+.example { min-width: 560px; }
+.src { min-width: 860px; }
+.src td { font-size: 0.85rem; }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.stat { border-top: 2px solid var(--accent); padding-top: 8px; display: flex; flex-direction: column; gap: 2px; }
+.stat strong { font-family: var(--font-display); font-size: 1.9rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.stat span { color: var(--muted); font-size: 0.88rem; }
+
+ol.steps { counter-reset: s; list-style: none; padding-left: 0; gap: 12px; }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 2.1em 1fr; gap: 10px; }
+ol.steps li::before { content: counter(s); font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; color: var(--accent); line-height: 1.4; }
+footer { color: var(--muted); font-size: 0.88rem; border-top: 1px solid var(--rule); padding-top: 14px; }
+</style>
+
+<main>
+  <header style="display:flex;flex-direction:column;gap:14px">
+    <div class="eyebrow">SCADA panel BOM generator &middot; device library</div>
+    <h1>Device library data brief</h1>
+    <p class="lede">You will read manufacturer datasheets and record each part's electrical and physical data in three CSV tables. This page says what to put in every column, how to cite where each value came from, and how your delivery will be checked.</p>
+    <div class="meta">
+      <span><b>Files sent with this page:</b> blank template, worked example, list of existing parts with gaps</span>
+      <span><b>Format:</b> the generator's own Library CSV tables</span>
+    </div>
+  </header>
+
+  <section id="deliver">
+    <h2>What to send back</h2>
+    <p>One folder (or a <code>.zip</code> of it) per delivery. Start from the blank template files so the column headers are exact. Do not rename, reorder or delete columns.</p>
+<pre class="tree">delivery-2026-11-15/
+├── devices.csv        <span class="c">one row per orderable part</span>
+├── device_ports.csv   <span class="c">network port groups, switches and firewalls only</span>
+├── sources.csv        <span class="c">where every value came from: file, page, revision</span>
+└── pdfs/
+    ├── SEL_SEL-2488_PDS2488-01_20260331.pdf
+    └── …              <span class="c">named Make_Model_DocNumber_Revision.pdf, as downloaded</span></pre>
+    <p>Send only the parts you added or changed. You do not need to send the whole library back. Your rows are merged onto the current library, so a blank cell on an existing part means "not researched" and leaves our value in place.</p>
+  </section>
+
+  <section id="format">
+    <h2>File rules</h2>
+    <div class="rules">
+      <div class="rule"><b>Save as CSV UTF-8</b><span>In Excel: Save As, then "CSV UTF-8 (Comma delimited)". Comma or semicolon separators both read.</span></div>
+      <div class="rule"><b>Decimal point</b><span><code>12.5</code>, not <code>12,5</code>. No thousands separators, no units in the cell.</span></div>
+      <div class="rule"><b>Exact spelling</b><span>Allowed values are case sensitive: <code>VDC</code> not <code>DC</code>, <code>CONTINUOUS</code> not <code>continuous</code>, <code>low</code> not <code>Low</code>.</span></div>
+      <div class="rule"><b>No formulas</b><span>Type values. A cell starting with <code>=</code>, <code>+</code> or <code>@</code> is flagged.</span></div>
+      <div class="rule"><b>Guard part numbers</b><span>Excel turns codes like <code>3-12</code> into dates and <code>1E10</code> into numbers. Format those columns as Text before typing.</span></div>
+      <div class="rule"><b>Unknown means blank</b><span>Leave a cell empty when the document does not give the value. Never write 0, TBA or a guess in the value cell.</span></div>
+    </div>
+  </section>
+
+  <section id="devices">
+    <h2>devices.csv, column by column</h2>
+    <div class="legend">
+      <span><span class="chip fill">you fill</span> always, for every row</span>
+      <span><span class="chip maybe">if it applies</span> fill when the part has it</span>
+      <span><span class="chip blank">leave blank</span> engineering choices we make</span>
+    </div>
+    <div class="frame">
+      <table class="cols">
+        <thead><tr><th>Column</th><th>Fill</th><th>Format / allowed values</th><th>What to record</th></tr></thead>
+        <tbody>
+          <tr class="group"><td colspan="4">Identity</td></tr>
+          <tr><td class="col">part_id</td><td><span class="chip fill">you fill</span></td><td>Letters, digits and <code>. _ + -</code>; starts with a letter or digit</td><td>Our key for the part. For an existing part, copy it exactly from the worklist. For an alternative, see <a href="#alternatives">Alternatives</a>. For a new original part, use the model name, e.g. <code>SEL-2488</code>.</td></tr>
+          <tr><td class="col">category</td><td><span class="chip fill">you fill</span></td><td>One value from the <a href="#categories">category list</a></td><td>What kind of part it is.</td></tr>
+          <tr><td class="col">make</td><td><span class="chip fill">you fill</span></td><td>Text</td><td>Brand as it appears on the BOM, e.g. <code>SEL</code>, <code>Ruggedcom</code>, <code>Phoenix Contact</code>.</td></tr>
+          <tr><td class="col">model</td><td><span class="chip fill">you fill</span></td><td>Text</td><td>Model or family name, e.g. <code>SEL-2488</code>.</td></tr>
+          <tr><td class="col">ordering_code</td><td><span class="chip fill">you fill</span></td><td>Text, exactly as ordered</td><td>The full orderable code with every option, including the power supply option. When a part is ordered as several items, join them with <code>&nbsp;+&nbsp;</code>, e.g. <code>IE-9320-26S2C-E + 2 x PWR-RGD-AC-DC-H</code>.</td></tr>
+          <tr><td class="col">description_template</td><td><span class="chip fill">you fill</span></td><td>Text, no curly braces</td><td>A plain one-line BOM description, e.g. <code>GPS clock, 125 VDC redundant supply</code>. We add tag placeholders later.</td></tr>
+          <tr class="group"><td colspan="4">Power supply (DC / AC)</td></tr>
+          <tr><td class="col">supply_type</td><td><span class="chip maybe">if powered</span></td><td><code>VDC</code> or <code>VAC</code>; blank for a passive part</td><td>How the panel feeds it. Panels run on 125 V DC station battery and 230 V AC auxiliary. A universal AC/DC supply fed from the battery is <code>VDC</code>.</td></tr>
+          <tr><td class="col">voltage_v</td><td><span class="chip maybe">if powered</span></td><td>Whole number, volts</td><td>Nominal supply voltage of the variant in the ordering code: <code>125</code> for DC, <code>230</code> for AC. If no variant takes 125 V DC or 230 V AC, record the part's own nominal (e.g. <code>48</code>) and say "needs converter" in sources.csv.</td></tr>
+          <tr><td class="col">input_v_min</td><td><span class="chip maybe">if powered</span></td><td>Number, volts</td><td>Bottom of the rated operating range of that supply variant, for the supply type above. For a <code>VDC</code> part, use the DC range even if an AC range is printed too.</td></tr>
+          <tr><td class="col">input_v_max</td><td><span class="chip maybe">if powered</span></td><td>Number, volts</td><td>Top of the same range. Must not be below input_v_min, and the range should contain voltage_v.</td></tr>
+          <tr><td class="col">unit_power_w</td><td><span class="chip maybe">if powered</span></td><td>Number, watts</td><td>Maximum consumption of one unit as ordered, all supplies fitted. Prefer the datasheet maximum over typical. If only current is given, compute it (A × V) and show the arithmetic in sources.csv. If only VA is given, record it and say so.</td></tr>
+          <tr><td class="col">load_type</td><td><span class="chip maybe">if powered</span></td><td><code>CONTINUOUS</code> or <code>INTERMITTENT</code></td><td><code>CONTINUOUS</code> for anything powered all the time (nearly everything). <code>INTERMITTENT</code> for loads that run only now and then, such as a fan or lamp on a switch.</td></tr>
+          <tr><td class="col">power_supplies</td><td><span class="chip maybe">if powered</span></td><td><code>0</code>, <code>1</code> or <code>2</code></td><td><code>2</code> when the ordering code gives two independent DC inputs or redundant supplies. <code>1</code> for a single DC input. <code>0</code> for AC-fed and passive parts. Only <code>VDC</code> parts may be above 0.</td></tr>
+          <tr><td class="col">inrush_a</td><td><span class="chip maybe">if stated</span></td><td>Number, amps, above 0</td><td>Peak inrush current per feed, from the datasheet or installation manual. Most documents do not give it: leave blank and add a <code>not_given</code> row in sources.csv so we know you looked.</td></tr>
+          <tr><td class="col">inrush_ms</td><td><span class="chip maybe">if stated</span></td><td>Number, milliseconds, above 0</td><td>How long the inrush lasts. Blank, with a <code>not_given</code> source row, when not stated.</td></tr>
+          <tr class="group"><td colspan="4">Physical, ports and I/O</td></tr>
+          <tr><td class="col">height_u</td><td><span class="chip fill">you fill</span></td><td>Whole number</td><td>Rack units in a 19-inch rack (1U = 44.45 mm). <code>0</code> for DIN-rail, plug-in, door-mounted and external parts. Blank only for a rack part whose height you could not find.</td></tr>
+          <tr><td class="col">hwio_points</td><td><span class="chip maybe">if it applies</span></td><td>Whole number</td><td>Alarm or fail-safe relay outputs we wire to a digital input, usually <code>0</code> or <code>1</code>.</td></tr>
+          <tr><td class="col">di_inputs</td><td><span class="chip maybe">if it applies</span></td><td>Whole number</td><td>Digital inputs the unit provides (I/O modules). <code>0</code> otherwise.</td></tr>
+          <tr><td class="col">cores</td><td><span class="chip maybe">if it applies</span></td><td>Whole number</td><td>Fibre core count, for fibre patch panels only.</td></tr>
+          <tr class="group"><td colspan="4">Alternatives</td></tr>
+          <tr><td class="col">alt_group</td><td><span class="chip fill">you fill</span></td><td>Capital letters, digits, hyphens</td><td>The group of interchangeable parts this one belongs to. See <a href="#alternatives">Alternatives</a>.</td></tr>
+          <tr><td class="col">tier</td><td><span class="chip maybe">alternatives</span></td><td><code>low</code>, <code>mid</code> or <code>high</code></td><td>Blank on the original part. On an alternative: <code>low</code> cheapest acceptable equivalent, <code>mid</code> closest like-for-like, <code>high</code> premium or more capable.</td></tr>
+          <tr class="group"><td colspan="4">Leave blank</td></tr>
+          <tr><td class="col">tag_type<br>purdue_level<br>tag_pattern<br>min_branch_mcb_a<br>alarm_on_branch_mcb<br>excluded_from_power</td><td><span class="chip blank">leave blank</span></td><td>&nbsp;</td><td>Tagging, network level and protection choices are made by the engineer. <code>excluded_from_power</code> is set automatically from supply_type.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">A part that ships with separately ordered accessories (antenna, mounting kit, cables) gets one row per accessory, with no supply_type. Name the parent part in the accessory's sources.csv note. We link them.</p>
+  </section>
+
+  <section id="ports">
+    <h2>device_ports.csv</h2>
+    <p>Switches and firewalls only. One row per group of identical ports. If you send ports for a part, send all its groups: they replace what we have.</p>
+    <div class="frame">
+      <table class="cols">
+        <thead><tr><th>Column</th><th>Fill</th><th>Format / allowed values</th><th>What to record</th></tr></thead>
+        <tbody>
+          <tr><td class="col">part_id</td><td><span class="chip fill">you fill</span></td><td>As in devices.csv</td><td>The part these ports belong to.</td></tr>
+          <tr><td class="col">seq</td><td><span class="chip fill">you fill</span></td><td><code>1</code>, <code>2</code>, <code>3</code>…</td><td>Order of the groups on that part.</td></tr>
+          <tr><td class="col">count</td><td><span class="chip fill">you fill</span></td><td>Whole number, at least 1</td><td>Ports in the group.</td></tr>
+          <tr><td class="col">speed</td><td><span class="chip fill">you fill</span></td><td><code>10M</code>, <code>100M</code>, <code>1G</code>, <code>10G</code></td><td>Highest speed of the port. Record a 10/100 port as <code>100M</code>.</td></tr>
+          <tr><td class="col">kind</td><td><span class="chip fill">you fill</span></td><td><code>fixed</code> or <code>sfp_slot</code></td><td>Built-in port, or an empty cage that takes a transceiver.</td></tr>
+          <tr><td class="col">media</td><td><span class="chip maybe">fixed ports</span></td><td><code>MM</code>, <code>SM</code>, <code>RJ45</code></td><td>Required for fixed ports: multimode fibre, single-mode fibre or copper. Blank for SFP slots.</td></tr>
+          <tr><td class="col">usable_for</td><td><span class="chip blank">leave blank</span></td><td>&nbsp;</td><td>Whether a group serves devices or uplinks is an engineering choice.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="sources">
+    <h2>sources.csv: one row per value</h2>
+    <p>Every value you put in devices.csv or device_ports.csv needs a row here saying where it came from. Inrush and input range also need a row when the document does not state them, with <code>basis</code> set to <code>not_given</code> and the value blank. For port groups, write the column as <code>ports.1</code>, <code>ports.2</code> and so on.</p>
+    <div class="frame">
+      <table class="cols">
+        <thead><tr><th>Column</th><th>Fill</th><th>Format / allowed values</th><th>What to record</th></tr></thead>
+        <tbody>
+          <tr><td class="col">part_id</td><td><span class="chip fill">you fill</span></td><td>As in devices.csv</td><td>&nbsp;</td></tr>
+          <tr><td class="col">column</td><td><span class="chip fill">you fill</span></td><td>A devices.csv column name, or <code>ports.N</code></td><td>Which value this row backs.</td></tr>
+          <tr><td class="col">value</td><td><span class="chip fill">you fill</span></td><td>Same as the cell</td><td>Repeat the value, so a mismatch shows up.</td></tr>
+          <tr><td class="col">pdf_file</td><td><span class="chip fill">you fill</span></td><td>A file name in <code>pdfs/</code></td><td>The document you read it in. A value from a web page: save the page as PDF with the date in the name.</td></tr>
+          <tr><td class="col">page</td><td><span class="chip fill">you fill</span></td><td>Whole number</td><td>PDF page number as the viewer shows it (first page = 1), not the printed page number.</td></tr>
+          <tr><td class="col">doc_title</td><td><span class="chip fill">you fill</span></td><td>Text</td><td>Title on the cover, e.g. "SEL-2488 Data Sheet".</td></tr>
+          <tr><td class="col">doc_number</td><td><span class="chip maybe">if printed</span></td><td>Text</td><td>Manufacturer's document number, e.g. <code>PDS2488-01</code>.</td></tr>
+          <tr><td class="col">doc_revision</td><td><span class="chip fill">you fill</span></td><td>Text</td><td>Revision, version or date code exactly as printed. Write "none printed" if there is none.</td></tr>
+          <tr><td class="col">doc_date</td><td><span class="chip maybe">if printed</span></td><td><code>YYYY-MM-DD</code></td><td>Issue date of the document.</td></tr>
+          <tr><td class="col">url</td><td><span class="chip fill">you fill</span></td><td>Link</td><td>Where you downloaded it.</td></tr>
+          <tr><td class="col">basis</td><td><span class="chip fill">you fill</span></td><td><code>datasheet</code>, <code>computed</code>, <code>assumed</code>, <code>not_given</code></td><td><code>computed</code>: show the arithmetic in the note. <code>assumed</code>: give the reason. <code>not_given</code>: you looked and it is not stated.</td></tr>
+          <tr><td class="col">exact_part_seen</td><td><span class="chip fill">you fill</span></td><td><code>true</code> or <code>false</code></td><td><code>true</code> only if this exact ordering code appears on a manufacturer or distributor page or document. <code>false</code> if you built it from the ordering pattern.</td></tr>
+          <tr><td class="col">note</td><td><span class="chip maybe">if useful</span></td><td>Text</td><td>Quote the datasheet wording for anything unusual: per-PSU figures, a different AC range, typical vs maximum, "needs converter".</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="alternatives">
+    <h2>Alternatives</h2>
+    <p>Each alternative part is its own row in devices.csv with its own data and sources. Parts that can replace each other share an <code>alt_group</code>.</p>
+    <ul>
+      <li>For a part already in the library, use the <code>alt_group</code> from the worklist. It is usually the original's part_id, e.g. <code>RST2228-L2</code>.</li>
+      <li>Name an alternative <code>&lt;original part_id&gt;.&lt;BRAND&gt;-&lt;TIER&gt;</code>, brand in capitals with hyphens for spaces: <code>SEL-2488.MEINBERG-LOW</code>, <code>SEL-3555-GW.HITACHI-ENERGY-MID</code>.</li>
+      <li>Give the original part the same alt_group and a blank tier.</li>
+      <li>Aim for two brands other than the original, each with a low, mid and high part. If a brand has no distinct high part, skip that tier and say so in a note.</li>
+      <li>Record an alternative even if it cannot take 125 V DC or 230 V AC. Give its real supply, and write "needs converter" in the note.</li>
+    </ul>
+  </section>
+
+  <section id="example">
+    <h2>Worked example: SEL-2488 GPS clock</h2>
+    <p>This is a real part from the current library. The <code>example/</code> folder sent with this page has these rows as files.</p>
+    <h3>devices.csv</h3>
+    <div class="frame">
+      <table class="example">
+        <thead><tr><th>Column</th><th>Value</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td class="col">part_id</td><td>SEL-2488</td><td>Existing part, copied from the worklist</td></tr>
+          <tr><td class="col">category</td><td>gps_clock</td><td>&nbsp;</td></tr>
+          <tr><td class="col">make / model</td><td>SEL / SEL-2488</td><td>&nbsp;</td></tr>
+          <tr><td class="col">ordering_code</td><td>2488#J544</td><td>SEL configured-part number</td></tr>
+          <tr><td class="col">description_template</td><td>GPS Clock with Antenna and accessories (SNTP/IRIG-B), 125VDC redundant, 100mbps SFP ports redundant</td><td>&nbsp;</td></tr>
+          <tr><td class="col">supply_type</td><td>VDC</td><td>Universal supply, fed from the 125 V battery</td></tr>
+          <tr><td class="col">voltage_v</td><td class="num">125</td><td>&nbsp;</td></tr>
+          <tr><td class="col">input_v_min / max</td><td class="num">88 / 300</td><td>DC range of the SEL-9330-A supply. AC range 85–264 V goes in the note only.</td></tr>
+          <tr><td class="col">unit_power_w</td><td class="num">50</td><td>Basis <code>assumed</code>: datasheet says &lt; 45 W per PSU</td></tr>
+          <tr><td class="col">load_type</td><td>CONTINUOUS</td><td>&nbsp;</td></tr>
+          <tr><td class="col">power_supplies</td><td class="num">2</td><td>Ordered with two A-type supplies</td></tr>
+          <tr><td class="col">inrush_a</td><td class="num">8</td><td>"Peak Inrush: 8 A", per supply</td></tr>
+          <tr><td class="col">inrush_ms</td><td><span class="muted">blank</span></td><td>Not stated: <code>not_given</code> row in sources.csv</td></tr>
+          <tr><td class="col">height_u</td><td class="num">1</td><td>19-inch rack, 1U</td></tr>
+          <tr><td class="col">hwio_points / di_inputs</td><td class="num">1 / 0</td><td>&nbsp;</td></tr>
+          <tr><td class="col">alt_group / tier</td><td>SEL-2488 / <span class="muted">blank</span></td><td>The original of its group</td></tr>
+          <tr><td class="col">engineering columns</td><td><span class="muted">blank</span></td><td>&nbsp;</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>sources.csv (three of its ten rows)</h3>
+    <div class="frame">
+      <table class="src">
+        <thead><tr><th>part_id</th><th>column</th><th>value</th><th>pdf_file</th><th>page</th><th>doc_number</th><th>doc_revision</th><th>basis</th><th>exact_part_seen</th><th>note</th></tr></thead>
+        <tbody>
+          <tr><td>SEL-2488</td><td class="mono">inrush_a</td><td class="num">8</td><td class="mono">SEL_SEL-2488_PDS2488-01_20260331.pdf</td><td class="muted">p.</td><td>PDS2488-01</td><td>date code 20260331</td><td>datasheet</td><td>false</td><td>"Peak Inrush: 8 A" for SEL-9330-A, per PSU</td></tr>
+          <tr><td>SEL-2488</td><td class="mono">inrush_ms</td><td class="muted">blank</td><td class="mono">SEL_SEL-2488_PDS2488-01_20260331.pdf</td><td class="muted">p.</td><td>PDS2488-01</td><td>date code 20260331</td><td>not_given</td><td>false</td><td>Peak only, no duration</td></tr>
+          <tr><td>SEL-2488</td><td class="mono">input_v_min</td><td class="num">88</td><td class="mono">SEL_SEL-2488_PDS2488-01_20260331.pdf</td><td class="muted">p.</td><td>PDS2488-01</td><td>date code 20260331</td><td>datasheet</td><td>false</td><td>DC 88–300 V; AC 85–264 V not used</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">
+      <p>The page column is empty here because our current records cite the document but not the page. Page numbers are one of the things we need from you. <code>exact_part_seen</code> is <code>false</code> because SEL's configured code <code>#J544</code> cannot be read from the datasheet.</p>
+    </div>
+  </section>
+
+  <section id="existing">
+    <h2>What already exists</h2>
+    <p>The library already holds 50 original parts from a reference project, each with alternatives from two other brands at low, mid and high tier. Their make, model, ordering code, power, ports and rack height are filled. Do not re-enter those values. Correct one only when the document says otherwise, and cite it.</p>
+    <div class="stats">
+      <div class="stat"><strong>329</strong><span>parts in 50 alternative groups</span></div>
+      <div class="stat"><strong>89</strong><span>powered parts, all missing inrush duration</span></div>
+      <div class="stat"><strong>77</strong><span>powered parts missing peak inrush</span></div>
+      <div class="stat"><strong>33</strong><span>missing the input voltage range</span></div>
+      <div class="stat"><strong>65</strong><span>alternative part numbers built from a pattern, not confirmed</span></div>
+      <div class="stat"><strong>0</strong><span>datasheet PDFs or page numbers on file</span></div>
+    </div>
+    <p><code>worklist-existing-parts.csv</code> lists the 136 existing parts that need work. The <code>missing</code> column names the empty fields, and <code>confirm_part_number</code> is <code>true</code> where the ordering code needs checking against a manufacturer or distributor source. For these parts, send rows with only the columns you filled plus part_id, and a sources.csv row for each.</p>
+  </section>
+
+  <section id="validation">
+    <h2>How your delivery is checked</h2>
+    <ol class="steps">
+      <li><span><b>Import dry run.</b> Your rows are merged onto the current library and run through the generator's own Library CSV import without saving. It checks file encoding, column names, allowed values, number formats and cross-field rules, for example that only <code>VDC</code> parts have power_supplies above 0 and that input_v_min is not above input_v_max. Any row that fails is returned with its row number and the reason.</span></li>
+      <li><span><b>Source coverage.</b> Every filled value must have a sources.csv row with a matching value, an existing PDF in <code>pdfs/</code>, a page number and a revision. Every powered part needs inrush and input range rows, filled or <code>not_given</code>.</span></li>
+      <li><span><b>Sanity checks.</b> The nominal voltage must sit inside the input range. Power must be plausible for the part type. Every row in an alt_group must name the same function, and each brand should cover low, mid and high.</span></li>
+      <li><span><b>Spot check against the PDFs.</b> A sample of values is read back from the cited page, including every inrush figure and every corrected value. If more than a few in the sample are wrong, the delivery is returned for a full recheck.</span></li>
+      <li><span><b>Report back.</b> You get one list of problems by file, row and column. Once it is clean, the delivery is imported as a new library version.</span></li>
+    </ol>
+  </section>
+
+  <section id="categories">
+    <h2>Category list</h2>
+    <p class="mono" style="line-height:1.9">network_switch · firewall · gateway · patch_panel · gps_clock · rtac · io_chassis · workstation · monitor · peripheral · sfp · cable_manager · serial_cable · component · lamp · door_switch · fan · vent_filter · thermostat · relay · socket · change_over_diode · annunciator · software · cable · accessory</p>
+    <p class="muted">If none fits, use <code>component</code> and say what it is in the sources note.</p>
+  </section>
+
+  <footer>Column names and allowed values match the generator's Library CSV export as of October 2026. A delivery built from the blank template imports without editing the headers.</footer>
+</main>

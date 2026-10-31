@@ -43,13 +43,16 @@ workbook or the spec. Those are open questions for Ali, not changes.
 | `electrical.yaml` | MCBs, auxiliary contact, terminal blocks, grounding busbars |
 | `workstation-loose.yaml` | Monitor, annunciator and mount, keyboard, software, loose cables, patch cords |
 
-`contractor-2026-10-31/` holds the contractor's consolidated library delivery of 2026-10-31 as it
-arrived, for reference only: CSV tables, evidence ledgers and manifests. It is not read by the
-generator, `build.py` or `pack`, which take only the YAML files above. The 82 source PDFs (about
-220 MB) and the review workbook stay out of git; `pdf_manifest.csv` lists each PDF with its SHA-256.
-Its parts reach the library only through the records above, one reviewed step at a time
-([review](https://claude.ai/artifact/AZ8CXFEtk6a91J1uDTy745)).
-`contractor-return-2026-10-31.md` and its CSV list what still goes back to the contractor.
+`contractor-2026-10-31/` holds the contractor's consolidated library for reference only: CSV
+tables, evidence ledgers and manifests. It is the second version (v2), the contractor's answer to
+the return list, which replaced the delivery of 2026-10-31 in place (git history keeps the first);
+`CONTRACTOR-RESPONSE.txt` and `contractor_responses.csv` answer each ask. It is not read by the
+generator, `build.py` or `pack`, which take only the YAML files above. The 131 source PDFs (about
+320 MB) and the review workbook stay out of git; `pdf_manifest.csv` lists each PDF with its SHA-256.
+Its parts reach the shipped library only through `data/library/additions.yaml`, one reviewed step
+at a time ([review](https://claude.ai/artifact/AZ8CXFEtk6a91J1uDTy745)).
+`contractor-return-2026-10-31.md` and its CSV list what went back to the contractor after the
+first version.
 
 ## Record format
 
