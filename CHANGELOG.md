@@ -7,6 +7,16 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Power Consumption agrees with the BOM: the "MCB rating per device" column
+  shows the rating of the row's own branch MCB (2 A in the example, where it
+  showed 1 A), and each row is drawn at its part's own voltage (ADR 0028,
+  Proposed). The check report names AC loose loads, which the DC-only
+  External Equipment block leaves out of the totals. When no cabinet has
+  fans, the steel coefficient box no longer lands on the constants box. The
+  device nameplate row is a normal BOM row, not a tall white grounding row.
+
 ### Changed
 
 - `data/device-db/contractor-2026-10-31/` holds v2 of the contractor's

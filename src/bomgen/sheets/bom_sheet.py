@@ -127,7 +127,7 @@ def _lines(sheet: SheetBuilder, table: BomTable, first_row: int) -> dict[int, in
 
 
 def _line(sheet: SheetBuilder, row: int, line: BomLine, sr_no: CellValue) -> None:
-    grounding = line.group is Group.H
+    grounding = _is_grounding(line)
     values: tuple[CellValue, ...] = (
         sr_no,
         line.tag,
@@ -169,9 +169,14 @@ def _qty(line: BomLine) -> CellValue:
     return qty
 
 
+def _is_grounding(line: BomLine) -> bool:
+    """A grounding busbar row; the nameplate row is group H too, but a library part."""
+    return line.group is Group.H and line.part_id is None
+
+
 def _height(line: BomLine) -> float:
     text_lines = line.description.count("\n") + 1
-    if line.group is Group.H:
+    if _is_grounding(line):
         return LINE_HEIGHT * (text_lines + 2)
     height = max(BODY_MIN_HEIGHT, LINE_HEIGHT * text_lines)
     if len(line.ordering_code or "") > LONG_CODE_CHARS:

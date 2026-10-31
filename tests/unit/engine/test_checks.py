@@ -10,6 +10,7 @@ from bomgen.checks import (
     dc_float_checks,
     dc_main_checks,
     di_capacity_check,
+    external_ac_checks,
     library_check,
     part_number_checks,
     render_json,
@@ -19,7 +20,7 @@ from bomgen.checks import (
 )
 from bomgen.engine.units import expand_devices
 from bomgen.library_store.store import LibraryRef
-from bomgen.models.bom import BomLine, Group, PanelBom
+from bomgen.models.bom import BomLine, Group, LooseTable, PanelBom
 from bomgen.models.calc import (
     BranchMcb,
     CabinetThermal,
@@ -400,3 +401,34 @@ def test_a_device_without_a_part_number_warns() -> None:
             message="no part number; the BOM prints the library model",
         )
     ]
+
+
+def loose_line(part: str) -> BomLine:
+    return BomLine(group=Group.B, description=part, qty=2, part_id=part)
+
+
+def test_an_ac_loose_load_is_reported_as_left_out_of_the_totals() -> None:
+    # Power Consumption: External Equipment holds station DC loads only, so an AC loose
+    # load is named rather than dropped silently.
+    lib = library(
+        powered(
+            "PRN", "component", supply_type="VAC", voltage_v=230, unit_power_w=622, power_supplies=0
+        ),
+        powered("ANN", "annunciator", power_supplies=1),
+        device("CABLE"),
+    )
+    loose = LooseTable(
+        title=("t", "t"),
+        lines=tuple(loose_line(p) for p in ("PRN", "ANN", "CABLE")),
+        host_panel="ws",
+    )
+    assert external_ac_checks(loose, lib) == [
+        CheckItem(
+            check="external_ac",
+            status=CheckStatus.WARN,
+            subject="PRN",
+            message="2 x 622 W AC left out of the power and heat totals: "
+            "External Equipment counts station DC loads only",
+        )
+    ]
+    assert external_ac_checks(None, lib) == []

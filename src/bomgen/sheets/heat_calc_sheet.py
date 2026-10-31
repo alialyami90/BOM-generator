@@ -49,8 +49,9 @@ def heat_calculations_sheet(
     btu_h = {block.panel_id: block.total_btu_h for block in heat.dissipation}
     calc = _Calc(sheet, dissipation_sheet, totals, btu_h, cabinet_names, constants)
 
-    row = 3
     forced = [c for c in heat.cabinets if c.ventilation is Ventilation.FORCED]
+    # A natural block's coefficient box (I:M) on rows 3-5 would run into the constants box.
+    row = 3 if forced else 7
     for cabinet in forced:
         row = calc.forced(row, cabinet)
     if heat.line_up is not None:

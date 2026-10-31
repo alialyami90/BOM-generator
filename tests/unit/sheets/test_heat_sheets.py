@@ -308,7 +308,56 @@ def test_cabinet_without_powered_devices_has_zero_heat_loss() -> None:
     m = heat_calculations_sheet(
         "Heat Calculations", heat, "Heat Dissipation", dissipation.totals, names, CONSTANTS
     )
-    assert value(m, "B3") == "TOTAL HEAT DISSIPATION FOR SPARE CABINET"
-    assert value(m, "D5") == 0
-    assert formula(m, "G5").text == "=D5/3.41"
-    assert formula(m, "G5").result == 0
+    assert value(m, "B7") == "TOTAL HEAT DISSIPATION FOR SPARE CABINET"
+    assert value(m, "D9") == 0
+    assert formula(m, "G9").text == "=D9/3.41"
+    assert formula(m, "G9").result == 0
+
+
+def test_steel_coefficient_box_stays_apart_from_the_constants_box() -> None:
+    # Formatting -> Heat Calculations: the constants box is J3:L5 and the steel coefficient
+    # has its own box, so a first natural-convection block starts below the constants.
+    heat = HEAT.model_copy(update={"cabinets": (NATURAL,), "line_up": None})
+    m = heat_calculations_sheet("H", heat, "Heat Dissipation", {"ws": 13}, NAMES, CONSTANTS)
+    assert [value(m, c) for c in ("I3", "M3", "I4", "M4", "I5", "M5")] == [None] * 6
+    assert value(m, "B7") == "TOTAL HEAT DISSIPATION FOR WS CONSOLE"
+    assert value(m, "M7") == 5.5
+    assert formula(m, "D16").text == "=G9/(D13*$M$7)"
+
+
+def test_a_vac_group_b_device_is_an_ac_row_at_its_own_voltage_on_both_sheets() -> None:
+    # ADR 0025: a VAC group B unit sits in its cabinet's AUX AC LOAD block; ADR 0028: at
+    # its own voltage, with its AC branch rating in P. Heat Dissipation reads that row.
+    gw = pline("psa1", 4, AC, 73).model_copy(update={"voltage_v": 120, "branch_mcb_a": 2})
+    power_model = POWER.model_copy(
+        update={
+            "cabinets": (
+                CabinetPower(
+                    panel_id="psa1",
+                    dc=PowerBlock(supply_type=DC, lines=(L1,), margin=0.25),
+                    ac=PowerBlock(supply_type=AC, lines=(gw, LAMP), margin=0.25),
+                ),
+            ),
+            "external": None,
+        }
+    )
+    sources = {**SOURCES, gw.source: source("1", 7, "Gateway")}
+    power = power_sheet("Power Consumption", power_model, sources, NAMES, CONSTANTS)
+    p, row = power.model, power.rows[gw.source]
+    assert value(p, "B10") == "AUX AC LOAD"
+    assert row == 13  # the first row of the AC block
+    assert [value(p, f"{c}{row}") for c in "CDP"] == ["120V", "VAC", 2]
+    assert formula(p, f"N{row}").text == f"=I{row}/120"
+
+    heat = HeatResult(
+        dissipation=(CabinetHeat(panel_id="psa1", lines=tuple(map(heat_line, (L1, gw, LAMP)))),),
+        cabinets=(FORCED,),
+        line_up=None,
+    )
+    diss = heat_dissipation_sheet(
+        "Heat Dissipation", heat, "Power Consumption", power.rows, sources, NAMES, CONSTANTS
+    )
+    d = diss.model
+    assert formula(d, "E6").text == f"='Power Consumption'!E{row}"
+    assert formula(d, "E6").result == "Gateway"
+    assert formula(d, "L8").result == pytest.approx(6 * 77 + 73 + 11)

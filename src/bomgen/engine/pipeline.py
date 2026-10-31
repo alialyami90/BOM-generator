@@ -64,7 +64,8 @@ def build(loaded: LoadedSubstation) -> BuildResult:
     if library.catalogues.housekeeping.nameplate is None:
         plates = []
     loose = loose_table(material, substation, [(d.panel, d.rows) for d in drafts], library)
-    power = power_consumption(panels, loose, library, loaded.constants)
+    fed = {item.part_id for item in loose_items if item.part_id and item.fed_from}
+    power = power_consumption(panels, loose, library, loaded.constants, fed)
     fan_pair_m3h = FORCED_FANS * library.catalogues.housekeeping.fan.airflow_m3h
     heat = heat_result(
         [(d.panel, d.ventilation) for d in drafts], power, fan_pair_m3h, loaded.constants
