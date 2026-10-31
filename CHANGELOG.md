@@ -26,7 +26,7 @@ project uses [Semantic Versioning](https://semver.org/).
 - Dragging a device on the Panels board works in the installed app. The board
   now drags with pointer events instead of HTML5 drag-and-drop, which never
   reached the page in the Windows app; the drop rules, the live green or red
-  panel and Esc to cancel are unchanged (M19).
+  panel and Esc to cancel are unchanged (M19, #238).
 - The installed app no longer carries the design prototype's illustrative
   substation, library and checks. When the window cannot reach the Python
   engine it says so on every page, with Try again, instead of showing example
