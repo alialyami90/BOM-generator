@@ -7,11 +7,28 @@ Stable knowledge stays where it lives ([`CLAUDE.md`](../../CLAUDE.md), [`docs/pl
 [`docs/spec/`](../spec/), the ADRs in [`docs/decisions/`](../decisions/)); these files link to it
 rather than copy it.
 
-## 1. Overview (2026-10-30)
+## 1. Overview (2026-10-31)
 
-- Repo `alialyami90/BOM-generator`, default branch `main`, at `723507a` (#228, the last of the
-  audit fix PRs).
-- **Open PRs: none. Unmerged or uncommitted work: none.**
+- Repo `alialyami90/BOM-generator`, default branch `main`, at `628ff1c` (#253, M26 device
+  nameplates). Check open PRs with `list_pull_requests` before starting.
+- **Part picking, M19–M26 (2026-10-31).** Ali's feedback on v0.2.1, designed in
+  [`part-picking-design`](../superpowers/specs/2026-10-31-part-picking-design.md), questions Q42–Q53.
+  All merged:
+  - M19 Panels board pointer drag (#238).
+  - M20 part overrides, BOM part number and SFP choice as derived parts (#239, ADR 0024).
+  - M21 panel priority and waist-height placement (#241).
+  - M22 Parts page and Device preview design (#240).
+  - M23 Parts page replaces Network (#244), plus a cable manager per network device (#243) and the
+    M23 follow-ups (#250).
+  - M24 Device preview: the engine (#245, `top_u` pins and `engine/preview.py`) and the app (#247).
+  - M25 one AC branch MCB per VAC device (#248, ADR 0025), shown in the preview (#252).
+  - M26 device nameplates (#253, ADR 0026): a group H row per panel and a Nameplates sheet.
+  - The shipped library went psa-devices 1.2.0 (#249) → 1.3.0 (#251, twelve researched parts in
+    `data/library/additions.yaml`) → **1.4.0** (#253, the nameplate part and role).
+    `examples/project.yaml` pins it, and the app tests read the version from there.
+- **Not released yet:** M19–M26 sit in `[Unreleased]`; the last release is still v0.2.1.
+- **Gate on `628ff1c`:** ruff and format pass (319 files), mypy passes (240 files), pytest has
+  2852 passed. The table under "Verification" below is from 2026-10-30.
 - **Audit of 2026-10-30** ([Claude Doc "Repo audit after v0.2.1"](https://claude.ai/artifact/DXyJnufrHguPCCVWgeLGPh)): no code defect; 14
   findings, one a product risk (the installed app fell back to the prototype's illustrative data when
   the bridge was missing) and the rest documents behind the code. Fixed in #227 (app fallback
@@ -34,10 +51,12 @@ rather than copy it.
   round-trip writers (ADR 0021), and the loose material sheet and page (ADR 0020, ADR 0022). v0.2.1 is
   the UI polish pass from [`docs/ui/polish-v02.md`](../ui/polish-v02.md) (items 1–16, #205–#208) plus
   #194, #198–#201.
-- **Numbers.** ADRs 0001–0023 are all Accepted; next free ADR **0024**. Open questions Q1–Q41 are
-  resolved; next free question **Q42**. Next milestone after M18 is **M19**.
-- **Changelog** is current through #228; `[Unreleased]` holds #228 (Changed) and #227 (Fixed).
-- **Next feature work waits on Ali's testing feedback on v0.2.1** (README "Status" says so).
+- **Numbers.** ADRs 0001–0024 are Accepted. Ali accepted 0025 on 2026-10-31, but its file and
+  README row may still say Proposed until the lead records it. 0026 is Proposed and on a card to Ali.
+  Next free ADR **0027**. Q51 (annunciator) and Q54 (power of the -2 SEL computers) are open; the
+  next free question is **Q55**. The next milestone is **M27**.
+- **Changelog** `[Unreleased]` holds every PR through #253.
+- **Next engine work:** the model changes (step 4) from A4's plan.
 
 ### Verification (`f2234f7`, after #227)
 
@@ -407,7 +426,9 @@ Last code change: `ef65800` (#100).
   rack block ending in its active device, ADR 0013 R5 amendment); #100 M17 engine
   (`DeviceMove.position`/`PairMove.position`, every override pins its units, `PanelFill.is_pinned` /
   `position`, R7 amendment, plus the `position` model fields and schema); #176 plan §3 `position`
-  example.
+  example; #241 M21 (panel priority, waist-height anchor for KVM/console); #245 M24 (`top_u` pins on
+  `DeviceMove`/`PairMove`, exclusive with `position`; `placement()` → `Placement`; `blocks()`;
+  `runs()`; issues `pin-overlaps`, `pin-outside-rack`, `pinned-away-from-waist`; ADR 0013 amended).
 - What works: L1 ranked then picked, L2 from kept units, generated port plans, the 32U fill with A/B
   streams, common devices spread, removals, overrides with positions and pins, blank plates,
   `port-capacity`/`replaced-panel`/`missing-panel`/`stale-*` issues, `panels:` list reconciliation. The
@@ -497,8 +518,10 @@ consume `BuildResult`.
 | `engine/ac_dist.py` | group E: CINC and the AC branches, from `catalogues.mcb` |
 | `engine/dc_dist.py` | group F: Q1/Q2 mains, Q1.n/Q2.n branches, spares, QCODs, `branch_sizing` (ADR 0019), all from `catalogues.dc_mcb` (ADR 0023) |
 | `engine/mcb.py` | `rating_at_least`, `rating_above`, `mcb_line` take an `McbCatalogue`; aux contact rows; `alarms_wired` |
-| `engine/terminals.py` | group G: terminal strips (X1, X3-AC, X4-DC1/DC2, XDIN, …) |
+| `engine/terminals.py` | group G: terminal strips (X1, X3-AC, X4-DC1/DC2, XDIN, …); `unit_strips` for the preview |
 | `engine/grounding.py` | group H: grounding busbars |
+| `engine/nameplates.py` | group H: the nameplate row (last) and each plate's text, the MCB short tag (M26, ADR 0026) |
+| `engine/preview.py` | `device_preview(loaded, overrides)`: every unit with its U, MCBs (`BranchMcb.unit_tag`, `feed`) and strips (M24) |
 | `engine/assemble.py` | step 11: separators and SR.NO in group order |
 | `engine/power.py` | step 4: Power Consumption rows and totals (2,177.5 W DC, 1,090.3 W AC on the example) |
 | `engine/thermal.py` | heat checks and the ventilation choice (forced and natural) |
@@ -511,7 +534,10 @@ History: M2 #22; M3 #36; M4 #44, #46; M7 engine #58 (ADR 0016), #67 (Q34, ADR 00
 0023 engine side #154 (`f319f64`; group F, branch sizing and the `dc_float` item use
 `catalogues.dc_mcb`; group E and CINC keep `catalogues.mcb`); shipped-library sizing tests #171
 (`8be24d5`: SEL-3555-GW/RTAC and SEL-3355 at 6 A, set by inrush 20 A ÷ 9.05 = 2.2 A; their feeds'
-spares 6 A; QCOD spares and others 2 A; mains unchanged); #157 power footnote fields in `models/calc.py`.
+spares 6 A; QCOD spares and others 2 A; mains unchanged); #157 power footnote fields in `models/calc.py`;
+#239 M20 derived parts (ADR 0024); #248 M25 (a VAC unit gets its own group E branch from
+`catalogues.mcb`, CINC carries them, ADR 0025); #253 M26 (`engine/tags.short_tag` shared by groups
+E, F and the plates; the nameplate role `catalogues.housekeeping.nameplate`; `BuildResult.nameplates`).
 
 What works: the example reproduces the spec's values with goldens citing their sections (power and
 heat in `test_engine_power_heat.py`; groups A–H in `expected_groups_*.py`/`test_engine_groups_*.py`;
@@ -541,6 +567,7 @@ warnings; Q7 was replaced by Q35 and ADR 0019.
 | #48 | 02241ed | M5: `sheets/` (BOM, Power Consumption, Heat Dissipation, Heat Calculations, header/footer, `build_workbook`), pycel golden |
 | #69 | d01dcbe | Writes `<stem>.tmp-<hex><suffix>` beside the target, then `os.replace`; failures raise `WriterError`, target untouched |
 | #96 | 4c97af7 | M18 sheet side (ADR 0020): Loose Material sheet; `output.sheet_names.loose_material`; revision compare falls back to host sheet table 1 for older issues |
+| #253 | 628ff1c | M26: Nameplates sheet after Loose Material (`sheets/nameplate_sheet.py`, `output.sheet_names.nameplates`), only when the build has plates |
 | #157 | a21e675 | Power footnotes: one row per `output.power_footnotes` entry, two rows below the NOTES, merged B:L, wrapped, 15 pt per line, inside the print area (Q40) |
 
 - `build_workbook(loaded, result, *, logo=None) -> WorkbookModel` (`sheets/workbook.py`). Sheet order:
