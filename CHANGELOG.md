@@ -9,6 +9,10 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Every AC-powered device unit in a panel gets its own AC branch MCB in group E,
+  after the socket and before the spare, sized like the DC branches from the AC
+  catalogue; CINC is raised to carry them (M25, ADR 0025 proposed). The
+  example has no AC device, so its BOM is unchanged.
 - Device preview engine (M24): `engine.preview.device_preview` lays out the
   substation, builds it in memory and lists every generated unit with its
   panel, top U, branch MCBs, terminal strips and overridden values, plus the

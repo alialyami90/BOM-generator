@@ -946,6 +946,9 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
   [`superpowers/plans/2026-10-31-m23-parts-page.md`](superpowers/plans/2026-10-31-m23-parts-page.md).
 - **M24 — Device preview page.** Engine API for per-unit MCBs and positions, the device table, and the
   panel elevation with dragging.
+- **M25 — AC branch MCB per VAC device.** One group E branch per VAC unit after the socket, sized
+  like the DC branches; CINC carries them (ADR 0025, Q52). Plan:
+  [`superpowers/plans/2026-10-31-m25-ac-device-branches.md`](superpowers/plans/2026-10-31-m25-ac-device-branches.md).
 
 ## 5. Testing strategy
 
@@ -1283,3 +1286,10 @@ Preview's panel elevation gets dragging too (M24).
 goes to loose material by default, with a "Mount in panel" switch on its Parts row for a panel
 annunciator. No M22 spec or engine rule covers the switch yet, so M23 leaves it out. To ask Ali:
 is a panel-mounted annunciator needed, and if so, which panel takes it?
+
+**Q52 — AC branch MCBs for VAC devices** (M25). *Resolved 2026-10-31:* Ali chose "one AC branch
+MCB per VAC unit, after the socket". A1 approved the rest (ADR 0025, Proposed): branches in group B
+order before the spares, sized by `branch_sizing` on the AC set; the spare stays the largest
+housekeeping branch; CINC is raised above the largest VAC branch and to the panel's AC design
+current (to confirm with Ali); an alarmed part adds an AC aux contact; the load text is the
+unit's short tag.
