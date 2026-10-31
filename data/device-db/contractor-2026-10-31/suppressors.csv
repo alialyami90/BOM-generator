@@ -1,2 +1,3 @@
 ﻿part_id,ac_nominal_min_v,ac_nominal_max_v,dc_nominal_v,tolerance_pct,protective_circuit,indicator,source_pdf,source_page,source_bundle,bundle_page,notes
 IPR-SUPP-2900944,120,230,110,20,Varistor,Yellow LED,pdfs/Phoenix Contact_Suppressor_VD-EL0009-007_p291-295.pdf,2,VD-EL0009-007.pdf,292,
+IPR-SUPP-2900944.WEIDMULLER-MID,110,230,,,"RC element, 100 ohm / 220 nF",Green LED,pdfs/Weidmuller_7760056045.pdf,2,,,"Rated control voltage 110-230 VAC. Plug-in D-SERIES socket accessory, not a DC varistor or free-wheel diode. Dimensions W15.5 x H12.5 x D32 mm. Quantity 10 is packaging, not project quantity. Verify compatible relay socket; the catalogue shows different RIM modules with distinct circuits and AC/DC suitability."

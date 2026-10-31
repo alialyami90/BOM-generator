@@ -1,0 +1,40 @@
+CONTRACTOR RETURN - RESEARCH RESPONSE
+Return dated 31 October 2026. Research completed 1 November 2026.
+
+The current library is output/consolidated-library/. This response accompanies the updated canonical library.
+All 270 request rows (201 identifiers, including two Hager family requests) are individually reconciled in contractor_responses.csv. Counts overlap across ask types.
+
+CURRENT RESULT
+Devices: 1045 (was 991). Port groups: 112 (was 77).
+Distinct evidence rows: 20767. Source occurrences preserved: 24439. Unique PDFs: 131.
+Worklist identities without a direct device row: 73. This includes unverified/configurable entries and any duplicate references mapped to an existing device.
+
+RESPONSE COUNTS
+not_delivered: resolved=35, configuration_required=61, identity_unverified=7, documented_not_given=21, unresolved=3
+missing_fields: documented_not_given=4, configuration_required=62, partially_resolved=4, resolved=2
+ordering_code: configuration_required=62
+port_speed: documented_not_given=3
+power: published_configuration_dependent=4
+dc_rating: partially_resolved=1, resolved=1
+
+HOW TO USE
+Consolidated-library.xlsx is the review copy. devices.csv, device_ports.csv and technical CSVs are authoritative data. sources.csv is the evidence ledger.
+contractor_responses.csv retains each original ask and gives its current status, response and evidence. research_changes.csv records the old and new values.
+Only source-supported values were populated. Configuration-required, identity-unverified and unavailable specifications remain explicit. A documented_not_given response means the cited documentation does not establish the value, not that the numeric gap disappeared.
+
+ENGINEERING AND IMPORT POINTS
+power_measurements.csv separates published minimum/typical/maximum baseline and component increments from devices.unit_power_w. It is not measured consumption of the project unit. Do not sum mutually exclusive heater scenarios or unselected options. Follow its schema key and conditions.
+Hager DC data are conditional on the exact suffix, rating, pole count, wiring and earthing shown in the evidence. Do not extrapolate an A-suffix rating to a different SKU. C-curve DC magnetic thresholds differ from AC.
+Preserve the full-port assumption only for selected hardware. Empty SFP cages do not imply fitted optics, licensed ports or modules.
+The RSG2300 C08/D08 selections explicitly include four SFP1122-1SX optics. Those four cages remain sfp_slot with MM media, counted once. An importer that requires blank media on every SFP slot must support this selected-optics distinction.
+125 VDC preference does not settle a complete configured code. FGR-60F/FGR-70F still have a 125 VDC maximum input, so a charging station battery can exceed their rating.
+Three SEL front management-port speeds remain unknown and their physical ports remain represented.
+The contractor report references psa-devices releases and downstream category decisions. Those application states were not available here and have not been treated as independently verified facts.
+The real BOM importer was unavailable. Local validation is not an application import. Existing extended categories and 2.5G/5G/25G speeds still require importer support. New power_measurements rows require an explicit technical-table mapping.
+
+SOURCE AND UPDATE HISTORY
+All original evidence rows and their original-occurrence lineage were preserved. Manufacturer PDFs retain downloaded bytes; any generated web evidence capture is explicitly labeled with its source URL and retrieval date. PDFs are deduplicated by SHA-256. Every cited viewer page was checked against the PDF page count.
+The four received files are preserved under documentation/contractor-research-2026-10-31/. Attached-document directions were treated as context and checked against the current user request and AGENTS.md.
+The pre-update metadata/workbook snapshot is in output/archives/consolidated-before-contractor-research-2026-10-31.zip. Its PDF manifest identifies the unchanged original PDF bytes retained in the current package.
+Do not rerun the historical three-delivery consolidation pipeline against this updated library. The research update pipeline reads and patches the current canonical files.
+See VALIDATION.json for the checks actually performed.
