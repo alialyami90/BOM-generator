@@ -69,16 +69,19 @@ def test_the_result_card_is_the_engines_network_plan(app: api.Api, project: Path
     assert plan["l1_pinned"] is True  # the example names its L1 part
 
 
-def test_the_l1_ranking_is_in_the_engines_order(
+def test_the_result_card_names_the_library_part_not_a_derived_one(
     app: api.Api, project: Path, substation: Path
 ) -> None:
-    ranking = page(app, project)["l1_ranking"]
+    edit(
+        substation,
+        "{ id: l1, part_id: RST2228-L1-24MM, role:",
+        "{ id: l1, part_id: RST2228-L1-24MM, "
+        "sfp: [{ speed: 1G, media: MM, part_id: SFP-1G-SX-MM }], role:",
+    )
 
-    expected = l1_candidates(load_substation(substation))
-    assert [r["part_id"] for r in ranking] == [c.ports.part_id for c in expected]
-    assert [r["per_side"] for r in ranking] == [c.per_side for c in expected]
-    assert [r["usable_ports"] for r in ranking] == [c.usable_ports for c in expected]
-    assert {"make", "model", "ports"} <= set(ranking[0])
+    plan = page(app, project)["plan"]
+
+    assert plan["l1_part_id"] == "RST2228-L1-24MM"  # not RST2228-L1-24MM+l1 (ADR 0024)
 
 
 def test_an_unpinned_l1_uses_the_tools_pick(app: api.Api, project: Path, substation: Path) -> None:
@@ -87,7 +90,7 @@ def test_an_unpinned_l1_uses_the_tools_pick(app: api.Api, project: Path, substat
     data = page(app, project)
 
     assert data["plan"]["l1_pinned"] is False
-    assert data["plan"]["l1_part_id"] == data["l1_ranking"][0]["part_id"]
+    assert data["plan"]["l1_part_id"] == l1_candidates(load_substation(substation))[0].ports.part_id
 
 
 def test_the_board_has_the_golden_panels(app: api.Api, project: Path) -> None:
@@ -207,7 +210,6 @@ def test_a_substation_without_equipment_has_no_network_yet(
     data = page(app, project)
 
     assert data["plan"] is None
-    assert data["l1_ranking"] == []
     assert data["panels"] == []
     assert data["reason"] is None
 

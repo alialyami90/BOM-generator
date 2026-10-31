@@ -16,6 +16,15 @@ project uses [Semantic Versioning](https://semver.org/).
   unit by its top U (`top_u`, exclusive with `position`); a pin that leaves
   the rack or overlaps another is a layout error (ADR 0013 amended). Branch
   MCB records name the unit and feed they serve.
+- App: the Parts page replaces Network (M23). Each device row picks its
+  library part and can carry a BOM part number, this design's overrides of the
+  part's height, power, supply, voltage, supplies, inrush and load type (a value
+  equal to the library is not written), an SFP choice per speed and media, a
+  Cable manager switch on network rows and, on the time server, accessories
+  written as loose material items. Changing a part clears its overrides, SFP
+  choices and part number. Rows move up or down, are added by category and
+  removed with Undo; a new substation starts from a setup card. `#/network`
+  opens Parts. The L1 ranking and the Change… dialog are gone.
 - A switch, patch panel, firewall or gateway can have or not have a cable
   manager (`cable_manager` on the equipment entry or panel row): the layout
   gives or drops its 1U manager and the BOM counts it accordingly; unset keeps

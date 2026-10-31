@@ -490,3 +490,11 @@ The rules are in ADR 0013 and the design spec (R1–R10).
 - Measure, then claim: in Playwright check a select's text width vs `clientWidth - 34`, a table's right
   edge vs the next column, `getClientRects().length > 1` for a broken id, the gap between `.savebar` and
   `#main`'s bottom.
+- The app window's minimum is 1280×720 (`window.py` `MIN_SIZE`): screenshots at 1024 show a sideways-
+  scrolled shell, not a narrow layout. Take 1280 and 1440.
+- Playwright and toasts: several toasts can carry Undo at once; click `.toast:last-child
+  [data-toast-undo]`, not the first `.toast button`.
+- ruamel 0.19 kept the "- " flag through a flow mapping: after a first list item `- { a: 1 }  # note`
+  the next block mapping came out on one line. `_PaddedEmitter` resets `no_newline` on "{" (M23).
+- `test_every_endpoint_the_screens_call_exists` needs a literal endpoint name in every `Bridge.call`;
+  a helper that passes the name in a variable fails it.

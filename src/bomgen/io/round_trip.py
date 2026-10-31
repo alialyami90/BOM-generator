@@ -34,6 +34,9 @@ class _PaddedEmitter(Emitter):
     ) -> None:
         if indicator == "{":
             whitespace = False  # the first key gets a space after the brace
+            # ruamel 0.19 keeps the "- " flag through a flow mapping, so after a first list
+            # item like `- { a: 1 }  # note` the next block mapping lost its line breaks
+            self.no_newline = False
         elif indicator == "}":
             need_whitespace = True
         super().write_indicator(indicator, need_whitespace, whitespace, indention)

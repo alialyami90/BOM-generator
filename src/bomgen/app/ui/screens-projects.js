@@ -53,7 +53,7 @@
         <ol class="steps" style="max-width:600px;gap:18px">
           <li>${icon('library')}<div><b>1. Install a device library</b><div class="muted small">The library is the list of devices a project can use. It arrives as a <span class="mono">.bomlib</span> file from whoever maintains it.</div></div></li>
           <li>${icon('folder')}<div><b>2. Create a project, or import one</b><div class="muted small">A colleague can send you a <span class="mono">.bomproj</span> file. Import it to get their project with all its substations.</div></div></li>
-          <li>${icon('panels')}<div><b>3. Add a substation</b><div class="muted small">Enter the network and equipment. The panels are laid out for you, and you can adjust them.</div></div></li>
+          <li>${icon('panels')}<div><b>3. Add a substation</b><div class="muted small">Pick the parts and enter the network. The panels are laid out for you, and you can adjust them.</div></div></li>
           <li>${icon('build')}<div><b>4. Check, preview and build the workbook</b></div></li>
         </ol>
         <div class="row" style="margin-top:var(--space-5)">
@@ -252,7 +252,7 @@
   /* ---------- Create, rename and delete (docs/ui/editing.md "Creating", plan M17d) ---------- */
   const err = (id, e) => { const el = $('#' + id); if (el) el.innerHTML = banner('bad', esc(e.message)); };
   const settle = () => { S.dirty = false; };  // dialog inputs are not unsaved page edits
-  const openSub = (id) => { S.sub = id; go('#/network'); };
+  const openSub = (id) => { S.sub = id; go('#/parts'); };
   ACTIONS['new-project'] = () => Bridge.call('new_project_form', '').then((f) => {
     dialog({ title: 'New project', body: `<div class="stack">
       ${field('Project name', input('np-name', '', { placeholder: 'e.g. North Gas Plant' }), `<span id="np-folder">The folder is made from the name in <span class="mono">${esc(f.workspace)}</span>.</span>`)}

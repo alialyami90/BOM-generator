@@ -1,4 +1,4 @@
-/* Screens: the Network result and L1 ranking, and the Panels board and list, on bomgen.app.api (plan M10c).
+/* Screens: the network Result card on Parts, and the Panels board and list, on bomgen.app.api (plan M10c).
    Every figure comes from substation_layout, which flattens M1c's layout_preview; this file only draws it.
    Moves, pins and deletes write layout.overrides and layout.removed at once through the bridge's
    writers, which refuse what the layout cannot take (docs/ui/editing.md, Panels board). */
@@ -27,19 +27,7 @@
     return LAY.state === 'loaded' ? LAY : null;
   }
 
-  /* ---------- Network: L1 ranking and Result card (called from screens-substation.js) ---------- */
-  function rankTable() {
-    const l = layout();
-    if (!l || !l.data) return `<p class="row muted small" style="margin-top:var(--space-3)"><span class="spinner"></span>Ranking the library’s L1 switches…</p>`;
-    const d = l.data, plan = d.plan;
-    if (!plan || !d.l1_ranking.length) return `<div class="empty" style="margin-top:var(--space-3)"><b>No ranking yet.</b><div class="muted small">${esc(d.reason || 'It appears once the IED count and the equipment are set.')}</div></div>`;
-    return `<p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">The engine ranks the library's L1 switches for ${plan.ied_count} IEDs, fewest switches first. The best is used unless <span class="mono">substation.yaml</span> pins another.</p>
-      <div class="table-wrap"><table class="table"><caption class="sr-only">L1 switch models ranked by the engine</caption><thead><tr><th style="width:48px;text-align:center">Rank</th><th>Model</th><th class="num" style="width:56px">Ports</th><th class="num" style="width:76px">Per side</th><th class="num" style="width:96px">Usable ports</th><th style="width:170px">Use</th></tr></thead><tbody>
-      ${d.l1_ranking.map((r, i) => { const used = r.part_id === plan.l1_part_id; return `<tr${used ? ' aria-current="true"' : ''}><td style="text-align:center">${i + 1}</td><td class="nowrap"><span class="mono">${esc(r.part_id)}</span><span class="cell-sub">${esc([r.make, r.model].filter(Boolean).join(' '))}</span></td><td class="num">${r.ports}</td><td class="num">${r.per_side}</td><td class="num">${r.usable_ports}</td>
-        <td>${used ? (plan.l1_pinned ? badge('info', 'Pinned', 'check') : badge('ok', 'Tool\'s pick', 'check')) : i === 0 ? '<span class="muted small">Tool\'s pick</span>' : ''}</td></tr>`; }).join('')}</tbody></table>
-      <div class="table-foot"><span>${plan.l1_pinned ? `Pinned in substation.yaml: the engine sizes the network with ${esc(plan.l1_part_id)}.` : 'Nothing pinned: the engine uses the top row.'}</span></div></div>`;
-  }
-
+  /* ---------- Result card (called from screens-parts.js) ---------- */
   function resultCard() {
     const l = layout();
     if (!l || !l.data) return `<div class="card"><h3>Result</h3><p class="row" style="margin-top:var(--space-3)"><span class="spinner"></span>Calculating…</p></div>`;
@@ -56,7 +44,7 @@
       <p class="muted small" style="margin-top:var(--space-2)">${ring ? 'Rings: two ports close each ring.' : 'Star: each L1 switch has one uplink to its L2 switch plus an A–B interlink.'}</p>
       <a class="btn btn--secondary btn--sm" href="#/panels" style="margin-top:var(--space-3)">${icon('panels')}See the panels</a></div>`;
   }
-  App.network = { rankTable, resultCard, reload: () => { LAY.state = 'idle'; } };  // after a Network input is saved
+  App.network = { resultCard, reload: () => { LAY.state = 'idle'; } };  // after a Parts input is saved
 
   /* ---------- Panels ---------- */
   let selected = '';  // `${panel}:${key}:${side}` of the selected unit
@@ -94,7 +82,7 @@
   };
 
   function board(d) {
-    if (!d.panels.length) return `<div class="empty" style="max-width:640px"><b>No panels yet.</b><div class="muted small" style="margin:var(--space-1) 0 var(--space-3)">Panels are placed once the network has an IED count and equipment.</div><a class="btn btn--primary" href="#/network">${icon('network')}See the network</a></div>`;
+    if (!d.panels.length) return `<div class="empty" style="max-width:640px"><b>No panels yet.</b><div class="muted small" style="margin:var(--space-1) 0 var(--space-3)">Panels are placed once the network has an IED count and equipment.</div><a class="btn btn--primary" href="#/parts">${icon('parts')}Open Parts</a></div>`;
     let sel = null;
     learn(d);
     d.panels.forEach((p) => p.units.forEach((u) => { if (uid(p, u) === selected) sel = { p, u }; }));
