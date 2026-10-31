@@ -1,6 +1,7 @@
-# Parts the shipped psa-devices library adds to the example library (plan Q38: the example
-# stays the spec's example project). data/library/build.py appends them after the example's
-# devices. Each part comes from the contractor's 2026-10-31 delivery
+# Parts and MCB brand sets the shipped psa-devices library adds to the example library
+# (plan Q38: the example stays the spec's example project). data/library/build.py appends
+# them after the example's. The MCB sets come from the delivery's mcbs.csv (Hager MCB
+# catalogue in VD-EL0009-007). Each part comes from the contractor's 2026-10-31 delivery
 # (data/device-db/contractor-2026-10-31/: devices.csv, device_ports.csv, and sources.csv for
 # every value); the comment names the document behind its model and power.
 # purdue_level is left out where the datasheet does not state it, so these switches are not
@@ -228,21 +229,16 @@ devices:
     height_u: 1
     input_v_min: 18
     input_v_max: 300
-
-# MCB brand sets the shipped library adds to the example's (contractor delivery, mcbs.csv:
-# Hager MCB catalogue in VD-EL0009-007, pp. 345-363). Hager's ordering pages give no DC
-# rating, so these sets have no dc_rating_v: a project refuses one as mcb_dc, and one chosen
-# as mcb with mcb_dc unset also feeds the DC branches, which the check report warns about.
 catalogue_brands:
   mcb:
-    - id: hager-mcn-2p
+    - id: hager-mcn-2p  # AC set: Hager gives no DC rating, so no dc_rating_v
       family: MCN 2P C 6 kA  # VD-EL0009-007 p. 347 (MCN201 to MCN216)
       make: Hager
       poles: 2
       ratings_a: [1, 2, 6, 10, 16]
       code_pattern: "MCN2{rating:02d}"
       trip_curve: C
-    - id: hager-ncn-2p
+    - id: hager-ncn-2p  # AC set: Hager gives no DC rating, so no dc_rating_v
       family: NCN 2P C 10 kA  # VD-EL0009-007 p. 356 (NCN201A to NCN216A)
       make: Hager
       poles: 2
