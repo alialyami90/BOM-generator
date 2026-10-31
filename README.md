@@ -13,7 +13,7 @@ setup, and page headers/footers.
 
 ## Status
 
-v0.2.1 is released ([`CHANGELOG.md`](CHANGELOG.md)). The next work waits on
+v0.3.0 is released ([`CHANGELOG.md`](CHANGELOG.md)). The next work waits on
 Ali's testing feedback on it.
 
 Done in v0.1:
@@ -92,6 +92,28 @@ Done in v0.2 (Ali's feedback on v0.1.0, tracked in
   undo and keyboard moves (ADR 0021).
 - M18: loose material on its own sheet and Preview tab (ADR 0020), with
   free-text items and the app's Loose material page (ADR 0022).
+
+Done in v0.3 (Ali's request to replace the Network section with part picking;
+milestones in `docs/plan.md` → "M19–M24 — Part picking, panel priority and
+preview"):
+
+- M19: the Panels board drags with pointer events, and hand-written panels
+  can be laid out.
+- M20: an equipment row can override its part's values, carry a BOM part
+  number and choose its SFPs, as derived parts (ADR 0024).
+- M21: generated panels stack devices by priority, with a KVM or console at
+  waist height.
+- M22 and M23: the Parts page replaces Network, with a cable manager switch
+  per network device and the Device picker for long part lists.
+- M24: the Device preview page draws each panel's front view and lists every
+  unit with its U, branch MCBs and strips; units are pinned by dragging.
+- M25: every AC-powered device gets its own AC branch MCB, and CINC carries
+  them (ADR 0025).
+- M26: device nameplates, one BOM row per panel and a Nameplates sheet
+  (ADR 0026).
+- The installer ships psa-devices 1.6.0: researched switches, firewalls,
+  RTACs and a clock, Hager AC MCB sets, and the nameplate part. 2.5G, 5G and
+  25G ports are listed but never sized for SFPs (ADR 0027 proposed).
 
 The terms project, substation, side and stream are defined in `docs/plan.md` →
 "Glossary".

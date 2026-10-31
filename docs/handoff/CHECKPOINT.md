@@ -3,6 +3,15 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-10-31: v0.3.0 released (A3, engine)
+
+- **Base:** main `46fcbe2` (#263). Docs-only PR.
+- **Done:** v0.3.0 is published (release run 41234995752) with `bomgen-setup-0.3.0.exe` and
+  `default.bomlib` (psa-devices 1.6.0). Since the last checkpoint: #256 Nameplates tab, #257 and #259
+  psa-devices 1.5.0 and 1.6.0, #258 2.5G/5G/25G port speeds (ADR 0027), #260 contractor return list,
+  #261 changelog, #263 version bump. README Status and STATE.md §1 are updated.
+- **Waiting:** ADR 0027 on a card to Ali; Q51, Q54 and Q55 open; Ali's testing feedback on v0.3.0.
+
 ## 2026-10-31: M19–M26 merged, handoff updated (A3, engine)
 
 - **Base:** main `dfcf810` (#254). Docs-only PR.
