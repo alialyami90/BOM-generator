@@ -14,7 +14,7 @@ backup. The YAML tabs stay as an advanced view (see "YAML tabs").
 
 | Kind | Where | How it behaves |
 | --- | --- | --- |
-| **Form** | Project, Substation settings, Network, hand-written panel | Edits are held until the person saves. A **save bar** appears at the foot of the page while there are unsaved changes. |
+| **Form** | Project, Substation settings, Parts, hand-written panel | Edits are held until the person saves. A **save bar** appears at the foot of the page while there are unsaved changes. |
 | **Direct action** | Create or delete a project, substation, panel or document; board moves, pins and deletes; remove a row | Writes at once, says what it did in a toast, and offers **Undo** or has a backup behind it. Never silent. |
 | **Pending set** | Library device and catalogue edits | Edits collect in a *pending changes* list. "Review and apply…" shows the diff (the same review as importing a library update) and writes one new local library version. See "Library editing (v0.2)". |
 
@@ -71,11 +71,11 @@ compares the modified time of the open project and substation files.
 | Project | Home › **New project…** (dialog) | Name, client (optional), device library (default: the active one), whether to add a first substation and its name | The folder, named from the project (shown, with "Change where projects are kept"), shared defaults from the spec, an empty document register, the library version stamp |
 | Substation | Project › Substations › **New substation…** (dialog), or **Create from this…** | Start from (blank or a copy), name, first cabinet number, tag prefix | Folder from the name, three calculation documents in the register with blank numbers, a cabinet document per panel when panels appear |
 | Document | Project › Documents › **Add** (dialog) | Substation, name, number, revision, issue date | The register key |
-| Equipment row | Network › **Add device** (picker) | The part; then role, A and B, quantity, L2 ports in the row | Defaults from the library entry |
+| Part row | Parts › **Add a device** (category menu) | The category; then the part, part number, quantity, A and B and overrides in the row | Role from the category; data from the library part |
 | Hand-written panel | Panels › **Add hand-written panel…** | Name, cabinet number, kind | Tag prefix, empty devices |
 
-A new substation opens on **Network** with a **setup card** that lists what is left, in order: the number of
-field IEDs, the equipment, then "Look at the panels". Each step is done when its data exists.
+A new substation opens on **Parts** with a **setup card** that lists what is left, in order: the number of
+field IEDs, a part for each device row, then "Generate preview". Each step is done when its data exists.
 Creating never needs a path, a file name or YAML. The folder name of a substation is fixed once it
 exists; its **name** can change at any time (Rename), so file paths in a `.bomproj` do not move.
 
@@ -150,6 +150,9 @@ yet. To move one, add it to layout.overrides in substation.yaml." and the blocks
   goes to an odd panel, a B unit only to an even one.
 - The position is the gap the pointer is in. Dropping into the same panel only changes the position.
 - Moves never re-flow other devices silently. If a move does not fit, it is refused.
+- **Device preview (M22)** uses the same contract on its front views, with pointer events as on the board
+  (M19). A drop at a U writes a pin with that position. A KVM or console may be dropped away from waist
+  height: the pin wins, and the unit is marked "Pinned away from waist height".
 
 ### Keyboard
 
@@ -251,16 +254,32 @@ shows what a new record starts with. Labels are the user-facing words; model nam
 | Loose material | Moved to its own page, **Loose material** in the sidebar (see "Loose material (v0.2)") |
 | YAML | Advanced view of the file |
 
-### Substation › Network
+### Substation › Parts (M22)
 
-| Field | Control | Notes |
-| --- | --- | --- |
-| Field IEDs | Number, required | Never a BOM row; sizes the L1 switches. A new substation marks it required |
-| Topology | Star or Ring (segmented) | Ring shows *Switches per ring* |
-| L1 switch model | Ranked table, **Pin** per row, **Unpin** | The engine ranks; the UI pins only |
-| Equipment rows | Part (picker; **Change part…**), role, A+B, quantity, L2 ports, remove | Quantity is replaced by "Sized" on an L1 row, because the sizing sets it. Height comes from the library |
-| Spares | Ports kept free (%), spare SFPs per L1, rack space kept free (U), spare DC branches per feed, spare AC branches | Start from the project's defaults; changed ones are marked |
-| Result | Read-only card | Updates as the fields change; shows a busy state |
+Part picking design §3 and §4 (ADR 0024 when M20 lands). All fields write `substation.yaml`.
+
+| Field | Control | Writes | Validation sentence |
+| --- | --- | --- | --- |
+| Field IEDs | Number, required | `network.ied_count` | "Enter the number of field IEDs, for example 40." |
+| Topology | Star or Ring (segmented) | `network.topology` | — |
+| Network fine tuning | Number fields in a disclosure: switches per ring (Ring), L1 uplinks per switch, A–B interlink, L3 uplinks per L2, ports kept free (%), DC branches per feed, AC branches, rack U kept free | `network.*`, `spares.*` | As today's Network fields; changed ones are marked |
+| Part | Device picker filtered to the row's category | `equipment[i].part_id` | "Pick a part from the library." (empty on save) · "Not in psa-devices 1.1.0. Pick another part." |
+| Part number | Text, mono, optional | `equipment[i].ordering_code` | None; empty means the library model is printed, and Checks warns |
+| Qty | Number ≥ 1; "Sized" on L1 and L2 | `equipment[i].qty` | "Enter a whole number, 1 or more." |
+| A and B | Checkbox | `equipment[i].redundant` | — |
+| Detail values | Height (U), power (W), supply (AC or DC), voltage (V), supplies (0, 1, 2), inrush (A), load type | `equipment[i].overrides.<field>` | The library check's sentence for that field, for example "A part on AC has no second supply: set supplies to 0 or 1." |
+| SFP per media and speed | Select, first option automatic | `equipment[i].sfp[]` | "Pick an SFP for 1G multi-mode, or leave it automatic." |
+| Time accessories | Part, quantity, remove; *Add accessory* | `equipment[]` rows with role `time_accessory` | As Part and Qty |
+| Row order | Move up / Move down in the row menu | the order of `equipment` | — |
+| MCB make and series | Two selects (AC, DC) | `catalogue_choice.mcb`, `catalogue_choice.mcb_dc` | As in Settings |
+| Terminal blocks | Select | `catalogue_choice.terminal_blocks` | As in Settings |
+
+**Overrides.** A detail value is an override only when it differs from the library part's value; typing
+the library value back removes the override on save, and *Reset* or *Reset all* do the same at once. An
+override on a sized switch row with no part is not offered (the M20 loader refuses it with "pick the
+switch to override its data"). Overrides never change the library.
+
+**Generate preview** needs saved parts: with unsaved changes it is disabled with the reason.
 
 ### Panel (hand-written; generated panels keep their read-only tabs)
 
@@ -273,7 +292,7 @@ shows what a new record starts with. Labels are the user-facing words; model nam
 | Document | Register document (select), revised cells list with **Add** |
 
 A **generated panel** shows the same tabs read-only under a banner that says what writes them and links to the
-page that does (Network, Panels board). Those fields are not disabled inputs that look editable: they are
+page that does (Parts, Panels board). Those fields are not disabled inputs that look editable: they are
 shown as plain values.
 
 ## Library editing (v0.2)

@@ -8,7 +8,9 @@ from the substations and auto-layout design
 (`docs/superpowers/specs/2026-10-28-substations-and-auto-layout-design.md`), and extended for
 v0.2 editing (`editing.md`). The app (M10, M16–M18, v0.2.1) implements it; where the built app
 differs, `screens.md` "Departures in the built app" says so, and the prototype is not changed
-to match.
+to match. M22 adds the **Parts** page (replacing Network) and **Device preview** from the part picking
+design (`docs/superpowers/specs/2026-10-31-part-picking-design.md`) to the specs and the prototype;
+the app builds them in M23 and M24.
 
 ## Read in this order
 
