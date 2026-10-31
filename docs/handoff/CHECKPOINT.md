@@ -3,6 +3,15 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-10-31: v0.3.1 released (A1, lead)
+
+- **Base:** main `f0fa53c` (#268). Docs-only PR.
+- **Done:** v0.3.1 is published (release run 41241782759) with `bomgen-setup-0.3.1.exe` and
+  `default.bomlib` (psa-devices 1.7.0). Since the last checkpoint: #264 handoff, #265 psa-devices
+  1.7.0 (Hubbell fibre shelves), #266 ADR 0027 Accepted, #267 fix for "StopIteration:" on Settings
+  and Parts of a blank substation (Ali's report), #268 version bump.
+- **Waiting:** Q51, Q54 and Q55 open; Ali's testing feedback on v0.3.1.
+
 ## 2026-10-31: v0.3.0 released (A3, engine)
 
 - **Base:** main `46fcbe2` (#263). Docs-only PR.
