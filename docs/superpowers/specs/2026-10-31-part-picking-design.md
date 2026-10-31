@@ -96,7 +96,7 @@ Everything on the page is saved together with the existing Save/Discard bar.
 
 **How overrides reach the engine (recommended approach).** The loader turns each equipment entry
 that has an `ordering_code` or `overrides` into a **derived part**: a copy of the library part
-with those fields replaced, under the id `<part_id>~<equipment id>`, added to that substation's
+with those fields replaced, under the id `<part_id>+<equipment id>` (`~` is not a valid `PartId` character; `+` is), added to that substation's
 resolved library only. The layout and every engine step then use that part id unchanged. The
 library files are never written.
 

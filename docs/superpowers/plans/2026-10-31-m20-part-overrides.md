@@ -74,13 +74,20 @@ def test_overrides_need_a_part_id_on_a_sized_switch():
     with pytest.raises(ValidationError, match="pick the switch to override its data"):
         Equipment(id="l1", role="l1_switch", redundant=True, overrides={"height_u": 2})
 
+
 def test_sfp_choice_is_for_l1_and_l2_switches_only():
     with pytest.raises(ValidationError, match="sfp is for L1 and L2 switches"):
-        Equipment(id="gw", part_id="X", role="other",
-                  sfp=[{"speed": "1G", "media": "MM", "part_id": "SFP-1"}])
+        Equipment(
+            id="gw",
+            part_id="X",
+            role="other",
+            sfp=[{"speed": "1G", "media": "MM", "part_id": "SFP-1"}],
+        )
+
 
 def test_partoverrides_values_lists_only_what_was_set():
     assert PartOverrides(height_u=2).values() == {"height_u": 2}
+
 
 def test_layout_defaults_are_1000_and_200_mm():
     assert Defaults().layout == LayoutDefaults(waist_height_mm=1000, rack_start_mm=200)
@@ -117,22 +124,42 @@ device with `derived_from` set is refused by `Library` ("derived_from is set by 
 
 ```python
 def test_part_number_box_is_the_bom_ordering_code():
-    lib, problems = derive_parts(LIB, sub_with(Equipment(id="ows", part_id="SEL-3355",
-                                 role="operator_ws", ordering_code="3355#ABC")))
+    lib, problems = derive_parts(
+        LIB,
+        sub_with(
+            Equipment(id="ows", part_id="SEL-3355", role="operator_ws", ordering_code="3355#ABC")
+        ),
+    )
     part = next(d for d in lib.devices if d.part_id == "SEL-3355+ows")
     assert (part.code, part.derived_from, problems) == ("3355#ABC", "SEL-3355", [])
 
+
 def test_override_replaces_only_the_values_given():
-    lib, _ = derive_parts(LIB, sub_with(Equipment(id="ows", part_id="SEL-3355",
-                          role="operator_ws", overrides={"unit_power_w": 120})))
+    lib, _ = derive_parts(
+        LIB,
+        sub_with(
+            Equipment(
+                id="ows", part_id="SEL-3355", role="operator_ws", overrides={"unit_power_w": 120}
+            )
+        ),
+    )
     part = next(d for d in lib.devices if d.part_id == "SEL-3355+ows")
     assert (part.unit_power_w, part.height_u) == (120, 3)
 
+
 def test_an_override_that_breaks_a_library_rule_is_a_located_problem():
-    _, problems = derive_parts(LIB, sub_with(Equipment(id="ows", part_id="SEL-3355",
-                               role="operator_ws", overrides={"supply_type": "VAC"})))
-    assert problems == [(("equipment", 0, "overrides"),
-                         "power_supplies above 0 needs supply_type VDC")]
+    _, problems = derive_parts(
+        LIB,
+        sub_with(
+            Equipment(
+                id="ows", part_id="SEL-3355", role="operator_ws", overrides={"supply_type": "VAC"}
+            )
+        ),
+    )
+    assert problems == [
+        (("equipment", 0, "overrides"), "power_supplies above 0 needs supply_type VDC")
+    ]
+
 
 def test_a_derived_id_taken_by_a_library_part_is_a_problem(): ...
 def test_two_substations_get_their_own_derived_parts(): ...  # load_project on a two-sub fixture
