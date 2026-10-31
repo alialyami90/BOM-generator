@@ -33,6 +33,7 @@ from bomgen.engine.sizing import (
 from bomgen.engine.tags import first_number
 from bomgen.io.derived import effective_part_id
 from bomgen.io.loader import LoadedSubstation, load_substation
+from bomgen.io.references import NETWORK_DEVICES
 from bomgen.models.library import Category, Media, PortSpeed, PurdueLevel
 from bomgen.models.panel import (
     DeviceInstance,
@@ -718,6 +719,10 @@ def _rows(panel: PanelFill, loaded: LoadedSubstation) -> list[DeviceInstance]:
         first = run[0]
         entry = entries[first.device]
         start = first_number(devices[first.part_id]) + first.n - 1 if first.n > 1 else None
+        # the BOM counts a generated panel's managers from the layout (ADR 0013, Q32)
+        managed = None
+        if devices[first.part_id].category in NETWORK_DEVICES:
+            managed = first.cable_manager_u == 1
         rows.append(
             DeviceInstance(
                 part_id=first.part_id,
@@ -726,7 +731,7 @@ def _rows(panel: PanelFill, loaded: LoadedSubstation) -> list[DeviceInstance]:
                 lan=_LAN[first.side],
                 hwio_points=entry.hwio_points,  # a row total, as on DeviceInstance
                 first_nn=start,
-                cable_manager=entry.cable_manager,
+                cable_manager=managed,
             )
         )
     return rows

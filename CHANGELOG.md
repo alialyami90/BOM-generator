@@ -41,6 +41,8 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- A rack-mounted firewall in a generated panel gets its cable manager row on
+  the BOM; the layout already gave it the 1U (ADR 0013, Q32).
 - Dragging a device on the Panels board works in the installed app. The board
   now drags with pointer events instead of HTML5 drag-and-drop, which never
   reached the page in the Windows app; the drop rules, the live green or red

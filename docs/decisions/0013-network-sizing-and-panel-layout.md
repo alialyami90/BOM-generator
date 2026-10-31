@@ -93,11 +93,14 @@ R1–R10 are in the design document named in ADR 0012.
 
   *Amended (Ali, 2026-10-31, M22 review):* a network device can have or not have its
   cable manager. `cable_manager` on an equipment entry (and on a panel row) is true,
-  false or unset; unset keeps each step's category rule, true or false overrides it
-  for a switch, patch panel, firewall or gateway and is refused on any other part. The
-  layout gives the unit its 1U manager only when it has one (without it the R5 plate
-  rule applies as for any device), and writes the choice on the generated row so the
-  BOM's cable-manager count follows it.
+  false or unset; unset keeps the rule above (a rack switch, firewall or patch panel
+  has one, a gateway does not), true or false overrides it for a switch, patch panel,
+  firewall or gateway and is refused on any other part. The layout gives the unit its
+  1U manager only when it has one (without it the R5 plate rule applies as for any
+  device) and writes the answer on every generated row of those four categories, and
+  the BOM counts the managers from those rows, as Q32 says. This fixes a rack firewall
+  in a generated panel, which took the manager's U but got no BOM row. Hand-written
+  panels keep the M2 count (switches and patch panels) unless a row sets the flag.
 - **Pipeline**: a step 0 (`engine/sizing.py`, `engine/layout.py`,
   `bomgen layout`) runs before the existing steps 1–15; `bomgen build
   --no-layout` keeps hand-written panels working.
