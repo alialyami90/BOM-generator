@@ -1,6 +1,6 @@
 # 0024. Part overrides and derived parts
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-10-31)
 - Date: 2026-10-31
 - Spec sections: Inputs the tool needs (2. Substation and its panels); Data model and generation
   order (step 0); Derivation rules (group C, SFPs)

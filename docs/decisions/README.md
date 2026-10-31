@@ -29,4 +29,4 @@ An ADR stays "Proposed" until Ali accepts it in review.
 | 0021 | [Round-trip YAML writers, checked before they write](0021-round-trip-writers.md) | Accepted (Ali, 2026-10-28) |
 | 0022 | [Free-text loose items](0022-free-text-loose-items.md) | Accepted (Ali, 2026-10-28) |
 | 0023 | [Separate AC and DC MCB choices](0023-separate-ac-and-dc-mcb-choices.md) | Accepted (Ali, 2026-10-28) |
-| 0024 | [Part overrides and derived parts](0024-part-overrides-and-derived-parts.md) | Proposed |
+| 0024 | [Part overrides and derived parts](0024-part-overrides-and-derived-parts.md) | Accepted (Ali, 2026-10-31) |
