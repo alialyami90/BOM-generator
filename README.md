@@ -187,9 +187,9 @@ on Windows and the XDG data directory elsewhere (override with
 `BOMGEN_LIBRARY_HOME`).
 
 ```bash
-bomgen library pack data/library/psa-devices.yaml --name psa-devices --version 1.8.0
-bomgen library import psa-devices-1.8.0.bomlib --dry-run   # show the part diff only
-bomgen library import psa-devices-1.8.0.bomlib             # verify, install, activate
+bomgen library pack data/library/psa-devices.yaml --name psa-devices --version 1.9.0
+bomgen library import psa-devices-1.9.0.bomlib --dry-run   # show the part diff only
+bomgen library import psa-devices-1.9.0.bomlib             # verify, install, activate
 bomgen library list                                        # installed versions
 bomgen library rollback psa-devices                        # back to the previous version
 bomgen library export psa-devices                          # back up the active version as a .bomlib
@@ -206,7 +206,7 @@ from (for example `1.1.0+local.1`) and activated; the release version stays
 installed.
 
 ```bash
-bomgen library export-csv psa-devices                      # writes psa-devices-1.8.0-csv.zip
+bomgen library export-csv psa-devices                      # writes psa-devices-1.9.0-csv.zip
 bomgen library export-csv psa-devices --out csv/           # or one .csv file per table
 bomgen library import-csv psa-devices csv/ --dry-run       # every check and what would change
 bomgen library import-csv psa-devices csv/ --notes "new SEL alternatives"

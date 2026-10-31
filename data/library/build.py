@@ -3,8 +3,9 @@
 The shipped library is examples/library.yaml with each original part's datasheet inrush
 and input voltage range from data/device-db added (plan Q38), and its make as the device
 database records it, followed by the parts and MCB brand sets in
-data/library/additions.yaml. The example library leaves them out so the golden values
-stay those of the spec's example workbook.
+data/library/additions.yaml, with that file's overrides applied to the example's parts and
+catalogues. The example library leaves them out so the golden values stay those of the
+spec's example workbook.
 
 Usage, from the repository root: ``python data/library/build.py``. It rewrites
 data/library/psa-devices.yaml; tests/unit/test_shipped_library.py fails while the file
@@ -13,6 +14,7 @@ is out of date.
 
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -37,8 +39,9 @@ HEADER = """\
 # The shipped psa-devices library: examples/library.yaml plus each original part's
 # datasheet inrush and input voltage range from data/device-db/ (plan Q38), and its make
 # as the device database records it, then the parts and MCB brand sets in
-# data/library/additions.yaml.
+# data/library/additions.yaml, with its overrides applied.
 """
+OVERRIDE = "override (data/library/additions.yaml)"
 
 
 def datasheets(device_db: Path = DEVICE_DB) -> dict[str, dict[str, Any]]:
@@ -74,14 +77,40 @@ def build(example: str, figures: dict[str, dict[str, Any]], additions: str) -> s
             if offset == 0:
                 device.yaml_add_eol_comment("datasheet (data/device-db)", key)
     extra = load_text(additions)
+    overrides = extra.get("overrides") or {}
+    parts = {device["part_id"]: device for device in data["devices"]}
+    for part_id, changes in (overrides.get("devices") or {}).items():
+        if part_id not in parts:
+            raise ValueError(f"the overrides name {part_id}, which the example lacks")
+        _override(parts[part_id], changes)
+    _override(data["catalogues"], overrides.get("catalogues") or {})
     data["devices"].extend(extra["devices"])
     data["catalogue_brands"]["mcb"].extend(extra["catalogue_brands"]["mcb"])
-    text = dump_text(data)
+    text = re.sub(r"(\S) +# " + re.escape(OVERRIDE), r"\1  # " + OVERRIDE, dump_text(data))
     body = text.split("\n", 1)[1] if text.startswith("# yaml-language-server") else text
     lines = body.splitlines(keepends=True)
     while lines and lines[0].startswith("#"):
         lines.pop(0)  # the example's own header describes the example workbook
     return HEADER + "".join(lines)
+
+
+def _override(target: Any, changes: Any, owner: tuple[Any, str] | None = None) -> None:
+    """Set each of ``changes``' values in ``target``, nested mappings key by key. The
+    override comment replaces the line's own: on the key, or on the block key ``owner``
+    that holds a one-line mapping."""
+    for key, value in changes.items():
+        if isinstance(value, dict) and isinstance(target.get(key), dict):
+            flow = target[key].fa.flow_style()
+            _override(target[key], value, (target, key) if flow else owner)
+            continue
+        if key not in target and "alt_group" in target:
+            target.insert(list(target).index("alt_group") + 1, key, value)
+        else:
+            target[key] = value
+        mark, at = owner or (target, key)
+        if at in mark.ca.items:
+            mark.ca.items[at][2] = None  # the end-of-line comment only
+        mark.yaml_add_eol_comment(OVERRIDE, at)
 
 
 def main() -> None:

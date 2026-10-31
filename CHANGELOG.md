@@ -14,6 +14,14 @@ project uses [Semantic Versioning](https://semver.org/).
   load type), and the Hager NCN 2P set is DC rated, 250 V with the two poles
   in series (6 kA; 15 kA at 125 V) and a DC magnetic multiple of 7, so it can
   be chosen as `mcb_dc`. Hager MCN stays an AC set.
+- The installer ships psa-devices 1.9.0. The shipped library now applies
+  overrides from `data/library/additions.yaml` to the example's parts, and
+  `examples/library.yaml` and the goldens keep the issued workbook. With them,
+  the SK 3110 thermostat draws 0 W and each fan gives 460 m³/h with the SK
+  3243.200 outlet filter, which replaces SK 3238.200 (plan Q29). NAP-K55 takes
+  0U. The gateway tags drop the example's `DHPCC`. The five contractor
+  switches carry Purdue levels as a design call: L2 for those with 10G
+  uplinks, L1 for the 1G bay switches.
 
 ### Changed
 
