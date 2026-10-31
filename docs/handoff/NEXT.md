@@ -45,7 +45,7 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
   either. Don't move golden values without an ADR. Only Ali marks ADRs Accepted. Don't commit `.xlsx`.
   Don't force-push (LESSONS "Branch restart"). Don't bump the version outside a release PR (on main it
   publishes at once). Don't push tags.
-- Next free numbers: ADR 0024, Q42, milestone M19.
+- Next free numbers: ADR 0027, Q55, milestone M27.
 
 ## 3. Questions for Ali (one card each, recommendation marked)
 
@@ -61,14 +61,15 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
    table in Excel's Print Preview?" Options "It fits" (recommended: the size is computed to fit at the
    print scale) and "It overlaps". See section 14 for what each answer means.
 4. **Q23** (issued sheets vs masters): keep the default (the masters) until he answers.
+5. **Q51** (annunciator mounted in a panel) and **Q54** (power of the -2 SEL computers) are open in
+   plan §6.
 
-**Next work:** the part-picking milestones M19–M24 (Q42–Q50), designed in
-[`part-picking-design`](../superpowers/specs/2026-10-31-part-picking-design.md).
+**Next work:** M19–M26 are merged (STATE.md §1). Engine model changes (step 4) come from A4's plan.
 
 ## 4. When Ali's feedback arrives
 
 Write it into `docs/backlog.md` as numbered points (as for v0.2), propose milestones in `docs/plan.md`
-(from M19), give decisions an ADR (0024 on) or a plan question (Q42 on), and deliver one PR per
+(from M27), give decisions an ADR (0027 on) or a plan question (Q55 on), and deliver one PR per
 milestone.
 
 ## 5. Next release (v0.2.2 or v0.3.0)
@@ -241,7 +242,7 @@ Don't place pins before the automatic fill (pins-first re-flows other devices); 
 
 ## 13. BOM rule engine
 
-No task is open. Likely work:
+No task is open; the next is the model changes (step 4) in A4's plan. Likely work:
 - **A DC aux-contact choice.** If Ali wants DC aux contacts to follow `mcb_dc`, add the choice key to the
   models, then switch `aux_contact_line` in `engine/dc_dist.py` to it. Tests first, e.g.
   `test_dc_aux_contacts_use_the_dc_aux_choice`.

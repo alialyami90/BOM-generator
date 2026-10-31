@@ -14,6 +14,9 @@ project uses [Semantic Versioning](https://semver.org/).
   `hager-ncn-2p` (NCN 2P C, 10 kA), 1 to 16 A. Hager gives no DC rating, so
   they are AC sets: a project refuses one as `mcb_dc`, and the check report
   warns when one feeds the DC branches through `mcb`.
+- App: the Preview page shows the Nameplates sheet (M26, ADR 0026) as a tab
+  after Loose Material, one row per plate with its panel, plate text and
+  device.
 - Device nameplates (M26, ADR 0026 proposed): each panel BOM ends with one
   nameplate row whose quantity is its tagged devices, and a new Nameplates sheet
   after Loose Material lists every plate's text (the tag as the MCB rows print
