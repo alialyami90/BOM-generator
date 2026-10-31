@@ -378,7 +378,7 @@ Three input sets rebuild the whole workbook: a device library (one record per pa
 | min\_branch\_mcb\_a | Deprecated: still read, reported when above the computed rating, sets nothing | 2 |
 | alarm\_on\_branch\_mcb | Adds DC aux contacts for its branches | false (true for firewall) |
 | hwio\_points | Hardwired alarm DIs (col H) per unit | 1 |
-| ports | Count and type per port group, for SFP sizing | 24 × 100FX MM fixed; 4 × 1G SFP slots |
+| ports | Count and type per port group, for SFP sizing. Speeds 10M, 100M, 1G and 10G; 2.5G, 5G and 25G describe a port but are never sized for SFPs (ADR 0027) | 24 × 100FX MM fixed; 4 × 1G SFP slots |
 | children | Kit parts added as child rows, with qty rule | – (FOPP: spool 1, splice holder 1, pigtails = cores) |
 | terminals | Strip code + count per unit it adds | – (DI module: XDIP‹slot› × 58; RTAC port: XRTAC-Cn × 5) |
 | loose\_items | Parts shipped loose, not in the panel | – (GPS clock: antenna, LMR-400 cables, surge kit, mount) |
