@@ -3,6 +3,16 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-10-31: M24 Device preview page (A2, app)
+
+- **Base:** main after #245 (M24 engine). PR for review by A1.
+- **Done:** `app/device_preview.py` and the `device_preview` endpoint; `drag.js` shared by the board
+  and the preview; `screens-device-preview.js`; Generate preview and Go to the row on Parts.
+- **Checked:** gate passes; the M19 board drag E2E unchanged; the Device preview E2E on the example
+  with generated panels covers Down, Unpin, Arrow Up, an A unit refused on a B panel, Esc, drag to
+  pin with Undo, Go to the row and an overflow, with no console errors. Screens are in
+  `/mnt/project-files/a11-screens/m24-device-preview/`.
+
 ## 2026-10-31: M23 Parts page (A2, app)
 
 - **Branch** `claude/project-thread-ufgt03`, on main after #243 (`cable_manager`). PR for review by A1.

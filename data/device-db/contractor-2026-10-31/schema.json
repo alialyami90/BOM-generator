@@ -1,0 +1,3697 @@
+{
+  "version": "2.0-consolidated",
+  "blankMeaning": "unknown / not selected / not applicable; never coerce to zero",
+  "joinKey": "part_id",
+  "tables": {
+    "devices": {
+      "file": "devices.csv",
+      "rows": 991,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "category",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "make",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "model",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "ordering_code",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "description_template",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "tag_type",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "purdue_level",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "tag_pattern",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "supply_type",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "voltage_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "unit_power_w",
+          "type": "number",
+          "unit": "W",
+          "nullable": true
+        },
+        {
+          "name": "load_type",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "power_supplies",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "min_branch_mcb_a",
+          "type": "number",
+          "unit": "A",
+          "nullable": true
+        },
+        {
+          "name": "alarm_on_branch_mcb",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "hwio_points",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "di_inputs",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "cores",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "height_u",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "excluded_from_power",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "alt_group",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "tier",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "inrush_a",
+          "type": "number",
+          "unit": "A",
+          "nullable": true
+        },
+        {
+          "name": "inrush_ms",
+          "type": "number",
+          "unit": "ms",
+          "nullable": true
+        },
+        {
+          "name": "input_v_min",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "input_v_max",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "one row per part_id",
+      "template": "templates/devices.csv"
+    },
+    "device_ports": {
+      "file": "device_ports.csv",
+      "rows": 77,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "seq",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "count",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "speed",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "media",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "usable_for",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/device_ports.csv"
+    },
+    "sources": {
+      "file": "sources.csv",
+      "rows": 18998,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "column",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "pdf_file",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "doc_title",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "doc_number",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "doc_revision",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "doc_date",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "url",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "basis",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "exact_part_seen",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "note",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/sources.csv"
+    },
+    "fans": {
+      "file": "fans.csv",
+      "rows": 1,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "frequency_1_hz",
+          "type": "number",
+          "unit": "Hz",
+          "nullable": true
+        },
+        {
+          "name": "power_1_w",
+          "type": "number",
+          "unit": "W",
+          "nullable": true
+        },
+        {
+          "name": "current_1_a",
+          "type": "number",
+          "unit": "A",
+          "nullable": true
+        },
+        {
+          "name": "airflow_chopped_1_m3_h",
+          "type": "number",
+          "unit": "m3/h",
+          "nullable": true
+        },
+        {
+          "name": "airflow_pleated_1_m3_h",
+          "type": "number",
+          "unit": "m3/h",
+          "nullable": true
+        },
+        {
+          "name": "frequency_2_hz",
+          "type": "number",
+          "unit": "Hz",
+          "nullable": true
+        },
+        {
+          "name": "power_2_w",
+          "type": "number",
+          "unit": "W",
+          "nullable": true
+        },
+        {
+          "name": "current_2_a",
+          "type": "number",
+          "unit": "A",
+          "nullable": true
+        },
+        {
+          "name": "airflow_chopped_2_m3_h",
+          "type": "number",
+          "unit": "m3/h",
+          "nullable": true
+        },
+        {
+          "name": "airflow_pleated_2_m3_h",
+          "type": "number",
+          "unit": "m3/h",
+          "nullable": true
+        },
+        {
+          "name": "width_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "height_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "installation_depth_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "cutout_width_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "cutout_height_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "ip_standard",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "recommended_prefuse_a",
+          "type": "number",
+          "unit": "A",
+          "nullable": true
+        },
+        {
+          "name": "temp_min_c",
+          "type": "number",
+          "unit": "degC",
+          "nullable": true
+        },
+        {
+          "name": "temp_max_c",
+          "type": "number",
+          "unit": "degC",
+          "nullable": true
+        },
+        {
+          "name": "weight_kg",
+          "type": "number",
+          "unit": "kg",
+          "nullable": true
+        },
+        {
+          "name": "life_50hz_h",
+          "type": "number",
+          "unit": "h",
+          "nullable": true
+        },
+        {
+          "name": "life_60hz_h",
+          "type": "number",
+          "unit": "h",
+          "nullable": true
+        },
+        {
+          "name": "noise_50hz_dba",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "noise_60hz_dba",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/fans.csv"
+    },
+    "thermostats": {
+      "file": "thermostats.csv",
+      "rows": 1,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "setpoint_min_c",
+          "type": "number",
+          "unit": "degC",
+          "nullable": true
+        },
+        {
+          "name": "setpoint_max_c",
+          "type": "number",
+          "unit": "degC",
+          "nullable": true
+        },
+        {
+          "name": "switching_difference_k",
+          "type": "number",
+          "unit": "K",
+          "nullable": true
+        },
+        {
+          "name": "switching_tolerance_k",
+          "type": "number",
+          "unit": "K",
+          "nullable": true
+        },
+        {
+          "name": "contact_form",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "ac_min_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "ac_max_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "dc_min_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "dc_max_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "heating_resistive_a",
+          "type": "number",
+          "unit": "A",
+          "nullable": true
+        },
+        {
+          "name": "cooling_resistive_a",
+          "type": "number",
+          "unit": "A",
+          "nullable": true
+        },
+        {
+          "name": "inductive_a",
+          "type": "number",
+          "unit": "A",
+          "nullable": true
+        },
+        {
+          "name": "dc_contact_max_w",
+          "type": "number",
+          "unit": "W",
+          "nullable": true
+        },
+        {
+          "name": "width_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "height_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "depth_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "mounting",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/thermostats.csv"
+    },
+    "switches_sockets": {
+      "file": "switches_sockets.csv",
+      "rows": 2,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "rated_ac_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "rated_dc_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "rated_current_a",
+          "type": "number",
+          "unit": "A",
+          "nullable": true
+        },
+        {
+          "name": "width_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "height_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "depth_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "cable_length_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "conductor_mm2",
+          "type": "number",
+          "unit": "mm2",
+          "nullable": true
+        },
+        {
+          "name": "ip_rating",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "gangs",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "backbox_min_depth_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "standard",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "pack_qty",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/switches_sockets.csv"
+    },
+    "relays": {
+      "file": "relays.csv",
+      "rows": 1,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "coil_voltage_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "coil_supply_type",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "coil_current_typical_ma",
+          "type": "number",
+          "unit": "mA",
+          "nullable": true
+        },
+        {
+          "name": "dissipation_max_w",
+          "type": "number",
+          "unit": "W",
+          "nullable": true
+        },
+        {
+          "name": "changeover_contacts",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "contact_material",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "response_min_ms",
+          "type": "number",
+          "unit": "ms",
+          "nullable": true
+        },
+        {
+          "name": "response_max_ms",
+          "type": "number",
+          "unit": "ms",
+          "nullable": true
+        },
+        {
+          "name": "release_min_ms",
+          "type": "number",
+          "unit": "ms",
+          "nullable": true
+        },
+        {
+          "name": "release_max_ms",
+          "type": "number",
+          "unit": "ms",
+          "nullable": true
+        },
+        {
+          "name": "gold_ac_max_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "gold_dc_max_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "gold_continuous_a",
+          "type": "number",
+          "unit": "A",
+          "nullable": true
+        },
+        {
+          "name": "gold_make_a",
+          "type": "number",
+          "unit": "A",
+          "nullable": true
+        },
+        {
+          "name": "power_contact_max_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "power_contact_continuous_a",
+          "type": "number",
+          "unit": "A",
+          "nullable": true
+        },
+        {
+          "name": "contact_make_a",
+          "type": "number",
+          "unit": "A",
+          "nullable": true
+        },
+        {
+          "name": "contact_make_ms",
+          "type": "number",
+          "unit": "ms",
+          "nullable": true
+        },
+        {
+          "name": "width_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "height_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "depth_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "temp_min_c",
+          "type": "number",
+          "unit": "degC",
+          "nullable": true
+        },
+        {
+          "name": "temp_max_c",
+          "type": "number",
+          "unit": "degC",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/relays.csv"
+    },
+    "accessories": {
+      "file": "accessories.csv",
+      "rows": 70,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "parent_family",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "pack_qty",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "unit",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/accessories.csv"
+    },
+    "relay_bases": {
+      "file": "relay_bases.csv",
+      "rows": 1,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "rated_voltage_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "rated_current_max_a",
+          "type": "number",
+          "unit": "A",
+          "nullable": true
+        },
+        {
+          "name": "connection",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "wire_min_mm2",
+          "type": "number",
+          "unit": "mm2",
+          "nullable": true
+        },
+        {
+          "name": "wire_max_mm2",
+          "type": "number",
+          "unit": "mm2",
+          "nullable": true
+        },
+        {
+          "name": "width_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "height_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "depth_with_bracket_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "strip_length_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/relay_bases.csv"
+    },
+    "suppressors": {
+      "file": "suppressors.csv",
+      "rows": 1,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "ac_nominal_min_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "ac_nominal_max_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "dc_nominal_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "tolerance_pct",
+          "type": "number",
+          "unit": "%",
+          "nullable": true
+        },
+        {
+          "name": "protective_circuit",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "indicator",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/suppressors.csv"
+    },
+    "terminal_blocks": {
+      "file": "terminal_blocks.csv",
+      "rows": 3,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "terminal_type",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "rated_voltage_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "rated_current_a",
+          "type": "number",
+          "unit": "A",
+          "nullable": true
+        },
+        {
+          "name": "nominal_wire_mm2",
+          "type": "number",
+          "unit": "mm2",
+          "nullable": true
+        },
+        {
+          "name": "wire_rigid_min_mm2",
+          "type": "number",
+          "unit": "mm2",
+          "nullable": true
+        },
+        {
+          "name": "wire_rigid_max_mm2",
+          "type": "number",
+          "unit": "mm2",
+          "nullable": true
+        },
+        {
+          "name": "wire_flexible_min_mm2",
+          "type": "number",
+          "unit": "mm2",
+          "nullable": true
+        },
+        {
+          "name": "wire_flexible_max_mm2",
+          "type": "number",
+          "unit": "mm2",
+          "nullable": true
+        },
+        {
+          "name": "connection",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "connections",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "levels",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "mounting",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "color",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "pack_qty",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "width_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "height_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "depth_7_5_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "depth_15_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "end_cover_width_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "torque_min_nm",
+          "type": "number",
+          "unit": "N.m",
+          "nullable": true
+        },
+        {
+          "name": "torque_max_nm",
+          "type": "number",
+          "unit": "N.m",
+          "nullable": true
+        },
+        {
+          "name": "strip_length_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "dissipation_nominal_w",
+          "type": "number",
+          "unit": "W",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/terminal_blocks.csv"
+    },
+    "enclosures": {
+      "file": "enclosures.csv",
+      "rows": 1,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "width_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "height_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "depth_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "ip_rating",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "nema_rating",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "color",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/enclosures.csv"
+    },
+    "keyboards": {
+      "file": "keyboards.csv",
+      "rows": 1,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "keys",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "width_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "depth_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "height_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "interface",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "current_typical_ma",
+          "type": "number",
+          "unit": "mA",
+          "nullable": true
+        },
+        {
+          "name": "touchpad_active_ma",
+          "type": "number",
+          "unit": "mA",
+          "nullable": true
+        },
+        {
+          "name": "ip_rating",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "temp_min_c",
+          "type": "number",
+          "unit": "degC",
+          "nullable": true
+        },
+        {
+          "name": "temp_max_c",
+          "type": "number",
+          "unit": "degC",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/keyboards.csv"
+    },
+    "mcbs": {
+      "file": "mcbs.csv",
+      "rows": 645,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "poles",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "pole_configuration",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "curve",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "rated_current_a",
+          "type": "number",
+          "unit": "A",
+          "nullable": true
+        },
+        {
+          "name": "catalog_breaking_capacity_ka",
+          "type": "string",
+          "unit": "kA",
+          "nullable": true
+        },
+        {
+          "name": "module_width_18mm",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "pack_qty",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "width_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "icn_ac_ka",
+          "type": "number",
+          "unit": "kA",
+          "nullable": true
+        },
+        {
+          "name": "icn_standard",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "icn_ac_voltage_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/mcbs.csv"
+    },
+    "mcb_ratings": {
+      "file": "mcb_ratings.csv",
+      "rows": 1035,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "supply_type",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "voltage_max_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "breaking_capacity_ka",
+          "type": "number",
+          "unit": "kA",
+          "nullable": true
+        },
+        {
+          "name": "rating_type",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "standard",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "ics_percent_icu",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "required_poles",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "voltage_min_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/mcb_ratings.csv"
+    },
+    "io_modules": {
+      "file": "io_modules.csv",
+      "rows": 13,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "parent_family",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "di_channels",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "do_channels",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "ai_channels",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "ao_channels",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "max_added_burden_w",
+          "type": "number",
+          "unit": "W",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/io_modules.csv"
+    },
+    "io_power_variants": {
+      "file": "io_power_variants.csv",
+      "rows": 6,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "variant",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "max_added_burden_w",
+          "type": "number",
+          "unit": "W",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/io_power_variants.csv"
+    },
+    "io_controllers": {
+      "file": "io_controllers.csv",
+      "rows": 1,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "dc_min_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "dc_max_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "ac_min_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "ac_max_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "dc_power_upper_w",
+          "type": "number",
+          "unit": "W",
+          "nullable": true
+        },
+        {
+          "name": "dc_power_operator",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "ac_apparent_power_upper_va",
+          "type": "number",
+          "unit": "VA",
+          "nullable": true
+        },
+        {
+          "name": "inrush_upper_a",
+          "type": "number",
+          "unit": "A",
+          "nullable": true
+        },
+        {
+          "name": "inrush_operator",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "ethernet_ports",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "ethernet_speed_mbps",
+          "type": "number",
+          "unit": "Mbps",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/io_controllers.csv"
+    },
+    "servers_storage": {
+      "file": "servers_storage.csv",
+      "rows": 4,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "cpu",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "memory_slots",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "memory_max_gb",
+          "type": "number",
+          "unit": "GB",
+          "nullable": true
+        },
+        {
+          "name": "width_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "height_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "depth_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "ethernet_1g_rj45",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "memory_gb",
+          "type": "number",
+          "unit": "GB",
+          "nullable": true
+        },
+        {
+          "name": "drive_bays",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "ethernet_10g_rj45",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "weight_kg",
+          "type": "number",
+          "unit": "kg",
+          "nullable": true
+        },
+        {
+          "name": "controllers",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "ports_per_controller",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "drive_bays_lff",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "drive_bays_sff",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/servers_storage.csv"
+    },
+    "fibre_channel_switches": {
+      "file": "fibre_channel_switches.csv",
+      "rows": 4,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "physical_fc_ports",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "licensed_fc_ports",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "included_transceivers",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "transceiver_speed_gbps",
+          "type": "number",
+          "unit": "Gbps",
+          "nullable": true
+        },
+        {
+          "name": "max_port_speed_gbps",
+          "type": "number",
+          "unit": "Gbps",
+          "nullable": true
+        },
+        {
+          "name": "power_supply_count",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "full_24_port_32g_power_w",
+          "type": "number",
+          "unit": "W",
+          "nullable": true
+        },
+        {
+          "name": "idle_all_optics_loaded_w",
+          "type": "number",
+          "unit": "W",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/fibre_channel_switches.csv"
+    },
+    "data_diodes": {
+      "file": "data_diodes.csv",
+      "rows": 1,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "ac_min_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "ac_max_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "dc_min_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "dc_max_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "width_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "height_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "depth_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "weight_kg",
+          "type": "number",
+          "unit": "kg",
+          "nullable": true
+        },
+        {
+          "name": "temp_min_c",
+          "type": "number",
+          "unit": "degC",
+          "nullable": true
+        },
+        {
+          "name": "temp_max_c",
+          "type": "number",
+          "unit": "degC",
+          "nullable": true
+        },
+        {
+          "name": "power_inlets",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "admin_ports",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "data_interface",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "usb_ports",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "vga_ports",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/data_diodes.csv"
+    },
+    "network_appliances": {
+      "file": "network_appliances.csv",
+      "rows": 8,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "power_supply_count",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "power_max_w",
+          "type": "number",
+          "unit": "W",
+          "nullable": true
+        },
+        {
+          "name": "storage_gb",
+          "type": "number",
+          "unit": "GB",
+          "nullable": true
+        },
+        {
+          "name": "width_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "height_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "depth_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "dc_input_count",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/network_appliances.csv"
+    },
+    "security_sensors": {
+      "file": "security_sensors.csv",
+      "rows": 19,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "max_nodes",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "max_throughput_mbps",
+          "type": "number",
+          "unit": "Mbps",
+          "nullable": true
+        },
+        {
+          "name": "power_supply_count",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "deployment",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "ac_min_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "ac_max_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "dc_min_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "dc_max_v",
+          "type": "number",
+          "unit": "V",
+          "nullable": true
+        },
+        {
+          "name": "published_platform_power_w",
+          "type": "number",
+          "unit": "W",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/security_sensors.csv"
+    },
+    "fiber_patch_panels": {
+      "file": "fiber_patch_panels.csv",
+      "rows": 21,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "loaded",
+          "type": "boolean",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "fiber_positions",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "adapter_count",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "adapter_type",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "fiber_type",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "adapter_color",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "width_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "height_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "depth_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "max_lc_fiber_positions",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/fiber_patch_panels.csv"
+    },
+    "displays": {
+      "file": "displays.csv",
+      "rows": 18,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "diagonal_in",
+          "type": "number",
+          "unit": "inch",
+          "nullable": true
+        },
+        {
+          "name": "resolution_width_px",
+          "type": "number",
+          "unit": "pixels",
+          "nullable": true
+        },
+        {
+          "name": "resolution_height_px",
+          "type": "number",
+          "unit": "pixels",
+          "nullable": true
+        },
+        {
+          "name": "brightness_cd_m2",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "power_screen_on_max_w",
+          "type": "number",
+          "unit": "W",
+          "nullable": true
+        },
+        {
+          "name": "power_saving_w",
+          "type": "number",
+          "unit": "W",
+          "nullable": true
+        },
+        {
+          "name": "power_off_w",
+          "type": "number",
+          "unit": "W",
+          "nullable": true
+        },
+        {
+          "name": "front_protection",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/displays.csv"
+    },
+    "kvm_consoles": {
+      "file": "kvm_consoles.csv",
+      "rows": 31,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "diagonal_in",
+          "type": "number",
+          "unit": "inch",
+          "nullable": true
+        },
+        {
+          "name": "resolution_width_px",
+          "type": "number",
+          "unit": "pixels",
+          "nullable": true
+        },
+        {
+          "name": "resolution_height_px",
+          "type": "number",
+          "unit": "pixels",
+          "nullable": true
+        },
+        {
+          "name": "width_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "height_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "depth_mm",
+          "type": "number",
+          "unit": "mm",
+          "nullable": true
+        },
+        {
+          "name": "console_power_max_w",
+          "type": "number",
+          "unit": "W",
+          "nullable": true
+        },
+        {
+          "name": "kvm_power_max_w",
+          "type": "number",
+          "unit": "W",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/kvm_consoles.csv"
+    },
+    "network_switches": {
+      "file": "network_switches.csv",
+      "rows": 108,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "access_ports",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "access_configuration",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "uplink_type",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "license_family",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/network_switches.csv"
+    },
+    "network_interfaces": {
+      "file": "network_interfaces.csv",
+      "rows": 30,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "seq",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "count",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "speed",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "media",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": "templates/network_interfaces.csv"
+    },
+    "device_review": {
+      "file": "device_review.csv",
+      "rows": 991,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "match_status",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "record_scope",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "ordering_code_status",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "application_selection",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "one row per part_id",
+      "template": null
+    },
+    "existing_matches": {
+      "file": "existing_matches.csv",
+      "rows": 12,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "match_type",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "note",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_pdf",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "source_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": null
+    },
+    "datasheet_manifest": {
+      "file": "datasheet_manifest.csv",
+      "rows": 40,
+      "fields": [
+        {
+          "name": "section_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "start_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "end_page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "manufacturer",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "pdf_path",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "page_count",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "doc_revision",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "doc_date",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "doc_number",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "url",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "sha256",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": null
+    },
+    "page_coverage": {
+      "file": "page_coverage.csv",
+      "rows": 485,
+      "fields": [
+        {
+          "name": "bundle",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "page",
+          "type": "number",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "classification",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "section_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": null
+    },
+    "worklist-updated": {
+      "file": "worklist-updated.csv",
+      "rows": 1118,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "category",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "make",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "model",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "ordering_code",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "alt_group",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "tier",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "missing",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "confirm_part_number",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": null
+    },
+    "merge_duplicates": {
+      "file": "merge_duplicates.csv",
+      "rows": 2,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "input_rows",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "output_rows",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "removed_rows",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "deliveries",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "rule",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": null
+    },
+    "merge_conflicts": {
+      "file": "merge_conflicts.csv",
+      "rows": 4,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "column",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "selected_value",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "alternative_value",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "selected_delivery",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "alternative_delivery",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "resolution",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": null
+    },
+    "device_lineage": {
+      "file": "device_lineage.csv",
+      "rows": 993,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "original_part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "delivery",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "original_csv_row",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "merged_occurrences",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": null
+    },
+    "field_lineage": {
+      "file": "field_lineage.csv",
+      "rows": 7417,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "column",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "original_value",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "selected_delivery",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "selected_csv_row",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": null
+    },
+    "port_lineage": {
+      "file": "port_lineage.csv",
+      "rows": 81,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "seq",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "delivery",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "original_csv_row",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": null
+    },
+    "source_lineage": {
+      "file": "source_lineage.csv",
+      "rows": 22334,
+      "fields": [
+        {
+          "name": "delivery",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "original_csv_row",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "consolidated_csv_row",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "original_pdf_file",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": null
+    },
+    "worklist_coverage": {
+      "file": "worklist_coverage.csv",
+      "rows": 1118,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "in_consolidated_devices",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": null
+    },
+    "worklist_lineage": {
+      "file": "worklist_lineage.csv",
+      "rows": 1111,
+      "fields": [
+        {
+          "name": "original_csv_row",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "original_part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": null
+    },
+    "identity_aliases": {
+      "file": "identity_aliases.csv",
+      "rows": 1,
+      "fields": [
+        {
+          "name": "original_part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "reason",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": null
+    },
+    "related_records": {
+      "file": "related_records.csv",
+      "rows": 16,
+      "fields": [
+        {
+          "name": "part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "related_part_id",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "relationship",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "reason",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": null
+    },
+    "pdf_aliases": {
+      "file": "pdf_aliases.csv",
+      "rows": 155,
+      "fields": [
+        {
+          "name": "delivery",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "original_path",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "pdf_file",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "sha256",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": null
+    },
+    "pdf_manifest": {
+      "file": "pdf_manifest.csv",
+      "rows": 82,
+      "fields": [
+        {
+          "name": "pdf_file",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "sha256",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "bytes",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        },
+        {
+          "name": "pages",
+          "type": "string",
+          "unit": "",
+          "nullable": true
+        }
+      ],
+      "cardinality": "see table key and source context",
+      "template": null
+    }
+  },
+  "description": "Consolidated three-delivery library; source row numbers are one-based CSV rows including header.",
+  "deviceIdentity": "part_id; manufacturer and full ordering code cross-checked; punctuation and configured assemblies preserved",
+  "sourcePaths": "All active pdf_file/source_pdf/pdf_path values are relative to this folder.",
+  "historicalTables": [
+    "existing_matches",
+    "page_coverage",
+    "datasheet_manifest"
+  ],
+  "worklistNote": "Tracking list reconciled to canonical identities; original retained in documentation. Entries absent from devices are unresearched tracking records.",
+  "port_speed_values": [
+    "10M",
+    "100M",
+    "1G",
+    "2.5G",
+    "5G",
+    "10G",
+    "25G"
+  ]
+}

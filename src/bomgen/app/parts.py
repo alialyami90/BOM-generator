@@ -138,6 +138,12 @@ def _label(entry: Equipment, category: Category | None) -> str:
     return CATEGORY_LABEL.get(category, "Other") if category is not None else "Other"
 
 
+def row_label(entry: Equipment, library: Library) -> str:
+    """The name Parts gives equipment ``entry``: its role, or else its part's category."""
+    part = library.get(entry.part_id) if entry.part_id else None
+    return _label(entry, _category(entry, part))
+
+
 def _sfp_needs(loaded: LoadedSubstation) -> dict[str, set[tuple[str, str]]]:
     """The (speed, media) pairs each sized switch entry's ports use, from the layout."""
     try:

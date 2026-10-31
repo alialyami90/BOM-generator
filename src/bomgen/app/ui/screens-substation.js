@@ -157,5 +157,6 @@
   }
 
   /* The Parts screen (screens-parts.js) shares this substation page; it loads parts_page, a superset. */
-  App.sub = { real, page, waiting, problems, resets: [], reload: () => { SUB.state = 'idle'; }, set: (p) => { SUB.page = p; } };
+  /* peek: the open substation's page if it is already loaded, without loading it (the rail asks on every render). */
+  App.sub = { real, page, waiting, problems, resets: [], reload: () => { SUB.state = 'idle'; }, set: (p) => { SUB.page = p; }, peek: () => (real() && SUB.key === `${S.project.file}#${S.sub}` ? SUB.page : null) };
 })();

@@ -449,8 +449,10 @@ def test_the_deprecated_minimum_branch_mcb_is_shown_read_only_with_why() -> None
 
 def test_the_panels_board_drags_with_pointer_events_not_html5_drag_and_drop() -> None:
     """M19: HTML5 drag-and-drop does not reach the board in the installed app (WebView2), so the
-    board drags with pointer events and pointer capture, and a cancel or lost capture ends it."""
+    board drags with pointer events and pointer capture, and a cancel or lost capture ends it.
+    M24 moved the pointer handling into drag.js, shared with Device preview."""
     js = (UI_DIR / "screens-panels.js").read_text(encoding="utf-8")
+    js += (UI_DIR / "drag.js").read_text(encoding="utf-8")
     for html5 in ("draggable", "dragstart", "dragover", "dataTransfer"):
         assert html5 not in js, html5
     for event in ("pointerdown", "pointermove", "pointerup", "pointercancel", "lostpointercapture"):
@@ -497,10 +499,13 @@ def test_parts_offers_no_override_controls_on_a_sized_row_without_a_part() -> No
     assert "'Pick the switch to change its data.'" in strip
 
 
-def test_parts_has_no_generate_preview_button_until_the_device_preview_exists() -> None:
-    js = PARTS.read_text(encoding="utf-8") + (UI_DIR / "ui.js").read_text(encoding="utf-8")
-    assert "Generate preview" not in js
-    assert "#/device-preview" not in js
+def test_generate_preview_is_disabled_while_parts_has_changes() -> None:
+    js = PARTS.read_text(encoding="utf-8")
+    assert (
+        'PF.dirty() ? `<button class="btn btn--secondary" disabled title="Save your changes first."'
+        in js
+    )
+    assert "href=\"#/device-preview\">${icon('elevation')}Generate preview</a>" in js
 
 
 def test_an_empty_category_shows_a_line_not_an_empty_dropdown() -> None:
@@ -525,3 +530,43 @@ def test_network_rows_have_a_cable_manager_switch_written_through_its_endpoint()
     assert "Bridge.call('set_cable_manager'" in js
     assert '<label class="switch prow-cm"' in js
     assert "${r.cable_manager ? " in js  # network rows only
+
+
+# -- Device preview (plan M24; docs/ui/screens.md "Device preview") ---------------------------
+
+
+def test_board_and_preview_load_the_shared_drag_helper() -> None:
+    index = (UI_DIR / "index.html").read_text(encoding="utf-8")
+    assert index.index('src="drag.js"') < index.index('src="screens-panels.js"')
+    drag = (UI_DIR / "drag.js").read_text(encoding="utf-8")
+    for needle in ("setPointerCapture", "lostpointercapture", "pointercancel", "< 4)", "'Escape'"):
+        assert needle in drag
+    panels = (UI_DIR / "screens-panels.js").read_text(encoding="utf-8")
+    assert "App.pointerDrag({ handle: '.dev.is-movable[data-uid]'" in panels
+    assert "setPointerCapture" not in panels
+
+
+DEVICE_PREVIEW = UI_DIR / "screens-device-preview.js"
+
+
+def test_device_preview_draws_only_what_the_engine_gives() -> None:
+    """No U, waist or MCB arithmetic in the screen beyond a unit's top U to pixels."""
+    js = DEVICE_PREVIEW.read_text(encoding="utf-8")
+    assert "Bridge.call('device_preview'" in js
+    assert "44.45" not in js  # the waist U comes from the engine (waist_u)
+    assert "d.waist_u" in js
+    assert "rating_a" in js  # MCBs as the engine sized them
+    assert "at_minimum" in js
+    assert "Bridge.call('set_layout_overrides'" in js
+    assert "Bridge.call('check_layout'" in js
+    assert "App.pointerDrag({" in js
+
+
+def test_device_preview_rail_item_follows_parts() -> None:
+    ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    parts = ui.index("navItem('#/parts'")
+    preview = ui.index("navItem('#/device-preview', 'elevation', 'Device preview'")
+    assert parts < preview < ui.index("navItem('#/panels'")
+    assert "!ns || noParts()" in ui
+    index = (UI_DIR / "index.html").read_text(encoding="utf-8")
+    assert index.index('src="drag.js"') < index.index('src="screens-device-preview.js"')

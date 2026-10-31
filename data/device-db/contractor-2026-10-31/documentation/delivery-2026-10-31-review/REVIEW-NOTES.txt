@@ -1,0 +1,331 @@
+DEVICE LIBRARY RESEARCH DELIVERY - 31 OCTOBER 2026
+Status: review draft, not approved for import or procurement.
+
+24 device records: 2 existing-part research rows and 22 proposed additions.
+20 distinct supplied PDFs used; duplicate PDF copies excluded.
+473 value/source records; 17 port groups across six switches. Original download URLs recovered from local Windows download-origin metadata; documents were not replaced with current online editions.
+
+HOW TO USE
+The three CSV headers exactly match the contractor templates. All blank cells remain blank. Engineering columns are untouched. Sources name the PDF viewer page, printed revision, and chosen variant or assumption.
+New rows are model/variant research records. Complete configured ordering codes are absent from the supplied documents; no orderable code was invented. Supply selections are provisional and explicitly marked assumed. New models are absent from the supplied worklist, but absence from the complete 329-part library cannot be checked because that library was not supplied.
+All physical switch ports are inventoried under the user instruction to assume every port configured and available. One complete fiber-rich layout is chosen for each switch; mutually exclusive media options are not added together. Management ports are separate groups and are not ordinary forwarding capacity. SFP cages retain kind sfp_slot and blank media per template, even when assumed fitted.
+Front management speeds on SEL-2731, SEL-2740S and SEL-2741 could not be specifically verified in supplied documents or the targeted manufacturer search. Their physical ports are included with speed blank and explicit source notes. These three groups require a confirmed speed before importer validation.
+SEL-2488 and SEL-2730M-EXT now contain full device records as requested. SEL-2488 retains the supplied worked-example50 W planning allowance, with its assumed basis explicit. Its description corrects the earlier SFP wording: rear Ethernet interfaces are fixed RJ45 or LC options, not SFP cages.
+Clock Ethernet and timing ports are documented in the SEL-2488 description/source notes. The contractor schema reserves device_ports.csv for switches and firewalls, so a clock is not entered as a switch.
+Power values for selected dual-supply configurations may be conservative sums of published input burden ceilings. They are identified as computed allowances, not measured consumption; redundant sharing can make actual draw lower.
+The full current library was not supplied. Values have page-level sources, but comparison and merged cross-field validation against that library remain outstanding. The generator/importer was not supplied, so its actual dry run was not executed.
+
+EXISTING PARTS HELD FOR CONFIGURATION CONFIRMATION
+SEL-3555-GW (3555#0KVC): supplied -2 generation PDF cannot confirm this configured code. Do not transfer 9 ms at 250 VDC or 100-300 VDC to the existing row without confirming generation and SEL-9331 HV supply. See the new -2 model evidence.
+SEL-3555-RTAC (3555#F2R2): supplied -2 generation PDF cannot confirm this configured code. Do not transfer 9 ms at 250 VDC or 100-300 VDC to the existing row without confirming generation and SEL-9331 HV supply. See the new -2 model evidence.
+SEL-3355 (3355#F5P8): supplied -2 generation PDF cannot confirm this configured code. Do not transfer 9 ms at 250 VDC or 100-300 VDC to the existing row without confirming generation and SEL-9331 HV supply. See the new -2 model evidence.
+
+PER-PART OPEN ITEMS
+SEL-2730M-EXT
+  Configured hash2730M#2CF9 retained; chosen fully populated fiber layout and dual-HV supplies are assumptions rather than decoded fitted options.
+  Inrush duration is not published.
+  90 W is a conservative sum of two supply ratings, not measured unit draw.
+SEL-2488
+  Manufacturer does not state inrush duration.
+  Configured hash2488#J544 is retained from supplied worklist but not decoded by the datasheet.
+  50 W total is the supplied existing project assumption, not a measured manufacturer maximum.
+  Clock Ethernet inventory is in description/source notes; it is not a switch and is therefore excluded from switch-only device_ports.csv.
+SEL-2407
+  Unfilled required/configuration fields: ordering_code
+  Complete configured ordering code is absent.
+  Antenna and accessory order codes are separate from clock; supplied manual names SEL-9524A and surge protector915900139 (p4), but complete kit selection is not established.
+SEL-2731
+  Unfilled required/configuration fields: ordering_code
+  Complete configured ordering code is absent.
+  Dual high-voltage supplies and fiber-rich fully populated port layout are provisional planning selections; exact configured ordering code remains unconfirmed.
+SEL-2740S
+  Unfilled required/configuration fields: ordering_code
+  Complete configured ordering code is absent.
+  Dual high-voltage supplies and fiber-rich fully populated port layout are provisional planning selections; exact configured ordering code remains unconfirmed.
+SEL-2741
+  Unfilled required/configuration fields: ordering_code
+  Complete configured ordering code is absent.
+  Dual high-voltage supplies and fiber-rich fully populated port layout are provisional planning selections; exact configured ordering code remains unconfirmed.
+SEL-2743
+  Unfilled required/configuration fields: ordering_code
+  Complete configured ordering code is absent.
+  Dual high-voltage supplies and fiber-rich fully populated port layout are provisional planning selections; exact configured ordering code remains unconfirmed.
+SEL-2744
+  Unfilled required/configuration fields: ordering_code
+  Complete configured ordering code is absent.
+  Dual high-voltage supplies and fiber-rich fully populated port layout are provisional planning selections; exact configured ordering code remains unconfirmed.
+SEL-311L
+  Unfilled required/configuration fields: ordering_code
+  Full configured ordering code (manufacturer configurator/order confirmation required; model alias is not a complete code)
+  Power-supply peak inrush not published in supplied datasheet
+  Power-supply inrush duration not published in supplied datasheet
+  Original download URL not retained in supplied files
+SEL-400G
+  Unfilled required/configuration fields: ordering_code
+  Full configured ordering code (manufacturer configurator/order confirmation required; model alias is not a complete code)
+  Power-supply peak inrush not published in supplied datasheet
+  Power-supply inrush duration not published in supplied datasheet
+  Original download URL not retained in supplied files
+SEL-411L
+  Unfilled required/configuration fields: ordering_code
+  Full configured ordering code (manufacturer configurator/order confirmation required; model alias is not a complete code)
+  Power-supply peak inrush not published in supplied datasheet
+  Power-supply inrush duration not published in supplied datasheet
+  Original download URL not retained in supplied files
+SEL-451-5
+  Unfilled required/configuration fields: ordering_code
+  Full configured ordering code (manufacturer configurator/order confirmation required; model alias is not a complete code)
+  Power-supply peak inrush not published in supplied datasheet
+  Power-supply inrush duration not published in supplied datasheet
+  Original download URL not retained in supplied files
+SEL-751
+  Unfilled required/configuration fields: ordering_code
+  Full configured ordering code (manufacturer configurator/order confirmation required; model alias is not a complete code)
+  Power-supply peak inrush not published in supplied datasheet
+  Power-supply inrush duration not published in supplied datasheet
+  Original download URL not retained in supplied files
+SEL-787-2
+  Unfilled required/configuration fields: ordering_code
+  Full configured ordering code (manufacturer configurator/order confirmation required; model alias is not a complete code)
+  Power-supply peak inrush not published in supplied datasheet
+  Power-supply inrush duration not published in supplied datasheet
+  Original download URL not retained in supplied files
+SEL-787-3
+  Unfilled required/configuration fields: ordering_code
+  Full configured ordering code (manufacturer configurator/order confirmation required; model alias is not a complete code)
+  Power-supply peak inrush not published in supplied datasheet
+  Power-supply inrush duration not published in supplied datasheet
+  Original download URL not retained in supplied files
+SEL-787-4
+  Unfilled required/configuration fields: ordering_code
+  Full configured ordering code (manufacturer configurator/order confirmation required; model alias is not a complete code)
+  Power-supply peak inrush not published in supplied datasheet
+  Power-supply inrush duration not published in supplied datasheet
+  Original download URL not retained in supplied files
+SEL-3350-1
+  Unfilled required/configuration fields: ordering_code
+  Full manufacturer configured ordering code is not printed in the supplied datasheet. Do not use the model name as an orderable code.
+SEL-3505
+  Unfilled required/configuration fields: ordering_code
+  Full manufacturer configured ordering code is not printed in the supplied datasheet. Do not use the model name as an orderable code.
+  Manufacturer does not publish inrush duration in supplied datasheet.
+SEL-3505-3
+  Unfilled required/configuration fields: ordering_code
+  Full manufacturer configured ordering code is not printed in the supplied datasheet. Do not use the model name as an orderable code.
+  Manufacturer does not publish inrush duration in supplied datasheet.
+SEL-3530-4
+  Unfilled required/configuration fields: ordering_code
+  Full manufacturer configured ordering code is not printed in the supplied datasheet. Do not use the model name as an orderable code.
+  Manufacturer does not publish inrush duration in supplied datasheet.
+SEL-3355-2
+  Unfilled required/configuration fields: ordering_code
+  Full manufacturer configured ordering code is not printed in the supplied datasheet. Do not use the model name as an orderable code.
+  Existing generic worklist model and configured # code do not establish this -2 generation. Do not transfer these specs to existing parts without confirmation.
+  Published12.8A/9ms inrush is at250VDC. No125VDC-specific measurement supplied.
+SEL-3555-2
+  Unfilled required/configuration fields: ordering_code
+  Full manufacturer configured ordering code is not printed in the supplied datasheet. Do not use the model name as an orderable code.
+  Existing generic worklist model and configured # code do not establish this -2 generation. Do not transfer these specs to existing parts without confirmation.
+  Published12.8A/9ms inrush is at250VDC. No125VDC-specific measurement supplied.
+SEL-3560S
+  Unfilled required/configuration fields: ordering_code
+  Full manufacturer configured ordering code is not printed in the supplied datasheet. Do not use the model name as an orderable code.
+  Manufacturer does not publish inrush duration in supplied datasheet.
+SEL-3560E
+  Unfilled required/configuration fields: ordering_code
+  Full manufacturer configured ordering code is not printed in the supplied datasheet. Do not use the model name as an orderable code.
+  Manufacturer does not publish inrush duration in supplied datasheet.
+
+WORKLIST ITEMS WITHOUT MATCHING SUPPLIED DOCUMENTS (131)
+RST2228-L2
+RST2228-L1-24MM
+FGR-60F
+SEL-2240
+NAP-F23
+SZ2500-LAMP
+SK3243-FAN
+SK3110-TH
+IPR-2903685
+NAP-K55
+FOPP-PIGTAIL-LC-SM.CORNING-LOW
+FOPP-PIGTAIL-LC-SM.CORNING-MID
+FOPP-PIGTAIL-LC-SM.PANDUIT-MID
+FOPP-PIGTAIL-LC-SM.PANDUIT-HIGH
+RST2228-L2.MOXA-LOW
+RST2228-L2.MOXA-MID
+RST2228-L2.MOXA-HIGH
+RST2228-L2.CISCO-LOW
+RST2228-L2.CISCO-MID
+RST2228-L2.CISCO-HIGH
+RST2228-L1-24MM.MOXA-LOW
+RST2228-L1-24MM.MOXA-MID
+RST2228-L1-24MM.MOXA-HIGH
+RST2228-L1-24MM.CISCO-LOW
+RST2228-L1-24MM.CISCO-MID
+RST2228-L1-24MM.CISCO-HIGH
+SEL-2730M-EXT.MOXA-LOW
+SEL-2730M-EXT.MOXA-MID
+SEL-2730M-EXT.MOXA-HIGH
+SEL-2730M-EXT.SIEMENS-MID
+SEL-2730M-EXT.SIEMENS-HIGH
+SEL-3555-GW.SIEMENS-LOW
+SEL-3555-GW.SIEMENS-MID
+SEL-3555-GW.SIEMENS-HIGH
+SEL-3555-GW.HITACHI-ENERGY-MID
+FGR-60F.CISCO-LOW
+FGR-60F.CISCO-MID
+FGR-60F.CISCO-HIGH
+FGR-60F.MOXA-LOW
+FGR-60F.MOXA-MID
+FGR-60F.MOXA-HIGH
+SEL-2488.MEINBERG-LOW
+SEL-2488.MEINBERG-MID
+SEL-2488.MEINBERG-HIGH
+SEL-2488.ARBITER-SYSTEMS-LOW
+SEL-2488.ARBITER-SYSTEMS-HIGH
+SEL-3555-RTAC.SIEMENS-LOW
+SEL-3555-RTAC.SIEMENS-MID
+SEL-3555-RTAC.SIEMENS-HIGH
+SEL-3555-RTAC.HITACHI-ENERGY-MID
+SEL-2240.SIEMENS-LOW
+SEL-2240.SIEMENS-MID
+SEL-2240.SIEMENS-HIGH
+SEL-2240.HITACHI-ENERGY-MID
+SEL-2242.SIEMENS-LOW
+SEL-2242.HITACHI-ENERGY-LOW
+SEL-2242.HITACHI-ENERGY-MID
+SEL-2242.HITACHI-ENERGY-HIGH
+SEL-2241.HITACHI-ENERGY-LOW
+SEL-2241.HITACHI-ENERGY-HIGH
+SEL-2243.HITACHI-ENERGY-LOW
+SEL-2243.HITACHI-ENERGY-MID
+SEL-2243.HITACHI-ENERGY-HIGH
+SEL-2244-2.HITACHI-ENERGY-LOW
+SEL-2244-2.HITACHI-ENERGY-MID
+SEL-2244-2.HITACHI-ENERGY-HIGH
+SEL-3355.ADVANTECH-LOW
+SEL-3355.ADVANTECH-MID
+SEL-3355.ADVANTECH-HIGH
+NAP-F23.ADVANTECH-LOW
+NAP-F23.ADVANTECH-MID
+NAP-F23.ADVANTECH-HIGH
+NAP-F23.SIEMENS-LOW
+NAP-F23.SIEMENS-MID
+NAP-F23.SIEMENS-HIGH
+KEYTEK-KBM.GETT-FORMERLY-INDUKEY-HIGH
+SZ2500-LAMP.STEGO-LOW
+SZ2500-LAMP.STEGO-MID
+SZ2500-LAMP.STEGO-HIGH
+SZ2500-LAMP.NVENT-HOFFMAN-LOW
+SZ2500-LAMP.NVENT-HOFFMAN-MID
+SZ2500-LAMP.NVENT-HOFFMAN-HIGH
+SK3243-FAN.PFANNENBERG-LOW
+SK3243-FAN.PFANNENBERG-MID
+SK3243-FAN.PFANNENBERG-HIGH
+SK3243-FAN.STEGO-LOW
+SK3243-FAN.STEGO-MID
+SK3243-FAN.STEGO-HIGH
+SK3110-TH.PFANNENBERG-LOW
+SK3110-TH.STEGO-HIGH
+IPR-2903685.FINDER-LOW
+IPR-2903685.FINDER-MID
+IPR-2903685.FINDER-HIGH
+IPR-2903685.WEIDMULLER-LOW
+IPR-2903685.WEIDMULLER-MID
+IPR-2903685.WEIDMULLER-HIGH
+IPR-SUPP-2900944.WEIDMULLER-MID
+IPR-BRACKET-2900954.FINDER-HIGH
+NAP-K55.ADVANTECH-LOW
+NAP-K55.ADVANTECH-MID
+NAP-K55.ADVANTECH-HIGH
+NAP-K55.SAMSUNG-LOW
+NAP-K55.SAMSUNG-MID
+NAP-K55.SAMSUNG-HIGH
+ZENON-V12.SIEMENS-LOW
+ZENON-V12.SIEMENS-MID
+ZENON-V12.SIEMENS-HIGH
+ZENON-V12.HITACHI-ENERGY-LOW
+ZENON-V12.HITACHI-ENERGY-MID
+ZENON-V12.HITACHI-ENERGY-HIGH
+SEL-9524B.MEINBERG-LOW
+SEL-9524B.MEINBERG-MID
+SEL-9524B.MEINBERG-HIGH
+SEL-9524B.ARBITER-SYSTEMS-MID
+SEL-9524B.ARBITER-SYSTEMS-HIGH
+SEL-C961-050.TIMES-MICROWAVE-SYSTEMS-LOW
+SEL-C961-050.MEINBERG-LOW
+SEL-C961-050.MEINBERG-MID
+SEL-C961-050.MEINBERG-HIGH
+SEL-915900139.POLYPHASER-LOW
+SEL-915900139.MEINBERG-LOW
+SEL-915900139.MEINBERG-HIGH
+SEL-C961-025.TIMES-MICROWAVE-SYSTEMS-LOW
+SEL-C961-025.MEINBERG-LOW
+SEL-C961-025.MEINBERG-MID
+SEL-C961-025.MEINBERG-HIGH
+SEL-915900043.MEINBERG-LOW
+SEL-915900043.MEINBERG-MID
+SEL-915900043.ARBITER-SYSTEMS-LOW
+FO-PATCH-CORDS.CORNING-LOW
+FO-PATCH-CORDS.CORNING-MID
+
+COMPLETE AUDIT OF APPLICABLE BLANK FIELDS
+SEL-2730M-EXT: inrush_ms - No power-supply inrush duration found in the supplied manual. The 50/100 ms input-voltage-interruption figures are ride-through ratings, not inrush duration.
+SEL-2488: inrush_ms - No inrush duration found in this datasheet. Peak is 8 A for SEL-9330-A; input-voltage-interruption ratings are not inrush duration. Existing values are retained under the brief's merge convention.
+SEL-2407: ordering_code - A complete configured ordering code is not printed; model name is not represented as a complete orderable code.; inrush_a - Full supplied manual searched; no peak inrush specification found. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.; inrush_ms - Full supplied manual searched; no inrush duration found. Input voltage interruption ride-through times and relay pickup/dropout times are not inrush durations. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.
+SEL-2731: ordering_code - A complete configured ordering code is not printed; model name is not represented as a complete orderable code.; inrush_a - Full supplied manual searched; no peak inrush specification found. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.; inrush_ms - Full supplied manual searched; no inrush duration found. Input voltage interruption ride-through times and relay pickup/dropout times are not inrush durations. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.
+SEL-2740S: ordering_code - A complete configured ordering code is not printed; model name is not represented as a complete orderable code.; inrush_a - Full supplied manual searched; no peak inrush specification found. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.; inrush_ms - Full supplied manual searched; no inrush duration found. Input voltage interruption ride-through times and relay pickup/dropout times are not inrush durations. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.
+SEL-2741: ordering_code - A complete configured ordering code is not printed; model name is not represented as a complete orderable code.; inrush_a - Full supplied manual searched; no peak inrush specification found. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.; inrush_ms - Full supplied manual searched; no inrush duration found. Input voltage interruption ride-through times and relay pickup/dropout times are not inrush durations. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.
+SEL-2743: ordering_code - A complete configured ordering code is not printed; model name is not represented as a complete orderable code.; inrush_a - Full supplied manual searched; no peak inrush specification found. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.; inrush_ms - Full supplied manual searched; no inrush duration found. Input voltage interruption ride-through times and relay pickup/dropout times are not inrush durations. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.
+SEL-2744: ordering_code - A complete configured ordering code is not printed; model name is not represented as a complete orderable code.; inrush_a - Full supplied manual searched; no peak inrush specification found. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.; inrush_ms - Full supplied manual searched; no inrush duration found. Input voltage interruption ride-through times and relay pickup/dropout times are not inrush durations. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.
+SEL-311L: ordering_code - Datasheet supplies a family/model designation, not a complete configured ordering code with power, I/O and chassis options.; inrush_a - No power-supply peak inrush specified in the supplied datasheet. Transformer/magnetizing inrush and contact make currents are unrelated and were excluded. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.; inrush_ms - No power-supply inrush duration specified in the supplied datasheet. Interruption ride-through and relay start-up times are not inrush duration. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.
+SEL-400G: ordering_code - Datasheet supplies a family/model designation, not a complete configured ordering code with power, I/O and chassis options.; inrush_a - No power-supply peak inrush specified in the supplied datasheet. Transformer/magnetizing inrush and contact make currents are unrelated and were excluded. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.; inrush_ms - No power-supply inrush duration specified in the supplied datasheet. Interruption ride-through and relay start-up times are not inrush duration. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.
+SEL-411L: ordering_code - Datasheet supplies a family/model designation, not a complete configured ordering code with power, I/O and chassis options.; inrush_a - No power-supply peak inrush specified in the supplied datasheet. Transformer/magnetizing inrush and contact make currents are unrelated and were excluded. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.; inrush_ms - No power-supply inrush duration specified in the supplied datasheet. Interruption ride-through and relay start-up times are not inrush duration. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.
+SEL-451-5: ordering_code - Datasheet supplies a family/model designation, not a complete configured ordering code with power, I/O and chassis options.; inrush_a - No power-supply peak inrush specified in the supplied datasheet. Transformer/magnetizing inrush and contact make currents are unrelated and were excluded. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.; inrush_ms - No power-supply inrush duration specified in the supplied datasheet. Interruption ride-through and relay start-up times are not inrush duration. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.
+SEL-751: ordering_code - Datasheet supplies a family/model designation, not a complete configured ordering code with power, I/O and chassis options.; inrush_a - No power-supply peak inrush specified in the supplied datasheet. Transformer/magnetizing inrush and contact make currents are unrelated and were excluded. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.; inrush_ms - No power-supply inrush duration specified in the supplied datasheet. Interruption ride-through and relay start-up times are not inrush duration. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.
+SEL-787-2: ordering_code - Datasheet supplies a family/model designation, not a complete configured ordering code with power, I/O and chassis options.; inrush_a - No power-supply peak inrush specified in the supplied datasheet. Transformer/magnetizing inrush and contact make currents are unrelated and were excluded. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.; inrush_ms - No power-supply inrush duration specified in the supplied datasheet. Interruption ride-through and relay start-up times are not inrush duration. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.
+SEL-787-3: ordering_code - Datasheet supplies a family/model designation, not a complete configured ordering code with power, I/O and chassis options.; inrush_a - No power-supply peak inrush specified in the supplied datasheet. Transformer/magnetizing inrush and contact make currents are unrelated and were excluded. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.; inrush_ms - No power-supply inrush duration specified in the supplied datasheet. Interruption ride-through and relay start-up times are not inrush duration. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.
+SEL-787-4: ordering_code - Datasheet supplies a family/model designation, not a complete configured ordering code with power, I/O and chassis options.; inrush_a - No power-supply peak inrush specified in the supplied datasheet. Transformer/magnetizing inrush and contact make currents are unrelated and were excluded. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.; inrush_ms - No power-supply inrush duration specified in the supplied datasheet. Interruption ride-through and relay start-up times are not inrush duration. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.
+SEL-3350-1: ordering_code - Datasheet identifies model and available options but does not establish the full configured order code for this proposed configuration.
+SEL-3505: ordering_code - Datasheet identifies model and available options but does not establish the full configured order code for this proposed configuration.; inrush_ms - Peak only. No inrush duration stated anywhere in this datasheet. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.
+SEL-3505-3: ordering_code - Datasheet identifies model and available options but does not establish the full configured order code for this proposed configuration.; inrush_ms - Peak only. No inrush duration stated anywhere in this datasheet. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.
+SEL-3530-4: ordering_code - Datasheet identifies model and available options but does not establish the full configured order code for this proposed configuration.; inrush_ms - Inrush duration absent. The listed50ms at125VDC is interruption ride-through, not inrush duration. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.
+SEL-3355-2: ordering_code - Datasheet identifies model and available options but does not establish the full configured order code for this proposed configuration.
+SEL-3555-2: ordering_code - Datasheet identifies model and available options but does not establish the full configured order code for this proposed configuration.
+SEL-3560S: ordering_code - Datasheet identifies model and available options but does not establish the full configured order code for this proposed configuration.; inrush_ms - No inrush duration stated. Applies to a proposed assembly including separately ordered external SEL-9331 HV supply. Bare SEL-3560S accepts 12 VDC nominal (10-16.6 VDC); never connect station battery directly to bare unit. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.
+SEL-3560E: ordering_code - Datasheet identifies model and available options but does not establish the full configured order code for this proposed configuration.; inrush_ms - No inrush duration stated. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only.
+Engineering columns are intentionally blank. tier is blank for original parts. cores is not applicable to these devices. SFP media is blank by schema. These are not missing research values.
+
+PORT INVENTORY TOTALS
+SEL-2730M-EXT: 25 physical ports including management.
+SEL-2731: 25 physical ports including management.
+SEL-2740S: 21 physical ports including management.
+SEL-2741: 25 physical ports including management.
+SEL-2743: 9 physical ports including management.
+SEL-2744: 11 physical ports including management.
+
+VALIDATION
+Passed: template headers, unique keys, populated-value source coverage, valid PDF pages/revisions, PDF file presence, nominal voltage within recorded range, positive inrush values, DC-only positive supply counts, no engineering-column values, complete physical port counts for selected layouts, and no formula-prefixed device cells.
+Open:22 manufacturer-configured order codes; unpublished inrush values; three front-management speed ratings; model-generation checks for three existing parts; comparison against full current library; generator import dry run. Assumed planning configurations are explicitly distinguished from verified fitted configurations.
+
+SOURCE PDF MANIFEST
+SEL_SEL-2730M_PM2730M-01_20260408.pdf | 176 pages | SHA256 4417e835f31ad0d2460fca7f10f23c05e0df34aa2fa45333392989bc8f001479
+SEL_SEL-2488_PDS2488-01_20260331.pdf | 12 pages | SHA256 a18a2ae26eaafe86322ad155e756ee61b2f4df3905e21b358e989598984a6ddf
+SEL_SEL-2407_PM2407-01_20250918.pdf | 44 pages | SHA256 d708a225b75a06f5a01fdde3ddbaa3be97b79abfe71d7d4f2b8250deb2172c49
+SEL_SEL-2731_NoDocNumber_20251223.pdf | 26 pages | SHA256 df439407e42fde6931151e10df7e786153d1957b614bdb79a4a857e2ef8e38bc
+SEL_SEL-2740S_PM2740S-01_20260601.pdf | 52 pages | SHA256 53bfb1cb57e444af8438aae495fad11d645e37d2f3ddc1eba8c25a2f3bcc9374
+SEL_SEL-2741_PM2741-01_20260724.pdf | 28 pages | SHA256 aee15c557b2e0bcbc92a24d2705feaff505ed946f8736a6074b3332c2d5e42e1
+SEL_SEL-2743_NoDocNumber_20260624.pdf | 26 pages | SHA256 ca855643eff88724dc27f7af750a0bdc32c5cda3f7637fcac73353e7c9366a06
+SEL_SEL-2744_NoDocNumber_20260601.pdf | 26 pages | SHA256 18f262a5fdc429b809d9bbe007ad22fd6495e5711664562024a897bc50632fa2
+SEL_SEL-311L_PDS311L-01_20221103.pdf | 28 pages | SHA256 ad5eb66d6bdfea894935e4ee09351fe3b8ad3a68cb3bc60ab48a28bac24e26ca
+SEL_SEL-400G_PDS400G-01_20260331.pdf | 44 pages | SHA256 7ae949d4e0af2a18cca8061a2c39476d397ea0d9ad97ba9beec2ca990d3b16d0
+SEL_SEL-411L_PDS411L-01_20250731.pdf | 44 pages | SHA256 9c8c2b488361917246b0ec455d0d305055c746229479fdb49825066429aaf8dd
+SEL_SEL-451_PDS451-03_20250731.pdf | 32 pages | SHA256 bd1bea67b6ea0f86dc43420f6d617c4ebac1a83972caea0cf419c070ef31738f
+SEL_SEL-751_PDS751-01_20260910.pdf | 44 pages | SHA256 c39e307a4d79de716dab8a02127aa37d2a0ab2f529cabec62991f664ff807487
+SEL_SEL-787-2-3-4_PDS787-02_20250501.pdf | 48 pages | SHA256 d09f59cba0d9d1ce38df6cd972931f7c43f19297efbdfb13505eac597adb8ba0
+SEL_SEL-3350-1_PDS3350-01_20260928.pdf | 20 pages | SHA256 897abdb1455228b3231317e6266b69a4b400f6e8751924a82e312fd603b55765
+SEL_SEL-3505_PDS3505-01_20241010.pdf | 16 pages | SHA256 ce6200504e73b92fcfe98b5aafe916376ae1c6a8a738fc1510a195658e9edc06
+SEL_SEL-3530-4_PDS3530-02_20260925.pdf | 16 pages | SHA256 a4c2a6139948532b84d0b7de8d73b35f0c3c01e490d8b380d3e2a47c29bd9c1d
+SEL_SEL-3355-2_PDS3355-04_20260521.pdf | 12 pages | SHA256 2285fa65fc914f6372e615b5907afef03c1b05c197cbf2aaa65f0f0ac550b4bf
+SEL_SEL-3555-2_PDS3555-02_20250730.pdf | 16 pages | SHA256 fb98135dd2ffe16abffcc2b3d667c9d392f9167dbed671a642c77525534bc93d
+SEL_SEL-3560_PDS3560-01_20241218.pdf | 16 pages | SHA256 1c29cfe211b0f6beedef59f3e3f4780f6ebc3b392aac84e74b67fe3430ea963d

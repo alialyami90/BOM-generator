@@ -13,6 +13,14 @@ project uses [Semantic Versioning](https://semver.org/).
   after the socket and before the spare, sized like the DC branches from the AC
   catalogue; CINC is raised to carry them (M25, ADR 0025 proposed). The
   example has no AC device, so its BOM is unchanged.
+- App: the Device preview page (M24), after Parts in the rail. It draws a
+  front view of each panel from the engine's device preview, with cable
+  managers, the waist line and DIN-rail parts. A table lists each unit with
+  its part, BOM part number, panel, U, watts, supply and branch MCBs. A unit
+  can be pinned by dragging it, or with Up 1 U and Down 1 U, and unpinned;
+  each move is checked live and can be undone. Parts gets "Generate preview",
+  and a warning's "Go to the row" lands on that row. The Panels board and the
+  preview share one pointer-drag helper.
 - Device preview engine (M24): `engine.preview.device_preview` lays out the
   substation, builds it in memory and lists every generated unit with its
   panel, top U, branch MCBs, terminal strips and overridden values, plus the

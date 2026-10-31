@@ -1,0 +1,2 @@
+﻿part_id,rated_voltage_v,rated_current_max_a,connection,wire_min_mm2,wire_max_mm2,width_mm,height_mm,depth_with_bracket_mm,strip_length_mm,source_pdf,source_page,source_bundle,bundle_page,notes
+IPR-BASE-2900934,250,12,Push-in,0.14,1.5,31,96,75,8,pdfs/Phoenix Contact_RelayBase_VD-EL0009-007_p285-290.pdf,2,VD-EL0009-007.pdf,286,Current rating depends on assembly; it does not raise the relay contact rating.

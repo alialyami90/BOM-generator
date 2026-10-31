@@ -171,7 +171,7 @@
     calls.forEach((call) => { chain = chain.then((prev) => (prev && !prev.written ? prev : call())); });
     return chain.then((reply) => {
       if (reply.written) {
-        LAY.data = reply.page;
+        LAY.data = reply.page; App.devicePreview.reload();  // the preview shows the new pins on its next visit
         if (undoable) history.push(before);
         if (said) toast(said, ic, undoable ? () => ACTIONS['pv-undo']() : null);
       } else {
@@ -225,7 +225,7 @@
     closeDialog();
     busy = true; App.render();
     Bridge.call('generate_panels', S.project.file, S.sub).then((r) => {
-      LAY.data = r.page; history.length = 0; showIssues = false;
+      LAY.data = r.page; history.length = 0; showIssues = false; App.devicePreview.reload();
       toast(`Laid out ${plural(r.written.length, 'panel')}.${r.backup ? ` Hand-written files copied to panels/${r.backup.split(/[\\/]/).pop()}.` : ''}`);
     }).catch((err) => toast(err.message, 'error')).then(() => { busy = false; App.render(); });
   };
@@ -238,7 +238,7 @@
   }
 
   /* ---------- drag and drop: the bridge says which panels can take the move ---------- */
-  let drag = null;  // { id, u, from, alone, fits: {panel: true|false|undefined}, why, at: {panel, index}, pointer, el }
+  let drag = null;  // { id, u, from, alone, fits: {panel: true|false|undefined}, why, at: {panel, index}, el }
   const onBoard = () => real() && LAY.data && !LAY.data.reason && editable() && (S.tab.panels || 'board') === 'board';
   const others = (u, alone) => LAY.data.overrides.filter((x) => !places(x, u, alone));
   function probe(n) {
@@ -258,17 +258,13 @@
     cols.forEach((k) => { const c = document.querySelector(`.bcol[data-panel="${k}"]`); if (c && ok !== undefined) c.classList.add(ok ? 'drop-ok' : 'drop-bad'); });
     if (ok) { const devs = [...document.querySelectorAll(`.bcol[data-panel="${n}"] .dev`)]; const i = drag.at.index; if (devs[i]) devs[i].classList.add('ins-before'); else if (devs.length) devs[devs.length - 1].classList.add('ins-after'); }
   }
-  /* Pointer events, not HTML5 drag-and-drop, which never reaches the page in the installed app (WebView2).
-     A press becomes a drag after 4 px; a click without movement still selects. */
-  let press = null, swallowClick = false;  // press: { el, id, x, y, alone, pointer }
-  function startDrag(e) {
-    const p = press, sel = unitOf(p.id); press = null;
-    if (!sel || !document.body.contains(p.el)) return;
-    drag = { id: p.id, u: sel.u, from: sel.p.number, alone: p.alone && !!sel.u.side, fits: {}, why: {}, at: null, pointer: p.pointer, el: p.el };
-    try { p.el.setPointerCapture(p.pointer); } catch (_) { /* the pointer is already gone */ }
-    p.el.classList.add('is-dragging'); document.body.classList.add('is-dragging-dev');
+  /* The shared pointer drag (drag.js): a press becomes a drag after 4 px; Alt moves one unit of a pair. */
+  function startDrag(el, e) {
+    const sel = unitOf(el.dataset.uid); if (!sel) return false;
+    drag = { id: el.dataset.uid, u: sel.u, from: sel.p.number, alone: e.altKey && !!sel.u.side, fits: {}, why: {}, at: null, el };
+    el.classList.add('is-dragging'); document.body.classList.add('is-dragging-dev');
     LAY.data.panels.forEach((x) => probe(x.number));
-    moveDrag(e);
+    return true;
   }
   function moveDrag(e) {
     const under = document.elementFromPoint(e.clientX, e.clientY);
@@ -280,10 +276,9 @@
   }
   /* Ends a drag; only a drop that was not cancelled writes. A refused drop still lands, so the banner can say why. */
   function endDrag(cancelled) {
-    const d = drag; drag = null; press = null; swallowClick = true;  // the click that follows a drag is not a select
+    const d = drag; drag = null;
     clearMarks();
     $$('.dev.is-dragging').forEach((x) => x.classList.remove('is-dragging')); document.body.classList.remove('is-dragging-dev');
-    try { if (d.el.hasPointerCapture(d.pointer)) d.el.releasePointerCapture(d.pointer); } catch (_) { /* already released */ }
     if (cancelled || !d.at) return;
     const n = d.at.panel, u = d.u;
     const devs = [...document.querySelectorAll(`.bcol[data-panel="${n}"] .dev`)];
@@ -295,21 +290,7 @@
     const move = moveOf(u, n, position, d.alone);
     write({ overrides: [...others(u, d.alone), move] }, `Pinned ${describe(move)}`);
   }
-  document.addEventListener('pointerdown', (e) => {
-    swallowClick = false;
-    if (drag || e.button !== 0 || !e.isPrimary) return;
-    const c = e.target.closest && e.target.closest('.dev.is-movable[data-uid]'); if (!c || !onBoard() || busy) return;
-    press = { el: c, id: c.dataset.uid, x: e.clientX, y: e.clientY, alone: e.altKey, pointer: e.pointerId };
-  });
-  document.addEventListener('pointermove', (e) => {
-    if (drag) { if (e.pointerId === drag.pointer) moveDrag(e); return; }
-    if (press && e.pointerId === press.pointer && Math.hypot(e.clientX - press.x, e.clientY - press.y) >= 4) startDrag(e);
-  });
-  document.addEventListener('pointerup', (e) => { press = null; if (drag && e.pointerId === drag.pointer) endDrag(false); });
-  document.addEventListener('pointercancel', (e) => { press = null; if (drag && e.pointerId === drag.pointer) endDrag(true); });
-  document.addEventListener('lostpointercapture', (e) => { if (drag && e.pointerId === drag.pointer) endDrag(true); });
-  document.addEventListener('keydown', (e) => { if (drag && e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); endDrag(true); } }, true);
-  document.addEventListener('click', (e) => { if (swallowClick) { swallowClick = false; e.stopPropagation(); e.preventDefault(); } }, true);
+  App.pointerDrag({ handle: '.dev.is-movable[data-uid]', enabled: () => onBoard() && !busy, start: startDrag, move: moveDrag, drop: () => endDrag(false), cancel: () => endDrag(true) });
 
   /* ---------- keyboard moves and Move… (docs/ui/editing.md, Keyboard) ---------- */
   const panelOf = (n) => LAY.data.panels.find((p) => p.number === n);

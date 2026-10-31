@@ -58,7 +58,7 @@
     write,
     done: (page) => {
       if (page && page.parts) sub().set(page); else sub().reload();
-      App.network.reload();
+      App.network.reload(); App.devicePreview.reload();
       if (cleared) { toast(cleared, 'info'); cleared = ''; }
     }
   });
@@ -68,7 +68,7 @@
   const mark = (key, html) => PF.mark(key, html);
   const err = (key) => (PF.errors[key] ? `<span class="err small" id="p-${key}-err">${icon('error')}<span>${PF.err(key)}</span></span>` : '');
   /* A change that reloads the page from an immediate write (move, remove, accessories). */
-  const reloaded = (page) => { if (page && page.parts) sub().set(page); else sub().reload(); App.network.reload(); App.render(); };
+  const reloaded = (page) => { if (page && page.parts) sub().set(page); else sub().reload(); App.network.reload(); App.devicePreview.reload(); App.render(); };
   const fail = (e) => toast(e.message, 'error');
 
   /* ---------- the details strip: the library values, each overridable for this design ---------- */
@@ -215,7 +215,8 @@
     if (!p.parts) { if (p.network) sub().reload(); return `<div class="page">${pageHead('Parts', 'Pick a library part for each device.')}${sub().problems(p)}</div>`; }
     const fresh = !p.equipment.length, rows = fresh ? freshRows(p) : p.parts.rows, topo = shown('n.topology');
     const unset = !shown('n.ied_count');
-    return `<div class="page">${pageHead('Parts', 'Pick a library part for each device. The panels, MCBs, power and heat follow from these picks.')}
+    const gen = fresh ? '' : PF.dirty() ? `<button class="btn btn--secondary" disabled title="Save your changes first." aria-describedby="pp-gen-why">${icon('elevation')}Generate preview</button><span id="pp-gen-why" class="sr-only">Save your changes first.</span>` : `<a class="btn btn--secondary" href="#/device-preview">${icon('elevation')}Generate preview</a>`;
+    return `<div class="page">${pageHead('Parts', 'Pick a library part for each device. The panels, MCBs, power and heat follow from these picks.', gen)}
       ${sub().problems(p)}${fresh ? setupCard(p, rows) : ''}
       <div class="net-grid">
         <div class="stack" style="gap:var(--space-6)">
@@ -242,6 +243,19 @@
       ${UI.addOpen ? `<div class="menu" role="menu" style="left:0;top:34px">${p.parts.add_categories.map((c) => { const n = (p.parts.options[c.category] || []).length; return `<button role="menuitem" data-action="pp-add-cat" data-c="${c.category}" ${n ? '' : `disabled title="The library has no ${esc(c.label)} parts yet."`}>${esc(c.label)}${n ? '' : `<span class="muted small">The library has no ${esc(c.label)} parts yet.</span>`}</button>`; }).join('')}</div>` : ''}</div>`;
   }
 
+  /* "Go to the row" from Device preview: #/parts/<device> scrolls to the row and focuses its part. The page
+     re-renders as its parts load (the Result card), so the focus is put back on the row for a few seconds. */
+  let goRow = null;  // { id, until, scrolled }
+  SCREENS.partsAfter = () => {
+    const want = decodeURIComponent(App.route().b || '');
+    if (want) { goRow = { id: want, until: Date.now() + 3000, scrolled: false }; history.replaceState(null, '', '#/parts'); }
+    const p = goRow && Date.now() < goRow.until && sub().page(); if (!p || !p.parts) return;
+    const r = p.parts.rows.find((x) => x.id === goRow.id), el = r && document.getElementById(`p-e.${r.index}.part_id`);
+    if (!el) return;
+    if (!goRow.scrolled) { el.closest('.prow').scrollIntoView({ block: 'center' }); goRow.scrolled = true; }
+    if (document.activeElement === document.body) el.focus({ preventScroll: true });
+  };
+
   /* ---------- actions ---------- */
   const keep = (fn) => { const m = document.getElementById('main'), y = m ? m.scrollTop : 0; fn(); App.render(); if (m) m.scrollTop = y; };
   ACTIONS['pp-tuning'] = () => keep(() => { const p = sub().page(); UI.tuning = !(UI.tuning == null ? !p.equipment.length : UI.tuning); });
@@ -260,7 +274,7 @@
   ACTIONS['pp-remove'] = (el) => {
     const i = +el.dataset.i, file = S.project.file, sid = S.sub, label = rowAt(i).label; UI.menu = -1;
     Bridge.call('remove_equipment', file, sid, i).then((r) => {
-      sub().reload(); App.network.reload(); App.render();
+      sub().reload(); App.network.reload(); App.devicePreview.reload(); App.render();
       toast(`Removed ${label}`, 'trash', () => Bridge.call('add_equipment', file, sid, r.row, i).then(() => { sub().reload(); App.render(); }).catch(fail));
     }).catch(fail);
   };
@@ -282,7 +296,7 @@
     const base = part.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^[^a-z0-9]+|-+$/g, '') || 'device';
     const row = { id: freeId(base, p.equipment.map((e) => e.id)), part_id: part, role: ROLE_OF[el.dataset.c] || 'other' };
     if (v('pa-red').checked) row.redundant = true;
-    Bridge.call('add_equipment', S.project.file, S.sub, row, null).then(() => { App.closeDialog(); sub().reload(); App.network.reload(); App.render(); toast(`Added ${row.id}`, 'check'); })
+    Bridge.call('add_equipment', S.project.file, S.sub, row, null).then(() => { App.closeDialog(); sub().reload(); App.network.reload(); App.devicePreview.reload(); App.render(); toast(`Added ${row.id}`, 'check'); })
       .catch((e) => { v('pa-err').innerHTML = `${icon('error')}<span>${esc(e.message)}</span>`; });
   };
   /* Accessories are loose material items, written at once (decision 2 of the M23 plan). */

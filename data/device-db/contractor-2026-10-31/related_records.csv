@@ -1,0 +1,17 @@
+﻿part_id,related_part_id,relationship,reason
+C9300-24T-A,CISCO-C9300-24T-A,configured_assembly_and_base_sku,Configured assembly includes additional selected components.
+CISCO-C9300X-NM-8M=,CISCO-C9300X-NM-8M,distinct_spare_ordering_code,Trailing = is retained as part of the orderable SKU.
+CISCO-C9300X-NM-8Y=,CISCO-C9300X-NM-8Y,distinct_spare_ordering_code,Trailing = is retained as part of the orderable SKU.
+CISCO-C9300X-NM-2C=,CISCO-C9300X-NM-2C,distinct_spare_ordering_code,Trailing = is retained as part of the orderable SKU.
+CISCO-C9300X-NM-4C=,CISCO-C9300X-NM-4C,distinct_spare_ordering_code,Trailing = is retained as part of the orderable SKU.
+CISCO-C9300-NM-4G=,CISCO-C9300-NM-4G,distinct_spare_ordering_code,Trailing = is retained as part of the orderable SKU.
+CISCO-C9300-NM-8X=,CISCO-C9300-NM-8X,distinct_spare_ordering_code,Trailing = is retained as part of the orderable SKU.
+CISCO-C9300-NM-2Q=,CISCO-C9300-NM-2Q,distinct_spare_ordering_code,Trailing = is retained as part of the orderable SKU.
+CISCO-C9300-NM-2Y=,CISCO-C9300-NM-2Y,distinct_spare_ordering_code,Trailing = is retained as part of the orderable SKU.
+CISCO-C9300-NM-4M=,CISCO-C9300-NM-4M,distinct_spare_ordering_code,Trailing = is retained as part of the orderable SKU.
+CISCO-SSD-120G=,CISCO-SSD-120G,distinct_spare_ordering_code,Trailing = is retained as part of the orderable SKU.
+CISCO-SSD-240G=,CISCO-SSD-240G,distinct_spare_ordering_code,Trailing = is retained as part of the orderable SKU.
+CISCO-C9300L-STACK-KIT=,CISCO-C9300L-STACK-KIT,distinct_spare_ordering_code,Trailing = is retained as part of the orderable SKU.
+CISCO-STACK-T3-50CM=,CISCO-STACK-T3-50CM,distinct_spare_ordering_code,Trailing = is retained as part of the orderable SKU.
+CISCO-STACK-T3-1M=,CISCO-STACK-T3-1M,distinct_spare_ordering_code,Trailing = is retained as part of the orderable SKU.
+CISCO-STACK-T3-3M=,CISCO-STACK-T3-3M,distinct_spare_ordering_code,Trailing = is retained as part of the orderable SKU.
