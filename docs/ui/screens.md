@@ -330,8 +330,9 @@ Part picking design §6. "Will this build the way I expect?" answered before the
 written. Reached from Parts (**Generate preview**) and the rail. Read-only except for dragging on the
 front view. The workbook's sheet preview (above) is unchanged.
 
-- **Layout:** title and lede, the check report's issues for this substation (banners with **Go to**,
-  which opens the Parts row), then a **panel strip**: one front view per panel (`components.md` "Rack
+- **Layout:** title and lede, the check report's errors and then its warnings for this substation
+  (banners above the front views; warnings have **Go to the row**, which opens the Parts row), then a
+  **panel strip**: one front view per panel (`components.md` "Rack
   elevation"), side by side and scrolling sideways when they do not fit. Under it, the **device table**,
   one row per unit: device, part, BOM part number, panel, U position, watts, supply, PS1 MCB (tag and
   rating), PS2 MCB (tag and rating), terminal strip. Overridden values carry the override marker.
@@ -343,12 +344,17 @@ front view. The workbook's sheet preview (above) is unchanged.
   writes a pin. A KVM or console dropped away from waist height is allowed and marked "Pinned away
   from waist height".
 - **Flags** (design §7.3): a unit whose MCB is at the 2 A minimum, or whose watts are 0, shows a
-  warning marker in its row with the reason in the tooltip and the accessible name.
-- **States:** clean; warnings; a panel that overflows (the overflow is drawn above the frame in red with
-  the check report's sentence; units are never drawn outside the rack); a KVM that cannot sit at waist
-  height (error on the panel, the KVM drawn where it landed); an engine error (no front views or
-  table, one banner naming the error and **Open checks**); unsaved changes on Parts (a banner says the
-  preview shows the saved parts, with **Back to Parts**).
+  warning marker in its row with the reason in the tooltip and the accessible name. A one-line legend
+  above the table says what the warning marker and the override dot mean. A pinned unit's U cell
+  reads "Pinned" in words.
+- **Keyboard:** the selected unit bar (`components.md` "Rack elevation") moves a unit up or down 1 U
+  and unpins it; Arrow Up and Down on the selected unit do the same.
+- **States:** clean; warnings; a panel that overflows (an error banner above the front views with the
+  check report's sentence and the fix, and the panel's count in red, "35 of 32 U used"; units are
+  never drawn outside the rack); a KVM that cannot sit at waist height (the same banner, the KVM drawn
+  where it landed); an engine error (no front views or table, one banner naming the row and the
+  library version, with **Go to the row**); unsaved changes on Parts (a banner says the preview shows
+  the saved parts; the header's **Back to Parts** is the only way back).
 
 ### Build
 - **Layout:** two columns. Left: file name (from the pattern), save folder,
@@ -506,5 +512,25 @@ open PRs at the time.
   first design.
 - Preview, Power and Heat show figures the engine supplies. The prototype holds
   them as literal values in `data.js`; no rule is computed in the UI.
+- Parts and Device preview (M22): every U number comes from one source. A switch with a cable
+  manager reads "1 U + CM" on the front view, matching the 1 U on Parts; an overflowing panel counts
+  what could not be drawn ("35 of 32 U used"); the waist error names the U above the line.
+- Parts (M22): the rail shows "Not set up" on a new substation and "1 error" when a row is invalid or
+  its part is missing from the library, like Checks. The setup card ticks a step only when its field
+  is filled. Device preview is disabled in the rail until Parts is set up.
+- Device preview (M22): errors sit in a banner above the front views, not under the base frame, so
+  they are seen at 800 px tall. Each panel keeps a second meta line while any panel has an error, so
+  the frames stay aligned.
+- Device preview (M22): a selected unit gets a bar with Up 1 U, Down 1 U and Unpin, plus Arrow Up and
+  Down, so pinning does not need a mouse. Moving to another panel stays drag-only for now: the only
+  other panel in the example is on the other side, where every move is refused anyway.
+- Device preview (M22): a drop or a move writes the pin straight away with a toast and Undo, as the
+  Panels board does (`editing.md` "Drag and drop contract"). It does not go through the save bar. A
+  KVM pinned away from waist height is added to the warnings banner in words.
+- Kept as they are after the M22 critique: the green drop colour (the board uses it, and the ghost
+  says "U 9" in words); amber Changed and cobalt Override dots side by side (the existing components;
+  Changed sits before the label, Override before the value); a second "Firewall" row added from Add a
+  device shows the same label (its part and tags tell them apart in the built app, which is M23's
+  call); below 1280 px the page does not reflow (1280 is the minimum width, `design-language.md`).
 - Still open for Ali: a read-only reviewer mode (hides Save, Add device and
   Remove for non-engineers). Not designed yet; it is a likely M10 follow-up.

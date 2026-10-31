@@ -108,6 +108,7 @@
   }
   function renderNav() {
     const r = route().a, c = counts(), np = hasProject(), ns = hasSub(), p = curProject();
+    const partsNew = isBlank() || S.partsState === 'new', partsBad = ['invalid', 'missing'].includes(S.partsState);
     const buildTail = !ns ? '' : c.errors ? `${icon('error')}Blocked` : `${icon('check')}Ready`;
     const projTail = !np ? '' : p.status === 'bad' ? `${icon('error')}${p.statusText}` : p.status === 'warn' ? `${icon('warn')}1` : `${icon('check')}`;
     const switcher = np ? `<div class="nav-switch"><label class="sr-only" for="sub-switch">Substation</label><select class="select" id="sub-switch" data-action="sub-switch">${S.sub ? '' : '<option value="">Choose a substation…</option>'}${p.substations.map((x) => `<option value="${x.id}" ${x.id === S.sub ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>` : '';
@@ -118,8 +119,8 @@
       ${navItem('#/project', 'project', esc(p.name.replace(' (example)', '')), projTail, p.status === 'bad' ? 'bad' : p.status === 'warn' ? 'warn' : 'ok', false, r === 'project')}
       <div class="nav-group">Substation</div>${switcher}
       ${navItem('#/settings', 'file', 'Settings', ns ? icon('check') : '', 'ok', !ns, r === 'settings')}
-      ${navItem('#/parts', 'parts', 'Parts', ns ? (isBlank() ? `${icon('warn')}Not set up` : icon('check')) : '', isBlank() ? 'warn' : 'ok', !ns, r === 'parts' || r === 'network')}
-      ${navItem('#/device-preview', 'elevation', 'Device preview', '', '', !ns || isBlank(), r === 'device-preview')}
+      ${navItem('#/parts', 'parts', 'Parts', ns ? (partsNew ? `${icon('warn')}Not set up` : partsBad ? `${icon('error')}1 error` : icon('check')) : '', partsNew ? 'warn' : partsBad ? 'bad' : 'ok', !ns, r === 'parts' || r === 'network')}
+      ${navItem('#/device-preview', 'elevation', 'Device preview', '', '', !ns || partsNew, r === 'device-preview')}
       ${navItem('#/panels', 'panels', 'Panels', ns ? String(isBlank() ? 0 : DB.panels.length) : '', '', !ns, r === 'panels')}
       ${navItem('#/loose', 'pkg', 'Loose material', ns ? String(isBlank() ? 0 : (DB.sub.loose || []).length) : '', '', !ns, r === 'loose')}
       <div class="nav-group">Verify and issue</div>

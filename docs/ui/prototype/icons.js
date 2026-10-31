@@ -17,6 +17,7 @@ window.ICONS = {
   search: '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>',
   filter: '<path d="M4 5.5h16l-6 7v6l-4-2v-4z"/>',
   chevd: '<path d="m6 9.5 6 6 6-6"/>',
+  chevu: '<path d="m6 14.5 6-6 6 6"/>',
   chevr: '<path d="m9.5 6 6 6-6 6"/>',
   x: '<path d="M6 6l12 12M18 6 6 18"/>',
   info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8h.01"/>',

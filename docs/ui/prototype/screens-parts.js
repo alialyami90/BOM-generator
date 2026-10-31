@@ -15,6 +15,7 @@
     if (st() === 'missing') r[1] = { ...r[1], part: 'RST2228-L2-OLD' };
     if (st() === 'invalid') r[3] = { ...r[3], ov: { w: 'approx 180' } };
     if (st() === 'many') for (let i = 0; i < 12; i++) r.push({ key: 'io' + i, label: 'I/O rack', cat: 'io_rack', part: 'AXION-IO-RACK', pn: 'AXION-' + (i + 1), qty: 1, ab: true, ov: i % 4 ? {} : { w: 55 }, added: true });
+    ft().ied = isNew() ? '' : (ft().ied || '40');
     S.pp = { state: st(), sub: S.sub, rows: r, open: { tuning: isNew() }, editing: '', menu: -1, expanded: new Set() };
     if (st() === 'invalid') { S.dirty = true; S.changed.add('ov-ows-w'); S.invalid.add('ov-ows-w'); }
     return r;
@@ -22,7 +23,7 @@
   const many = () => rows().length >= 20;
 
   /* ---------- details strip ---------- */
-  const KEYS = [['h', 'Height', (v) => `${v} U`], ['w', 'Power', (v) => `${v} W`], ['supply', 'Supply', (v) => (v ? `${v}` : '—')], ['v', 'Voltage', (v) => (v ? `${v} V` : '—')],
+  const KEYS = [['h', 'Height', (v) => (+v ? `${v} U` : 'DIN rail')], ['w', 'Power', (v) => `${v} W`], ['supply', 'Supply', (v) => (v ? `${v}` : '—')], ['v', 'Voltage', (v) => (v ? `${v} V` : '—')],
     ['ps', 'Supplies', (v) => `${v}`], ['inrush', 'Inrush', (v) => `${v} A`], ['load', 'Load', (v) => ({ continuous: 'Continuous', intermittent: 'Intermittent' }[v] || '—')]];
   const LOADS = [['continuous', 'Continuous'], ['intermittent', 'Intermittent']];
   const badNumber = (v) => typeof v === 'string' && !/^\d+(\.\d+)?$/.test(v.trim());
@@ -36,7 +37,7 @@
     const keys = p.supply ? KEYS : KEYS.filter(([k]) => k === 'h');  // an unpowered part has only a height
     const n = Object.keys(r.ov).length;
     if (many() && !S.pp.expanded.has(i)) {
-      return `<div class="prow-strip"><button class="link-btn small prow-summary" data-action="pp-expand" data-i="${i}" aria-label="Show the data of ${esc(r.label)}">${[`${r.ov.h ?? p.h} U`, `${r.ov.w ?? p.w} W`, p.supply ? `${r.ov.v ?? p.v} V${r.ov.supply ?? p.supply}` : ''].filter(Boolean).join(' · ')}${n ? ` · ${n} override${n === 1 ? '' : 's'}` : ''}</button></div>`;
+      return `<div class="prow-strip"><button class="link-btn small prow-summary" data-action="pp-expand" data-i="${i}" aria-label="Show the data of ${esc(r.label)}">${[KEYS[0][2](r.ov.h ?? p.h), `${r.ov.w ?? p.w} W`, p.supply ? `${r.ov.v ?? p.v} V${r.ov.supply ?? p.supply}` : ''].filter(Boolean).join(' · ')}${n ? ` · <i class="ov-dot" aria-hidden="true"></i>${n} override${n === 1 ? '' : 's'}` : ''}</button></div>`;
     }
     const vals = keys.map(([k, label, fmt]) => {
       const has = Object.prototype.hasOwnProperty.call(r.ov, k), val = has ? r.ov[k] : p[k], id = `ov-${r.key}-${k}`;
@@ -138,7 +139,7 @@
         <div class="stack" style="gap:var(--space-6)">
           <section aria-labelledby="h-fn"><h3 id="h-fn">Field network</h3>
             <div class="form form--2" style="margin-top:var(--space-3)">
-              ${field('Field IEDs', `<div class="input-affix">${input('n-ied', isNew() ? '' : f.ied, { num: true, mono: true, invalid: iedBad, placeholder: 'Required' })}<span class="affix">IEDs</span></div>`, 'Never listed in the BOM. Only used to size the L1 switches.', iedBad ? 'Enter the number of field IEDs, for example 40.' : '')}
+              ${field('Field IEDs', `<div class="input-affix">${input('n-ied', f.ied, { num: true, mono: true, invalid: iedBad, placeholder: 'Required' })}<span class="affix">IEDs</span></div>`, 'Never listed in the BOM. Only used to size the L1 switches.', iedBad ? 'Enter the number of field IEDs, for example 40.' : '')}
               <div class="field"><span class="label" id="topo-l">Topology</span><div class="segmented" role="radiogroup" aria-labelledby="topo-l"><label><input type="radio" name="pp-topo" value="star" data-action="pp-topo" ${f.topology === 'star' ? 'checked' : ''}><span>Star</span></label><label><input type="radio" name="pp-topo" value="ring" data-action="pp-topo" ${f.topology === 'ring' ? 'checked' : ''}><span>Ring</span></label></div>
                 <span class="help">${f.topology === 'star' ? 'Each L1 switch has one uplink to its L2 switch plus an A–B interlink.' : 'L1 switches are joined in rings. Two ports close each ring.'}</span></div>
             </div>

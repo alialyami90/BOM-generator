@@ -152,7 +152,9 @@ yet. To move one, add it to layout.overrides in substation.yaml." and the blocks
 - Moves never re-flow other devices silently. If a move does not fit, it is refused.
 - **Device preview (M22)** uses the same contract on its front views, with pointer events as on the board
   (M19). A drop at a U writes a pin with that position. A KVM or console may be dropped away from waist
-  height: the pin wins, and the unit is marked "Pinned away from waist height".
+  height: the pin wins, and the unit is marked "Pinned away from waist height". Its keyboard path is the
+  selected unit bar: Up 1 U, Down 1 U and Unpin, or Arrow Up and Down on the selected unit; a move
+  pins with the same toast and Undo, and Unpin hands the unit back to the layout.
 
 ### Keyboard
 
