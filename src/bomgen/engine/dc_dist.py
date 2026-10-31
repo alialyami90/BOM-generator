@@ -72,16 +72,21 @@ def _load_name(device: DeviceType) -> str:
 
 
 def unit_current(device: DeviceType, constants: DesignConstants) -> float:
-    """Design current of one unit with margin: current factor x W / V (column O)."""
-    voltage = device.voltage_v or constants.dc_voltage_v
+    """Design current of one unit with margin: current factor x W / V (column O); a part
+    with no voltage takes the system's AC or DC voltage."""
+    system = (
+        constants.ac_voltage_v if device.supply_type is SupplyType.VAC else constants.dc_voltage_v
+    )
+    voltage = device.voltage_v or system
     return constants.current_factor * (device.unit_power_w or 0) / voltage
 
 
 def branch_sizing(device: DeviceType, library: Library, constants: DesignConstants) -> BranchSizing:
     """The smallest catalogue MCB that carries the running current with margin, whose
     magnetic trip clears an inrush lasting at least ``inrush_min_ms``, and that is at
-    least the floor (plan Q35, ADR 0019)."""
-    mcb = library.catalogues.dc_mcb
+    least the floor (plan Q35, ADR 0019). An AC part is sized from the AC set (M25)."""
+    catalogues = library.catalogues
+    mcb = catalogues.mcb if device.supply_type is SupplyType.VAC else catalogues.dc_mcb
     running = unit_current(device, constants)
     multiple = _trip_multiple(mcb, device) if device.inrush_a else None
     counted = device.inrush_ms is None or device.inrush_ms >= constants.inrush_min_ms

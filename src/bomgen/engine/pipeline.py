@@ -85,7 +85,7 @@ def _draft(
     trial = [*equipment, *housekeeping(panel, library, Ventilation.NATURAL, change_over)]
     heat_w = ventilation_heat_w(flatten(trial), library)
     ventilation = choose_ventilation(panel, heat_w, constants)
-    ac = ac_distribution(panel, library, ventilation)
+    ac = ac_distribution(panel, library, ventilation, rows, constants)
     fed = single_fed_loads(panel, rows, library, loose)
     dc = dc_distribution(panel, library, constants, rows, fed, change_over)
     annunciators = [
@@ -115,7 +115,7 @@ def _draft(
         rating_a=dc.main_a,
         rule_rating_a=dc.rule_main_a,
     )
-    branch_mcbs = tuple(dc.branch_mcbs)
+    branch_mcbs = (*dc.branch_mcbs, *ac.branch_mcbs)
     return _PanelDraft(panel, rows, ventilation, items, strip_inputs, mains, branch_mcbs)
 
 

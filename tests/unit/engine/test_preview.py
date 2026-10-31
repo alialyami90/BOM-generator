@@ -6,6 +6,7 @@ from typing import Any
 
 import pytest
 
+from bomgen.checks import check_report
 from bomgen.engine import preview as preview_module
 from bomgen.engine.errors import EngineError
 from bomgen.engine.layout import layout_preview
@@ -154,3 +155,28 @@ def test_preview_takes_candidate_overrides_without_writing(example: LoadedSubsta
     assert unit(preview, "gps").pinned is True
     assert example.substation.layout.overrides == []
     assert EXAMPLE.read_text("utf-8") == before
+
+
+AC_GW = {"overrides": {"supply_type": "VAC", "voltage_v": 230, "power_supplies": 0}}
+
+
+def test_preview_gives_a_vac_unit_its_ac_mcb(example: LoadedSubstation) -> None:
+    preview = device_preview(with_entry(example, "gw", **AC_GW))
+    a, b = unit(preview, "gw", "a"), unit(preview, "gw", "b")
+    assert a.ps1 is not None
+    assert b.ps1 is not None
+    assert (a.ps1.tag[:6], b.ps1.tag[:6], a.ps2, b.ps2) == ("PSA1-C", "PSA2-C", None, None)
+    assert a.supply == "230 VAC"
+
+
+def test_an_ac_branch_mcb_is_reported_with_its_numbers(example: LoadedSubstation) -> None:
+    loaded = with_entry(example, "gw", **AC_GW)
+    laid_out = replace(loaded, panels=(*layout_preview(loaded).panels,))
+    items = [
+        x
+        for x in check_report(laid_out, build(laid_out)).items
+        if x.check == "branch_mcb" and "DHPCC_GW_1" in x.message
+    ]
+    assert [(x.panel_id, x.message) for x in items] == [
+        ("psa1", "2 A for DHPCC_GW_1: running 0.41 A, floor 2 A; set by floor")
+    ]
