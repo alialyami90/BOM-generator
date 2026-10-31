@@ -1,0 +1,230 @@
+# Parts the shipped psa-devices library adds to the example library (plan Q38: the example
+# stays the spec's example project). data/library/build.py appends them after the example's
+# devices. Each part comes from the contractor's 2026-10-31 delivery
+# (data/device-db/contractor-2026-10-31/: devices.csv, device_ports.csv, and sources.csv for
+# every value); the comment names the document behind its model and power.
+# purdue_level is left out where the datasheet does not state it, so these switches are not
+# L1/L2 candidates until an engineer sets it. Ports as delivered, management ports included.
+devices:
+  - part_id: C9300-24T-A  # Cisco Catalyst 9300 Series Switches Data Sheet C78-738977 C78-738977-46 09/26, p. 65
+    category: "network_switch"
+    alt_group: "C9300-24T-A"
+    make: "Cisco"
+    model: "C9300-24T-A"
+    ordering_code: "C9300-24T-A + C9300-NM-8X + PWR-C1-350WAC-P"
+    description_template: "Catalyst 9300 data-only switch, 1U rack, 24 x 1G RJ45 and C9300-NM-8X with 8 x 10G SFP+ cages, separate 1G RJ45 management, one PWR-C1-350WAC-P at 230 VAC, Network Advantage"
+    supply_type: "VAC"
+    voltage_v: 230
+    unit_power_w: 395
+    load_type: "CONTINUOUS"
+    power_supplies: 0
+    hwio_points: 0
+    height_u: 1
+    input_v_min: 100
+    input_v_max: 240
+    ports:
+      - { count: 24, speed: 1G, media: RJ45, kind: fixed }
+      - { count: 8, speed: 10G, kind: sfp_slot }
+      - { count: 1, speed: 1G, media: RJ45, kind: fixed }
+  - part_id: IE-4010-16S12P  # Cisco Industrial Ethernet 4010 Series Switches Data Sheet C78-737279 C78-737279-13 10/24, p. 15
+    category: "network_switch"
+    alt_group: "IE-4010-16S12P"
+    make: "Cisco"
+    model: "IE-4010-16S12P"
+    ordering_code: "IE-4010-16S12P + 2 x PWR-RGD-AC-DC-H"
+    description_template: "Industrial Ethernet switch, 1U rack, 16 x 1G SFP cages and 12 x 1G RJ45, PoE disabled, two PWR-RGD-AC-DC-H supplies at 125 VDC"
+    supply_type: "VDC"
+    voltage_v: 125
+    unit_power_w: 70
+    load_type: "CONTINUOUS"
+    power_supplies: 2
+    hwio_points: 1
+    height_u: 1
+    inrush_a: 30
+    input_v_min: 88
+    input_v_max: 300
+    ports:
+      - { count: 12, speed: 1G, kind: sfp_slot }
+      - { count: 4, speed: 1G, kind: sfp_slot }
+      - { count: 12, speed: 1G, media: RJ45, kind: fixed }
+  - part_id: RST2228-28SFP-HV  # RUGGEDCOM RST2228 Equipment Manual C79000-G8976-1359-20 03/2024, p. 1
+    category: "network_switch"
+    alt_group: "RST2228-28SFP-HV"  # delivered in RST2228-L2 with no tier: its own group until tiered
+    make: "Siemens"
+    model: "RUGGEDCOM RST2228"
+    ordering_code: "6GK6222-6AB00-5CC0-Z A00+B06+C06+D06+E06+F06+G06"
+    description_template: "Rugged managed Layer 2 switch, 24 gigabit SFP and 4 ten-gigabit SFP+ ports, dual 125 VDC supply, 1U rack"
+    supply_type: "VDC"
+    voltage_v: 125
+    unit_power_w: 77
+    load_type: "CONTINUOUS"
+    power_supplies: 2
+    hwio_points: 1
+    height_u: 1
+    input_v_min: 88
+    input_v_max: 300
+    ports:
+      - { count: 24, speed: 1G, kind: sfp_slot }
+      - { count: 4, speed: 10G, kind: sfp_slot }
+  - part_id: SEL-2743  # SEL-2743 Ethernet Switch Manual Date Code 20260624, p. 1
+    category: "network_switch"
+    alt_group: "SEL-2743"
+    make: "SEL"
+    model: "SEL-2743"
+    description_template: "Managed Ethernet switch"
+    supply_type: "VDC"
+    voltage_v: 125
+    unit_power_w: 80
+    load_type: "CONTINUOUS"
+    power_supplies: 2
+    hwio_points: 1
+    height_u: 0
+    input_v_min: 36
+    input_v_max: 300
+    ports:
+      - { count: 8, speed: 1G, kind: sfp_slot }
+      - { count: 1, speed: 1G, media: RJ45, kind: fixed }
+  - part_id: SEL-2744  # SEL-2744 Ethernet Switch Manual Date Code 20260601, p. 1
+    category: "network_switch"
+    alt_group: "SEL-2744"
+    make: "SEL"
+    model: "SEL-2744"
+    description_template: "Managed Ethernet switch"
+    supply_type: "VDC"
+    voltage_v: 125
+    unit_power_w: 80
+    load_type: "CONTINUOUS"
+    power_supplies: 2
+    hwio_points: 1
+    height_u: 0
+    input_v_min: 36
+    input_v_max: 300
+    ports:
+      - { count: 8, speed: 1G, kind: sfp_slot }
+      - { count: 2, speed: 10G, kind: sfp_slot }
+      - { count: 1, speed: 1G, media: RJ45, kind: fixed }
+  - part_id: FG-121G  # FortiGate 120G Series Data Sheet FG-120G-DAT FG-120G-DAT-R19-20260929, p. 10
+    category: "firewall"
+    alt_group: "FG-121G"
+    make: "Fortinet"
+    model: "FortiGate 121G"
+    ordering_code: "FG-121G"
+    description_template: "FortiGate 121G next-generation firewall, 480 GB SSD, dual AC supplies, 1U rack mount"
+    supply_type: "VAC"
+    voltage_v: 230
+    unit_power_w: 47
+    load_type: "CONTINUOUS"
+    power_supplies: 0
+    hwio_points: 0
+    height_u: 1
+    input_v_min: 100
+    input_v_max: 240
+    ports:
+      - { count: 16, speed: 1G, media: RJ45, kind: fixed }
+      - { count: 1, speed: 1G, media: RJ45, kind: fixed }
+      - { count: 1, speed: 1G, media: RJ45, kind: fixed }
+      - { count: 8, speed: 1G, kind: sfp_slot }
+      - { count: 4, speed: 10G, kind: sfp_slot }
+  - part_id: FG-60F  # FortiGate 60F Series Data Sheet FG-60F-DAT R51, p. 11
+    category: "firewall"
+    alt_group: "FG-60F"
+    make: "Fortinet"
+    model: "FortiGate 60F"
+    ordering_code: "FG-60F"
+    description_template: "FortiGate 60F firewall, 230 VAC via included external DC adapter"
+    supply_type: "VAC"
+    voltage_v: 230
+    unit_power_w: 12.43
+    load_type: "CONTINUOUS"
+    power_supplies: 0
+    hwio_points: 0
+    height_u: 0
+    input_v_min: 100
+    input_v_max: 240
+    ports:
+      - { count: 10, speed: 1G, media: RJ45, kind: fixed }
+  - part_id: FG-70F  # FortiGate 70F Series Data Sheet FG-70F-DAT R14, p. 10
+    category: "firewall"
+    alt_group: "FG-70F"
+    make: "Fortinet"
+    model: "FortiGate 70F"
+    ordering_code: "FG-70F"
+    description_template: "FortiGate 70F firewall, 230 VAC via included external DC adapter"
+    supply_type: "VAC"
+    voltage_v: 230
+    unit_power_w: 12.43
+    load_type: "CONTINUOUS"
+    power_supplies: 0
+    hwio_points: 0
+    height_u: 0
+    input_v_min: 100
+    input_v_max: 240
+    ports:
+      - { count: 10, speed: 1G, media: RJ45, kind: fixed }
+  - part_id: FGR-70F  # FortiGate Rugged Series Data Sheet FGR-DAT R59, p. 26
+    category: "firewall"
+    alt_group: "FGR-70F"
+    make: "Fortinet"
+    model: "FortiGate Rugged 70F"
+    ordering_code: "FGR-70F"
+    description_template: "FortiGate Rugged 70F firewall, dual DC inputs, 125 VDC planning feed"
+    supply_type: "VDC"
+    voltage_v: 125
+    unit_power_w: 18
+    load_type: "CONTINUOUS"
+    power_supplies: 2
+    hwio_points: 1
+    height_u: 0
+    input_v_min: 12
+    input_v_max: 125
+    ports:
+      - { count: 6, speed: 1G, media: RJ45, kind: fixed }
+      - { count: 2, speed: 1G, kind: sfp_slot }
+  - part_id: SEL-3530-4  # SEL-3530-4 RTAC Data Sheet PDS3530-02 Date Code 20260925, p. 1
+    category: "rtac"
+    alt_group: "SEL-3530-4"
+    make: "SEL"
+    model: "SEL-3530-4"
+    description_template: "Real-time automation controller, 1U rack with bracket, 125 VDC HV supply, two Ethernet ports, 1 DI and alarm contact"
+    supply_type: "VDC"
+    voltage_v: 125
+    unit_power_w: 30
+    load_type: "CONTINUOUS"
+    power_supplies: 1
+    hwio_points: 1
+    height_u: 1
+    inrush_a: 40
+    input_v_min: 85
+    input_v_max: 300
+  - part_id: SEL-3350-1  # SEL-3350-1 Data Sheet PDS3350-01 Date Code 20260928, p. 1
+    category: "rtac"
+    alt_group: "SEL-3350-1"
+    make: "SEL"
+    model: "SEL-3350-1"
+    description_template: "Real-time automation controller, 3U rack, 125 VDC dual HV supplies, 48 serial ports, I/O expansion with 25 DI"
+    supply_type: "VDC"
+    voltage_v: 125
+    unit_power_w: 62
+    load_type: "CONTINUOUS"
+    power_supplies: 2
+    hwio_points: 1
+    height_u: 3
+    inrush_a: 5.4
+    inrush_ms: 36
+    input_v_min: 85
+    input_v_max: 300
+  - part_id: SEL-2407  # SEL-2407 Satellite-Synchronized Clock Instruction Manual PM2407-01 Date Code 20250918, p. 1
+    category: "gps_clock"
+    alt_group: "SEL-2407"
+    make: "SEL"
+    model: "SEL-2407"
+    description_template: "Satellite-synchronized GPS clock with IRIG-B outputs"
+    supply_type: "VDC"
+    voltage_v: 125
+    unit_power_w: 15
+    load_type: "CONTINUOUS"
+    power_supplies: 1
+    hwio_points: 1
+    height_u: 1
+    input_v_min: 18
+    input_v_max: 300

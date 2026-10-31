@@ -1305,3 +1305,11 @@ panel whose quantity is the panel's tagged devices, and a sheet listing every pl
 approved the rest (ADR 0026, Proposed): group B units with a tag only; the last row of group H;
 the part from a new optional housekeeping role (NAMEPLATE-0828805, researched by A4); the sheet
 after Loose Material.
+
+**Q54 — Power of the -2 generation SEL computers** (contractor delivery 2026-10-31). *Open.* The
+delivery gives SEL-3555-2 and SEL-3355-2 480 W each (2 x 240 W, the SEL-9331 HV supply's peak
+input burden, PDS3555-02 p. 11 and PDS3355-04 p. 8) and SEL-3560E and SEL-3560S 240 W each (one
+supply's peak burden, PDS3560-01 p. 11), all basis computed or assumed. The library's SEL-3555-GW is
+73 W, SEL-3555-RTAC 62 W and SEL-3355 91 W. These four parts stay out of the shipped library and in
+`data/device-db/contractor-2026-10-31/`. To ask Ali: use the supply-burden ceilings as unit power,
+or wait for measured or typical consumption figures?
