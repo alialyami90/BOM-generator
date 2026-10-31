@@ -506,3 +506,7 @@ The rules are in ADR 0013 and the design spec (R1–R10).
   for a short while after landing (Parts `goRow`).
 - In a shell, `pkill -f "serve.py 8765"` also matches the shell running it. Kill the server by
   reading `/proc/*/cmdline` instead.
+- After a merge with conflicts, run `git grep -n '^<<<<<<< \|^=======$\|^>>>>>>> '` before
+  `git add -A`. A merge that showed only the last conflict committed markers into CHANGELOG.md (M26).
+- A test that names the shipped library's version breaks on every bump. Read `name` and `version` from
+  `examples/project.yaml` with `read_yaml` (#252, #253).

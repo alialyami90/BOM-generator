@@ -1,6 +1,6 @@
 # 0025. One AC branch MCB per AC-powered device
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-10-31)
 - Date: 2026-10-31
 - Spec sections: Derivation rules → AC distribution (group E); Data model and generation order (step 6)
 

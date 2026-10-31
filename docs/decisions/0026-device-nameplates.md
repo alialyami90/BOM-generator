@@ -1,6 +1,6 @@
 # 0026. Device nameplates
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-10-31)
 - Date: 2026-10-31
 - Spec sections: Workbook map; How each panel BOM groups its materials (group H); Derivation rules (device nameplates); Inputs the tool needs (housekeeping kits); Output requirements (OUT-3); Data model and generation order (steps 9 and 12)
 
