@@ -90,7 +90,7 @@ and problem-level filters.
 ### Segmented control
 Joined options, 30 px, one selected (`action` fill). Built on radio inputs, so
 the arrow keys move the choice and a screen reader hears a radio group with a
-label. Used for Star or Ring on the Network screen.
+label. Used for Star or Ring on the Parts page.
 
 ## Inputs
 
@@ -294,7 +294,7 @@ activates, Esc closes and returns focus to the button. The row's main action (Op
 stays visible beside it; the menu holds the rest.
 
 ### Setup card
-A bordered box on a new substation's Network page: "Set up GIS Substation 01" and a list
+A bordered box on a new substation's Parts page: "Set up GIS Substation 01" and a list
 of steps. Each step has a status icon (done: green tick, current: cobalt info,
 waiting: muted), a title, one muted sentence and an action when there is one. A step
 is done when its data exists; the card disappears when all are done.
@@ -383,3 +383,102 @@ Each row shows the result ("After: 27 U and 27 U of 32 U"), or, greyed and not
 selectable, the reason it does not fit. The current location is marked "(now)".
 The text above says what moves: both units, or one unit and why it stays on its
 side.
+
+## Parts and Device preview (M22)
+
+### Part row
+One device type on the Parts page. A bordered row on `surface`, 4 px radius, 8 px between rows, three lines:
+
+1. **Top line:** the role label in medium weight (Time server clock, L2 switch…), then at the right the
+   **A and B** checkbox and the row menu.
+2. **Fields line**, a three-column grid shared by every row so the columns line up under one muted header
+   ("Library part · Part number on the BOM · Qty"):
+   the **part select**, a select of the library parts of the row's category, each as "part id · make
+   model" in mono (the Device picker replaces it when a category has more than 12 parts); the **part
+   number** box, mono, placeholder "Prints <library part id>" (free text printed in the BOM's ORDERING
+   CODE column; disabled until a part is picked); **Qty** (number, or "Sized" in muted text on L1 and L2
+   rows). The row menu holds Move up, Move down, a rule, and Remove in danger colour; Remove is absent on
+   the L1 and L2 rows, which the layout needs.
+3. **Details strip**, 26 px, under the fields: the library values as **detail values**,
+   then *Reset all* when any value is overridden. A part with no power (a patch panel) shows its height only.
+
+| State | Appearance |
+| --- | --- |
+| No part yet | Part select reads "Pick a part" in muted text; strip reads "Pick a part to see its data." On a new substation the select is marked required on save, not before. |
+| Part not in the library | Part id in danger colour with the error line "Not in psa-devices 1.1.0. Pick another part."; strip empty. |
+| Sized switch, no part | Part select reads "The sizing picks the switch"; strip reads "Pick the switch to change its data." No detail values. |
+| Changed | Changed marker before the role label (the rule in "Changed marker"). |
+| Collapsed (20 or more rows) | The strip becomes one muted line ("1 U · 15 W · 125 VDC · 2 overrides"); clicking it opens the full strip for that row. |
+
+Accessible name of the row group: "Time server clock, SEL-2488, quantity 1".
+
+### Detail value
+One library value in a details strip: a 24 px button with the label in muted text and the value in mono
+("Height **1 U**", "Power **15 W**", "Supply **VDC**", "Voltage **125 V**", "Supplies **2**", "Inrush
+**20 A**", "Load **Continuous**"). Clicking it turns it into an input of the same width (a select for
+supply and load type) with Enter to keep and Esc to cancel.
+
+| State | Appearance |
+| --- | --- |
+| Library value | Muted label, text-colour value, no border until hover (control border on hover, focus ring on focus). |
+| Overridden | Value in `actionText` with a 6 px cobalt dot before it, the library value under it in muted 11.5 px ("Library 15 W"), and a 20 px reset icon button ("Reset power to the library's 15 W"). The accessible name says "overridden". |
+| Invalid | Input with the danger border and the error under the strip ("Enter watts as a number, for example 25."). |
+| Equal to the library | Not an override: entering the library value shows it as a library value, and saving writes nothing for it. |
+
+### SFP sub-row
+Under an L1 or L2 row, one per media and speed the sizing needs: "1G · Multi-mode · 6 needed" in muted
+text (the count is the engine's), then a select of the library's SFPs for that media and speed. The first
+option is "Automatic: <part> (same make first)". Indented 24 px with a hairline rule at the left edge of
+the indent. No part number box, no overrides.
+
+### Accessory sub-row
+Under the time server row: part select (accessories category), quantity, remove. Ends with *Add
+accessory* (ghost, small). Accessories go to loose material; the sub-row says so once, in muted text.
+
+### Add a device
+A secondary button under the last part row. It opens a menu (`role="menu"`) of categories: Fibre
+patch panel, Firewall, External switch, Gateway, RTAC, I/O rack, Other. Picking one adds a part row of
+that category with no part yet, focuses its part select, and marks the row Changed.
+
+### Disclosure (Network fine tuning)
+A full-width button row: chevron, the title in medium weight, and the summary in muted text to its
+right; `aria-expanded`. Open, the fields follow in the three-column form grid. It opens on its own when one
+of its fields is invalid or named by a Go to link.
+
+### Rack elevation
+A scaled front view of one panel in Device preview, 268 px wide. 1 U is 18 px, as on the board, so the
+32 U that may be used are 576 px tall. Front views sit side by side with their frames aligned, so the
+waist-height lines meet across panels.
+
+- **Header:** panel name (a button that filters the device table to this panel) and side badge. Under
+  it: "23 of 32 U used · waist 1000 mm", the second part with a short dashed key. The count includes
+  what could not be drawn, so an overflowing panel reads "35 of 32 U used" in `dangerText`. When any
+  panel has an error, every panel gets a second line ("1 error, see above" or a muted "No errors"),
+  so the frames stay aligned.
+- **Ruler** at the left: U numbers from the bottom, every 5 U, in 11 px mono, `textMuted`; the waist U
+  number in `actionText`, semibold.
+- **Frame:** a sunken well like the board's rack, with the base frame drawn as a 24 px muted band
+  under it, labelled with its height in mm. Under that, the DIN-rail parts by tag ("1 DIN-rail part:
+  PSA2-ANN-01 · no rack space").
+- **Units:** blocks as tall as their U, placed at their top U, showing tag (mono) and height. A unit
+  with a cable manager reads "1 U + CM" and draws the manager as a 16 px muted band at the bottom of
+  the block labelled "Cable manager", so the part's height matches Parts. Selected, pinned, dragging
+  and drop states are the board's (Device block, Panel column).
+- **Blank space:** empty rack units, drawn as the well with no fill. Blank space has no BOM row.
+- **Waist-height line:** a 1 px dashed `action` line across the frame at the waist height, starting in
+  the ruler at the waist U number (it has no label over the frame, so it never covers the unit on it). A KVM or console whose bottom edge sits on it shows a small
+  check; one pinned away from it carries a warning badge "Pinned away from waist height".
+- **Overflow and waist errors:** units that do not fit are not drawn. The sentence goes in a danger
+  banner above the front views, in the check report's words plus the fix ("Move a device to panel 3,
+  or raise the rack space on Settings."). A KVM that cannot sit at waist height is drawn where it
+  landed, with a warning flag.
+- **Selected unit bar:** selecting a unit (click, or Enter on its table row) shows a bar under the
+  front views: tag, panel and U, "Up 1 U" and "Down 1 U" (each shown only when that move fits), and
+  "Unpin" on a pinned unit. Arrow Up and Arrow Down on the focused, selected unit do the same. This is
+  the keyboard path for pinning; a move pins, with the drop's toast and Undo. Unpin hands the unit back
+  to the layout.
+- **Drag over:** the panel takes the board's drop colours, and a dashed ghost as tall as the unit shows
+  where its top lands ("U 9").
+
+Accessible name: "PSA Cabinet - 001, side A, 23 of 32 U used". Each unit is a button whose name gives
+tag, part, top U and height ("PSA1-GPS-01, SEL-2488, U 32, 1 U").

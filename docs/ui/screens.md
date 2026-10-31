@@ -11,7 +11,7 @@ editing behaviour, `editing.md` is newer.
 
 ```
 Home (all projects) ─ Project ─┬─ Overview · Substations · Documents · Backup and share
-                               └─ Substation ─ Settings · Network · Panels (board, list, panel editor) · Loose material
+                               └─ Substation ─ Settings · Parts · Device preview · Panels (board, list, panel editor) · Loose material
 Library (import, versions)         └─ Checks ─ Preview ─ Build        (each per substation)
 ```
 
@@ -24,7 +24,8 @@ panels, checks and workbook. The first substation can be copied to start the nex
 | `#/home` | Home | All projects on this PC; first-run guidance when no library is installed |
 | `#/project/<tab>` | Project | `info`, `substations`, `documents`, `share` |
 | `#/settings/<tab>` | Substation settings | Substation-only settings (general, documents used, output, constants, YAML) |
-| `#/network` | Network | IED count, topology, equipment, spares, the engine's sizing result |
+| `#/parts` | Parts | IED count and topology, network fine tuning, one row per device type with its library part, part number and overrides, the catalogue brands (M22; `#/network` redirects here) |
+| `#/device-preview` | Device preview | Each device with its panel, rack position and MCBs, and a front view of each panel, before the workbook is built (M22) |
 | `#/panels` | Panels | The Board and List views of the generated panels |
 | `#/panels/<id>/<tab>` | Panel editor | One cabinet; generated panels have editable enclosure, port plans, options and document, hand-written ones are fully editable |
 | `#/loose` | Loose material | The substation's own list of items not mounted in a cabinet, printed on its own sheet |
@@ -33,7 +34,7 @@ panels, checks and workbook. The first substation can be copied to start the nex
 
 The rail has three groups. Top: Home and Library, always reachable. **Project**:
 one item that opens the project page, with its status. **Substation**: a
-switcher (a select that lists the project's substations) over Settings, Network,
+switcher (a select that lists the project's substations) over Settings, Parts, Device preview,
 Panels and Loose material, then **Verify and issue** (Checks, Preview, Build). The substation
 items are disabled until a substation is open.
 
@@ -56,8 +57,10 @@ fix → "Run checks again" → Preview → Build. Build is disabled while errors
 and says why. The project's document register is edited once, on the project
 page, and every substation's headers read from it.
 
-**4. Adjust the panels.** Network sets the IED count, topology, equipment and
-spares; the layout engine places the devices in panels. The Panels board shows
+**4. Pick the parts, check the placement, adjust the panels.** Parts sets the IED count, topology, one
+library part per device type with this design's part number and overrides, and the network fine tuning;
+the layout engine places the devices in panels. **Generate preview** opens Device preview: each device's
+panel, rack position and MCBs, and a front view of each panel. The Panels board shows
 the result, and the engineer moves, deletes or resets (see Panels below). Each
 change is saved as an override and the layout runs again.
 
@@ -88,7 +91,7 @@ line. "Apply to form" is available only when the YAML is valid.
   updates. A `.bomproj` launch adds a banner above the table.
 - **New project:** a dialog with name, client, device library (default: the active one) and an
   optional first substation; the folder is shown, not asked for. Creating opens the new
-  substation's Network page.
+  substation's Parts page.
 - **Behaviour:** a row opens the project page on Substations. Status uses the
   same words as Checks (`Ready`, `2 errors`, `Library out of date`).
 - **States:** first run (steps list, "Install a library…" primary, the project
@@ -137,31 +140,44 @@ here.
 - **States:** empty (explains that no sheet is written, offers both add actions); a library part that is not
   in the active library is shown as "Library part" without make and model; invalid quantity marks the cell ("Enter a whole number, or 1 Lot.").
 
-### Network
-- **Layout:** two columns. Left: **Field network** (IED count, Star or Ring, ring
-  size when Ring), **Equipment** (device, role, A+B, L2 ports, height), and
-  **Spares** (ports kept free, spare SFPs per L1, rack space kept free, spare DC
-  and AC branches). Right: a read-only **Result** card from the engine
-  (`NetworkPlan`): L1 and L2 switches, L2 ports used of usable, links, and the
-  note for the chosen topology.
-- **L1 switch model:** under Field network, a ranked table of the engine's
-  `rank_l1_switches` result (rank, model, ports, switches per side, **usable
-  ports**). The row in use is marked "Tool's pick" or, when `substation.yaml` pins
-  a model, "Pinned" (the Result card says "(pinned)"); a top row that is not in
-  use shows "Tool's pick" in muted text. The UI never ranks; it shows the
-  engine's order. No ranking is shown until the IED count is set. In the built
-  app the pin is made in `substation.yaml` (see *Departures in the built app*).
-- **Behaviour:** the Result card shows a busy state and updates after each
-  change. Equipment rows are checked against the library; an unknown part id
-  shows an inline error with a suggestion. In a star, each L1 has one uplink to
-  its L2 plus an A–B interlink. The equipment table sits here because the panels
-  are generated from it.
-- **New substation:** the **setup card** (see `components.md`) sits above Field network and lists
-  the steps left: IEDs, equipment, panels. The IED count is marked required until entered.
-- **Equipment rows:** part (with "Change part…"), role, A and B, quantity (L1 rows read "Sized"),
-  L2 ports and remove, all editable; the Result card recalculates after each change.
-- **States:** substation with no network yet (setup card, IED count marked
-  required, empty equipment, empty result); IED count assumed; unknown device.
+### Parts (M22, replaces Network)
+
+Part picking design (`docs/superpowers/specs/2026-10-31-part-picking-design.md` §3). One page answers
+"what is in this substation, and which part is each thing": the network inputs at the top, then one
+row per device type in the order the layout fills panels, then the catalogue brands. It is a form page
+with the save bar; everything on it is saved together.
+
+- **Layout:** the two columns of the old Network page. Left, top to bottom:
+  1. **Field network:** Field IEDs (required on a new substation) and Topology (Star or Ring), as before.
+  2. **Network fine tuning**, a disclosure under them, closed once the substation is set up. Closed, it
+     is one muted summary line ("Star · 1 uplink per L1 · A–B interlink · 20% ports kept free · 4 U kept
+     free"); open, it holds switches per ring (Ring only), L1 uplinks per switch, A–B interlink, L3
+     uplinks per L2 and the spares (ports kept free, DC branches per feed, AC branches, rack U kept free).
+     A changed value is marked and the disclosure's summary names how many differ from the project's
+     defaults.
+  3. **Devices:** the part rows (`components.md` "Part row"), in this default order: Time server clock,
+     L2 switch, L1 switch, Operator workstation, Engineering workstation, DA server, KVM, Console,
+     Annunciator, then any rows added with **Add a device**. The order is the order the layout fills
+     panels in; **Move up** and **Move down** in each row's menu change it.
+  4. **Catalogue brands:** MCB make and series (AC and DC, one select each, as in Settings) and Terminal
+     blocks. No part number, no overrides.
+
+  Right: the **Result** card as before (L1 and L2 switches per side, ports used, links), plus
+  **Generate preview** (primary). The L1 ranking table is gone: the L1 switch is picked in its row.
+- **Behaviour:** picking a part fills the row's details strip from the library. A value clicked in the
+  strip becomes an input; a value that differs from the library is an **override**, marked, with a reset.
+  The Result card recalculates after each change, as before. Rows with no part number get a warning on
+  Checks ("printed with the library model").
+- **Sized switches:** the L1 and L2 rows show "Sized" for quantity. With no part picked, the sizing picks
+  one and the row says so ("The sizing picks the switch"); the strip then reads "Pick the switch to
+  change its data." and offers no overrides.
+- **Generate preview** opens Device preview. With unsaved changes it is disabled, and its hint says
+  "Save your changes first".
+- **States:** new substation (setup card; IED count required; only the rows of the default order, each
+  with no part); set up and clean; overrides present; an override that is invalid (inline error and the
+  save bar's sentence); a row whose part is not in the active library (the id in error, "Pick another
+  part", an empty strip); 20 or more rows (strips collapse to a one-line summary per row; the save bar
+  never covers the last row).
 
 ### Panels
 - **Header actions:** Undo, Reset to automatic, Add hand-written panel….
@@ -199,7 +215,7 @@ here.
 - **Boundary:** the board only writes `layout.overrides` and `removed` and shows
   the result of `layout_preview`; the placement rules live in the engine.
   Overrides refer to equipment ids and pairs, not tags.
-- **States:** no panels yet (link to Network); errors in a panel; manual changes
+- **States:** no panels yet (link to Parts); errors in a panel; manual changes
   present.
 
 ### Panel editor
@@ -208,7 +224,7 @@ here.
 - **Generated panel:** a banner says the layout writes the devices. Devices (with an Origin
   column that marks pinned devices) is read-only; Enclosure, Port plans, Options and Document are
   editable, with their scope stated (shared by all generated panels, or this panel only).
-  The YAML tab is labelled Generated and read-only. The banner links to Network and the board.
+  The YAML tab is labelled Generated and read-only. The banner links to Parts and the board.
 - **Hand-written panel** (`manual_panels`, for example the WS console): the full
   editor, as in the first design. Devices: reorder handle, device, quantity,
   purpose, HWIO override, generated tag, remove; "Add device" opens the picker.
@@ -307,6 +323,38 @@ too and their "Go to field" opens the project page.
   Calculations: forced-ventilation table with line-up check, natural-convection
   metrics and the resulting recommendation.
 - **Behaviour:** read-only. Filters change the view only.
+
+### Device preview (M22)
+
+Part picking design §6. "Will this build the way I expect?" answered before the workbook is
+written. Reached from Parts (**Generate preview**) and the rail. Read-only except for dragging on the
+front view. The workbook's sheet preview (above) is unchanged.
+
+- **Layout:** title and lede, the check report's errors and then its warnings for this substation
+  (banners above the front views; warnings have **Go to the row**, which opens the Parts row), then a
+  **panel strip**: one front view per panel (`components.md` "Rack
+  elevation"), side by side and scrolling sideways when they do not fit. Under it, the **device table**,
+  one row per unit: device, part, BOM part number, panel, U position, watts, supply, PS1 MCB (tag and
+  rating), PS2 MCB (tag and rating), terminal strip. Overridden values carry the override marker.
+- **Linked selection:** clicking a unit on a front view selects its table row and scrolls it into view;
+  clicking a row selects the unit. Clicking a panel's header filters the table to that panel; the
+  filter chips above the table (All panels, then one per panel) do the same.
+- **Dragging** on a front view follows the board's contract (`editing.md` "Drag and drop contract"):
+  to another panel or another U; Alt moves one unit of a pair; the target is checked live; a drop
+  writes a pin. A KVM or console dropped away from waist height is allowed and marked "Pinned away
+  from waist height".
+- **Flags** (design §7.3): a unit whose MCB is at the 2 A minimum, or whose watts are 0, shows a
+  warning marker in its row with the reason in the tooltip and the accessible name. A one-line legend
+  above the table says what the warning marker and the override dot mean. A pinned unit's U cell
+  reads "Pinned" in words.
+- **Keyboard:** the selected unit bar (`components.md` "Rack elevation") moves a unit up or down 1 U
+  and unpins it; Arrow Up and Down on the selected unit do the same.
+- **States:** clean; warnings; a panel that overflows (an error banner above the front views with the
+  check report's sentence and the fix, and the panel's count in red, "35 of 32 U used"; units are
+  never drawn outside the rack); a KVM that cannot sit at waist height (the same banner, the KVM drawn
+  where it landed); an engine error (no front views or table, one banner naming the row and the
+  library version, with **Go to the row**); unsaved changes on Parts (a banner says the preview shows
+  the saved parts; the header's **Back to Parts** is the only way back).
 
 ### Build
 - **Layout:** two columns. Left: file name (from the pattern), save folder,
@@ -464,5 +512,25 @@ open PRs at the time.
   first design.
 - Preview, Power and Heat show figures the engine supplies. The prototype holds
   them as literal values in `data.js`; no rule is computed in the UI.
+- Parts and Device preview (M22): every U number comes from one source. A switch with a cable
+  manager reads "1 U + CM" on the front view, matching the 1 U on Parts; an overflowing panel counts
+  what could not be drawn ("35 of 32 U used"); the waist error names the U above the line.
+- Parts (M22): the rail shows "Not set up" on a new substation and "1 error" when a row is invalid or
+  its part is missing from the library, like Checks. The setup card ticks a step only when its field
+  is filled. Device preview is disabled in the rail until Parts is set up.
+- Device preview (M22): errors sit in a banner above the front views, not under the base frame, so
+  they are seen at 800 px tall. Each panel keeps a second meta line while any panel has an error, so
+  the frames stay aligned.
+- Device preview (M22): a selected unit gets a bar with Up 1 U, Down 1 U and Unpin, plus Arrow Up and
+  Down, so pinning does not need a mouse. Moving to another panel stays drag-only for now: the only
+  other panel in the example is on the other side, where every move is refused anyway.
+- Device preview (M22): a drop or a move writes the pin straight away with a toast and Undo, as the
+  Panels board does (`editing.md` "Drag and drop contract"). It does not go through the save bar. A
+  KVM pinned away from waist height is added to the warnings banner in words.
+- Kept as they are after the M22 critique: the green drop colour (the board uses it, and the ghost
+  says "U 9" in words); amber Changed and cobalt Override dots side by side (the existing components;
+  Changed sits before the label, Override before the value); a second "Firewall" row added from Add a
+  device shows the same label (its part and tags tell them apart in the built app, which is M23's
+  call); below 1280 px the page does not reflow (1280 is the minimum width, `design-language.md`).
 - Still open for Ali: a read-only reviewer mode (hides Save, Add device and
   Remove for non-engineers). Not designed yet; it is a likely M10 follow-up.

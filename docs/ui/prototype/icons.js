@@ -17,6 +17,7 @@ window.ICONS = {
   search: '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>',
   filter: '<path d="M4 5.5h16l-6 7v6l-4-2v-4z"/>',
   chevd: '<path d="m6 9.5 6 6 6-6"/>',
+  chevu: '<path d="m6 14.5 6-6 6 6"/>',
   chevr: '<path d="m9.5 6 6 6-6 6"/>',
   x: '<path d="M6 6l12 12M18 6 6 18"/>',
   info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8h.01"/>',
@@ -44,6 +45,8 @@ window.ICONS = {
   grip: '<path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01"/>',
   sort: '<path d="M8 5v14M5 16l3 3 3-3M16 19V5M13 8l3-3 3 3"/>',
   pin: '<path d="M9 4h6l-1 6 3 3H7l3-3z"/><path d="M12 13v7"/>',
+  parts: '<rect x="6.5" y="6.5" width="11" height="11" rx="1.5"/><path d="M9.5 3.5v3M14.5 3.5v3M9.5 17.5v3M14.5 17.5v3M3.5 9.5h3M3.5 14.5h3M17.5 9.5h3M17.5 14.5h3"/>',
+  elevation: '<rect x="5" y="3.5" width="14" height="17" rx="1"/><path d="M8 7h8M8 10h8"/><path d="M2.5 14.5h19" stroke-dasharray="2 2.5"/>',
   shield: '<path d="M12 3.5 19 6v5.5c0 4.2-2.8 7.4-7 9-4.2-1.6-7-4.8-7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/>'
 };
 window.icon = (name, cls = '') =>
