@@ -269,9 +269,10 @@ Part picking design §3 and §4 (ADR 0024 when M20 lands). All fields write `sub
 | Part number | Text, mono, optional | `equipment[i].ordering_code` | None; empty means the library model is printed, and Checks warns |
 | Qty | Number ≥ 1; "Sized" on L1 and L2 | `equipment[i].qty` | "Enter a whole number, 1 or more." |
 | A and B | Checkbox | `equipment[i].redundant` | — |
+| Cable manager | Switch, network rows only; starts at the part category's default | `equipment[i].cable_manager`, written only when it differs from the default | — |
 | Detail values | Height (U), power (W), supply (AC or DC), voltage (V), supplies (0, 1, 2), inrush (A), load type | `equipment[i].overrides.<field>` | The library check's sentence for that field, for example "A part on AC has no second supply: set supplies to 0 or 1." |
 | SFP per media and speed | Select, first option automatic | `equipment[i].sfp[]` | "Pick an SFP for 1G multi-mode, or leave it automatic." |
-| Time accessories | Part, quantity, remove; *Add accessory* | `equipment[]` rows with role `time_accessory` | As Part and Qty |
+| Time accessories | The library part's own accessories, read-only; added ones: quantity, remove; *Add accessory* | `loose_material.items` rows, linked to the time server row by part (M23 decision 2); no `time_accessory` role is written | "Enter a whole number, 1 or more." |
 | Row order | Move up / Move down in the row menu | the order of `equipment` | — |
 | MCB make and series | Two selects (AC, DC) | `catalogue_choice.mcb`, `catalogue_choice.mcb_dc` | As in Settings |
 | Terminal blocks | Select | `catalogue_choice.terminal_blocks` | As in Settings |

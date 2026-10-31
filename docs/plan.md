@@ -941,7 +941,8 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
   both screens (the new step is called **Device preview**, so the rail does not have two "Preview"
   items), made with the impeccable skill (CLAUDE.md "UI work"). Plan:
   [`superpowers/plans/2026-10-31-m22-parts-and-device-preview-design.md`](superpowers/plans/2026-10-31-m22-parts-and-device-preview-design.md).
-- **M23 — Parts page in the app.** Replaces the Network page; writers for the new fields. Plan:
+- **M23 — Parts page in the app.** *Done (PR for review).* Replaces the Network page; writers for the
+  new fields and the cable manager switch. Plan:
   [`superpowers/plans/2026-10-31-m23-parts-page.md`](superpowers/plans/2026-10-31-m23-parts-page.md).
 - **M24 — Device preview page.** Engine API for per-unit MCBs and positions, the device table, and the
   panel elevation with dragging.

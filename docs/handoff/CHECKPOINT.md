@@ -3,6 +3,18 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-10-31: M23 Parts page (A2, app)
+
+- **Branch** `claude/project-thread-ufgt03`, on main after #243 (`cable_manager`). PR for review by A1.
+- **Done:** Parts replaces Network (`screens-parts.js`, `app/parts.py`, `io/parts_edit.py`); writers for
+  overrides, SFP choices, part change (clears what described the old part), cable manager, row move and
+  a new substation's first rows; time accessories as loose material items; `start_equipment` and the L1
+  ranking payload removed; a ruamel emitter fix in `round_trip.py`.
+- **Checked:** gate passes; Playwright E2E on the example (override, library value back, Reset all,
+  SFP, part change, cable manager, move, remove and Undo, Use this instead, `#/network`), no console
+  errors. Screens in `/mnt/project-files/a11-screens/m23-parts/`.
+- **Next:** M24 Device preview (plan in A3's engine PR).
+
 ## 2026-10-30: repo audit done, fix PRs merged, spec at v2.1
 
 - **Base:** origin/main `d7841e4` (#234). Gate at `f2234f7` (#227): ruff and format pass (291 files),
