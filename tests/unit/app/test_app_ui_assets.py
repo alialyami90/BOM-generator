@@ -311,7 +311,7 @@ def test_the_save_bar_fix_sentence_is_one_control() -> None:
 def test_a_route_change_closes_an_open_dialog() -> None:
     """polish-v02 item 15."""
     ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
-    assert "window.addEventListener('hashchange', () => { closeDialog(); render();" in ui
+    assert "closeDialog(); render(); $('#main').scrollTop = 0;" in ui
 
 
 def test_a_new_list_row_is_checked_once_it_is_filled_or_on_save() -> None:
@@ -608,3 +608,87 @@ def test_preview_shows_the_nameplates_sheet_after_loose_material() -> None:
     assert "function nameplatesView(n)" in js
     for head in ("<th>Panel</th>", "<th>Plate text</th>", "<th>Device</th>"):
         assert head in js
+
+
+# -- M29: unsaved changes and app polish (audit 2026-10-31) --
+
+
+def test_leaving_a_form_page_with_unsaved_changes_asks_first() -> None:
+    """APP-6; editing.md "Leaving with unsaved changes": a link, another substation or project."""
+    js = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    form = js[js.index("function draftForm(o)") :]
+    for label in (">Keep editing<", ">Discard changes<", "Save and leave<"):
+        assert label in form
+    assert "Save the changes first?" in form
+    # Save and leave is disabled while a field is invalid, and says why
+    assert "before you can save." in form
+    # the shell holds the route and the substation switch until the dialog answers
+    assert "history.replaceState(null, '', was)" in js
+    assert "const leaving = (then) =>" in js
+    assert "if (leaving(() => switchTo(value))) return;" in js
+    # the draft is no longer dropped on a route change
+    assert "if (route().a !== o.screen) D.reset()" not in js
+
+
+def test_the_status_bar_says_unsaved_changes_while_a_save_bar_shows() -> None:
+    """APP-6; editing.md "Save bar", components.md "Status bar"."""
+    js = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    assert "Unsaved changes</span>" in js
+    assert ".status .warn" in (UI_DIR / "styles.css").read_text(encoding="utf-8")
+
+
+def test_the_first_loose_save_does_not_clear_the_host_it_just_set() -> None:
+    """APP-5: add_loose_item sets the host; a host never chosen is not written as null."""
+    js = LOOSE.read_text(encoding="utf-8")
+    assert "draft.host == null || draft.host === LM.data.host_panel" in js
+
+
+def test_save_the_parts_also_saves_the_network_inputs() -> None:
+    """APP-16: one press saves the picks and the IED count."""
+    js = (UI_DIR / "screens-parts.js").read_text(encoding="utf-8")
+    start = js[js.index("Bridge.call('start_parts'") :]
+    assert "PF.save()" in start[: start.index("}).catch(fail);")]
+
+
+def test_the_rail_counts_the_panels_from_the_last_layout() -> None:
+    """APP-17: the Panels count follows a layout without a reload."""
+    assert "App.panelCount = " in (UI_DIR / "screens-panels.js").read_text(encoding="utf-8")
+    assert "App.panelCount()" in (UI_DIR / "ui.js").read_text(encoding="utf-8")
+
+
+def test_every_engine_check_has_a_name_on_checks_and_build() -> None:
+    """APP-13: no raw check ids such as branch_mcb or dc_float."""
+    checks = (REPO / "src" / "bomgen" / "checks.py").read_text(encoding="utf-8")
+    ids = set(re.findall(r'check="(\w+)"', checks))
+    js = (UI_DIR / "screens-verify.js").read_text(encoding="utf-8")
+    names = js[js.index("const CHECKS = {") : js.index("};", js.index("const CHECKS = {"))]
+    assert ids
+    assert [i for i in ids if f"{i}:" not in names] == []
+    # Build's list names the device the way the Checks table does
+    assert "i.subject ? ` · ${esc(i.subject)}` : ''" in js
+
+
+def test_device_preview_with_no_panel_files_offers_to_lay_them_out() -> None:
+    """APP-15: not called hand-written when there are none."""
+    js = (UI_DIR / "screens-device-preview.js").read_text(encoding="utf-8")
+    assert "d.panel_files" in js
+    assert "No panels laid out yet." in js
+    assert "Bridge.call('generate_panels'" in js
+
+
+def test_add_a_device_and_the_result_card_read_as_english() -> None:
+    """APP-18: "3 L1 switches", "Add an RTAC", "Add a KVM", "Add an I/O rack"."""
+    panels = (UI_DIR / "screens-panels.js").read_text(encoding="utf-8")
+    assert "plural(p.l1_per_side, 'L1 switch')" not in panels
+    parts = (UI_DIR / "screens-parts.js").read_text(encoding="utf-8")
+    assert "c.label.toLowerCase()" not in parts
+    assert "const aName = (label) =>" in parts
+
+
+def test_project_overview_edits_the_layout_heights_and_marks_them_assumed() -> None:
+    """APP-19: waist height and rack start, with the register's Assumed badge and Confirm."""
+    js = (UI_DIR / "screens-projects.js").read_text(encoding="utf-8")
+    assert "['defaults', 'layout', 'waist_height_mm']" in js
+    assert "['defaults', 'layout', 'rack_start_mm']" in js
+    assert "p.layoutAssumed" in js
+    assert 'data-action="po-confirm"' in js

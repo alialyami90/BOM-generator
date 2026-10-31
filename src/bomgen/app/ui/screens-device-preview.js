@@ -143,7 +143,7 @@
     const errs = issuesOf('error'), warns = issuesOf('warning');
     const goto = (i) => (i.device ? `<button class="link-btn small" data-action="dp-goto" data-device="${esc(i.device)}">Go to the row</button>` : '');
     return `<div class="page page--wide">${head}
-      ${d.generated ? '' : `<div style="margin-bottom:var(--space-3)">${banner('info', '<b>Hand-written panels.</b> This shows what <span class="mono">bomgen layout</span> would place; Build uses your panel files. Lay out the panels from the equipment on Panels to pin devices here.', '<a class="btn btn--secondary btn--sm" href="#/panels">Open Panels</a>')}</div>`}
+      ${d.generated ? '' : !d.panel_files ? `<div style="margin-bottom:var(--space-3)">${banner('info', '<b>No panels laid out yet.</b> This shows where the layout would place each device. Lay out the panels to pin devices here and to build the workbook.', `<button class="btn btn--primary btn--sm" data-action="dp-generate" ${DP.busy ? 'disabled' : ''}>${icon('panels')}Lay out panels</button>`)}</div>` : `<div style="margin-bottom:var(--space-3)">${banner('info', '<b>Hand-written panels.</b> This shows what <span class="mono">bomgen layout</span> would place; Build uses your panel files. Lay out the panels from the equipment on Panels to pin devices here.', '<a class="btn btn--secondary btn--sm" href="#/panels">Open Panels</a>')}</div>`}
       ${DP.refusal ? `<div style="margin-bottom:var(--space-3)">${banner('bad', `<b>Not moved.</b> ${esc(DP.refusal)} Nothing was changed.`, `<button class="btn btn--ghost btn--icon btn--sm" data-action="dp-refusal-close" aria-label="Close">${icon('x')}</button>`)}</div>` : ''}
       ${errs.length ? `<div style="margin-bottom:var(--space-3)">${banner('bad', errs.length === 1 ? `${esc(sentence(errs[0].message))} ${goto(errs[0])}` : `<b>${plural(errs.length, 'error')}.</b><ul class="dp-issues">${errs.map((i) => `<li><span>${esc(sentence(i.message))}</span>${goto(i)}</li>`).join('')}</ul>`)}</div>` : ''}
       ${warns.length ? `<div style="margin-bottom:var(--space-4)">${banner('warn', `<b>${plural(warns.length, 'warning')} from the checks.</b><ul class="dp-issues">${warns.map((i) => `<li><span>${esc(sentence(i.message))}</span>${goto(i)}</li>`).join('')}</ul>`)}</div>` : ''}
@@ -223,6 +223,14 @@
     drop: () => endDrag(false),
     cancel: () => endDrag(true)
   });
+  /* No panel files yet: nothing is replaced, so the layout writes them without asking. */
+  ACTIONS['dp-generate'] = () => {
+    DP.busy = true; App.render();
+    Bridge.call('generate_panels', S.project.file, S.sub).then((r) => {
+      const row = App.curSub(); if (row) row.panels = r.page.list.length;  // the rail's Panels count
+      App.network.reload(); reload(); toast(`Laid out ${plural(r.written.length, 'panel')}.`);
+    }).catch((err) => toast(err.message, 'error')).then(() => { DP.busy = false; App.render(); });
+  };
   /* Parts saves change the units: the next visit generates the preview again. */
   App.devicePreview = { reload };
 })();

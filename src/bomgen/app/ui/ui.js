@@ -136,7 +136,7 @@
       ${navItem('#/settings', 'file', 'Settings', '', 'ok', !ns, r === 'settings')}
       ${navItem('#/parts', 'parts', 'Parts', '', 'ok', !ns, r === 'parts')}
       ${navItem('#/device-preview', 'elevation', 'Device preview', '', '', !ns || noParts(), r === 'device-preview')}
-      ${navItem('#/panels', 'panels', 'Panels', ns ? esc(curSub().panels) : '', '', !ns, r === 'panels')}
+      ${navItem('#/panels', 'panels', 'Panels', ns ? esc(App.panelCount && App.panelCount() != null ? App.panelCount() : curSub().panels) : '', '', !ns, r === 'panels')}
       ${navItem('#/loose', 'pkg', 'Loose material', App.looseCount && App.looseCount() != null ? String(App.looseCount()) : '', '', !ns, r === 'loose')}
       <div class="nav-group">Verify and issue</div>
       ${navItem('#/checks', 'checks', 'Checks', checksTail, bad ? 'bad' : 'ok', !ns, r === 'checks')}
@@ -144,11 +144,12 @@
       ${navItem('#/build', 'build', 'Build', buildTail, v && v.errors ? 'bad' : 'ok', !ns, r === 'build')}` : ''}
       <div class="nav-foot">App ${S.app ? esc(S.app.version) : ''}<br>Works offline. Nothing leaves this PC.</div>`;
   }
+  const saveState = () => (unsaved() ? `<span class="warn">${icon('warn')} Unsaved changes</span>` : '');
   function renderStatus() {
     const ns = hasSub(), np = hasProject(), p = curProject();
     $('#status').innerHTML = S.backend === 'no' ? `<span class="bad">${icon('error')} Engine not reachable</span>`
-      : ns ? `<span class="mono" style="font-size:12px">${esc(curSub().file)}</span><span class="sp"></span>`
-      : np ? `<span>${esc(p.path)}</span><span class="sp"></span><span>${p.substations.length} ${p.substations.length === 1 ? 'substation' : 'substations'}</span>`
+      : ns ? `${saveState()}<span class="mono" style="font-size:12px">${esc(curSub().file)}</span><span class="sp"></span>`
+      : np ? `${saveState()}<span>${esc(p.path)}</span><span class="sp"></span><span>${p.substations.length} ${p.substations.length === 1 ? 'substation' : 'substations'}</span>`
       : `<span>No project open</span><span class="sp"></span><span>${S.firstRun ? 'Library: none installed' : ''}</span>`;
   }
   /* No bridge: the UI must never stand in for the engine, so every page says so (audit 2026-10-30, finding 1). */
@@ -206,13 +207,33 @@
 
   ACTIONS.tab = (el) => { S.tab[el.dataset.group] = el.dataset.value; if (el.dataset.group === 'project') history.replaceState(null, '', '#/project/' + el.dataset.value); if (el.dataset.group === 'settings') history.replaceState(null, '', '#/settings/' + el.dataset.value); if (el.dataset.group === 'panel') history.replaceState(null, '', '#/panels/' + route().b + '/' + el.dataset.value); const keep = $('#main').scrollTop; renderMain(); $('#main').scrollTop = keep; const nt = document.getElementById(el.id); nt && nt.focus(); };
   ACTIONS.goto = (el) => go(el.dataset.to);
-  ACTIONS['sub-switch'] = (el) => { S.sub = el.value || null; S.dirty = false; const { a } = route(); go(['settings', 'parts', 'device-preview', 'panels', 'loose', 'checks', 'preview', 'build'].includes(a) ? '#/' + a : '#/panels'); };
+  const switchTo = (id) => { S.sub = id || null; S.dirty = false; const { a } = route(); go(['settings', 'parts', 'device-preview', 'panels', 'loose', 'checks', 'preview', 'build'].includes(a) ? '#/' + a : '#/panels'); };
+  ACTIONS['sub-switch'] = (el) => {
+    const value = el.value;
+    el.value = S.sub || '';  // the switch waits for the dialog's answer
+    if (leaving(() => switchTo(value))) return;
+    switchTo(value);
+  };
   ACTIONS.theme = () => { S.theme = { light: 'dark', dark: 'system', system: 'light' }[S.theme]; render(); toast(`Theme: ${S.theme}`, 'info'); };
   ACTIONS.help = () => dialog({ title: 'Help', body: '<p>The user guide is not written yet.</p>', actions: '<button class="btn btn--primary" data-action="close">Close</button>' });
   ACTIONS.close = () => closeDialog();
   ACTIONS['retry-backend'] = () => { S.backend = 'unknown'; render(); Bridge.call('app_info').then(setAppInfo).catch((err) => { if (err.kind === 'no_backend') { S.backend = 'no'; render(); } else toast(`Could not read the app's state: ${err.message}`, 'error'); }); };
   ACTIONS.scrim = () => closeDialog();
-  window.addEventListener('hashchange', () => { closeDialog(); render(); $('#main').scrollTop = 0; });
+  /* Leaving a form page with unsaved changes asks first (editing.md "Leaving with unsaved changes").
+     Each draft form adds a guard; `leaving(then)` opens the first dirty one's dialog and returns true. */
+  const GUARDS = [];
+  const unsaved = () => GUARDS.some((g) => g.screen === route().a && g.dirty());
+  const leaving = (then) => { const g = GUARDS.find((x) => x.screen === route().a && x.dirty()); if (!g) return false; g.ask(then); return true; };
+  let here = location.hash;
+  window.addEventListener('hashchange', () => {
+    const was = here; here = location.hash;
+    const to = location.hash, from = was.split('/')[1] || 'home';
+    if (from !== route().a && GUARDS.some((g) => g.screen === from && g.dirty())) {
+      history.replaceState(null, '', was); here = was;  // stay until the dialog answers
+      leaving(() => go(to)); return;
+    }
+    closeDialog(); render(); $('#main').scrollTop = 0;
+  });
 
   /* ---------- a form drafted on the page and saved together (docs/ui/editing.md) ----------
      Each field is read on change and checked by the model; the draft holds only what differs from the file.
@@ -269,9 +290,9 @@
       if (el) { el.scrollIntoView({ block: 'center' }); el.focus(); }
     };
     ACTIONS[o.prefix + 'discard'] = () => { D.reset(); S.dirty = false; render(); toast('Changes discarded', 'undo'); };
-    ACTIONS[o.prefix + 'save'] = () => {
+    D.save = () => {  // resolves true once every change is written
       const keys = Object.keys(D.draft);
-      if (D.saving || !keys.length || n(D.errors)) return;
+      if (D.saving || !keys.length || n(D.errors)) return Promise.resolve(false);
       D.saving = true; render();
       let page = null;
       const next = (i) => {
@@ -280,16 +301,26 @@
         return o.write(path, toModel(kind, D.draft[key])[0]).then((r) => { page = r; delete D.draft[key]; return next(i + 1); })
           .catch((err) => { D.errors[key] = err.message; throw err; });
       };
-      next(0).then(() => { toast(`Saved ${keys.length} change${keys.length === 1 ? '' : 's'} to ${o.file}`, 'check'); S.dirty = false; })
-        .catch(() => toast('Not saved: a value was refused. It is marked on the page.', 'error'))
-        .then(() => { D.saving = false; if (page) o.done(page, keys); render(); });
+      return next(0).then(() => { toast(`Saved ${keys.length} change${keys.length === 1 ? '' : 's'} to ${o.file}`, 'check'); S.dirty = false; return true; })
+        .catch(() => { toast('Not saved: a value was refused. It is marked on the page.', 'error'); return false; })
+        .then((ok) => { D.saving = false; if (page) o.done(page, keys); render(); return ok; });
     };
+    ACTIONS[o.prefix + 'save'] = () => { D.save(); };
+    let then = null;  // where the person was going when the leave dialog opened
+    GUARDS.push({ screen: o.screen, dirty: () => D.dirty() && !D.saving, ask: (next) => {
+      then = next;
+      const c = n(D.draft), bad = n(D.errors), why = bad ? `${bad} ${bad === 1 ? 'field needs' : 'fields need'} fixing before you can save.` : '';
+      dialog({ title: 'Save the changes first?', body: `<p>You have ${c} unsaved change${c === 1 ? '' : 's'} on this page. They are saved to ${esc(o.file)}.</p>${bad ? `<p class="small" id="${o.prefix}leave-why" style="color:var(--color-danger-text);display:flex;gap:6px">${icon('error')}${esc(why)}</p>` : ''}`,
+        actions: `<button class="btn btn--secondary" data-action="close">Keep editing</button><button class="btn btn--secondary" data-action="${o.prefix}leave-discard">Discard changes</button><button class="btn btn--primary" data-action="${o.prefix}leave-save" ${bad ? `disabled aria-describedby="${o.prefix}leave-why" title="${esc(why)}"` : ''}>${icon('save')}Save and leave</button>` });
+    } });
+    const leave = () => { const t = then; then = null; if (t) t(); };
+    ACTIONS[o.prefix + 'leave-discard'] = () => { closeDialog(); D.reset(); S.dirty = false; leave(); };
+    ACTIONS[o.prefix + 'leave-save'] = () => { closeDialog(); D.save().then((ok) => { if (ok) leave(); }); };
     document.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's' && route().a === o.screen && D.dirty()) {
         e.preventDefault(); if (document.activeElement) document.activeElement.blur(); queueMicrotask(ACTIONS[o.prefix + 'save']);
       }
     });
-    window.addEventListener('hashchange', () => { if (route().a !== o.screen) D.reset(); });
     return D;
   }
 

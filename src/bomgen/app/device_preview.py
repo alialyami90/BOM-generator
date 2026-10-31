@@ -45,5 +45,10 @@ def device_preview_page(
             issue["message"] = f"{labels[issue['subject']]}: {issue['message']}"
     layout = loaded.substation.layout.model_dump(mode="json", exclude_none=True)
     generated = any(p.generated for p in loaded.panels)  # pins reach only generated panels
-    extra = {"generated": generated, "overrides": layout["overrides"], "removed": layout["removed"]}
+    extra = {
+        "generated": generated,
+        "panel_files": len(loaded.panels),  # none yet: the screen offers to lay them out
+        "overrides": layout["overrides"],
+        "removed": layout["removed"],
+    }
     return page | preview | extra
