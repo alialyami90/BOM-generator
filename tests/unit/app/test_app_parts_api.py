@@ -275,7 +275,7 @@ def test_options_carry_the_data_quality_of_the_installed_library(
 ) -> None:
     package = tmp_path / "lib.bomlib"
     db = Path(__file__).parents[3] / "data" / "device-db"
-    pack(EXAMPLES / "library.yaml", package, name="psa-devices", version="1.1.0", extra_dirs=[db])
+    pack(EXAMPLES / "library.yaml", package, name="psa-devices", version="1.2.0", extra_dirs=[db])
     store.import_package(package)
     edit(project, "  file: library.yaml\n", "")
 
