@@ -55,17 +55,21 @@ def test_the_shipped_library_is_the_example_plus_the_originals_datasheet_figures
 ) -> None:
     example = load_library(EXAMPLE)
     keys = {"inrush_a", "inrush_ms", "input_v_min", "input_v_max", "make"}
+    overrides = yaml.safe_load(ADDITIONS.read_text(encoding="utf-8"))["overrides"]
 
     originals = shipped.devices[: len(example.devices)]
 
     assert [d.part_id for d in originals] == [d.part_id for d in example.devices]
-    assert shipped.catalogues == example.catalogues
+    fan = {"housekeeping": {"fan"}}  # plan Q29: the next tests
+    assert shipped.catalogues.model_dump(exclude=fan) == example.catalogues.model_dump(exclude=fan)
     brands = shipped.catalogue_brands.model_dump(exclude={"mcb"})  # mcb: the next tests
     assert brands == example.catalogue_brands.model_dump(exclude={"mcb"})
     for ours, theirs in zip(originals, example.devices, strict=True):
-        assert ours.model_dump(exclude=keys) == theirs.model_dump(exclude=keys), ours.part_id
+        changed = keys | set(overrides["devices"].get(ours.part_id, {}))
+        assert ours.model_dump(exclude=changed) == theirs.model_dump(exclude=changed), ours.part_id
         if ours.tier is not None:
-            assert ours == theirs, ours.part_id
+            tier_keys = set(overrides["devices"].get(ours.part_id, {}))
+            assert ours.model_dump(exclude=tier_keys) == theirs.model_dump(exclude=tier_keys)
 
 
 def test_the_shipped_library_ends_with_the_additions(shipped: Library) -> None:
@@ -201,3 +205,72 @@ def test_the_hubbell_fibre_shelves_come_in_as_patch_panels(shipped: Library) -> 
     for shelf in shelves:
         assert (shelf.category, shelf.make, shelf.height_u) == ("patch_panel", "Hubbell", 1)
         assert shelf.ordering_code == shelf.model
+
+
+def test_q29_the_thermostat_draws_nothing_in_the_shipped_library(shipped: Library) -> None:
+    thermostat = shipped.get("SK3110-TH")
+    example = load_library(EXAMPLE).get("SK3110-TH")
+    assert thermostat is not None
+    assert example is not None
+
+    assert thermostat.unit_power_w == 0
+    assert example.unit_power_w == 30  # the example keeps the issued workbook (plan Q29)
+
+
+def test_q29_each_fan_gives_460_m3h_with_the_sk_3243_200_outlet_filter(
+    shipped: Library,
+) -> None:
+    example = load_library(EXAMPLE)
+    vent_filter = shipped.get("SK3238-FILTER")
+    assert vent_filter is not None
+
+    assert shipped.catalogues.housekeeping.fan.airflow_m3h == 460
+    assert (vent_filter.model, vent_filter.ordering_code) == ("SK 3243.200", "SK 3243.200")
+    assert example.catalogues.housekeeping.fan.airflow_m3h == 358
+
+
+def test_the_annunciator_takes_no_rack_space(shipped: Library) -> None:
+    annunciator = shipped.get("NAP-K55")
+    assert annunciator is not None
+
+    assert annunciator.height_u == 0  # wall mounted (data/device-db, contractor v2)
+
+
+def test_the_contractor_switches_can_be_picked_as_l1_or_l2(shipped: Library) -> None:
+    levels = {
+        part_id: part.purdue_level
+        for part_id in (
+            "C9300-24T-A",
+            "RST2228-28SFP-HV",
+            "SEL-2744",
+            "IE-4010-16S12P",
+            "SEL-2743",
+        )
+        if (part := shipped.get(part_id))
+    }
+
+    assert levels == {
+        "C9300-24T-A": "L2",
+        "RST2228-28SFP-HV": "L2",
+        "SEL-2744": "L2",
+        "IE-4010-16S12P": "L1",
+        "SEL-2743": "L1",
+    }
+
+
+def test_the_gateway_tags_name_no_project(shipped: Library) -> None:
+    gateways = [d for d in shipped.devices if d.alt_group == "SEL-3555-GW"]
+
+    assert len(gateways) == 5
+    assert {d.tag_pattern for d in gateways} == {"{prefix}-GW-{lan_index}"}
+
+
+def test_an_override_of_a_part_the_example_lacks_is_refused() -> None:
+    build = _build_module()
+    additions = (
+        "devices: []\ncatalogue_brands: {mcb: []}\n"
+        "overrides:\n  devices:\n    NOPE: {height_u: 0}\n"
+    )
+
+    with pytest.raises(ValueError, match="NOPE"):
+        build.build(EXAMPLE.read_text(encoding="utf-8"), {}, additions)

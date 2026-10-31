@@ -4,8 +4,9 @@
 # catalogue in VD-EL0009-007). Each part comes from the contractor's 2026-10-31 delivery
 # (data/device-db/contractor-2026-10-31/: devices.csv, device_ports.csv, and sources.csv for
 # every value); the comment names the document behind its model and power.
-# purdue_level is left out where the datasheet does not state it, so these switches are not
-# L1/L2 candidates until an engineer sets it. Ports as delivered, management ports included.
+# No datasheet states a purdue_level: the switches' levels are a design call (plan M28), L2
+# for those with 10G uplinks and L1 for the 1G bay switches. Ports as delivered, management
+# ports included.
 # The delivery's fiber_patch_panel parts take the library's patch_panel category.
 devices:
   - part_id: C9300-24T-A  # Cisco Catalyst 9300 Series Switches Data Sheet C78-738977 C78-738977-46 09/26, p. 65
@@ -22,6 +23,7 @@ devices:
     power_supplies: 0
     hwio_points: 0
     height_u: 1
+    purdue_level: "L2"  # design call (M28): 10G uplinks, aggregation
     input_v_min: 100
     input_v_max: 240
     ports:
@@ -42,6 +44,7 @@ devices:
     power_supplies: 2
     hwio_points: 1
     height_u: 1
+    purdue_level: "L1"  # design call (M28): bay switch, 1G only
     inrush_a: 30
     input_v_min: 88
     input_v_max: 300
@@ -63,6 +66,7 @@ devices:
     power_supplies: 2
     hwio_points: 1
     height_u: 1
+    purdue_level: "L2"  # design call (M28): 10G uplinks, aggregation
     input_v_min: 88
     input_v_max: 300
     ports:
@@ -81,6 +85,7 @@ devices:
     power_supplies: 2
     hwio_points: 1
     height_u: 0
+    purdue_level: "L1"  # design call (M28): bay switch, 1G only
     input_v_min: 36
     input_v_max: 300
     ports:
@@ -99,6 +104,7 @@ devices:
     power_supplies: 2
     hwio_points: 1
     height_u: 0
+    purdue_level: "L2"  # design call (M28): 10G uplinks, aggregation
     input_v_min: 36
     input_v_max: 300
     ports:
@@ -504,3 +510,25 @@ catalogue_brands:
       trip_curve: C
       magnetic_trip_multiple_dc: 7  # C curve on DC: 7 to 15 In (Hager Protection devices catalogue p. 93)
       dc_rating_v: 250  # 6 kA at 250 V, 15 kA at 125 V, 20 kA to 60 V (p. 93)
+overrides:  # values the shipped library changes in the example's parts and catalogues
+  devices:
+    SK3110-TH:  # plan Q29: "30 W" is the contact's DC switching limit; it draws nothing
+      description_template: "Thermostat"
+      unit_power_w: 0
+    SK3243-FAN:  # plan Q29: the 60 Hz figure with one SK 3243.200 outlet filter
+      description_template: "230V AC Inlet and Exhaust Fan, Throughput: 460 m3/h with outlet filter, 87W"
+    SK3238-FILTER:  # plan Q29: the outlet filter that fits the SK 3243.100 fan
+      model: "SK 3243.200"
+      ordering_code: "SK 3243.200"
+    NAP-K55:  # wall mounted: no rack space (data/device-db, contractor v2)
+      height_u: 0
+    SEL-3555-GW: &gateway  # plan M28: no project name in the tag
+      tag_pattern: "{prefix}-GW-{lan_index}"
+    SEL-3555-GW.SIEMENS-LOW: *gateway
+    SEL-3555-GW.SIEMENS-MID: *gateway
+    SEL-3555-GW.SIEMENS-HIGH: *gateway
+    SEL-3555-GW.HITACHI-ENERGY-MID: *gateway
+  catalogues:
+    housekeeping:
+      fan:  # plan Q29: per fan, with the SK 3243.200 outlet filter at 60 Hz
+        airflow_m3h: 460

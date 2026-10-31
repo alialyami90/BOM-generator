@@ -6,7 +6,7 @@
 # The shipped psa-devices library: examples/library.yaml plus each original part's
 # datasheet inrush and input voltage range from data/device-db/ (plan Q38), and its make
 # as the device database records it, then the parts and MCB brand sets in
-# data/library/additions.yaml.
+# data/library/additions.yaml, with its overrides applied.
 
 devices:
   # --- Group B: network cabinets (example workbook, 'Panel 1'!B4:H12) -----------------
@@ -138,7 +138,7 @@ devices:
     ordering_code: "3555#0KVC"
     description_template: "Protocol Gateway {purpose}"
     tag_type: GW
-    tag_pattern: "{prefix}-DHPCC-GW-{lan_index}"
+    tag_pattern: "{prefix}-GW-{lan_index}"  # override (data/library/additions.yaml)
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 73  # 'Power Consumption'!I10
@@ -438,7 +438,7 @@ devices:
     make: Rittal
     model: SK 3243.100
     ordering_code: SK 3243.100
-    description_template: "230V AC Inlet and Exhaust Fan, Throughput: 716 m3/h, 87W"
+    description_template: "230V AC Inlet and Exhaust Fan, Throughput: 460 m3/h with outlet filter, 87W"  # override (data/library/additions.yaml)
     tag_type: FAN
     supply_type: VAC
     voltage_v: 230
@@ -449,8 +449,8 @@ devices:
     category: vent_filter
     alt_group: SK3238-FILTER  # M14 (ADR 0017)
     make: Rittal
-    model: SK 3238.200
-    ordering_code: SK 3238.200
+    model: "SK 3243.200"  # override (data/library/additions.yaml)
+    ordering_code: "SK 3243.200"  # override (data/library/additions.yaml)
     description_template: "Ventilation Filter"
     tag_type: FILTER
     tag_pattern: "{prefix}-FILTER"
@@ -461,11 +461,11 @@ devices:
     make: Rittal
     model: SK 3110.000
     ordering_code: SK 3110.000
-    description_template: "Thermostat, 30W"
+    description_template: "Thermostat"  # override (data/library/additions.yaml)
     tag_type: TH
     supply_type: VAC
     voltage_v: 230
-    unit_power_w: 30  # 'Power Consumption'!I19
+    unit_power_w: 0  # override (data/library/additions.yaml)
     load_type: INTERMITTENT
 
   - part_id: IPR-2903685  # 'Panel 1' row 22: PSA1-IPR
@@ -547,6 +547,7 @@ devices:
   - part_id: NAP-K55  # 'Aux' row 49: 55" LCD Alarm Annunciator
     category: annunciator
     alt_group: NAP-K55  # M14 (ADR 0017)
+    height_u: 0  # override (data/library/additions.yaml)
     input_v_min: 43     # datasheet (data/device-db)
     input_v_max: 160
     make: Ultraview
@@ -1543,7 +1544,7 @@ devices:
     ordering_code: 6MF2803-1AA00 + PS-8622 6MF2862-2AA00
     description_template: Protocol Gateway {purpose}
     tag_type: GW
-    tag_pattern: '{prefix}-DHPCC-GW-{lan_index}'
+    tag_pattern: "{prefix}-GW-{lan_index}"  # override (data/library/additions.yaml)
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 15
@@ -1562,7 +1563,7 @@ devices:
     ordering_code: 6MF2805-0AA00 + PS-8642 6MF2864-2AA00
     description_template: Protocol Gateway {purpose}
     tag_type: GW
-    tag_pattern: '{prefix}-DHPCC-GW-{lan_index}'
+    tag_pattern: "{prefix}-GW-{lan_index}"  # override (data/library/additions.yaml)
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 56
@@ -1581,7 +1582,7 @@ devices:
     ordering_code: 2 x 6MF2805-0AA00 + 2 x PS-8642 6MF2864-2AA00 + CI Ethernet modules (CI codes not verified)
     description_template: Protocol Gateway {purpose}
     tag_type: GW
-    tag_pattern: '{prefix}-DHPCC-GW-{lan_index}'
+    tag_pattern: "{prefix}-GW-{lan_index}"  # override (data/library/additions.yaml)
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 112
@@ -1600,7 +1601,7 @@ devices:
     ordering_code: 1KGT036300R0001 (+ 560PSU01 rack PSU, believed 1KGT006600R0002)
     description_template: Protocol Gateway {purpose}
     tag_type: GW
-    tag_pattern: '{prefix}-DHPCC-GW-{lan_index}'
+    tag_pattern: "{prefix}-GW-{lan_index}"  # override (data/library/additions.yaml)
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 44.3
@@ -4673,6 +4674,7 @@ devices:
     power_supplies: 0
     hwio_points: 0
     height_u: 1
+    purdue_level: "L2"  # design call (M28): 10G uplinks, aggregation
     input_v_min: 100
     input_v_max: 240
     ports:
@@ -4693,6 +4695,7 @@ devices:
     power_supplies: 2
     hwio_points: 1
     height_u: 1
+    purdue_level: "L1"  # design call (M28): bay switch, 1G only
     inrush_a: 30
     input_v_min: 88
     input_v_max: 300
@@ -4714,6 +4717,7 @@ devices:
     power_supplies: 2
     hwio_points: 1
     height_u: 1
+    purdue_level: "L2"  # design call (M28): 10G uplinks, aggregation
     input_v_min: 88
     input_v_max: 300
     ports:
@@ -4732,6 +4736,7 @@ devices:
     power_supplies: 2
     hwio_points: 1
     height_u: 0
+    purdue_level: "L1"  # design call (M28): bay switch, 1G only
     input_v_min: 36
     input_v_max: 300
     ports:
@@ -4750,6 +4755,7 @@ devices:
     power_supplies: 2
     hwio_points: 1
     height_u: 0
+    purdue_level: "L2"  # design call (M28): 10G uplinks, aggregation
     input_v_min: 36
     input_v_max: 300
     ports:
@@ -5183,7 +5189,7 @@ catalogues:
   housekeeping:  # part ids of the group D records above (ADR 0010 item 1)
     lamp: { part_id: SZ2500-LAMP }
     # no door_switch: the lamp part includes it (SZ 2500.210, SZ 2500.470)
-    fan: { part_id: SK3243-FAN, airflow_m3h: 358 }  # per fan; the pair gives 716 (plan Q8)
+    fan: { part_id: SK3243-FAN, airflow_m3h: 460 }  # override (data/library/additions.yaml)
     vent_filter: { part_id: SK3238-FILTER }
     thermostat: { part_id: SK3110-TH }
     ipr_kit: { part_id: IPR-2903685 }
