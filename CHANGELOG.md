@@ -7,6 +7,8 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-10-31
+
 ### Added
 
 - A library can list `larger_fans` in its housekeeping catalogue. A cabinet
@@ -608,7 +610,8 @@ project uses [Semantic Versioning](https://semver.org/).
   airflow; future library defaults use 0 W for the SK 3110 thermostat and
   460 m³/h for the SK 3243.100 fan with its outlet filter (#12).
 
-[Unreleased]: https://github.com/alialyami90/BOM-generator/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/alialyami90/BOM-generator/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/alialyami90/BOM-generator/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/alialyami90/BOM-generator/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/alialyami90/BOM-generator/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/alialyami90/BOM-generator/compare/v0.2.0...v0.2.1
