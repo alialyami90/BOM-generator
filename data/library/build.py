@@ -1,8 +1,9 @@
 """Build the shipped psa-devices library from the example library and the device database.
 
 The shipped library is examples/library.yaml with each original part's datasheet inrush
-and input voltage range from data/device-db added (plan Q38). The example library leaves
-them out so the golden values stay those of the spec's example workbook.
+and input voltage range from data/device-db added (plan Q38), and its make as the device
+database records it. The example library leaves them out so the golden values stay those
+of the spec's example workbook.
 
 Usage, from the repository root: ``python data/library/build.py``. It rewrites
 data/library/psa-devices.yaml; tests/unit/test_shipped_library.py fails while the file
@@ -32,17 +33,20 @@ HEADER = """\
 # data/device-db/ and run `python data/library/build.py` again.
 #
 # The shipped psa-devices library: examples/library.yaml plus each original part's
-# datasheet inrush and input voltage range from data/device-db/ (plan Q38).
+# datasheet inrush and input voltage range from data/device-db/ (plan Q38), and its make
+# as the device database records it.
 """
 
 
 def datasheets(device_db: Path = DEVICE_DB) -> dict[str, dict[str, Any]]:
-    """Each original part's datasheet figures that the library carries, by part id."""
+    """Each original part's datasheet figures and make that the library carries, by part id."""
     found: dict[str, dict[str, Any]] = {}
     for path in sorted(device_db.glob("*.yaml")):
         for record in yaml.safe_load(path.read_text(encoding="utf-8"))["records"]:
             datasheet = record.get("datasheet") or {}
             figures = {k: datasheet[k] for k in DATASHEET_KEYS if datasheet.get(k) is not None}
+            if record.get("make"):
+                figures["make"] = record["make"]
             if figures:
                 found[record["part_id"]] = figures
     return found
@@ -56,7 +60,10 @@ def build(example: str, figures: dict[str, dict[str, Any]]) -> str:
             continue
         keys = list(device)
         at = keys.index("alt_group") + 1 if "alt_group" in keys else len(keys)
-        for offset, (key, value) in enumerate(figures[device["part_id"]].items()):
+        added = {k: v for k, v in figures[device["part_id"]].items() if k != "make"}
+        if "make" in figures[device["part_id"]]:
+            device["make"] = figures[device["part_id"]]["make"]
+        for offset, (key, value) in enumerate(added.items()):
             if key in device:
                 raise ValueError(f"{device['part_id']} already has {key} in the example")
             device.insert(at + offset, key, value)

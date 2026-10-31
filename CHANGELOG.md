@@ -51,6 +51,13 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- The installer ships psa-devices 1.2.0. The SEL-2730M-EXT gets its
+  datasheet inrush (8 A per feed) and the IPR-2903685 relay its coil range
+  (179.4–317.4 V AC), both cited in the contractor's 2026-10-31 delivery.
+  Original parts take their make from the device database: IPR-2903685,
+  IPR-BASE-2900934, IPR-SUPP-2900944 and IPR-BRACKET-2900954 print Phoenix
+  Contact, FGR-60F and FR-TRAN-SX Fortinet, ZENON-V12 COPA-DATA and
+  MS-OFFICE-2021 Microsoft. The example library and the goldens are unchanged.
 - The device editor shows "Minimum branch MCB" read-only, marked deprecated,
   with the reason: branch MCBs are sized from the rated power and inrush
   current (ADR 0019), so typing a value there changed nothing (#228).

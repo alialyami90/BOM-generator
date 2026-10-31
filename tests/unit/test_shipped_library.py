@@ -49,7 +49,7 @@ def test_the_shipped_library_is_the_example_plus_the_originals_datasheet_figures
     shipped: Library,
 ) -> None:
     example = load_library(EXAMPLE)
-    keys = {"inrush_a", "inrush_ms", "input_v_min", "input_v_max"}
+    keys = {"inrush_a", "inrush_ms", "input_v_min", "input_v_max", "make"}
 
     assert shipped.part_ids() == example.part_ids()
     assert shipped.catalogues == example.catalogues
@@ -73,6 +73,23 @@ def test_the_originals_carry_their_datasheet_inrush_and_input_range(shipped: Lib
     assert fgr is not None
     assert rtac.inrush_a == db["SEL-3555-RTAC"]["datasheet"]["inrush_a"]
     assert (fgr.input_v_min, fgr.input_v_max) == (12, 125)
+
+
+def test_the_originals_take_their_make_from_the_device_db(shipped: Library) -> None:
+    # The example keeps the reference workbook's makes; the shipped library prints the
+    # manufacturer's name as the device database records it (contractor delivery 2026-10-31).
+    example = load_library(EXAMPLE)
+    makes = {
+        part_id: (example_part.make, part.make)
+        for part_id in ("IPR-2903685", "FGR-60F", "FR-TRAN-SX")
+        if (example_part := example.get(part_id)) and (part := shipped.get(part_id))
+    }
+
+    assert makes == {
+        "IPR-2903685": ("Phoenix", "Phoenix Contact"),
+        "FGR-60F": ("Fortigate", "Fortinet"),
+        "FR-TRAN-SX": ("Fortigate", "Fortinet"),
+    }
 
 
 def test_the_example_project_builds_with_the_shipped_library(tmp_path: Path) -> None:
