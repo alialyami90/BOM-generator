@@ -828,3 +828,21 @@ def test_the_panel_editor_writes_generated_panels_through_the_save_bar() -> None
     assert "Show on Device preview" in editor
     index = (UI_DIR / "index.html").read_text(encoding="utf-8")
     assert index.index('src="screens-panels.js"') < index.index('src="screens-panel-editor.js"')
+
+
+def test_hand_written_panels_are_added_edited_and_deleted_in_the_editor() -> None:
+    """M32b: Add hand-written panel… asks for the first device; the editor writes the panel's
+    own file field by field and the device list as a whole; Delete panel… lists what still
+    names the panel and offers Undo."""
+    panels = (UI_DIR / "screens-panels.js").read_text(encoding="utf-8")
+    assert 'data-action="pv-add-panel"' in panels
+    assert "Bridge.call('panel_parts'" in panels
+    assert "Bridge.call('add_panel'" in panels
+    editor = (UI_DIR / "screens-panel-editor.js").read_text(encoding="utf-8")
+    assert "Bridge.call('set_panel_field', S.project.file, S.sub, hPanel" in editor
+    assert "Bridge.call('check_panel_field'" in editor
+    assert "['devices'], list)" in editor
+    assert "Bridge.call('delete_panel'" in editor
+    assert "Bridge.call('restore_panel'" in editor
+    assert "is still in use" in editor
+    assert "Delete the panel instead." in editor  # the last device is not removed

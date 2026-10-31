@@ -83,17 +83,48 @@
     const d = l.data;
     if (d.reason) return `<div class="page">${pageHead('Panels', 'Laid out from the equipment and network.')}${banner('bad', `<b>No layout.</b> ${esc(d.reason)}.`, App.fixButtons(d.problems))}</div>`;
     const t = ['board', 'list'].includes(S.tab.panels) ? S.tab.panels : 'board';
-    return `<div class="page page--wide">${pageHead('Panels', d.generated ? 'Placed by the engine from the equipment and network. Drag a device to another panel or position, or pin it where it is. A pair moves together; hold Alt to move one unit.' : 'Laid out by the engine from the equipment and network.', d.generated ? headActions(d) : '')}
+    return `<div class="page page--wide">${pageHead('Panels', d.generated ? 'Placed by the engine from the equipment and network. Drag a device to another panel or position, or pin it where it is. A pair moves together; hold Alt to move one unit.' : 'Laid out by the engine from the equipment and network.', headActions(d))}
       ${tabs('panels', [['board', 'Board'], ['list', 'List']], t, 'Panels view')}
       <div role="tabpanel" aria-labelledby="tab-panels-${t}" style="margin-top:var(--space-4)">${t === 'board' ? board(d) : list(d)}</div></div>`;
   };
 
   /* Undo covers the board's writes; Reset to automatic releases every pin and deleted unit. */
   function headActions(d) {
-    const none = !(d.overrides.length + d.removed.length);
-    return `<button class="btn btn--secondary" data-action="pv-undo" ${history.length && !busy ? '' : 'disabled'} title="${history.length ? 'Undo the last change on the board' : 'Nothing to undo yet'}">${icon('undo')}Undo</button>
+    const none = !(d.overrides.length + d.removed.length), add = `<button class="btn btn--secondary" data-action="pv-add-panel">${icon('plus')}Add hand-written panel…</button>`;
+    if (!d.generated) return add;
+    return `${add}<button class="btn btn--secondary" data-action="pv-undo" ${history.length && !busy ? '' : 'disabled'} title="${history.length ? 'Undo the last change on the board' : 'Nothing to undo yet'}">${icon('undo')}Undo</button>
       <button class="btn btn--secondary" data-action="pv-reset" ${none || busy ? `disabled title="Nothing is pinned or deleted"` : ''}>Reset to automatic</button>`;
   }
+
+  /* Add hand-written panel…: a cabinet the layout doesn't make, such as a WS console. It is listed
+     after the generated panels and opens on Devices. A panel lists at least one device, so the
+     dialog asks for the first. */
+  ACTIONS['pv-add-panel'] = () => {
+    Bridge.call('panel_parts', S.project.file, S.sub).then((parts) => {
+      const cats = [...new Set(parts.map((x) => x.category))];
+      dialog({ title: 'Add a hand-written panel', body: `<div class="stack">
+        ${App.field('Name', App.input('ap-name', '', { placeholder: 'For example WS Console' }), 'Its id and tag prefix are made from it; you can change the prefix later.')}
+        ${App.field('Cabinet number', App.input('ap-number', '', { mono: true }))}
+        ${App.field('Kind', App.select('ap-kind', [['console', 'Console'], ['network', 'Network cabinet']], 'console'))}
+        ${App.field('First device', `<select class="select" id="ap-part">${cats.map((c) => `<optgroup label="${esc(c)}">${parts.filter((x) => x.category === c).map((x) => `<option value="${esc(x.part_id)}">${esc(x.part_id)} · ${esc(x.label)}</option>`).join('')}</optgroup>`).join('')}</select>`, 'Add the others on the panel\'s Devices tab.')}
+        <div id="ap-err" class="err small" role="alert"></div></div>`,
+        actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="pv-add-panel-go">Add panel</button>' });
+      $('#ap-name').focus();
+    }).catch((e) => toast(e.message, 'error'));
+  };
+  ACTIONS['pv-add-panel-go'] = (el) => {
+    const v = (id) => $('#' + id).value.trim(), say = (m) => { $('#ap-err').innerHTML = `${icon('error')}<span>${esc(m)}</span>`; };
+    if (!v('ap-name')) { say('Enter a name.'); $('#ap-name').focus(); return; }
+    if (!v('ap-number')) { say('Enter the cabinet number.'); $('#ap-number').focus(); return; }
+    el.disabled = true;
+    const name = v('ap-name');
+    Bridge.call('add_panel', S.project.file, S.sub, { name, cabinet_number: v('ap-number'), kind: v('ap-kind'), part_id: v('ap-part') }).then((r) => {
+      if (!r.written) { el.disabled = false; say(r.issues.map((i) => i.message).join(' ')); return; }
+      closeDialog(); LAY.state = 'idle'; App.devicePreview.reload(); if (App.curSub()) App.curSub().panels += 1;
+      S.tab.panel = 'devices'; App.go(`#/panels/${r.id}/devices`);
+      toast(`Added ${name}`);
+    }).catch((e) => { el.disabled = false; say(e.message); });
+  };
 
   function board(d) {
     if (!d.panels.length) return `<div class="empty" style="max-width:640px"><b>No panels yet.</b><div class="muted small" style="margin:var(--space-1) 0 var(--space-3)">Panels are placed once the network has an IED count and equipment.</div><a class="btn btn--primary" href="#/parts">${icon('parts')}Open Parts</a></div>`;

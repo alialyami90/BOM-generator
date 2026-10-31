@@ -9,6 +9,14 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Hand-written panels in the panel editor (M32b). Add hand-written panel… on
+  Panels asks for a name, cabinet number, kind and first device, writes
+  `panels/<id>.yaml` listed last in `manual_panels`, and opens it on Devices.
+  A hand-written panel edits the cabinet's name, number, sheet, tag prefix,
+  kind and side with its enclosure, the devices (add, reorder, remove,
+  quantity, purpose, HWIO), options with "Use the default" and the document;
+  its port plans stay in its file. Delete panel… lists what still names the
+  panel instead of deleting it, and a delete can be undone.
 - A library can list `larger_fans` in its housekeeping catalogue. A cabinet
   that the catalogue fan pair can't cool gets the smallest larger fan whose
   pair can, still two fans with the same AC branches and terminals (ADR 0029,

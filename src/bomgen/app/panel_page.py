@@ -20,9 +20,10 @@ from bomgen.engine.layout import layout_preview
 from bomgen.engine.pipeline import build
 from bomgen.io.edit import panel_options
 from bomgen.io.loader import LoadedSubstation
+from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.store import LibraryStore
 from bomgen.models.bom import BomLine, Group, QtySum
-from bomgen.models.panel import Panel
+from bomgen.models.panel import Panel, PanelOptions
 from bomgen.models.substation import EquipmentRole
 
 SIZED = (EquipmentRole.L1_SWITCH, EquipmentRole.L2_SWITCH)  # their port plans are computed
@@ -72,6 +73,23 @@ def _ports(
     return rows
 
 
+def _part_label(loaded: LoadedSubstation, part_id: str) -> str:
+    found = loaded.library.get(part_id)
+    return " ".join(x for x in (found.make, found.model) if x) if found else part_id
+
+
+def part_list(loaded: LoadedSubstation) -> list[dict[str, str]]:
+    """Every part of the substation's library, for the hand-written panels' device picker."""
+    return [
+        {
+            "part_id": d.part_id,
+            "label": _part_label(loaded, d.part_id),
+            "category": d.category.value,
+        }
+        for d in loaded.library.devices
+    ]
+
+
 def panel_page(
     project_file: Path, substation_id: str, panel_id: str, store: LibraryStore
 ) -> dict[str, Any]:
@@ -100,6 +118,8 @@ def panel_page(
         else None
     )
     units = board["units"] if board else []
+    defaults = PanelOptions().model_dump(mode="json")
+    written = panel.options.model_fields_set
     lines: Sequence[BomLine] = []
     try:
         lines = next(b.lines for b in build(loaded).panels if b.panel_id == panel.id)
@@ -115,8 +135,11 @@ def panel_page(
             "kind": panel.kind.value,
             "side": board["side"] if board else panel.lan,
             "pair": board["pair"] if board else None,
+            "tag_prefix": panel.tag_prefix,
+            "lan": panel.lan,
             "generated": panel.generated,
             "manual": panel.id in loaded.manual_panel_ids,
+            "mirror_of": read_yaml(file).data.get("mirror_of"),
             "file": str(file),
         },
         "enclosure": panel.enclosure.model_dump(mode="json", exclude_none=True),
@@ -129,8 +152,8 @@ def panel_page(
         "options": (
             [dataclasses.asdict(o) for o in panel_options(loaded, board["number"])]
             if board
-            else [
-                {"key": k, "value": v, "shared": None, "own": True}
+            else [  # a hand-written panel's own values; "shared" is the default
+                {"key": k, "value": v, "shared": defaults[k], "own": k in written}
                 for k, v in panel.options.model_dump(mode="json").items()
             ]
         ),
@@ -144,9 +167,16 @@ def panel_page(
                 for u in units
             ]
             if board
-            else [d.model_dump(mode="json", exclude_none=True) for d in panel.devices]
+            else [
+                {
+                    **d.model_dump(mode="json", exclude_none=True),
+                    "label": _part_label(loaded, d.part_id),
+                }
+                for d in panel.devices
+            ]
         ),
         "ports": _ports(loaded, panel, units, lines) if board else [],
+        "parts": [] if board else part_list(loaded),
         "yaml": file.read_text(encoding="utf-8"),
     }
     return page
