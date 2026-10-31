@@ -47,14 +47,14 @@ def test_build_writes_the_example_workbook(tmp_path: Path, args: list[str]) -> N
 def test_build_prints_and_writes_the_check_report(tmp_path: Path) -> None:
     result = runner.invoke(app, ["build", str(EXAMPLES / "project.yaml"), "-o", str(tmp_path)])
     assert result.exit_code == 0, result.output
-    # Three warnings: the 16 A main MCB override on psa1/psa2 (plan Q3), and the iC60N's
-    # 125 V DC rating under the 140 V battery float. 50 of the passes are the branch
-    # MCBs (plan Q35).
-    assert result.stdout.splitlines()[-1] == "0 failed, 3 warnings, 64 passed"
+    # Four warnings: the 16 A main MCB override on psa1/psa2 (plan Q3), the iC60N's
+    # 125 V DC rating under the 140 V battery float, and the hwio entry with no part
+    # number (ADR 0024). 50 of the passes are the branch MCBs (plan Q35).
+    assert result.stdout.splitlines()[-1] == "0 failed, 4 warnings, 64 passed"
     assert "PASS  psa1  PSA1-EXT-FW-A  sfp_slots  2 SFPs in 2 SFP slots" in result.stdout
     report = json.loads((tmp_path / FILE_NAME).with_suffix(".checks.json").read_text("utf-8"))
     assert report["failed"] is False
-    assert len(report["items"]) == 67
+    assert len(report["items"]) == 68
 
 
 def test_no_checks_skips_the_report(tmp_path: Path) -> None:

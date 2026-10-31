@@ -23,6 +23,7 @@ from bomgen.models.library import Library, Media, PortKind, PortSpeed, SupplyTyp
 from bomgen.models.panel import Panel, Ventilation
 from bomgen.models.project import DesignConstants
 from bomgen.models.report import CheckItem, CheckReport, CheckStatus
+from bomgen.models.substation import Equipment
 
 SPEED_ORDER = (PortSpeed.M10, PortSpeed.M100, PortSpeed.G1, PortSpeed.G10)
 
@@ -41,6 +42,7 @@ def check_report(loaded: LoadedSubstation, result: BuildResult) -> CheckReport:
     di = di_capacity_check(result.panels, loaded.library)
     if di is not None:
         items.append(di)
+    items += part_number_checks(loaded.substation.equipment, loaded.library)
     return CheckReport(items=tuple(items))
 
 
@@ -327,6 +329,25 @@ def di_capacity_check(panels: Sequence[PanelBom], library: Library) -> CheckItem
         message=message,
         values={"di_inputs": inputs, "hwio": hwio},
     )
+
+
+def part_number_checks(equipment: Iterable[Equipment], library: Library) -> list[CheckItem]:
+    """A warning per equipment entry with no part number whose library part has no
+    ordering code either (ADR 0024)."""
+    items = []
+    for entry in equipment:
+        part = library.get(entry.part_id) if entry.part_id is not None else None
+        if part is None or entry.ordering_code is not None or part.ordering_code is not None:
+            continue
+        items.append(
+            CheckItem(
+                check="part_number",
+                status=CheckStatus.WARN,
+                subject=entry.id,
+                message="no part number; the BOM prints the library model",
+            )
+        )
+    return items
 
 
 def library_check(recorded: LibraryRef, active: LibraryRef | None) -> CheckItem:

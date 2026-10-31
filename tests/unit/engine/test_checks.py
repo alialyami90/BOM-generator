@@ -11,6 +11,7 @@ from bomgen.checks import (
     dc_main_checks,
     di_capacity_check,
     library_check,
+    part_number_checks,
     render_json,
     render_text,
     sfp_slot_checks,
@@ -32,6 +33,7 @@ from bomgen.models.library import CatalogueChoice, resolve_catalogues
 from bomgen.models.panel import Ventilation
 from bomgen.models.project import DesignConstants
 from bomgen.models.report import CheckItem, CheckReport, CheckStatus
+from bomgen.models.substation import Equipment
 
 SLOTTED = switch(
     "SW",
@@ -380,3 +382,21 @@ def test_text_and_json_rendering() -> None:
 def test_every_status_renders(status: CheckStatus) -> None:
     item = CheckItem(check="c", status=status, message="m")
     assert status.value.upper() in render_text(CheckReport(items=(item,)))
+
+
+def test_a_device_without_a_part_number_warns() -> None:
+    lib = library(powered("NOCODE", "rtac", ordering_code=None), powered("CODED", "rtac"))
+    equipment = [
+        Equipment(id="a", part_id="NOCODE", role="other"),
+        Equipment(id="b", part_id="NOCODE", role="other", ordering_code="PN-1"),
+        Equipment(id="c", part_id="CODED", role="other"),
+        Equipment(id="l1", role="l1_switch", redundant=True),
+    ]
+    assert part_number_checks(equipment, lib) == [
+        CheckItem(
+            check="part_number",
+            status=CheckStatus.WARN,
+            subject="a",
+            message="no part number; the BOM prints the library model",
+        )
+    ]
