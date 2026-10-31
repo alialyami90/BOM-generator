@@ -1021,6 +1021,8 @@ records:
     inrush_note: A relay coil has no meaningful inrush for MCB sizing. The Phoenix datasheet (earlier
       round) gives a 230 VAC coil at 6.5 mA = 1.5 VA. The 16 A / 20 ms inrush figure on that datasheet
       is a contact rating, not coil inrush.
+    input_v_min: 179.4
+    input_v_max: 317.4
   alternatives:
   - make: Finder
     manufacturer: Finder S.p.A.

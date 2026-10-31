@@ -15,6 +15,11 @@ project uses [Semantic Versioning](https://semver.org/).
   it) per panel. The library names the part as the housekeeping role
   `nameplate`; the example uses Phoenix Contact US-EMLP (60X30). The example's
   BOM sheets each gain that row.
+- App: Parts rows collapse to a one-line summary at 20 or more rows ("1 U ·
+  77 W · 125 VDC · 2 overrides"), and a category with more than 12 parts picks
+  its part with the Device picker: search, up to 8 matches with make, model,
+  supply, power and data quality, keyboard ↑ ↓ Enter Esc. Parts options carry
+  the supply, rated power and data quality (M23 follow-ups).
 - Every AC-powered device unit in a panel gets its own AC branch MCB in group E,
   after the socket and before the spare, sized like the DC branches from the AC
   catalogue; CINC is raised to carry them (M25, ADR 0025 proposed). The
@@ -69,6 +74,13 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- The installer ships psa-devices 1.2.0. The SEL-2730M-EXT gets its
+  datasheet inrush (8 A per feed) and the IPR-2903685 relay its coil range
+  (179.4–317.4 V AC), both cited in the contractor's 2026-10-31 delivery.
+  Original parts take their make from the device database: IPR-2903685,
+  IPR-BASE-2900934, IPR-SUPP-2900944 and IPR-BRACKET-2900954 print Phoenix
+  Contact, FGR-60F and FR-TRAN-SX Fortinet, ZENON-V12 COPA-DATA and
+  MS-OFFICE-2021 Microsoft. The example library and the goldens are unchanged.
 - The device editor shows "Minimum branch MCB" read-only, marked deprecated,
   with the reason: branch MCBs are sized from the rated power and inrush
   current (ADR 0019), so typing a value there changed nothing (#228).

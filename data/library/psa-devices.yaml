@@ -4,7 +4,8 @@
 # data/device-db/ and run `python data/library/build.py` again.
 #
 # The shipped psa-devices library: examples/library.yaml plus each original part's
-# datasheet inrush and input voltage range from data/device-db/ (plan Q38).
+# datasheet inrush and input voltage range from data/device-db/ (plan Q38), and its make
+# as the device database records it.
 
 devices:
   # --- Group B: network cabinets (example workbook, 'Panel 1'!B4:H12) -----------------
@@ -100,7 +101,8 @@ devices:
   - part_id: SEL-2730M-EXT  # 'Panel 1' row 10: PSA1-EXT-ESW-A
     category: network_switch
     alt_group: SEL-2730M-EXT  # M14 (ADR 0017)
-    input_v_min: 88           # datasheet (data/device-db)
+    inrush_a: 8               # datasheet (data/device-db)
+    input_v_min: 88
     input_v_max: 300
     height_u: 1  # device database (PR #18)
     make: SEL
@@ -149,7 +151,7 @@ devices:
     input_v_min: 12     # datasheet (data/device-db)
     input_v_max: 125
     height_u: 0  # device database (PR #18): DIN rail
-    make: Fortigate
+    make: Fortinet
     model: FGR-60F
     ordering_code: FGR-60F
     description_template: "Industrial Firewall for External Systems"
@@ -382,7 +384,7 @@ devices:
   - part_id: FR-TRAN-SX  # 'Panel 1' row 17: EXT-FW-A SFP (MM)
     category: sfp
     alt_group: FR-TRAN-SX  # M14 (ADR 0017)
-    make: Fortigate
+    make: Fortinet
     model: FR-TRAN-SX
     ordering_code: FR-TRAN-SX
     description_template: "Industrial SFP (1Gig, MM)"
@@ -468,7 +470,9 @@ devices:
   - part_id: IPR-2903685  # 'Panel 1' row 22: PSA1-IPR
     category: relay
     alt_group: IPR-2903685  # M14 (ADR 0017)
-    make: Phoenix
+    input_v_min: 179.4      # datasheet (data/device-db)
+    input_v_max: 317.4
+    make: Phoenix Contact
     model: "2903685"
     ordering_code: "2903685"
     description_template: "Interposing Relay for High Temp Alarm"
@@ -486,7 +490,7 @@ devices:
   - part_id: IPR-BASE-2900934  # 'Panel 1' row 23
     category: component
     alt_group: IPR-BASE-2900934  # M14 (ADR 0017)
-    make: Phoenix
+    make: Phoenix Contact
     model: "2900934"
     ordering_code: "2900934"
     description_template: "IPR Relay Base"
@@ -494,7 +498,7 @@ devices:
   - part_id: IPR-SUPP-2900944  # 'Panel 1' row 24
     category: component
     alt_group: IPR-SUPP-2900944  # M14 (ADR 0017)
-    make: Phoenix
+    make: Phoenix Contact
     model: "2900944"
     ordering_code: "2900944"
     description_template: "Suppression Module"
@@ -502,7 +506,7 @@ devices:
   - part_id: IPR-BRACKET-2900954  # 'Panel 1' row 25
     category: component
     alt_group: IPR-BRACKET-2900954  # M14 (ADR 0017)
-    make: Phoenix
+    make: Phoenix Contact
     model: "2900954"
     ordering_code: "2900954"
     description_template: "Retaining Bracket - RIF-RH-2"
@@ -574,7 +578,7 @@ devices:
   - part_id: ZENON-V12  # 'Aux' row 51: SRV/OAS -HMI Software
     category: software
     alt_group: ZENON-V12  # M14 (ADR 0017)
-    make: COPADATA
+    make: COPA-DATA
     model: Zenon V12
     ordering_code: Zenon V12
     description_template: "Zenon Energy Edition Sever/Client with Editor Studio"
@@ -582,7 +586,7 @@ devices:
   - part_id: MS-OFFICE-2021  # 'Aux' row 52: SRV/OAS -MS Office
     category: software
     alt_group: MS-OFFICE-2021  # M14 (ADR 0017)
-    make: MS
+    make: Microsoft
     model: "2021"
     ordering_code: "2021"
     description_template: "Microsoft Office 2021"

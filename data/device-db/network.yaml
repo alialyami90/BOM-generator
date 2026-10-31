@@ -873,11 +873,15 @@ records:
       kind: fixed
       usable_for: ied
       note: 'Ordered as 4-port multimode LC groups (BOM: 16 MM ports)'
-    inrush_basis: not_given
-    inrush_note: 'SEL-2730M data sheet (2013-12-04) gives no inrush figure. 125/250 V supply: rated 125-250
-      VDC / 110-240 VAC, range 88-300 VDC / 85-264 VAC, consumption DC < 45 W, AC < 60 VA, ride-through
-      50 ms at 125 V. Redundant hot-swappable second supply is optional. The BOM''s 45 W matches the DC
-      figure. 1U, 43.7 x 482.5 x 232.1 mm, 1.96 kg.'
+    inrush_a: 8
+    inrush_basis: datasheet
+    inrush_note: 'SEL-2730M instruction manual PM2730M-01, date code 20260408, p. 27: peak inrush 8 A
+      per feed for the 125-250 V supply (the 24-48 V supply has 18 A); no duration given. Assumes #2CF9
+      carries the high-voltage supply, as the 125 VDC feed needs (contractor delivery 2026-10-31). The
+      2013-12-04 data sheet gives no inrush figure. 125/250 V supply: rated 125-250 VDC / 110-240 VAC,
+      range 88-300 VDC / 85-264 VAC, consumption DC < 45 W, AC < 60 VA, ride-through 50 ms at 125 V.
+      Redundant hot-swappable second supply is optional. The BOM''s 45 W matches the DC figure. 1U,
+      43.7 x 482.5 x 232.1 mm, 1.96 kg.'
     input_v_min: 88
     input_v_max: 300
   alternatives:
@@ -1185,6 +1189,7 @@ records:
         - https://cache.industry.siemens.com/dl/files/348/109766348/att_980977/v1/SIE_RST2228.pdf
         - https://assets.new.siemens.com/siemens/assets/api/uuid:7c5d5b6f-4c7a-4917-b9d4-4781694f0bb6/di-pa-ci-rst2228-brochure-en.pdf
   sources:
+  - https://selinc.com/api/download/100428/?lang=en-us
   - https://selinc.com/products/2730M/
   - https://selinc.com/products/2730M/specs
   - https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/
@@ -1195,7 +1200,7 @@ records:
 - part_id: FGR-60F
   kind: device
   description: Industrial Firewall for External Systems
-  make: Fortigate
+  make: Fortinet
   verified: partial
   datasheet:
     full_name: FortiGate Rugged 60F (FGR-60F)
