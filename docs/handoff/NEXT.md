@@ -277,10 +277,6 @@ test-first in a small PR. Since the audit: the app never shows the prototype's d
 every page is "BOM Generator could not reach its engine" with *Try again* (#227), and the device
 editor shows `min_branch_mcb_a` read-only as deprecated (#228).
 
-Open: a **Nameplates tab** on the Preview page. Since #253, `app/preview.py` returns a `nameplates`
-key (the sheet name, then per panel `panel_id`, `cabinet` and `plates` with `text` and `device`); the
-UI doesn't show it yet.
-
 How to work: TDD (for UI-only changes, an asserting test in `test_app_ui_assets.py`); conventional
 commits (`fix(app): …`); never commit scratch scripts or screenshots. For UI PRs run a Playwright E2E
 (LESSONS.md "E2E without the window"), save screenshots to the project files folder `a11-screens/`, and

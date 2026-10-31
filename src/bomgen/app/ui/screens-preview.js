@@ -3,6 +3,7 @@
 (function () {
   const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, pageHead, toast, go, $ } = App;
   const LOOSE = 'loose-material';  // not a panel id: those name panel files
+  const PLATES = 'nameplates';
   const real = () => S.backend === 'yes' && S.project && S.project.real && S.sub;
   const GROUPS = { A: 'Enclosure', B: 'Main equipment', C: 'Network and IO accessories', D: 'Cabinet housekeeping', E: 'AC distribution', F: 'DC distribution', G: 'Terminal blocks', H: 'Grounding' };  // the spec's group names, labels only
   const fmt = (n, d = 1) => Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -36,9 +37,10 @@
         ${banner('bad', `<b>Nothing to preview.</b> ${esc(d.reason)}${errors ? ' must be fixed first' : ''}.`, '<a class="btn btn--secondary btn--sm" href="#/checks">Open checks</a>')}</div>`;
     }
     // short labels keep all tabs in view; the cabinet is the tooltip and the sheet's title block
-    // the workbook's order: panel sheets, the loose material sheet, then the calculations (ADR 0020)
+    // the workbook's order: panel sheets, loose material, nameplates, then the calculations (ADR 0020, 0026)
     const sheets = [...d.panels.map((x) => [x.panel_id, `Sheet ${x.sheet}`, '', x.cabinet]),
       ...(d.loose ? [[LOOSE, `${d.loose.sheet} (${d.loose.rows.length})`, '', 'Shipped loose, not in a panel']] : []),
+      ...(d.nameplates ? [[PLATES, `${d.nameplates.sheet} (${d.nameplates.panels.reduce((n, x) => n + x.plates.length, 0)})`, '', 'One plate per tagged unit']] : []),
       ['power', 'Power', '', d.calc_sheets.power], ['heatdiss', 'Heat dissipation', '', d.calc_sheets.heat_dissipation],
       ['heatcalc', 'Heat calculations', '', d.calc_sheets.heat_calculations]];
     const { b } = App.route();
@@ -46,7 +48,7 @@
     if (!sheets.some(([k]) => k === t)) t = sheets[0][0];
     S.tab.preview = t;
     const panel = t === LOOSE ? d.loose : d.panels.find((x) => x.panel_id === t);
-    const body = panel ? bomView(panel, t === LOOSE) : t === 'power' ? powerView(d) : t === 'heatdiss' ? heatDissView(d) : heatCalcView(d);
+    const body = panel ? bomView(panel, t === LOOSE) : t === PLATES ? nameplatesView(d.nameplates) : t === 'power' ? powerView(d) : t === 'heatdiss' ? heatDissView(d) : heatCalcView(d);
     return `<div class="page">${pageHead('Preview', 'What the workbook will contain. Values are calculated by the engine; nothing here is editable.',
       `<a class="btn btn--primary" href="#/build">${icon('build')}Continue to Build</a>`)}
       ${tabs('preview', sheets, t, 'Workbook sheets')}
@@ -89,6 +91,14 @@
   ACTIONS['pv-grp'] = (el) => { grp = el.value; App.render(); };
   ACTIONS['pv-hwio'] = (el) => { showHwio = el.checked; App.render(); };
   document.addEventListener('input', (e) => { if (e.target.id === 'pv-q') { q = e.target.value; const pos = e.target.selectionStart; App.render(); const n = $('#pv-q'); if (n) { n.focus(); n.setSelectionRange(pos, pos); } } });
+
+  /* ---------- Nameplates sheet (ADR 0026): one plate per tagged unit, in each panel's row order ---------- */
+  function nameplatesView(n) {
+    let i = 0;
+    const rows = n.panels.map((x) => x.plates.map((pl) => `<tr><td class="num">${++i}</td><td class="nowrap">${esc(x.cabinet || x.panel_id)}</td><td class="mono">${esc(pl.text)}</td><td>${esc(pl.device)}</td></tr>`).join('')).join('');
+    return `<div class="table-wrap" style="max-width:860px;max-height:calc(100vh - 320px)"><table class="table"><thead><tr><th class="num">S.No</th><th>Panel</th><th>Plate text</th><th>Device</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="muted small" style="margin-top:var(--space-2)">${plural(i, 'plate')}. Each panel's BOM orders them in its last group H row.</p>`;
+  }
 
   /* ---------- Calculation sheets ---------- */
   const name = (x) => esc(x.cabinet || x.panel_id || 'PSA Auxiliary Equipment');
