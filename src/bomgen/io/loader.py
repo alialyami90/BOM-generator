@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ValidationError
 
-from bomgen.io.derived import derive_parts
+from bomgen.io.derived import derive_parts, without_stale_derived
 from bomgen.io.errors import InputError, Issue, Loc, format_location, issues_from_validation_error
 from bomgen.io.mirror import mirror_panel
 from bomgen.io.references import (
@@ -246,6 +246,10 @@ def _load_substation(
     library, derive_problems = derive_parts(library, substation)
     for loc, message in derive_problems:
         found.append(Issue(source.path, format_location(loc), message, source.line_for(loc)))
+    panel_sources = [
+        (s, without_stale_derived(p, library) if isinstance(p, Panel) else p)
+        for s, p in panel_sources
+    ]
     base = source.path.parent
     manual_files = {(base / p).resolve() for p in substation.manual_panels}
     resolved = _resolve_panels(panel_sources, library, library_name, found)

@@ -5,6 +5,7 @@ from pydantic import ValidationError
 
 from bomgen.io.errors import Loc
 from bomgen.models.library import DeviceType, Library
+from bomgen.models.panel import Panel
 from bomgen.models.substation import Equipment, Substation
 
 _VALUE_ERROR_PREFIX = "Value error, "
@@ -62,3 +63,25 @@ def derive_parts(library: Library, substation: Substation) -> tuple[Library, lis
         return library, problems
     # model_copy does not re-validate, so the library's refusal of derived parts is kept
     return library.model_copy(update={"devices": [*library.devices, *added]}), problems
+
+
+def without_stale_derived(panel: Panel, library: Library) -> Panel:
+    """A generated panel with each row naming a derived part that no longer exists (an
+    override removed, an entry renamed) put back on its library part, so the substation
+    still loads and the layout can rewrite the panel (ADR 0024). The file is not changed."""
+    if not panel.generated:
+        return panel
+    known = set(library.part_ids())
+    renamed: dict[str, str] = {}
+    for device in panel.devices:
+        base, plus, _entry = device.part_id.rpartition("+")
+        if plus and device.part_id not in known and base in known:
+            renamed[device.part_id] = base
+    if not renamed:
+        return panel
+    devices = [
+        d.model_copy(update={"part_id": renamed[d.part_id]}) if d.part_id in renamed else d
+        for d in panel.devices
+    ]
+    port_plans = {renamed.get(key, key): plan for key, plan in panel.port_plans.items()}
+    return panel.model_copy(update={"devices": devices, "port_plans": port_plans})
