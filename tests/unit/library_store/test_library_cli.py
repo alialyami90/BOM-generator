@@ -97,7 +97,7 @@ def test_cli_import_dry_run_installs_nothing(runner: CliRunner, tmp_path: Path) 
     result = runner.invoke(library_app, ["import", str(package), "--dry-run"])
 
     assert result.exit_code == 0, result.output
-    assert "Added parts (330): " in result.output
+    assert "Added parts (331): " in result.output
     assert "Dry run: nothing was installed." in result.output
     assert not (tmp_path / "home").exists()
 

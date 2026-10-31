@@ -1843,3 +1843,120 @@ records:
   - https://www.tme.eu/en/katalog/diode-modules_113441/params/b227_load-current/p1440742_150a/
   - https://www.tme.eu/en/katalog/diode-modules_113441/params/b35_case/p1441047_semipack2/
   - https://www.tme.com/th/en/details/mek250-12da/diode-modules/ixys/
+- part_id: NAMEPLATE-0828805
+  kind: device
+  description: Device nameplate, white PVC plate 60 x 30 mm, self-adhesive
+  make: Phoenix Contact
+  verified: confirmed
+  datasheet:
+    full_name: US-EMLP (60X30) - Plastic label
+    manufacturer: Phoenix Contact
+    summary: Blank white PVC equipment marker 60 x 30 mm, self-adhesive, printed with THERMOMARK or BLUEMARK
+    ratings:
+      lettering_field: 60 x 30 mm
+      material: PVC, silicone-free
+      colour: white
+      flammability: UL 94 V0
+      fixing: adhesive
+      pack: 10 pcs
+    dimensions_mm:
+      h: 30
+      w: 60
+      d: 0.5
+    operating_temp_c:
+      min: -30
+      max: 80
+    mounting: self-adhesive on the device, cabinet door or mounting plate
+    datasheet_url: https://docs.rs-online.com/5d31/A700000009046584.pdf
+    product_url: https://rspsupply.com/p-78934-phoenix-contact-0828805-plastic-label-us-emlp-60x30.aspx
+    notes: A printed plate, not engraved traffolyte; engraved traffolyte plates are made to order by
+      engravers and have no catalogue ordering codes. Marked with THERMOMARK PRIME, THERMOMARK CARD (2.0),
+      BLUEMARK ID or BLUEMARK ID COLOR. The datasheet lists 4 labels per sheet, 1 per row; RS sells a pack
+      of 10. Phoenix's custom-labelled version is EMLP (60X30)R CUS (0824363).
+    mounting_kind: enclosure
+    height_u: 0
+    height_note: Stuck to the device or cabinet
+  alternatives:
+  - make: Weidmuller
+    manufacturer: Weidmuller Interface GmbH & Co. KG
+    tiers:
+      low:
+        model: CC 30/60 MM WS
+        ordering_code: '2005330000'
+        description: Self-adhesive white polyester ClipCard device marker 30 x 60 mm, halogen-free
+        url: https://www.mouser.com/datasheet/2/575/2005330000_CC_30_60_MM_WS_en-3034641.pdf
+        notes: 0.1 mm film, acrylate adhesive, UL 94 V-0, -40 to 120 C; 450 per pack
+        verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
+      mid:
+        model: CC 30/60 K MC NE WS
+        ordering_code: '1934390000'
+        description: White PA66 ClipCard device marker 30 x 60 x 1.2 mm, MultiCard, adhesive tape or carrier
+        url: https://www.e-sonic.com/productfiles/mf-we/1934390000_cc_30_60_k_mc_ne_ws_en.pdf
+        notes: Like-for-like rigid plate; UL 94 V-2, -40 to 60 C; 30 per pack; PrintJet or plotter, not
+          the laser
+        verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
+      high:
+        model: CC 30/60 MC NEUTRAL WS
+        ordering_code: '1934420000'
+        description: White PA66 ClipCard device marker 30 x 60 x 1.2 mm, laser-markable, screw, cable-tie
+          or adhesive fixing
+        url: https://media.onlinecomponents.com/productfiles/mf-we/1934420000_cc_30_60_mc_neutral_ws_en.pdf_78.pdf
+        notes: Sold as an alternative to engraving; marked by PrintJet, plotter or SpeedMarking laser;
+          UL 94 V-2, -40 to 100 C; 30 per pack
+        verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
+  - make: Brady
+    manufacturer: Brady Corporation
+    tiers:
+      low:
+        model: EPREP label B-7593 48 x 19 mm, black
+        ordering_code: PTLEP-08-7593-BK
+        description: Polyethylene-foam laminate engraved-plate replacement label 48 x 19 mm, black
+        url: https://www.labelzone.co.uk/products/brady-ptlep-08-7593-bk-eprep-labels-polyethylene-foam-laminate-b-7593
+        notes: Smaller than the original; for the Brady TLS2200 and BMP61 printers; permanent foam-backed
+          acrylic adhesive; the listing gives 100 and 125 labels per roll
+        verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
+      mid:
+        model: EPREP label B-7593 30 x 40 mm, white
+        ordering_code: '312120'
+        description: Polyethylene-foam laminate engraved-plate replacement label 30 x 40 mm, white
+        url: https://www.labelzone.co.uk/products/brady-312120-eprep-labels-polyethylene-foam-laminate-b-7593
+        notes: Sold for control panels and switchgear in place of engraved plates; BMP61 and TLS2200
+          printers; 100 per roll
+        verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
+      high:
+        model: BMP71 raised panel engraved-plate label 3 x 1 in, black
+        ordering_code: M71EP-176-593-BK
+        description: B-593 polyester raised panel label 76 x 25 mm, black, aggressive permanent adhesive
+        url: https://www.steinerelectric.com/Product/Brady-M71EP-176-593-BK-Engraved-Plate-Raised-Panel-Label3-in-W-x-1-in-HBlackB-593-Polyester-1457571
+        notes: Heat and solvent resistant, -20 to 100 C, sold as a replacement for engraved tags; BMP71
+          printer; the white M71EP-176-593 is listed as discontinued at Crescent Electric
+        verified: true
+        mounting_kind: enclosure
+        height_u: 0
+        supply_type: none
+  sources:
+  - https://docs.rs-online.com/5d31/A700000009046584.pdf
+  - https://uk.rs-online.com/web/p/label-printer-tapes/2482215
+  - https://rspsupply.com/p-78934-phoenix-contact-0828805-plastic-label-us-emlp-60x30.aspx
+  - https://www.phoenixcontact.com/en-in/products/labeled-device-marker-emlp-60x30r-cus-0824363
+  - https://www.mouser.com/datasheet/2/575/2005330000_CC_30_60_MM_WS_en-3034641.pdf
+  - https://www.e-sonic.com/productfiles/mf-we/1934390000_cc_30_60_k_mc_ne_ws_en.pdf
+  - https://media.onlinecomponents.com/productfiles/mf-we/1934420000_cc_30_60_mc_neutral_ws_en.pdf_78.pdf
+  - https://www.labelzone.co.uk/products/brady-ptlep-08-7593-bk-eprep-labels-polyethylene-foam-laminate-b-7593
+  - https://www.labelzone.co.uk/products/brady-312120-eprep-labels-polyethylene-foam-laminate-b-7593
+  - https://www.steinerelectric.com/Product/Brady-M71EP-176-593-BK-Engraved-Plate-Raised-Panel-Label3-in-W-x-1-in-HBlackB-593-Polyester-1457571

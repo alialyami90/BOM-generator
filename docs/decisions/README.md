@@ -31,3 +31,4 @@ An ADR stays "Proposed" until Ali accepts it in review.
 | 0023 | [Separate AC and DC MCB choices](0023-separate-ac-and-dc-mcb-choices.md) | Accepted (Ali, 2026-10-28) |
 | 0024 | [Part overrides and derived parts](0024-part-overrides-and-derived-parts.md) | Accepted (Ali, 2026-10-31) |
 | 0025 | [One AC branch MCB per AC-powered device](0025-ac-branch-per-vac-device.md) | Proposed |
+| 0026 | [Device nameplates](0026-device-nameplates.md) | Proposed |

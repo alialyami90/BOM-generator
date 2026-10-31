@@ -952,6 +952,9 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
 - **M25 — AC branch MCB per VAC device.** One group E branch per VAC unit after the socket, sized
   like the DC branches; CINC carries them (ADR 0025, Q52). Plan:
   [`superpowers/plans/2026-10-31-m25-ac-device-branches.md`](superpowers/plans/2026-10-31-m25-ac-device-branches.md).
+- **M26 — Device nameplates.** One nameplate row per panel (its tagged group B units, last in group
+  H) and a Nameplates sheet with every plate's text (ADR 0026, Q53). Plan:
+  [`superpowers/plans/2026-10-31-m26-device-nameplates.md`](superpowers/plans/2026-10-31-m26-device-nameplates.md).
 
 ## 5. Testing strategy
 
@@ -1296,3 +1299,17 @@ order before the spares, sized by `branch_sizing` on the AC set; the spare stays
 housekeeping branch; CINC is raised above the largest VAC branch and to the panel's AC design
 current (to confirm with Ali); an alarmed part adds an AC aux contact; the load text is the
 unit's short tag.
+
+**Q53 — Device nameplates** (M26). *Resolved 2026-10-31:* Ali chose one "Device nameplate" row per
+panel whose quantity is the panel's tagged devices, and a sheet listing every plate's text. A1
+approved the rest (ADR 0026, Proposed): group B units with a tag only; the last row of group H;
+the part from a new optional housekeeping role (NAMEPLATE-0828805, researched by A4); the sheet
+after Loose Material.
+
+**Q54 — Power of the -2 generation SEL computers** (contractor delivery 2026-10-31). *Open.* The
+delivery gives SEL-3555-2 and SEL-3355-2 480 W each (2 x 240 W, the SEL-9331 HV supply's peak
+input burden, PDS3555-02 p. 11 and PDS3355-04 p. 8) and SEL-3560E and SEL-3560S 240 W each (one
+supply's peak burden, PDS3560-01 p. 11), all basis computed or assumed. The library's SEL-3555-GW is
+73 W, SEL-3555-RTAC 62 W and SEL-3355 91 W. These four parts stay out of the shipped library and in
+`data/device-db/contractor-2026-10-31/`. To ask Ali: use the supply-burden ceilings as unit power,
+or wait for measured or typical consumption figures?

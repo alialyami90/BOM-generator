@@ -12,9 +12,11 @@ import xlsxwriter.workbook
 from bomgen import build
 from bomgen.app import api
 from bomgen.engine.errors import EngineError
+from bomgen.io.yaml_source import read_yaml
 from bomgen.models.report import CheckItem, CheckReport, CheckStatus
 
 EXAMPLES = Path(__file__).parents[3] / "examples"
+LIBRARY = read_yaml(EXAMPLES / "project.yaml").data["library"]  # what the example asks for
 SUBSTATION = Path("substations") / "gis01" / "substation.yaml"
 WORKBOOK = "VD-EL0009-861GISPSA-001_PSA_BOM_Rev02.xlsx"
 
@@ -112,7 +114,7 @@ def test_build_target_gives_the_file_name_and_default_folder(app: api.Api, proje
     assert target["sheets"][0] == {"name": "1", "cabinet": "PSA Cabinet - 001"}
     assert target["sheets"][-1] == {"name": "Heat Calculations", "cabinet": None}
     assert target["revision"] == "02"
-    assert target["library"] == {"name": "psa-devices", "version": "1.2.0"}
+    assert target["library"] == {"name": LIBRARY["name"], "version": LIBRARY["version"]}
     assert target["problems"] == []
 
 

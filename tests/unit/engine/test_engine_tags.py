@@ -6,7 +6,8 @@ import pytest
 from engine_factories import device, library, panel, powered, switch
 
 from bomgen.engine.errors import EngineError
-from bomgen.engine.units import DeviceRow, describe, expand_devices
+from bomgen.engine.tags import short_tag
+from bomgen.engine.units import DeviceRow, describe, expand_devices, lookup
 
 
 def rows(
@@ -155,3 +156,9 @@ def test_ext_device_in_a_panel_without_lan_has_no_dangling_hyphen() -> None:
 def test_numbered_device_in_a_panel_without_lan_keeps_its_number() -> None:
     (row,) = rows({"part_id": "L2"}, lib_devices=SWITCHES, lan=None, tag_prefix="PSA3")
     assert row.tag == "PSA3-L2-ESW-01"
+
+
+def test_short_tag_drops_the_panel_prefix_and_uses_underscores() -> None:
+    lib = library(switch("L2", "L2"))
+    assert short_tag("PSA1-L2-ESW-A01", lookup(lib, "L2"), "PSA1") == "L2_ESW_A01"
+    assert short_tag(None, lookup(lib, "L2"), "PSA1") == "L2"  # untagged: the model

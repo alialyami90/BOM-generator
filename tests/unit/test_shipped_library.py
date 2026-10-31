@@ -14,11 +14,12 @@ import yaml
 
 from bomgen.build import build_substation
 from bomgen.io.loader import load_library, load_substation
-from bomgen.models.library import Library
+from bomgen.models.library import DeviceType, Library
 
 REPO = Path(__file__).resolve().parents[2]
 SHIPPED = REPO / "data" / "library" / "psa-devices.yaml"
 EXAMPLE = REPO / "examples" / "library.yaml"
+ADDITIONS = REPO / "data" / "library" / "additions.yaml"
 
 
 def _build_module() -> ModuleType:
@@ -38,7 +39,11 @@ def shipped() -> Library:
 def test_the_shipped_library_is_up_to_date_with_its_sources() -> None:
     build = _build_module()
 
-    expected = build.build(EXAMPLE.read_text(encoding="utf-8"), build.datasheets())
+    expected = build.build(
+        EXAMPLE.read_text(encoding="utf-8"),
+        build.datasheets(),
+        ADDITIONS.read_text(encoding="utf-8"),
+    )
 
     assert SHIPPED.read_text(encoding="utf-8") == expected, (
         "data/library/psa-devices.yaml is out of date: run `python data/library/build.py`"
@@ -51,13 +56,34 @@ def test_the_shipped_library_is_the_example_plus_the_originals_datasheet_figures
     example = load_library(EXAMPLE)
     keys = {"inrush_a", "inrush_ms", "input_v_min", "input_v_max", "make"}
 
-    assert shipped.part_ids() == example.part_ids()
+    originals = shipped.devices[: len(example.devices)]
+
+    assert [d.part_id for d in originals] == [d.part_id for d in example.devices]
     assert shipped.catalogues == example.catalogues
     assert shipped.catalogue_brands == example.catalogue_brands
-    for ours, theirs in zip(shipped.devices, example.devices, strict=True):
+    for ours, theirs in zip(originals, example.devices, strict=True):
         assert ours.model_dump(exclude=keys) == theirs.model_dump(exclude=keys), ours.part_id
         if ours.tier is not None:
             assert ours == theirs, ours.part_id
+
+
+def test_the_shipped_library_ends_with_the_additions(shipped: Library) -> None:
+    additions = yaml.safe_load(ADDITIONS.read_text(encoding="utf-8"))["devices"]
+    added = shipped.devices[len(load_library(EXAMPLE).devices) :]
+
+    assert [d.part_id for d in added] == [a["part_id"] for a in additions]
+    for device, entry in zip(added, additions, strict=True):
+        assert device == DeviceType.model_validate(entry), device.part_id
+
+
+def test_each_addition_is_a_valid_part_new_to_the_example() -> None:
+    additions = yaml.safe_load(ADDITIONS.read_text(encoding="utf-8"))["devices"]
+    example_ids = set(load_library(EXAMPLE).part_ids())
+
+    for entry in additions:
+        part = DeviceType.model_validate(entry)
+        assert part.part_id not in example_ids
+        assert part.alt_group == part.part_id  # its own group until alternatives are researched
 
 
 def test_the_originals_carry_their_datasheet_inrush_and_input_range(shipped: Library) -> None:

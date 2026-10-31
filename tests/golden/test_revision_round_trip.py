@@ -36,7 +36,8 @@ def test_the_issue_reads_back_as_its_build(loaded: LoadedSubstation, issued: Pat
     assert list(previous.sheets) == ["1", "2", "3", "4", "Loose Material"]
     tables = {sheet: [len(t.rows) for t in found] for sheet, found in previous.sheets.items()}
     # ADR 0020: the loose material has its own sheet; the console's sheet holds one table.
-    assert tables == {"1": [71], "2": [74], "3": [62], "4": [39], "Loose Material": [14]}
+    # ADR 0026: each panel ends with its device nameplate row.
+    assert tables == {"1": [72], "2": [75], "3": [63], "4": [40], "Loose Material": [14]}
     result = build(loaded)
     marked, report = compare_with_previous(result, previous)
     assert report.changes == ()

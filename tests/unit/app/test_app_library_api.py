@@ -152,6 +152,7 @@ def test_housekeeping_roles_name_their_library_parts(app: api.Api, package: Any)
         ("change_over_diode_negative", "COD-NEG-IRND150F12", None),
         ("change_over_diode_positive", "COD-POS-IRMD150F12", None),
         ("socket", "SOCKET-730076", "10 A"),
+        ("nameplate", "NAMEPLATE-0828805", None),
     ]
     assert all(r["in_library"] for r in roles)  # the loader refuses a dangling part id
 

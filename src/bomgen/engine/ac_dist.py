@@ -4,7 +4,7 @@ Data model and generation order, step 6)."""
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 
-from bomgen.engine.dc_dist import _unit_name, branch_sizing, unit_current
+from bomgen.engine.dc_dist import branch_sizing, unit_current
 from bomgen.engine.housekeeping import FORCED_FANS, FORCED_THERMOSTATS, NATURAL_THERMOSTATS
 from bomgen.engine.items import BomItem
 from bomgen.engine.mcb import (
@@ -14,6 +14,7 @@ from bomgen.engine.mcb import (
     rating_above,
     rating_at_least,
 )
+from bomgen.engine.tags import short_tag
 from bomgen.engine.units import DeviceRow
 from bomgen.models.bom import Group
 from bomgen.models.calc import BranchMcb
@@ -64,7 +65,7 @@ def ac_distribution(
     alarmed_units: list[str] = []
     for n, (device, tag) in enumerate(units, start=first):
         sizing = branch_sizing(device, library, constants)
-        name = _unit_name(tag, device, prefix)
+        name = short_tag(tag, device, prefix)
         loads.append((name, sizing.rating_a))
         branch_mcbs.append(
             BranchMcb(

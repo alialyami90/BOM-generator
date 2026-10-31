@@ -69,7 +69,7 @@ def test_the_researched_database_loads_and_keys_on_part_id() -> None:
     records = parse_device_records(files)
 
     expected = sum(len(yaml.safe_load(data)["records"]) for data in files.values())
-    assert len(records) == expected == 63
+    assert len(records) == expected == 64
     switch = records["RST2228-L1-24MM"]
     assert isinstance(switch, DeviceRecord)
     assert switch.kind == "device"
