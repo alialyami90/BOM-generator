@@ -409,6 +409,18 @@ reviewed by the design owner and is the intended behaviour; the prototype in
     the loose material's host panel; without one the row points to Loose material.
   - Rows do not collapse at 20 or more.
   - The annunciator's "Mount in panel" switch is not built (Q51).
+- **Device preview (M24).** The app differs from the M22 prototype in these ways:
+  - The Strip column shows a unit's own terminal strips as the engine gives them, not
+    the X1/X2 feed strips the prototype shows, and only when some unit has strips.
+  - AC units have no branch MCB until Ali answers the AC-MCB question: their PS1 and
+    PS2 cells show "—" with the title "AC devices have no branch MCB in this design".
+  - With hand-written panels the page shows what the layout would place, with a banner
+    pointing to Panels, and nothing can be dragged or pinned: pins reach only
+    generated panels.
+  - Up 1 U and Down 1 U appear once the bridge has checked that the move fits.
+  - "Go to the row" lands on Parts with that row's part select focused.
+  - There is no "Parts has unsaved changes" banner: Parts asks to save or discard
+    before you leave it, so the preview always shows the saved parts.
 - **Settings › General (v0.2.1, #207).** The catalogue brands sit in a two-column
   form; the first option of each select names the resolved brand, "Same as the
   project (Schneider Acti9 2P)", and for the DC MCB set "Same as AC branches".
