@@ -16,6 +16,7 @@ from bomgen.engine.layout import (
     blank_plates,
     fill,
     fill_lines,
+    l1_candidates,
     layout_preview,
     layout_substation,
     reconcile_panels_list,
@@ -23,6 +24,7 @@ from bomgen.engine.layout import (
     used_u,
     with_layout,
 )
+from bomgen.io.derived import derive_parts
 from bomgen.io.loader import LoadedSubstation, load_substation
 from bomgen.models.library import Category, PurdueLevel
 from bomgen.models.panel import Panel, PortAllocation
@@ -578,3 +580,37 @@ def test_r9_loose_material_on_a_panel_the_layout_drops_is_reported(
     assert issue.subject == "loose_material.items[0].fed_from"
     assert "'psa3'" in issue.message
     assert issue.is_error
+
+
+def with_entry(loaded: LoadedSubstation, device: str, **fields: Any) -> LoadedSubstation:
+    """The example with equipment ``device`` changed and its derived part in the library."""
+    equipment = [
+        e.model_validate({**e.model_dump(exclude_unset=True), **fields}) if e.id == device else e
+        for e in loaded.substation.equipment
+    ]
+    substation = loaded.substation.model_copy(update={"equipment": equipment})
+    library, problems = derive_parts(loaded.library, substation)
+    assert problems == []
+    return replace(loaded, substation=substation, library=library)
+
+
+def test_override_height_moves_the_layout(example: LoadedSubstation) -> None:
+    result = layout_preview(with_entry(example, "gw", overrides={"height_u": 10}))
+    gw = [x for fill in result.fills for x in fill.units if x.device == "gw"]
+    assert {x.height_u for x in gw} == {10}
+    gw_rows = [d for p in result.panels for d in p.devices if d.part_id.startswith("SEL-3555-GW")]
+    assert {d.part_id for d in gw_rows} == {"SEL-3555-GW+gw"}
+
+
+def test_l1_ranking_ignores_derived_parts(example: LoadedSubstation) -> None:
+    candidates = l1_candidates(with_entry(example, "l1", ordering_code="L1-CODE"))
+    assert candidates
+    assert not [c for c in candidates if "+" in c.ports.part_id]
+
+
+def test_an_l1_override_applies_to_the_sized_switch(example: LoadedSubstation) -> None:
+    result = layout_preview(with_entry(example, "l1", overrides={"unit_power_w": 50}))
+    l1_rows = [d.part_id for p in result.panels for d in p.devices if "L1" in d.part_id]
+    assert l1_rows
+    assert set(l1_rows) == {"RST2228-L1-24MM+l1"}
+    assert result.plan.l1_part_id == "RST2228-L1-24MM+l1"

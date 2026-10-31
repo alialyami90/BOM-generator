@@ -28,6 +28,7 @@ from bomgen.engine.sizing import (
     switch_ports,
 )
 from bomgen.engine.tags import first_number
+from bomgen.io.derived import effective_part_id
 from bomgen.io.loader import LoadedSubstation
 from bomgen.models.library import Category, Media, PortSpeed, PurdueLevel
 from bomgen.models.panel import (
@@ -432,7 +433,9 @@ def l1_candidates(loaded: LoadedSubstation) -> list[L1Candidate]:
     devices = [
         switch_ports(d)
         for d in loaded.library.devices
-        if d.category is Category.NETWORK_SWITCH and d.purdue_level is PurdueLevel.L1
+        if d.category is Category.NETWORK_SWITCH
+        and d.purdue_level is PurdueLevel.L1
+        and d.derived_from is None
     ]
     return rank_l1_switches(devices, network_inputs(loaded))
 
@@ -483,7 +486,7 @@ def _part_id(entry: Equipment, plan: NetworkPlan) -> str:
         return plan.l1_part_id
     if entry.role is EquipmentRole.L2_SWITCH:
         return plan.l2_part_id
-    return str(entry.part_id)
+    return str(effective_part_id(entry))
 
 
 @dataclass(frozen=True)
@@ -563,12 +566,12 @@ def _size(loaded: LoadedSubstation) -> tuple[NetworkPlan, NetworkInputs, list[L1
     devices = {d.part_id: d for d in loaded.library.devices}
     candidates = l1_candidates(loaded)
     l1_entry = _role(loaded, EquipmentRole.L1_SWITCH)
-    pinned: str | None = l1_entry.part_id
+    pinned = effective_part_id(l1_entry)
     if pinned is not None:
         l1 = switch_ports(devices[pinned])
     else:
         l1 = pick_l1_switch((c.ports for c in candidates), net)
-    l2 = switch_ports(devices[str(_role(loaded, EquipmentRole.L2_SWITCH).part_id)])
+    l2 = switch_ports(devices[str(effective_part_id(_role(loaded, EquipmentRole.L2_SWITCH)))])
     by_side = [_links(loaded, Side.A), _links(loaded, Side.B)]
     busiest = max(by_side, key=lambda links: sum(link.ports for link in links))
     return size_network(net, l1, l2, busiest), net, candidates
