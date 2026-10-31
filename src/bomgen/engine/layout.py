@@ -60,6 +60,7 @@ IssueKind = Literal[
     "missing-panel",
     "port-capacity",
     "replaced-panel",
+    "waist-height",
 ]
 WARNING_KINDS: frozenset[IssueKind] = frozenset(
     {"stale-override", "stale-removal", "replaced-panel"}
@@ -196,18 +197,14 @@ class PanelFill:
         """
         rack = [x for x in self.stack() if x.block_u > 0]
         waist = rules.waist_u
-        anchored = [x for x in rack if x.waist and self.pins.get(x) is None]
+        anchored = self._anchored()
         if waist is None or not anchored:
             return _from_top(rack, rules.capacity_u, rules)
         others = [x for x in rack if x not in anchored]
-        tops: dict[Unit, int] = {}
-        top = waist - 1
-        for unit in anchored:  # bottom up: the first in stack order sits at waist_u
-            bottom = top + 1 + (_clearance(unit, rules) if tops else 0)
-            top = bottom + unit.block_u - 1
-            tops[unit] = top
-        if top > rules.capacity_u:
-            return None
+        tops = _anchor(anchored, waist, rules)
+        top = max(tops.values())
+        if top > rules.capacity_u:  # reported as waist-height; stack from the top instead
+            return _from_top(rack, rules.capacity_u, rules)
         anchor_top, above, count = top, rules.capacity_u, 0
         for unit in others:
             bottom = above - unit.block_u + 1
@@ -218,6 +215,18 @@ class PanelFill:
             count += 1
         below = _from_top(others[count:], waist - 1 - _clearance(anchored[0], rules), rules)
         return None if below is None else tops | below
+
+    def _anchored(self) -> list[Unit]:
+        """The KVM and console units held at waist height: rack units with no pinned place."""
+        return [x for x in self.stack() if x.waist and x.block_u > 0 and self.pins.get(x) is None]
+
+    def waist_short(self, rules: LayoutRules) -> int | None:
+        """The anchor's top U when the panel is too short to hold it at waist height."""
+        anchored = self._anchored()
+        if rules.waist_u is None or not anchored:
+            return None
+        top = max(_anchor(anchored, rules.waist_u, rules).values())
+        return top if top > rules.capacity_u else None
 
     def top_u(self, unit: Unit, rules: LayoutRules) -> int | None:
         """The unit's top U in the panel; None on DIN rail or when the panel overflows."""
@@ -241,6 +250,17 @@ class PanelFill:
 def _clearance(upper: Unit, rules: LayoutRules) -> int:
     """Space under a block: a blank plate unless it ends in its cable manager (R5)."""
     return 0 if upper.cable_manager_u else rules.blank_plate_u
+
+
+def _anchor(anchored: Sequence[Unit], waist: int, rules: LayoutRules) -> dict[Unit, int]:
+    """Top U of each anchored unit, bottom up: the first in stack order sits at ``waist``."""
+    tops: dict[Unit, int] = {}
+    top = waist - 1
+    for unit in anchored:
+        bottom = top + 1 + (_clearance(unit, rules) if tops else 0)
+        top = bottom + unit.block_u - 1
+        tops[unit] = top
+    return tops
 
 
 def _from_top(units: Sequence[Unit], top: int, rules: LayoutRules) -> dict[Unit, int] | None:
@@ -352,6 +372,19 @@ class _Builder:
             self.panels.pop()
         for panel in self.panels:
             panel.units = panel.stack()
+            short = panel.waist_short(self.rules)
+            if short is not None and self.rules.waist_u is not None:
+                span = f"U{self.rules.waist_u}" + (
+                    f" to U{short}" if short > self.rules.waist_u else ""
+                )
+                self.issues.append(
+                    LayoutIssue(
+                        "waist-height",
+                        f"panel {panel.number}",
+                        f"panel {panel.number} has {self.rules.capacity_u} U; a KVM or "
+                        f"console at waist height needs {span}",
+                    )
+                )
             if not panel.units:
                 self.issues.append(
                     LayoutIssue(

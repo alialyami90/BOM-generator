@@ -33,6 +33,7 @@ from bomgen.models.panel import Panel, PortAllocation
 from bomgen.models.project import LayoutDefaults
 from bomgen.models.substation import (
     DeviceMove,
+    Equipment,
     EquipmentRole,
     PairMove,
     Side,
@@ -703,3 +704,39 @@ def test_a_pinned_kvm_ignores_waist_height() -> None:
     unit = kvm(rank=1)
     panel = PanelFill(1, [u("a", 1, NONE, rank=0), unit], pins={unit: 1})
     assert tops(panel) == {"kvm": 32, "a": 30}
+
+
+def test_a_panel_too_short_for_waist_height_is_an_error() -> None:
+    rules = LayoutRules(capacity_u=16, blank_plate_u=1, waist_u=18)
+    layout = fill([kvm(rank=0)], rules)
+    assert [(i.kind, i.subject, i.message, i.is_error) for i in layout.issues] == [
+        (
+            "waist-height",
+            "panel 1",
+            "panel 1 has 16 U; a KVM or console at waist height needs U18",
+            True,
+        )
+    ]
+    assert layout.panels[0].top_u(layout.panels[0].units[0], rules) == 16
+
+
+def test_a_taller_anchor_names_its_top_u() -> None:
+    rules = LayoutRules(capacity_u=19, blank_plate_u=1, waist_u=18)
+    (issue,) = fill([kvm(rank=0, h=3)], rules).issues
+    assert issue.message == "panel 1 has 19 U; a KVM or console at waist height needs U18 to U20"
+
+
+def test_waist_height_error_reaches_the_layout_report(example: LoadedSubstation) -> None:
+    base = example.library.get("SEL-3355")
+    assert base is not None
+    console = base.model_copy(update={"part_id": "KVM-1", "category": Category.KVM, "height_u": 1})
+    library = example.library.model_copy(update={"devices": [*example.library.devices, console]})
+    entry = Equipment(id="kvm", part_id="KVM-1", role="kvm")
+    substation = example.substation.model_copy(
+        update={"equipment": [*example.substation.equipment, entry]}
+    )
+    enclosure_u = example.library.catalogues.enclosure_u
+    spares = example.spares.model_copy(update={"rack_u_reserved": enclosure_u - 16})
+    short = replace(example, library=library, substation=substation, spares=spares)
+    kinds = [i.kind for i in layout_preview(short).report.issues]
+    assert "waist-height" in kinds
