@@ -96,8 +96,6 @@ replaced entry "superseded by …".
 - When nits turn up after a PR is good, merge it and send the nits as one follow-up PR (#208).
 - Release sequencing: hold other merges until a release is published; prepare the CHANGELOG while the
   last PR is open but open it only after that PR merges, so its wording matches the final squash.
-- A test that packs the example library reads its name and version from `examples/project.yaml`; a
-  hardcoded "1.1.0" turned main red when #249 bumped the example while #250 was in review (fixed #252).
 
 ### Keeping these docs honest
 

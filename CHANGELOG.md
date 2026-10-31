@@ -9,6 +9,9 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- App: the Preview page shows the Nameplates sheet (M26, ADR 0026) as a tab
+  after Loose Material, one row per plate with its panel, plate text and
+  device.
 - Device nameplates (M26, ADR 0026 proposed): each panel BOM ends with one
   nameplate row whose quantity is its tagged devices, and a new Nameplates sheet
   after Loose Material lists every plate's text (the tag as the MCB rows print

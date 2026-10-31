@@ -305,7 +305,7 @@ too and their "Go to field" opens the project page.
 
 ### Preview
 - **Layout:** title, a banner when the last load had errors, sheet tabs (one
-  Sheet per panel, then **Loose Material (n)** when the substation has loose material, then Power Consumption, Heat Dissipation, Heat Calculations),
+  Sheet per panel, then **Loose Material (n)** when the substation has loose material, then **Nameplates (n)** when some panel has plates, then Power Consumption, Heat Dissipation, Heat Calculations),
   then the sheet.
 - **BOM sheet:** group chips A to H with counts, a row filter, a switch for the
   hidden HWIO column (the revised-cells switch was dropped, see *Departures in
@@ -318,6 +318,8 @@ too and their "Go to field" opens the project page.
 - **Loose Material sheet:** the panel BOM layout without group chips: the grey title block, then SR.NO, tag,
   description, quantity, make, model and ordering code; an item's children follow it. A line says which
   document the header comes from, with *Edit the list*.
+- **Nameplates sheet (ADR 0026):** S.No, panel (cabinet number), plate text in mono and device, one row per
+  plate in each panel's row order, with the plate count under the table.
 - **Calculation sheets:** Power: headline metrics and block tables with totals
   including the 25% margin. Heat Dissipation: per-device W and BTU/h. Heat
   Calculations: forced-ventilation table with line-up check, natural-convection
