@@ -151,7 +151,7 @@ def test_the_device_editor_edits_every_list_the_model_has() -> None:
 
 def test_in_use_rows_are_named_as_the_screens_show_them() -> None:
     edit = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
-    assert "the equipment row ${m(x.name)} (Network)" in edit
+    assert "the equipment row ${m(x.name)} (Parts)" in edit
     assert "on panel ${m(p)} (Panels)" in edit
     assert "Fixed once created: projects refer to it." in edit
 
@@ -196,20 +196,20 @@ def test_project_overview_edits_client_logo_defaults_and_brands_in_the_app() -> 
     assert "Same as the AC branches" in js  # mcb_dc, ADR 0023
 
 
-def test_network_inputs_are_edited_with_a_setup_card_for_a_new_substation() -> None:
-    js = (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
-    for name in ("set_substation_field", "check_substation_field"):
+def test_parts_edits_the_network_inputs_with_a_setup_card_for_a_new_substation() -> None:
+    js = (UI_DIR / "screens-parts.js").read_text(encoding="utf-8")
+    for name in ("set_substation_field", "check_substation_field", "start_parts"):
         assert f"Bridge.call('{name}'" in js
-    assert "function setupCard(p)" in js
+    assert "function setupCard(p, rows)" in js
     css = (UI_DIR / "styles.css").read_text(encoding="utf-8")
     assert ".setup li.done svg" in css
 
 
-def test_equipment_rows_are_edited_on_network_and_removing_one_offers_undo() -> None:
-    js = (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
-    for name in ("add_equipment", "remove_equipment"):
+def test_equipment_rows_are_edited_on_parts_and_removing_one_offers_undo() -> None:
+    js = (UI_DIR / "screens-parts.js").read_text(encoding="utf-8")
+    for name in ("add_equipment", "remove_equipment", "move_equipment"):
         assert f"Bridge.call('{name}'" in js
-    assert "toast(`Removed ${id}`, 'trash', () =>" in js
+    assert "toast(`Removed ${label}`, 'trash', () =>" in js
 
 
 def test_substation_settings_are_edited_through_the_shared_draft_form() -> None:
@@ -226,24 +226,23 @@ def test_the_document_register_is_edited_with_confirm_add_and_remove_with_undo()
     for name in ("confirm_project_field", "add_document", "remove_document", "restore_document"):
         assert f"Bridge.call('{name}'" in js
     assert "Pick another document there first." in js
-    network = (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
-    assert "Bridge.call('start_equipment'" in network
 
 
-def test_use_this_instead_hands_the_part_to_network_as_an_unsaved_edit() -> None:
+def test_use_this_instead_hands_the_part_to_parts_as_an_unsaved_edit() -> None:
     edit = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
     assert "ACTIONS['use-instead']" in edit
     assert "pins stay put" in edit
+    assert "Review and save it on Parts." in edit
     assert "App.useButton(id, r.part_id)" in (UI_DIR / "screens-library.js").read_text("utf-8")
-    assert "App.holdParts = " in (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
+    assert "App.holdParts = " in (UI_DIR / "screens-parts.js").read_text(encoding="utf-8")
 
 
-def test_overview_and_network_use_the_shared_draft_form() -> None:
-    for name in ("screens-projects.js", "screens-substation.js"):
+def test_overview_and_parts_use_the_shared_draft_form() -> None:
+    for name in ("screens-projects.js", "screens-substation.js", "screens-parts.js"):
         js = (UI_DIR / name).read_text(encoding="utf-8")
         assert "function toModel(" not in js  # one reader of typed values, in ui.js
     assert "const PO = App.draftForm({" in (UI_DIR / "screens-projects.js").read_text("utf-8")
-    assert "const NET = App.draftForm({" in (UI_DIR / "screens-substation.js").read_text("utf-8")
+    assert "const PF = App.draftForm({" in (UI_DIR / "screens-parts.js").read_text("utf-8")
 
 
 def test_deleting_a_device_not_applied_yet_drops_it_from_the_pending_changes() -> None:
@@ -251,15 +250,6 @@ def test_deleting_a_device_not_applied_yet_drops_it_from_the_pending_changes() -
     assert "data-new=\"${isNew ? 1 : ''}\"" in edit
     assert "It is not in the library yet, so it goes at once" in edit
     assert "dropped from the pending changes" in edit
-
-
-def test_an_equipment_row_changes_its_part_with_its_alternatives_first() -> None:
-    sub = (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
-    assert 'data-action="eq-part-change"' in sub
-    assert "Bridge.call('library_alternatives', was)" in sub
-    assert 'label="Alternatives to ${esc(was)}"' in sub
-    assert "Other parts in the library" in sub
-    assert "ACTIONS['eq-part-change-do']" in sub
 
 
 def test_the_parts_datalist_shows_make_and_model() -> None:
@@ -357,7 +347,7 @@ def test_row_delete_buttons_share_one_style() -> None:
     assert ".btn--del { color: var(--color-text-muted); }" in css
     for name in (
         "screens-libedit.js",
-        "screens-substation.js",
+        "screens-parts.js",
         "screens-loose.js",
         "screens-projects.js",
     ):
@@ -365,19 +355,13 @@ def test_row_delete_buttons_share_one_style() -> None:
         assert "btn--del" in js, name
 
 
-def test_network_rows_are_two_lines_and_the_role_select_fits() -> None:
-    """polish-v02 items 4 and 11, and the #205 screen check (a) and (b)."""
-    sub = (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
-    assert '<th style="min-width:170px">Role</th><th style="width:56px">A and B</th>' in sub
-    assert 'class="part-line"' in sub  # Change… sits at the end of the part-id line
+def test_parts_rows_keep_to_their_column_and_a_part_change_says_what_was_cleared() -> None:
+    """components.md "Parts and Device preview"; decision 1 of the M23 plan."""
+    js = (UI_DIR / "screens-parts.js").read_text(encoding="utf-8")
     css = (UI_DIR / "styles.css").read_text(encoding="utf-8")
-    # #207 check: the table stays in its column; a part id never breaks, Change… wraps
     assert ".net-grid > * { min-width: 0; }" in css
-    assert ".part-line { display: flex; flex-wrap: wrap;" in css
-    assert ".part-line .mono { white-space: nowrap; }" in css
-    assert "if (App.route().a !== 'network' || S.sub !== sub) return;" in sub
-    assert "el.setAttribute('aria-busy', 'true')" in sub
-    assert "dc_branches_per_feed: ['Spare DC branches', 'per feed']" in sub
+    assert "Bridge.call('set_equipment_part'" in js
+    assert "was' : 'were'} cleared, so the BOM prints the library's code." in js
 
 
 def test_settings_names_the_resolved_brand_and_the_register_key() -> None:
@@ -490,3 +474,46 @@ def test_a_hand_written_board_offers_to_lay_out_panels_after_a_confirm_that_name
     assert 'data-action="pv-generate-go"' in js
     editing = (DESIGN / "editing.md").read_text(encoding="utf-8")
     assert "Lay out panels from the equipment" in editing
+
+
+# -- Parts (plan M23; docs/ui/screens.md "Parts") ---------------------------------------------
+
+PARTS = UI_DIR / "screens-parts.js"
+
+
+def test_parts_replaces_network_and_network_redirects() -> None:
+    ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    assert "navItem('#/parts', 'parts', 'Parts'" in ui
+    assert "'#/network'" not in ui
+    assert "if (a === 'network') { location.replace('#/parts'); return; }" in ui
+    assert "SCREENS.network" not in (UI_DIR / "screens-substation.js").read_text("utf-8")
+    assert "SCREENS.parts = " in PARTS.read_text(encoding="utf-8")
+
+
+def test_parts_offers_no_override_controls_on_a_sized_row_without_a_part() -> None:
+    js = PARTS.read_text(encoding="utf-8")
+    strip = js[js.index("function strip(r)") :]
+    assert strip.index("if (!r.part_id) return") < strip.index('data-action="pp-edit"')
+    assert "'Pick the switch to change its data.'" in strip
+
+
+def test_parts_has_no_generate_preview_button_until_the_device_preview_exists() -> None:
+    js = PARTS.read_text(encoding="utf-8") + (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    assert "Generate preview" not in js
+    assert "#/device-preview" not in js
+
+
+def test_an_empty_category_shows_a_line_not_an_empty_dropdown() -> None:
+    """Decision 5 of the M23 plan: the library has no KVM or console parts yet."""
+    js = PARTS.read_text(encoding="utf-8")
+    assert "The library has no ${esc(label)} parts yet." in js
+    assert "if (!opts.length && !r.part_id) return emptyLine(" in js
+    assert "${n ? '' : `disabled title=\"The library has no ${esc(c.label)} parts yet.\"`}" in js
+
+
+def test_time_accessories_on_parts_write_loose_material_items() -> None:
+    """Decision 2 of the M23 plan."""
+    js = PARTS.read_text(encoding="utf-8")
+    for name in ("add_loose_item", "remove_loose_item", "set_loose_item"):
+        assert f"Bridge.call('{name}'" in js
+    assert "To add accessories, set the loose material's host panel first." in js

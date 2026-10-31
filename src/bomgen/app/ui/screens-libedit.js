@@ -200,7 +200,7 @@
       </tbody></table><div class="table-foot"><span>${a.rows.length - 1} alternatives · group <span class="mono">${esc(a.group)}</span></span><span>Differences are against this device.</span></div></div>`;
   }
   /* Use this instead (docs/ui/editing.md, Alternatives): pick the open substation's equipment rows that use this
-     device; Network then holds the other part on them as an unsaved edit, so it is reviewed and saved there. */
+     device; Parts then holds the other part on them as an unsaved edit, so it is reviewed and saved there. */
   App.useButton = (from, to) => `<button class="btn btn--ghost btn--sm" data-action="use-instead" data-from="${esc(from)}" data-to="${esc(to)}" aria-label="Use ${esc(to)} instead of ${esc(from)}">Use…</button>`;
   ACTIONS['use-instead'] = (el) => {
     const from = el.dataset.from, to = el.dataset.to, title = `Use ${esc(to)} instead`;
@@ -215,7 +215,7 @@
         : !rows.length ? `<p>No equipment row of ${esc(u.substation)} uses <span class="mono">${esc(from)}</span>.</p>`
         : `<p>Equipment rows of ${esc(u.substation)} that use <span class="mono">${esc(from)}</span>:</p>
           <div class="stack" style="margin:var(--space-3) 0">${rows.map((x) => `<label class="check"><input type="checkbox" data-use-row="${x.index}" checked><span class="mono">${esc(x.name)}</span></label>`).join('')}</div>
-          <p class="small muted">Only the part changes. The layout, MCB sizes and BOM are worked out again, and pins stay put. The change waits on Network for you to review and save.</p>`;
+          <p class="small muted">Only the part changes. The layout, MCB sizes and BOM are worked out again, and pins stay put. The change waits on Parts for you to review and save.</p>`;
       dialog({ title, body, actions: cancel + `<button class="btn btn--primary" data-action="use-instead-do" data-to="${esc(to)}" ${rows.length ? '' : 'disabled'}>Use on these rows</button>` });
     }).catch((err) => toast(err.message, 'error'));
   };
@@ -223,7 +223,7 @@
     const picked = $$('[data-use-row]').filter((x) => x.checked).map((x) => Number(x.dataset.useRow));
     if (!picked.length) { toast('Tick at least one row.', 'error'); return; }
     closeDialog(); App.holdParts(picked, el.dataset.to);
-    toast(`${picked.length === 1 ? 'One row changes' : `${picked.length} rows change`} to ${el.dataset.to}. Review and save it on Network.`, 'info');
+    toast(`${picked.length === 1 ? 'One row changes' : `${picked.length} rows change`} to ${el.dataset.to}. Review and save it on Parts.`, 'info');
   };
   ACTIONS['add-alternative'] = (el) => { ACTIONS['add-device'](); const from = $('#ad-from'); from.value = el.dataset.id; from.dispatchEvent(new Event('change', { bubbles: true })); $('#ad-group').value = el.dataset.group; $('#ad-title-note').textContent = `It joins the group ${el.dataset.group}.`; };
 
@@ -236,7 +236,7 @@
     const panels = {};
     rows.filter((x) => x.where === 'panel').forEach((x) => { panels[x.panel] = (panels[x.panel] || 0) + 1; });
     const parts = [
-      ...rows.filter((x) => x.where === 'equipment').map((x) => `the equipment row ${m(x.name)} (Network)`),
+      ...rows.filter((x) => x.where === 'equipment').map((x) => `the equipment row ${m(x.name)} (Parts)`),
       ...Object.entries(panels).map(([p, n]) => `${n === 1 ? 'a row' : `${n} rows`} on panel ${m(p)} (Panels)`),
       ...rows.filter((x) => x.where === 'loose material').map((x) => `the loose material row ${m(x.name)} (Loose material)`),
     ];

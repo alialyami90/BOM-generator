@@ -971,28 +971,6 @@ class Api:
         return substation_page(Path(project_file), substation_id, store)
 
     @endpoint
-    def start_equipment(
-        self, project_file: str, substation_id: str, l2_part_id: str
-    ) -> dict[str, Any]:
-        """A substation's first equipment: the redundant L2 switch the person picks and a
-        redundant L1 row the sizing picks a model for, written together because the model
-        takes no equipment without both (ADR 0013). Returns the page."""
-        store = self._library_store()
-        project = Path(project_file)
-        with self._substation(substation_id):
-            file = resolve(project, substation_id, store).file
-        if read_yaml(file).data.get("equipment"):
-            raise AppError("edit_refused", "This substation already has equipment.")
-        rows = [
-            {"id": "l2", "part_id": l2_part_id, "role": "l2_switch", "redundant": True},
-            {"id": "l1", "role": "l1_switch", "redundant": True},
-        ]
-        with self._substation(substation_id), _edit_refusals():
-            result = set_field(project, ("equipment",), rows, substation=substation_id, store=store)
-        _written(result)
-        return substation_page(project, substation_id, store)
-
-    @endpoint
     def remove_equipment(self, project_file: str, substation_id: str, index: int) -> dict[str, Any]:
         """Remove an equipment row; returns the page and the row as written, for Undo."""
         store = self._library_store()
