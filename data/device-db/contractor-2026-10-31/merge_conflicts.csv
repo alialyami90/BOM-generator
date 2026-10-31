@@ -1,0 +1,5 @@
+﻿part_id,column,selected_value,alternative_value,selected_delivery,alternative_delivery,resolution,status
+FGR-60F,model,FortiGate Rugged 60F,FGR-60F,vendor-library-2026-10-31,delivery-2026-10-31-bundles,Retain detailed configured vendor wording; all evidence retained,resolved_wording
+FGR-60F,description_template,"FortiGate Rugged 60F firewall, dual DC inputs, 125 VDC planning feed","Rugged industrial firewall, dual DC inputs",vendor-library-2026-10-31,delivery-2026-10-31-bundles,Retain detailed configured vendor wording; all evidence retained,resolved_wording
+FGR-70F,model,FortiGate Rugged 70F,FGR-70F,vendor-library-2026-10-31,delivery-2026-10-31-bundles,Retain detailed configured vendor wording; all evidence retained,resolved_wording
+FGR-70F,description_template,"FortiGate Rugged 70F firewall, dual DC inputs, 125 VDC planning feed","Rugged industrial firewall, dual DC inputs",vendor-library-2026-10-31,delivery-2026-10-31-bundles,Retain detailed configured vendor wording; all evidence retained,resolved_wording

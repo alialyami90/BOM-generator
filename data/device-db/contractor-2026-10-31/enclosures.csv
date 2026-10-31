@@ -1,0 +1,2 @@
+﻿part_id,width_mm,height_mm,depth_mm,ip_rating,nema_rating,material,color,source_pdf,source_page,source_bundle,bundle_page,notes
+RITTAL-PC5386-050,800,1600,636,IP55,12,Sheet steel,RAL 7035,pdfs/Rittal_PCEnclosure_VD-EL0009-007_p337-340.pdf,2,VD-EL0009-007.pdf,338,No rack-U value inferred from enclosure height.

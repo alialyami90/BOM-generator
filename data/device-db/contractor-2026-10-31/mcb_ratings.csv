@@ -1,0 +1,1036 @@
+﻿part_id,supply_type,voltage_max_v,breaking_capacity_ka,rating_type,standard,ics_percent_icu,required_poles,voltage_min_v,source_pdf,source_page,source_bundle,bundle_page,notes
+SCHNEIDER-A9F73170,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73170,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73170,VAC,60,50,Icu,IEC/EN 60947-2,100,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73170,VAC,133,50,Icu,IEC/EN 60947-2,100,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73170,VAC,240,50,Icu,IEC/EN 60947-2,100,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74170,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74170,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74170,VAC,60,50,Icu,IEC/EN 60947-2,100,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74170,VAC,133,50,Icu,IEC/EN 60947-2,100,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74170,VAC,240,50,Icu,IEC/EN 60947-2,100,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75170,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75170,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75170,VAC,60,50,Icu,IEC/EN 60947-2,100,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75170,VAC,133,50,Icu,IEC/EN 60947-2,100,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75170,VAC,240,50,Icu,IEC/EN 60947-2,100,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73670,VAC,60,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73670,VAC,133,50,Icu,IEC/EN 60947-2,100,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73670,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74670,VAC,60,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74670,VAC,133,50,Icu,IEC/EN 60947-2,100,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74670,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75670,VAC,60,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75670,VAC,133,50,Icu,IEC/EN 60947-2,100,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75670,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73270,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73270,VAC,133,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73270,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73270,VAC,415,50,Icu,IEC/EN 60947-2,100,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73270,VAC,440,25,Icu,IEC/EN 60947-2,100,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74270,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74270,VAC,133,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74270,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74270,VAC,415,50,Icu,IEC/EN 60947-2,100,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74270,VAC,440,25,Icu,IEC/EN 60947-2,100,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75270,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75270,VAC,133,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75270,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75270,VAC,415,50,Icu,IEC/EN 60947-2,100,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75270,VAC,440,25,Icu,IEC/EN 60947-2,100,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73370,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73370,VAC,133,50,Icu,IEC/EN 60947-2,100,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73370,VAC,240,50,Icu,IEC/EN 60947-2,100,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73370,VAC,415,50,Icu,IEC/EN 60947-2,100,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73370,VAC,440,25,Icu,IEC/EN 60947-2,100,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74370,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74370,VAC,133,50,Icu,IEC/EN 60947-2,100,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74370,VAC,240,50,Icu,IEC/EN 60947-2,100,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74370,VAC,415,50,Icu,IEC/EN 60947-2,100,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74370,VAC,440,25,Icu,IEC/EN 60947-2,100,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75370,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75370,VAC,133,50,Icu,IEC/EN 60947-2,100,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75370,VAC,240,50,Icu,IEC/EN 60947-2,100,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75370,VAC,415,50,Icu,IEC/EN 60947-2,100,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75370,VAC,440,25,Icu,IEC/EN 60947-2,100,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73470,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73470,VAC,133,50,Icu,IEC/EN 60947-2,100,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73470,VAC,240,50,Icu,IEC/EN 60947-2,100,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73470,VAC,415,50,Icu,IEC/EN 60947-2,100,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73470,VAC,440,25,Icu,IEC/EN 60947-2,100,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74470,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74470,VAC,133,50,Icu,IEC/EN 60947-2,100,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74470,VAC,240,50,Icu,IEC/EN 60947-2,100,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74470,VAC,415,50,Icu,IEC/EN 60947-2,100,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74470,VAC,440,25,Icu,IEC/EN 60947-2,100,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75470,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75470,VAC,133,50,Icu,IEC/EN 60947-2,100,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75470,VAC,240,50,Icu,IEC/EN 60947-2,100,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75470,VAC,415,50,Icu,IEC/EN 60947-2,100,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75470,VAC,440,25,Icu,IEC/EN 60947-2,100,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73101,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73101,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73101,VAC,60,50,Icu,IEC/EN 60947-2,100,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73101,VAC,133,50,Icu,IEC/EN 60947-2,100,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73101,VAC,240,50,Icu,IEC/EN 60947-2,100,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74101,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74101,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74101,VAC,60,50,Icu,IEC/EN 60947-2,100,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74101,VAC,133,50,Icu,IEC/EN 60947-2,100,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74101,VAC,240,50,Icu,IEC/EN 60947-2,100,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75101,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75101,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75101,VAC,60,50,Icu,IEC/EN 60947-2,100,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75101,VAC,133,50,Icu,IEC/EN 60947-2,100,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75101,VAC,240,50,Icu,IEC/EN 60947-2,100,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73601,VAC,60,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73601,VAC,133,50,Icu,IEC/EN 60947-2,100,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73601,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74601,VAC,60,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74601,VAC,133,50,Icu,IEC/EN 60947-2,100,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74601,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75601,VAC,60,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75601,VAC,133,50,Icu,IEC/EN 60947-2,100,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75601,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73201,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73201,VAC,133,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73201,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73201,VAC,415,50,Icu,IEC/EN 60947-2,100,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73201,VAC,440,25,Icu,IEC/EN 60947-2,100,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74201,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74201,VAC,133,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74201,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74201,VAC,415,50,Icu,IEC/EN 60947-2,100,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74201,VAC,440,25,Icu,IEC/EN 60947-2,100,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75201,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75201,VAC,133,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75201,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75201,VAC,415,50,Icu,IEC/EN 60947-2,100,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75201,VAC,440,25,Icu,IEC/EN 60947-2,100,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73301,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73301,VAC,133,50,Icu,IEC/EN 60947-2,100,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73301,VAC,240,50,Icu,IEC/EN 60947-2,100,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73301,VAC,415,50,Icu,IEC/EN 60947-2,100,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73301,VAC,440,25,Icu,IEC/EN 60947-2,100,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74301,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74301,VAC,133,50,Icu,IEC/EN 60947-2,100,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74301,VAC,240,50,Icu,IEC/EN 60947-2,100,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74301,VAC,415,50,Icu,IEC/EN 60947-2,100,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74301,VAC,440,25,Icu,IEC/EN 60947-2,100,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75301,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75301,VAC,133,50,Icu,IEC/EN 60947-2,100,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75301,VAC,240,50,Icu,IEC/EN 60947-2,100,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75301,VAC,415,50,Icu,IEC/EN 60947-2,100,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75301,VAC,440,25,Icu,IEC/EN 60947-2,100,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73401,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73401,VAC,133,50,Icu,IEC/EN 60947-2,100,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73401,VAC,240,50,Icu,IEC/EN 60947-2,100,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73401,VAC,415,50,Icu,IEC/EN 60947-2,100,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73401,VAC,440,25,Icu,IEC/EN 60947-2,100,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74401,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74401,VAC,133,50,Icu,IEC/EN 60947-2,100,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74401,VAC,240,50,Icu,IEC/EN 60947-2,100,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74401,VAC,415,50,Icu,IEC/EN 60947-2,100,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74401,VAC,440,25,Icu,IEC/EN 60947-2,100,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75401,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75401,VAC,133,50,Icu,IEC/EN 60947-2,100,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75401,VAC,240,50,Icu,IEC/EN 60947-2,100,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75401,VAC,415,50,Icu,IEC/EN 60947-2,100,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75401,VAC,440,25,Icu,IEC/EN 60947-2,100,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73102,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73102,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73102,VAC,60,50,Icu,IEC/EN 60947-2,100,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73102,VAC,133,50,Icu,IEC/EN 60947-2,100,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73102,VAC,240,50,Icu,IEC/EN 60947-2,100,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74102,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74102,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74102,VAC,60,50,Icu,IEC/EN 60947-2,100,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74102,VAC,133,50,Icu,IEC/EN 60947-2,100,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74102,VAC,240,50,Icu,IEC/EN 60947-2,100,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75102,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75102,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75102,VAC,60,50,Icu,IEC/EN 60947-2,100,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75102,VAC,133,50,Icu,IEC/EN 60947-2,100,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75102,VAC,240,50,Icu,IEC/EN 60947-2,100,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73602,VAC,60,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73602,VAC,133,50,Icu,IEC/EN 60947-2,100,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73602,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74602,VAC,60,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74602,VAC,133,50,Icu,IEC/EN 60947-2,100,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74602,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75602,VAC,60,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75602,VAC,133,50,Icu,IEC/EN 60947-2,100,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75602,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73202,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73202,VAC,133,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73202,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73202,VAC,415,50,Icu,IEC/EN 60947-2,100,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73202,VAC,440,25,Icu,IEC/EN 60947-2,100,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74202,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74202,VAC,133,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74202,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74202,VAC,415,50,Icu,IEC/EN 60947-2,100,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74202,VAC,440,25,Icu,IEC/EN 60947-2,100,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75202,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75202,VAC,133,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75202,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75202,VAC,415,50,Icu,IEC/EN 60947-2,100,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75202,VAC,440,25,Icu,IEC/EN 60947-2,100,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73302,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73302,VAC,133,50,Icu,IEC/EN 60947-2,100,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73302,VAC,240,50,Icu,IEC/EN 60947-2,100,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73302,VAC,415,50,Icu,IEC/EN 60947-2,100,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73302,VAC,440,25,Icu,IEC/EN 60947-2,100,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74302,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74302,VAC,133,50,Icu,IEC/EN 60947-2,100,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74302,VAC,240,50,Icu,IEC/EN 60947-2,100,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74302,VAC,415,50,Icu,IEC/EN 60947-2,100,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74302,VAC,440,25,Icu,IEC/EN 60947-2,100,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75302,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75302,VAC,133,50,Icu,IEC/EN 60947-2,100,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75302,VAC,240,50,Icu,IEC/EN 60947-2,100,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75302,VAC,415,50,Icu,IEC/EN 60947-2,100,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75302,VAC,440,25,Icu,IEC/EN 60947-2,100,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73402,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73402,VAC,133,50,Icu,IEC/EN 60947-2,100,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73402,VAC,240,50,Icu,IEC/EN 60947-2,100,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73402,VAC,415,50,Icu,IEC/EN 60947-2,100,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73402,VAC,440,25,Icu,IEC/EN 60947-2,100,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74402,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74402,VAC,133,50,Icu,IEC/EN 60947-2,100,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74402,VAC,240,50,Icu,IEC/EN 60947-2,100,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74402,VAC,415,50,Icu,IEC/EN 60947-2,100,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74402,VAC,440,25,Icu,IEC/EN 60947-2,100,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75402,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75402,VAC,133,50,Icu,IEC/EN 60947-2,100,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75402,VAC,240,50,Icu,IEC/EN 60947-2,100,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75402,VAC,415,50,Icu,IEC/EN 60947-2,100,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75402,VAC,440,25,Icu,IEC/EN 60947-2,100,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73103,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73103,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73103,VAC,60,50,Icu,IEC/EN 60947-2,100,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73103,VAC,133,50,Icu,IEC/EN 60947-2,100,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73103,VAC,240,50,Icu,IEC/EN 60947-2,100,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74103,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74103,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74103,VAC,60,50,Icu,IEC/EN 60947-2,100,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74103,VAC,133,50,Icu,IEC/EN 60947-2,100,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74103,VAC,240,50,Icu,IEC/EN 60947-2,100,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75103,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75103,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75103,VAC,60,50,Icu,IEC/EN 60947-2,100,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75103,VAC,133,50,Icu,IEC/EN 60947-2,100,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75103,VAC,240,50,Icu,IEC/EN 60947-2,100,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73603,VAC,60,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73603,VAC,133,50,Icu,IEC/EN 60947-2,100,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73603,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74603,VAC,60,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74603,VAC,133,50,Icu,IEC/EN 60947-2,100,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74603,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75603,VAC,60,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75603,VAC,133,50,Icu,IEC/EN 60947-2,100,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75603,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73203,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73203,VAC,133,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73203,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73203,VAC,415,50,Icu,IEC/EN 60947-2,100,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73203,VAC,440,25,Icu,IEC/EN 60947-2,100,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74203,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74203,VAC,133,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74203,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74203,VAC,415,50,Icu,IEC/EN 60947-2,100,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74203,VAC,440,25,Icu,IEC/EN 60947-2,100,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75203,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75203,VAC,133,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75203,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75203,VAC,415,50,Icu,IEC/EN 60947-2,100,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75203,VAC,440,25,Icu,IEC/EN 60947-2,100,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73303,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73303,VAC,133,50,Icu,IEC/EN 60947-2,100,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73303,VAC,240,50,Icu,IEC/EN 60947-2,100,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73303,VAC,415,50,Icu,IEC/EN 60947-2,100,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73303,VAC,440,25,Icu,IEC/EN 60947-2,100,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74303,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74303,VAC,133,50,Icu,IEC/EN 60947-2,100,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74303,VAC,240,50,Icu,IEC/EN 60947-2,100,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74303,VAC,415,50,Icu,IEC/EN 60947-2,100,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74303,VAC,440,25,Icu,IEC/EN 60947-2,100,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75303,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75303,VAC,133,50,Icu,IEC/EN 60947-2,100,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75303,VAC,240,50,Icu,IEC/EN 60947-2,100,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75303,VAC,415,50,Icu,IEC/EN 60947-2,100,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75303,VAC,440,25,Icu,IEC/EN 60947-2,100,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73403,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73403,VAC,133,50,Icu,IEC/EN 60947-2,100,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73403,VAC,240,50,Icu,IEC/EN 60947-2,100,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73403,VAC,415,50,Icu,IEC/EN 60947-2,100,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73403,VAC,440,25,Icu,IEC/EN 60947-2,100,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74403,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74403,VAC,133,50,Icu,IEC/EN 60947-2,100,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74403,VAC,240,50,Icu,IEC/EN 60947-2,100,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74403,VAC,415,50,Icu,IEC/EN 60947-2,100,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74403,VAC,440,25,Icu,IEC/EN 60947-2,100,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75403,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75403,VAC,133,50,Icu,IEC/EN 60947-2,100,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75403,VAC,240,50,Icu,IEC/EN 60947-2,100,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75403,VAC,415,50,Icu,IEC/EN 60947-2,100,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75403,VAC,440,25,Icu,IEC/EN 60947-2,100,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73104,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73104,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73104,VAC,60,50,Icu,IEC/EN 60947-2,100,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73104,VAC,133,50,Icu,IEC/EN 60947-2,100,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73104,VAC,240,50,Icu,IEC/EN 60947-2,100,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74104,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74104,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74104,VAC,60,50,Icu,IEC/EN 60947-2,100,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74104,VAC,133,50,Icu,IEC/EN 60947-2,100,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74104,VAC,240,50,Icu,IEC/EN 60947-2,100,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75104,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75104,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75104,VAC,60,50,Icu,IEC/EN 60947-2,100,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75104,VAC,133,50,Icu,IEC/EN 60947-2,100,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75104,VAC,240,50,Icu,IEC/EN 60947-2,100,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73604,VAC,60,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73604,VAC,133,50,Icu,IEC/EN 60947-2,100,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73604,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74604,VAC,60,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74604,VAC,133,50,Icu,IEC/EN 60947-2,100,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74604,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75604,VAC,60,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75604,VAC,133,50,Icu,IEC/EN 60947-2,100,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75604,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73204,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73204,VAC,133,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73204,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73204,VAC,415,50,Icu,IEC/EN 60947-2,100,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73204,VAC,440,25,Icu,IEC/EN 60947-2,100,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74204,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74204,VAC,133,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74204,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74204,VAC,415,50,Icu,IEC/EN 60947-2,100,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74204,VAC,440,25,Icu,IEC/EN 60947-2,100,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75204,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75204,VAC,133,50,Icu,IEC/EN 60947-2,100,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75204,VAC,240,50,Icu,IEC/EN 60947-2,100,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75204,VAC,415,50,Icu,IEC/EN 60947-2,100,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75204,VAC,440,25,Icu,IEC/EN 60947-2,100,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73304,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73304,VAC,133,50,Icu,IEC/EN 60947-2,100,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73304,VAC,240,50,Icu,IEC/EN 60947-2,100,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73304,VAC,415,50,Icu,IEC/EN 60947-2,100,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73304,VAC,440,25,Icu,IEC/EN 60947-2,100,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74304,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74304,VAC,133,50,Icu,IEC/EN 60947-2,100,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74304,VAC,240,50,Icu,IEC/EN 60947-2,100,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74304,VAC,415,50,Icu,IEC/EN 60947-2,100,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74304,VAC,440,25,Icu,IEC/EN 60947-2,100,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75304,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75304,VAC,133,50,Icu,IEC/EN 60947-2,100,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75304,VAC,240,50,Icu,IEC/EN 60947-2,100,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75304,VAC,415,50,Icu,IEC/EN 60947-2,100,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75304,VAC,440,25,Icu,IEC/EN 60947-2,100,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73404,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73404,VAC,133,50,Icu,IEC/EN 60947-2,100,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73404,VAC,240,50,Icu,IEC/EN 60947-2,100,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73404,VAC,415,50,Icu,IEC/EN 60947-2,100,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73404,VAC,440,25,Icu,IEC/EN 60947-2,100,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74404,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74404,VAC,133,50,Icu,IEC/EN 60947-2,100,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74404,VAC,240,50,Icu,IEC/EN 60947-2,100,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74404,VAC,415,50,Icu,IEC/EN 60947-2,100,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74404,VAC,440,25,Icu,IEC/EN 60947-2,100,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75404,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75404,VAC,133,50,Icu,IEC/EN 60947-2,100,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75404,VAC,240,50,Icu,IEC/EN 60947-2,100,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75404,VAC,415,50,Icu,IEC/EN 60947-2,100,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75404,VAC,440,25,Icu,IEC/EN 60947-2,100,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73106,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73106,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73106,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73106,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73106,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74106,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74106,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74106,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74106,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74106,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75106,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75106,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75106,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75106,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75106,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73606,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73606,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73606,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74606,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74606,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74606,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75606,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75606,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75606,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73206,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73206,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73206,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73206,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73206,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74206,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74206,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74206,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74206,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74206,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75206,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75206,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75206,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75206,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75206,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73306,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73306,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73306,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73306,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73306,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74306,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74306,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74306,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74306,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74306,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75306,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75306,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75306,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75306,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75306,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73406,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73406,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73406,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73406,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73406,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74406,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74406,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74406,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74406,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74406,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75406,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75406,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75406,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75406,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75406,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73110,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73110,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73110,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73110,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73110,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74110,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74110,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74110,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74110,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74110,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75110,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75110,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75110,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75110,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75110,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73610,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73610,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73610,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74610,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74610,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74610,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75610,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75610,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75610,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73210,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73210,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73210,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73210,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73210,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74210,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74210,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74210,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74210,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74210,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75210,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75210,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75210,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75210,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75210,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73310,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73310,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73310,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73310,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73310,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74310,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74310,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74310,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74310,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74310,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75310,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75310,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75310,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75310,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75310,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73410,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73410,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73410,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73410,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73410,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74410,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74410,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74410,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74410,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74410,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75410,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75410,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75410,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75410,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75410,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73113,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73113,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73113,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73113,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73113,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74113,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74113,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74113,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74113,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74113,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75113,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75113,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75113,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75113,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75113,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73613,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73613,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73613,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74613,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74613,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74613,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75613,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75613,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75613,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73213,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73213,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73213,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73213,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73213,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74213,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74213,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74213,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74213,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74213,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75213,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75213,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75213,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75213,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75213,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73313,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73313,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73313,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73313,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73313,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74313,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74313,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74313,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74313,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74313,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75313,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75313,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75313,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75313,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75313,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73413,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73413,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73413,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73413,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73413,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74413,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74413,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74413,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74413,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74413,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75413,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75413,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75413,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75413,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75413,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73116,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73116,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73116,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73116,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73116,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74116,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74116,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74116,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74116,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74116,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75116,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75116,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75116,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75116,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75116,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73616,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73616,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73616,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74616,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74616,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74616,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75616,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75616,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75616,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73216,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73216,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73216,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73216,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73216,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74216,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74216,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74216,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74216,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74216,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75216,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75216,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75216,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75216,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75216,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73316,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73316,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73316,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73316,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73316,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74316,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74316,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74316,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74316,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74316,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75316,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75316,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75316,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75316,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75316,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73416,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73416,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73416,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73416,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73416,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74416,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74416,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74416,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74416,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74416,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75416,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75416,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75416,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75416,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75416,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73120,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73120,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73120,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73120,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73120,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74120,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74120,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74120,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74120,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74120,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75120,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75120,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75120,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75120,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75120,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73620,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73620,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73620,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74620,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74620,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74620,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75620,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75620,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75620,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73220,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73220,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73220,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73220,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73220,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74220,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74220,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74220,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74220,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74220,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75220,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75220,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75220,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75220,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75220,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73320,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73320,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73320,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73320,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73320,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74320,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74320,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74320,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74320,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74320,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75320,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75320,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75320,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75320,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75320,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73420,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73420,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73420,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73420,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73420,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74420,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74420,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74420,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74420,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74420,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75420,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75420,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75420,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75420,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75420,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73125,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73125,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73125,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73125,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73125,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74125,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74125,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74125,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74125,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74125,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75125,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75125,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75125,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75125,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75125,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73625,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73625,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73625,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74625,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74625,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74625,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75625,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75625,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75625,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73225,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73225,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73225,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73225,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73225,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74225,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74225,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74225,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74225,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74225,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75225,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75225,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75225,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75225,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75225,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73325,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73325,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73325,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73325,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73325,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74325,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74325,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74325,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74325,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74325,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75325,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75325,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75325,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75325,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75325,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73425,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73425,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73425,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73425,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73425,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74425,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74425,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74425,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74425,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74425,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75425,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75425,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75425,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75425,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75425,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73132,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73132,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73132,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73132,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73132,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74132,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74132,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74132,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74132,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74132,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75132,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75132,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75132,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75132,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75132,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73632,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73632,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73632,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74632,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74632,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74632,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75632,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75632,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75632,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73232,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73232,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73232,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73232,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73232,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74232,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74232,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74232,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74232,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74232,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75232,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75232,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75232,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75232,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75232,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73332,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73332,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73332,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73332,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73332,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74332,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74332,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74332,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74332,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74332,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75332,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75332,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75332,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75332,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75332,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73432,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73432,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73432,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73432,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73432,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74432,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74432,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74432,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74432,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74432,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75432,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75432,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75432,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75432,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75432,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73140,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73140,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73140,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73140,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73140,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74140,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74140,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74140,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74140,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74140,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75140,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75140,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75140,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75140,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75140,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73640,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73640,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73640,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74640,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74640,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74640,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75640,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75640,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75640,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73240,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73240,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73240,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73240,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73240,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74240,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74240,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74240,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74240,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74240,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75240,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75240,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75240,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75240,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75240,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73340,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73340,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73340,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73340,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73340,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74340,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74340,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74340,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74340,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74340,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75340,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75340,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75340,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75340,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75340,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73440,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73440,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73440,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73440,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73440,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74440,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74440,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74440,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74440,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74440,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75440,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75440,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75440,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75440,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75440,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73150,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73150,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73150,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73150,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73150,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74150,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74150,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74150,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74150,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74150,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75150,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75150,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75150,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75150,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75150,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73650,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73650,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73650,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74650,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74650,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74650,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75650,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75650,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75650,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73250,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73250,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73250,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73250,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73250,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74250,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74250,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74250,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74250,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74250,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75250,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75250,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75250,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75250,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75250,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73350,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73350,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73350,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73350,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73350,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74350,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74350,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74350,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74350,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74350,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75350,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75350,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75350,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75350,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75350,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73450,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73450,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73450,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73450,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73450,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74450,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74450,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74450,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74450,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74450,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75450,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75450,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75450,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75450,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75450,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73163,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73163,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73163,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73163,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73163,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74163,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74163,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74163,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74163,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74163,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75163,VDC,60,15,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75163,VDC,72,10,Icu,IEC/EN 60947-2,100,1,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75163,VAC,60,36,Icu,IEC/EN 60947-2,75,1,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75163,VAC,133,20,Icu,IEC/EN 60947-2,75,1,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75163,VAC,240,10,Icu,IEC/EN 60947-2,75,1,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73663,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73663,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73663,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74663,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74663,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74663,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75663,VAC,60,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75663,VAC,133,20,Icu,IEC/EN 60947-2,75,2,100,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75663,VAC,240,10,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73263,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73263,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73263,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73263,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73263,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74263,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74263,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74263,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74263,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74263,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75263,VDC,125,10,Icu,IEC/EN 60947-2,100,2,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75263,VAC,133,36,Icu,IEC/EN 60947-2,75,2,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75263,VAC,240,20,Icu,IEC/EN 60947-2,75,2,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75263,VAC,415,10,Icu,IEC/EN 60947-2,75,2,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75263,VAC,440,6,Icu,IEC/EN 60947-2,75,2,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73363,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73363,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73363,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73363,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73363,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74363,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74363,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74363,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74363,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74363,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75363,VDC,180,10,Icu,IEC/EN 60947-2,100,3,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75363,VAC,133,36,Icu,IEC/EN 60947-2,75,3,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75363,VAC,240,20,Icu,IEC/EN 60947-2,75,3,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75363,VAC,415,10,Icu,IEC/EN 60947-2,75,3,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75363,VAC,440,6,Icu,IEC/EN 60947-2,75,3,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73463,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F73463,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73463,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73463,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F73463,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74463,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F74463,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74463,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74463,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F74463,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75463,VDC,250,10,Icu,IEC/EN 60947-2,100,4,,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,Series pole arrangement and application must follow manufacturer wiring instructions; not automatic approval for a station battery circuit.
+SCHNEIDER-A9F75463,VAC,133,36,Icu,IEC/EN 60947-2,75,4,12,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75463,VAC,240,20,Icu,IEC/EN 60947-2,75,4,220,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75463,VAC,415,10,Icu,IEC/EN 60947-2,75,4,380,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,
+SCHNEIDER-A9F75463,VAC,440,6,Icu,IEC/EN 60947-2,75,4,440,pdfs/Schneider Electric_iC60N_VD-EL0009-007_p364-366.pdf,1,VD-EL0009-007.pdf,364,

@@ -1,0 +1,31 @@
+﻿part_id,seq,count,speed,media,kind,role,source_pdf,source_page,source_bundle,bundle_page,notes
+FG-100F,1,15,1G,RJ45,fixed,data/WAN/DMZ,pdfs/Fortinet_FG100F-2023_VD-EL0009-007_p147-156.pdf,7,VD-EL0009-007.pdf,153,
+FG-100F,2,1,1G,RJ45,fixed,management,pdfs/Fortinet_FG100F-2023_VD-EL0009-007_p147-156.pdf,7,VD-EL0009-007.pdf,153,
+FG-100F,3,2,1G,RJ45,fixed,HA,pdfs/Fortinet_FG100F-2023_VD-EL0009-007_p147-156.pdf,7,VD-EL0009-007.pdf,153,
+FG-100F,4,4,1G,,sfp_slot,shared data,pdfs/Fortinet_FG100F-2023_VD-EL0009-007_p147-156.pdf,7,VD-EL0009-007.pdf,153,Planning layout chooses SFP side of four RJ45/SFP pairs. Matching copper side must not be counted again; optics not included.
+FG-100F,5,2,10G,,sfp_slot,FortiLink/data,pdfs/Fortinet_FG100F-2023_VD-EL0009-007_p147-156.pdf,7,VD-EL0009-007.pdf,153,SFP+ cages; transceivers not included.
+FG-101F,1,15,1G,RJ45,fixed,data/WAN/DMZ,pdfs/Fortinet_FG100F-2023_VD-EL0009-007_p147-156.pdf,7,VD-EL0009-007.pdf,153,
+FG-101F,2,1,1G,RJ45,fixed,management,pdfs/Fortinet_FG100F-2023_VD-EL0009-007_p147-156.pdf,7,VD-EL0009-007.pdf,153,
+FG-101F,3,2,1G,RJ45,fixed,HA,pdfs/Fortinet_FG100F-2023_VD-EL0009-007_p147-156.pdf,7,VD-EL0009-007.pdf,153,
+FG-101F,4,4,1G,,sfp_slot,shared data,pdfs/Fortinet_FG100F-2023_VD-EL0009-007_p147-156.pdf,7,VD-EL0009-007.pdf,153,Planning layout chooses SFP side of four RJ45/SFP pairs. Matching copper side must not be counted again; optics not included.
+FG-101F,5,2,10G,,sfp_slot,FortiLink/data,pdfs/Fortinet_FG100F-2023_VD-EL0009-007_p147-156.pdf,7,VD-EL0009-007.pdf,153,SFP+ cages; transceivers not included.
+FG-600F,1,16,1G,RJ45,fixed,data,pdfs/Fortinet_FG600F_VD-EL0009-007_p157-166.pdf,7,VD-EL0009-007.pdf,163,
+FG-600F,2,1,1G,RJ45,fixed,management,pdfs/Fortinet_FG600F_VD-EL0009-007_p157-166.pdf,7,VD-EL0009-007.pdf,163,
+FG-600F,3,1,1G,RJ45,fixed,HA,pdfs/Fortinet_FG600F_VD-EL0009-007_p157-166.pdf,7,VD-EL0009-007.pdf,163,
+FG-600F,4,8,1G,,sfp_slot,data,pdfs/Fortinet_FG600F_VD-EL0009-007_p157-166.pdf,7,VD-EL0009-007.pdf,163,Cage maximum speed. Only two 1GE SX transceivers are included; other optics require selection.
+FG-600F,5,4,10G,,sfp_slot,data,pdfs/Fortinet_FG600F_VD-EL0009-007_p157-166.pdf,7,VD-EL0009-007.pdf,163,Cage maximum speed. Only two 1GE SX transceivers are included; other optics require selection.
+FG-600F,6,4,25G,,sfp_slot,data,pdfs/Fortinet_FG600F_VD-EL0009-007_p157-166.pdf,7,VD-EL0009-007.pdf,163,Cage maximum speed. Only two 1GE SX transceivers are included; other optics require selection.
+FG-601F,1,16,1G,RJ45,fixed,data,pdfs/Fortinet_FG600F_VD-EL0009-007_p157-166.pdf,7,VD-EL0009-007.pdf,163,
+FG-601F,2,1,1G,RJ45,fixed,management,pdfs/Fortinet_FG600F_VD-EL0009-007_p157-166.pdf,7,VD-EL0009-007.pdf,163,
+FG-601F,3,1,1G,RJ45,fixed,HA,pdfs/Fortinet_FG600F_VD-EL0009-007_p157-166.pdf,7,VD-EL0009-007.pdf,163,
+FG-601F,4,8,1G,,sfp_slot,data,pdfs/Fortinet_FG600F_VD-EL0009-007_p157-166.pdf,7,VD-EL0009-007.pdf,163,Cage maximum speed. Only two 1GE SX transceivers are included; other optics require selection.
+FG-601F,5,4,10G,,sfp_slot,data,pdfs/Fortinet_FG600F_VD-EL0009-007_p157-166.pdf,7,VD-EL0009-007.pdf,163,Cage maximum speed. Only two 1GE SX transceivers are included; other optics require selection.
+FG-601F,6,4,25G,,sfp_slot,data,pdfs/Fortinet_FG600F_VD-EL0009-007_p157-166.pdf,7,VD-EL0009-007.pdf,163,Cage maximum speed. Only two 1GE SX transceivers are included; other optics require selection.
+FGR-60F,1,4,1G,RJ45,fixed,data,pdfs/Fortinet_FGR_VD-EL0009-007_p247-261.pdf,9,VD-EL0009-007.pdf,255,
+FGR-60F,2,2,1G,,sfp_slot,data,pdfs/Fortinet_FGR_VD-EL0009-007_p247-261.pdf,9,VD-EL0009-007.pdf,255,60F: SFP side selected for two shared RJ45/SFP pairs; 70F: dedicated SFP slots. Transceivers not included.
+FGR-60F-3G4G,1,4,1G,RJ45,fixed,data,pdfs/Fortinet_FGR_VD-EL0009-007_p247-261.pdf,9,VD-EL0009-007.pdf,255,
+FGR-60F-3G4G,2,2,1G,,sfp_slot,data,pdfs/Fortinet_FGR_VD-EL0009-007_p247-261.pdf,9,VD-EL0009-007.pdf,255,60F: SFP side selected for two shared RJ45/SFP pairs; 70F: dedicated SFP slots. Transceivers not included.
+FGR-70F,1,6,1G,RJ45,fixed,data,pdfs/Fortinet_FGR_VD-EL0009-007_p247-261.pdf,9,VD-EL0009-007.pdf,255,
+FGR-70F,2,2,1G,,sfp_slot,data,pdfs/Fortinet_FGR_VD-EL0009-007_p247-261.pdf,9,VD-EL0009-007.pdf,255,60F: SFP side selected for two shared RJ45/SFP pairs; 70F: dedicated SFP slots. Transceivers not included.
+FGR-70F-3G4G,1,6,1G,RJ45,fixed,data,pdfs/Fortinet_FGR_VD-EL0009-007_p247-261.pdf,9,VD-EL0009-007.pdf,255,
+FGR-70F-3G4G,2,2,1G,,sfp_slot,data,pdfs/Fortinet_FGR_VD-EL0009-007_p247-261.pdf,9,VD-EL0009-007.pdf,255,60F: SFP side selected for two shared RJ45/SFP pairs; 70F: dedicated SFP slots. Transceivers not included.

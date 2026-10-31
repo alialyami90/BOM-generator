@@ -1,0 +1,2 @@
+﻿part_id,ac_nominal_min_v,ac_nominal_max_v,dc_nominal_v,tolerance_pct,protective_circuit,indicator,source_pdf,source_page,source_bundle,bundle_page,notes
+IPR-SUPP-2900944,120,230,110,20,Varistor,Yellow LED,pdfs/Phoenix Contact_Suppressor_VD-EL0009-007_p291-295.pdf,2,VD-EL0009-007.pdf,292,

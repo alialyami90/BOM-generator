@@ -1,0 +1,3 @@
+﻿part_id,rated_ac_v,rated_dc_v,rated_current_a,width_mm,height_mm,depth_mm,cable_length_mm,conductor_mm2,ip_rating,gangs,backbox_min_depth_mm,standard,pack_qty,source_pdf,source_page,source_bundle,bundle_page,notes
+RITTAL-SZ2500-470,230,24,1,31,78,30,800,0.75,IP40,,,,,pdfs/Rittal_DoorSwitch_VD-EL0009-007_p269-271.pdf,2,VD-EL0009-007.pdf,270,Separate component of existing SZ2500-LAMP assembly. Bundle does not contain SZ 2500.210 lamp specifications.
+LEGRAND-730076,250,,13,146,86,,,,,2,25,BS 1363 Part 2,5,pdfs/Legrand_Socket_VD-EL0009-007_p367-367.pdf,1,VD-EL0009-007.pdf,367,"13 A is a socket rating, not a connected load or per-gang load allowance."

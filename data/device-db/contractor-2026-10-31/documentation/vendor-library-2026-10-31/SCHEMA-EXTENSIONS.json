@@ -1,0 +1,20 @@
+{
+  "device_ports.speed": {
+    "original": [
+      "10M",
+      "100M",
+      "1G",
+      "10G"
+    ],
+    "add": [
+      "2.5G",
+      "5G",
+      "25G"
+    ],
+    "affected_parts": [
+      "FG-401G",
+      "FG-701G"
+    ],
+    "required_before_import": true
+  }
+}

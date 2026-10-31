@@ -1,0 +1,23 @@
+Vendor device library — research delivery, 2026-10-31
+
+Scope: 11 requested device families. IE-9010E corrected to IE-9300 by the user; a documented IE-9320 configuration is selected. IE-4010E interpreted as the IE-4010 series. Austin Hughes and Dell skipped at the user's request.
+
+IMPORT STATUS
+The three CSV headers match the supplied template. This is a research delivery, not an approved power-design or procurement release. The actual generator was not available for an import dry run.
+device_ports.csv preserves real maximum rates. The original importer must accept 2.5G, 5G and 25G in addition to 10M/100M/1G/10G before importing FG-401G/FG-701G. No port was downgraded to fit the old enumeration. SCHEMA-EXTENSIONS.json records the change.
+
+PORT INVENTORY
+Every device has all Ethernet port groups for the selected configuration. All are assumed available, as requested. Combo copper/fiber interfaces are counted once, with fiber selected. Dedicated management/HA ports are included and identified in sources. USB/serial consoles are excluded. SFP, SFP+ and SFP28 cages remain sfp_slot with blank media because the link distance/fiber type was not supplied. Optical reach and transceiver procurement are separate choices. No physical interface is counted at two rates.
+
+SOURCE AND POWER LIMITATIONS
+Every populated device value and every port group has a file/page citation. Unknown numeric values are blank with explicit not_given evidence. Engineering-owned fields and SFP media are intentionally blank, not missing research.
+Inrush is not published for most models. The two Cisco industrial switches use the identical PWR-RGD-AC-DC-H supply documented as LESS THAN 30 A at 125 VDC per feed. The numeric 30 represents that upper bound; duration is not specified.
+IE-9300's published 73 W is indicative, not a guaranteed fully populated maximum; maximum unit_power_w remains blank with an explanatory source. Because blank existing-part cells do not overwrite imported values, manually review any old power allowance for RST2228-L2.CISCO-MID.
+C9300 uses one AC supply and a conservative 395 W published PSU input envelope, not its 350 W output rating or 99 W measured traffic consumption. IE-4010's 70 W excludes PoE; all data ports remain available with PoE disabled.
+FGR-60F and FGR-70F support 12–125 VDC. A 125 V nominal battery system can exceed 125 V while charging: verify actual feed voltage or provide suitable regulation. Do not assume a 125 V upper operating limit tolerates station charging voltage.
+power_supplies=0 for AC-fed models follows the template's DC-feed counting convention, even for models with two physical AC supplies.
+Cisco composite order configurations join individually verified component SKUs; exact_part_seen=false for the combined selection. Siemens fully populated order code is constructed from its official ordering pattern and is also false.
+The Siemens selection is a new 28-port variant; it does not silently replace the existing G00 (empty sixth slot) configuration. The IE-9300 configuration preserves the matching existing RST2228-L2.CISCO-MID key/group/tier. Other devices use their model/SKU keys.
+FG-70F's archived vendor-authored datasheet may use a distributor mirror where Fortinet's current series URL no longer includes FG-70F. Its exact provenance is retained in sources; FG-71F specifications are not substituted.
+
+See CONFIGURATION-NOTES.txt for each device, citations in sources.csv, and original PDFs in pdfs/.

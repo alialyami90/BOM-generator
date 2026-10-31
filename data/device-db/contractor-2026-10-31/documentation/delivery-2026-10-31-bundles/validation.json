@@ -1,0 +1,19 @@
+{
+  "checks": [
+    "All saved CSV values and headers match the prepared typed records; templates are header-only.",
+    "Every populated device/technical field has evidence; all PDF page pointers and SHA256 hashes resolve.",
+    "All 485 original pages accounted for: 479 extracted, 3 cover/index, 3 duplicate trailing clock pages.",
+    "All 420 unique Hager catalogue rows and 225 Schneider combinations captured; KVM SKU boundaries and firewall combo-port counts checked.",
+    "Contact inrush, fan frequency variants, modular burden, and PSU capacities are kept separate from configured unit loads."
+  ],
+  "devices": 958,
+  "new_to_supplied_lists": 952,
+  "existing_worklist_rows_enriched": 6,
+  "templates": 28,
+  "technical_templates": 25,
+  "datasheets": 40,
+  "pages": 485,
+  "mcbs": 645,
+  "full_library_comparison": "not available",
+  "actual_bom_import": "not run; application/importer not provided"
+}

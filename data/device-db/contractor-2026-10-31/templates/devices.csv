@@ -1,0 +1,1 @@
+﻿part_id,category,make,model,ordering_code,description_template,tag_type,purdue_level,tag_pattern,supply_type,voltage_v,unit_power_w,load_type,power_supplies,min_branch_mcb_a,alarm_on_branch_mcb,hwio_points,di_inputs,cores,height_u,excluded_from_power,alt_group,tier,inrush_a,inrush_ms,input_v_min,input_v_max
