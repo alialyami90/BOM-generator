@@ -8,8 +8,10 @@ from typing import Any
 import pytest
 
 from bomgen.app import api
+from bomgen.io.yaml_source import read_yaml
 
 EXAMPLES = Path(__file__).parents[3] / "examples"
+LIBRARY = read_yaml(EXAMPLES / "project.yaml").data["library"]  # what the example asks for
 EXAMPLE_ID = "jfgp2-pkg3"
 EXAMPLE_NAME = "JAFURAH JFGP2 PKG.3 UTILITIES, SULFUR and INTERCONNECTING SYSTEMS"
 
@@ -83,8 +85,8 @@ def test_projects_in_the_workspace_are_listed_with_their_substations(
     assert project["id"] == EXAMPLE_ID
     assert project["name"] == EXAMPLE_NAME
     assert project["file"] == str(example)
-    assert project["library"]["name"] == "psa-devices"
-    assert project["library"]["version"] == "1.3.0"
+    assert project["library"]["name"] == LIBRARY["name"]
+    assert project["library"]["version"] == LIBRARY["version"]
     assert [(s["id"], s["panels"]) for s in project["substations"]] == [("gis01", 4)]
     assert project["status"] == {"level": "ok", "text": "Ready", "errors": 0}
 
@@ -217,7 +219,7 @@ def test_back_up_now_then_list_backups(app: api.Api, example: Path) -> None:
     (backup,) = ok(app.list_backups(str(example)))
     assert backup["path"] == saved["path"]
     assert backup["project_id"] == EXAMPLE_ID
-    assert backup["library_version"] == "1.3.0"
+    assert backup["library_version"] == LIBRARY["version"]
     assert backup["size"] > 0
     assert backup["problem"] is None
 

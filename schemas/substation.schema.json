@@ -1146,6 +1146,17 @@
             "integer"
           ]
         },
+        "nameplates": {
+          "default": "Nameplates",
+          "maxLength": 31,
+          "minLength": 1,
+          "pattern": "^(?!')(?:[^\\[\\]:*?/\\\\']|'(?!$))*$",
+          "title": "Nameplates",
+          "type": [
+            "string",
+            "integer"
+          ]
+        },
         "power_consumption": {
           "default": "Power Consumption",
           "maxLength": 31,

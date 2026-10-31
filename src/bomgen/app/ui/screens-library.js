@@ -148,7 +148,7 @@
   const firstLine = (text) => String(text || '').split('\n')[0];
   const ROLES = {
     lamp: 'Cabinet lamp', door_switch: 'Door switch', fan: 'Fan', vent_filter: 'Vent filter', thermostat: 'Thermostat', ipr_kit: 'IPR kit',
-    change_over_diode_negative: 'Change-over diode, negative', change_over_diode_positive: 'Change-over diode, positive', socket: 'Socket'
+    change_over_diode_negative: 'Change-over diode, negative', change_over_diode_positive: 'Change-over diode, positive', socket: 'Socket', nameplate: 'Device nameplate'
   };
   const withRecord = (e) => {
     const r = (e.record && LIB.overview.records[e.record]) || null;

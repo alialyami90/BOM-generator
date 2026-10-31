@@ -37,6 +37,7 @@ _FILE_NAME_FORBIDDEN = set('<>:"/\\|?*')
 
 class SheetNames(InputModel):
     loose_material: ExcelSheetName = "Loose Material"  # ADR 0020
+    nameplates: ExcelSheetName = "Nameplates"  # ADR 0026
     power_consumption: ExcelSheetName = "Power Consumption"
     heat_dissipation: ExcelSheetName = "Heat Dissipation"
     heat_calculations: ExcelSheetName = "Heat Calculations"

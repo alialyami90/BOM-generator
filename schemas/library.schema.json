@@ -689,6 +689,17 @@
         "lamp": {
           "$ref": "#/$defs/HousekeepingRef"
         },
+        "nameplate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HousekeepingRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "socket": {
           "$ref": "#/$defs/SocketRef"
         },
@@ -753,6 +764,17 @@
           ],
           "default": null,
           "title": "Name"
+        },
+        "nameplate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HousekeepingRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "socket": {
           "$ref": "#/$defs/SocketRef"

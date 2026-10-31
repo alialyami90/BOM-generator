@@ -83,3 +83,11 @@ def _range(units: tuple[str, ...]) -> str:
 def without_prefix(tag: str, prefix: str) -> str:
     """The tag as written inside descriptions and SFP rows: no ``<PANEL>-`` prefix."""
     return tag.removeprefix(f"{prefix}-")
+
+
+def short_tag(unit_tag: str | None, device: DeviceType, prefix: str) -> str:
+    """A unit as MCB rows and nameplates name it: no panel prefix, underscores; an
+    untagged unit is named by its model."""
+    if unit_tag is None:
+        return device.model or device.part_id
+    return without_prefix(unit_tag, prefix).replace("-", "_")
