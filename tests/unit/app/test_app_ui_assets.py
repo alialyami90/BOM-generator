@@ -592,3 +592,9 @@ def test_a_category_with_more_than_12_parts_opens_the_device_picker() -> None:
     assert "No device matches. Check the spelling, or install a library that has it." in js
     # the pick goes through the same change handlers as the select it replaces
     assert "dispatchEvent(new Event('change', { bubbles: true }))" in js
+
+
+def test_device_preview_shows_the_ac_branch_mcb_like_any_other() -> None:
+    """ADR 0025: AC units have their own branch MCB, so no AC-only dash."""
+    js = (UI_DIR / "screens-device-preview.js").read_text(encoding="utf-8")
+    assert "AC devices have no branch MCB" not in js
