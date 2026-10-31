@@ -768,6 +768,15 @@ def test_a_kvm_pinned_by_top_u_ignores_waist_height() -> None:
     assert tops(panel) == {"a": 32, "kvm": 25}
 
 
+def test_an_overflowing_panel_places_what_fits() -> None:
+    units = [u(f"t{i}", 1, NONE, h=2, rank=i) for i in range(3)]
+    placement = PanelFill(1, units).placement(LayoutRules(capacity_u=5, blank_plate_u=1))
+    assert {x.device: top for x, top in placement.tops.items()} == {"t0": 5, "t1": 2}
+    assert [x.device for x in placement.unplaced] == ["t2"]
+    assert (placement.used_u, placement.overflow_u) == (5, 2)
+    assert PanelFill(1, units).place(LayoutRules(capacity_u=5, blank_plate_u=1)) is None
+
+
 def test_a_panel_too_short_for_waist_height_is_an_error() -> None:
     rules = LayoutRules(capacity_u=16, blank_plate_u=1, waist_u=18)
     layout = fill([kvm(rank=0)], rules)

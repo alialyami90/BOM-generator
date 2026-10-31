@@ -156,6 +156,14 @@ def _stack_order(unit: Unit) -> tuple[int, int, str, int]:
     return (unit.priority, *_order(unit))
 
 
+@dataclass(frozen=True)
+class Placement:
+    tops: dict[Unit, int]  # placed rack units
+    unplaced: list[Unit]  # rack units that do not fit, in stack order
+    used_u: int  # placed blocks and the blank plates between them
+    overflow_u: int  # the unplaced units' blocks
+
+
 @dataclass
 class PanelFill:
     number: int
@@ -193,7 +201,12 @@ class PanelFill:
         return trial.place(rules) is not None
 
     def place(self, rules: LayoutRules) -> dict[Unit, int] | None:
-        """Each rack unit's top U (U1 at the bottom), or None when the stack does not fit.
+        """Each rack unit's top U (U1 at the bottom), or None when the stack does not fit."""
+        placement = self.placement(rules)
+        return None if placement.unplaced else placement.tops
+
+    def placement(self, rules: LayoutRules) -> Placement:
+        """Each rack unit's top U (U1 at the bottom), and the units that do not fit.
 
         Units pinned by top U sit there, and unpinned KVM and console units are anchored
         with the first one's bottom edge at ``waist_u``. The other units fill from the top
@@ -201,17 +214,25 @@ class PanelFill:
         its clearance (ADR 0013, amended M21 and M24).
         """
         tops = self.blocks(rules)
-        top = rules.capacity_u
+        unplaced: list[Unit] = []
+        cursor = rules.capacity_u
         for unit in self.stack():
             if unit.block_u == 0 or unit in tops:
                 continue
-            top = _free_top(unit, top, self.blocks(rules), rules)
+            top = _free_top(unit, cursor, self.blocks(rules), rules)
             bottom = top - unit.block_u + 1
             if bottom < 1:
-                return None
+                unplaced.append(unit)
+                continue
             tops[unit] = top
-            top = bottom - 1 - _clearance(unit, rules)
-        return tops
+            cursor = bottom - 1 - _clearance(unit, rules)
+        placed = [x for x in self.stack() if x in tops]
+        return Placement(
+            tops,
+            unplaced,
+            used_u(placed, rules.blank_plate_u),
+            sum(x.block_u for x in unplaced),
+        )
 
     def blocks(self, rules: LayoutRules) -> dict[Unit, int]:
         """The units placed before the fill: top U pins, then the waist anchor."""
