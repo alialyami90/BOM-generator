@@ -11,6 +11,7 @@ from bomgen.engine.layout import (
     Layout,
     LayoutResult,
     LayoutRules,
+    PanelFill,
     Unit,
     auto_layout,
     blank_plates,
@@ -614,3 +615,27 @@ def test_an_l1_override_applies_to_the_sized_switch(example: LoadedSubstation) -
     assert l1_rows
     assert set(l1_rows) == {"RST2228-L1-24MM+l1"}
     assert result.plan.l1_part_id == "RST2228-L1-24MM+l1"
+
+
+def test_time_server_stacks_above_network_in_a_panel() -> None:
+    gw = replace(u("gw", 1, NONE, rank=0), priority=2)
+    gps = replace(u("gps", 1, NONE, rank=1), priority=1)
+    assert [x.device for x in PanelFill(1, [gw, gps]).stack()] == ["gps", "gw"]
+
+
+def test_priority_ties_keep_equipment_order() -> None:
+    late = replace(u("late", 1, NONE, rank=1), priority=2)
+    early = replace(u("early", 1, NONE, rank=0), priority=2)
+    assert [x.device for x in PanelFill(1, [late, early]).stack()] == ["early", "late"]
+
+
+def test_priority_does_not_choose_the_panel() -> None:
+    units = [*pair("sw", 1, h=20, rank=0), *pair("gps", 1, h=20, rank=1)]
+    ranked = [replace(x, priority=1) if x.device == "gps" else x for x in units]
+    assert where(fill(ranked, RULES)) == where(fill(units, RULES))
+
+
+def test_units_carry_priority_and_waist_from_the_category(example: LoadedSubstation) -> None:
+    units = {x.device: x for f in layout_preview(example).fills for x in f.units}
+    assert (units["gps"].priority, units["rtac"].priority, units["l2"].priority) == (1, 4, 2)
+    assert not any(x.waist for x in units.values())

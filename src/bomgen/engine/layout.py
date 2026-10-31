@@ -76,6 +76,8 @@ class Unit:
     rank: int  # the entry's position in BOM group order
     height_u: int
     cable_manager_u: int = 0  # a 1U manager directly under a rack switch or patch panel
+    priority: int = 4  # stack order inside a panel, 1 = top (ADR 0013, amended M21)
+    waist: bool = False  # a KVM or console, placed at waist height
 
     @property
     def key(self) -> str:
@@ -124,6 +126,22 @@ def _order(unit: Unit) -> tuple[int, str, int]:
     return (unit.rank, unit.device, unit.n)
 
 
+# Stack order inside a panel (part-picking design §5); every other category is 4.
+PRIORITY: dict[Category, int] = {
+    Category.GPS_CLOCK: 1,
+    Category.NETWORK_SWITCH: 2,
+    Category.PATCH_PANEL: 2,
+    Category.FIREWALL: 2,
+    Category.GATEWAY: 2,
+    Category.WORKSTATION: 3,
+}
+WAIST: frozenset[Category] = frozenset({Category.KVM, Category.CONSOLE})
+
+
+def _stack_order(unit: Unit) -> tuple[int, int, str, int]:
+    return (unit.priority, *_order(unit))
+
+
 @dataclass
 class PanelFill:
     number: int
@@ -131,9 +149,10 @@ class PanelFill:
     pins: dict[Unit, int | None] = field(default_factory=dict)  # pinned units, position (R7)
 
     def stack(self) -> list[Unit]:
-        """The units top to bottom: group order, with positioned pins at their place."""
+        """The units top to bottom: priority, then group order, with positioned pins at
+        their place."""
         placed = {x: p for x, p in self.pins.items() if p is not None and x.block_u > 0}
-        order = [x for x in sorted(self.units, key=_order) if x not in placed]
+        order = [x for x in sorted(self.units, key=_stack_order) if x not in placed]
         taken: dict[int, int] = {}
         for unit in sorted(placed, key=lambda x: (placed[x], _order(x))):
             position = placed[unit] + taken.get(placed[unit], 0)
@@ -479,8 +498,10 @@ def _units(loaded: LoadedSubstation, plan: NetworkPlan, issues: list[LayoutIssue
             EquipmentRole.L2_SWITCH: plan.l2_per_side,
         }.get(entry.role, entry.qty)
         sides = [Side.A, Side.B] if entry.redundant else [entry.side]
+        priority = PRIORITY.get(device.category, 4)
+        waist = device.category in WAIST
         units += [
-            Unit(entry.id, n, side, part_id, rank, height, manager)
+            Unit(entry.id, n, side, part_id, rank, height, manager, priority, waist)
             for n in range(1, count + 1)
             for side in sides
         ]
