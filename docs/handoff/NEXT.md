@@ -45,13 +45,12 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
   either. Don't move golden values without an ADR. Only Ali marks ADRs Accepted. Don't commit `.xlsx`.
   Don't force-push (LESSONS "Branch restart"). Don't bump the version outside a release PR (on main it
   publishes at once). Don't push tags.
-- Next free numbers: ADR 0027, Q55, milestone M27.
+- Next free numbers: ADR 0028, Q56, milestone M27.
 
 ## 3. Questions for Ali (one card each, recommendation marked)
 
-1. **What comes after v0.2.1?** "What should we do after v0.2.1?" Options "Test v0.2.1, send feedback"
-   (recommended: everything asked for in v0.2 shipped and nobody has used it in the field yet) and
-   "I'll describe v0.3 now". Ali asked for the repo audit first (done, 2026-10-30); the question stands.
+1. **What comes after v0.3.0?** Options "Test v0.3.0, send feedback" (recommended: part picking
+   shipped and nobody has used it in the field yet) and "I'll describe the next work now".
 2. **ASSUMED seeds:** show the cabinet number pattern, the enclosure and the document number/date
    defaults a new substation gets; recommend "Keep them, edit per project in the app". If he changes
    them, change `_blank` in `src/bomgen/io/lifecycle.py` and
@@ -61,15 +60,16 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
    table in Excel's Print Preview?" Options "It fits" (recommended: the size is computed to fit at the
    print scale) and "It overlaps". See section 14 for what each answer means.
 4. **Q23** (issued sheets vs masters): keep the default (the masters) until he answers.
-5. **Q51** (annunciator mounted in a panel) and **Q54** (power of the -2 SEL computers) are open in
-   plan §6.
+5. **Q51** (annunciator mounted in a panel), **Q54** (power of the -2 SEL computers) and **Q55**
+   (categories for the contractor's other part types) are open in plan §6.
+6. **ADR 0027** (port speeds 2.5G, 5G and 25G): the lead has it on a card for acceptance.
 
-**Next work:** M19–M26 are merged (STATE.md §1). Engine model changes (step 4) come from A4's plan.
+**Next work:** M19–M26 shipped in v0.3.0 (STATE.md §1). Engine model changes (step 4) come from A4's plan.
 
 ## 4. When Ali's feedback arrives
 
 Write it into `docs/backlog.md` as numbered points (as for v0.2), propose milestones in `docs/plan.md`
-(from M27), give decisions an ADR (0027 on) or a plan question (Q55 on), and deliver one PR per
+(from M27), give decisions an ADR (0028 on) or a plan question (Q56 on), and deliver one PR per
 milestone.
 
 ## 5. Next release (v0.2.2 or v0.3.0)

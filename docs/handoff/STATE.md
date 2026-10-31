@@ -9,8 +9,8 @@ rather than copy it.
 
 ## 1. Overview (2026-10-31)
 
-- Repo `alialyami90/BOM-generator`, default branch `main`, at `dfcf810` (#254, ADRs 0025 and
-  0026 accepted). Check open PRs with `list_pull_requests` before starting.
+- Repo `alialyami90/BOM-generator`, default branch `main`, at `46fcbe2` (#263, the v0.3.0
+  release). Check open PRs with `list_pull_requests` before starting.
 - **Part picking, M19–M26 (2026-10-31).** Ali's feedback on v0.2.1, designed in
   [`part-picking-design`](../superpowers/specs/2026-10-31-part-picking-design.md), questions Q42–Q53.
   All merged:
@@ -26,7 +26,12 @@ rather than copy it.
   - The shipped library went psa-devices 1.2.0 (#249) → 1.3.0 (#251, twelve researched parts in
     `data/library/additions.yaml`) → **1.4.0** (#253, the nameplate part and role).
     `examples/project.yaml` pins it, and the app tests read the version from there.
-- **Not released yet:** M19–M26 sit in `[Unreleased]`; the last release is still v0.2.1.
+- **v0.3.0 is released** (#263, tag on `46fcbe2`, release run 41234995752), with
+  `bomgen-setup-0.3.0.exe` and `default.bomlib` built from psa-devices 1.6.0. It holds M19–M26 and,
+  after #255: #256 (Preview shows the Nameplates sheet), #257 (psa-devices 1.5.0, Hager MCN and NCN
+  AC MCB sets), #258 (2.5G, 5G and 25G port speeds, never sized for SFPs, ADR 0027), #259
+  (psa-devices 1.6.0, FortiGate 401G and 701G), #260 (the list of what goes back to the contractor)
+  and #261 (the changelog section). `pyproject.toml` and `bomgen.__version__` are `0.3.0`.
 - **Gate on `628ff1c`:** ruff and format pass (319 files), mypy passes (240 files), pytest has
   2852 passed. The table under "Verification" below is from 2026-10-30.
 - **Audit of 2026-10-30** ([Claude Doc "Repo audit after v0.2.1"](https://claude.ai/artifact/DXyJnufrHguPCCVWgeLGPh)): no code defect; 14
@@ -41,7 +46,9 @@ rather than copy it.
   release from main) and **v0.2.1** (`1678343`, #211, published 2026-10-29 03:17 UTC with
   `bomgen-setup-0.2.1.exe`, 29.7 MB, and `default.bomlib` built from psa-devices 1.1.0):
   https://github.com/alialyami90/BOM-generator/releases/tag/v0.2.1. `pyproject.toml` and
-  `bomgen.__version__` are `0.2.1`. Check tags with `git ls-remote origin 'refs/tags/v0.2*'`.
+  `bomgen.__version__` were `0.2.1` until **v0.3.0** (`46fcbe2`, #263, 2026-10-31):
+  https://github.com/alialyami90/BOM-generator/releases/tag/v0.3.0. Check tags with
+  `git ls-remote origin 'refs/tags/v0.*'`.
 - **Product.** v0.1 is M0–M11 (engine, sheets, checks, desktop app, installer). v0.2 is Ali's ten
   points on v0.1.0 ([`docs/backlog.md`](../backlog.md), all "Done in v0.2.0"; milestones M12–M18 in
   `docs/plan.md`): layout fixes, alternatives as library parts with per-project/substation brand sets
@@ -51,10 +58,12 @@ rather than copy it.
   round-trip writers (ADR 0021), and the loose material sheet and page (ADR 0020, ADR 0022). v0.2.1 is
   the UI polish pass from [`docs/ui/polish-v02.md`](../ui/polish-v02.md) (items 1–16, #205–#208) plus
   #194, #198–#201.
-- **Numbers.** ADRs 0001–0026 are Accepted; next free ADR **0027**. Q51 (annunciator) and Q54
-  (power of the -2 SEL computers) are open; the next free question is **Q55**. The next milestone
+- **Numbers.** ADRs 0001–0026 are Accepted; 0027 (port speeds) is Proposed and on a card to Ali.
+  Next free ADR **0028**. Q51 (annunciator), Q54
+  (power of the -2 SEL computers) and Q55 (categories for the contractor's other part types) are
+  open; the next free question is **Q56**. The next milestone
   is **M27**.
-- **Changelog** `[Unreleased]` holds every code PR through #253.
+- **Changelog** has a `[0.3.0]` section through #260, and `[Unreleased]` is empty.
 - **Next engine work:** the model changes (step 4) from A4's plan.
 
 ### Verification (`f2234f7`, after #227)
