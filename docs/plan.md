@@ -941,7 +941,8 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
   both screens (the new step is called **Device preview**, so the rail does not have two "Preview"
   items), made with the impeccable skill (CLAUDE.md "UI work"). Plan:
   [`superpowers/plans/2026-10-31-m22-parts-and-device-preview-design.md`](superpowers/plans/2026-10-31-m22-parts-and-device-preview-design.md).
-- **M23 — Parts page in the app.** Replaces the Network page; writers for the new fields.
+- **M23 — Parts page in the app.** Replaces the Network page; writers for the new fields. Plan:
+  [`superpowers/plans/2026-10-31-m23-parts-page.md`](superpowers/plans/2026-10-31-m23-parts-page.md).
 - **M24 — Device preview page.** Engine API for per-unit MCBs and positions, the device table, and the
   panel elevation with dragging.
 
@@ -1276,3 +1277,8 @@ automatic pick.
 **Q50 — Drag and drop in the panel views** (M19, M24). *Resolved 2026-10-31:* Ali chose "Both".
 The Panels board's dragging does not work in the installed app and is fixed (M19), and the
 Preview's panel elevation gets dragging too (M24).
+
+**Q51 — Annunciator mounted in a panel** (M23 onwards). *Open.* Design §10 assumes the annunciator
+goes to loose material by default, with a "Mount in panel" switch on its Parts row for a panel
+annunciator. No M22 spec or engine rule covers the switch yet, so M23 leaves it out. To ask Ali:
+is a panel-mounted annunciator needed, and if so, which panel takes it?
