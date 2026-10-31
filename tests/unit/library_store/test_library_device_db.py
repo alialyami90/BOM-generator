@@ -215,14 +215,14 @@ def test_a_boolean_is_not_a_height_or_a_figure() -> None:
 def test_port_groups_use_the_library_vocabulary() -> None:
     group = (
         "      port_groups:\n"
-        "        - {ports: p, count: 4, speed: 5G, media: SFP,"
+        "        - {ports: p, count: 4, speed: 40G, media: SFP,"
         " kind: sfp_slot, usable_for: uplink}\n"
     )
     text = MINIMAL.replace("      height_u: 1\n", "      height_u: 1\n" + group)
 
     with pytest.raises(LibraryPackageError, match=r"port_groups\[0\]\.speed"):
         parse_device_records(_bad(text))
-    parse_device_records(_bad(text.replace("5G", "10G")))
+    parse_device_records(_bad(text.replace("40G", "10G")))
 
 
 LOW = "low: {model: A, description: a, verified: true}"
@@ -331,7 +331,7 @@ def test_the_original_part_inrush_follows_the_same_rules() -> None:
 def test_a_tier_may_list_port_groups() -> None:
     group = "{ports: p, count: 4, speed: 10G, media: SFP, kind: sfp_slot, usable_for: uplink}"
     parse_device_records(_tier(f"port_groups: [{group}]"))
-    _refused(_tier(f"port_groups: [{group.replace('10G', '5G')}]"), "low.port_groups[0].speed")
+    _refused(_tier(f"port_groups: [{group.replace('10G', '40G')}]"), "low.port_groups[0].speed")
 
 
 def test_a_tier_may_carry_fan_airflow_ratings_and_sources() -> None:

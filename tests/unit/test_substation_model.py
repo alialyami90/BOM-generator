@@ -309,3 +309,12 @@ def test_partoverrides_values_lists_only_what_was_set() -> None:
 )
 def test_parts_page_roles_parse(role: str) -> None:
     assert Equipment(id="x", part_id="X", role=role).role.value == role
+
+
+@pytest.mark.parametrize("speed", ["2.5G", "5G", "25G"])
+def test_new_port_speeds_are_not_sized_as_l2_links(speed: str) -> None:
+    data = substation_dict()
+    data["equipment"][3]["l2_speed"] = speed
+
+    with pytest.raises(ValidationError, match="not sized for SFPs"):
+        Substation.model_validate(data)

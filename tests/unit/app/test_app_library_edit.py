@@ -252,7 +252,7 @@ def test_describe_shows_a_changed_list_as_readable_text() -> None:
 def test_library_device_lists_the_part_ids_and_the_list_choices(app: api.Api) -> None:
     reply = ok(app.library_device(PART))
     assert PART in reply["part_ids"]
-    assert reply["choices"]["speed"] == ["10M", "100M", "1G", "10G"]
+    assert reply["choices"]["speed"] == ["10M", "100M", "1G", "2.5G", "5G", "10G", "25G"]
     assert reply["choices"]["per"] == ["unit", "serial_port"]
     assert "sfp_slot" in reply["choices"]["kind"]
 
