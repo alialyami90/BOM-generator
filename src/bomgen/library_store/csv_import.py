@@ -18,7 +18,7 @@ import json
 import re
 import zipfile
 from collections import defaultdict
-from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Collection, Iterable, Mapping, Sequence
 from dataclasses import dataclass, field, replace
 from pathlib import Path, PurePosixPath
 from typing import Any, Literal, get_args, get_origin
@@ -527,8 +527,13 @@ def _base_entry(base: Mapping[str, Any], kind: str, cid: str) -> dict[str, Any] 
 
 
 def _unique(
-    table: _Table, columns: Sequence[str], asm: _Assembly
+    table: _Table,
+    columns: Sequence[str],
+    asm: _Assembly,
+    repeats: Collection[str] = (),
 ) -> Iterable[tuple[int, dict[str, str]]]:
+    """Rows with each key once; a row whose last key column is in ``repeats`` is keyed by
+    its part as well (one housekeeping.csv row per larger fan)."""
     seen: dict[tuple[str, ...], int] = {}
     for row, cells in table.records:
         key = tuple(cells.get(c, "").strip() for c in columns)
@@ -541,6 +546,8 @@ def _unique(
                 key[0] or None,
             )
             continue
+        if key[-1] in repeats:
+            key = (*key, cells.get("part_id", "").strip())
         if key in seen:
             asm.links.append(
                 f"{table.file} row {row}: {' / '.join(key)} is also on row {seen[key]}"
@@ -692,7 +699,7 @@ def _housekeeping(
         return
     names = _names(table, asm)
     sets: dict[str, dict[str, Any]] = {}
-    for row, cells in _unique(table, ("catalogue_id", "role"), asm):
+    for row, cells in _unique(table, ("catalogue_id", "role"), asm, repeats={"larger_fan"}):
         cid, role = cells["catalogue_id"].strip(), cells["role"].strip()
         if role not in HOUSEKEEPING_ROLES:
             asm.problem(
@@ -706,7 +713,7 @@ def _housekeeping(
         part_id = cells.get("part_id", "").strip()
         data: dict[str, Any] = {"part_id": part_id}
         model: type[BaseModel]
-        if role == "fan":
+        if role in ("fan", "larger_fan"):
             model, extra = FanRef, "airflow_m3h"
         elif role == "socket":
             model, extra = SocketRef, "rating_a"
@@ -724,6 +731,8 @@ def _housekeeping(
             target.setdefault("change_over_diodes", {})[role.removeprefix("change_over_diode_")] = (
                 value["part_id"]
             )
+        elif role == "larger_fan":
+            target.setdefault("larger_fans", []).append(value)
         else:
             target[role] = value
     for cid, roles in sets.items():

@@ -3,6 +3,7 @@ sheets, "Rule for the tool"; Data model and generation order, step 4)."""
 
 from collections.abc import Iterable, Sequence
 
+from bomgen.engine.housekeeping import FORCED_FANS, FORCED_THERMOSTATS
 from bomgen.engine.power import count
 from bomgen.engine.units import lookup
 from bomgen.models.bom import BomLine
@@ -17,7 +18,7 @@ from bomgen.models.calc import (
     PowerBlock,
     PowerConsumption,
 )
-from bomgen.models.library import Category, Library
+from bomgen.models.library import Category, FanRef, Library
 from bomgen.models.panel import Panel, Ventilation
 from bomgen.models.project import DesignConstants
 
@@ -62,6 +63,25 @@ def line_up_check(checks: Sequence[ForcedVentCheck]) -> LineUpCheck:
         required_m3h=sum(check.required_m3h for check in checks),
         fan_m3h=sum(check.fan_m3h for check in checks),
     )
+
+
+def choose_fan(heat_w: float, library: Library, constants: DesignConstants) -> FanRef:
+    """The fan a forced cabinet gets: the catalogue fan, or the smallest of
+    ``larger_fans`` whose pair moves the required airflow, counting the fans' and
+    thermostats' own heat; the largest when none does. ``heat_w`` excludes the
+    ventilation parts, as ``ventilation_heat_w`` gives it."""
+    kit = library.catalogues.housekeeping
+    thermostats_w = FORCED_THERMOSTATS * (lookup(library, kit.thermostat.part_id).unit_power_w or 0)
+    larger = [fan for fan in kit.larger_fans if fan.airflow_m3h > kit.fan.airflow_m3h]
+    fans = [kit.fan, *sorted(larger, key=lambda fan: fan.airflow_m3h)]
+    for fan in fans:
+        fans_w = FORCED_FANS * (lookup(library, fan.part_id).unit_power_w or 0)
+        check = forced_check(
+            "", heat_w + fans_w + thermostats_w, FORCED_FANS * fan.airflow_m3h, constants
+        )
+        if check.passes:
+            return fan
+    return fans[-1]
 
 
 def choose_ventilation(panel: Panel, heat_w: float, constants: DesignConstants) -> Ventilation:
@@ -110,18 +130,17 @@ def heat_dissipation(
 
 
 def heat_result(
-    panels: Sequence[tuple[Panel, Ventilation]],
+    panels: Sequence[tuple[Panel, Ventilation, float]],
     power: PowerConsumption,
-    fan_pair_m3h: float,
     constants: DesignConstants,
 ) -> HeatResult:
     """Both checks for every cabinet from its Heat Dissipation total, and the line-up
     check over the fan-ventilated cabinets. The forced check compares with the fan
-    pair a cabinet has or would get."""
+    pair (m³/h) a cabinet has or would get."""
     dissipation = heat_dissipation(power, constants)
     heat_by_panel = {block.panel_id: block.total_w for block in dissipation}
     cabinets = []
-    for panel, ventilation in panels:
+    for panel, ventilation, fan_pair_m3h in panels:
         heat_w = heat_by_panel.get(panel.id, 0.0)
         cabinets.append(
             CabinetThermal(

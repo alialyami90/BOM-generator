@@ -140,6 +140,8 @@ def _housekeeping_refs(base: Loc, housekeeping: Housekeeping) -> list[tuple[Loc,
         if isinstance(ref, ChangeOverDiodes):
             refs.append(((*base, role, "negative"), ref.negative))
             refs.append(((*base, role, "positive"), ref.positive))
+        elif isinstance(ref, list):  # larger_fans
+            refs += [((*base, role, i, "part_id"), fan.part_id) for i, fan in enumerate(ref)]
         elif ref is not None:
             refs.append(((*base, role, "part_id"), ref.part_id))
     return refs

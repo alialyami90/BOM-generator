@@ -6,6 +6,7 @@ from engine_factories import library, panel, powered
 
 from bomgen.engine.errors import EngineError
 from bomgen.engine.thermal import (
+    choose_fan,
     choose_ventilation,
     forced_check,
     heat_dissipation,
@@ -138,3 +139,43 @@ def test_ventilation_heat_leaves_out_fans_filters_and_thermostats() -> None:
 
     lines = [line("SW", 2), line("PFAN", 2), line("PTH", 3), line("PLAMP", 1), line("TH", 1)]
     assert ventilation_heat_w(lines, lib) == 2 * 77 + 11
+
+
+# Heat Calculations, "Rule for the tool": fans whose throughput >= required airflow (ENG-6).
+# k / (TMax - TInt) = 0.41 m³/h per W; the catalogue fan pair gives 716 m³/h.
+
+FAN_LIB = library(
+    powered("BIG1", "fan", supply_type="VAC", voltage_v=230, unit_power_w=160, power_supplies=0),
+    powered("BIG2", "fan", supply_type="VAC", voltage_v=230, unit_power_w=200, power_supplies=0),
+    larger_fans=[
+        {"part_id": "BIG2", "airflow_m3h": 600},
+        {"part_id": "BIG1", "airflow_m3h": 445},
+    ],
+)
+
+
+def test_the_catalogue_fan_is_kept_while_its_pair_is_enough() -> None:
+    assert choose_fan(1000, FAN_LIB, C).part_id == "FAN"  # 410 <= 716
+
+
+def test_a_hotter_cabinet_gets_the_smallest_larger_fan_whose_pair_is_enough() -> None:
+    # BIG1's pair (890) would cover 2000 W alone (820), but not with its own 2 x 160 W.
+    assert choose_fan(2000, FAN_LIB, C).part_id == "BIG2"  # (2000 + 400) x 0.41 = 984
+
+
+def test_when_no_fan_is_enough_the_largest_is_fitted() -> None:
+    assert choose_fan(5000, FAN_LIB, C).part_id == "BIG2"  # the airflow check then fails
+
+
+def test_without_larger_fans_the_catalogue_fan_is_fitted() -> None:
+    assert choose_fan(5000, library(), C).part_id == "FAN"
+
+
+def test_a_listed_fan_smaller_than_the_catalogue_fan_is_never_fitted() -> None:
+    lib = library(
+        powered("SMALL", "fan", supply_type="VAC", voltage_v=230, unit_power_w=10,
+                power_supplies=0),
+        larger_fans=[{"part_id": "SMALL", "airflow_m3h": 100}],
+    )  # fmt: skip
+    assert choose_fan(100, lib, C).part_id == "FAN"
+    assert choose_fan(5000, lib, C).part_id == "FAN"

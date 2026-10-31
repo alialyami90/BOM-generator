@@ -99,6 +99,18 @@ def test_housekeeping_brand_parts_must_be_in_the_library(tmp_path: Path) -> None
     )
 
 
+def test_larger_fans_must_be_in_the_library(tmp_path: Path) -> None:
+    library = branded_library()
+    library["catalogues"]["housekeeping"]["larger_fans"] = [
+        {"part_id": "FAN-999", "airflow_m3h": 600}
+    ]
+    (issue,) = issues_for(write_project(tmp_path, library=library))
+    assert (issue.location, issue.message) == (
+        "catalogues.housekeeping.larger_fans[0].part_id",
+        "unknown part_id 'FAN-999' (not in library.yaml)",
+    )
+
+
 def dc_only_library() -> dict[str, Any]:
     library = branded_library()
     library["catalogue_brands"]["mcb"].append(

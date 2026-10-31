@@ -855,3 +855,24 @@ def test_the_changes_check_names_the_base_and_the_version_a_save_makes(
     assert detail.startswith("Compared with 1.0.0: ")
     assert detail.endswith("Saving makes 1.0.0+local.1.")
     assert "Would be saved" not in detail
+
+
+def test_larger_fans_survive_the_round_trip_one_row_each(
+    tmp_path: Path, base: Library, store: LibraryStore
+) -> None:
+    # ENG-6: the fans a hot cabinet steps up to, a housekeeping.csv row per fan.
+    fans = [
+        {"part_id": "SK3243-FAN.PFANNENBERG-MID", "airflow_m3h": 445},
+        {"part_id": "SK3243-FAN.STEGO-MID", "airflow_m3h": 373},
+    ]
+    edited = apply_edits(
+        base, [SetValue(path=["catalogues", "housekeeping", "larger_fans"], value=fans)]
+    ).library
+    assert edited is not None
+    out = tmp_path / "fans.zip"
+    export_csv(edited, out, name="psa", based_on="1.0.0")
+
+    preview = preview_csv_import(out, store, "psa")
+
+    assert preview.problems == []
+    assert preview.library == edited

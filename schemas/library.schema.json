@@ -689,6 +689,13 @@
         "lamp": {
           "$ref": "#/$defs/HousekeepingRef"
         },
+        "larger_fans": {
+          "items": {
+            "$ref": "#/$defs/FanRef"
+          },
+          "title": "Larger Fans",
+          "type": "array"
+        },
         "nameplate": {
           "anyOf": [
             {
@@ -752,6 +759,13 @@
         },
         "lamp": {
           "$ref": "#/$defs/HousekeepingRef"
+        },
+        "larger_fans": {
+          "items": {
+            "$ref": "#/$defs/FanRef"
+          },
+          "title": "Larger Fans",
+          "type": "array"
         },
         "name": {
           "anyOf": [

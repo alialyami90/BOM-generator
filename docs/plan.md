@@ -960,6 +960,10 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
   the spec, and the audit's untested rules get tests (audit 2026-10-31: ENG-4, ENG-5, ENG-7,
   ENG-8, ENG-12 to ENG-15). Plan:
   [`superpowers/plans/2026-10-31-m33-sheet-consistency.md`](superpowers/plans/2026-10-31-m33-sheet-consistency.md).
+- **M34 — Larger fans for hot cabinets.** A forced cabinet keeps two fans and steps up to the
+  smallest of the catalogue's `larger_fans` whose pair moves its required airflow (ADR 0029,
+  Proposed; audit 2026-10-31, ENG-6). Plan:
+  [`superpowers/plans/2026-10-31-m34-larger-fans.md`](superpowers/plans/2026-10-31-m34-larger-fans.md).
 
 ## 5. Testing strategy
 

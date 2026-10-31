@@ -21,12 +21,12 @@ from bomgen.engine.nameplates import nameplate_item, nameplates
 from bomgen.engine.network import accessories
 from bomgen.engine.power import power_consumption
 from bomgen.engine.terminals import StripInputs, terminal_strips
-from bomgen.engine.thermal import choose_ventilation, heat_result, ventilation_heat_w
+from bomgen.engine.thermal import choose_fan, choose_ventilation, heat_result, ventilation_heat_w
 from bomgen.engine.units import DeviceRow, expand_devices, lookup
 from bomgen.io.loader import LoadedSubstation
 from bomgen.models.bom import BuildResult, PanelBom
 from bomgen.models.calc import BranchMcb, DcMains
-from bomgen.models.library import Category, Library
+from bomgen.models.library import Category, FanRef, Library
 from bomgen.models.panel import Panel, Ventilation
 from bomgen.models.project import DesignConstants, LooseExtra, LooseMaterial
 
@@ -38,6 +38,7 @@ class _PanelDraft:
     panel: Panel
     rows: tuple[DeviceRow, ...]
     ventilation: Ventilation
+    fan: FanRef  # fitted when forced, else the one the forced check assumes
     items: list[BomItem]
     strip_inputs: StripInputs
     mains: DcMains
@@ -68,9 +69,10 @@ def build(loaded: LoadedSubstation) -> BuildResult:
     loose = loose_table(material, substation, [(d.panel, d.rows) for d in drafts], library)
     fed = {item.part_id for item in loose_items if item.part_id and item.fed_from}
     power = power_consumption(panels, loose, library, loaded.constants, fed)
-    fan_pair_m3h = FORCED_FANS * library.catalogues.housekeeping.fan.airflow_m3h
     heat = heat_result(
-        [(d.panel, d.ventilation) for d in drafts], power, fan_pair_m3h, loaded.constants
+        [(d.panel, d.ventilation, FORCED_FANS * d.fan.airflow_m3h) for d in drafts],
+        power,
+        loaded.constants,
     )
     return BuildResult(
         panels=panels,
@@ -96,6 +98,7 @@ def _draft(
     trial = [*equipment, *housekeeping(panel, library, Ventilation.NATURAL, change_over)]
     heat_w = ventilation_heat_w(flatten(trial), library)
     ventilation = choose_ventilation(panel, heat_w, constants)
+    fan = choose_fan(heat_w, library, constants)
     ac = ac_distribution(panel, library, ventilation, rows, constants)
     fed = single_fed_loads(panel, rows, library, loose)
     dc = dc_distribution(panel, library, constants, rows, fed, change_over)
@@ -108,7 +111,7 @@ def _draft(
     ]
     items = [
         *equipment,
-        *housekeeping(panel, library, ventilation, change_over),
+        *housekeeping(panel, library, ventilation, change_over, fan),
         *ac.items,
         *dc.items,
     ]
@@ -127,7 +130,7 @@ def _draft(
         rule_rating_a=dc.rule_main_a,
     )
     branch_mcbs = (*dc.branch_mcbs, *ac.branch_mcbs)
-    return _PanelDraft(panel, rows, ventilation, items, strip_inputs, mains, branch_mcbs)
+    return _PanelDraft(panel, rows, ventilation, fan, items, strip_inputs, mains, branch_mcbs)
 
 
 def _finish(
