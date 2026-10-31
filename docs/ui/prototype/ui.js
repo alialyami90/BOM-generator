@@ -52,12 +52,12 @@
 
   /* The save bar: appears at the foot of a form page while it has unsaved changes. It names what will be written. */
   /* A form route saves with the save bar. Lists, the board and read-only pages do not. */
-  const isFormRoute = () => { const { a, b } = route(); if (a === 'library') return b === 'device'; if (a === 'panels') return !!b; if (a === 'project') return !['substations', 'share'].includes(S.tab.project); return ['settings', 'network', 'loose'].includes(a); };
+  const isFormRoute = () => { const { a, b } = route(); if (a === 'library') return b === 'device'; if (a === 'panels') return !!b; if (a === 'project') return !['substations', 'share'].includes(S.tab.project); return ['settings', 'network', 'parts', 'loose'].includes(a); };
   function saveBar() {
     if (!S.dirty) return '';
     const n = Math.max(S.changed.size, 1), bad = S.invalid.size;
     const lib = route().a === 'library';
-    const file = ({ project: 'project.yaml', settings: 'substation.yaml', network: 'substation.yaml', panels: 'the panel file' })[route().a] || 'the file';
+    const file = ({ project: 'project.yaml', settings: 'substation.yaml', network: 'substation.yaml', parts: 'substation.yaml', panels: 'the panel file' })[route().a] || 'the file';
     return `<div class="savebar${bad ? ' savebar--bad' : ''}" role="region" aria-label="Unsaved changes">
       <span class="savebar-msg">${bad ? `${icon('error')}<b>${bad} ${bad === 1 ? 'field needs' : 'fields need'} fixing</b> before you can save.` : `<span class="dot dot--warn" aria-hidden="true"></span><b>${n} unsaved ${n === 1 ? 'change' : 'changes'}</b> · ${lib ? 'added to the library\'s pending changes' : 'saved to ' + file}`}</span>
       <span class="sp"></span>
@@ -118,7 +118,8 @@
       ${navItem('#/project', 'project', esc(p.name.replace(' (example)', '')), projTail, p.status === 'bad' ? 'bad' : p.status === 'warn' ? 'warn' : 'ok', false, r === 'project')}
       <div class="nav-group">Substation</div>${switcher}
       ${navItem('#/settings', 'file', 'Settings', ns ? icon('check') : '', 'ok', !ns, r === 'settings')}
-      ${navItem('#/network', 'network', 'Network', ns ? (isBlank() ? `${icon('warn')}Not set up` : icon('check')) : '', isBlank() ? 'warn' : 'ok', !ns, r === 'network')}
+      ${navItem('#/parts', 'parts', 'Parts', ns ? (isBlank() ? `${icon('warn')}Not set up` : icon('check')) : '', isBlank() ? 'warn' : 'ok', !ns, r === 'parts' || r === 'network')}
+      ${navItem('#/device-preview', 'elevation', 'Device preview', '', '', !ns || isBlank(), r === 'device-preview')}
       ${navItem('#/panels', 'panels', 'Panels', ns ? String(isBlank() ? 0 : DB.panels.length) : '', '', !ns, r === 'panels')}
       ${navItem('#/loose', 'pkg', 'Loose material', ns ? String(isBlank() ? 0 : (DB.sub.loose || []).length) : '', '', !ns, r === 'loose')}
       <div class="nav-group">Verify and issue</div>
@@ -141,8 +142,8 @@
   }
   function renderMain() {
     const { a } = route();
-    const key = ({ home: 'home', project: 'project', settings: 'settings', network: 'network', panels: 'panels', loose: 'loose', library: 'library', checks: 'checks', preview: 'preview', build: 'build' })[a] || 'home';
-    const needsProject = key === 'project', needsSub = ['settings', 'network', 'panels', 'loose', 'checks', 'preview', 'build'].includes(key);
+    const key = ({ home: 'home', project: 'project', settings: 'settings', network: 'parts', parts: 'parts', 'device-preview': 'device-preview', panels: 'panels', loose: 'loose', library: 'library', checks: 'checks', preview: 'preview', build: 'build' })[a] || 'home';
+    const needsProject = key === 'project', needsSub = ['settings', 'network', 'parts', 'device-preview', 'panels', 'loose', 'checks', 'preview', 'build'].includes(key);
     const m = $('#main');
     m.innerHTML = (needsProject && !hasProject()) || (needsSub && !hasSub()) ? SCREENS.home() : SCREENS[key]();
     if (isFormRoute()) m.insertAdjacentHTML('beforeend', saveBar());
@@ -162,6 +163,8 @@
       ${sel('checks', 'Validation', [['errors', '2 errors, 4 warnings'], ['clean', 'No errors, 4 warnings']], S.checks)}
       ${sel('importScenario', 'Library package', Object.entries(DB.importScenarios).map(([k, v]) => [k, v.label]), S.importScenario)}
       ${sel('build', 'Build result', [['ready', 'Ready'], ['building', 'Building'], ['success', 'Success'], ['locked', 'Failed: file open in Excel']], S.build)}
+      ${sel('partsState', 'Parts page (M22)', [['clean', 'Set up, overrides shown'], ['new', 'New substation'], ['invalid', 'An invalid override'], ['missing', 'A part not in the library'], ['many', '24 rows']], S.partsState || 'clean')}
+      ${sel('previewState', 'Device preview (M22)', [['clean', 'Placed, two warnings'], ['overflow', 'A panel overflows'], ['nowaist', 'KVM cannot sit at waist height'], ['error', 'Engine error'], ['unsaved', 'Unsaved changes on Parts']], S.previewState || 'clean')}
       ${sel('density', 'Table density', [['default', 'Default (28 px rows)'], ['comfort', 'Comfortable (36 px rows)']], S.density)}
     </div>`;
   }
@@ -223,7 +226,7 @@
 
   ACTIONS.tab = (el) => { S.tab[el.dataset.group] = el.dataset.value; if (el.dataset.group === 'project') history.replaceState(null, '', '#/project/' + el.dataset.value); if (el.dataset.group === 'settings') history.replaceState(null, '', '#/settings/' + el.dataset.value); if (el.dataset.group === 'panel') history.replaceState(null, '', '#/panels/' + route().b + '/' + el.dataset.value); const keep = $('#main').scrollTop; renderMain(); $('#main').scrollTop = keep; const nt = document.getElementById(el.id); nt && nt.focus(); };
   ACTIONS.goto = (el) => go(el.dataset.to);
-  ACTIONS['sub-switch'] = (el) => { S.sub = el.value || null; clearEdits(); S.layout = { overrides: [], removed: [], history: [], selected: '', openOverrides: false }; const { a } = route(); go(['settings', 'network', 'panels', 'checks', 'preview', 'build'].includes(a) ? '#/' + a : '#/panels'); };
+  ACTIONS['sub-switch'] = (el) => { S.sub = el.value || null; clearEdits(); S.layout = { overrides: [], removed: [], history: [], selected: '', openOverrides: false }; const { a } = route(); go(['settings', 'parts', 'device-preview', 'panels', 'checks', 'preview', 'build'].includes(a) ? '#/' + a : '#/panels'); };
   ACTIONS.theme = () => { S.theme = { light: 'dark', dark: 'system', system: 'light' }[S.theme]; render(); toast(`Theme: ${S.theme}`, 'info'); };
   ACTIONS.help = () => dialog({ title: 'Help', body: '<p>Prototype only. In the app this opens the user guide.</p>', actions: '<button class="btn btn--primary" data-action="close">Close</button>' });
   ACTIONS.close = () => closeDialog();
@@ -234,6 +237,8 @@
     if (k === 'importScenario') { S.importStep = 'review'; S.libTab = 'import'; go('#/library/import'); }
     if (k === 'build') { S.buildStep = S.build === 'building' ? 2 : 0; go('#/build'); }
     if (k === 'firstRun' || k === 'launch') go('#/home');
+    if (k === 'partsState') { S.pp = null; App.clearEdits(); go('#/parts'); }
+    if (k === 'previewState') { S.dp = null; go('#/device-preview'); }
     render(); const p = $('#proto-panel'); if (!p) ACTIONS.proto();
   };
   window.addEventListener('hashchange', () => { render(); $('#main').scrollTop = 0; });
