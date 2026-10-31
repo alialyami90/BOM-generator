@@ -388,6 +388,7 @@ The library also holds the commodity catalogues: MCBs by rating (1/2/6/10/16 A â
 - Network port plan for each switch: downlinks by speed and media (feeds SFP counts), uplinks to L3 (SM).
 - Options: aux socket (rating), smoke detector, change-over diodes (auto when single-PSU DC loads exist), ventilation mode (auto from heat check, or forced), spare branches per DC feed and on AC, main MCB override, inter-panel terminal count, grounding busbars.
 - Catalogue choice: `catalogue_choice` with a brand id or `default` per catalogue (`mcb`, `mcb_dc`, `aux_contact`, `terminal_blocks`, `busbars`, `housekeeping`); unset keys follow the project's choice, and `mcb_dc` must be a DC-rated set (ADR 0023).
+- Equipment: per device, a library `part_id` and optionally `ordering_code` (the part number printed in BOM col G instead of the library's), `overrides` of the library's `height_u`, `unit_power_w`, `supply_type`, `voltage_v`, `power_supplies`, `inrush_a` and `load_type` for this design, and, on the L1 and L2 switches, `sfp`: one SFP part per port speed and media (ADR 0024).
 - Loose material: `loose_material.host_panel`, the panel whose document the Loose Material sheet is issued under, and `items[]`, each a library `part_id` with quantity, tag, children and `fed_from`, or a free-text `description` with quantity and tag (ADR 0022).
 - BOM document data for its page header/footer: supplier document number, revision, issue date.
 - Revision: changed rows/cells to highlight yellow.
@@ -419,10 +420,10 @@ Build one BOM sheet per cabinet with the HWIO column hidden, and let the calcula
 
 **Generation order**
 
-0. Resolve the substation's catalogues: for each kind, the brand `catalogue_choice` names (substation over project, unset means the library's default); the DC set is `mcb_dc`, else the `mcb` choice.
+0. Resolve the substation's catalogues: for each kind, the brand `catalogue_choice` names (substation over project, unset means the library's default); the DC set is `mcb_dc`, else the `mcb` choice. Then add a derived part per equipment entry that sets `ordering_code`, `overrides` or `sfp`: the library part with those values, id `<part_id>+<equipment id>`, used by the layout and every later step; the library itself is not changed (ADR 0024).
 1. Expand each panel's device instances into units and build tags from prefix, level, type code, LAN and number.
 2. Add each device's child kit rows and loose items.
-3. Size network accessories from each switch's port plan: SFPs by speed and media, FOPP pigtails = cores, cable managers.
+3. Size network accessories from each switch's port plan: SFPs by speed and media (the switch's SFP choice for that speed and media, else the first matching SFP of the switch's make), FOPP pigtails = cores, cable managers.
 4. Compute device power, then run the heat checks and choose ventilation (fans + 3 thermostats, or filters + 1).
 5. Add the housekeeping kit (lamp, ventilation parts, IPR kit, socket, change-over diodes if any single-supply DC loads).
 6. Build AC distribution: CINC, branches in fixed order, spare, aux contacts.
