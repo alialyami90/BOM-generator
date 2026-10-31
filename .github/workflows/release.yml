@@ -192,7 +192,7 @@ jobs:
           New-Item -ItemType Directory -Force out | Out-Null
           & "dist\bomgen\bomgen.exe" library pack data\library\psa-devices.yaml `
             --name psa-devices --version 1.2.0 --add data\device-db --out out\default.bomlib `
-            --notes "Cited inrush for the SEL-2730M-EXT and coil range for the IPR-2903685 relay; manufacturer makes for six original parts (contractor delivery 2026-10-31). Builds on 1.1.0: alternatives as library parts, datasheet inrush and input voltage ranges, DC-rated brand sets."
+            --notes "Cited inrush for the SEL-2730M-EXT and coil range for the IPR-2903685 relay; manufacturer makes for eight original parts (contractor delivery 2026-10-31). Builds on 1.1.0: alternatives as library parts, datasheet inrush and input voltage ranges, DC-rated brand sets."
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           if (-not (Test-Path out\default.bomlib)) { Write-Error "out\default.bomlib was not written"; exit 1 }
 
