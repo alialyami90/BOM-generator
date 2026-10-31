@@ -187,7 +187,7 @@ on Windows and the XDG data directory elsewhere (override with
 `BOMGEN_LIBRARY_HOME`).
 
 ```bash
-bomgen library pack data/library/psa-devices.yaml --name psa-devices --version 1.8.0
+bomgen library pack data/library/psa-devices.yaml --name psa-devices --version 1.9.0
 bomgen library import psa-devices-1.9.0.bomlib --dry-run   # show the part diff only
 bomgen library import psa-devices-1.9.0.bomlib             # verify, install, activate
 bomgen library list                                        # installed versions
