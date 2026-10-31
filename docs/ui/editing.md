@@ -122,6 +122,13 @@ the person can compare, under one banner line: "Hand-written panels. The board s
 `bomgen layout` would write; Build uses your panel files." with a "Show N problem(s)" button
 that lists what running the layout would report.
 
+When the substation has equipment, the banner also has **Lay out panels from the equipment**. It opens a
+confirmation: "This replaces N hand-written panel files with panels laid out from the equipment. Copies
+are kept in panels/hand-written-…/." It names any listed hand-written panel the layout does not write
+(it leaves the BOM; its file stays). **Lay out panels** writes the generated files as `bomgen layout
+--force` does, after copying each file it replaces to `panels/hand-written-<YYYYMMDD-HHMMSS>/`; the board
+then reloads, can be dragged, and a toast names the copy folder. **Cancel** changes nothing.
+
 ### Drag and drop contract
 
 The board never draws an affordance that does not act. The grip, the grab cursor and the drop targets exist
