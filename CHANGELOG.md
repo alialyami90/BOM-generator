@@ -7,6 +7,14 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- The installer ships psa-devices 1.8.0 from v2 of the contractor's library:
+  the FortiGate 600F and 601F firewalls (230 V AC, now with their voltage and
+  load type), and the Hager NCN 2P set is DC rated, 250 V with the two poles
+  in series (6 kA; 15 kA at 125 V) and a DC magnetic multiple of 7, so it can
+  be chosen as `mcb_dc`. Hager MCN stays an AC set.
+
 ### Changed
 
 - `data/device-db/contractor-2026-10-31/` holds v2 of the contractor's
