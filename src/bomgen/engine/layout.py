@@ -8,9 +8,12 @@ after. Units are named by equipment id and unit number, never by tag.
 
 import math
 import re
+import shutil
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field, replace
-from typing import Literal
+from datetime import datetime
+from pathlib import Path
+from typing import TYPE_CHECKING, Literal
 
 import yaml
 
@@ -28,7 +31,7 @@ from bomgen.engine.sizing import (
     switch_ports,
 )
 from bomgen.engine.tags import first_number
-from bomgen.io.loader import LoadedSubstation
+from bomgen.io.loader import LoadedSubstation, load_substation
 from bomgen.models.library import Category, Media, PortSpeed, PurdueLevel
 from bomgen.models.panel import (
     DeviceInstance,
@@ -40,6 +43,9 @@ from bomgen.models.panel import (
 )
 from bomgen.models.substation import DeviceMove, Equipment, EquipmentRole, PairMove, Side, UnitRef
 from bomgen.models.substation import Layout as LayoutInputs
+
+if TYPE_CHECKING:
+    from bomgen.library_store.store import LibraryStore
 
 IssueKind = Literal[
     "device-too-tall",
@@ -837,3 +843,87 @@ def reconcile_panels_list(text: str, files: Sequence[str]) -> str:
     head = lines[start] if block else "panels:\n"  # a flow list becomes a block list
     items = [f"{indent}- {f}\n" for f in files]
     return "".join([*lines[:start], head, *items, *lines[end:]])
+
+
+@dataclass(frozen=True)
+class WrittenPanels:
+    """What ``write_generated_panels`` did: the files written, the hand-written ones it left
+    alone, where it copied the hand-written files it replaced, the layout report, and one
+    line per change to the ``panels`` list."""
+
+    written: list[Path]
+    refused: list[Path]
+    backup_dir: Path | None
+    report: LayoutReport
+    notes: list[str]
+
+
+def write_generated_panels(
+    substation_file: Path,
+    *,
+    replace_hand_written: bool,
+    backup: bool,
+    folder: Path | None = None,
+    store: "LibraryStore | None" = None,
+) -> WrittenPanels:
+    """Lay out ``substation_file`` and write its panel files (``bomgen layout``, ADR 0013).
+
+    Hand-written files in the way are left alone unless ``replace_hand_written``; with
+    ``backup`` they are first copied to ``panels/hand-written-<YYYYMMDD-HHMMSS>/``. Written
+    to the substation's own ``panels/`` folder (``folder`` unset), the ``panels`` list is
+    pointed at the written files and stale generated files are removed.
+    Raises ``InputError`` or ``EngineError`` when the substation cannot be laid out.
+    """
+    result = layout_substation(load_substation(substation_file, store=store))
+    target_folder = folder if folder is not None else substation_file.parent / "panels"
+    targets = {target_folder / f"{panel.id}.yaml": panel for panel in result.panels}
+    hand_written = [t for t in targets if t.exists() and not _is_generated(t)]
+    if hand_written and not replace_hand_written:
+        return WrittenPanels([], hand_written, None, result.report, [])
+    backup_dir = None
+    if hand_written and backup:
+        backup_dir = target_folder / f"hand-written-{datetime.now():%Y%m%d-%H%M%S}"
+        backup_dir.mkdir(parents=True)
+        for target in hand_written:
+            shutil.copy2(target, backup_dir / target.name)
+    target_folder.mkdir(parents=True, exist_ok=True)
+    for target, panel in targets.items():
+        target.write_text(render_panel_yaml(panel), encoding="utf-8")
+    notes = []
+    if folder is None:
+        notes = _relist_panels(substation_file, target_folder, list(targets))
+    return WrittenPanels(list(targets), [], backup_dir, result.report, notes)
+
+
+def _relist_panels(substation: Path, folder: Path, written: list[Path]) -> list[str]:
+    """Point substation.yaml's ``panels:`` at the written files; drop stale generated ones."""
+    notes: list[str] = []
+    text = substation.read_text(encoding="utf-8")
+    data = yaml.safe_load(text) or {}
+    base = substation.parent
+    files = [path.relative_to(base).as_posix() for path in written]
+    new_text = reconcile_panels_list(text, files)
+    if new_text != text:
+        substation.write_text(new_text, encoding="utf-8")
+        notes.append(f"updated the panels list in {substation}")
+    kept = {path.resolve() for path in written}
+    listed = {(base / entry).resolve() for entry in data.get("panels") or []}
+    for path in sorted(listed | {p.resolve() for p in folder.glob("*.yaml")}):
+        if path in kept or not path.exists():
+            continue
+        if _is_generated(path):
+            path.unlink()
+            notes.append(f"removed {path}: the layout no longer writes it")
+        elif path in listed:
+            notes.append(
+                f"{path}: hand-written, no longer listed in panels (manual_panels keeps it)"
+            )
+    return notes
+
+
+def _is_generated(path: Path) -> bool:
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError):
+        return False
+    return isinstance(data, dict) and data.get("generated") is True

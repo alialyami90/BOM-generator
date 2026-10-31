@@ -7,6 +7,14 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Panels: a board of hand-written panels has "Lay out panels from the
+  equipment". After a confirmation it writes the generated panel files as
+  `bomgen layout --force` does, copying each file it replaces to
+  `panels/hand-written-<date-time>/` first, and the board becomes draggable
+  (M19).
+
 ### Changed
 
 - The device editor shows "Minimum branch MCB" read-only, marked deprecated,
@@ -15,6 +23,10 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Dragging a device on the Panels board works in the installed app. The board
+  now drags with pointer events instead of HTML5 drag-and-drop, which never
+  reached the page in the Windows app; the drop rules, the live green or red
+  panel and Esc to cancel are unchanged (M19).
 - The installed app no longer carries the design prototype's illustrative
   substation, library and checks. When the window cannot reach the Python
   engine it says so on every page, with Try again, instead of showing example

@@ -51,6 +51,8 @@ from bomgen.app.substations import (
     substation_page,
 )
 from bomgen.bundle.errors import LibraryPackageError, RefusalKind
+from bomgen.engine.errors import EngineError
+from bomgen.engine.layout import write_generated_panels
 from bomgen.io import edit, lifecycle, loose_edit
 from bomgen.io.edit import EditError, EditResult
 from bomgen.io.errors import InputError
@@ -1097,6 +1099,36 @@ class Api:
                 removed=removed,
             )
         return {"fits": not check["issues"], **check}
+
+    @endpoint
+    def generate_panels(self, project_file: str, substation_id: str) -> dict[str, Any]:
+        """Lay out the substation's panels from its equipment and write them, replacing
+        hand-written panel files after copying them to ``panels/hand-written-<time>/``; the
+        Panels board is then editable. Returns the files written, that folder, the layout's
+        problems and the refreshed board."""
+        store = self._library_store()
+        project = Path(project_file)
+        with self._substation(substation_id):
+            file = resolve(project, substation_id, store).file
+        try:
+            written = write_generated_panels(
+                file, replace_hand_written=True, backup=True, store=store
+            )
+        except (InputError, EngineError) as exc:
+            raise AppError("edit_refused", f"The panels cannot be laid out: {exc}") from None
+        return {
+            "written": [str(path) for path in written.written],
+            "backup": str(written.backup_dir) if written.backup_dir else None,
+            "issues": [
+                {
+                    "level": "error" if issue.is_error else "warning",
+                    "subject": issue.subject,
+                    "message": issue.message,
+                }
+                for issue in written.report.issues
+            ],
+            "page": layout_page(project, substation_id, store),
+        }
 
     @endpoint
     def set_enclosure(

@@ -70,7 +70,8 @@
     if (!d.generated) {  // one banner: what the board is, and what the layout would report
       const n = d.issues.length;
       return `<div style="margin-bottom:var(--space-3)">${banner('info', `<b>Hand-written panels.</b> The board shows what <span class="mono">bomgen layout</span> would write; Build uses your panel files.${n && showIssues ? `<div style="margin-top:6px">Running it would report ${plural(n, 'problem')}:</div>${issueList(d.issues)}` : ''}`,
-        n ? `<button class="btn btn--secondary btn--sm" data-action="pv-issues" aria-expanded="${showIssues}">${showIssues ? 'Hide' : `Show ${plural(n, 'problem')}`}</button>` : '')}</div>`;
+        (n ? `<button class="btn btn--secondary btn--sm" data-action="pv-issues" aria-expanded="${showIssues}">${showIssues ? 'Hide' : `Show ${plural(n, 'problem')}`}</button>` : '')
+        + (d.panels.length ? '<button class="btn btn--secondary btn--sm" data-action="pv-generate">Lay out panels from the equipment</button>' : ''))}</div>`;
     }
     const errors = d.issues.filter((i) => i.level === 'error'), warnings = d.issues.filter((i) => i.level === 'warning');
     return (errors.length ? `<div style="margin-bottom:var(--space-3)">${banner('bad', `<b>${plural(errors.length, 'layout error')}.</b> Build is blocked until they are fixed.${issueList(errors)}`, '<a class="btn btn--secondary btn--sm" href="#/checks">Open checks</a>')}</div>` : '')
@@ -221,6 +222,24 @@
     const d = LAY.data;
     dialog({ title: 'Reset to automatic?', body: `<p>This releases ${[d.overrides.length ? plural(d.overrides.length, 'pin') : '', d.removed.length ? plural(d.removed.length, 'deleted device') : ''].filter(Boolean).join(' and ')}. The layout then places every device again. You can undo it.</p>`,
       actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="pv-reset-go">Reset to automatic</button>' });
+  };
+  /* Hand-written panels to generated ones: the bridge copies the files it replaces first. */
+  ACTIONS['pv-generate'] = () => {
+    const d = LAY.data, ids = d.panels.map((p) => p.id);
+    const replaced = d.list.filter((p) => !p.generated && !p.manual && ids.includes(p.id));
+    const dropped = d.list.filter((p) => !p.generated && !p.manual && !ids.includes(p.id));
+    dialog({ title: 'Lay out panels from the equipment?', body: `<p>${replaced.length ? `This replaces ${plural(replaced.length, 'hand-written panel file')} with panels` : 'This writes the panels'} laid out from the equipment. ${replaced.length ? 'Copies are kept in <span class="mono">panels/hand-written-…/</span>.' : ''}</p>
+      ${dropped.length ? `<p>${dropped.map((p) => esc(p.cabinet_name)).join(', ')} ${dropped.length === 1 ? 'is' : 'are'} no longer listed, so ${dropped.length === 1 ? 'it leaves' : 'they leave'} the BOM; the ${dropped.length === 1 ? 'file stays' : 'files stay'}.</p>` : ''}
+      <p>The board can then move, pin and delete devices.</p>`,
+      actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="pv-generate-go">Lay out panels</button>' });
+  };
+  ACTIONS['pv-generate-go'] = () => {
+    closeDialog();
+    busy = true; App.render();
+    Bridge.call('generate_panels', S.project.file, S.sub).then((r) => {
+      LAY.data = r.page; history.length = 0; showIssues = false;
+      toast(`Laid out ${plural(r.written.length, 'panel')}.${r.backup ? ` Hand-written files copied to panels/${r.backup.split(/[\\/]/).pop()}.` : ''}`);
+    }).catch((err) => toast(err.message, 'error')).then(() => { busy = false; App.render(); });
   };
   ACTIONS['pv-reset-go'] = () => { closeDialog(); showChanges = false; write({ overrides: [], removed: [] }, 'Reset to automatic'); };
   function changesList(d) {

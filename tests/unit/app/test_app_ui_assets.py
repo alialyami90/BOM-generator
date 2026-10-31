@@ -476,3 +476,17 @@ def test_the_panels_board_drags_with_pointer_events_not_html5_drag_and_drop() ->
     css = (UI_DIR / "styles.css").read_text(encoding="utf-8")
     assert re.search(r"\.dev\.is-movable \{[^}]*touch-action: none", css)
     assert re.search(r"body\.is-dragging-dev[^{]*\{[^}]*user-select: none", css)
+
+
+def test_a_hand_written_board_offers_to_lay_out_panels_after_a_confirm_that_names_the_copies() -> (
+    None
+):
+    """M19: the read-only board's banner has "Lay out panels from the equipment", which asks
+    first and says where the hand-written files are copied; editing.md describes it."""
+    js = (UI_DIR / "screens-panels.js").read_text(encoding="utf-8")
+    assert "Lay out panels from the equipment" in js
+    assert "Bridge.call('generate_panels'" in js
+    assert "panels/hand-written-" in js
+    assert 'data-action="pv-generate-go"' in js
+    editing = (DESIGN / "editing.md").read_text(encoding="utf-8")
+    assert "Lay out panels from the equipment" in editing

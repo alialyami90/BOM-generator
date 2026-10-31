@@ -128,3 +128,19 @@ def test_hand_written_panels_are_built_as_they_are(app: api.Api, project: Path) 
 
     assert [s["name"] for s in target["sheets"]][:4] == ["1", "2", "3", "4"]
     assert target["problems"] == []
+
+
+def test_api_generate_panels_makes_the_board_editable(
+    app: api.Api, project: Path, substation: Path
+) -> None:
+    assert ok(app.substation_layout(str(project), "gis01"))["generated"] is False
+    hand_written = (substation.parent / "panels" / "psa1.yaml").read_bytes()
+
+    reply = ok(app.generate_panels(str(project), "gis01"))
+
+    assert sorted(Path(p).name for p in reply["written"]) == ["psa1.yaml", "psa2.yaml"]
+    assert reply["backup"] is not None
+    assert (Path(reply["backup"]) / "psa1.yaml").read_bytes() == hand_written
+    assert reply["issues"] == []
+    assert reply["page"]["generated"] is True
+    assert ok(app.substation_layout(str(project), "gis01"))["generated"] is True
