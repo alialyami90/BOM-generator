@@ -9,6 +9,12 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- The installer ships psa-devices 1.3.0 with twelve parts researched in the
+  contractor's 2026-10-31 delivery, each its own alternative group:
+  C9300-24T-A, IE-4010-16S12P, RST2228-28SFP-HV, SEL-2743 and SEL-2744
+  switches, FG-121G, FG-60F, FG-70F and FGR-70F firewalls, SEL-3530-4 and
+  SEL-3350-1 RTACs and the SEL-2407 clock (`data/library/additions.yaml`).
+  The switches have no Purdue level yet, so they are not L1/L2 picks.
 - App: Device preview shows an AC unit's own AC branch MCB (M25, ADR 0025) as
   its PS1, in place of the "—" it showed before.
 - App: Parts rows collapse to a one-line summary at 20 or more rows ("1 U ·

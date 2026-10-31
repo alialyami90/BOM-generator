@@ -84,7 +84,7 @@ def test_projects_in_the_workspace_are_listed_with_their_substations(
     assert project["name"] == EXAMPLE_NAME
     assert project["file"] == str(example)
     assert project["library"]["name"] == "psa-devices"
-    assert project["library"]["version"] == "1.2.0"
+    assert project["library"]["version"] == "1.3.0"
     assert [(s["id"], s["panels"]) for s in project["substations"]] == [("gis01", 4)]
     assert project["status"] == {"level": "ok", "text": "Ready", "errors": 0}
 
@@ -217,7 +217,7 @@ def test_back_up_now_then_list_backups(app: api.Api, example: Path) -> None:
     (backup,) = ok(app.list_backups(str(example)))
     assert backup["path"] == saved["path"]
     assert backup["project_id"] == EXAMPLE_ID
-    assert backup["library_version"] == "1.2.0"
+    assert backup["library_version"] == "1.3.0"
     assert backup["size"] > 0
     assert backup["problem"] is None
 
