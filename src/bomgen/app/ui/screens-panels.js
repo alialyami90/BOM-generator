@@ -70,7 +70,8 @@
     if (!d.generated) {  // one banner: what the board is, and what the layout would report
       const n = d.issues.length;
       return `<div style="margin-bottom:var(--space-3)">${banner('info', `<b>Hand-written panels.</b> The board shows what <span class="mono">bomgen layout</span> would write; Build uses your panel files.${n && showIssues ? `<div style="margin-top:6px">Running it would report ${plural(n, 'problem')}:</div>${issueList(d.issues)}` : ''}`,
-        n ? `<button class="btn btn--secondary btn--sm" data-action="pv-issues" aria-expanded="${showIssues}">${showIssues ? 'Hide' : `Show ${plural(n, 'problem')}`}</button>` : '')}</div>`;
+        (n ? `<button class="btn btn--secondary btn--sm" data-action="pv-issues" aria-expanded="${showIssues}">${showIssues ? 'Hide' : `Show ${plural(n, 'problem')}`}</button>` : '')
+        + (d.panels.length ? '<button class="btn btn--secondary btn--sm" data-action="pv-generate">Lay out panels from the equipment</button>' : ''))}</div>`;
     }
     const errors = d.issues.filter((i) => i.level === 'error'), warnings = d.issues.filter((i) => i.level === 'warning');
     return (errors.length ? `<div style="margin-bottom:var(--space-3)">${banner('bad', `<b>${plural(errors.length, 'layout error')}.</b> Build is blocked until they are fixed.${issueList(errors)}`, '<a class="btn btn--secondary btn--sm" href="#/checks">Open checks</a>')}</div>` : '')
@@ -123,7 +124,7 @@
     const cards = [];
     rack.forEach((u) => {
       const id = uid(p, u), isSel = id === selected, isPartner = partner && `${u.key}:${u.side}` === partner;
-      cards.push(`<div class="dev ${u.cable_manager_u ? 'has-cm' : ''} ${isSel ? 'is-sel' : ''} ${isPartner ? 'is-partner' : ''} ${u.pinned ? 'is-pinned' : ''}" ${movable ? 'draggable="true" ' : ''}tabindex="0" role="button" aria-pressed="${isSel}" data-action="pv-select-dev" data-uid="${esc(id)}" style="height:${u.block_u * U}px"
+      cards.push(`<div class="dev ${u.cable_manager_u ? 'has-cm' : ''} ${isSel ? 'is-sel' : ''} ${isPartner ? 'is-partner' : ''} ${u.pinned ? 'is-pinned' : ''} ${movable ? 'is-movable' : ''}" tabindex="0" role="button" aria-pressed="${isSel}" data-action="pv-select-dev" data-uid="${esc(id)}" style="height:${u.block_u * U}px"
         aria-label="${esc(name(u))}${u.side ? ', side ' + u.side : ', common'}, ${u.block_u} U${u.cable_manager_u ? ' including a 1 U cable manager' : ''}${u.pinned ? ', pinned by an override' : ''}" title="${esc(u.part_id)} · ${esc(u.label)}">
         <span class="dev-row" style="height:${u.height_u * U - 2}px">${movable ? `<span class="dev-grip">${icon('grip')}</span>` : ''}<span class="dev-main"><b>${esc(name(u))}</b>${u.height_u >= 2 ? `<span class="mono">${esc(u.part_id)}</span>` : ''}</span>${u.pinned ? `<span class="dev-flag" title="Pinned by an override: stays here when the network changes">${icon('pin')}</span>` : ''}<span class="dev-u">${u.height_u} U</span></span>${u.cable_manager_u ? `<span class="dev-cm">Cable manager<span class="dev-u">${u.cable_manager_u} U</span></span>` : ''}</div>`);
       if (u.plate_below_u) cards.push(`<div class="plate" style="height:${u.plate_below_u * U}px" title="Blank plate (not in the BOM)"></div>`);
@@ -222,6 +223,24 @@
     dialog({ title: 'Reset to automatic?', body: `<p>This releases ${[d.overrides.length ? plural(d.overrides.length, 'pin') : '', d.removed.length ? plural(d.removed.length, 'deleted device') : ''].filter(Boolean).join(' and ')}. The layout then places every device again. You can undo it.</p>`,
       actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="pv-reset-go">Reset to automatic</button>' });
   };
+  /* Hand-written panels to generated ones: the bridge copies the files it replaces first. */
+  ACTIONS['pv-generate'] = () => {
+    const d = LAY.data, ids = d.panels.map((p) => p.id);
+    const replaced = d.list.filter((p) => !p.generated && !p.manual && ids.includes(p.id));
+    const dropped = d.list.filter((p) => !p.generated && !p.manual && !ids.includes(p.id));
+    dialog({ title: 'Lay out panels from the equipment?', body: `<p>${replaced.length ? `This replaces ${plural(replaced.length, 'hand-written panel file')} with panels` : 'This writes the panels'} laid out from the equipment. ${replaced.length ? 'Copies are kept in <span class="mono">panels/hand-written-…/</span>.' : ''}</p>
+      ${dropped.length ? `<p>${dropped.map((p) => esc(p.cabinet_name)).join(', ')} ${dropped.length === 1 ? 'is' : 'are'} no longer listed, so ${dropped.length === 1 ? 'it leaves' : 'they leave'} the BOM; the ${dropped.length === 1 ? 'file stays' : 'files stay'}.</p>` : ''}
+      <p>The board can then move, pin and delete devices.</p>`,
+      actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="pv-generate-go">Lay out panels</button>' });
+  };
+  ACTIONS['pv-generate-go'] = () => {
+    closeDialog();
+    busy = true; App.render();
+    Bridge.call('generate_panels', S.project.file, S.sub).then((r) => {
+      LAY.data = r.page; history.length = 0; showIssues = false;
+      toast(`Laid out ${plural(r.written.length, 'panel')}.${r.backup ? ` Hand-written files copied to panels/${r.backup.split(/[\\/]/).pop()}.` : ''}`);
+    }).catch((err) => toast(err.message, 'error')).then(() => { busy = false; App.render(); });
+  };
   ACTIONS['pv-reset-go'] = () => { closeDialog(); showChanges = false; write({ overrides: [], removed: [] }, 'Reset to automatic'); };
   function changesList(d) {
     const act = (a, i, t) => (d.generated ? `<button class="btn btn--ghost btn--sm" data-action="${a}" data-i="${i}">${t}</button>` : '');
@@ -231,7 +250,7 @@
   }
 
   /* ---------- drag and drop: the bridge says which panels can take the move ---------- */
-  let drag = null;  // { id, u, from, alone, fits: {panel: true|false|undefined}, at: {panel, position} }
+  let drag = null;  // { id, u, from, alone, fits: {panel: true|false|undefined}, why, at: {panel, index}, pointer, el }
   const onBoard = () => real() && LAY.data && !LAY.data.reason && editable() && (S.tab.panels || 'board') === 'board';
   const others = (u, alone) => LAY.data.overrides.filter((x) => !places(x, u, alone));
   function probe(n) {
@@ -241,38 +260,43 @@
     Bridge.call('check_layout', S.project.file, S.sub, [...others(u, d.alone), move], LAY.data.removed)
       .then((r) => { if (drag === d) { d.fits[n] = r.fits; d.why[n] = r.issues[0] ? r.issues[0].message : ''; paint(); } }).catch(() => {});
   }
-  function clearMarks() { $$('.bcol.drop-ok, .bcol.drop-bad').forEach((x) => x.classList.remove('drop-ok', 'drop-bad')); $$('.dev.ins-before, .dev.ins-after').forEach((x) => x.classList.remove('ins-before', 'ins-after')); }
+  function clearMarks() { document.body.classList.remove('is-drop-bad'); $$('.bcol.drop-ok, .bcol.drop-bad').forEach((x) => x.classList.remove('drop-ok', 'drop-bad')); $$('.dev.ins-before, .dev.ins-after').forEach((x) => x.classList.remove('ins-before', 'ins-after')); }
   function paint() {
     clearMarks();
     if (!drag || !drag.at) return;
     const n = drag.at.panel, cols = drag.u.side && !drag.alone ? pairPanels(n) : [n];
     const ok = drag.fits[n];
+    document.body.classList.toggle('is-drop-bad', ok === false);  // the captured block sets the cursor, so say it on the body
     cols.forEach((k) => { const c = document.querySelector(`.bcol[data-panel="${k}"]`); if (c && ok !== undefined) c.classList.add(ok ? 'drop-ok' : 'drop-bad'); });
     if (ok) { const devs = [...document.querySelectorAll(`.bcol[data-panel="${n}"] .dev`)]; const i = drag.at.index; if (devs[i]) devs[i].classList.add('ins-before'); else if (devs.length) devs[devs.length - 1].classList.add('ins-after'); }
   }
-  document.addEventListener('dragstart', (e) => {
-    const c = e.target.closest && e.target.closest('.dev[data-uid]'); if (!c || !onBoard() || busy) return;
-    const sel = unitOf(c.dataset.uid); if (!sel) return;
-    drag = { id: c.dataset.uid, u: sel.u, from: sel.p.number, alone: e.altKey && !!sel.u.side, fits: {}, why: {}, at: null };
-    e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', sel.u.key);
-    c.classList.add('is-dragging');
-    LAY.data.panels.forEach((p) => probe(p.number));
-  });
-  document.addEventListener('dragover', (e) => {
-    if (!drag) return;
-    const col = e.target.closest && e.target.closest('.bcol[data-panel]'); if (!col) { drag.at = null; paint(); return; }
+  /* Pointer events, not HTML5 drag-and-drop, which never reaches the page in the installed app (WebView2).
+     A press becomes a drag after 4 px; a click without movement still selects. */
+  let press = null, swallowClick = false;  // press: { el, id, x, y, alone, pointer }
+  function startDrag(e) {
+    const p = press, sel = unitOf(p.id); press = null;
+    if (!sel || !document.body.contains(p.el)) return;
+    drag = { id: p.id, u: sel.u, from: sel.p.number, alone: p.alone && !!sel.u.side, fits: {}, why: {}, at: null, pointer: p.pointer, el: p.el };
+    try { p.el.setPointerCapture(p.pointer); } catch (_) { /* the pointer is already gone */ }
+    p.el.classList.add('is-dragging'); document.body.classList.add('is-dragging-dev');
+    LAY.data.panels.forEach((x) => probe(x.number));
+    moveDrag(e);
+  }
+  function moveDrag(e) {
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    const col = under && under.closest('.bcol[data-panel]'); if (!col) { drag.at = null; paint(); return; }
     const n = +col.dataset.panel, devs = [...col.querySelectorAll('.dev')];
     const index = devs.filter((x) => { const r = x.getBoundingClientRect(); return r.top + r.height / 2 < e.clientY; }).length;  // the gap under the pointer
     drag.at = { panel: n, index };
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';  // a refused drop still lands, so the banner can say why
     paint();
-  });
-  document.addEventListener('drop', (e) => {
-    if (!drag) return;
-    const d = drag; drag = null; clearMarks();
-    if (!d.at) return;
-    e.preventDefault();
+  }
+  /* Ends a drag; only a drop that was not cancelled writes. A refused drop still lands, so the banner can say why. */
+  function endDrag(cancelled) {
+    const d = drag; drag = null; press = null; swallowClick = true;  // the click that follows a drag is not a select
+    clearMarks();
+    $$('.dev.is-dragging').forEach((x) => x.classList.remove('is-dragging')); document.body.classList.remove('is-dragging-dev');
+    try { if (d.el.hasPointerCapture(d.pointer)) d.el.releasePointerCapture(d.pointer); } catch (_) { /* already released */ }
+    if (cancelled || !d.at) return;
     const n = d.at.panel, u = d.u;
     const devs = [...document.querySelectorAll(`.bcol[data-panel="${n}"] .dev`)];
     const own = devs.findIndex((x) => x.dataset.uid === d.id);
@@ -282,8 +306,22 @@
     if (d.fits[n] === false) { refusal = d.why[n] ? sentence(d.why[n]) : (sideFits(u, n) ? `Panel ${n} cannot take ${name(u)}.` : `A side ${u.side} unit goes in ${u.side === 'A' ? 'an odd' : 'an even'} panel.`); App.render(); return; }
     const move = moveOf(u, n, position, d.alone);
     write({ overrides: [...others(u, d.alone), move] }, `Pinned ${describe(move)}`);
+  }
+  document.addEventListener('pointerdown', (e) => {
+    swallowClick = false;
+    if (drag || e.button !== 0 || !e.isPrimary) return;
+    const c = e.target.closest && e.target.closest('.dev.is-movable[data-uid]'); if (!c || !onBoard() || busy) return;
+    press = { el: c, id: c.dataset.uid, x: e.clientX, y: e.clientY, alone: e.altKey, pointer: e.pointerId };
   });
-  document.addEventListener('dragend', () => { if (drag) { drag = null; clearMarks(); } $$('.dev.is-dragging').forEach((x) => x.classList.remove('is-dragging')); });
+  document.addEventListener('pointermove', (e) => {
+    if (drag) { if (e.pointerId === drag.pointer) moveDrag(e); return; }
+    if (press && e.pointerId === press.pointer && Math.hypot(e.clientX - press.x, e.clientY - press.y) >= 4) startDrag(e);
+  });
+  document.addEventListener('pointerup', (e) => { press = null; if (drag && e.pointerId === drag.pointer) endDrag(false); });
+  document.addEventListener('pointercancel', (e) => { press = null; if (drag && e.pointerId === drag.pointer) endDrag(true); });
+  document.addEventListener('lostpointercapture', (e) => { if (drag && e.pointerId === drag.pointer) endDrag(true); });
+  document.addEventListener('keydown', (e) => { if (drag && e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); endDrag(true); } }, true);
+  document.addEventListener('click', (e) => { if (swallowClick) { swallowClick = false; e.stopPropagation(); e.preventDefault(); } }, true);
 
   /* ---------- keyboard moves and Move… (docs/ui/editing.md, Keyboard) ---------- */
   const panelOf = (n) => LAY.data.panels.find((p) => p.number === n);

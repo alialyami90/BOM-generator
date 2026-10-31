@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Annotated, NoReturn
 
 import typer
-import yaml
 
 from bomgen import __version__
 from bomgen.build import build_substation, workbook_name
@@ -15,7 +14,7 @@ from bomgen.checks import render_text
 from bomgen.engine.errors import EngineError
 from bomgen.engine.layout import with_layout
 from bomgen.io.errors import InputError
-from bomgen.io.loader import LoadedProject, LoadedSubstation, load_inputs, load_substation
+from bomgen.io.loader import LoadedProject, LoadedSubstation, load_inputs
 from bomgen.io.schema import write_json_schemas
 from bomgen.library_store.cli import library_app
 from bomgen.project_store.cli import project_app
@@ -203,12 +202,12 @@ def layout(
     ] = False,
 ) -> None:
     """Size the switches and write the generated panel files (ADR 0013)."""
-    from bomgen.engine.errors import EngineError
-    from bomgen.engine.layout import layout_substation, render_panel_yaml
+    from bomgen.engine.layout import write_generated_panels
 
     try:
-        loaded = load_substation(substation)
-        result = layout_substation(loaded)
+        written = write_generated_panels(
+            substation, replace_hand_written=force, backup=False, folder=out
+        )
     except InputError as error:
         for issue in error.issues:
             typer.echo(str(issue), err=True)
@@ -217,56 +216,19 @@ def layout(
     except EngineError as error:
         typer.echo(f"error: {error}", err=True)
         raise typer.Exit(1) from None
-    folder = out if out is not None else substation.parent / "panels"
-    targets = {folder / f"{panel.id}.yaml": panel for panel in result.panels}
-    hand_written = [t for t in targets if t.exists() and not _is_generated(t)]
-    if hand_written and not force:
-        for target in hand_written:
+    if written.refused:
+        for target in written.refused:
             typer.echo(f"{target}: hand-written panel file; not overwritten", err=True)
         typer.echo("Use --out to write elsewhere, or --force to replace them.", err=True)
         raise typer.Exit(1)
-    folder.mkdir(parents=True, exist_ok=True)
-    for target, panel in targets.items():
-        target.write_text(render_panel_yaml(panel), encoding="utf-8")
+    for target in written.written:
         typer.echo(f"wrote {target}")
-    if out is None:
-        _relist_panels(substation, folder, list(targets))
-    for line in result.report.lines():
+    for note in written.notes:
+        typer.echo(note)
+    for line in written.report.lines():
         typer.echo(line)
-    if result.report.has_errors:
+    if written.report.has_errors:
         raise typer.Exit(1)
-
-
-def _relist_panels(substation: Path, folder: Path, written: list[Path]) -> None:
-    """Point substation.yaml's ``panels:`` at the written files; drop stale generated ones."""
-    from bomgen.engine.layout import reconcile_panels_list
-
-    text = substation.read_text(encoding="utf-8")
-    data = yaml.safe_load(text) or {}
-    base = substation.parent
-    files = [path.relative_to(base).as_posix() for path in written]
-    new_text = reconcile_panels_list(text, files)
-    if new_text != text:
-        substation.write_text(new_text, encoding="utf-8")
-        typer.echo(f"updated the panels list in {substation}")
-    kept = {path.resolve() for path in written}
-    listed = {(base / entry).resolve() for entry in data.get("panels") or []}
-    for path in sorted(listed | {p.resolve() for p in folder.glob("*.yaml")}):
-        if path in kept or not path.exists():
-            continue
-        if _is_generated(path):
-            path.unlink()
-            typer.echo(f"removed {path}: the layout no longer writes it")
-        elif path in listed:
-            typer.echo(f"{path}: hand-written, no longer listed in panels (manual_panels keeps it)")
-
-
-def _is_generated(path: Path) -> bool:
-    try:
-        data = yaml.safe_load(path.read_text(encoding="utf-8"))
-    except (OSError, yaml.YAMLError):
-        return False
-    return isinstance(data, dict) and data.get("generated") is True
 
 
 @app.command()
