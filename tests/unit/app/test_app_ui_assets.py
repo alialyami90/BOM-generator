@@ -449,8 +449,10 @@ def test_the_deprecated_minimum_branch_mcb_is_shown_read_only_with_why() -> None
 
 def test_the_panels_board_drags_with_pointer_events_not_html5_drag_and_drop() -> None:
     """M19: HTML5 drag-and-drop does not reach the board in the installed app (WebView2), so the
-    board drags with pointer events and pointer capture, and a cancel or lost capture ends it."""
+    board drags with pointer events and pointer capture, and a cancel or lost capture ends it.
+    M24 moved the pointer handling into drag.js, shared with Device preview."""
     js = (UI_DIR / "screens-panels.js").read_text(encoding="utf-8")
+    js += (UI_DIR / "drag.js").read_text(encoding="utf-8")
     for html5 in ("draggable", "dragstart", "dragover", "dataTransfer"):
         assert html5 not in js, html5
     for event in ("pointerdown", "pointermove", "pointerup", "pointercancel", "lostpointercapture"):
@@ -525,3 +527,17 @@ def test_network_rows_have_a_cable_manager_switch_written_through_its_endpoint()
     assert "Bridge.call('set_cable_manager'" in js
     assert '<label class="switch prow-cm"' in js
     assert "${r.cable_manager ? " in js  # network rows only
+
+
+# -- Device preview (plan M24; docs/ui/screens.md "Device preview") ---------------------------
+
+
+def test_board_and_preview_load_the_shared_drag_helper() -> None:
+    index = (UI_DIR / "index.html").read_text(encoding="utf-8")
+    assert index.index('src="drag.js"') < index.index('src="screens-panels.js"')
+    drag = (UI_DIR / "drag.js").read_text(encoding="utf-8")
+    for needle in ("setPointerCapture", "lostpointercapture", "pointercancel", "< 4)", "'Escape'"):
+        assert needle in drag
+    panels = (UI_DIR / "screens-panels.js").read_text(encoding="utf-8")
+    assert "App.pointerDrag({ handle: '.dev.is-movable[data-uid]'" in panels
+    assert "setPointerCapture" not in panels
