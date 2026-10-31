@@ -174,3 +174,12 @@ def test_the_fortigate_401g_and_701g_list_their_5g_and_25g_ports(shipped: Librar
         assert (1, "2.5G", "fixed") in speeds, part_id
         assert (4, "25G", "sfp_slot") in speeds, part_id
         assert (part.category, part.supply_type, part.unit_power_w) == ("firewall", "VAC", 295)
+
+
+def test_the_hubbell_fibre_shelves_come_in_as_patch_panels(shipped: Library) -> None:
+    shelves = [d for d in shipped.devices if d.part_id.startswith("HUBBELL-FEUR")]
+
+    assert len(shelves) == 21  # the delivery's fiber_patch_panel parts
+    for shelf in shelves:
+        assert (shelf.category, shelf.make, shelf.height_u) == ("patch_panel", "Hubbell", 1)
+        assert shelf.ordering_code == shelf.model
