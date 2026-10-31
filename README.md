@@ -13,7 +13,7 @@ setup, and page headers/footers.
 
 ## Status
 
-v0.3.0 is released ([`CHANGELOG.md`](CHANGELOG.md)). The next work waits on
+v0.3.1 is released ([`CHANGELOG.md`](CHANGELOG.md)). The next work waits on
 Ali's testing feedback on it.
 
 Done in v0.1:
@@ -111,9 +111,12 @@ preview"):
   them (ADR 0025).
 - M26: device nameplates, one BOM row per panel and a Nameplates sheet
   (ADR 0026).
-- The installer ships psa-devices 1.6.0: researched switches, firewalls,
-  RTACs and a clock, Hager AC MCB sets, and the nameplate part. 2.5G, 5G and
+- The installer ships psa-devices 1.7.0: researched switches, firewalls,
+  RTACs and a clock, Hager AC MCB sets, Hubbell fibre shelves and the
+  nameplate part. 2.5G, 5G and
   25G ports are listed but never sized for SFPs (ADR 0027).
+- v0.3.1: Settings and Parts open on a new, blank substation (they showed
+  "StopIteration:" in 0.3.0).
 
 The terms project, substation, side and stream are defined in `docs/plan.md` →
 "Glossary".
