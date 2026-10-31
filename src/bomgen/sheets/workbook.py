@@ -15,6 +15,7 @@ from bomgen.sheets import heat_calc_sheet, heat_diss_sheet, styles
 from bomgen.sheets import power_sheet as power_module
 from bomgen.sheets.bom_sheet import BomSheet, bom_sheet, loose_sheet
 from bomgen.sheets.header_footer import bom_header_footer, calc_header_footer, fitting_size
+from bomgen.sheets.nameplate_sheet import nameplate_sheet
 from bomgen.sheets.power_sheet import BomSource
 
 
@@ -49,6 +50,17 @@ def build_workbook(
         document = loaded.documents[panels[loose.host_panel].document]
         header_footer = bom_header_footer(project_name, names.loose_material, document, logo)
         add(loose_sheet(names.loose_material, loose, header_footer), loose)
+    if result.nameplates:
+        # Issued under the first panel's document, as the BOM sheets are (ADR 0026).
+        document = loaded.documents[loaded.panels[0].document]
+        header_footer = bom_header_footer(project_name, names.nameplates, document, logo)
+        numbers = {panel.id: panel.cabinet_number for panel in loaded.panels}
+        substation_name = loaded.substation.substation.name
+        sheets.append(
+            nameplate_sheet(
+                names.nameplates, substation_name, result.nameplates, numbers, header_footer
+            )
+        )
 
     if result.power is None or result.heat is None:
         return WorkbookModel(sheets=tuple(sheets))

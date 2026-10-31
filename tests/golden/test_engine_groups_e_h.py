@@ -79,9 +79,10 @@ def test_groups_in_order_with_separators_before_e_to_h(result: BuildResult) -> N
         ]
 
 
-def test_cabinet_001_numbers_71_rows(result: BuildResult) -> None:
-    # Plan M3: SR.NO 1...71 on cabinet 001 (one SR.NO per line; separators carry none).
-    assert len(panel(result, "psa1").lines) == 71
+def test_cabinet_001_numbers_72_rows(result: BuildResult) -> None:
+    # Plan M3: SR.NO 1...71 on cabinet 001 (one SR.NO per line; separators carry none),
+    # plus the device nameplate row (ADR 0026).
+    assert len(panel(result, "psa1").lines) == 72
 
 
 def test_dc_branches_of_cabinet_001(result: BuildResult) -> None:
@@ -177,6 +178,6 @@ def test_hwio_panel_totals_cover_xdin(result: BuildResult) -> None:
 def test_grounding_rows(result: BuildResult) -> None:
     # How each panel BOM groups its materials, group H: description only, no make/model.
     for p in result.panels:
-        h = [x for x in p.lines if x.group is Group.H]
+        h = [x for x in p.lines if x.group is Group.H and x.tag is not None]
         assert h
         assert all((x.make, x.model, x.ordering_code, x.qty) == (None, None, None, 1) for x in h)

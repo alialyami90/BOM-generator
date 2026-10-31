@@ -403,6 +403,7 @@ class Housekeeping(InputModel):
     ipr_kit: HousekeepingRef
     change_over_diodes: ChangeOverDiodes
     socket: SocketRef
+    nameplate: HousekeepingRef | None = None  # one row per panel, its tagged units (ADR 0026)
 
 
 class Catalogues(InputModel):

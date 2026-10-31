@@ -55,6 +55,21 @@ def busbar(tag: str, description: str) -> Row:
     return (tag, description, 1, None, None, None, 0)
 
 
+# ADR 0026: one row per panel after the busbars, qty = the panel's tagged group B units.
+# The part is A4's NAMEPLATE-0828805 (data/device-db/housekeeping.yaml).
+NAMEPLATE = (
+    "Device nameplate, white PVC plate 60 x 30 mm, self-adhesive",
+    "Phoenix Contact",
+    "US-EMLP (60X30)",
+    "0828805",
+)  # description, make, model, code
+
+
+def nameplate(qty: int) -> Row:
+    description, make, model, code = NAMEPLATE
+    return (None, description, qty, make, model, code, 0)
+
+
 def dc_feed(prefix: str, feed: int, main_a: int, loads: list[str], spares: int) -> list[Row]:
     used = [mcb(f"{prefix}-Q{feed}.{n}", 2, f"{load} PS{feed}") for n, load in enumerate(loads, 1)]
     spare = [
@@ -106,7 +121,7 @@ def network_cabinet(prefix: str, lan: str, gateway: int, socket: bool) -> list[R
         busbar("AC SAFETY POWER-GROUND", AC_SAFETY_GROUND),
         busbar("INSTRUMENT-GROUND", INSTRUMENT_GROUND),
     ]
-    return [*ac, *dc, *terminals, *grounding]
+    return [*ac, *dc, *terminals, *grounding, nameplate(11)]
 
 
 PSA1_E_TO_H = network_cabinet("PSA1", "A", 1, socket=False)
@@ -161,6 +176,7 @@ PSA3_E_TO_H: list[Row] = [
     ),  # 60-61, 65-68
     busbar("AC SAFETY POWER-GROUND", AC_SAFETY_GROUND),  # 63
     busbar("INSTRUMENT-GROUND", INSTRUMENT_GROUND),  # 64
+    nameplate(3),  # GPS, RTAC, HWIO (ADR 0026)
 ]
 
 # 'Aux' rows 17-45. The console's DC rows follow the spec order Q1, Q1.n, Q2, Q2.n
@@ -190,4 +206,5 @@ WS_E_TO_H: list[Row] = [
     strip("WS-X4-COD", "Change-over Circuits", 6),  # 39
     strip("WS-XIP", "Interpanel Wiring", 12),  # 40
     busbar("POWER-GROUND", POWER_GROUND),  # 45
+    nameplate(3),  # SRV/OAS/EAS, MONITOR, Keyboard & Mouse (ADR 0026)
 ]

@@ -553,6 +553,14 @@ devices:
     power_supplies: 1  # single-fed through PSA3's change-over diodes (PSA3-QCOD-1)
     min_branch_mcb_a: 2
 
+  - part_id: NAMEPLATE-0828805  # not in the workbook: one per tagged unit (ADR 0026)
+    category: accessory
+    alt_group: NAMEPLATE-0828805
+    make: Phoenix Contact
+    model: US-EMLP (60X30)
+    ordering_code: "0828805"
+    description_template: "Device nameplate, white PVC plate 60 x 30 mm, self-adhesive"
+
   - part_id: LPA37-696  # 'Aux' row 50 (child of the annunciator)
     category: accessory
     alt_group: LPA37-696  # M14 (ADR 0017)
@@ -4696,6 +4704,7 @@ catalogues:
     ipr_kit: { part_id: IPR-2903685 }
     change_over_diodes: { negative: COD-NEG-IRND150F12, positive: COD-POS-IRMD150F12 }
     socket: { part_id: SOCKET-730076, rating_a: 10 }
+    nameplate: { part_id: NAMEPLATE-0828805 }  # ADR 0026
 
 # Brand sets a project can pick instead of the `catalogues` defaults (ADR 0017, M14).
 # Codes, ratings and trip data come from data/device-db/ (MCB-*, AUX-*, TB-*, BUSBAR-*).
