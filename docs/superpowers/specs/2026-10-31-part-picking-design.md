@@ -30,6 +30,7 @@ needs, look at the result". Success means:
 | f | Does priority choose the panel? | No. Devices go to panels as today (equipment order, ADR 0013); priority only orders the stack inside each panel. |
 | g | Preview content | A per-device table and a front view (elevation) of each panel. |
 | h | SFP selection | One SFP model per media and speed the switch needs; the sizing still computes the counts. |
+| i | Drag and drop in the panel views | Both: the Panels board's dragging does not work in the installed app and must be fixed, and the Preview's panel elevation gets dragging too. |
 
 ## 3. The Parts page
 
@@ -139,7 +140,27 @@ the nav. It runs the engine without writing the workbook.
   height, blank space, and the waist-height line.
 - Check report issues appear above both, with "Go to" links to the row on the Parts page.
 
+- **Dragging on the elevation** works as on the Panels board (editing.md, "Drag and drop
+  contract"): drag a unit to another panel or U, Alt moves one unit of a pair, the target is
+  checked live, and a drop saves a pin in `layout.overrides`. Dropping a KVM or console away from
+  waist height is allowed (the pin wins) and the preview marks it. The same pointer-based drag
+  code as the board fix (section 6a) is used, so both views behave the same.
+
 The existing workbook sheet preview stays where it is.
+
+## 6a. Panels board drag and drop fix
+
+The board has HTML5 drag-and-drop code since M17 (`screens-panels.js`, `dragstart`/`drop`), and
+the Linux Playwright test passes, but Ali reports dragging does not work in the installed Windows
+app (WebView2). Plan:
+
+1. Reproduce on the Windows CI runner (the "Build Windows installer" job can drive the frozen app
+   with a Playwright/WebView2 script) to find the cause: WebView2 or pywebview blocking HTML5
+   drag events is the most likely one.
+2. Replace HTML5 drag-and-drop with pointer events (`pointerdown`/`pointermove`/`pointerup` with
+   pointer capture), which WebView2 handles like any click. Same states, same bridge check,
+   same Esc-cancels and Alt-moves-one rules; the keyboard "Move…" path is unchanged.
+3. A test drives a drag with pointer events in Playwright and asserts the pin is saved.
 
 ## 7. Improvements added (Ali asked for these "as you see fit")
 
@@ -152,11 +173,12 @@ The existing workbook sheet preview stays where it is.
 
 | Milestone | Content |
 | --- | --- |
-| M19 | ADR 0024; `Equipment.ordering_code`, `overrides`, `sfp`, new roles and categories, `defaults.layout`; derived parts in the loader; schemas; spec update. TDD, golden test unchanged. |
-| M20 | Panel priority and waist-height placement in `engine/layout.py`; ADR 0013 amendment; layout preview gives top U per unit. |
-| M21 | Parts page design in `docs/ui/` with the impeccable skill (CLAUDE.md "UI work"). |
-| M22 | Parts page in the app, replacing Network; writers for the new fields. |
-| M23 | Preview page (engine API for per-unit MCBs and positions, table and elevation). |
+| M19 | Panels board drag fix (section 6a): pointer-event drag, Windows reproduction, test. Ships first; it is independent. |
+| M20 | ADR 0024; `Equipment.ordering_code`, `overrides`, `sfp`, new roles and categories, `defaults.layout`; derived parts in the loader; schemas; spec update. TDD, golden test unchanged. |
+| M21 | Panel priority and waist-height placement in `engine/layout.py`; ADR 0013 amendment; layout preview gives top U per unit. |
+| M22 | Parts page design in `docs/ui/` with the impeccable skill (CLAUDE.md "UI work"). |
+| M23 | Parts page in the app, replacing Network; writers for the new fields. |
+| M24 | Preview page (engine API for per-unit MCBs and positions, table, elevation with dragging). |
 
 ## 9. Testing
 
