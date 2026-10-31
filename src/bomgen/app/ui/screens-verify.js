@@ -96,7 +96,7 @@
     if (!c || !c.data) return waiting('Build', c, 'Reading the substation…');
     const t = c.data;
     if (B.key !== c.key) Object.assign(B, { key: c.key, state: 'ready', result: null, error: null, name: t.file_name || '', folder: t.folder, compare: false, previous: '' });
-    const errors = t.problems.filter((p) => p.level === 'error').length, warnings = t.problems.length - errors;
+    const errors = t.problems.filter((p) => p.level === 'error').length, warnings = t.problems.length - errors + t.flags;
     const blocked = errors > 0, busy = B.state === 'building';
     let result = '';
     if (busy) result = `<div class="stack" style="max-width:520px"><h3>Building…</h3><div class="progress progress--busy" role="progressbar" aria-label="Build progress"><i></i></div>

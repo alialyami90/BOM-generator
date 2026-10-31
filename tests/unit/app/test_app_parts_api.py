@@ -83,6 +83,23 @@ def test_a_new_blank_substation_opens_its_parts_page(project: Path, store: Libra
     assert found["default_rows"]
 
 
+def test_starting_a_blank_substations_parts_lays_out_its_panels(
+    app: api.Api, project: Path, store: LibraryStore
+) -> None:
+    """Panels follow the equipment with no manual step (Ali, 2026-10-28; audit ALI-3)."""
+    lifecycle.create_substation(project, "b", "b", store=store)
+    rows = [
+        {"role": "time_server", "part_id": "SEL-2488"},
+        {"role": "l2_switch", "part_id": "RST2228-L2", "redundant": True},
+    ]
+
+    ok(app.start_parts(str(project), "b", rows))
+
+    listed = read_yaml(project.parent / "substations" / "b" / "substation.yaml").data["panels"]
+    assert listed == ["panels/psa1.yaml", "panels/psa2.yaml"]
+    assert ok(app.build_target(str(project), "b"))["problems"] == []
+
+
 def test_a_row_is_named_by_its_role_or_else_by_its_part_category(
     project: Path, store: LibraryStore
 ) -> None:

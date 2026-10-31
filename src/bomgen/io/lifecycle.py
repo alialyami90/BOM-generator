@@ -171,6 +171,7 @@ def _blank(
                 "cable_entry": "top",
             },
             "document": keys["bom"],
+            "options": {"inter_panel_terminals": 40},  # network cabinets (spec, XIP)
         },
     }
     entries = [

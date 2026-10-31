@@ -121,6 +121,17 @@ def test_no_loose_table_without_loose_material() -> None:
     assert build(loaded()).loose is None
 
 
+def test_device_loose_items_go_to_the_first_panel_without_a_loose_material_block() -> None:
+    # A new substation has no loose_material block; its devices' kits must not vanish.
+    cable_manager = device("CM", "cable_manager", tag_pattern="Cable Manager")
+    lib = library(switch("L2", "L2"), cable_manager, *LOOSE_PARTS)
+    p1 = panel([{"part_id": "L2"}, {"part_id": "GPS"}], id="p1")
+    table = build(loaded(lib=lib, panels=(p1,))).loose
+    assert table is not None
+    assert table.host_panel == "p1"
+    assert [line.part_id for line in table.lines] == ["ANT", "CABLE"]
+
+
 def test_no_loose_lines_no_loose_table() -> None:
     # The Loose Material sheet is written only while it has rows (ADR 0020, 0022).
     lib = library(*LOOSE_PARTS)
