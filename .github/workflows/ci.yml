@@ -2,13 +2,16 @@ name: CI
 
 # Runs lint, type-check and tests on pull requests and on pushes to main.
 #
-# Docs-only changes (docs/**, **/*.md, LICENSE) must not run the test jobs.
+# Docs-only changes (docs/**, **/*.md, LICENSE) must not run the test jobs,
+# except docs/ui/** (tokens, fonts and editing.md the app tests read) and data/**
+# (the library and device-db, whose markdown ships in the default .bomlib).
 # We do NOT use `paths-ignore` for that: a workflow skipped by `paths-ignore`
 # never reports a status, so a *required* status check would wait forever on a
 # docs-only PR. Instead:
 #
 #   1. `changes` always runs and uses dorny/paths-filter to decide whether any
-#      non-docs file changed (output `code` = 'true' / 'false').
+#      non-docs file, or a file under docs/ui or data, changed (output `code` =
+#      'true' / 'false').
 #   2. `lint`, `typecheck` and `test` run only when `code` is 'true'. When they
 #      are skipped by their `if:`, GitHub records them as "skipped", not pending.
 #   3. `ci-status` always runs, after everything else, and is the ONE job to mark
@@ -34,7 +37,7 @@ jobs:
     name: Detect code changes
     runs-on: ubuntu-latest
     outputs:
-      code: ${{ steps.filter.outputs.code }}
+      code: ${{ steps.filter.outputs.code == 'true' || steps.filter.outputs.read_by_code == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - id: filter
@@ -49,6 +52,9 @@ jobs:
               - '!docs/**'
               - '!**/*.md'
               - '!LICENSE'
+            # Docs that code or tests read; one pattern, so 'every' is the same as 'some'.
+            read_by_code:
+              - '{docs/ui,data}/**'
 
   lint:
     name: Lint (ruff)
