@@ -17,7 +17,7 @@ from bomgen.engine.network import port_plan
 from bomgen.engine.units import DeviceRow, expand_devices
 from bomgen.io.loader import LoadedSubstation
 from bomgen.library_store.store import LibraryRef, library_mismatch
-from bomgen.models.bom import BomTable, BuildResult, PanelBom, QtySum
+from bomgen.models.bom import BomTable, BuildResult, LooseTable, PanelBom, QtySum
 from bomgen.models.calc import BranchMcb, DcMains, HeatResult
 from bomgen.models.library import Library, Media, PortKind, PortSpeed, SupplyType
 from bomgen.models.panel import Panel, Ventilation
@@ -43,6 +43,7 @@ def check_report(loaded: LoadedSubstation, result: BuildResult) -> CheckReport:
     if di is not None:
         items.append(di)
     items += part_number_checks(loaded.substation.equipment, loaded.library)
+    items += external_ac_checks(result.loose, loaded.library)
     return CheckReport(items=tuple(items))
 
 
@@ -345,6 +346,26 @@ def part_number_checks(equipment: Iterable[Equipment], library: Library) -> list
                 status=CheckStatus.WARN,
                 subject=entry.id,
                 message="no part number; the BOM prints the library model",
+            )
+        )
+    return items
+
+
+def external_ac_checks(loose: LooseTable | None, library: Library) -> list[CheckItem]:
+    """A warning per AC loose load: Power Consumption's External Equipment block holds
+    station DC loads only, so the load is in neither the power nor the heat totals."""
+    items = []
+    for line in loose.lines if loose is not None else ():
+        part = library.get(line.part_id) if line.part_id is not None else None
+        if part is None or part.excluded_from_power or part.supply_type is not SupplyType.VAC:
+            continue
+        items.append(
+            CheckItem(
+                check="external_ac",
+                status=CheckStatus.WARN,
+                subject=line.part_id or line.description,
+                message=f"{line.qty} x {part.unit_power_w:g} W AC left out of the power and heat "
+                "totals: External Equipment counts station DC loads only",
             )
         )
     return items

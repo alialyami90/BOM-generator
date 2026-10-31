@@ -955,6 +955,11 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
 - **M26 — Device nameplates.** One nameplate row per panel (its tagged group B units, last in group
   H) and a Nameplates sheet with every plate's text (ADR 0026, Q53). Plan:
   [`superpowers/plans/2026-10-31-m26-device-nameplates.md`](superpowers/plans/2026-10-31-m26-device-nameplates.md).
+- **M33 — Sheet consistency.** Power Consumption's P and voltage follow the branch MCB (ADR 0028),
+  AC loose loads are reported, the steel-coefficient box and the nameplate row are laid out per
+  the spec, and the audit's untested rules get tests (audit 2026-10-31: ENG-4, ENG-5, ENG-7,
+  ENG-8, ENG-12 to ENG-15). Plan:
+  [`superpowers/plans/2026-10-31-m33-sheet-consistency.md`](superpowers/plans/2026-10-31-m33-sheet-consistency.md).
 
 ## 5. Testing strategy
 

@@ -3,9 +3,12 @@
 from dataclasses import replace
 from pathlib import Path
 
+import engine_factories as f
 import pytest
 
+from bomgen.engine.nameplates import nameplate_item, nameplates
 from bomgen.engine.pipeline import build
+from bomgen.engine.units import expand_devices
 from bomgen.io.loader import LoadedSubstation, load_substation
 from bomgen.models.bom import BomLine, BuildResult, Group
 
@@ -79,3 +82,41 @@ def test_no_nameplate_role_means_no_row(example: LoadedSubstation, built: BuildR
     assert result.nameplates == ()
     for panel in built.panels:
         assert lines(result, panel.panel_id) == lines(built, panel.panel_id)[:-1]
+
+
+# Rules on their own, without the example (ADR 0026, item 1).
+
+LIB = f.library(
+    f.switch("L1", "L1"),
+    f.powered("KB", "component", tag_type="KB"),
+    f.powered("GW", "gateway", tag_type="GW", tag_pattern="{prefix}-DHPCC-GW-{lan_index}"),
+    f.device("CABLE"),
+)
+
+
+def plate_texts(*devices: dict[str, object]) -> list[str]:
+    p = f.panel(list(devices))
+    return [x.text for x in nameplates(p, expand_devices(p, LIB)).plates]
+
+
+def test_a_tag_override_is_printed_as_written() -> None:
+    assert plate_texts({"part_id": "KB", "tag": "Keyboard & Mouse"}) == ["Keyboard & Mouse"]
+
+
+def test_a_multi_quantity_row_gets_a_plate_per_unit() -> None:
+    assert plate_texts({"part_id": "L1", "qty": 3}) == ["L1_ESW_A11", "L1_ESW_A12", "L1_ESW_A13"]
+
+
+def test_a_panel_with_no_tagged_units_has_no_plates_and_no_row() -> None:
+    p = f.panel([{"part_id": "CABLE", "qty": 2}])
+    assert nameplates(p, expand_devices(p, LIB)).plates == ()
+    assert nameplate_item(p, LIB, 0) is None
+
+
+# Tag naming conventions: every unit has its own tag (ENG-15).
+
+
+@pytest.mark.xfail(strict=True, reason="ENG-1: the gateway pattern numbers by LAN, not by unit")
+def test_two_units_of_one_tag_pattern_in_a_panel_get_different_tags() -> None:
+    texts = plate_texts({"part_id": "GW"}, {"part_id": "GW"})
+    assert len(set(texts)) == 2
