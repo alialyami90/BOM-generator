@@ -21,11 +21,13 @@
       LAY.state = 'loading';
       const current = () => LAY.key === key;
       Bridge.call('substation_layout', S.project.file, S.sub)
-        .then((d) => { if (current()) LAY.data = d; }).catch((err) => { if (current()) { LAY.error = err; toast(err.message, 'error'); } })
+        .then((d) => { if (current()) { LAY.data = d; counted(d); } }).catch((err) => { if (current()) { LAY.error = err; toast(err.message, 'error'); } })
         .then(() => { if (current()) { LAY.state = 'loaded'; App.render(); } });
     }
     return LAY.state === 'loaded' ? LAY : null;
   }
+  /* The rail falls back on the substation's panel count while a layout reloads, so keep it current. */
+  const counted = (d) => { const sub = App.curSub(); if (sub && !d.reason) sub.panels = d.list.length; };
 
   /* ---------- Result card (called from screens-parts.js) ---------- */
   function resultCard() {
@@ -44,7 +46,10 @@
       <p class="muted small" style="margin-top:var(--space-2)">${ring ? 'Rings: two ports close each ring.' : 'Star: each L1 switch has one uplink to its L2 switch plus an A–B interlink.'}</p>
       <a class="btn btn--secondary btn--sm" href="#/panels" style="margin-top:var(--space-3)">${icon('panels')}See the panels</a></div>`;
   }
-  App.network = { resultCard, reload: () => { LAY.state = 'idle'; } };  // after a Parts input is saved
+  App.network = { resultCard, reload: () => { LAY.state = 'idle'; } };
+  /* The id of generated panel n in the last layout read, for the panel editor and whereToFix. */
+  App.generatedPanelId = (n) => { const p = LAY.data && LAY.data.panels.find((x) => x.number === n); return p ? p.id : null; };
+  App.panelsShowChanges = () => { showChanges = true; S.tab.panels = 'board'; };  // after a Parts input is saved
   /* The rail's Panels count: the panel files of the last layout read for the open substation, or null. */
   App.panelCount = () => (real() && LAY.state === 'loaded' && LAY.data && LAY.key === `${S.project.file}#${S.sub}` && !LAY.data.reason ? LAY.data.list.length : null);
 
@@ -72,16 +77,23 @@
   SCREENS.panels = () => {
     if (!real()) return `<div class="page">${pageHead('Panels')}<div class="empty"><b>Open a substation first.</b></div></div>`;
     const { b } = App.route();
-    if (b) return `<div class="page">${pageHead('Panel', 'The panel editor comes with the substation writers.')}<a class="btn btn--secondary" href="#/panels">Back to the panels</a></div>`;
+    if (b) return App.panelEditor(b);
     const l = layout();
     if (!l || !l.data) return `<div class="page">${pageHead('Panels', l && l.error ? esc(l.error.message) : 'Laying out the panels…')}</div>`;
     const d = l.data;
-    if (d.reason) return `<div class="page">${pageHead('Panels', 'Laid out from the equipment and network.')}${banner('bad', `<b>No layout.</b> ${esc(d.reason)}.`, '<a class="btn btn--secondary btn--sm" href="#/checks">Open checks</a>')}</div>`;
+    if (d.reason) return `<div class="page">${pageHead('Panels', 'Laid out from the equipment and network.')}${banner('bad', `<b>No layout.</b> ${esc(d.reason)}.`, App.fixButtons(d.problems))}</div>`;
     const t = ['board', 'list'].includes(S.tab.panels) ? S.tab.panels : 'board';
-    return `<div class="page page--wide">${pageHead('Panels', d.generated ? 'Placed by the engine from the equipment and network. Drag a device to another panel or position, or pin it where it is. A pair moves together; hold Alt to move one unit.' : 'Laid out by the engine from the equipment and network.', history.length ? `<button class="btn btn--secondary" data-action="pv-undo">${icon('undo')}Undo</button>` : '')}
+    return `<div class="page page--wide">${pageHead('Panels', d.generated ? 'Placed by the engine from the equipment and network. Drag a device to another panel or position, or pin it where it is. A pair moves together; hold Alt to move one unit.' : 'Laid out by the engine from the equipment and network.', d.generated ? headActions(d) : '')}
       ${tabs('panels', [['board', 'Board'], ['list', 'List']], t, 'Panels view')}
       <div role="tabpanel" aria-labelledby="tab-panels-${t}" style="margin-top:var(--space-4)">${t === 'board' ? board(d) : list(d)}</div></div>`;
   };
+
+  /* Undo covers the board's writes; Reset to automatic releases every pin and deleted unit. */
+  function headActions(d) {
+    const none = !(d.overrides.length + d.removed.length);
+    return `<button class="btn btn--secondary" data-action="pv-undo" ${history.length && !busy ? '' : 'disabled'} title="${history.length ? 'Undo the last change on the board' : 'Nothing to undo yet'}">${icon('undo')}Undo</button>
+      <button class="btn btn--secondary" data-action="pv-reset" ${none || busy ? `disabled title="Nothing is pinned or deleted"` : ''}>Reset to automatic</button>`;
+  }
 
   function board(d) {
     if (!d.panels.length) return `<div class="empty" style="max-width:640px"><b>No panels yet.</b><div class="muted small" style="margin:var(--space-1) 0 var(--space-3)">Panels are placed once the network has an IED count and equipment.</div><a class="btn btn--primary" href="#/parts">${icon('parts')}Open Parts</a></div>`;
@@ -121,7 +133,7 @@
     });
     const din = p.units.filter((u) => u.block_u === 0);
     return `<section class="bcol" data-panel="${p.number}" aria-label="${esc(p.cabinet_name)}, side ${esc(p.side || '')}, ${p.used_u} of ${p.capacity_u} U used">
-      <header><b title="${esc(p.cabinet_name)}">${esc(p.cabinet_name)}</b>${p.side ? `<span class="badge badge--plain">Side ${esc(p.side)}</span>` : ''}</header>
+      <header><a class="bcol-name" href="#/panels/${esc(p.id)}" title="Open ${esc(p.cabinet_name)}"><b>${esc(p.cabinet_name)}</b></a>${p.side ? `<span class="badge badge--plain">Side ${esc(p.side)}</span>` : ''}</header>
       <div class="umeter ${p.free_u < 3 ? 'is-full' : ''}" role="img" aria-label="${p.used_u} of ${p.capacity_u} U used"><i style="width:${Math.min(100, pct)}%"></i></div>
       <div class="ulabel"><b>${p.used_u}</b> of ${p.capacity_u} U used · ${p.free_u} U free</div>
       <div class="rack">${cards.join('')}${p.free_u > 0 ? `<div class="freeu" style="height:${p.free_u * U}px">${p.free_u} U free</div>` : ''}${reserved ? `<div class="reserve" style="height:${reserved * U}px"><span>${reserved} U kept free for expansion</span></div>` : ''}</div>
@@ -131,7 +143,7 @@
   function list(d) {
     const used = Object.fromEntries(d.panels.map((p) => [p.id, p]));
     return `<div class="table-wrap"><table class="table table--comfort"><thead><tr><th>Sheet</th><th>Cabinet</th><th>Name</th><th>Written by</th><th>Side</th><th class="num">Rack space</th></tr></thead>
-      <tbody>${d.list.map((p) => { const lp = p.generated ? used[p.id] : null; return `<tr><td class="mono">${esc(p.sheet)}</td><td class="mono">${esc(p.cabinet_number)}</td><td><b style="font-weight:500">${esc(p.cabinet_name)}</b></td>
+      <tbody>${d.list.map((p) => { const lp = p.generated ? used[p.id] : null; return `<tr><td class="mono">${esc(p.sheet)}</td><td class="mono">${esc(p.cabinet_number)}</td><td><a href="#/panels/${esc(p.id)}" style="font-weight:500">${esc(p.cabinet_name)}</a></td>
         <td>${p.generated ? 'Layout' : p.manual ? 'Hand-written (manual)' : 'Hand-written'}</td><td>${p.side ? 'Side ' + esc(p.side) : '—'}</td><td class="num">${lp ? `${lp.used_u} of ${lp.capacity_u} U` : '—'}</td></tr>`; }).join('')}</tbody></table>
       <div class="table-foot"><span>One sheet per cabinet, in the order shown</span></div></div>`;
   }
@@ -227,7 +239,7 @@
     closeDialog();
     busy = true; App.render();
     Bridge.call('generate_panels', S.project.file, S.sub).then((r) => {
-      LAY.data = r.page; history.length = 0; showIssues = false; App.devicePreview.reload();
+      LAY.data = r.page; counted(r.page); history.length = 0; showIssues = false; App.devicePreview.reload();
       toast(`Laid out ${plural(r.written.length, 'panel')}.${r.backup ? ` Hand-written files copied to panels/${r.backup.split(/[\\/]/).pop()}.` : ''}`);
     }).catch((err) => toast(err.message, 'error')).then(() => { busy = false; App.render(); });
   };
@@ -236,7 +248,7 @@
     const act = (a, i, t) => (d.generated ? `<button class="btn btn--ghost btn--sm" data-action="${a}" data-i="${i}">${t}</button>` : '');
     const rows = [...d.overrides.map((o, i) => `<li><span>${icon('pin')}Pinned ${esc(describe(o))}</span>${act('pv-unpin-at', i, 'Unpin')}</li>`),
       ...d.removed.map((r, i) => `<li><span>${icon('trash')}Deleted ${esc(unitName(r))}</span>${act('pv-restore-at', i, 'Restore')}</li>`)];
-    return `<div style="margin-bottom:var(--space-3)"><ul class="changes">${rows.join('')}</ul>${d.generated ? '<div class="row" style="justify-content:flex-end;margin-top:var(--space-2)"><button class="btn btn--secondary btn--sm" data-action="pv-reset">Reset to automatic</button></div>' : ''}</div>`;
+    return `<div style="margin-bottom:var(--space-3)"><ul class="changes">${rows.join('')}</ul></div>`;
   }
 
   /* ---------- drag and drop: the bridge says which panels can take the move ---------- */

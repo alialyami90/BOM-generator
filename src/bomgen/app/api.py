@@ -43,6 +43,7 @@ from bomgen.app.library_edit import EditRefusedError, LibraryEditor, PendingEdit
 from bomgen.app.loose import loose_page
 from bomgen.app.network import layout_page
 from bomgen.app.output import OutputRefusedError, build_file, build_target, checks_page
+from bomgen.app.panel_page import PanelNotFoundError, panel_page
 from bomgen.app.parts import parts_page
 from bomgen.app.preview import preview_page
 from bomgen.app.projects import RecentProjects, free_id, project_files, summarize
@@ -1124,6 +1125,18 @@ class Api:
         """Every generated unit with its panel, top U, MCBs and strips, for Device preview."""
         with self._substation(substation_id):
             return device_preview_page(Path(project_file), substation_id, self._library_store())
+
+    @endpoint
+    def panel_page(self, project_file: str, substation_id: str, panel_id: str) -> dict[str, Any]:
+        """One panel for the panel editor: header facts, enclosure, document, options,
+        devices with their origin, port plans with the engine's lines, and its YAML."""
+        with self._substation(substation_id):
+            try:
+                return panel_page(
+                    Path(project_file), substation_id, panel_id, self._library_store()
+                )
+            except PanelNotFoundError:
+                raise AppError("not_found", f"The substation has no panel {panel_id!r}") from None
 
     # -- Editing (docs/ui/editing.md; writers in bomgen.io.edit, ADR 0021) --
 

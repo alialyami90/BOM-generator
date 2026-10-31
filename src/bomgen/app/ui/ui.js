@@ -165,6 +165,10 @@
     const m = $('#main');
     m.innerHTML = (needsProject && !hasProject()) || (needsSub && !hasSub()) ? SCREENS.home() : SCREENS[key]();
     if (SCREENS[key + 'After']) SCREENS[key + 'After']();
+    if (fixing) {  // the field a problem leads to, once its page has loaded
+      if (fixing.screen !== a) fixing = null;
+      else { const el = m.querySelector(fixing.focus); if (el) { fixing = null; el.scrollIntoView({ block: 'center' }); el.focus(); } }
+    }
     // a strip wider than the page scrolls; keep the selected tab whole
     // (sideways only, so a re-render never moves the page)
     m.querySelectorAll('.tabs [role="tab"][aria-selected="true"]').forEach((t) => {
@@ -207,6 +211,60 @@
 
   ACTIONS.tab = (el) => { S.tab[el.dataset.group] = el.dataset.value; if (el.dataset.group === 'project') history.replaceState(null, '', '#/project/' + el.dataset.value); if (el.dataset.group === 'settings') history.replaceState(null, '', '#/settings/' + el.dataset.value); if (el.dataset.group === 'panel') history.replaceState(null, '', '#/panels/' + route().b + '/' + el.dataset.value); const keep = $('#main').scrollTop; renderMain(); $('#main').scrollTop = keep; const nt = document.getElementById(el.id); nt && nt.focus(); };
   ACTIONS.goto = (el) => go(el.dataset.to);
+
+  /* ---------- where to fix a located problem (APP-7; the M32 design brief) ---------- */
+  /* One action per problem: its label, the page that holds the value, and the control to focus there. */
+  let fixing = null;  // { screen, focus } until that page has drawn the control
+  const SETTINGS_TAB = { substation: 'general', output: 'output', document: 'output', calculations: 'documents', constants: 'constants' };
+  const PANEL_TAB = { enclosure: 'enclosure', devices: 'devices', port_plans: 'ports', options: 'options', document: 'document' };
+  function whereToFix(p) {
+    const file = String(p.file || ''), loc = String(p.location || ''), id = (x) => `[id="${x}"]`;
+    const line = { label: 'Show the line', hash: '#/settings/yaml', focus: null, line: p.line || null };
+    const own = /[\\/]panels[\\/]([^\\/]+)\.yaml$/.exec(file);
+    if (own) return { label: 'Open the panel', hash: `#/panels/${own[1]}/${PANEL_TAB[loc.split(/[.[]/)[0]] || 'yaml'}`, focus: null };
+    if (!/substation\.yaml$/.test(file)) return { label: 'Open the project', hash: '#/project', focus: null };
+    const [head, rest = ''] = loc.split(/\.(.*)/s), key = rest.split(/[.[]/)[0];
+    let m;
+    if ((m = /^equipment\[(\d+)\]/.exec(loc))) return { label: 'Go to the row', hash: '#/parts', focus: id(`p-e.${m[1]}.part_id`) };
+    if (head === 'network') return { label: 'Go to the field', hash: '#/parts', focus: id(`p-n.${key}`) };
+    if (head === 'spares') return { label: 'Go to the field', hash: '#/parts', focus: id(`p-s.${key}`) };
+    if (head === 'catalogue_choice') return { label: 'Go to the field', hash: '#/parts', focus: id(`p-b.${key}`) };
+    if (head === 'generated_panels') {
+      const n = (m = /^options_by_panel\[(\d+)\]\.(\w+)/.exec(rest)) ? Number(m[1]) : 1;
+      const panel = App.generatedPanelId ? App.generatedPanelId(n) : null, base = `#/panels/${panel}`;
+      if (!panel) return line;  // no layout to open while the files have errors
+      if (m) return { label: 'Open the panel', hash: `${base}/options`, focus: id(`pe-o.${n}.${m[2]}`), scope: 'own' };
+      if (key === 'options') { const k = rest.split('.')[1]; return { label: 'Open the panel', hash: `${base}/options`, focus: k ? id(`pe-o.all.${k}`) : null, scope: 'all' }; }
+      if (key === 'enclosure') { const k = rest.split('.').slice(1).join('.'); return { label: 'Open the panel', hash: `${base}/enclosure`, focus: k ? id(`pe-e.${k}`) : null }; }
+      if (key === 'document') return { label: 'Open the panel', hash: `${base}/document`, focus: id('pe-doc') };
+      return line;
+    }
+    if (loc === 'equipment') return { label: 'Open Parts', hash: '#/parts', focus: null };
+    if (loc === 'panels') return { label: 'Open Panels', hash: '#/panels', focus: null };
+    if (head === 'layout') return { label: 'Open the board', hash: '#/panels', focus: null, changes: true };
+    if (head === 'loose_material') return { label: 'Open loose material', hash: '#/loose', focus: null };
+    const tab = SETTINGS_TAB[head];
+    if (!tab) return line;
+    const field = head === 'substation' ? 'st-name' : head === 'document' ? 'st-document' : head === 'output' ? (key === 'sheet_names' ? `st-sheet_${rest.split('.')[1]}` : 'st-file_name')
+      : head === 'calculations' ? `st-calc_${key}` : `st-c_${key}`;
+    return { label: 'Go to the field', hash: `#/settings/${tab}`, focus: id(field) };
+  }
+  /* A banner's buttons for a page that cannot show: the first error's fix, and Checks. */
+  let fixable = null;
+  const fixButtons = (problems) => {
+    fixable = (problems || []).find((p) => p.level === 'error') || null;
+    return `${fixable ? `<button class="btn btn--primary btn--sm" data-action="fix-first">${esc(whereToFix(fixable).label)}</button>` : ''}<a class="btn btn--secondary btn--sm" href="#/checks">Open checks</a>`;
+  };
+  ACTIONS['fix-first'] = () => { if (fixable) fix(fixable); };
+  /* Opens where a problem is fixed and focuses the control once the page draws it. */
+  function fix(p, to) {  // to: a place given directly, instead of the problem's
+    const f = to || whereToFix(p);
+    if (f.scope) S.optScope = f.scope;
+    if (f.changes && App.panelsShowChanges) App.panelsShowChanges();
+    fixing = f.focus ? { screen: f.hash.split('/')[1], focus: f.focus } : f.line ? { screen: 'settings', focus: `.code .src > div:nth-child(${f.line})` } : null;
+    if (f.hash.startsWith('#/settings/')) S.tab.settings = f.hash.split('/')[2];
+    if (location.hash === f.hash) render(); else go(f.hash);
+  }
   const switchTo = (id) => { S.sub = id || null; S.dirty = false; const { a } = route(); go(['settings', 'parts', 'device-preview', 'panels', 'loose', 'checks', 'preview', 'build'].includes(a) ? '#/' + a : '#/panels'); };
   ACTIONS['sub-switch'] = (el) => {
     const value = el.value;
@@ -324,5 +382,5 @@
     return D;
   }
 
-  window.App = { $, $$, esc, S, ACTIONS, SCREENS, badge, verified, banner, tabs, field, input, select, pageHead, dialog, closeDialog, toast, go, render, setAppInfo, checkList, route, hasProject, hasSub, curProject, curSub, renderStatus, draftForm, changedField, changedCell, fixLine };
+  window.App = { $, $$, esc, S, ACTIONS, SCREENS, badge, verified, banner, tabs, field, input, select, pageHead, dialog, closeDialog, toast, go, render, setAppInfo, checkList, route, hasProject, hasSub, curProject, curSub, renderStatus, draftForm, changedField, changedCell, fixLine, whereToFix, fix, fixButtons };
 })();
