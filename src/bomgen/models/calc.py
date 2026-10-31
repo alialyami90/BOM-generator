@@ -236,3 +236,5 @@ class BranchMcb(BranchSizing):
     panel_id: str
     tag: str
     load: str
+    unit_tag: str | None = None  # the unit it feeds; None for a loose load
+    feed: Literal[1, 2] | None = None  # None on a QCOD
