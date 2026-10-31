@@ -9,12 +9,17 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+<<<<<<< HEAD
 - Device nameplates (M26, ADR 0026 proposed): each panel BOM ends with one
   nameplate row whose quantity is its tagged devices, and a new Nameplates sheet
   after Loose Material lists every plate's text (the tag as the MCB rows print
   it) per panel. The library names the part as the housekeeping role
   `nameplate`; the example uses Phoenix Contact US-EMLP (60X30). The example's
   BOM sheets each gain that row.
+=======
+- App: Device preview shows an AC unit's own AC branch MCB (M25, ADR 0025) as
+  its PS1, in place of the "—" it showed before.
+>>>>>>> origin/main
 - App: Parts rows collapse to a one-line summary at 20 or more rows ("1 U ·
   77 W · 125 VDC · 2 overrides"), and a category with more than 12 parts picks
   its part with the Device picker: search, up to 8 matches with make, model,
