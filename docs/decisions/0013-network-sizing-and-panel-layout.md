@@ -90,6 +90,14 @@ R1–R10 are in the design document named in ADR 0012.
   no BOM row (Q25). A pinned `position` wins over the priority and the anchor. A
   panel too short for the anchor is a layout error naming the panel, and its units
   stack from the top. The BOM row order (group B) stays equipment order.
+
+  *Amended (Ali, 2026-10-31, M22 review):* a network device can have or not have its
+  cable manager. `cable_manager` on an equipment entry (and on a panel row) is true,
+  false or unset; unset keeps each step's category rule, true or false overrides it
+  for a switch, patch panel, firewall or gateway and is refused on any other part. The
+  layout gives the unit its 1U manager only when it has one (without it the R5 plate
+  rule applies as for any device), and writes the choice on the generated row so the
+  BOM's cable-manager count follows it.
 - **Pipeline**: a step 0 (`engine/sizing.py`, `engine/layout.py`,
   `bomgen layout`) runs before the existing steps 1–15; `bomgen build
   --no-layout` keeps hand-written panels working.

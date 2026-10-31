@@ -588,7 +588,10 @@ def _units(loaded: LoadedSubstation, plan: NetworkPlan, issues: list[LayoutIssue
                 )
             )
         height = device.height_u or 0
-        manager = 1 if device.category in CABLE_MANAGED and height > 0 else 0
+        managed = device.category in CABLE_MANAGED
+        if entry.cable_manager is not None:
+            managed = entry.cable_manager
+        manager = 1 if managed and height > 0 else 0
         count = {
             EquipmentRole.L1_SWITCH: plan.l1_per_side,
             EquipmentRole.L2_SWITCH: plan.l2_per_side,
@@ -723,6 +726,7 @@ def _rows(panel: PanelFill, loaded: LoadedSubstation) -> list[DeviceInstance]:
                 lan=_LAN[first.side],
                 hwio_points=entry.hwio_points,  # a row total, as on DeviceInstance
                 first_nn=start,
+                cable_manager=entry.cable_manager,
             )
         )
     return rows

@@ -740,3 +740,23 @@ def test_waist_height_error_reaches_the_layout_report(example: LoadedSubstation)
     short = replace(example, library=library, substation=substation, spares=spares)
     kinds = [i.kind for i in layout_preview(short).report.issues]
     assert "waist-height" in kinds
+
+
+def test_a_switch_without_a_cable_manager_takes_no_manager_u(example: LoadedSubstation) -> None:
+    result = layout_preview(with_entry(example, "l2", cable_manager=False))
+    l2 = [x for f in result.fills for x in f.units if x.device == "l2"]
+    assert {x.cable_manager_u for x in l2} == {0}
+    l2_rows = [d for p in result.panels for d in p.devices if d.part_id == "RST2228-L2"]
+    assert {d.cable_manager for d in l2_rows} == {False}
+
+
+def test_a_gateway_with_a_cable_manager_takes_a_manager_u(example: LoadedSubstation) -> None:
+    result = layout_preview(with_entry(example, "gw", cable_manager=True))
+    gw = [x for f in result.fills for x in f.units if x.device == "gw"]
+    assert {x.cable_manager_u for x in gw} == {1}
+
+
+def test_an_unset_cable_manager_is_not_written(example: LoadedSubstation) -> None:
+    result = layout_preview(example)
+    assert {d.cable_manager for p in result.panels for d in p.devices} == {None}
+    assert "cable_manager" not in render_panel_yaml(result.panels[0])

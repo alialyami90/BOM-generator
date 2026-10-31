@@ -384,11 +384,11 @@ The library also holds the commodity catalogues: MCBs by rating (1/2/6/10/16 A �
 
 - Identity: cabinet number (861-GIS01-PSA-0001), cabinet name, tag prefix (PSA1), LAN letter (A/B or none), sheet name and order.
 - Enclosure: make, model/code, H × D × W, base frame size, cable entry (top/side).
-- Device list in display order: part\_id, quantity, tag override (optional), purpose text (e.g. "for Dhahran PCC connection"), LAN.
+- Device list in display order: part\_id, quantity, tag override (optional), purpose text (e.g. "for Dhahran PCC connection"), LAN, cable manager on or off for a network device (optional).
 - Network port plan for each switch: downlinks by speed and media (feeds SFP counts), uplinks to L3 (SM).
 - Options: aux socket (rating), smoke detector, change-over diodes (auto when single-PSU DC loads exist), ventilation mode (auto from heat check, or forced), spare branches per DC feed and on AC, main MCB override, inter-panel terminal count, grounding busbars.
 - Catalogue choice: `catalogue_choice` with a brand id or `default` per catalogue (`mcb`, `mcb_dc`, `aux_contact`, `terminal_blocks`, `busbars`, `housekeeping`); unset keys follow the project's choice, and `mcb_dc` must be a DC-rated set (ADR 0023).
-- Equipment: per device, a library `part_id` and optionally `ordering_code` (the part number printed in BOM col G instead of the library's), `overrides` of the library's `height_u`, `unit_power_w`, `supply_type`, `voltage_v`, `power_supplies`, `inrush_a` and `load_type` for this design, and, on the L1 and L2 switches, `sfp`: one SFP part per port speed and media (ADR 0024).
+- Equipment: per device, a library `part_id` and optionally `ordering_code` (the part number printed in BOM col G instead of the library's), `overrides` of the library's `height_u`, `unit_power_w`, `supply_type`, `voltage_v`, `power_supplies`, `inrush_a` and `load_type` for this design, and, on the L1 and L2 switches, `sfp`: one SFP part per port speed and media (ADR 0024). On a switch, patch panel, firewall or gateway, `cable_manager` true or false gives or removes its 1U cable manager in the panel and on the BOM; unset keeps the category's rule (ADR 0013).
 - Loose material: `loose_material.host_panel`, the panel whose document the Loose Material sheet is issued under, and `items[]`, each a library `part_id` with quantity, tag, children and `fed_from`, or a free-text `description` with quantity and tag (ADR 0022).
 - BOM document data for its page header/footer: supplier document number, revision, issue date.
 - Revision: changed rows/cells to highlight yellow.

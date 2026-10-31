@@ -112,6 +112,7 @@ class Equipment(InputModel):
     ordering_code: str | None = None  # the BOM's ordering code instead of the library's
     overrides: PartOverrides | None = None
     sfp: list[SfpChoice] = Field(default_factory=list)
+    cable_manager: bool | None = None  # None: the category's rule (ADR 0013, amended)
 
     @model_validator(mode="after")
     def _consistent(self) -> "Equipment":

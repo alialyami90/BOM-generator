@@ -178,3 +178,32 @@ def test_a_hand_written_panel_naming_a_removed_override_is_an_unknown_part(
     assert [(i.location, f"'{base}+gone'" in i.message) for i in caught.value.issues] == [
         ("devices[0].part_id", True)
     ]
+
+
+def test_a_cable_manager_is_only_for_network_devices(tmp_path: Path) -> None:
+    file = tmp_path / "substations" / "gis01" / "substation.yaml"
+    project_file = example_project(tmp_path)
+    data = yaml.safe_load(file.read_text(encoding="utf-8"))
+    rtac = next(i for i, e in enumerate(data["equipment"]) if e["id"] == "rtac")
+    data["equipment"][rtac]["cable_manager"] = False
+    file.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+    with pytest.raises(InputError) as caught:
+        load_project(project_file)
+    assert [(i.location, i.message) for i in caught.value.issues] == [
+        (f"equipment[{rtac}].cable_manager", "only network devices have a cable manager")
+    ]
+
+
+def test_a_hand_written_row_with_a_cable_manager_must_be_a_network_device(
+    tmp_path: Path,
+) -> None:
+    project_file = example_project(tmp_path)
+    file = tmp_path / "substations" / "gis01" / "panels" / "psa3.yaml"
+    data = yaml.safe_load(file.read_text(encoding="utf-8"))
+    data["devices"][0]["cable_manager"] = True  # the GPS clock
+    file.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+    with pytest.raises(InputError) as caught:
+        load_project(project_file)
+    assert [(i.location, i.message) for i in caught.value.issues] == [
+        ("devices[0].cable_manager", "only network devices have a cable manager")
+    ]

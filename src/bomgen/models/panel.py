@@ -73,6 +73,7 @@ class DeviceInstance(InputModel):
     lan: Lan | None = None
     hwio_points: NonNegativeInt | None = None  # the row's HWIO total, overriding the library's
     first_nn: PositiveInt | None = None  # first {nn} of the row, continuing a range (ADR 0013)
+    cable_manager: bool | None = None  # None: the category's rule (ADR 0013, amended)
 
 
 class PortAllocation(InputModel):

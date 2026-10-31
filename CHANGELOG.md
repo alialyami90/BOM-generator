@@ -9,6 +9,10 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- A switch, patch panel, firewall or gateway can have or not have a cable
+  manager (`cable_manager` on the equipment entry or panel row): the layout
+  gives or drops its 1U manager and the BOM counts it accordingly; unset keeps
+  today's rule.
 - Generated panels stack their devices by priority: time server on top, then
   network, then servers and workstations, then the rest, keeping equipment
   order within each. A KVM or console sits with its bottom edge at waist
