@@ -264,6 +264,15 @@ def test_override_position_is_optional_and_one_based() -> None:
         DeviceMove.model_validate({"device": "gps", "panel": 1, "position": 0})
 
 
+def test_top_u_and_position_are_exclusive() -> None:
+    assert DeviceMove.model_validate({"device": "gps", "panel": 1, "top_u": 30}).top_u == 30
+    assert PairMove.model_validate({"pair": "l2", "panel": [1, 2], "top_u": 28}).top_u == 28
+    with pytest.raises(ValidationError, match="give position or top_u, not both"):
+        DeviceMove.model_validate({"device": "gps", "panel": 1, "position": 1, "top_u": 30})
+    with pytest.raises(ValidationError, match="give position or top_u, not both"):
+        PairMove.model_validate({"pair": "l2", "panel": [1, 2], "position": 1, "top_u": 30})
+
+
 def test_overrides_need_a_part_id_on_a_sized_switch() -> None:
     with pytest.raises(ValidationError, match="pick the switch to override its data"):
         Equipment(id="l1", role="l1_switch", redundant=True, overrides={"height_u": 2})

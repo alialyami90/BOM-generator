@@ -708,6 +708,66 @@ def test_a_pinned_kvm_ignores_waist_height() -> None:
     assert tops(panel) == {"kvm": 32, "a": 30}
 
 
+def test_a_unit_pinned_by_top_u_sits_there() -> None:
+    pinned = u("b", 1, NONE, rank=1)
+    panel = PanelFill(1, [u("a", 1, NONE, rank=0), pinned, u("c", 1, NONE, rank=2)])
+    panel.fixed[pinned] = 10
+    assert tops(panel) == {"a": 32, "b": 10, "c": 30}
+
+
+def test_units_fill_around_a_top_u_pin() -> None:
+    pinned = u("p", 1, NONE, rank=2)
+    panel = PanelFill(1, [u("a", 1, NONE, rank=0), u("b", 1, NONE, rank=1), pinned])
+    panel.fixed[pinned] = 30
+    assert tops(panel) == {"a": 32, "p": 30, "b": 28}
+
+
+def test_a_position_pin_fills_around_a_top_u_pin() -> None:
+    first, fixed = u("c", 1, NONE, rank=2), u("p", 1, NONE, rank=3)
+    panel = PanelFill(1, [u("a", 1, NONE, rank=0), u("b", 1, NONE, rank=1), first, fixed])
+    panel.pins[first] = 1
+    panel.fixed[fixed] = 32
+    assert tops(panel) == {"p": 32, "c": 30, "a": 28, "b": 26}
+
+
+def test_a_top_u_pin_overlapping_another_is_an_error() -> None:
+    units = [*pair("gps", 1, rank=0), u("rtac", 1, NONE, h=3, rank=1)]
+    moves = [
+        DeviceMove(device="gps", side="a", panel=1, top_u=30),
+        DeviceMove(device="rtac", panel=1, top_u=30),
+    ]
+    layout = auto_layout(units, RULES, moves=moves)
+    assert [(i.kind, i.subject, i.message, i.is_error) for i in layout.issues] == [
+        (
+            "pin-overlaps",
+            "panel 1",
+            "gps#1/a at U30 overlaps rtac#1 at U30 to U28 in panel 1",
+            True,
+        )
+    ]
+
+
+def test_a_top_u_pin_outside_the_rack_is_an_error() -> None:
+    layout = auto_layout(
+        pair("l2", 1), RULES, moves=[DeviceMove(device="l2", side="a", panel=1, top_u=33)]
+    )
+    assert [(i.kind, i.subject, i.message, i.is_error) for i in layout.issues] == [
+        (
+            "pin-outside-rack",
+            "panel 1",
+            "l2#1/a at U33 leaves the rack of panel 1 (U1 to U32)",
+            True,
+        )
+    ]
+
+
+def test_a_kvm_pinned_by_top_u_ignores_waist_height() -> None:
+    unit = kvm(rank=1)
+    panel = PanelFill(1, [u("a", 1, NONE, rank=0), unit])
+    panel.fixed[unit] = 25
+    assert tops(panel) == {"a": 32, "kvm": 25}
+
+
 def test_a_panel_too_short_for_waist_height_is_an_error() -> None:
     rules = LayoutRules(capacity_u=16, blank_plate_u=1, waist_u=18)
     layout = fill([kvm(rank=0)], rules)

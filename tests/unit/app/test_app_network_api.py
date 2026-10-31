@@ -140,7 +140,7 @@ def test_a_device_moved_by_an_override_is_pinned(
     assert next(p for p in panels if any(u is gps for u in p["units"]))["number"] == 2
     assert not any(u["pinned"] for p in panels for u in p["units"] if u["device"] != "gps")
     assert page(app, project)["overrides"] == [
-        {"device": "gps", "unit": None, "side": None, "panel": 2, "position": None}
+        {"device": "gps", "unit": None, "side": None, "panel": 2, "position": None, "top_u": None}
     ]
 
 
