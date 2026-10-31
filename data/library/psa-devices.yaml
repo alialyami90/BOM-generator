@@ -5095,6 +5095,48 @@ devices:
     ordering_code: "FEURFSPD"
     description_template: "Unloaded FSP adapter-panel fiber shelf, maximum 72 LC fiber positions"
     height_u: 1
+  - part_id: FG-600F  # FortiGate 600F Series, p. 7
+    category: "firewall"
+    alt_group: "FG-600F"
+    make: "Fortinet"
+    model: "FG-600F"
+    ordering_code: "FG-600F"
+    description_template: "FortiGate firewall, dual AC supplies, 1U rack"
+    supply_type: "VAC"
+    voltage_v: 230
+    unit_power_w: 255
+    load_type: "CONTINUOUS"
+    height_u: 1
+    input_v_min: 100
+    input_v_max: 240
+    ports:
+      - { count: 16, speed: 1G, media: RJ45, kind: fixed }
+      - { count: 1, speed: 1G, media: RJ45, kind: fixed }
+      - { count: 1, speed: 1G, media: RJ45, kind: fixed }
+      - { count: 8, speed: 1G, kind: sfp_slot }
+      - { count: 4, speed: 10G, kind: sfp_slot }
+      - { count: 4, speed: 25G, kind: sfp_slot }
+  - part_id: FG-601F  # FortiGate 600F Series, p. 7
+    category: "firewall"
+    alt_group: "FG-601F"
+    make: "Fortinet"
+    model: "FG-601F"
+    ordering_code: "FG-601F"
+    description_template: "FortiGate firewall, dual AC supplies, 1U rack"
+    supply_type: "VAC"
+    voltage_v: 230
+    unit_power_w: 260
+    load_type: "CONTINUOUS"
+    height_u: 1
+    input_v_min: 100
+    input_v_max: 240
+    ports:
+      - { count: 16, speed: 1G, media: RJ45, kind: fixed }
+      - { count: 1, speed: 1G, media: RJ45, kind: fixed }
+      - { count: 1, speed: 1G, media: RJ45, kind: fixed }
+      - { count: 8, speed: 1G, kind: sfp_slot }
+      - { count: 4, speed: 10G, kind: sfp_slot }
+      - { count: 4, speed: 25G, kind: sfp_slot }
 catalogues:
   enclosure_u: 42  # rack units of the standard enclosure (ADR 0013)
   mcb:  # spec: Derivation rules -> Breaker part numbers
@@ -5200,13 +5242,15 @@ catalogue_brands:
       ratings_a: [1, 2, 6, 10, 16]
       code_pattern: "MCN2{rating:02d}"
       trip_curve: C
-    - id: hager-ncn-2p  # AC set: Hager gives no DC rating, so no dc_rating_v
+    - id: hager-ncn-2p  # also DC rated, poles in series (contractor v2 mcb_ratings.csv)
       family: NCN 2P C 10 kA  # VD-EL0009-007 p. 356 (NCN201A to NCN216A)
       make: Hager
       poles: 2
       ratings_a: [1, 2, 6, 10, 16]
       code_pattern: "NCN2{rating:02d}A"
       trip_curve: C
+      magnetic_trip_multiple_dc: 7  # C curve on DC: 7 to 15 In (Hager Protection devices catalogue p. 93)
+      dc_rating_v: 250  # 6 kA at 250 V, 15 kA at 125 V, 20 kA to 60 V (p. 93)
   aux_contact:
     - id: schneider-c60h-dc
       make: Schneider

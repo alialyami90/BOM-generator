@@ -28,7 +28,7 @@ from bomgen.models.bom import BuildResult, PanelBom
 from bomgen.models.calc import BranchMcb, DcMains
 from bomgen.models.library import Category, Library
 from bomgen.models.panel import Panel, Ventilation
-from bomgen.models.project import DesignConstants, LooseExtra
+from bomgen.models.project import DesignConstants, LooseExtra, LooseMaterial
 
 
 @dataclass(frozen=True)
@@ -63,6 +63,8 @@ def build(loaded: LoadedSubstation) -> BuildResult:
     )
     if library.catalogues.housekeeping.nameplate is None:
         plates = []
+    if material is None and loaded.panels:  # devices' own loose items still need a sheet
+        material = LooseMaterial(host_panel=loaded.panels[0].id)
     loose = loose_table(material, substation, [(d.panel, d.rows) for d in drafts], library)
     fed = {item.part_id for item in loose_items if item.part_id and item.fed_from}
     power = power_consumption(panels, loose, library, loaded.constants, fed)

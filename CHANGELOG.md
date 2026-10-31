@@ -7,15 +7,13 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-### Fixed
+### Added
 
-- Power Consumption agrees with the BOM: the "MCB rating per device" column
-  shows the rating of the row's own branch MCB (2 A in the example, where it
-  showed 1 A), and each row is drawn at its part's own voltage (ADR 0028,
-  Proposed). The check report names AC loose loads, which the DC-only
-  External Equipment block leaves out of the totals. When no cabinet has
-  fans, the steel coefficient box no longer lands on the constants box. The
-  device nameplate row is a normal BOM row, not a tall white grounding row.
+- The installer ships psa-devices 1.8.0 from v2 of the contractor's library:
+  the FortiGate 600F and 601F firewalls (230 V AC, now with their voltage and
+  load type), and the Hager NCN 2P set is DC rated, 250 V with the two poles
+  in series (6 kA; 15 kA at 125 V) and a DC magnetic multiple of 7, so it can
+  be chosen as `mcb_dc`. Hager MCN stays an AC set.
 
 ### Changed
 
@@ -24,6 +22,23 @@ project uses [Semantic Versioning](https://semver.org/).
   groups, `contractor_responses.csv` with a status for each of the 270 asks,
   and a new `power_measurements.csv`. Reference only; nothing the generator
   reads changes.
+
+### Fixed
+
+- A new substation works from its first parts to Build (audit 2026-10-31,
+  M27). Device preview no longer hangs on a blank substation. Saving its
+  first parts lays out its panels. Checks and Build say what is missing, parts
+  or panels, instead of "You can build". Build counts the engine warnings that
+  Checks lists. A device's own loose items, such as the SEL-2488 antenna kit,
+  reach the Loose Material sheet without a loose material block. New
+  substations' panels get the spec's 40 XIP terminals.
+- Power Consumption agrees with the BOM: the "MCB rating per device" column
+  shows the rating of the row's own branch MCB (2 A in the example, where it
+  showed 1 A), and each row is drawn at its part's own voltage (ADR 0028,
+  Proposed). The check report names AC loose loads, which the DC-only
+  External Equipment block leaves out of the totals. When no cabinet has
+  fans, the steel coefficient box no longer lands on the constants box. The
+  device nameplate row is a normal BOM row, not a tall white grounding row.
 
 ## [0.3.1] - 2026-10-31
 

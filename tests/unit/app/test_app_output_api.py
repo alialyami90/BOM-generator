@@ -12,6 +12,7 @@ import xlsxwriter.workbook
 from bomgen import build
 from bomgen.app import api
 from bomgen.engine.errors import EngineError
+from bomgen.io import lifecycle
 from bomgen.io.yaml_source import read_yaml
 from bomgen.models.report import CheckItem, CheckReport, CheckStatus
 
@@ -70,6 +71,21 @@ def test_checks_on_a_clean_substation_run_the_engine_checks(app: api.Api, projec
     assert page["engine"]["failed"] is any(i["status"] == "fail" for i in items)
 
 
+def test_checks_and_build_are_blocked_until_the_substation_has_parts(
+    app: api.Api, project: Path
+) -> None:
+    """A blank substation must not read "You can build" (audit APP-8)."""
+    lifecycle.create_substation(project, "b", "b")
+
+    checks = ok(app.run_checks(str(project), "b"))
+    target = ok(app.build_target(str(project), "b"))
+
+    for problems in (checks["problems"], target["problems"]):
+        assert [(p["level"], p["location"]) for p in problems] == [("error", "equipment")]
+        assert "Parts" in problems[0]["message"]
+    assert checks["engine"]["run"] is False
+
+
 def test_checks_list_input_errors_and_do_not_run_the_engine(app: api.Api, project: Path) -> None:
     edit(project.parent / SUBSTATION, "ied_count: 40", "ied_count: lots")
 
@@ -116,6 +132,15 @@ def test_build_target_gives_the_file_name_and_default_folder(app: api.Api, proje
     assert target["revision"] == "02"
     assert target["library"] == {"name": LIBRARY["name"], "version": LIBRARY["version"]}
     assert target["problems"] == []
+
+
+def test_build_target_counts_the_engine_flags_checks_shows(app: api.Api, project: Path) -> None:
+    """Build's Warnings matches Checks (audit APP-12)."""
+    items = ok(app.run_checks(str(project), "gis01"))["engine"]["items"]
+    flags = sum(1 for item in items if item["status"] == "warn")
+
+    assert flags
+    assert ok(app.build_target(str(project), "gis01"))["flags"] == flags
 
 
 def test_build_does_not_replace_a_file_unless_asked(

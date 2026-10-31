@@ -7,6 +7,7 @@ from typing import Any
 import pytest
 import yaml
 
+from bomgen.engine.errors import EngineError
 from bomgen.engine.layout import (
     Layout,
     LayoutResult,
@@ -375,6 +376,12 @@ def example() -> LoadedSubstation:
 def with_changes(loaded: LoadedSubstation, **changes: Any) -> LoadedSubstation:
     """The loaded substation with top-level ``Substation`` fields replaced."""
     return replace(loaded, substation=loaded.substation.model_copy(update=changes))
+
+
+def test_a_substation_without_switches_cannot_be_laid_out(example: LoadedSubstation) -> None:
+    # A blank substation reaches the layout from Device preview and Panels (audit APP-1).
+    with pytest.raises(EngineError, match="no l1_switch"):
+        layout_preview(with_changes(example, equipment=[]))
 
 
 def rows(panel: Panel) -> list[tuple[str, int, str | None, int | None]]:
