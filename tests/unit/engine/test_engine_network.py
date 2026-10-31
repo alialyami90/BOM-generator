@@ -11,6 +11,7 @@ from bomgen.engine.items import BomItem
 from bomgen.engine.network import accessories
 from bomgen.engine.units import expand_devices
 from bomgen.models.bom import Group, QtySum
+from bomgen.models.library import SfpChoice
 
 PARTS = (
     switch("L2", "L2"),
@@ -160,3 +161,46 @@ def test_one_sfp_part_serving_two_media_gets_one_row_per_media() -> None:
         ("L2-ESW-A01 SFP (SM)", 2, "SFP-COMBO"),
         ("L2-ESW-A01 SFP (MM)", 15, "SFP-COMBO"),
     ]
+
+
+def build_with_choice(choice: list[dict[str, str]], plans: dict[str, Any]) -> list[BomItem]:
+    """As ``build`` with the L2 switch carrying an SFP choice, as a derived part does."""
+    lib = library(*PARTS)
+    devices = [
+        d.model_copy(update={"sfp_choice": [SfpChoice.model_validate(c) for c in choice]})
+        if d.part_id == "L2"
+        else d
+        for d in lib.devices
+    ]
+    lib = lib.model_copy(update={"devices": devices})
+    p = panel([{"part_id": "L2"}], port_plans=plans)
+    return accessories(p, expand_devices(p, lib), lib)
+
+
+MM_DOWNLINKS = {
+    "L2": {
+        "downlinks": [
+            {"count": 4, "speed": "1G", "media": "MM"},
+            {"count": 2, "speed": "1G", "media": "SM"},
+        ]
+    }
+}
+
+
+def test_sfp_choice_replaces_the_automatic_pick() -> None:
+    items = build_with_choice([{"speed": "1G", "media": "MM", "part_id": "FR-SX"}], MM_DOWNLINKS)
+    assert summary(items)[:2] == [
+        ("L2-ESW-A01 SFP (MM)", 4, "FR-SX"),
+        ("L2-ESW-A01 SFP (SM)", 2, "SFP-LX"),
+    ]
+
+
+def test_sfp_choice_for_another_media_keeps_the_automatic_pick() -> None:
+    items = build_with_choice([{"speed": "100M", "media": "MM", "part_id": "SFP-FX"}], MM_DOWNLINKS)
+    assert [part for _tag, _qty, part in summary(items)[:2]] == ["SFP-SX", "SFP-LX"]
+
+
+def test_an_sfp_choice_that_does_not_fit_the_ports_is_an_engine_error() -> None:
+    choice = [{"speed": "1G", "media": "MM", "part_id": "SFP-FX"}]
+    with pytest.raises(EngineError, match=r"^PSA1-L2-ESW-A01: SFP SFP-FX is not 1G MM$"):
+        build_with_choice(choice, MM_DOWNLINKS)

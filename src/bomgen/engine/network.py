@@ -72,13 +72,25 @@ def _sfp_items(panel: Panel, row: DeviceRow, library: Library) -> list[BomItem]:
 
 
 def _sfp_for(row: DeviceRow, allocation: PortAllocation, library: Library) -> DeviceType:
-    """The SFP serving ``allocation``: the host's make first, else library order."""
-    matches = [
-        device
-        for device in library.devices
-        if device.category is Category.SFP
-        and any(p.speed is allocation.speed and p.media is allocation.media for p in device.ports)
-    ]
+    """The SFP serving ``allocation``: the host's choice for its speed and media (ADR 0024),
+    else the host's make first, else library order."""
+    chosen = next(
+        (
+            c.part_id
+            for c in row.device.sfp_choice
+            if (c.speed, c.media) == (allocation.speed, allocation.media)
+        ),
+        None,
+    )
+    if chosen is not None:
+        part = library.get(chosen)
+        if part is None or not _serves(part, allocation):
+            host = row.tag or row.device.part_id
+            raise EngineError(
+                f"{host}: SFP {chosen} is not {allocation.speed.value} {allocation.media.value}"
+            )
+        return part
+    matches = [device for device in library.devices if _serves(device, allocation)]
     if not matches:
         host = row.tag or row.device.part_id
         raise EngineError(
@@ -87,6 +99,12 @@ def _sfp_for(row: DeviceRow, allocation: PortAllocation, library: Library) -> De
         )
     same_make = [device for device in matches if device.make == row.device.make]
     return (same_make or matches)[0]
+
+
+def _serves(device: DeviceType, allocation: PortAllocation) -> bool:
+    return device.category is Category.SFP and any(
+        p.speed is allocation.speed and p.media is allocation.media for p in device.ports
+    )
 
 
 def _commodity(panel: Panel, library: Library, category: Category, qty: int) -> BomItem:
