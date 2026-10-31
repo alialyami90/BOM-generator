@@ -22,6 +22,9 @@ project uses [Semantic Versioning](https://semver.org/).
   0U. The gateway tags drop the example's `DHPCC`. The five contractor
   switches carry Purdue levels as a design call: L2 for those with 10G
   uplinks, L1 for the 1G bay switches.
+- Device preview on a substation with no panel files offers "Lay out panels"
+  (APP-15). The project Overview edits the waist height and rack start, each
+  marked Assumed with Confirm until it is written (APP-19).
 
 ### Changed
 
@@ -50,6 +53,16 @@ project uses [Semantic Versioning](https://semver.org/).
   External Equipment block leaves out of the totals. When no cabinet has
   fans, the steel coefficient box no longer lands on the constants box. The
   device nameplate row is a normal BOM row, not a tall white grounding row.
+- Leaving Parts, Settings or the project Overview with unsaved changes asks
+  first: Keep editing, Discard changes or Save and leave. This applies to a
+  link, another substation and another project, and the status bar says
+  "Unsaved changes" (M29; audit 2026-10-31 APP-6).
+- The first Loose material save no longer reports "Not saved" (APP-5).
+  "Save the parts" also saves the IED count (APP-16). The rail's Panels count
+  follows a layout (APP-17).
+- Checks and Build name every engine check and the device it is about
+  (APP-13). A substation that does not load keeps its name (APP-14). The copy
+  reads "3 L1 switches" and "Add an RTAC" (APP-18).
 
 ## [0.3.1] - 2026-10-31
 

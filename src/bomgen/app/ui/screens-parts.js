@@ -361,11 +361,15 @@
   ACTIONS['pp-add'] = () => keep(() => { UI.addOpen = !UI.addOpen; UI.menu = -1; });
   /* Add a device: the model takes no row without a part, so the part is picked first. */
   const ROLE_OF = { patch_panel: 'fopp', firewall: 'firewall', network_switch: 'ext_switch', kvm: 'kvm', console: 'console' };
+  const aName = (label) => {  // "an RTAC", "a KVM", "an I/O rack", "a fibre patch panel"
+    const s = label.split(' ').map((w) => (/^[A-Z/]{2,}$/.test(w) ? w : w.toLowerCase())).join(' ');
+    return `${/^[aeiou]/.test(s) || /^[AEFHILMNORSX][A-Z/]/.test(s) ? 'an' : 'a'} ${s}`;
+  };
   const freeId = (base, taken) => { let id = base, n = 2; while (taken.includes(id)) id = `${base}-${n++}`; return id; };
   ACTIONS['pp-add-cat'] = (el) => {
     const p = sub().page(), c = p.parts.add_categories.find((x) => x.category === el.dataset.c), opts = p.parts.options[c.category];
     UI.addOpen = false;
-    App.dialog({ title: `Add a ${esc(c.label.toLowerCase())}`, body: `<div class="form">
+    App.dialog({ title: `Add ${esc(aName(c.label))}`, body: `<div class="form">
       ${field('Part', `<select class="select" id="pa-part">${opts.map((o) => `<option value="${esc(o.part_id)}">${esc(partText(o))}</option>`).join('')}</select>`, 'From the active library.')}
       <label class="check"><input type="checkbox" id="pa-red">A and B units (redundant)</label>
       <div id="pa-err" class="err small" role="alert"></div></div>`,
@@ -407,7 +411,10 @@
   });
   ACTIONS['pp-start'] = () => {
     const rows = UI.fresh.filter((d) => d.part_id || d.role === 'l1_switch').map((d) => ({ role: d.role, part_id: d.part_id || null, redundant: d.redundant || undefined }));
-    Bridge.call('start_parts', S.project.file, S.sub, rows).then((page) => { UI.fresh = null; reloaded(page); toast(`Saved ${plural(rows.length, 'device row')}`, 'check'); }).catch(fail);
+    Bridge.call('start_parts', S.project.file, S.sub, rows).then((page) => {
+      UI.fresh = null; reloaded(page); toast(`Saved ${plural(rows.length, 'device row')}`, 'check');
+      return PF.save();  // the IED count and the other network inputs typed on the set-up card
+    }).catch(fail);
   };
   /* A detail value being edited: the draft form keeps it on change; Enter keeps it, Esc puts the shown value back. */
   document.addEventListener('keydown', (e) => {

@@ -40,11 +40,13 @@
         ${row('L1 switches', `<b>${p.l1_per_side}</b>`)}${row('L2 switches', `<b>${p.l2_per_side}</b>`)}
         ${row('L2 ports in use', `${p.l2_demand_per_side} of ${p.l2_usable_ports * p.l2_per_side}`)}${row(ring ? 'Rings' : 'L1 to L2 links', ring ? p.rings_per_side : p.l1_links_per_side)}</tbody></table>
       <p class="small" style="margin-top:var(--space-3)">L1 model: <span class="mono">${esc(p.l1_part_id)}</span>${p.l1_pinned ? ' (pinned)' : ''}. L2 model: <span class="mono">${esc(p.l2_part_id)}</span>.</p>
-      <p class="small" style="margin-top:var(--space-2)">${p.ied_count} field IEDs need ${plural(p.l1_per_side, 'L1 switch')} on each side, ${p.l1_usable_ports} usable ports each.</p>
+      <p class="small" style="margin-top:var(--space-2)">${p.ied_count} field IEDs need ${p.l1_per_side} ${p.l1_per_side === 1 ? 'L1 switch' : 'L1 switches'} on each side, ${p.l1_usable_ports} usable ports each.</p>
       <p class="muted small" style="margin-top:var(--space-2)">${ring ? 'Rings: two ports close each ring.' : 'Star: each L1 switch has one uplink to its L2 switch plus an A–B interlink.'}</p>
       <a class="btn btn--secondary btn--sm" href="#/panels" style="margin-top:var(--space-3)">${icon('panels')}See the panels</a></div>`;
   }
   App.network = { resultCard, reload: () => { LAY.state = 'idle'; } };  // after a Parts input is saved
+  /* The rail's Panels count: the panel files of the last layout read for the open substation, or null. */
+  App.panelCount = () => (real() && LAY.state === 'loaded' && LAY.data && LAY.key === `${S.project.file}#${S.sub}` && !LAY.data.reason ? LAY.data.list.length : null);
 
   /* ---------- Panels ---------- */
   let selected = '';  // `${panel}:${key}:${side}` of the selected unit

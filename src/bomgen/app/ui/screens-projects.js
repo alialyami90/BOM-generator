@@ -20,7 +20,7 @@
       opened: day(row.changed), status: row.status.level, statusText: row.status.text,
       substations: row.substations.map((s) => ({ id: s.id, name: s.name, folder: inside(s.file, row.folder), file: s.file, panels: s.panels == null ? '—' : s.panels, changed: day(s.changed), status: s.errors ? 'bad' : 'ok', statusText: s.errors ? `${s.errors} error${s.errors === 1 ? '' : 's'}` : row.status.level === 'bad' ? 'Not checked' : 'Ready', from: '' })),
       documents: (row.documents || []).map((d) => ({ key: d.key, sub: d.substation, label: d.title || d.key, docNo: d.doc_no, rev: d.rev, issue: d.issue_date || '', assumed: false, usedBy: '' })),
-      defaults: row.defaults ? defaultsRows(row.defaults) : [], raw: row.defaults || null, brands: row.brands || {}, register: row.register || [],
+      defaults: row.defaults ? defaultsRows(row.defaults) : [], raw: row.defaults || null, brands: row.brands || {}, register: row.register || [], layoutAssumed: row.layout_assumed || {},
       problems: row.problems || [], backups: null, real: true
     };
   }
@@ -121,7 +121,9 @@
     ['sfp_per_l1', 'Spare SFPs per L1 switch', ['defaults', 'spares', 'sfp_per_l1'], 'int'],
     ['rack_u_reserved', 'Rack space kept free', ['defaults', 'spares', 'rack_u_reserved'], 'int', 'U'],
     ['dc_branches_per_feed', 'Spare DC branches', ['defaults', 'spares', 'dc_branches_per_feed'], 'int', 'per feed'],
-    ['ac_branches', 'Spare AC branches', ['defaults', 'spares', 'ac_branches'], 'int']
+    ['ac_branches', 'Spare AC branches', ['defaults', 'spares', 'ac_branches'], 'int'],
+    ['waist_height_mm', 'Waist height', ['defaults', 'layout', 'waist_height_mm'], 'int', 'mm', 'Bottom edge of the KVM and console, above the floor.'],
+    ['rack_start_mm', 'Rack start', ['defaults', 'layout', 'rack_start_mm'], 'int', 'mm', 'Lowest rack unit above the floor, base frame included.']
   ];
   const BRANDS = [['mcb', 'MCBs, AC branches'], ['mcb_dc', 'MCBs, DC branches'], ['aux_contact', 'Aux contacts'], ['terminal_blocks', 'Terminal blocks'], ['busbars', 'Busbars'], ['housekeeping', 'Housekeeping']];
   const ovField = (key) => OV.find((f) => f[0] === key) || (key.startsWith('brand_') ? [key, '', ['defaults', 'catalogue_choice', key.slice(6)], 'choice'] : null);
@@ -141,11 +143,19 @@
     done: (page) => { const tab = S.tab.project; S.project = view(page); S.tab.project = tab; }
   });
   const shown = (p, key) => PO.shown(key);
+  /* A height not in the file is the model's assumed default: Confirm writes it; a marked one loses the mark. */
+  ACTIONS['po-confirm'] = (el) => {
+    const p = curProject(), key = el.dataset.key, path = ovField(key)[2];
+    (p.layoutAssumed[key] === 'marked' ? Bridge.call('confirm_project_field', p.file, path) : Bridge.call('set_project_field', p.file, path, saved(p, key)))
+      .then((page) => { const tab = S.tab.project; S.project = view(page); S.tab.project = tab; App.render(); toast(`${ovField(key)[1]} confirmed`, 'check'); }).catch(fail);
+  };
   function ovControl(p, f) {
     const [key, label, , kind, unit, help = ''] = f, id = 'po-' + key, err = PO.errors[key], v = shown(p, key);
     let html = input(id, v == null ? '' : String(v), { mono: kind !== 'text', num: kind !== 'text', invalid: !!err, placeholder: kind === 'text' ? 'Not set' : '' });
     if (unit) html = `<div class="input-affix">${html}<span class="affix">${esc(unit)}</span></div>`;
-    return PO.mark(key, field(esc(label), html, help, err ? esc(err) : ''));
+    const assumed = p.layoutAssumed[key] && !(key in PO.draft)  // the register's Assumed badge and Confirm
+      ? `<span class="row" style="gap:var(--space-2);margin-top:4px;flex-wrap:nowrap">${badge('warn', 'Assumed', 'warn')}<button class="btn btn--ghost btn--sm" data-action="po-confirm" data-key="${key}" aria-label="Confirm the ${esc(label.toLowerCase())}">Confirm</button></span>` : '';
+    return PO.mark(key, field(esc(label), html + assumed, help, err ? esc(err) : ''));
   }
   function brandControl(p, kind, label) {
     const key = 'brand_' + kind, dc = kind === 'mcb_dc', opts = (p.brands[kind] || []).map((b) => [b.id === 'default' && !dc ? '' : b.id, b.name]);

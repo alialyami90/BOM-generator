@@ -161,6 +161,41 @@ def test_open_project_with_errors_returns_located_problems(app: api.Api, example
     assert problem["file"] == str(substation)
 
 
+def test_a_substation_that_does_not_load_keeps_its_name(app: api.Api, example: Path) -> None:
+    """Audit 2026-10-31 APP-14: the top bar and the switcher show the name, not the folder."""
+    file = example.parent / "substations" / "gis01" / "substation.yaml"
+    text = file.read_text("utf-8")
+    file.write_text(text.replace("part_id: RST2228-L2,", "part_id: NOPE,"), "utf-8")
+
+    page = ok(app.open_project(str(example)))
+
+    assert page["problems"]
+    (row,) = page["substations"]
+    assert row["id"] == "gis01"
+    assert row["name"] == "GIS Substation"
+
+
+def test_layout_heights_are_assumed_until_written_or_confirmed(app: api.Api, example: Path) -> None:
+    """Audit 2026-10-31 APP-19: waist height and rack start on the project Overview."""
+    layout = ["defaults", "layout"]
+    page = ok(app.open_project(str(example)))
+    assert page["defaults"]["layout"] == {"waist_height_mm": 1000, "rack_start_mm": 200}
+    assert page["layout_assumed"] == {"waist_height_mm": "default", "rack_start_mm": "default"}
+
+    page = ok(app.set_project_field(str(example), [*layout, "waist_height_mm"], 1100))
+    assert page["defaults"]["layout"]["waist_height_mm"] == 1100
+    assert page["layout_assumed"] == {"rack_start_mm": "default"}
+
+    text = example.read_text("utf-8")
+    marked = "    waist_height_mm: 1100\n    rack_start_mm: 250  # ASSUMED"
+    example.write_text(text.replace("    waist_height_mm: 1100", marked), "utf-8")
+    page = ok(app.open_project(str(example)))
+    assert page["layout_assumed"] == {"rack_start_mm": "marked"}
+
+    page = ok(app.confirm_project_field(str(example), [*layout, "rack_start_mm"]))
+    assert page["layout_assumed"] == {}
+
+
 def test_open_project_on_a_missing_file_is_an_io_error(app: api.Api, tmp_path: Path) -> None:
     assert error_kind(app.open_project(str(tmp_path / "nowhere" / "project.yaml"))) == "io"
 

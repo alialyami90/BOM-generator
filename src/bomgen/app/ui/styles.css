@@ -85,6 +85,7 @@ svg.i--lg { width: 20px; height: 20px; }
 .status button span { display: inline-flex; align-items: center; gap: 5px; }
 .status .bad { color: var(--color-danger-text); font-weight: var(--weight-semibold); }
 .status .ok { color: var(--color-success); font-weight: var(--weight-semibold); }
+.status .warn { color: var(--color-warning); font-weight: var(--weight-semibold); display: inline-flex; align-items: center; gap: 5px; }
 
 /* ---------- controls ---------- */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); height: var(--size-control-height); padding: 0 var(--space-4); border-radius: var(--radius-sm); border: 1px solid transparent; font: 500 13.5px/1 var(--font-sans); cursor: pointer; white-space: nowrap; text-decoration: none; transition: background var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out); }
