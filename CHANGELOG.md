@@ -23,6 +23,16 @@ project uses [Semantic Versioning](https://semver.org/).
   and a new `power_measurements.csv`. Reference only; nothing the generator
   reads changes.
 
+### Fixed
+
+- A new substation works from its first parts to Build (audit 2026-10-31,
+  M27). Device preview no longer hangs on a blank substation. Saving its
+  first parts lays out its panels. Checks and Build say what is missing, parts
+  or panels, instead of "You can build". Build counts the engine warnings that
+  Checks lists. A device's own loose items, such as the SEL-2488 antenna kit,
+  reach the Loose Material sheet without a loose material block. New
+  substations' panels get the spec's 40 XIP terminals.
+
 ## [0.3.1] - 2026-10-31
 
 ### Added

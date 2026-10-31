@@ -1083,10 +1083,21 @@ class Api:
     def start_parts(
         self, project_file: str, substation_id: str, rows: list[dict[str, Any]]
     ) -> dict[str, Any]:
-        """A new substation's first rows, written with its sized L1 switch."""
-        return self._parts_write(
-            project_file, substation_id, functools.partial(parts_edit.start_parts, rows=rows)
-        )
+        """A new substation's first rows, written with its sized L1 switch; a substation
+        with no panels yet then gets them laid out from those rows."""
+        store = self._library_store()
+        project = Path(project_file)
+        with self._substation(substation_id), _edit_refusals():
+            result = parts_edit.start_parts(project, substation_id, rows, store=store)
+        _written(result)
+        found = resolve(project, substation_id, store)
+        if found.loaded is not None and not found.loaded.panels:
+            # the rows are saved either way; Panels shows why they cannot be laid out
+            with contextlib.suppress(InputError, EngineError):
+                write_generated_panels(
+                    found.file, replace_hand_written=False, backup=False, store=store
+                )
+        return parts_page(project, substation_id, store)
 
     # -- Checks and Build (docs/ui/screens.md: Checks, Build) --
 

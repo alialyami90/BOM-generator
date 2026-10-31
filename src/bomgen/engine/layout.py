@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING, Literal
 
 import yaml
 
+from bomgen.engine.errors import EngineError
 from bomgen.engine.sizing import (
     L1Candidate,
     L2Link,
@@ -647,7 +648,10 @@ def l1_candidates(loaded: LoadedSubstation) -> list[L1Candidate]:
 
 
 def _role(loaded: LoadedSubstation, role: EquipmentRole) -> Equipment:
-    return next(e for e in loaded.substation.equipment if e.role is role)
+    found = next((e for e in loaded.substation.equipment if e.role is role), None)
+    if found is None:  # a blank substation: its parts are not picked yet
+        raise EngineError(f"the substation has no {role.value} entry yet")
+    return found
 
 
 def _links(loaded: LoadedSubstation, side: Side) -> list[L2Link]:
