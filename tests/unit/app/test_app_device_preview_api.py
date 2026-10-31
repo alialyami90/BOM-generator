@@ -91,3 +91,18 @@ def test_check_layout_refuses_a_top_u_that_overlaps_with_the_layout_sentence(
 
     assert check["fits"] is False
     assert "overlaps" in check["issues"][0]["message"]
+
+
+def test_the_page_says_whether_the_panels_are_generated(tmp_path: Path, project: Path) -> None:
+    page = device_preview_page(project, "gis01", LibraryStore(tmp_path / "libraries"))
+
+    assert (
+        page["generated"] is False
+    )  # the example's panels are hand-written: pins do not reach Build
+
+
+def test_an_issue_about_an_equipment_row_can_go_to_that_row(tmp_path: Path, project: Path) -> None:
+    page = device_preview_page(project, "gis01", LibraryStore(tmp_path / "libraries"))
+
+    no_number = next(i for i in page["issues"] if i["kind"] == "part_number")
+    assert no_number["device"] == "hwio"  # its subject is the equipment id

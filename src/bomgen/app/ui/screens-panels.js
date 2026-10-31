@@ -171,7 +171,7 @@
     calls.forEach((call) => { chain = chain.then((prev) => (prev && !prev.written ? prev : call())); });
     return chain.then((reply) => {
       if (reply.written) {
-        LAY.data = reply.page;
+        LAY.data = reply.page; App.devicePreview.reload();  // the preview shows the new pins on its next visit
         if (undoable) history.push(before);
         if (said) toast(said, ic, undoable ? () => ACTIONS['pv-undo']() : null);
       } else {
@@ -225,7 +225,7 @@
     closeDialog();
     busy = true; App.render();
     Bridge.call('generate_panels', S.project.file, S.sub).then((r) => {
-      LAY.data = r.page; history.length = 0; showIssues = false;
+      LAY.data = r.page; history.length = 0; showIssues = false; App.devicePreview.reload();
       toast(`Laid out ${plural(r.written.length, 'panel')}.${r.backup ? ` Hand-written files copied to panels/${r.backup.split(/[\\/]/).pop()}.` : ''}`);
     }).catch((err) => toast(err.message, 'error')).then(() => { busy = false; App.render(); });
   };

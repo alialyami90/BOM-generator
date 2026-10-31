@@ -37,5 +37,10 @@ def device_preview_page(
     for panel in preview["panels"]:
         for unit in panel["units"]:
             unit["label"] = labels.get(unit["device"], unit["device"])
+    for issue in preview["issues"]:  # a check about an equipment row names it as its subject
+        if issue["device"] is None and issue["subject"] in labels:
+            issue["device"] = issue["subject"]
     layout = loaded.substation.layout.model_dump(mode="json", exclude_none=True)
-    return page | preview | {"overrides": layout["overrides"], "removed": layout["removed"]}
+    generated = any(p.generated for p in loaded.panels)  # pins reach only generated panels
+    extra = {"generated": generated, "overrides": layout["overrides"], "removed": layout["removed"]}
+    return page | preview | extra
