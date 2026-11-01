@@ -5,10 +5,12 @@ from collections.abc import Iterable, Sequence
 
 from bomgen.engine.items import BomItem, flatten
 from bomgen.engine.units import DeviceRow, describe, lookup
+from bomgen.io.derived import effective_part_id
 from bomgen.models.bom import BomLine, Group, LooseTable, Qty
 from bomgen.models.library import Library, LooseItem
 from bomgen.models.panel import Panel
 from bomgen.models.project import LooseExtra, LooseMaterial
+from bomgen.models.substation import Equipment, EquipmentRole
 
 
 def device_item(row: DeviceRow, library: Library, group: Group) -> BomItem:
@@ -50,6 +52,24 @@ def device_item(row: DeviceRow, library: Library, group: Group) -> BomItem:
 def main_equipment(rows: Iterable[DeviceRow], library: Library) -> list[BomItem]:
     """Group B: the panel's devices in display order."""
     return [device_item(row, library, Group.B) for row in rows]
+
+
+def annunciator_items(
+    equipment: Iterable[Equipment], library: Library, panels: Sequence[Panel]
+) -> list[LooseExtra]:
+    """Each annunciator row as a loose item with its part's kit, fed from panel 001: design
+    §10 puts the annunciator in loose material (plan M45, Q51; Ali, plan M1c)."""
+    if not panels:
+        return []
+    items = []
+    for entry in equipment:
+        part_id = effective_part_id(entry)
+        if entry.role is EquipmentRole.ANNUNCIATOR and part_id is not None:
+            kit = [i.part_id for i in lookup(library, part_id).loose_items]
+            items.append(
+                LooseExtra(part_id=part_id, qty=entry.qty, children=kit, fed_from=panels[0].id)
+            )
+    return items
 
 
 def loose_table(

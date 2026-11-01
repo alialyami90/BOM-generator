@@ -71,6 +71,10 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- A substation's annunciator row now goes to loose material with its
+  wall-mount kit, fed from panel 001, instead of into a rack (M45, design
+  §10). The checks warn when a switch, firewall, gateway or other device that
+  should carry a tag prints without one (untagged_device).
 - Editing a generated panel numbering pattern in the panel editor drops its
   "# ASSUMED" mark, and rows written by Start parts and Add a device put id,
   part_id and role before the seeded L2 link, as hand-written rows do (M47).

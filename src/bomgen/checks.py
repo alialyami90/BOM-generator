@@ -20,7 +20,7 @@ from bomgen.io.parts_edit import CATEGORY_LINKS
 from bomgen.library_store.store import LibraryRef, library_mismatch
 from bomgen.models.bom import BomTable, BuildResult, LooseTable, PanelBom, QtySum
 from bomgen.models.calc import BranchMcb, DcMains, HeatResult
-from bomgen.models.library import Library, Media, PortKind, PortSpeed, SupplyType
+from bomgen.models.library import Category, Library, Media, PortKind, PortSpeed, SupplyType
 from bomgen.models.panel import Panel, Ventilation
 from bomgen.models.project import DesignConstants
 from bomgen.models.report import CheckItem, CheckReport, CheckStatus
@@ -36,6 +36,7 @@ def check_report(loaded: LoadedSubstation, result: BuildResult) -> CheckReport:
     for panel, rows in expanded:
         items += sfp_slot_checks(panel, rows)
     items += duplicate_tag_checks(expanded)
+    items += untagged_device_checks(expanded)
     items += dc_main_checks(result.mains)
     items += branch_mcb_checks(result.branch_mcbs)
     tables: list[BomTable] = [*result.panels, *([result.loose] if result.loose else [])]
@@ -127,6 +128,45 @@ def duplicate_tag_checks(
         for tag, panel_ids in owners.items()
         if len(panel_ids) > 1
     ]
+
+
+# Device categories whose units carry a device tag (spec: Tag naming conventions; ADR 0030).
+TAGGED_CATEGORIES = frozenset(
+    {
+        Category.NETWORK_SWITCH,
+        Category.FIREWALL,
+        Category.GATEWAY,
+        Category.PATCH_PANEL,
+        Category.GPS_CLOCK,
+        Category.RTAC,
+        Category.IO_CHASSIS,
+        Category.WORKSTATION,
+    }
+)
+
+
+def untagged_device_checks(
+    panels: Iterable[tuple[Panel, Sequence[DeviceRow]]],
+) -> list[CheckItem]:
+    """A warning per part, per panel, of a tagged category whose rows print no tag (M45):
+    duplicate_tag cannot see them, and they get no nameplate."""
+    items: dict[tuple[str, str], CheckItem] = {}
+    for panel, rows in panels:
+        for row in rows:
+            if row.device.category in TAGGED_CATEGORIES and row.tag is None:
+                items.setdefault(
+                    (panel.id, row.device.part_id),
+                    CheckItem(
+                        check="untagged_device",
+                        status=CheckStatus.WARN,
+                        panel_id=panel.id,
+                        subject=row.device.part_id,
+                        message=f"{row.device.model or row.device.part_id} prints with no "
+                        "device tag, so it gets no nameplate and its MCB is named by its "
+                        "model: give the library part a tag_type and purdue_level",
+                    ),
+                )
+    return list(items.values())
 
 
 def _short_speeds(needed: Counter[PortSpeed], slots: Counter[PortSpeed]) -> list[PortSpeed]:

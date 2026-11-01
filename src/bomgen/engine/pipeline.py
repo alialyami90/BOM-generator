@@ -16,7 +16,7 @@ from bomgen.engine.enclosure import enclosure_item
 from bomgen.engine.grounding import grounding
 from bomgen.engine.housekeeping import FORCED_FANS, housekeeping, needs_change_over
 from bomgen.engine.items import BomItem, flatten
-from bomgen.engine.kits import loose_table, main_equipment
+from bomgen.engine.kits import annunciator_items, loose_table, main_equipment
 from bomgen.engine.nameplates import nameplate_item, nameplates
 from bomgen.engine.network import accessories
 from bomgen.engine.power import power_consumption
@@ -53,7 +53,10 @@ def build(loaded: LoadedSubstation) -> BuildResult:
     """Every panel's BOM lines and the loose-material table."""
     library = loaded.library
     material = loaded.substation.loose_material
-    loose_items = material.items if material is not None else []
+    loose_items = [
+        *(material.items if material is not None else []),
+        *annunciator_items(loaded.substation.equipment, library, loaded.panels),
+    ]
     substation = loaded.substation.substation.name
     drafts = [_draft(p, library, loaded.constants, loose_items) for p in loaded.panels]
     hwio_total = sum(draft.hwio for draft in drafts)
@@ -66,6 +69,8 @@ def build(loaded: LoadedSubstation) -> BuildResult:
         plates = []
     if material is None and loaded.panels:  # devices' own loose items still need a sheet
         material = LooseMaterial(host_panel=loaded.panels[0].id)
+    if material is not None and len(loose_items) > len(material.items):  # annunciator rows
+        material = material.model_copy(update={"items": loose_items})
     loose = loose_table(material, substation, [(d.panel, d.rows) for d in drafts], library)
     power = power_consumption(panels, loose, library, loaded.constants)
     heat = heat_result(

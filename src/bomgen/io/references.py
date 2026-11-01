@@ -319,7 +319,7 @@ def equipment_issues(
         if device is None:
             issues.append(_unknown_part(source, loc, item.part_id, library_name))
             continue
-        if device.height_u is None:
+        if device.height_u is None and item.role is not EquipmentRole.ANNUNCIATOR:  # loose (M45)
             message = f"height_u is needed for the panel layout ('{item.part_id}' has none)"
             issues.append(_issue(source, loc, message))
         if item.cable_manager is not None and device.category not in NETWORK_DEVICES:

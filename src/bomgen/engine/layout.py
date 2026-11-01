@@ -666,6 +666,8 @@ def _units(loaded: LoadedSubstation, plan: NetworkPlan, issues: list[LayoutIssue
     devices = {d.part_id: d for d in loaded.library.devices}
     units: list[Unit] = []
     for rank, entry in enumerate(loaded.substation.equipment):
+        if entry.role is EquipmentRole.ANNUNCIATOR:  # loose material, not racked (M45, Q51)
+            continue
         part_id = _part_id(entry, plan)
         device = devices[part_id]
         if device.height_u is None:
