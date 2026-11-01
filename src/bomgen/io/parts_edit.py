@@ -74,10 +74,17 @@ def link_defaults(part: DeviceType | None, role: object) -> dict[str, Any]:
     return seeded
 
 
+def _ordered(row: Mapping[str, Any]) -> dict[str, Any]:
+    """``row`` with id, part_id and role first, as a hand-written row has them."""
+    lead = ("id", "part_id", "role")
+    return {**{k: row[k] for k in lead if k in row}, **row}
+
+
 def with_link_defaults(row: Mapping[str, Any], library: Library | None) -> dict[str, Any]:
-    """``row`` with the link defaults for the keys it leaves out."""
+    """``row`` with the link defaults for the keys it leaves out, after its own keys."""
     part = library.get(row["part_id"]) if library and row.get("part_id") else None
-    return {**link_defaults(part, row.get("role")), **row}
+    defaults = link_defaults(part, row.get("role"))
+    return {**row, **{k: v for k, v in defaults.items() if k not in row}}
 
 
 def seeded_row(
@@ -327,7 +334,9 @@ def start_parts(
         if data.get("equipment"):
             raise EditError("This substation already has equipment.")
         set_entry(
-            data, "equipment", [{k: v for k, v in r.items() if v not in (None, "")} for r in picked]
+            data,
+            "equipment",
+            [{k: v for k, v in _ordered(r).items() if v not in (None, "")} for r in picked],
         )
 
     return edit_substation(project_file, substation_id, change, store=store)

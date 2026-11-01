@@ -106,16 +106,20 @@ def set_field(
     substation: str | None = None,
     panel: str | None = None,
     store: LibraryStore | None = None,
+    confirm: bool = False,
 ) -> EditResult:
-    """Set the field at ``path`` (missing mappings on the way are added)."""
+    """Set the field at ``path`` (missing mappings on the way are added); ``confirm`` also
+    drops an ``ASSUMED`` mark from it, the rest of its comment staying."""
     _check_path(path)
-    return _edit(
-        project_file,
-        lambda data: set_entry(_walk(data, path, create=True), path[-1], value),
-        substation,
-        panel,
-        store,
-    )
+
+    def change(data: CommentedMap) -> None:
+        parent = _walk(data, path, create=True)
+        set_entry(parent, path[-1], value)
+        words = comment_of(parent, path[-1]).split()
+        if confirm and ASSUMED in words:
+            set_comment(parent, path[-1], " ".join(w for w in words if w != ASSUMED))
+
+    return _edit(project_file, change, substation, panel, store)
 
 
 def remove_field(

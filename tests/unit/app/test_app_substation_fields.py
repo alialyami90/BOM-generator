@@ -100,6 +100,15 @@ def test_a_row_added_from_the_parts_page_gets_its_l2_link_defaults(
     assert "l2_ports" not in substation_yaml(project)["equipment"][-1]
 
 
+def test_a_seeded_row_writes_id_role_and_part_id_before_its_l2_link(
+    app: api.Api, project: Path
+) -> None:
+    row = {"id": "gw-2", "part_id": "SEL-3555-GW", "role": "other"}
+    ok(app.add_equipment(str(project), SUB, row, None, True))
+    keys = list(substation_yaml(project)["equipment"][-1])
+    assert keys == ["id", "part_id", "role", "l2_ports", "l2_speed"]
+
+
 def test_a_removed_row_comes_back_at_its_place_on_undo(app: api.Api, project: Path) -> None:
     before = substation_yaml(project)["equipment"]
     at = [e["id"] for e in before].index("gps")

@@ -61,6 +61,13 @@ project uses [Semantic Versioning](https://semver.org/).
   inputs or product name (M43), for example the SCALANCE XR324-4M EEC as
   "8 MM Ports, 16 RJ45" and the SoftMaker suites under their own names. A
   figure the device database lacks is left out of the text.
+- The installer ships psa-devices 1.15.0. The contractor's switches (Cisco
+  IE-4010-16S12P and C9300-24T-A, RUGGEDCOM RST2228-28SFP-HV, SEL-2743 and
+  SEL-2744), the eight FortiGates and the 21 Hubbell FEUR fibre shelves now
+  carry a tag type and level, so they print with a tag and a nameplate. The
+  automatic L1 pick, the IE-4010, prints L1-ESW-A11 like the RST2228. The
+  NAP-K55 annunciator ships its LPA37-696 wall-mount kit as a loose item
+  (M44).
 
 ### Fixed
 
@@ -68,6 +75,9 @@ project uses [Semantic Versioning](https://semver.org/).
   wall-mount kit, fed from panel 001, instead of into a rack (M45, design
   §10). The checks warn when a switch, firewall, gateway or other device that
   should carry a tag prints without one (untagged_device).
+- Editing a generated panel numbering pattern in the panel editor drops its
+  "# ASSUMED" mark, and rows written by Start parts and Add a device put id,
+  part_id and role before the seeded L2 link, as hand-written rows do (M47).
 - A substation that picks an MCB brand without a DC brand no longer stores
   that brand as its DC set: the DC branches still size with it (ADR 0023),
   and the resolved library validates again when the brand has no DC rating

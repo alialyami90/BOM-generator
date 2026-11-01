@@ -374,3 +374,38 @@ def test_m43_no_alternative_description_contradicts_its_own_data(shipped: Librar
     }
 
     assert wrong == {}
+
+
+TAGGED = ("network_switch", "firewall", "gateway", "gps_clock", "rtac", "workstation")
+
+
+def test_m44_every_networked_part_has_a_level_and_a_type(shipped: Library) -> None:
+    untagged = [
+        d.part_id
+        for d in shipped.devices
+        if d.category in TAGGED and (d.purdue_level is None or not d.tag_type)
+    ]
+
+    assert untagged == []
+
+
+def test_m44_every_patch_panel_is_tagged_as_the_fopp(shipped: Library) -> None:
+    # ADR 0030, Q58: a patch panel keeps the FOPP's tag, with no level
+    fopp = next(d for d in shipped.devices if d.part_id == "FOPP-96SM")
+
+    wrong = [
+        d.part_id
+        for d in shipped.devices
+        if d.category == "patch_panel"
+        and (d.tag_type, d.tag_pattern) != (fopp.tag_type, fopp.tag_pattern)
+    ]
+
+    assert wrong == []
+
+
+def test_the_annunciator_brings_its_wall_mount_kit(shipped: Library) -> None:
+    annunciator = next(d for d in shipped.devices if d.part_id == "NAP-K55")
+    example = next(d for d in load_library(EXAMPLE).devices if d.part_id == "NAP-K55")
+
+    assert [i.part_id for i in annunciator.loose_items] == ["LPA37-696"]
+    assert example.loose_items == []  # the example writes its kit by hand (Q38)
