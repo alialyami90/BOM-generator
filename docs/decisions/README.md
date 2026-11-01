@@ -35,4 +35,4 @@ An ADR stays "Proposed" until Ali accepts it in review.
 | 0027 | [Port speeds 2.5G, 5G and 25G](0027-port-speeds-2-5g-5g-25g.md) | Accepted (Ali, 2026-10-31) |
 | 0028 | [Power Consumption follows the branch MCB](0028-power-consumption-follows-the-branch-mcb.md) | Rejected (Ali, 2026-11-01) |
 | 0029 | [Larger fans for hot cabinets](0029-larger-fans-for-hot-cabinets.md) | Proposed |
-| 0030 | [Every device tag has level, type, side and number](0030-every-device-tag-has-level-type-side-and-number.md) | Proposed |
+| 0030 | [Every device tag has level, type, side and number](0030-every-device-tag-has-level-type-side-and-number.md) | Accepted (Ali, 2026-11-01) |

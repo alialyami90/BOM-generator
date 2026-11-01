@@ -971,7 +971,7 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
 - **M30 — Device tags.** Every group B device with a level is tagged
   `<PANEL>-<LEVEL>-<TYPE>-<SIDE><NN>` (plate L2_GPS_A01). Gateway, GPS, RTAC and workstation
   parts are L2 (psa-devices 1.10.0). The workstation roles give OWS, EWS and SRV. A
-  `duplicate_tag` check fails a shared tag (ADR 0030, Proposed; audit 2026-10-31, ENG-1, APP-9,
+  `duplicate_tag` check fails a shared tag (ADR 0030, accepted by Ali 2026-11-01; audit 2026-10-31, ENG-1, APP-9,
   ALI-16; Q56 to Q60).
 
 ## 5. Testing strategy

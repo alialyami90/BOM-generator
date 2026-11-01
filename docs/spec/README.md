@@ -12,6 +12,7 @@ distribution (group F)").
 | `generator-spec-v2.md` | v2.1 (30 Oct 2026) | Hand-edited from the v2 export with the passages of the Claude Doc "Spec v2.1 draft" (ADRs 0017, 0019, 0020, 0022, 0023); the master doc still reads v2 |
 | `generator-spec-v2.md` | v2.1 + ADR 0024 (31 Oct 2026) | Hand-edited: equipment part number, overrides and SFP choice; derived parts in generation step 0 (design approved by Ali 2026-10-31) |
 | `generator-spec-v2.md` | v2.1 + ADR 0027 (31 Oct 2026) | Hand-edited: the `ports` row of "Inputs the tool needs" lists the port speeds; 2.5G, 5G and 25G are never sized for SFPs (ADR 0027, accepted by Ali 2026-10-31) |
+| `generator-spec-v2.md` | v2.1 + ADR 0030 (1 Nov 2026) | Hand-edited: "Tag naming conventions" gives every device with a level its level, type, side and number, and the duplicate-tag failure (ADR 0030, accepted by Ali 2026-11-01) |
 
 The export replaces the doc's embedded "workbook data flow" diagram with a text
 placeholder under "Relationships between sheets"; the surrounding text describes

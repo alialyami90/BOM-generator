@@ -10,7 +10,7 @@ project uses [Semantic Versioning](https://semver.org/).
 ### Changed
 
 - Every device with a level is tagged level, type, side and number (M30,
-  ADR 0030, Proposed): the time server's plate reads L2_GPS_A01, the
+  ADR 0030): the time server's plate reads L2_GPS_A01, the
   gateways PSA1-L2-GW-A01 and PSA2-L2-GW-B01, and the EXT switch and
   firewall PSA1-EXT-ESW-A01 and PSA1-EXT-FW-A01. A panel with no LAN uses
   side A. The operator workstation, engineering workstation and DA server

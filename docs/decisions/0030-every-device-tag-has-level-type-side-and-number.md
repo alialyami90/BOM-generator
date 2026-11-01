@@ -1,6 +1,6 @@
 # 0030. Every device tag has level, type, side and number
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-11-01)
 - Date: 2026-11-01
 - Spec sections: Tag naming conventions; Derivation rules (MCB descriptions); Device nameplates
   (ADR 0026)
@@ -81,6 +81,6 @@ decides:
 - Every device unit has its own tag, plate and MCB load name. A duplicate fails the build's
   checks instead of passing silently.
 - The example workbook no longer matches the issued workbook's tags. The spec's "Tag naming
-  conventions" text needs the same change once this ADR is accepted.
+  conventions" text is updated to match (Ali accepted on 2026-11-01).
 - A user library that still carries the old `tag_pattern` keeps its old tags. The duplicate
   check catches any clash.
