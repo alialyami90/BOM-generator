@@ -7,6 +7,19 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Every device with a level is tagged level, type, side and number (M30,
+  ADR 0030, Proposed): the time server's plate reads L2_GPS_A01, the
+  gateways PSA1-L2-GW-A01 and PSA2-L2-GW-B01, and the EXT switch and
+  firewall PSA1-EXT-ESW-A01 and PSA1-EXT-FW-A01. A panel with no LAN uses
+  side A. The operator workstation, engineering workstation and DA server
+  get OWS, EWS and SRV, so they no longer share one tag. The check report
+  fails a tag that two devices share. The installer ships psa-devices
+  1.10.0: gateway, GPS, RTAC and workstation parts are L2.
+
+## [0.3.2] - 2026-11-01
+
 ### Added
 
 - Parts rows set each device's link to the L2 switch (M31): ports, speed
@@ -63,14 +76,6 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- Every device with a level is tagged level, type, side and number (M30,
-  ADR 0030, Proposed): the time server's plate reads L2_GPS_A01, the
-  gateways PSA1-L2-GW-A01 and PSA2-L2-GW-B01, and the EXT switch and
-  firewall PSA1-EXT-ESW-A01 and PSA1-EXT-FW-A01. A panel with no LAN uses
-  side A. The operator workstation, engineering workstation and DA server
-  get OWS, EWS and SRV, so they no longer share one tag. The check report
-  fails a tag that two devices share. The installer ships psa-devices
-  1.10.0: gateway, GPS, RTAC and workstation parts are L2.
 - `data/device-db/contractor-return-v2-2026-10-31.md` and its CSV list what v2
   of the contractor's library leaves open: 10 asks for the contractor, and 193
   configured codes, code identities and the Q54 power choice that are ours.
@@ -644,7 +649,8 @@ project uses [Semantic Versioning](https://semver.org/).
   airflow; future library defaults use 0 W for the SK 3110 thermostat and
   460 m³/h for the SK 3243.100 fan with its outlet filter (#12).
 
-[Unreleased]: https://github.com/alialyami90/BOM-generator/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/alialyami90/BOM-generator/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/alialyami90/BOM-generator/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/alialyami90/BOM-generator/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/alialyami90/BOM-generator/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/alialyami90/BOM-generator/compare/v0.2.0...v0.2.1

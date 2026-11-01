@@ -7,10 +7,22 @@ Stable knowledge stays where it lives ([`CLAUDE.md`](../../CLAUDE.md), [`docs/pl
 [`docs/spec/`](../spec/), the ADRs in [`docs/decisions/`](../decisions/)); these files link to it
 rather than copy it.
 
-## 1. Overview (2026-10-31)
+## 1. Overview (2026-11-01)
 
-- Repo `alialyami90/BOM-generator`, default branch `main`, at `f0fa53c` (#268, the v0.3.1
+- Repo `alialyami90/BOM-generator`, default branch `main`, at `e887fac` (#280, the v0.3.2
   release). Check open PRs with `list_pull_requests` before starting.
+- **v0.3.2 is released** (#280, 2026-11-01), the first batch of fixes from Ali's specs-vs-app audit
+  ([Claude Doc "Audit: specs vs app (v0.3.1)"](https://claude.ai/artifact/5JGc6RakHiQyFunApSao4H)). It
+  carries M27 new substation from first parts to Build (#272), M28 psa-devices 1.9.0 (#270, #271,
+  #275), M29 unsaved-changes prompt and app polish (#274), M31 L2 link inputs on Parts with category
+  defaults (#283, #284), M32 panel editor (#281, #282), M33 sheet consistency (#273, #285), M34
+  larger fans (#278, ADR 0029 Proposed; no library lists a larger fan yet) and #277. Ali rejected
+  ADR 0028 (Power Consumption P follows the branch MCB), so #285 put P back to `=ROUNDUP(O,0)` and
+  V to 125/230 before the release. Ali confirmed "bigger fan per cabinet" for ENG-6.
+- **In progress after v0.3.2:** M30 tags (A3): every group B device tagged
+  `<PANEL>-<LEVEL>-<TYPE>-<SIDE><NN>`, plate text `L2_GPS_A01`, a `duplicate_tag` error, ADR 0030
+  (Ali chose "Yes, every device", 2026-11-01). A4's docs catch-up (audit DOC-5..10, plan M27–M34)
+  is pending.
 - **Part picking, M19–M26 (2026-10-31).** Ali's feedback on v0.2.1, designed in
   [`part-picking-design`](../superpowers/specs/2026-10-31-part-picking-design.md), questions Q42–Q53.
   All merged:
@@ -65,8 +77,8 @@ rather than copy it.
   round-trip writers (ADR 0021), and the loose material sheet and page (ADR 0020, ADR 0022). v0.2.1 is
   the UI polish pass from [`docs/ui/polish-v02.md`](../ui/polish-v02.md) (items 1–16, #205–#208) plus
   #194, #198–#201.
-- **Numbers.** ADRs 0001–0027 are Accepted (Ali accepted 0027, port speeds, on 2026-10-31).
-  Next free ADR **0028**. Q51 (annunciator), Q54
+- **Numbers (2026-11-01).** ADRs 0001–0027 are Accepted, 0028 is Rejected and 0029 is Proposed;
+  M30 takes 0030. Before that, on 2026-10-31: next free ADR was **0028**. Q51 (annunciator), Q54
   (power of the -2 SEL computers) and Q55 (categories for the contractor's other part types) are
   open; the next free question is **Q56**. The next milestone
   is **M27**.
