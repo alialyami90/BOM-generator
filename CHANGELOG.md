@@ -71,6 +71,9 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- A link to the L2 switch at a speed and media the library has no SFP for
+  is now a problem on its Parts row, which Checks and Build list with Go to
+  the row, instead of "The engine stopped" (M46). The Parts row warns too.
 - A substation's annunciator row now goes to loose material with its
   wall-mount kit, fed from panel 001, instead of into a rack (M45, design
   §10). The checks warn when a switch, firewall, gateway or other device that

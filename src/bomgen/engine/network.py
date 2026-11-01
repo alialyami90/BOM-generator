@@ -11,6 +11,7 @@ from bomgen.engine.units import DeviceRow, describe, expand_devices
 from bomgen.models.bom import BomLine, Group, Qty, QtySum
 from bomgen.models.library import Category, DeviceType, Library, Media
 from bomgen.models.panel import DeviceInstance, Panel, PortAllocation, PortPlan
+from bomgen.models.substation import Equipment
 
 # "roughly one per rack-mounted switch/patch panel"
 CABLE_MANAGED = frozenset({Category.NETWORK_SWITCH, Category.PATCH_PANEL})
@@ -110,6 +111,22 @@ def _serves(device: DeviceType, allocation: PortAllocation) -> bool:
     return device.category is Category.SFP and any(
         p.speed is allocation.speed and p.media is allocation.media for p in device.ports
     )
+
+
+def unserved_links(equipment: Sequence[Equipment], library: Library) -> list[int]:
+    """Indexes of the equipment rows whose L2 link no library SFP serves: the L2 switch end
+    of a fibre link takes an SFP of its speed and media (plan M46)."""
+    return [
+        index
+        for index, entry in enumerate(equipment)
+        if entry.l2_ports
+        and entry.l2_media is not Media.RJ45
+        and not any(
+            device.category is Category.SFP
+            and any(p.speed is entry.l2_speed and p.media is entry.l2_media for p in device.ports)
+            for device in library.devices
+        )
+    ]
 
 
 def _commodity(panel: Panel, library: Library, category: Category, qty: int) -> BomItem:

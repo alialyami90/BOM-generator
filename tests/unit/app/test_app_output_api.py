@@ -86,6 +86,27 @@ def test_checks_and_build_are_blocked_until_the_substation_has_parts(
     assert checks["engine"]["run"] is False
 
 
+def test_a_link_no_library_sfp_serves_is_a_problem_on_its_parts_row(
+    app: api.Api, project: Path
+) -> None:
+    """M46: not "The engine stopped", but a located problem Where to fix can open."""
+    sub = project.parent / SUBSTATION
+    edit(sub, "l2_ports: 1, l2_speed: 100M }", "l2_ports: 1, l2_speed: 10G, l2_media: SM }")
+    gps = [e["id"] for e in read_yaml(sub).data["equipment"]].index("gps")
+
+    checks = ok(app.run_checks(str(project), "gis01"))
+    target = ok(app.build_target(str(project), "gis01"))
+
+    for problems in (checks["problems"], target["problems"]):
+        (problem,) = problems
+        assert problem["level"] == "error"
+        assert problem["location"] == f"equipment[{gps}].l2_speed"
+        assert problem["line"] == 70
+        assert problem["message"].startswith("no SFP in the library for 10G SM")
+    assert checks["engine"]["run"] is False
+    assert checks["engine"]["reason"] == checks["problems"][0]["message"]
+
+
 def test_checks_list_input_errors_and_do_not_run_the_engine(app: api.Api, project: Path) -> None:
     edit(project.parent / SUBSTATION, "ied_count: 40", "ied_count: lots")
 

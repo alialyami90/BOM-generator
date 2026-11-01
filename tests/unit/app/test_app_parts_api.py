@@ -327,12 +327,27 @@ def test_rows_give_the_l2_link_and_com_ports_the_inputs_edit(
     found = parts(project, store)
 
     gps = row(found, "gps")
-    assert gps["link"] == {"l2_ports": 1, "l2_speed": "100M", "l2_media": "MM"}
+    assert gps["link"] == {"l2_ports": 1, "l2_speed": "100M", "l2_media": "MM", "no_sfp": False}
     assert gps["serial_ports"] is None  # not an RTAC
     assert row(found, "rtac")["serial_ports"] == 6
     assert row(found, "rtac")["link"]["l2_ports"] == 2
     for switch in ("l1", "l2", "fopp"):
         assert row(found, switch)["link"] is None  # sized or patched, not linked by hand
+
+
+def test_a_link_no_library_sfp_serves_is_marked_on_its_row(
+    project: Path, substation: Path, store: LibraryStore
+) -> None:
+    """M46: the row says so before Checks does; an RJ45 link needs no SFP."""
+    text = substation.read_text(encoding="utf-8")
+    old = "l2_ports: 1, l2_speed: 100M }"
+    assert old in text
+    substation.write_text(text.replace(old, "l2_ports: 1, l2_speed: 10G, l2_media: SM }"), "utf-8")
+    assert row(parts(project, store), "gps")["link"]["no_sfp"] is True
+    substation.write_text(
+        text.replace(old, "l2_ports: 1, l2_speed: 10G, l2_media: RJ45 }"), "utf-8"
+    )
+    assert row(parts(project, store), "gps")["link"]["no_sfp"] is False
 
 
 def test_the_l2_link_and_com_ports_are_written_as_equipment_fields(
@@ -344,7 +359,8 @@ def test_the_l2_link_and_com_ports_are_written_as_equipment_fields(
     ok(app.set_substation_field(str(project), "gis01", path, 4))
 
     found = parts(project, store)
-    assert row(found, "gw")["link"] == {"l2_ports": 2, "l2_speed": "10G", "l2_media": "MM"}
+    link = {"l2_ports": 2, "l2_speed": "10G", "l2_media": "MM", "no_sfp": True}  # no 10G SFP
+    assert row(found, "gw")["link"] == link
     assert row(found, "rtac")["serial_ports"] == 4
 
 

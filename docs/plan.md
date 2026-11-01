@@ -1028,6 +1028,10 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
   gateway, patch panel, clock, RTAC, I/O chassis or workstation that prints with no tag, which
   `duplicate_tag` cannot see. The automatic L1 pick takes only L1 parts; the untagged
   IE-4010-16S12P lacked a `tag_type`, which M44 adds.
+- **M46 — A link with no SFP.** An equipment row's L2 link whose speed and media no library SFP
+  serves is a located problem on Checks and Build (`equipment[i].l2_speed`, with its line), and
+  Where to fix lands on the link field on Parts, instead of "The engine stopped". The Parts row and
+  an L2 switch's SFP row with no candidate say so.
 
 ## 5. Testing strategy
 
