@@ -401,3 +401,11 @@ def test_m44_every_patch_panel_is_tagged_as_the_fopp(shipped: Library) -> None:
     ]
 
     assert wrong == []
+
+
+def test_the_annunciator_brings_its_wall_mount_kit(shipped: Library) -> None:
+    annunciator = next(d for d in shipped.devices if d.part_id == "NAP-K55")
+    example = next(d for d in load_library(EXAMPLE).devices if d.part_id == "NAP-K55")
+
+    assert [i.part_id for i in annunciator.loose_items] == ["LPA37-696"]
+    assert example.loose_items == []  # the example writes its kit by hand (Q38)

@@ -548,6 +548,8 @@ devices:
     category: annunciator
     alt_group: NAP-K55  # M14 (ADR 0017)
     height_u: 0  # override (data/library/additions.yaml)
+    loose_items:  # override (data/library/additions.yaml)
+      - { part_id: LPA37-696 }
     input_v_min: 43     # datasheet (data/device-db)
     input_v_max: 160
     make: Ultraview

@@ -810,6 +810,8 @@ overrides:  # values the shipped library changes in the example's parts and cata
       ordering_code: "SK 3243.200"
     NAP-K55:  # wall mounted: no rack space (data/device-db, contractor v2)
       height_u: 0
+      loose_items:  # its wall-mount kit, shipped loose with it (M45)
+        - { part_id: LPA37-696 }
     SEL-2244-2.SIEMENS-LOW:  # finding 31: one SICAM A8000 DI-8112, 16 inputs (data/device-db)
       description_template: "Digital Input Module-16DI (110V DC)"
       di_inputs: 16
