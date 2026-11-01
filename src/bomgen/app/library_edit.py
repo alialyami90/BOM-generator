@@ -12,11 +12,13 @@ import copy
 import dataclasses
 import json
 import os
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, get_args
 
+from bomgen.app import catalogue_edit
+from bomgen.app.catalogue_edit import CatalogueEditError
 from bomgen.io.errors import InputError
 from bomgen.io.loader import load_library
 from bomgen.library_store.alternatives import compare_alternatives
@@ -146,7 +148,9 @@ class LibraryEditor:
         assert pending.base is not None
         result = apply_edits(self._library(pending.base), parse_edits([*pending.edits, *more]))
         if result.library is None:
-            listed = "; ".join(f"{p.location}: {p.message}" for p in result.problems)
+            listed = "; ".join(
+                f"{p.location}: {p.message}" if p.location else p.message for p in result.problems
+            )
             raise EditRefusedError(listed)
         return result.library
 
@@ -325,11 +329,15 @@ class LibraryEditor:
             pending = Pending(pending.base, pending.edits, record_edits=[*mine, *record_edits])
         assert pending.base is not None
         base = self._library(pending.base).model_dump(mode="json")
-        saved = {
+        saved: dict[tuple[Any, ...], Any] = {
             ("devices", d["part_id"], key): value
             for d in base["devices"]
             for key, value in d.items()
         }
+        shown = self._library(pending.base).model_dump(mode="json", exclude_none=True)
+        for kind in catalogue_edit.KINDS:  # the Catalogues tab writes each one whole
+            saved[("catalogues", kind)] = shown["catalogues"][kind]
+            saved[("catalogue_brands", kind)] = shown.get("catalogue_brands", {}).get(kind, [])
         merged = merge(pending.edits, edits, saved)
         if merged or pending.record_edits:
             self.pending.save(
@@ -366,6 +374,27 @@ class LibraryEditor:
         if any(d.part_id == part_id for d in edited.devices):
             raise EditRefusedError(f"devices: {part_id} is already in the library")
         return self.add([{"op": "insert", "path": ["devices"], "value": body}])
+
+    def catalogues(self) -> dict[str, Any]:
+        """The Catalogues tab: every brand set as rows, with the pending edits applied."""
+        pending = self._ready()
+        assert pending.base is not None
+        return catalogue_edit.page(self._edited(pending), self._library(pending.base))
+
+    def edit_catalogue(self, action: str, kind: str, *args: Any) -> dict[str, Any]:
+        """Set a brand's rows, add a brand or make one the default, as pending edits."""
+        if kind not in catalogue_edit.KINDS:
+            raise CatalogueEditError(f"there is no catalogue '{kind}'")
+        makers: dict[str, Callable[..., list[Any]]] = {
+            "set": catalogue_edit.set_brand,
+            "add": catalogue_edit.add_brand,
+            "default": catalogue_edit.make_default,
+        }
+        pending = self._ready()
+        assert pending.base is not None
+        more = (self._library(pending.base),) if action == "set" else ()
+        edits = makers[action](self._edited(pending), kind, *args, *more)
+        return {"pending": self.add(edits), "catalogues": self.catalogues()}
 
     def discard(self) -> dict[str, Any]:
         """Drop the set; the edits come back so the page can offer Undo."""
@@ -477,6 +506,20 @@ def describe(before: Library, after: Library) -> list[dict[str, str]]:
     for key in cat_new:
         if cat_new[key] != cat_old.get(key):
             entries.append(_entry("Catalogue", key, "changed", "", "", ""))
+    brands_old = before.catalogue_brands.model_dump(mode="json")
+    brands_new = after.catalogue_brands.model_dump(mode="json")
+    for kind, brands in brands_new.items():
+        was = {b["id"]: b for b in brands_old.get(kind, [])}
+        now = {b["id"]: b for b in brands}
+        for brand_id, brand in now.items():
+            if brand_id not in was:
+                entries.append(_entry("Catalogue brand", f"{kind} {brand_id}", "added", "", "", ""))
+            elif brand != was[brand_id]:
+                entries.append(
+                    _entry("Catalogue brand", f"{kind} {brand_id}", "changed", "", "", "")
+                )
+        for brand_id in was.keys() - now.keys():
+            entries.append(_entry("Catalogue brand", f"{kind} {brand_id}", "removed", "", "", ""))
     return entries
 
 

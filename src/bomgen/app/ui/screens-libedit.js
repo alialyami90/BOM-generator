@@ -29,8 +29,8 @@
   ACTIONS['pending-discard-do'] = () => {
     closeDialog();
     Bridge.call('discard_library_edits').then((r) => {
-      PEND.page = r.page; ED.key = ''; App.render();
-      toast('Pending changes discarded', 'trash', r.discarded.length || r.discarded_records.length ? () => Bridge.call('add_library_edits', r.discarded, r.discarded_records).then((p) => { PEND.page = p; ED.key = ''; App.render(); }).catch((e) => toast(e.message, 'error')) : null);
+      PEND.page = r.page; ED.key = ''; App.cataloguesStale(); App.render();
+      toast('Pending changes discarded', 'trash', r.discarded.length || r.discarded_records.length ? () => Bridge.call('add_library_edits', r.discarded, r.discarded_records).then((p) => { PEND.page = p; ED.key = ''; App.cataloguesStale(); App.render(); }).catch((e) => toast(e.message, 'error')) : null);
     }).catch((e) => toast(e.message, 'error'));
   };
 
@@ -50,7 +50,7 @@
     const head = pageHead('Review library changes', `These edits become a new local version of ${esc(p.name)}. Nothing changes in any project until you apply them and a project records the new version.`, '', crumbs);
     if (!p.count) return `<div class="page">${head}<div class="empty" style="max-width:640px"><b>Nothing to review</b><div class="muted small" style="margin:4px 0 12px">Device edits you save appear here before they are applied.</div><a class="btn btn--secondary" href="#/library">Back to the library</a></div></div>`;
     const of = (k) => p.entries.filter((e) => e.kind === k);
-    const line = (e) => `<div><span class="mono">${esc(e.label)}</span><span class="muted">${e.kind === 'changed' ? `${e.field ? `${esc(labelOf(e.field))}: ` : ''}${esc(withUnit(e.field, e.from))} → ${esc(withUnit(e.field, e.to))}` : esc(e.to || e.from)}</span></div>`;
+    const line = (e) => `<div><span class="mono">${esc(e.label)}</span><span class="muted">${e.kind === 'changed' && !e.from && !e.to ? esc(e.area) : e.kind === 'changed' ? `${e.field ? `${esc(labelOf(e.field))}: ` : ''}${esc(withUnit(e.field, e.from))} → ${esc(withUnit(e.field, e.to))}` : esc(e.to || e.from)}</span></div>`;
     const group = (title, items, tone) => (items.length ? `<details open><summary>${icon('chevr', 'chev')}${esc(title)} ${badge(tone, items.length)}</summary><div class="items">${items.map(line).join('')}</div></details>` : '');
     const moved = p.active && p.active !== p.base ? `<div style="margin-bottom:var(--space-4)">${banner('warn', `<b>Started from ${esc(p.base)}; ${esc(p.active)} is now active.</b> Applying builds on ${esc(p.base)}, the version these edits started from.`)}</div>` : '';
     return `<div class="page">${head}${moved}<div class="stack" style="max-width:920px">
@@ -63,7 +63,7 @@
   ACTIONS['apply-pending'] = (el) => {
     el.disabled = true;
     Bridge.call('apply_library_edits', ($('#rv-note') && $('#rv-note').value.trim()) || 'Local edits').then((r) => {
-      PEND.state = 'idle'; ED.key = ''; App.reloadLibrary(); go('#/library'); toast(`${PEND.page.name} ${r.version} is active`, 'check');
+      PEND.state = 'idle'; ED.key = ''; App.cataloguesStale(); App.reloadLibrary(); go('#/library'); toast(`${PEND.page.name} ${r.version} is active`, 'check');
     }).catch((e) => { el.disabled = false; toast(e.message, 'error'); });
   };
 
