@@ -179,3 +179,21 @@ def test_an_unknown_part_names_the_installed_library_not_its_file(
     problems = ok(app.panel_page(str(project), "gis01", "psa1"))["problems"]
     [message] = [p["message"] for p in problems if "NOPE" in p["message"]]
     assert message == f"unknown part_id 'NOPE' (not in {library['name']} {library['version']})"
+
+
+def test_a_generated_panel_page_gives_the_shared_numbering_patterns(
+    app: api.Api, generated: Path
+) -> None:
+    """ALI-5/ALI-13: the generated-panel template is edited in the app, not only in YAML."""
+    page = ok(app.panel_page(str(generated), "gis01", "psa2"))
+    assert page["template"] == {
+        "cabinet_name": "PSA Cabinet - {n:03d}",
+        "cabinet_number": "861-GIS01-PSA-{n:04d}",
+        "tag_prefix": "PSA{n}",
+        "sheet_name": "{n}",
+    }
+    path = ["generated_panels", "cabinet_number"]
+    ok(app.set_substation_field(str(generated), "gis01", path, "861-GIS01-XYZ-{n:04d}"))
+    page = ok(app.panel_page(str(generated), "gis01", "psa2"))
+    assert page["panel"]["cabinet_number"] == "861-GIS01-XYZ-0002"
+    assert ok(app.panel_page(str(generated), "gis01", "ws"))["template"] is None

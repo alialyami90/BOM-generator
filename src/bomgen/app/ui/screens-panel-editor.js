@@ -34,6 +34,7 @@
     const [k, a, ...r] = key.split('.');
     if (k === 'e') { const f = [a, ...r].join('.'); return ENC[f] ? [['generated_panels', 'enclosure', ...f.split('.')], ENC[f]] : null; }
     if (k === 'doc') return [['generated_panels', 'document'], 'choice'];
+    if (k === 'g') return [['generated_panels', a], 'text'];  // a numbering pattern every generated panel shares
     if (k === 'o') return OPT[r[0]] ? [a === 'all' ? ['generated_panels', 'options', r[0]] : ['generated_panels', 'options_by_panel', Number(a), r[0]], OPT[r[0]]] : null;
     if (k === 'p' && r[0] === 'serial_ports') return [['equipment', Number(a), 'port_plan', 'serial_ports'], 'int'];
     if (k === 'p' && PORT[r[2]]) return [['equipment', Number(a), 'port_plan', r[0], Number(r[1]), r[2]], PORT[r[2]]];
@@ -44,6 +45,7 @@
     const [k, a, ...r] = key.split('.');
     if (k === 'e') return str([a, ...r].reduce((o, x) => (o == null ? o : o[x]), p.enclosure));
     if (k === 'doc') return p.document;
+    if (k === 'g') return p.template ? str(p.template[a]) : '';
     if (k === 'o') {
       const o = p.options.find((x) => x.key === r[0]); if (!o) return '';
       return a === 'all' ? str(o.shared) : o.own && Number(a) === p.panel.number ? str(o.value) : '';
@@ -107,7 +109,7 @@
   /* ---------- the page ---------- */
   const TABS = [['enclosure', 'Enclosure'], ['devices', 'Devices'], ['ports', 'Port plans'], ['options', 'Options'], ['document', 'Document'], ['yaml', 'YAML']];
   const KIND = { network: 'Network', control: 'Control', console: 'Console' };
-  const TAB_OF = (key) => ({ c: 'enclosure', e: 'enclosure', doc: 'document', o: 'options', p: 'ports', d: 'devices' })[key.split('.')[0]];
+  const TAB_OF = (key) => ({ c: 'enclosure', e: 'enclosure', g: 'enclosure', doc: 'document', o: 'options', p: 'ports', d: 'devices' })[key.split('.')[0]];
   function tabMark(tab) {
     const bad = Object.keys(F.errors).filter((k) => TAB_OF(k) === tab).length, n = Object.keys(F.draft).filter((k) => TAB_OF(k) === tab).length;
     if (bad) return ` <span class="dot dot--bad" aria-hidden="true"></span><span class="sr-only">(${bad} to fix)</span>`;
@@ -126,7 +128,7 @@
     const t = TABS.some(([k]) => k === S.tab.panel) ? S.tab.panel : 'enclosure';
     const meta = `<span class="mono" style="font-size:13px">${esc(h.cabinet_number)}</span> · ${KIND[h.kind] || esc(h.kind)}${gen ? ` · Side ${esc(h.side)}, pair ${h.pair} (panels ${2 * h.pair - 1} and ${2 * h.pair})` : ` · hand-written${h.manual ? ' (manual)' : ''}`}`;
     const intro = gen
-      ? banner('info', '<b>Written by the layout.</b> Its devices come from Parts and where you place them on Device preview or the board. Enclosure, port plans, options and the document are yours to set.',
+      ? banner('info', '<b>Written by the layout.</b> Its devices come from Parts and where you place them on Device preview or the board. Numbering, enclosure, port plans, options and the document are yours to set.',
         '<a class="btn btn--secondary btn--sm" href="#/parts">Open Parts</a><a class="btn btn--secondary btn--sm" href="#/device-preview">Open Device preview</a>')
       : mirror ? banner('info', `<b>Mirror of ${esc(h.mirror_of)}.</b> It takes its devices, enclosure and options from that panel, so they are shown here as they are. Change them on ${esc(h.mirror_of)}.`, `<a class="btn btn--secondary btn--sm" href="#/panels/${esc(h.mirror_of)}">Open ${esc(h.mirror_of)}</a>`)
       : banner('info', '<b>Hand-written panel.</b> The layout does not touch it. Everything on it is yours to set here.');
@@ -143,7 +145,12 @@
   };
 
   /* ---------- Enclosure: shared by every generated panel ---------- */
-  const enclosure = () => `<div style="margin-bottom:var(--space-4)">${banner('info', 'The enclosure is shared by every generated panel. A change here applies to each of them.')}</div>${encFields()}`;
+  const enclosure = () => `<div style="margin-bottom:var(--space-4)">${banner('info', 'The numbering and the enclosure are shared by every generated panel. A change here applies to each of them.')}</div>${numbering()}<h3 style="margin-bottom:var(--space-3)">Enclosure</h3>${encFields()}`;
+  /* ALI-5, ALI-13: the generated panels' numbering, written as patterns where {n} is the panel number. */
+  const numbering = () => `<section class="section" style="margin:0 0 var(--space-5)"><h3>Numbering</h3>
+    <p class="muted small" style="margin:2px 0 var(--space-3)">{n} is the panel number; {n:04d} pads it to four digits. This panel reads ${esc(PE.page.panel.cabinet_number)}.</p>
+    <div class="form form--2">${edit('g.cabinet_name', 'Cabinet name', text('g.cabinet_name', { mono: true }), 'Printed in the sheet header.')}${edit('g.cabinet_number', 'Cabinet number', text('g.cabinet_number', { mono: true }))}
+    ${edit('g.tag_prefix', 'Tag prefix', text('g.tag_prefix', { mono: true }), 'Starts every tag in the panel.')}${edit('g.sheet_name', 'Sheet name', text('g.sheet_name', { mono: true }), 'The workbook tab.')}</div></section>`;
   const encFields = () => `<div class="form form--3">
     ${edit('e.make', 'Make', text('e.make'))}${edit('e.model', 'Model', text('e.model'))}${edit('e.ordering_code', 'Ordering code', text('e.ordering_code', { mono: true, placeholder: 'Optional' }))}
     ${edit('e.h_mm', 'Height', num('e.h_mm', 'mm'))}${edit('e.d_mm', 'Depth', num('e.d_mm', 'mm'))}${edit('e.w_mm', 'Width', num('e.w_mm', 'mm'))}

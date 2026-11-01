@@ -27,6 +27,7 @@ from bomgen.models.panel import Panel, PanelOptions
 from bomgen.models.substation import EquipmentRole
 
 SIZED = (EquipmentRole.L1_SWITCH, EquipmentRole.L2_SWITCH)  # their port plans are computed
+TEMPLATE = ("cabinet_name", "cabinet_number", "tag_prefix", "sheet_name")
 
 
 class PanelNotFoundError(LookupError):
@@ -142,6 +143,10 @@ def panel_page(
             "mirror_of": read_yaml(file).data.get("mirror_of"),
             "file": str(file),
         },
+        # the numbering every generated panel shares (ALI-5, ALI-13); {n} is the panel number
+        "template": {k: getattr(loaded.substation.generated_panels, k) for k in TEMPLATE}
+        if panel.generated and loaded.substation.generated_panels
+        else None,
         "enclosure": panel.enclosure.model_dump(mode="json", exclude_none=True),
         "document": panel.document,
         "documents": [
