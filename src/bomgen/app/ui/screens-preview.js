@@ -11,6 +11,7 @@
   const plural = (n, one) => `${n} ${one}${n === 1 ? '' : 's'}`;
 
   const P = { key: '', state: 'idle', data: null, error: null };
+  App.onDiskChange(() => { P.state = 'idle'; });
   function page() {
     const key = `${S.project.file}#${S.sub}`;
     if (P.key !== key) Object.assign(P, { key, state: 'idle', data: null, error: null });

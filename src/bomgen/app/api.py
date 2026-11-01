@@ -233,6 +233,7 @@ def _edit_refusals() -> Iterator[None]:
 
 
 DELETED_DIR = "deleted-projects"
+KEEP_DELETED_DAYS = 30  # docs/ui/editing.md "Deleting": Home offers them this long
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 
 
@@ -750,6 +751,43 @@ class Api:
         self._recent().remove(file)
         self._list(saved)
         return {"saved": saved}
+
+    @endpoint
+    def deleted_projects(self) -> list[dict[str, Any]]:
+        """The projects deleted in the last 30 days, newest first (APP-26). Older files stay
+        in the folder; they are only no longer offered."""
+        folder = default_app_home(self._env) / DELETED_DIR
+        since = datetime.now(UTC).timestamp() - KEEP_DELETED_DAYS * 24 * 3600
+        files = [f for f in folder.glob(f"*{PROJECT_SUFFIX}") if f.stat().st_mtime >= since]
+        return [
+            {
+                "file": str(f),
+                "name": f.stem,
+                "deleted": datetime.fromtimestamp(f.stat().st_mtime, UTC).isoformat(),
+            }
+            for f in sorted(files, key=lambda f: f.stat().st_mtime, reverse=True)
+        ]
+
+    @endpoint
+    def restore_deleted_project(self, file: str) -> dict[str, Any]:
+        """Import a deleted project's file back into the workspace, then drop the file."""
+        saved = Path(file)
+        if saved.parent.resolve() != (default_app_home(self._env) / DELETED_DIR).resolve():
+            raise AppError("invalid_request", "That file is not a deleted project.")
+        result = import_project(saved, workspace=self._workspace(), store=self._library_store())
+        saved.unlink()
+        return self._imported(result)
+
+    @endpoint
+    def file_stamps(self, project_file: str) -> dict[str, int]:
+        """The modified time of each YAML file of the project, by its path in the folder, so
+        the page can tell a file changed on disk while the window was away (APP-25)."""
+        folder = Path(project_file).parent
+        return {
+            f.relative_to(folder).as_posix(): f.stat().st_mtime_ns
+            for f in sorted(folder.rglob("*.yaml"))
+            if "Backups" not in f.relative_to(folder).parts
+        }
 
     # -- The Project page's own fields (docs/ui/editing.md, Project > Overview; M17c) --
 

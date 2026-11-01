@@ -23,6 +23,7 @@
     return PE.state === 'loaded' ? PE : null;
   }
   const reload = () => { PE.state = 'idle'; };
+  App.onDiskChange(reload);
   /* A write changes the board, Device preview and Parts too. */
   const changed = () => { reload(); App.network.reload(); App.devicePreview.reload(); App.sub.reload(); };
 

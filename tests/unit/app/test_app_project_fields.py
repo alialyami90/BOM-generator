@@ -13,6 +13,8 @@ import pytest
 
 from bomgen.app import api
 from bomgen.io.yaml_source import read_yaml
+from bomgen.library_store.package import pack
+from bomgen.library_store.store import LibraryStore
 
 EXAMPLES = Path(__file__).parents[3] / "examples"
 PNG = bytes.fromhex(
@@ -133,3 +135,22 @@ def test_a_brand_without_a_name_is_named_by_its_make_and_family(
     assert abb["name"] == abb["product"] == "ABB S200M UC 2P"
     assert brands["terminal_blocks"][0]["product"] == "Phoenix"
     assert brands["busbars"][0] == {"id": "default", "name": "Library default", "product": None}
+
+
+def test_recording_the_active_library_version_clears_the_note(
+    app: api.Api, project: Path, tmp_path: Path
+) -> None:
+    """APP-28: "Record 9.9.9 in this project" when the active version is another one."""
+    library = read_yaml(project).data["library"]
+    store = LibraryStore(tmp_path / "libraries")
+    for version in (library["version"], "9.9.9"):
+        package = tmp_path / f"{version}.bomlib"
+        pack(EXAMPLES / "library.yaml", package, name=library["name"], version=version)
+        store.import_package(package)
+    text = project.read_text("utf-8")
+    project.write_text(text.replace("  file: library.yaml\n", "", 1), "utf-8")
+    assert ok(app.open_project(str(project)))["library"]["note"]
+
+    page = ok(app.set_project_field(str(project), ["library", "version"], "9.9.9"))
+    assert page["library"]["version"] == "9.9.9"
+    assert page["library"]["note"] is None

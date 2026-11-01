@@ -168,6 +168,7 @@
     const m = $('#main');
     m.innerHTML = (needsProject && !hasProject()) || (needsSub && !hasSub()) ? SCREENS.home() : SCREENS[key]();
     if (SCREENS[key + 'After']) SCREENS[key + 'After']();
+    if (disk) { const page = m.querySelector('.page'); if (page) page.insertAdjacentHTML('afterbegin', diskBanner()); }
     if (fixing) {  // the field a problem leads to, once its page has loaded
       if (fixing.screen !== a) fixing = null;
       else { const el = m.querySelector(fixing.focus); if (el) { fixing = null; el.scrollIntoView({ block: 'center' }); el.focus(); } }
@@ -297,6 +298,60 @@
     closeDialog(); render(); $('#main').scrollTop = 0;
   });
 
+  /* ---------- a file changed behind the app (docs/ui/editing.md "When the file changes behind the app", APP-25) ----------
+     The stamps are read when the window loses focus and again when it comes back; the app's own calls in between
+     (a file dialog that then writes) make the check skip, so only someone else's change counts. */
+  const RELOAD = [];
+  const onDiskChange = (f) => { RELOAD.push(f); };  // each screen drops what it read; may return a promise
+  const reloadAll = () => Promise.all(RELOAD.map((f) => f())).then(() => render());
+  let stamps = null, disk = null, calls = 0, busy = 0;
+  const call = Bridge.call;
+  Bridge.call = (name, ...args) => {
+    if (name === 'file_stamps') return call(name, ...args);
+    calls += 1; busy += 1;
+    return call(name, ...args).finally(() => { busy -= 1; });
+  };
+  const projectFile = () => (hasProject() && S.project.file) || null;
+  window.addEventListener('blur', () => {
+    const file = projectFile(), at = calls, quiet = !busy;
+    stamps = null;
+    if (file) call('file_stamps', file).then((s) => { stamps = { file, s, at, quiet }; }).catch(() => {});
+  });
+  window.addEventListener('focus', () => {
+    const before = stamps; stamps = null;
+    if (!before || !before.quiet || before.at !== calls || projectFile() !== before.file) return;
+    call('file_stamps', before.file).then((now) => {
+      if (calls !== before.at) return;
+      const names = [...new Set(Object.keys({ ...before.s, ...now }).filter((k) => before.s[k] !== now[k]).map((k) => k.split('/').pop()))];
+      if (!names.length) return;
+      if (unsaved()) { disk = { names }; render(); return; }
+      reloadAll().then(() => toast(`${diskNames(names)} changed on disk. Reloaded.`, 'refresh'));
+    }).catch(() => {});
+  });
+  const diskNames = (names) => (names.length > 2 ? `${names.slice(0, 2).join(', ')} and ${names.length - 2} more` : names.join(' and '));
+  const diskBanner = () => `<div class="disk-banner" style="margin-bottom:var(--space-4)">${banner('warn', `<b>${esc(diskNames(disk.names))} changed on disk since you opened ${disk.names.length === 1 ? 'it' : 'them'}.</b> Your unsaved changes are still on this page.`,
+    '<button class="btn btn--secondary btn--sm" data-action="disk-reload">Reload (lose my changes)</button><button class="btn btn--secondary btn--sm" data-action="disk-keep">Keep mine (overwrite the file)</button>')}</div>`;
+  ACTIONS['disk-reload'] = () => { GUARDS.filter((g) => g.screen === route().a).forEach((g) => g.reset()); disk = null; S.dirty = false; reloadAll().then(() => toast('Reloaded from disk', 'refresh')); };
+  ACTIONS['disk-keep'] = () => { disk = null; render(); toast('Your changes stay. Saving writes them over the file.', 'info'); };
+  window.addEventListener('hashchange', () => { if (disk && !unsaved()) disk = null; });
+
+  /* ---------- keyboard: F6 moves between the rail, the page and the status bar; Ctrl+O opens a project (APP-27) ---------- */
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'F6') {
+      e.preventDefault();
+      const regions = ['#nav', '#main', '#status'].map((x) => $(x)).filter(Boolean), at = regions.findIndex((r) => r.contains(document.activeElement));
+      const n = regions.length, next = regions[at < 0 ? (e.shiftKey ? n - 1 : 0) : (at + (e.shiftKey ? n - 1 : 1)) % n];
+      const first = next.id === 'main' ? null : next.querySelector('a[href]:not([aria-disabled="true"]), button:not([disabled]), select, input');
+      if (!first) next.setAttribute('tabindex', '-1');
+      (first || next).focus();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'o' && !$('#overlay').innerHTML && S.backend !== 'no') {
+      e.preventDefault();
+      const open = () => ACTIONS['open-project'] && ACTIONS['open-project']();
+      if (!leaving(open)) open();
+    }
+  });
+
   /* ---------- a form drafted on the page and saved together (docs/ui/editing.md) ----------
      Each field is read on change and checked by the model; the draft holds only what differs from the file.
      o: { prefix (control ids are prefix + key), screen (route), file, label, spec(key) -> [path, kind] or null,
@@ -372,7 +427,7 @@
     };
     ACTIONS[o.prefix + 'save'] = () => { D.save(); };
     let then = null;  // where the person was going when the leave dialog opened
-    GUARDS.push({ screen: o.screen, dirty: () => D.dirty() && !D.saving, ask: (next) => {
+    GUARDS.push({ screen: o.screen, dirty: () => D.dirty() && !D.saving, reset: () => D.reset(), ask: (next) => {
       then = next;
       const c = n(D.draft), bad = n(D.errors), why = bad ? `${bad} ${bad === 1 ? 'field needs' : 'fields need'} fixing before you can save.` : '';
       dialog({ title: 'Save the changes first?', body: `<p>You have ${c} unsaved change${c === 1 ? '' : 's'} on this page. They are saved to ${esc(o.file)}.</p>${bad ? `<p class="small" id="${o.prefix}leave-why" style="color:var(--color-danger-text);display:flex;gap:6px">${icon('error')}${esc(why)}</p>` : ''}`,
@@ -389,5 +444,5 @@
     return D;
   }
 
-  window.App = { $, $$, esc, S, ACTIONS, SCREENS, badge, verified, banner, tabs, field, input, select, pageHead, dialog, closeDialog, toast, go, render, setAppInfo, checkList, route, hasProject, hasSub, curProject, curSub, renderStatus, draftForm, changedField, changedCell, fixLine, whereToFix, fix, fixButtons };
+  window.App = { onDiskChange, $, $$, esc, S, ACTIONS, SCREENS, badge, verified, banner, tabs, field, input, select, pageHead, dialog, closeDialog, toast, go, render, setAppInfo, checkList, route, hasProject, hasSub, curProject, curSub, renderStatus, draftForm, changedField, changedCell, fixLine, whereToFix, fix, fixButtons };
 })();

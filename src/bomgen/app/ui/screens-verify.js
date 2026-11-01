@@ -34,6 +34,7 @@
     return c.state === 'loaded' || c.data ? c : null;  // a reload keeps showing the last answer
   }
   const reload = (name) => { if (cache[name]) cache[name].state = 'idle'; };
+  App.onDiskChange(() => { Object.keys(cache).forEach(reload); });
   /* The nav and status bar show the last answer for this substation. */
   function summarize() {
     const c = cache.checks && cache.checks.data, t = cache.target && cache.target.data;

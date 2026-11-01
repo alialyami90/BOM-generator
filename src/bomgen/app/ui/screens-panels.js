@@ -47,6 +47,7 @@
       <a class="btn btn--secondary btn--sm" href="#/panels" style="margin-top:var(--space-3)">${icon('panels')}See the panels</a></div>`;
   }
   App.network = { resultCard, reload: () => { LAY.state = 'idle'; } };
+  App.onDiskChange(() => { LAY.state = 'idle'; });
   /* The id of generated panel n in the last layout read, for the panel editor and whereToFix. */
   App.generatedPanelId = (n) => { const p = LAY.data && LAY.data.panels.find((x) => x.number === n); return p ? p.id : null; };
   App.panelsShowChanges = () => { showChanges = true; S.tab.panels = 'board'; };  // after a Parts input is saved
