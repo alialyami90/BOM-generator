@@ -97,16 +97,20 @@ def build(example: str, figures: dict[str, dict[str, Any]], additions: str) -> s
 def _override(target: Any, changes: Any, owner: tuple[Any, str] | None = None) -> None:
     """Set each of ``changes``' values in ``target``, nested mappings key by key. The
     override comment replaces the line's own: on the key, or on the block key ``owner``
-    that holds a one-line mapping."""
+    that holds a one-line mapping. A new key goes after the one ``changes`` names before
+    it, else after ``alt_group``."""
+    previous = "alt_group"
     for key, value in changes.items():
         if isinstance(value, dict) and isinstance(target.get(key), dict):
             flow = target[key].fa.flow_style()
             _override(target[key], value, (target, key) if flow else owner)
+            previous = key
             continue
-        if key not in target and "alt_group" in target:
-            target.insert(list(target).index("alt_group") + 1, key, value)
+        if key not in target and previous in target:
+            target.insert(list(target).index(previous) + 1, key, value)
         else:
             target[key] = value
+        previous = key
         mark, at = owner or (target, key)
         if at in mark.ca.items:
             mark.ca.items[at][2] = None  # the end-of-line comment only
