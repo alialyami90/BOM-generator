@@ -64,6 +64,9 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Editing a generated panel numbering pattern in the panel editor drops its
+  "# ASSUMED" mark, and rows written by Start parts and Add a device put id,
+  part_id and role before the seeded L2 link, as hand-written rows do (M47).
 - A substation that picks an MCB brand without a DC brand no longer stores
   that brand as its DC set: the DC branches still size with it (ADR 0023),
   and the resolved library validates again when the brand has no DC rating

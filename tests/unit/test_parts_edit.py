@@ -8,6 +8,7 @@ import pytest
 from bomgen.io import fields, parts_edit
 from bomgen.io.edit import EditError
 from bomgen.io.loader import load_project
+from bomgen.io.yaml_source import read_yaml
 from bomgen.models.substation import Equipment
 
 EXAMPLES = Path(__file__).parents[2] / "examples"
@@ -257,6 +258,15 @@ def test_start_parts_seeds_each_networked_rows_l2_link_by_category(project: Path
     assert link(rows["SEL-2488"]) == (1, "100M")
     assert link(rows["SEL-3555-RTAC"]) == (2, "1G")
     assert link(rows["SEL-3355"]) == (1, "1G")
+
+
+def test_start_parts_writes_id_part_id_and_role_before_the_l2_link(project: Path) -> None:
+    started(project)
+    rows = read_yaml(substation_yaml(project)).data["equipment"]
+    gateway = next(r for r in rows if r.get("part_id") == "SEL-3555-GW")
+    keys = list(gateway)
+    assert keys[:3] == ["id", "part_id", "role"]
+    assert keys[-2:] == ["l2_ports", "l2_speed"]
 
 
 def test_rows_without_an_l2_link_are_not_seeded(project: Path) -> None:

@@ -197,3 +197,16 @@ def test_a_generated_panel_page_gives_the_shared_numbering_patterns(
     page = ok(app.panel_page(str(generated), "gis01", "psa2"))
     assert page["panel"]["cabinet_number"] == "861-GIS01-XYZ-0002"
     assert ok(app.panel_page(str(generated), "gis01", "ws"))["template"] is None
+
+
+def test_an_edited_numbering_pattern_drops_its_assumed_mark(app: api.Api, generated: Path) -> None:
+    """Pre-release finding 6: an edit is a confirmation, as for a project.yaml field."""
+    file = generated.parent / "substations" / "gis01" / "substation.yaml"
+    text = file.read_text("utf-8")
+    old = 'cabinet_number: "861-GIS01-PSA-{n:04d}"'
+    file.write_text(text.replace(old, f"{old}  # ASSUMED"), "utf-8")
+
+    path = ["generated_panels", "cabinet_number"]
+    ok(app.set_substation_field(str(generated), "gis01", path, "861-GIS01-XYZ-{n:04d}"))
+    line = next(x for x in file.read_text("utf-8").splitlines() if "cabinet_number" in x)
+    assert line.strip() == 'cabinet_number: "861-GIS01-XYZ-{n:04d}"'

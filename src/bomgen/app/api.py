@@ -1001,7 +1001,12 @@ class Api:
                 )
             else:
                 result = set_field(
-                    Path(project_file), tuple(path), value, substation=substation_id, store=store
+                    Path(project_file),
+                    tuple(path),
+                    value,
+                    substation=substation_id,
+                    store=store,
+                    confirm=path[0] == "generated_panels",  # an edited pattern is confirmed
                 )
         _written(result)
         return substation_page(Path(project_file), substation_id, store)
