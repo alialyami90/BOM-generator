@@ -846,3 +846,18 @@ def test_hand_written_panels_are_added_edited_and_deleted_in_the_editor() -> Non
     assert "Bridge.call('restore_panel'" in editor
     assert "is still in use" in editor
     assert "Delete the panel instead." in editor  # the last device is not removed
+
+
+def test_parts_rows_edit_the_l2_link_and_the_rtac_com_ports() -> None:
+    """M31: each non-switch row sets its link to the L2 switch; an RTAC row its COM ports."""
+    js = PARTS.read_text(encoding="utf-8")
+    assert "const LINK = { l2_ports: 'int', l2_speed: 'choice', l2_media: 'choice' };" in js
+    assert "if (kind === 'l') return [['equipment', Number(a), b], LINK[b]];" in js
+    assert "[['equipment', Number(a), 'port_plan', 'serial_ports'], 'int']" in js
+    link = js[js.index("function linkRow(r)") :]
+    assert link.index("if (!r.link || !r.part_id) return '';") < link.index("prow-link")
+    assert "['10M', '100M', '1G', '10G']" in link
+    assert "['MM', 'SM', 'RJ45']" in link
+    assert "r.serial_ports == null ? ''" in link  # only an RTAC row has COM ports
+    assert "${linkRow(r)}${sfpRows(r)}" in js
+    assert "'eofcl'.includes(k[0])" in js  # the row shows its unsaved mark

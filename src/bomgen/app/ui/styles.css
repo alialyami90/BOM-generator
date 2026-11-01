@@ -517,6 +517,10 @@ body.is-dragging-dev { user-select: none; }
 .prow-sub:not(:has(.prow-qty)) { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); }
 .prow-sub--foot { display: flex; gap: var(--space-3); align-items: center; }
 .prow-sub-what { font-size: 12.5px; }
+.prow-link { display: flex; flex-wrap: wrap; }
+.prow-link .input--num { width: 56px; }
+.prow-link .select { width: auto; min-width: 84px; }
+.prow-link-com { display: inline-flex; gap: var(--space-2); align-items: center; margin-left: var(--space-4); }
 .prow-pick { display: block; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
 .prow-pick.is-unset { color: var(--color-text-muted); font-family: var(--font-sans); }
 .pk { top: calc(100% + 4px); left: 0; width: min(560px, 100%); min-width: 420px; padding: 8px; }
