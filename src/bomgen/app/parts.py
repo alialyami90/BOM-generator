@@ -226,6 +226,17 @@ def _row(
         "library": {k: getattr(part, k) for k in VALUES} if part is not None else None,
         "overrides": entry.overrides.values() if entry.overrides is not None else {},
         "sfp": sfp,
+        # M31: the link to the L2 switch (none for the sized switches and the patch panel)
+        "link": None
+        if entry.role in (*SIZED, EquipmentRole.FOPP)
+        else {
+            "l2_ports": entry.l2_ports,
+            "l2_speed": entry.l2_speed.value,
+            "l2_media": entry.l2_media.value,
+        },
+        "serial_ports": (entry.port_plan.serial_ports if entry.port_plan else 0)
+        if category is Category.RTAC
+        else None,
         "accessories": accessories,
         "cable_manager": {
             "on": entry.cable_manager if entry.cable_manager is not None else default,

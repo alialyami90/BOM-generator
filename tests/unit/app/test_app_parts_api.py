@@ -318,3 +318,31 @@ def test_options_carry_the_data_quality_of_the_installed_library(
     rtacs = parts(project, store)["options"]["rtac"]
 
     assert next(o for o in rtacs if o["part_id"] == "SEL-3555-RTAC")["data_quality"] == "partial"
+
+
+def test_rows_give_the_l2_link_and_com_ports_the_inputs_edit(
+    project: Path, store: LibraryStore
+) -> None:
+    """M31: the link to the L2 switch on every row that has one, COM ports on an RTAC."""
+    found = parts(project, store)
+
+    gps = row(found, "gps")
+    assert gps["link"] == {"l2_ports": 1, "l2_speed": "100M", "l2_media": "MM"}
+    assert gps["serial_ports"] is None  # not an RTAC
+    assert row(found, "rtac")["serial_ports"] == 6
+    assert row(found, "rtac")["link"]["l2_ports"] == 2
+    for switch in ("l1", "l2", "fopp"):
+        assert row(found, switch)["link"] is None  # sized or patched, not linked by hand
+
+
+def test_the_l2_link_and_com_ports_are_written_as_equipment_fields(
+    app: api.Api, project: Path, store: LibraryStore
+) -> None:
+    ok(app.set_substation_field(str(project), "gis01", ["equipment", 4, "l2_ports"], 2))
+    ok(app.set_substation_field(str(project), "gis01", ["equipment", 4, "l2_speed"], "10G"))
+    path: list[str | int] = ["equipment", 7, "port_plan", "serial_ports"]
+    ok(app.set_substation_field(str(project), "gis01", path, 4))
+
+    found = parts(project, store)
+    assert row(found, "gw")["link"] == {"l2_ports": 2, "l2_speed": "10G", "l2_media": "MM"}
+    assert row(found, "rtac")["serial_ports"] == 4

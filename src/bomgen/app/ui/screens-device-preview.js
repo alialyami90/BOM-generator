@@ -139,7 +139,7 @@
     if (!real()) return `<div class="page page--wide">${head}<div class="empty"><b>Open a substation first.</b></div></div>`;
     const d = load(); if (!d) return `<div class="page page--wide">${head}<p class="muted" aria-busy="true">Generating the preview…</p></div>`;
     if (d.blank) return `<div class="page page--wide">${head}<div class="empty" style="max-width:640px"><b>No parts yet</b><div class="muted small" style="margin:4px 0 12px">Pick this substation's parts first; the preview then draws its panels.</div><a class="btn btn--primary" href="#/parts">Go to Parts</a></div></div>`;
-    if (d.reason) return `<div class="page page--wide">${head}${banner('bad', `<b>No preview.</b> ${esc(d.reason)}. Checks lists them.`, '<a class="btn btn--secondary btn--sm" href="#/checks">Open Checks</a>')}</div>`;
+    if (d.reason) return `<div class="page page--wide">${head}${banner('bad', `<b>No preview.</b> ${esc(d.reason)}. Checks lists them.`, App.fixButtons(d.problems))}</div>`;
     const errs = issuesOf('error'), warns = issuesOf('warning');
     const goto = (i) => (i.device ? `<button class="link-btn small" data-action="dp-goto" data-device="${esc(i.device)}">Go to the row</button>` : '');
     return `<div class="page page--wide">${head}
@@ -232,5 +232,7 @@
     }).catch((err) => toast(err.message, 'error')).then(() => { DP.busy = false; App.render(); });
   };
   /* Parts saves change the units: the next visit generates the preview again. */
-  App.devicePreview = { reload };
+  /* select: the unit to show when the page opens, as uid() names it (the panel editor's Show on Device preview). */
+  const select = (id) => { const key = `${S.project.file}#${S.sub}`; if (DP.key !== key) Object.assign(DP, { key, state: 'idle', data: null, filter: 0, refusal: '', steps: null }); DP.sel = id; };
+  App.devicePreview = { reload, select };
 })();

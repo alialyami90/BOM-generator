@@ -9,6 +9,18 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Parts rows set each device's link to the L2 switch (M31): ports, speed
+  (10M, 100M, 1G, 10G) and media (MM, SM, RJ45) on one line under the row's
+  data, and an RTAC row its COM ports used. The sized switches and the patch
+  panel have no link line. They save with the rest of Parts.
+- Hand-written panels in the panel editor (M32b). Add hand-written panel… on
+  Panels asks for a name, cabinet number, kind and first device, writes
+  `panels/<id>.yaml` listed last in `manual_panels`, and opens it on Devices.
+  A hand-written panel edits the cabinet's name, number, sheet, tag prefix,
+  kind and side with its enclosure, the devices (add, reorder, remove,
+  quantity, purpose, HWIO), options with "Use the default" and the document;
+  its port plans stay in its file. Delete panel… lists what still names the
+  panel instead of deleting it, and a delete can be undone.
 - A library can list `larger_fans` in its housekeeping catalogue. A cabinet
   that the catalogue fan pair can't cool gets the smallest larger fan whose
   pair can, still two fans with the same AC branches and terminals (ADR 0029,
@@ -29,6 +41,18 @@ project uses [Semantic Versioning](https://semver.org/).
 - Device preview on a substation with no panel files offers "Lay out panels"
   (APP-15). The project Overview edits the waist height and rack start, each
   marked Assumed with Confirm until it is written (APP-19).
+- The panel editor for generated panels (M32a; APP-3, APP-4). Each panel opens
+  from the Panels list or its board column, with Enclosure, Options (for every
+  generated panel or this one only, with Own value and "Use the shared
+  value"), Port plans (the device's own, with the engine's SFPs and cables
+  under each; the L1 and L2 switch plans are read-only) and Document, saved to
+  `substation.yaml` through the save bar. Devices lists each unit with its
+  origin and "Show on Device preview"; YAML is read-only. The Panels header
+  has Undo and Reset to automatic. A located problem now opens where it is
+  fixed: Checks, and Panels and Device preview when they cannot show, say
+  "Go to the row", "Go to the field", "Open the panel" and so on (APP-7), and
+  an unknown part names the installed library by name and version instead of
+  `library.yaml`.
 
 ### Changed
 

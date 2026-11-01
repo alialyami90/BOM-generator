@@ -12,14 +12,17 @@
   const SPARES = { port_fraction: ['Ports kept free on each switch', '%', 'pct'], sfp_per_l1: ['Spare SFPs on each L1', '', 'int'], dc_branches_per_feed: ['Spare DC branches per feed', '', 'int'], ac_branches: ['Spare AC branches', '', 'int'], rack_u_reserved: ['Rack space kept free', 'U', 'int'] };
   const VALUES = [['height_u', 'Height', 'int'], ['unit_power_w', 'Power', 'num'], ['supply_type', 'Supply', 'choice'], ['voltage_v', 'Voltage', 'int'], ['power_supplies', 'Supplies', 'int'], ['inrush_a', 'Inrush', 'num'], ['load_type', 'Load', 'choice']];
   const EQ = { part_id: 'choice', ordering_code: 'text', qty: 'int', redundant: 'bool', cable_manager: 'bool' };
+  const LINK = { l2_ports: 'int', l2_speed: 'choice', l2_media: 'choice' };  // the row's link to the L2 switch
   const BRANDS = [['mcb', 'MCB make and series, AC'], ['mcb_dc', 'MCB make and series, DC'], ['terminal_blocks', 'Terminal blocks']];
   const pct = (v) => Math.round(v * 1000) / 10;
-  function spec(key) {  // [path, kind]; keys are n.<field>, s.<spare>, b.<brand>, e.<row>.<field>, o.<row>.<value>, f.<row>.<speed>.<media>
+  function spec(key) {  // [path, kind]; keys are n.<field>, s.<spare>, b.<brand>, e.<row>.<field>, l.<row>.<link field>, c.<row> (COM ports), o.<row>.<value>, f.<row>.<speed>.<media>
     const [kind, a, b, c] = key.split('.');
     if (kind === 'n') return [['network', a], NET[a]];
     if (kind === 's') return [['spares', a], SPARES[a][2]];
     if (kind === 'b') return [['catalogue_choice', a], 'choice'];
     if (kind === 'e') return [['equipment', Number(a), b], EQ[b]];
+    if (kind === 'l') return [['equipment', Number(a), b], LINK[b]];
+    if (kind === 'c') return [['equipment', Number(a), 'port_plan', 'serial_ports'], 'int'];
     if (kind === 'o') return [['equipment', Number(a), 'overrides', b], VALUES.find((v) => v[0] === b)[2]];
     if (kind === 'f') return [['equipment', Number(a), 'sfp', b, c], 'choice'];
     return null;
@@ -34,6 +37,8 @@
     const r = rowAt(Number(a)); if (!r) return '';
     if (kind === 'e' && b === 'cable_manager') return r.cable_manager ? String(r.cable_manager.on) : '';
     if (kind === 'e') { const v = r[b]; return v == null ? '' : typeof v === 'boolean' ? String(v) : v; }
+    if (kind === 'l') return r.link ? r.link[b] : '';
+    if (kind === 'c') return r.serial_ports == null ? '' : r.serial_ports;
     if (kind === 'o') { const v = b in r.overrides ? r.overrides[b] : r.library ? r.library[b] : null; return v == null ? '' : v; }
     if (kind === 'f') { const f = r.sfp.find((x) => x.speed === b && x.media === c); return (f && f.choice) || ''; }
     return '';
@@ -131,6 +136,16 @@
         ${mark(key, select(`p-${key}`, [['', 'Automatic: same make first'], ...f.candidates.map((c) => [c, c])], shown(key)).replace('<select ', `<select aria-label="SFP for ${esc(f.speed)} ${esc(f.media)}, ${esc(r.label)}" `))}</div>`;
     }).join('');
   }
+  function linkRow(r) {  // M31: how the device reaches the L2 switch, and an RTAC's COM ports
+    if (!r.link || !r.part_id) return '';
+    const k = (f) => `l.${r.index}.${f}`, com = `c.${r.index}`, id = (key) => `p-${key}`;
+    const ports = input(id(k('l2_ports')), shown(k('l2_ports')), { num: true, mono: true, invalid: !!PF.errors[k('l2_ports')] }).replace('<input ', `<input aria-label="Ports linked to the L2 switch, ${esc(r.label)}" `);
+    const speed = select(id(k('l2_speed')), ['10M', '100M', '1G', '10G'], String(shown(k('l2_speed')))).replace('<select ', `<select aria-label="Link speed, ${esc(r.label)}" `);
+    const media = select(id(k('l2_media')), ['MM', 'SM', 'RJ45'], String(shown(k('l2_media')))).replace('<select ', `<select aria-label="Link media, ${esc(r.label)}" `);
+    const serial = r.serial_ports == null ? '' : `<span class="prow-link-com"><label class="prow-sub-what" for="${id(com)}">COM ports used</label>${mark(com, input(id(com), shown(com), { num: true, mono: true, invalid: !!PF.errors[com] }))}</span>`;
+    const errs = [...Object.keys(LINK).map(k), com].map(err).join('');
+    return `<div class="prow-sub prow-link"><span class="prow-sub-what">Link to the L2 switch</span>${mark(k('l2_ports'), ports)}<span class="muted" aria-hidden="true">×</span>${mark(k('l2_speed'), speed)}${mark(k('l2_media'), media)}${serial}</div>${errs ? `<div class="prow-err">${errs}</div>` : ''}`;
+  }
   function accessories(p, r) {
     const a = r.accessories; if (!a) return '';
     const own = a.library.length ? `<div class="prow-sub prow-sub--foot"><span class="muted small">Comes with ${esc(r.part_id)}: ${a.library.map((x) => `<span class="mono">${esc(x.part_id)}</span> × ${x.qty}`).join(', ')}. They go to loose material.</span></div>` : '';
@@ -143,7 +158,7 @@
     return own + added + foot;
   }
   function partRow(p, r, last) {
-    const changed = Object.keys(PF.draft).some((k) => k.split('.')[1] === String(r.index) && 'eof'.includes(k[0]));
+    const changed = Object.keys(PF.draft).some((k) => k.split('.')[1] === String(r.index) && 'eofcl'.includes(k[0]));
     const opts = p.parts.options[r.category] || [], empty = !opts.length && !r.part_id;
     const fixed = r.sized, dirty = PF.dirty();
     const pn = `e.${r.index}.ordering_code`, qty = `e.${r.index}.qty`, ab = `e.${r.index}.redundant`, cm = `e.${r.index}.cable_manager`;
@@ -161,7 +176,7 @@
         ${empty ? '' : `<div class="prow-pn">${mark(pn, `<input class="input input--mono" id="p-${pn}" value="${esc(shown(pn))}" placeholder="${r.part_id ? 'Prints the library code' : 'Part number'}" aria-label="Part number on the BOM for ${esc(r.label)}" data-dirty="1" ${!r.part_id ? 'disabled' : ''}>`)}${err(pn)}</div>
         <div class="prow-qty">${r.sized ? '<span class="muted small" title="The sizing sets the quantity">Sized</span>' : `${input('p-' + qty, shown(qty), { num: true, mono: true, invalid: !!PF.errors[qty] }).replace('<input ', `<input aria-label="Quantity of ${esc(r.label)}" `)}`}</div>`}
       </div>
-      ${empty ? '' : strip(r)}${sfpRows(r)}${accessories(p, r)}
+      ${empty ? '' : strip(r)}${linkRow(r)}${sfpRows(r)}${accessories(p, r)}
     </div>`;
   }
 
