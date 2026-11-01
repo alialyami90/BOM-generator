@@ -89,11 +89,14 @@ def test_a_powered_tier_without_a_power_figure_is_skipped(tool: ModuleType) -> N
 def test_the_shipped_library_has_every_powered_alternative_but_the_unpowered_figures(
     tool: ModuleType,
 ) -> None:
-    # Finding 30: the 11 powered tiers with no figure are the only powered ones left out.
+    # Finding 30: nine powered tiers publish no figure; M41b found the other two (M41c adds them).
     parts, skipped = tool.alternative_parts(*tool.inputs(ROOT))
 
-    assert [p["part_id"] for p in parts if "supply_type" in p] == []
-    assert len(skipped) == 11
+    assert [p["part_id"] for p in parts if "supply_type" in p] == [
+        "SEL-2730M-EXT.SIEMENS-LOW",
+        "SEL-2488.ARBITER-SYSTEMS-MID",
+    ]
+    assert len(skipped) == 9
 
 
 def test_the_generator_reproduces_the_examples_alternatives(tool: ModuleType) -> None:

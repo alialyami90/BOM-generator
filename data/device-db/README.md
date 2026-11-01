@@ -88,7 +88,7 @@ records:
                  height_u, mounting_kind, supply_type, voltage_v, input_v_min, input_v_max,
                  supply_option, supply_ok, power_supplies, power_basis, power_note,
                  inrush_a, inrush_ms, inrush_basis, inrush_note, port_groups, airflow_m3h,
-                 ratings, sources}
+                 di_inputs, ratings, sources}
           mid:  {...}
           high: {..., same_as: mid}   # only when no distinct part exists for this tier
     sources: [https://...]
@@ -132,7 +132,10 @@ part and its branch MCB can be sized from its own data:
   part needs a converter. `power_supplies` is 2 when the code includes a redundant supply.
 - `unit_power_w` with `power_basis`: `datasheet_max`, `datasheet_typical`, `computed`
   (current × voltage, with the arithmetic in `power_note`) or `assumed` (reason in
-  `power_note`).
+  `power_note`). A powered tier with no published figure leaves `unit_power_w` out and
+  says `power_basis: not_given`, with what was searched in `power_note` (finding 30).
+- `di_inputs` on a digital input module: the inputs the tier provides as ordered (two
+  modules give twice one module's count), from the page in `sources` (finding 31).
 - `inrush_a` (peak A) and `inrush_ms` where a datasheet gives them, with `inrush_basis`
   (`datasheet | not_given | assumed`) and `inrush_note`. Most datasheets give none.
 - `port_groups` on switches and firewalls, as on the datasheet. `airflow_m3h` on fans:

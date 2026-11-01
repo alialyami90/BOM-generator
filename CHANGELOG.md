@@ -18,6 +18,11 @@ project uses [Semantic Versioning](https://semver.org/).
   parts, appends only the ones the library lacks to
   `data/library/additions.yaml`, and lists the powered tiers it skips for want
   of a power figure.
+- The device database has power figures for two more alternatives (finding
+  30): the SCALANCE XR324-4M EEC, now under its 125 V DC code
+  6GK5324-4GG10-4JR2, at 42 W, and the Arbiter 1202B/C at 30 W. The nine
+  that publish none say so (`power_basis: not_given`). The SEL-2244-2 Siemens
+  alternatives give their digital input count, `di_inputs` (finding 31).
 
 ### Fixed
 

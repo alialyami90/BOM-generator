@@ -148,10 +148,13 @@ class Tier(_Electrical):
     supply_option: str | None = None  # the PSU option that covers the supply
     supply_ok: StrictBool | None = None  # false: no variant takes 125 VDC / 230 VAC
     power_supplies: Annotated[int, Field(strict=True, ge=1, le=2)] | None = None
-    power_basis: Literal["datasheet_max", "datasheet_typical", "computed", "assumed"] | None = None
+    power_basis: (
+        Literal["datasheet_max", "datasheet_typical", "computed", "assumed", "not_given"] | None
+    ) = None  # not_given: no figure published, what was searched in power_note (finding 30)
     power_note: str | None = None
     port_groups: list[PortGroup] | None = None
     airflow_m3h: Number | None = None  # fans
+    di_inputs: WholeNumber | None = None  # digital input modules, as ordered (finding 31)
     ratings: dict[str, Any] | None = None  # free-form, like `datasheet.ratings`
     sources: list[str] | None = None
 

@@ -249,6 +249,9 @@ def test_a_powered_alternative_says_where_its_power_figure_comes_from(
             assert not {"voltage_v", "inrush_a", "input_v_min"} & tier.keys(), tier["model"]
         elif "unit_power_w" in tier:
             assert tier["power_basis"] in POWER_BASES, tier["model"]
+        else:  # finding 30: what was searched, when no figure is published
+            assert tier["power_basis"] == "not_given", tier["model"]
+            assert tier["power_note"], tier["model"]
         if "inrush_a" in tier:
             assert tier["inrush_basis"] in {"datasheet", "assumed"}, tier["model"]
 
@@ -271,3 +274,30 @@ def test_every_mcb_states_its_trip_curve_and_dc_magnetic_multiple(record: dict[s
         assert ratings["trip_curve"] == "C"
         assert ratings["magnetic_trip_multiple_dc"] >= ratings["magnetic_trip_multiple"]
     assert "same_brand_dc_range" in record["datasheet"]["ratings"]
+
+
+def _tier(part_id: str, make: str, tier: str) -> dict[str, Any]:
+    record = next(r for r in RECORDS if r["part_id"] == part_id)
+    alternative = next(a for a in record["alternatives"] if a["make"] == make)
+    return dict(alternative["tiers"][tier])
+
+
+def test_finding_30_the_scalance_and_arbiter_tiers_have_their_datasheet_power() -> None:
+    scalance = _tier("SEL-2730M-EXT", "Siemens", "low")
+    arbiter = _tier("SEL-2488", "Arbiter Systems", "mid")
+
+    assert scalance["ordering_code"] == "6GK5324-4GG10-4JR2"  # the EEC code, finding 27
+    assert (scalance["unit_power_w"], scalance["supply_type"], scalance["voltage_v"]) == (
+        42,
+        "VDC",
+        125,
+    )
+    assert (scalance["input_v_min"], scalance["input_v_max"]) == (60, 250)
+    assert (arbiter["unit_power_w"], arbiter["power_basis"]) == (30, "datasheet_max")
+
+
+def test_finding_31_the_sicam_di_modules_give_16_inputs_each() -> None:
+    # SEL-2244-2's Siemens tiers: one DI-8112, two DI-8112, two DI-8113.
+    inputs = [_tier("SEL-2244-2", "Siemens", tier).get("di_inputs") for tier in TIERS]
+
+    assert inputs == [16, 32, 32]
