@@ -1,8 +1,8 @@
 # Plan: Substation SCADA BOM generator
 
-Status: implemented. M0–M18 are on main (v0.2.1, released 2026-10-29); the v0.2 points they
-answered are in [`backlog.md`](backlog.md). The next milestone is M19, from Ali's feedback on
-v0.2.1. Changes go through the review flow in `CLAUDE.md`.
+Status: implemented. M0–M34 are released (v0.3.2, 2026-11-01), except M30, which is on main.
+Ali's v0.2 and v0.3 points and their milestones are in [`backlog.md`](backlog.md). Changes go
+through the review flow in `CLAUDE.md`.
 Spec: [`docs/spec/generator-spec-v2.md`](spec/generator-spec-v2.md). Sections are
 cited by name; this plan does not restate them.
 
@@ -551,8 +551,8 @@ Scaffold, spec in `docs/spec/`, ADRs, this plan, CI with docs-only gating.
   returns the `WorkbookModel`; one module per sheet, shared `styles` and `grid`).
   Layout decisions are in `docs/superpowers/plans/2026-10-28-m5-sheet-models.md`.
   Calculation-sheet header size comes from the top margin and print scale (Q11,
-  at most 20 pt). The header logo is passed in resolved; the loader does not
-  resolve `project.logo` yet. `tests/golden/test_workbook.py` evaluates every
+  at most 20 pt). The header logo is passed in resolved; the loader resolves
+  `project.logo` against the project folder and reports a missing file. `tests/golden/test_workbook.py` evaluates every
   formula with pycel (Q15).
 
 ### M6 — Excel writer
@@ -753,10 +753,9 @@ Delivered in small PRs, one screen group each (ADR 0015 for the bridge):
   `list_backups`, `preview_project_import`/`import_project`,
   `preview_backup_restore`/`restore_backup` and `show_in_folder`. A project's status is
   the loader's error count, else "Library out of date" when the recorded library differs
-  from the active one. The Project page is read-only: New project, New substation,
-  Create from this and editing the overview, documents and defaults need project
-  writers that do not exist yet, so they explain that the YAML files are edited for
-  now. An import that clashes offers Replace (backed up first), Keep both (imported
+  from the active one. The Project page was read-only at first: New project, New substation,
+  Create from this and editing the overview, documents and defaults needed project
+  writers, which M17 added. An import that clashes offers Replace (backed up first), Keep both (imported
   under the preview's `suggested_id` through `import_project(rename_to=)`, #53) or
   Cancel. The restore review runs `preview_backup_restore` (#59), so a backup outside its
   project's Backups folder shows as a failed check. The installed-versions table counts the
@@ -803,11 +802,9 @@ Delivered in small PRs, one screen group each (ADR 0015 for the bridge):
   fixes on the project, Library, Preview, Build, Network and Home screens. Done (#81);
   the departures the built app made from the design are recorded in `docs/ui/` (#82).
 
-Status: done (M10a–M10e, #28 to #82). The app stays read-only on projects and
-substations until the project and substation writers exist: creating projects and
-substations, editing their settings, documents and defaults, and the Panels board's
-moves, deletions, pins and panel editor are not available yet, and the app says to
-edit the YAML files instead.
+Status: done (M10a–M10e, #28 to #82). The app was read-only on projects and substations
+until M17 added the writers and M32 the panel editor. It now creates projects and substations,
+edits their settings, documents and defaults, and the Panels board moves, deletes and pins.
 
 ### M11 — Windows installer and releases
 - Freeze the app with PyInstaller (one folder) and wrap it in an Inno Setup
@@ -926,18 +923,18 @@ Ali's request "Replace network section with part picking" (2026-10-31). The desi
 [`superpowers/specs/2026-10-31-part-picking-design.md`](superpowers/specs/2026-10-31-part-picking-design.md);
 its section 8 is the milestone table. Each milestone is one PR, and Ali's answers are Q42–Q50.
 
-- **M19 — Panels board drag and drop fix.** Pointer-event drag in place of HTML5 drag and drop,
+- **M19 — Panels board drag and drop fix.** *Done (#238).* Pointer-event drag in place of HTML5 drag and drop,
   a Windows reproduction, and a "Lay out panels" button for hand-written panels. Independent of
   the rest, so it ships first. Plan:
   [`superpowers/plans/2026-10-31-m19-panels-drag.md`](superpowers/plans/2026-10-31-m19-panels-drag.md).
-- **M20 — Part overrides and derived parts (ADR 0024).** `Equipment.ordering_code`, `overrides`
+- **M20 — Part overrides and derived parts (ADR 0024).** *Done (#239).* `Equipment.ordering_code`, `overrides`
   and `sfp`, the new roles and categories, `defaults.layout`, derived parts in the loader,
   schemas and the spec update. The golden test is unchanged. Plan:
   [`superpowers/plans/2026-10-31-m20-part-overrides.md`](superpowers/plans/2026-10-31-m20-part-overrides.md).
-- **M21 — Panel priority and waist-height placement.** `engine/layout.py` stacks each panel by
+- **M21 — Panel priority and waist-height placement.** *Done (#241).* `engine/layout.py` stacks each panel by
   priority and places KVM and console screens at waist height; amends ADR 0013; the layout
   preview gives a top U per unit.
-- **M22 — Parts page and device preview design.** Component specs and prototype in `docs/ui/` for
+- **M22 — Parts page and device preview design.** *Done (#240).* Component specs and prototype in `docs/ui/` for
   both screens (the new step is called **Device preview**, so the rail does not have two "Preview"
   items), made with the impeccable skill (CLAUDE.md "UI work"). Plan:
   [`superpowers/plans/2026-10-31-m22-parts-and-device-preview-design.md`](superpowers/plans/2026-10-31-m22-parts-and-device-preview-design.md).
@@ -949,12 +946,29 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
 - **M24 — Device preview page.** *Done (engine #245, app #247).* Engine API for per-unit MCBs and
   positions, the device table, and the panel elevation with dragging. Plan:
   [`superpowers/plans/2026-10-31-m24-device-preview-engine.md`](superpowers/plans/2026-10-31-m24-device-preview-engine.md).
-- **M25 — AC branch MCB per VAC device.** One group E branch per VAC unit after the socket, sized
+- **M25 — AC branch MCB per VAC device.** *Done (engine #248, app #252).* One group E branch per VAC unit after the socket, sized
   like the DC branches; CINC carries them (ADR 0025, Q52). Plan:
   [`superpowers/plans/2026-10-31-m25-ac-device-branches.md`](superpowers/plans/2026-10-31-m25-ac-device-branches.md).
-- **M26 — Device nameplates.** One nameplate row per panel (its tagged group B units, last in group
+- **M26 — Device nameplates.** *Done (engine #253, app #256).* One nameplate row per panel (its tagged group B units, last in group
   H) and a Nameplates sheet with every plate's text (ADR 0026, Q53). Plan:
   [`superpowers/plans/2026-10-31-m26-device-nameplates.md`](superpowers/plans/2026-10-31-m26-device-nameplates.md).
+- **M27 — A new project works from creation to Build.** *Done (#272).* The device preview on a
+  blank substation, panels laid out when its first parts are saved, Checks and Build saying what
+  is missing and counting the same warnings, a device's own loose items without a loose material
+  block, and the XIP strip on new panels (audit 2026-10-31: APP-1, ALI-3, APP-8, APP-12, ENG-2,
+  APP-11, ENG-9).
+- **M28 — Library data in the shipped library.** *Done (#270, #271, #275; return list #277).*
+  v2 of the contractor's library; psa-devices 1.8.0 (FortiGate 600F/601F, Hager NCN DC rating)
+  and 1.9.0 (Q29 through build overrides, NAP-K55 at 0U, Purdue levels for the contractor
+  switches, gateway tags without the example's `DHPCC`) (audit 2026-10-31: APP-2, APP-10, ALI-1,
+  ALI-2, ALI-10, ALI-11, DOC-4).
+- **M29 — Unsaved changes and copy.** *Done (#274).* Leaving Parts, Settings or the project
+  Overview with unsaved changes asks first, plus the audit's copy and polish points (audit
+  2026-10-31: APP-6, APP-13 to APP-15, APP-18, APP-19).
+- **M32 — The panel editor.** *Done (design #279, generated panels #281, hand-written panels
+  #282).* Each panel opens an editor for its devices, enclosure, options, ports and document; the
+  Panels header has Undo and Reset to automatic; a located problem opens where it is (audit
+  2026-10-31: APP-3, APP-4, APP-7, DOC-1, DOC-2).
 - **M33 — Sheet consistency.** AC loose loads are reported, the steel-coefficient box and the nameplate row are laid out per
   the spec, and the audit's untested rules get tests (audit 2026-10-31: ENG-7, ENG-8, ENG-12 to
   ENG-15). ENG-4 and ENG-5 were built under ADR 0028, which Ali rejected on 2026-11-01: Power
@@ -971,7 +985,7 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
 - **M30 — Device tags.** Every group B device with a level is tagged
   `<PANEL>-<LEVEL>-<TYPE>-<SIDE><NN>` (plate L2_GPS_A01). Gateway, GPS, RTAC and workstation
   parts are L2 (psa-devices 1.10.0). The workstation roles give OWS, EWS and SRV. A
-  `duplicate_tag` check fails a shared tag (ADR 0030, Proposed; audit 2026-10-31, ENG-1, APP-9,
+  `duplicate_tag` check fails a shared tag (ADR 0030, accepted by Ali 2026-11-01; audit 2026-10-31, ENG-1, APP-9,
   ALI-16; Q56 to Q60).
 
 ## 5. Testing strategy
@@ -1313,15 +1327,15 @@ annunciator. No M22 spec or engine rule covers the switch yet, so M23 leaves it 
 is a panel-mounted annunciator needed, and if so, which panel takes it?
 
 **Q52 — AC branch MCBs for VAC devices** (M25). *Resolved 2026-10-31:* Ali chose "one AC branch
-MCB per VAC unit, after the socket". A1 approved the rest (ADR 0025, Proposed): branches in group B
+MCB per VAC unit, after the socket". A1 approved the rest (ADR 0025, accepted by Ali 2026-10-31): branches in group B
 order before the spares, sized by `branch_sizing` on the AC set; the spare stays the largest
 housekeeping branch; CINC is raised above the largest VAC branch and to the panel's AC design
-current (to confirm with Ali); an alarmed part adds an AC aux contact; the load text is the
+current (Ali confirmed the raise, 2026-10-31); an alarmed part adds an AC aux contact; the load text is the
 unit's short tag.
 
 **Q53 — Device nameplates** (M26). *Resolved 2026-10-31:* Ali chose one "Device nameplate" row per
 panel whose quantity is the panel's tagged devices, and a sheet listing every plate's text. A1
-approved the rest (ADR 0026, Proposed): group B units with a tag only; the last row of group H;
+approved the rest (ADR 0026, accepted by Ali 2026-10-31): group B units with a tag only; the last row of group H;
 the part from a new optional housekeeping role (NAMEPLATE-0828805, researched by A4); the sheet
 after Loose Material.
 
@@ -1340,20 +1354,25 @@ BOM group (spec: How each panel BOM groups its materials; Inputs the tool needs,
 Recommendation: no change until a project needs one; the 25 parts stay in
 `data/device-db/contractor-2026-10-31/`. Ask Ali when a project does.
 
-**Q56 — Level of the HWIO chassis** (ADR 0030). *Open.* The Axion I/O chassis (SEL-2240) has no
+**Q56 — Level of the HWIO chassis** (ADR 0030). *Answered 2026-11-01: keep it as it is.* The Axion I/O chassis (SEL-2240) has no
 L2 link. Is it L1 (bay I/O) or L2? Until Ali decides, it keeps PSA3-HWIO.
 
-**Q57 — Tag of the workstation monitor** (ADR 0030). *Open.* NAP-F23 is a workstation peripheral
+**Q57 — Tag of the workstation monitor** (ADR 0030). *Answered 2026-11-01: keep it as it is.* NAP-F23 is a workstation peripheral
 with no network link. Does it get a level, side and number? Until Ali decides, it keeps
 WS-MONITOR.
 
-**Q58 — Level of the FOPP** (ADR 0030). *Open.* PSA1-FOPP-CCR-A01 has a side and a number, and
+**Q58 — Level of the FOPP** (ADR 0030). *Answered 2026-11-01: keep it as it is.* PSA1-FOPP-CCR-A01 has a side and a number, and
 CCR stands where the level goes. Keep it, or make it L2 or L3? Until Ali decides, it is unchanged.
 
-**Q59 — Type code of the example's combined workstation** (ADR 0030). *Open.* The example's one
+**Q59 — Type code of the example's combined workstation** (ADR 0030). *Answered 2026-11-01: it keeps SRV/OAS/EAS.* The example's one
 SEL-3355 serves as DA server, operator and engineering workstation, so it keeps SRV/OAS/EAS
 (WS-L2-SRV/OAS/EAS-A01). The `da_server` role gives SRV. Are both codes right?
 
-**Q60 — Housekeeping and accessory tags** (ADR 0030). *Open.* IL, FAN, TH, IPR, COD, FILTER,
+**Q60 — Housekeeping and accessory tags** (ADR 0030). *Answered 2026-11-01: they keep their short labels.* IL, FAN, TH, IPR, COD, FILTER,
 Keyboard & Mouse and Cable Manager have no level and keep today's tags. Confirm they stay outside
 the device tag rule.
+
+**Q61 — Sheet 4's header row height** (M33; audit 2026-10-31, ENG-11). *Open.* The spec
+(Formatting, panel BOM) gives header row 2 a height of 26.25, or 53.1 on sheet 4; the writer uses
+26.25 on every sheet. M33 left it out as a spec-versus-code question. To ask Ali: follow the
+spec, or change the spec to 26.25?

@@ -83,7 +83,7 @@ Project name, document title, supplier document number and revision are not cell
 
 ## Tag naming conventions
 
-Device tags follow `<PANEL>-<LEVEL>-<TYPE>-<LAN><NN>`, and every circuit or terminal strip is tagged `<PANEL>-<CIRCUIT CODE>`. The panel prefix is PSA1, PSA2, PSA3 or WS. Rows with quantity > 1 use a range or list in one tag instead of one row per unit.
+Device tags follow `<PANEL>-<LEVEL>-<TYPE>-<SIDE><NN>` (ADR 0030), and every circuit or terminal strip is tagged `<PANEL>-<CIRCUIT CODE>`. The panel prefix is PSA1, PSA2, PSA3 or WS. Rows with quantity > 1 use a range or list in one tag instead of one row per unit.
 
 **Network devices and Purdue levels**
 
@@ -91,13 +91,15 @@ Device tags follow `<PANEL>-<LEVEL>-<TYPE>-<LAN><NN>`, and every circuit or term
 | --- | --- | --- | --- |
 | L2 | Purdue Level 2 – station/supervisory backbone switch | PSA1-L2-ESW-A01 | LAN letter + 01 |
 | L1 | Purdue Level 1 – bay/IED access switches (24 MM FO ports) | PSA1-L1-ESW-A11 to A16 | LAN letter + 11, 12, …; one row, range tag "A11 to A16" |
-| EXT | External-systems switch (16 MM + 4 RJ45) | PSA1-EXT-ESW-A | LAN letter only |
-| EXT (FW) | Firewall for external systems | PSA1-EXT-FW-A | LAN letter only |
+| EXT | External-systems switch (16 MM + 4 RJ45) | PSA1-EXT-ESW-A01 | LAN letter + 01 |
+| EXT (FW) | Firewall for external systems | PSA1-EXT-FW-A01 | LAN letter + 01 |
 | L2-L3 | Uplink to Level 3 / control room, via single-mode FOPP | PSA1-FOPP-CCR-A01 | CCR = central control room |
 
-LAN-B devices in Cabinet 002 swap the prefix and LAN letter: PSA2-L2-ESW-B01, PSA2-L1-ESW-B11 to B16. Gateways number by LAN: PSA1-DHPCC-GW-1, PSA2-DHPCC-GW-2.
+LAN-B devices in Cabinet 002 swap the prefix and LAN letter: PSA2-L2-ESW-B01, PSA2-L1-ESW-B11 to B16. Gateways follow the same rule: PSA1-L2-GW-A01, PSA2-L2-GW-B01.
 
-**Other device type codes:** GPS (clock), RTAC (data concentrator), HWIO (Axion IO), IL (lamp), FAN-1,2, TH-1,2,3, IPR (interposing relay), COD-1/-2 (change-over diodes neg/pos), AUX PS (socket), FILTER, MONITOR, SRV/OAS/EAS (workstation).
+**Every device with a level (ADR 0030).** A group B device whose part has a Purdue level gets level, type, side and a running number; the gateway, GPS clock, RTAC and workstation are L2. The side is the row's LAN letter, or A in a panel with no LAN (PSA3-L2-GPS-A01, PSA3-L2-RTAC-A01, WS-L2-SRV/OAS/EAS-A01). NN counts per panel, level, type and side from the level's first number (L1 from 11, the others from 01), so two gateways in one panel are GW-A01 and GW-A02. The operator workstation, engineering workstation and DA server share one part and get OWS, EWS and SRV from their role. A library `tag_pattern` or a panel row's own tag still wins. The check report fails any tag that two device units share. Parts with no type code (Keyboard & Mouse, Cable Manager) carry a label, not a tag.
+
+**Other device type codes:** GPS (clock), RTAC (data concentrator), HWIO (Axion IO), IL (lamp), FAN-1,2, TH-1,2,3, IPR (interposing relay), COD-1/-2 (change-over diodes neg/pos), AUX PS (socket), FILTER, MONITOR, SRV/OAS/EAS (workstation), OWS, EWS and SRV (operator workstation, engineering workstation, DA server).
 
 **Circuit and strip codes**
 
@@ -169,7 +171,7 @@ Part numbers come from the chosen catalogue brand (ADR 0017).
 - Cable managers: 9 per network cabinet (roughly one per rack-mounted switch/patch panel).
 - RTAC serial cables (SEL-C607): one per used COM port (6), matching the 6 XRTAC strips.
 
-**Device nameplates (last row of group H, ADR 0026).** When the library names a `nameplate` housekeeping part, each panel BOM ends with one row of it whose quantity is the panel's tagged group B units: one per unit, DIN rail included, kit children, housekeeping parts, MCBs, strips and loose items excluded. The plate text is the unit's tag as its MCB rows print it, without the panel prefix and with underscores (L2_ESW_A01, DHPCC_GW_1); a tag override is printed as written. In the example: 11 in Cabinets 001/002, 3 in Cabinet 003 and the WS console. The row has no HWIO and no power line.
+**Device nameplates (last row of group H, ADR 0026).** When the library names a `nameplate` housekeeping part, each panel BOM ends with one row of it whose quantity is the panel's tagged group B units: one per unit, DIN rail included, kit children, housekeeping parts, MCBs, strips and loose items excluded. The plate text is the unit's tag as its MCB rows print it, without the panel prefix and with underscores (L2_ESW_A01, L2_GW_A01, L2_GPS_A01); a tag override is printed as written. In the example: 11 in Cabinets 001/002, 3 in Cabinet 003 and the WS console. The row has no HWIO and no power line.
 
 **Housekeeping kit (group D).** Every cabinet gets lamp + door switch, interposing relay kit (relay, base, suppression module, bracket) for the high-temperature alarm, and either 2 fans + 3 thermostats (forced ventilation) or vent filters + 1 thermostat (natural convection). The choice follows from Heat Calculations. Part numbers come from the chosen catalogue brand (ADR 0017).
 
