@@ -22,6 +22,7 @@
     return DP.state === 'loaded' ? DP.data : null;
   }
   const reload = () => { DP.state = 'idle'; };
+  App.onDiskChange(reload);
 
   /* ---------- units and the moves that pin them (the board's rules, screens-panels.js) ---------- */
   const uid = (p, u) => `${p.number}:${u.device}#${u.n}:${u.side || ''}`;

@@ -9,6 +9,19 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Desktop conveniences (M39, APP-25 to APP-28). When the window comes back
+  into focus and someone else changed a project file, the app reloads it and
+  says so, or, over unsaved changes, asks: Reload (lose my changes) or Keep
+  mine. Home offers Restore deleted project… for 30 days. F6 moves between
+  the rail, the page and the status bar, and Ctrl+O opens a project folder.
+  Project › Overview offers Record <active version> in this project when the
+  recorded library differs, with Undo.
+- Add a device on Parts offers Monitor and Keyboard and mouse (M38, APP-23),
+  and the rail shows "Not set up" on Parts until a substation has its first
+  parts, or how many rows name a part the library lacks (APP-24). A
+  generated panel's Enclosure tab edits the numbering every generated panel
+  shares: the cabinet name, cabinet number, tag prefix and sheet name
+  patterns, where {n} is the panel number (ALI-5, ALI-13).
 - Library › Catalogues edits every brand set (M36, APP-20). A switch picks
   MCBs, aux contacts, terminal blocks, busbars or housekeeping; one tab per
   brand with the default marked; rows are edited in place, with Add rating or
@@ -29,6 +42,25 @@ project uses [Semantic Versioning](https://semver.org/).
   parts, appends only the ones the library lacks to
   `data/library/additions.yaml`, and lists the powered tiers it skips for want
   of a power figure.
+- The device database has power figures for two more alternatives (finding
+  30): the SCALANCE XR324-4M EEC, now under its 125 V DC code
+  6GK5324-4GG10-4JR2, at 42 W, and the Arbiter 1202B/C at 30 W. The nine
+  that publish none say so (`power_basis: not_given`). The SEL-2244-2 Siemens
+  alternatives give their digital input count, `di_inputs` (finding 31).
+- The installer ships psa-devices 1.13.0. It adds the SCALANCE XR324-4M EEC
+  (42 W) and Arbiter 1202B/C (30 W) alternatives and six Weidmüller and Brady
+  nameplate alternatives, and the SEL-2244-2 Siemens alternatives count 16,
+  32 and 32 digital inputs (M41c).
+- The device database records that no datasheet publishes inrush for the
+  parts that lack it (M42, ALI-9, finding 32): the Finder and Weidmüller
+  interposing-relay alternatives say `inrush_basis: not_given` with the
+  documents searched, and their branches stay sized from running current and
+  the 2 A floor.
+- The installer ships psa-devices 1.14.0. 51 alternatives that printed their
+  original's description now give their own ports, power, supply, digital
+  inputs or product name (M43), for example the SCALANCE XR324-4M EEC as
+  "8 MM Ports, 16 RJ45" and the SoftMaker suites under their own names. A
+  figure the device database lacks is left out of the text.
 
 ### Fixed
 

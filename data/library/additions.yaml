@@ -598,6 +598,125 @@ devices:
     unit_power_w: 138  # 60 Hz: the tender text's 138 W; the technical data says 135 W
     load_type: "INTERMITTENT"
     height_u: 0
+  # Alternative tiers from data/device-db (M14 rules), appended by
+  # data/device-db/tools/library_entries.py (M41c): the two that got a power figure in M41b
+  # (finding 30) and the six nameplate tiers.
+  - part_id: SEL-2730M-EXT.SIEMENS-LOW
+    category: network_switch
+    height_u: 1
+    make: Siemens
+    model: SCALANCE XR324-4M EEC
+    ordering_code: 6GK5324-4GG10-4JR2
+    description_template: LAN-{lan} Industrial Ethernet switch (EXT) (8 MM Ports, 16 RJ45)
+    tag_type: ESW
+    purdue_level: EXT
+    supply_type: VDC
+    voltage_v: 125
+    unit_power_w: 42
+    load_type: CONTINUOUS
+    power_supplies: 2
+    input_v_min: 60
+    input_v_max: 250
+    hwio_points: 1
+    ports:
+    - count: 16
+      speed: 1G
+      media: RJ45
+      kind: fixed
+      usable_for: any
+    - count: 8
+      speed: 100M
+      media: MM
+      kind: fixed
+      usable_for: ied
+    alt_group: SEL-2730M-EXT
+    tier: low
+  - part_id: SEL-2488.ARBITER-SYSTEMS-MID
+    category: gps_clock
+    height_u: 1
+    make: Arbiter Systems
+    model: Model 1202B/C GNSS Synchronized Clock (100 ns)
+    ordering_code: 1202B/C with Power Supply A01 + B01
+    description_template: GPS Clock with Antenna and accessories (SNTP/IRIG-B), 125VDC redundant, 100mbps
+      SFP ports redundant
+    tag_type: GPS
+    purdue_level: L2
+    supply_type: VDC
+    voltage_v: 125
+    unit_power_w: 30
+    load_type: CONTINUOUS
+    power_supplies: 2
+    input_v_min: 100
+    input_v_max: 350
+    hwio_points: 1
+    loose_items:
+    - part_id: SEL-9524B.ARBITER-SYSTEMS-MID
+      qty: 1
+      tag: Time Server Accessories
+    - part_id: SEL-C961-050
+      qty: 1
+    - part_id: SEL-915900139
+      qty: 1
+    - part_id: SEL-C961-025
+      qty: 1
+    - part_id: SEL-915900043
+      qty: 1
+    alt_group: SEL-2488
+    tier: mid
+  - part_id: NAMEPLATE-0828805.WEIDMULLER-LOW
+    category: accessory
+    height_u: 0
+    make: Weidmuller
+    model: CC 30/60 MM WS
+    ordering_code: '2005330000'
+    description_template: Device nameplate, white PVC plate 60 x 30 mm, self-adhesive
+    alt_group: NAMEPLATE-0828805
+    tier: low
+  - part_id: NAMEPLATE-0828805.WEIDMULLER-MID
+    category: accessory
+    height_u: 0
+    make: Weidmuller
+    model: CC 30/60 K MC NE WS
+    ordering_code: '1934390000'
+    description_template: Device nameplate, white PVC plate 60 x 30 mm, self-adhesive
+    alt_group: NAMEPLATE-0828805
+    tier: mid
+  - part_id: NAMEPLATE-0828805.WEIDMULLER-HIGH
+    category: accessory
+    height_u: 0
+    make: Weidmuller
+    model: CC 30/60 MC NEUTRAL WS
+    ordering_code: '1934420000'
+    description_template: Device nameplate, white PVC plate 60 x 30 mm, self-adhesive
+    alt_group: NAMEPLATE-0828805
+    tier: high
+  - part_id: NAMEPLATE-0828805.BRADY-LOW
+    category: accessory
+    height_u: 0
+    make: Brady
+    model: EPREP label B-7593 48 x 19 mm, black
+    ordering_code: PTLEP-08-7593-BK
+    description_template: Device nameplate, white PVC plate 60 x 30 mm, self-adhesive
+    alt_group: NAMEPLATE-0828805
+    tier: low
+  - part_id: NAMEPLATE-0828805.BRADY-MID
+    category: accessory
+    height_u: 0
+    make: Brady
+    model: EPREP label B-7593 30 x 40 mm, white
+    ordering_code: '312120'
+    description_template: Device nameplate, white PVC plate 60 x 30 mm, self-adhesive
+    alt_group: NAMEPLATE-0828805
+    tier: mid
+  - part_id: NAMEPLATE-0828805.BRADY-HIGH
+    category: accessory
+    height_u: 0
+    make: Brady
+    model: BMP71 raised panel engraved-plate label 3 x 1 in, black
+    ordering_code: M71EP-176-593-BK
+    description_template: Device nameplate, white PVC plate 60 x 30 mm, self-adhesive
+    alt_group: NAMEPLATE-0828805
+    tier: high
 catalogue_brands:
   mcb:
     - id: hager-mcn-2p  # AC set: Hager gives no DC rating, so no dc_rating_v
@@ -628,6 +747,110 @@ overrides:  # values the shipped library changes in the example's parts and cata
       ordering_code: "SK 3243.200"
     NAP-K55:  # wall mounted: no rack space (data/device-db, contractor v2)
       height_u: 0
+    SEL-2244-2.SIEMENS-LOW:  # finding 31: one SICAM A8000 DI-8112, 16 inputs (data/device-db)
+      description_template: "Digital Input Module-16DI (110V DC)"
+      di_inputs: 16
+    SEL-2244-2.SIEMENS-MID:  # finding 31: two DI-8112 modules
+      description_template: "Digital Input Module-32DI (110V DC)"
+      di_inputs: 32
+    SEL-2244-2.SIEMENS-HIGH:  # finding 31: two DI-8113 modules
+      description_template: "Digital Input Module-32DI (220V DC)"
+      di_inputs: 32
+    # M43: each alternative's own ports, ratings and name from its device-db tier
+    RST2228-L1-24MM.MOXA-LOW:
+      description_template: "LAN-{lan} Industrial Ethernet switch (Level-1) (12 MM FO Ports, 12 RJ45)"
+    RST2228-L1-24MM.MOXA-MID:
+      description_template: "LAN-{lan} Industrial Ethernet switch (Level-1) (20 MM FO Ports, 4 RJ45)"
+    RST2228-L1-24MM.MOXA-HIGH:
+      description_template: "LAN-{lan} Industrial Ethernet switch (Level-1) (24 SFP Ports, 2 RJ45)"
+    RST2228-L1-24MM.CISCO-LOW:
+      description_template: "LAN-{lan} Industrial Ethernet switch (Level-1) (24 SFP Ports)"
+    RST2228-L1-24MM.CISCO-MID:
+      description_template: "LAN-{lan} Industrial Ethernet switch (Level-1) (24 SFP Ports)"
+    RST2228-L1-24MM.CISCO-HIGH:
+      description_template: "LAN-{lan} Industrial Ethernet switch (Level-1) (24 SFP Ports)"
+    SEL-2730M-EXT.MOXA-LOW:
+      description_template: "LAN-{lan} Industrial Ethernet switch (EXT) (12 MM Ports, 12 RJ45)"
+    SEL-2730M-EXT.MOXA-MID:
+      description_template: "LAN-{lan} Industrial Ethernet switch (EXT) (20 MM Ports, 4 RJ45)"
+    SEL-2730M-EXT.MOXA-HIGH:
+      description_template: "LAN-{lan} Industrial Ethernet switch (EXT) (16 SFP Ports, 6 RJ45)"
+    SEL-2730M-EXT.SIEMENS-MID:
+      description_template: "LAN-{lan} Industrial Ethernet switch (EXT) (4 MM Ports, 24 RJ45)"
+    SEL-2488.MEINBERG-LOW:
+      description_template: "GPS Clock with Antenna and accessories (SNTP/IRIG-B), 48VDC"
+    SEL-2488.MEINBERG-MID:
+      description_template: "GPS Clock with Antenna and accessories (SNTP/IRIG-B), 230VAC"
+    SEL-2244-2.HITACHI-ENERGY-LOW:
+      description_template: "Digital Input Module"
+    SEL-2244-2.HITACHI-ENERGY-MID:
+      description_template: "Digital Input Module (110-125V DC)"
+    SEL-2244-2.HITACHI-ENERGY-HIGH:
+      description_template: "Digital Input Module (110-125V DC)"
+    SZ2500-LAMP.STEGO-LOW:
+      description_template: "Illumination Lamp with on/off switch, 5W"
+    SZ2500-LAMP.STEGO-MID:
+      description_template: "Illumination Lamp with on/off switch, 5W"
+    SZ2500-LAMP.STEGO-HIGH:
+      description_template: "Illumination Lamp, 4W"
+    SZ2500-LAMP.NVENT-HOFFMAN-LOW:
+      description_template: "Illumination Lamp with Door switch, 9W"
+    SZ2500-LAMP.NVENT-HOFFMAN-MID:
+      description_template: "Illumination Lamp with socket, 12W"
+    SZ2500-LAMP.NVENT-HOFFMAN-HIGH:
+      description_template: "Illumination Lamp with motion sensor, 12W"
+    SK3243-FAN.PFANNENBERG-LOW:
+      description_template: "230V AC Inlet and Exhaust Fan, Throughput: 505 m3/h with filter, 65W"
+    SK3243-FAN.PFANNENBERG-MID:
+      description_template: "230V AC Inlet and Exhaust Fan, Throughput: 445 m3/h with filter, 160W"
+    SK3243-FAN.PFANNENBERG-HIGH:
+      description_template: "230V AC Inlet and Exhaust Fan, Throughput: 625 m3/h with filter, 140W"
+    SK3243-FAN.STEGO-LOW:
+      description_template: "230V AC Inlet and Exhaust Fan, Throughput: 271 m3/h with filter, 64W"
+    SK3243-FAN.STEGO-MID:
+      description_template: "230V AC Inlet and Exhaust Fan, Throughput: 373 m3/h with filter, 95W"
+    SK3243-FAN.STEGO-HIGH:
+      description_template: "230V AC Inlet and Exhaust Fan, Throughput: 599 m3/h with filter, 140W"
+    SK3110-TH.PFANNENBERG-LOW:
+      description_template: "Thermostat"
+    SK3110-TH.PFANNENBERG-MID:
+      description_template: "Thermostat"
+    SK3110-TH.PFANNENBERG-HIGH:
+      description_template: "Thermostat"
+    SK3110-TH.STEGO-LOW:
+      description_template: "Thermostat"
+    SK3110-TH.STEGO-MID:
+      description_template: "Thermostat"
+    SK3110-TH.STEGO-HIGH:
+      description_template: "Thermostat, 1W"
+    MS-OFFICE-2021.SOFTMAKER-LOW:
+      description_template: "SoftMaker FreeOffice"
+    MS-OFFICE-2021.SOFTMAKER-MID:
+      description_template: "SoftMaker Office Standard 2024"
+    MS-OFFICE-2021.SOFTMAKER-HIGH:
+      description_template: "SoftMaker Office Professional 2024"
+    MS-OFFICE-2021.COREL-WORDPERFECT-OFFICE-LOW:
+      description_template: "Corel WordPerfect Office 2021 Standard"
+    MS-OFFICE-2021.COREL-WORDPERFECT-OFFICE-MID:
+      description_template: "Corel WordPerfect Office 2021 Standard"
+    MS-OFFICE-2021.COREL-WORDPERFECT-OFFICE-HIGH:
+      description_template: "Corel WordPerfect Office 2021 Professional"
+    SEL-C961-050.TIMES-MICROWAVE-SYSTEMS-LOW:
+      description_template: "50 ft (15 Meters) LMR-240 cable"
+    SEL-C961-050.MEINBERG-LOW:
+      description_template: "50 ft (15 Meters) antenna cable"
+    SEL-C961-050.MEINBERG-MID:
+      description_template: "50 ft (15 Meters) low-loss antenna cable"
+    SEL-C961-050.MEINBERG-HIGH:
+      description_template: "Fiber-optic antenna link"
+    SEL-C961-025.TIMES-MICROWAVE-SYSTEMS-LOW:
+      description_template: "25 ft (7 Meters) LMR-240 cable"
+    SEL-C961-025.MEINBERG-LOW:
+      description_template: "25 ft (7 Meters) antenna cable"
+    SEL-C961-025.MEINBERG-MID:
+      description_template: "25 ft (7 Meters) low-loss antenna cable"
+    SEL-C961-025.MEINBERG-HIGH:
+      description_template: "Fiber-optic antenna link"
   catalogues:
     housekeeping:
       fan:  # plan Q29: per fan, with the SK 3243.200 outlet filter at 60 Hz

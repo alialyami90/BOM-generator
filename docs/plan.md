@@ -1,6 +1,6 @@
 # Plan: Substation SCADA BOM generator
 
-Status: implemented. M0–M34 are released (v0.3.3, 2026-11-01). M35–M42 are the remaining roadmap.
+Status: implemented. M0–M34 are released (v0.3.3, 2026-11-01). M35–M43 are the remaining roadmap.
 Ali's v0.2 and v0.3 points and their milestones are in [`backlog.md`](backlog.md). Changes go
 through the review flow in `CLAUDE.md`.
 Spec: [`docs/spec/generator-spec-v2.md`](spec/generator-spec-v2.md). Sections are
@@ -1008,8 +1008,15 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
 - **M41 — Alternatives' power and inputs.** The M14 generator moves into
   `data/device-db/tools/`; findings 30 and 31 get sourced power figures and `di_inputs`; the newly
   powered tiers join the shipped library (handoff NEXT section 7).
-- **M42 — Cited inrush for the shipped library.** Datasheet inrush for the parts that have none,
-  in batches, each a psa-devices release; `examples/` is unchanged (Q38) (audit 2026-10-31, ALI-9).
+- **M42 — Cited inrush for the shipped library.** No datasheet publishes an inrush figure for the
+  parts that have none, so the device-db records say `inrush_basis: not_given` with the sources
+  searched and branches stay sized from running current and the 2 A floor; finding 32 in
+  `docs/device-db-findings.md` records it (audit 2026-10-31, ALI-9).
+- **M43 — Alternatives describe themselves.** Each alternative whose inherited description
+  contradicts its own ports, power, supply, input count or name gets its own
+  `description_template` from its device-db tier, as an override in `data/library/additions.yaml`;
+  a figure the tier does not give is left out. A test checks every alternative's description
+  against its data. psa-devices 1.14.0; originals unchanged.
 
 ## 5. Testing strategy
 

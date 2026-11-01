@@ -204,6 +204,10 @@ records:
         supply_ok: true
         power_supplies: 1
         inrush_basis: not_given
+        power_basis: not_given
+        power_note: 'M41b (2026-11-01): no figure to cite. The RTU540 line is discontinued and
+          Hitachi Energy no longer publishes the 540CMD01 data sheet; the copy on Scribd could not
+          be read, and no distributor page gives a consumption figure.'
         port_groups:
         - ports: ETH1-ETH2
           count: 2
@@ -283,6 +287,10 @@ records:
         input_v_max: 220
         supply_option: Would be powered from the RTU560 rack supply 560PSU01 (110-220 VDC nominal)
         inrush_basis: not_given
+        power_basis: not_given
+        power_note: 'M41b (2026-11-01): no figure to cite. No 560CMG10 data sheet or listing exists
+          (finding 27); the RTU560 product page lists only the 560CMR01 and 560CMR02 communication
+          units. A current Hitachi Energy CMU is needed before a figure can be researched.'
         height_u: 0
         sources:
         - https://www.hitachienergy.com/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu560-product-line
@@ -483,6 +491,10 @@ records:
         supply_ok: true
         power_supplies: 1
         inrush_basis: not_given
+        power_basis: not_given
+        power_note: 'M41b (2026-11-01): no figure to cite. The RTU540 line is discontinued and
+          Hitachi Energy no longer publishes the 540CMD01 data sheet; the copy on Scribd could not
+          be read, and no distributor page gives a consumption figure.'
         port_groups:
         - ports: ETH1-ETH2
           count: 2
@@ -558,6 +570,10 @@ records:
         input_v_max: 220
         supply_option: Would be powered from the RTU560 rack supply 560PSU01 (110-220 VDC nominal)
         inrush_basis: not_given
+        power_basis: not_given
+        power_note: 'M41b (2026-11-01): no figure to cite. No 560CMG10 data sheet or listing exists
+          (finding 27); the RTU560 product page lists only the 560CMR01 and 560CMR02 communication
+          units. A current Hitachi Energy CMU is needed before a figure can be researched.'
         height_u: 0
         sources:
         - https://www.hitachienergy.com/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu560-product-line
@@ -793,6 +809,11 @@ records:
         supply_option: 'Option A01 / B01: 100-240 VAC, 100-350 VDC (A02/B02: 24-48 VDC)'
         supply_ok: true
         power_supplies: 2
+        unit_power_w: 30
+        power_basis: datasheet_max
+        power_note: 'Arbiter catalogue page, Power Requirements: universal supply 100 Vdc to 350
+          Vdc, 30 W maximum (100-240 Vac, 20 VA maximum). The two supplies (A01 + B01) run in a
+          redundant configuration; 30 W is taken as the unit''s maximum.'
         inrush_basis: not_given
         sources:
         - https://arbiter.com/catalog/product/model-1202b-c-gnss-synchronized-clock-100ns-.php
@@ -1008,6 +1029,10 @@ records:
         supply_ok: true
         power_supplies: 1
         inrush_basis: not_given
+        power_basis: not_given
+        power_note: 'M41b (2026-11-01): no figure to cite. The RTU540 line is discontinued and
+          Hitachi Energy no longer publishes the 540CMD01 data sheet; the copy on Scribd could not
+          be read, and no distributor page gives a consumption figure.'
         sources:
         - https://www.hitachienergy.com/jp/ja/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu540-product-line1
       mid:
@@ -1074,6 +1099,10 @@ records:
         supply_option: Would be powered from the RTU560 rack supply 560PSU01 (110-220 VDC nominal)
         power_supplies: 2
         inrush_basis: not_given
+        power_basis: not_given
+        power_note: 'M41b (2026-11-01): no figure to cite. No 560CMG10 data sheet or listing exists
+          (finding 27); the RTU560 product page lists only the 560CMR01 and 560CMR02 communication
+          units. A current Hitachi Energy CMU is needed before a figure can be researched.'
         sources:
         - https://www.hitachienergy.com/products-and-solutions/substation-automation-protection-and-control/products/remote-terminal-units/rtu560-product-line
   sources:
@@ -1434,6 +1463,9 @@ records:
         mounting_kind: plug_in
         height_u: 0
         supply_type: none
+        di_inputs: 16
+        sources:
+        - https://uk.rs-online.com/web/p/plc-io-modules/2751773
       mid:
         model: SICAM A8000 DI-8112 (16 DI, 110 VDC) x2
         ordering_code: 6MF2811-2AA00
@@ -1444,6 +1476,9 @@ records:
         mounting_kind: plug_in
         height_u: 0
         supply_type: none
+        di_inputs: 32
+        sources:
+        - https://uk.rs-online.com/web/p/plc-io-modules/2751773
       high:
         model: SICAM A8000 DI-8113 (16 DI, 220 VDC) x2
         ordering_code: 6MF2811-3AA00
@@ -1455,6 +1490,9 @@ records:
         mounting_kind: plug_in
         height_u: 0
         supply_type: none
+        di_inputs: 32
+        sources:
+        - https://uk.rs-online.com/web/p/plc-io-modules/2751774
   - make: Hitachi Energy
     manufacturer: Hitachi Energy
     tiers:
@@ -1764,6 +1802,10 @@ records:
         supply_ok: false
         power_supplies: 1
         inrush_basis: not_given
+        power_basis: not_given
+        power_note: 'M41b (2026-11-01): no figure to cite. The Siemens data sheet for the sibling
+          6AG4141-5AB17-0FA0 (last modified 5/27/2021) gives the 24 V DC supply but no power
+          consumption, power loss or current, and no data sheet for the exact 5BB17 code was found.'
         sources:
         - https://cdn.shopify.com/s/files/1/0611/1530/2046/files/6AG41415AB170FA0_datasheet_en.pdf
         - https://steinerelectric.com/Catalog/Automation-And-Pneumatics/Industrial-Computer-And-Human-Machine-Interface/Industrial-Computers/Siemens-6AG41415BB170FA0-Siemens-IPC427E-1044846
@@ -1787,8 +1829,15 @@ records:
         supply_ok: false
         power_supplies: 1
         inrush_basis: not_given
+        power_basis: not_given
+        power_note: 'M41b (2026-11-01): no figure to cite. The Siemens Industry Mall entry for
+          6AG4112-3HR13-4BJ1 and the data sheet for the sibling 6AG4112-3JC13-0BX2 give the 100/240
+          V AC supply but no consumption; the operating instructions (A5E45589050-AA, 11/2018) give
+          slot power limits only. A supply rating is a ceiling, not the PC''s consumption.'
         sources:
         - https://mall.industry.siemens.com/mall/es/WW/Catalog/Product/6AG4112-3HR13-4BJ1
+        - https://cdn.eicom.ru/media/PDF24/494908.pdf
+        - https://www.manualslib.de/manual/458117/Siemens-Simatic-Ipc647E.html?page=157
       high:
         model: SIMATIC IPC847E
         ordering_code: 6AG4114-3MR12-3BX1
@@ -1809,8 +1858,14 @@ records:
         supply_ok: false
         power_supplies: 1
         inrush_basis: not_given
+        power_basis: not_given
+        power_note: 'M41b (2026-11-01): no figure to cite. The IPC847E single power supply (850 W)
+          product information (A5E51125364-AA, 06/2021) gives the supply''s input as at most 600 W,
+          a ceiling for the supply rather than the PC''s consumption; the distributor page for
+          6AG4114-3MR12-3BX1 gives none.'
         sources:
         - https://dattech.com.vn/p/6ag4114-3mr12-3bx1/
+        - https://www.manualslib.de/manual/837104/Siemens-Simatic-Ipc847E.html?page=7
   sources:
   - https://cms-cdn.selinc.com/assets/Literature/Publications/Product%20Catalogs/Catalog%20Sections/SEL%20Automation.pdf
   - https://selinc.com/api/download/102494/

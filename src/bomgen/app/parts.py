@@ -54,6 +54,8 @@ CATEGORY_LABEL = {
     Category.ANNUNCIATOR: "Annunciator",
     Category.KVM: "KVM",
     Category.CONSOLE: "Console",
+    Category.MONITOR: "Monitor",
+    Category.PERIPHERAL: "Keyboard and mouse",
 }
 ROLE_CATEGORY = {
     EquipmentRole.TIME_SERVER: Category.GPS_CLOCK,
@@ -92,6 +94,8 @@ ADD_CATEGORIES = (
     Category.WORKSTATION,
     Category.KVM,
     Category.CONSOLE,
+    Category.MONITOR,  # APP-23: the console's screen and keyboard
+    Category.PERIPHERAL,
 )
 NETWORK_CATEGORIES = frozenset(
     {Category.NETWORK_SWITCH, Category.PATCH_PANEL, Category.FIREWALL, Category.GATEWAY}

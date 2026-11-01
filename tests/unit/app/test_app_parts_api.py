@@ -346,3 +346,21 @@ def test_the_l2_link_and_com_ports_are_written_as_equipment_fields(
     found = parts(project, store)
     assert row(found, "gw")["link"] == {"l2_ports": 2, "l2_speed": "10G", "l2_media": "MM"}
     assert row(found, "rtac")["serial_ports"] == 4
+
+
+def test_add_a_device_offers_monitors_and_peripherals(project: Path, store: LibraryStore) -> None:
+    """APP-23: the console's monitor and keyboard can be added as equipment rows."""
+    found = parts(project, store)
+    added = {c["category"]: c["label"] for c in found["add_categories"]}
+    assert added["monitor"] == "Monitor"
+    assert added["peripheral"] == "Keyboard and mouse"
+    assert "NAP-F23" in [o["part_id"] for o in found["options"]["monitor"]]
+    assert "KEYTEK-KBM" in [o["part_id"] for o in found["options"]["peripheral"]]
+
+
+def test_a_monitor_row_is_named_by_its_category(
+    app: api.Api, project: Path, store: LibraryStore
+) -> None:
+    row_in = {"id": "mon", "part_id": "NAP-F23", "role": "other"}
+    ok(app.add_equipment(str(project), "gis01", row_in, None, True))
+    assert row(parts(project, store), "mon")["label"] == "Monitor"

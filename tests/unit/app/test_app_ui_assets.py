@@ -428,7 +428,7 @@ def test_the_app_ships_none_of_the_prototypes_illustrative_data() -> None:
         text = path.read_text(encoding="utf-8")
         assert not re.search(r"\bDB\.", text), path.name
         assert not re.search(r"\bEngine\.", text), path.name
-        assert "psa-devices 1.12.0" not in text, path.name
+        assert "psa-devices 1.14.0" not in text, path.name
 
 
 def test_without_its_bridge_the_app_says_so_instead_of_showing_example_pages() -> None:
@@ -754,6 +754,12 @@ def test_where_to_fix_leads_each_located_problem_to_its_page() -> None:
             "pe-doc",
         ),
         (
+            {"file": sub, "location": "generated_panels.cabinet_number"},
+            "Open the panel",
+            "#/panels/psa1/enclosure",
+            "pe-g.cabinet_number",
+        ),
+        (
             {"file": "/w/gis01/panels/ws.yaml", "location": "devices[0].part_id"},
             "Open the panel",
             "#/panels/ws/devices",
@@ -894,3 +900,50 @@ def test_library_catalogues_are_edited_as_pending_changes_by_brand() -> None:
     edit = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
     assert edit.count("App.cataloguesStale();") == 3  # discard, its Undo, apply
     assert "App.cataloguesStale();" in (UI_DIR / "screens-libcsv.js").read_text(encoding="utf-8")
+
+
+def test_the_rail_says_parts_is_not_set_up_or_counts_unknown_parts() -> None:
+    """APP-24: "Not set up" on a new substation, else the rows whose part is missing."""
+    ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    assert "noParts() ? `${icon('warn')}Not set up`" in ui
+    assert "sp.parts.rows.filter((x) => x.part_id && !x.known).length" in ui
+    assert "navItem('#/parts', 'parts', 'Parts', partsTail" in ui
+
+
+def test_a_generated_panel_edits_the_shared_numbering_patterns() -> None:
+    """ALI-5, ALI-13: the cabinet name, number, tag prefix and sheet name patterns."""
+    js = (UI_DIR / "screens-panel-editor.js").read_text(encoding="utf-8")
+    assert "if (k === 'g') return [['generated_panels', a], 'text'];" in js
+    for field in ("cabinet_name", "cabinet_number", "tag_prefix", "sheet_name"):
+        assert f"edit('g.{field}'" in js
+
+
+def test_a_file_changed_on_disk_reloads_or_asks() -> None:
+    """APP-25: stamps on blur and focus; reload quietly, or a banner over unsaved changes."""
+    ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    assert "window.addEventListener('blur'" in ui
+    assert "call('file_stamps', before.file)" in ui
+    assert "changed on disk. Reloaded." in ui
+    assert 'data-action="disk-reload">Reload (lose my changes)' in ui
+    assert 'data-action="disk-keep">Keep mine (overwrite the file)' in ui
+    for name in ("substation", "panels", "device-preview", "panel-editor", "verify", "loose"):
+        assert "App.onDiskChange(" in (UI_DIR / f"screens-{name}.js").read_text("utf-8")
+
+
+def test_f6_moves_between_regions_and_ctrl_o_opens_a_project() -> None:
+    """APP-27: docs/ui/screens.md "Keyboard"."""
+    ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    assert "e.key === 'F6'" in ui
+    assert "['#nav', '#main', '#status']" in ui
+    assert "e.key.toLowerCase() === 'o'" in ui
+    assert "ACTIONS['open-project']" in ui
+
+
+def test_home_restores_deleted_projects_and_overview_records_the_library() -> None:
+    """APP-26 and APP-28."""
+    js = (UI_DIR / "screens-projects.js").read_text(encoding="utf-8")
+    assert "Bridge.call('deleted_projects')" in js
+    assert "Bridge.call('restore_deleted_project', r.file)" in js
+    assert "Restore deleted project…" in js
+    assert "Record ${esc(p.library.active)} in this project" in js
+    assert "['library', 'version']" in js

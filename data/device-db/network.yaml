@@ -1033,35 +1033,45 @@ records:
     tiers:
       low:
         model: SCALANCE XR324-4M EEC
-        ordering_code: 6GK5324-4QG10-3HR2
-        description: 19" managed L2 switch, 24 FE media-module ports + 4 GbE, substation-capable EEC variant
-        url: https://automation-warehouse.com/products/6gk5324-4qg10-3hr2
-        notes: 'Part number seen at several distributors (sparepartsnow, electro-matic, automation-warehouse).
-          Power supply variant and power were not verified this session. M14: WRONG CODE FOR THE MODEL.
-          6GK5324-4QG10-3HR2 is the SCALANCE XR324-4M PoE (8 PoE + 8 RJ45 + 4 x 2-port media modules,
-          ports at the back, 230 VAC), per electro-matic. It is not the EEC substation variant and has
-          no 125 VDC input. The EEC family is 6GK5324-4GG10-xxR2. 125 VDC EEC variant (Siemens data sheets
-          read): 6GK5324-4GG10-4JR2, SCALANCE XR324-4M EEC, 16 x GbE RJ45 + 4 media-module slots (max
-          8 optical: 100 Mbit/s MM ST/SC or 1000 Mbit/s MM/SM LC), redundant power supply ''yes'', described
-          as 2x 230 V AC wide-range units. Each unit takes 80-276 V AC or 60-250 V DC (so input_v_min
-          60, input_v_max 250 for that variant), max 0.7 A, 42 W rated power loss per supply. 483 x 44
-          x 305 mm, 1 U, 7 kg, IEC 61850-3 yes, IEEE 1613 listed under EMC. The single-supply sibling
-          6GK5324-4GG10-3ER2 has the same 80-276 V AC / 60-250 V DC unit, 0.7 A max and 42 W, but ''redundant
-          power supply unit: No'' and weighs 6.6 kg. Even the EEC gives at most 8 fibre ports, not 16
-          MM. Power for the code as given was not found. height_u 1 is assumed from the 1 U EEC sibling.
-          port_groups assume MM 100M media modules (module order codes not decoded). Ask before swapping.'
-        verified: false
+        ordering_code: 6GK5324-4GG10-4JR2
+        description: 19" managed L2 switch, 16 x GbE RJ45 + 4 media-module slots, two wide-range
+          supplies, substation-capable EEC variant
+        url: https://mall.industry.siemens.com/mall/en/EN/Catalog/Product/6GK5324-4GG10-4JR2
+        notes: 'M41b (2026-11-01): ordering code changed to the 125 VDC EEC code 6GK5324-4GG10-4JR2
+          (finding 27), and supply, range and power taken from its Siemens data sheet (5/29/2025,
+          pp. 1-2): supply 1 rated 230 V AC (80-276 V), supply 2 60-250 V DC, rated power loss 42 W,
+          at most 0.7 A; inrush not stated. Earlier: Part number seen at several distributors
+          (sparepartsnow, electro-matic, automation-warehouse). Power supply variant and power were
+          not verified this session. M14: WRONG CODE FOR THE MODEL. 6GK5324-4QG10-3HR2 is the
+          SCALANCE XR324-4M PoE (8 PoE + 8 RJ45 + 4 x 2-port media modules, ports at the back, 230
+          VAC), per electro-matic. It is not the EEC substation variant and has no 125 VDC input.
+          The EEC family is 6GK5324-4GG10-xxR2. 125 VDC EEC variant (Siemens data sheets read):
+          6GK5324-4GG10-4JR2, SCALANCE XR324-4M EEC, 16 x GbE RJ45 + 4 media-module slots (max 8
+          optical: 100 Mbit/s MM ST/SC or 1000 Mbit/s MM/SM LC), redundant power supply ''yes'',
+          described as 2x 230 V AC wide-range units. Each unit takes 80-276 V AC or 60-250 V DC (so
+          input_v_min 60, input_v_max 250 for that variant), max 0.7 A, 42 W rated power loss per
+          supply. 483 x 44 x 305 mm, 1 U, 7 kg, IEC 61850-3 yes, IEEE 1613 listed under EMC. The
+          single-supply sibling 6GK5324-4GG10-3ER2 has the same 80-276 V AC / 60-250 V DC unit, 0.7
+          A max and 42 W, but ''redundant power supply unit: No'' and weighs 6.6 kg. Even the EEC
+          gives at most 8 fibre ports, not 16 MM. Power for the code as given was not found.
+          height_u 1 is assumed from the 1 U EEC sibling. port_groups assume MM 100M media modules
+          (module order codes not decoded). Ask before swapping.'
+        verified: true
         height_u: 1
         mounting_kind: rack
-        supply_type: VAC
-        voltage_v: 230
-        supply_option: 230 VAC only (per distributor description of 6GK5324-4QG10-3HR2); no DC input range
-          known, so input_v_min/max are left out
-        supply_ok: false
-        power_supplies: 1
+        supply_type: VDC
+        voltage_v: 125
+        input_v_min: 60
+        input_v_max: 250
+        supply_option: Two wide-range supply units, each 80-276 V AC or 60-250 V DC
+        supply_ok: true
+        power_supplies: 2
+        unit_power_w: 42
+        power_basis: datasheet_typical
+        power_note: Rated power loss 42 W, Siemens data sheet 6GK53244GG104JR2 (5/29/2025), pp. 1-2.
         inrush_basis: not_given
         port_groups:
-        - ports: RJ45 (8 with PoE, 8 without)
+        - ports: 16 x GbE RJ45
           count: 16
           speed: 1G
           media: RJ45
@@ -1074,6 +1084,8 @@ records:
           kind: fixed
           usable_for: ied
         sources:
+        - https://mall.industry.siemens.com/mall/en/EN/Catalog/Product/6GK5324-4GG10-4JR2
+        - https://www.mouser.com/datasheet/3/5917/1/6GK53244GG104JR2_datasheet_en.pdf
         - https://shop.electro-matic.com/6gk53244qg103hr2
         - https://www.mouser.com/datasheet/2/1412/6GK53244GG104JR2_datasheet_en-3294102.pdf
         - https://www.mouser.com/datasheet/2/1412/6GK53244GG103ER2_datasheet_en-3293853.pdf

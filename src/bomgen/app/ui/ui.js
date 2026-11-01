@@ -121,6 +121,9 @@
     const r = route().a, np = hasProject(), p = curProject();
     const ns = hasSub();
     const noParts = () => { const sp = App.sub && App.sub.peek(); return !!sp && !!sp.equipment && !sp.equipment.length; };  // Device preview waits for the first parts
+    /* APP-24: "Not set up" until the first parts; else a count of rows whose part the library lacks, as on Checks */
+    const unknown = () => { const sp = App.sub && App.sub.peek(); return sp && sp.parts ? sp.parts.rows.filter((x) => x.part_id && !x.known).length : 0; };
+    const partsTail = !ns ? '' : noParts() ? `${icon('warn')}Not set up` : unknown() ? `${icon('error')}${unknown()} ${unknown() === 1 ? 'error' : 'errors'}` : '';
     const v = ns && S.verify && S.verify.key === `${S.project.file}#${S.sub}` ? S.verify : null;  // the last checks of the open substation
     const buildTail = v ? (v.errors ? `${icon('error')}Blocked` : `${icon('check')}Ready`) : '';
     const checksTail = v ? (v.errors ? `${icon('error')}${v.errors} ${v.errors === 1 ? 'error' : 'errors'}` : v.failed ? `${icon('error')}Failed` : `${icon('check')}Clear`) : '';
@@ -134,7 +137,7 @@
       ${navItem('#/project', 'project', esc(p.name), projTail, p.status === 'bad' ? 'bad' : p.status === 'warn' ? 'warn' : 'ok', false, r === 'project')}
       <div class="nav-group">Substation</div>${switcher}
       ${navItem('#/settings', 'file', 'Settings', '', 'ok', !ns, r === 'settings')}
-      ${navItem('#/parts', 'parts', 'Parts', '', 'ok', !ns, r === 'parts')}
+      ${navItem('#/parts', 'parts', 'Parts', partsTail, partsTail ? (noParts() ? 'warn' : 'bad') : 'ok', !ns, r === 'parts')}
       ${navItem('#/device-preview', 'elevation', 'Device preview', '', '', !ns || noParts(), r === 'device-preview')}
       ${navItem('#/panels', 'panels', 'Panels', ns ? esc(App.panelCount && App.panelCount() != null ? App.panelCount() : curSub().panels) : '', '', !ns, r === 'panels')}
       ${navItem('#/loose', 'pkg', 'Loose material', App.looseCount && App.looseCount() != null ? String(App.looseCount()) : '', '', !ns, r === 'loose')}
@@ -165,6 +168,7 @@
     const m = $('#main');
     m.innerHTML = (needsProject && !hasProject()) || (needsSub && !hasSub()) ? SCREENS.home() : SCREENS[key]();
     if (SCREENS[key + 'After']) SCREENS[key + 'After']();
+    if (disk) { const page = m.querySelector('.page'); if (page) page.insertAdjacentHTML('afterbegin', diskBanner()); }
     if (fixing) {  // the field a problem leads to, once its page has loaded
       if (fixing.screen !== a) fixing = null;
       else { const el = m.querySelector(fixing.focus); if (el) { fixing = null; el.scrollIntoView({ block: 'center' }); el.focus(); } }
@@ -237,6 +241,7 @@
       if (key === 'options') { const k = rest.split('.')[1]; return { label: 'Open the panel', hash: `${base}/options`, focus: k ? id(`pe-o.all.${k}`) : null, scope: 'all' }; }
       if (key === 'enclosure') { const k = rest.split('.').slice(1).join('.'); return { label: 'Open the panel', hash: `${base}/enclosure`, focus: k ? id(`pe-e.${k}`) : null }; }
       if (key === 'document') return { label: 'Open the panel', hash: `${base}/document`, focus: id('pe-doc') };
+      if (['cabinet_name', 'cabinet_number', 'tag_prefix', 'sheet_name'].includes(key)) return { label: 'Open the panel', hash: `${base}/enclosure`, focus: id(`pe-g.${key}`) };
       return line;
     }
     if (loc === 'equipment') return { label: 'Open Parts', hash: '#/parts', focus: null };
@@ -291,6 +296,60 @@
       leaving(() => go(to)); return;
     }
     closeDialog(); render(); $('#main').scrollTop = 0;
+  });
+
+  /* ---------- a file changed behind the app (docs/ui/editing.md "When the file changes behind the app", APP-25) ----------
+     The stamps are read when the window loses focus and again when it comes back; the app's own calls in between
+     (a file dialog that then writes) make the check skip, so only someone else's change counts. */
+  const RELOAD = [];
+  const onDiskChange = (f) => { RELOAD.push(f); };  // each screen drops what it read; may return a promise
+  const reloadAll = () => Promise.all(RELOAD.map((f) => f())).then(() => render());
+  let stamps = null, disk = null, calls = 0, busy = 0;
+  const call = Bridge.call;
+  Bridge.call = (name, ...args) => {
+    if (name === 'file_stamps') return call(name, ...args);
+    calls += 1; busy += 1;
+    return call(name, ...args).finally(() => { busy -= 1; });
+  };
+  const projectFile = () => (hasProject() && S.project.file) || null;
+  window.addEventListener('blur', () => {
+    const file = projectFile(), at = calls, quiet = !busy;
+    stamps = null;
+    if (file) call('file_stamps', file).then((s) => { stamps = { file, s, at, quiet }; }).catch(() => {});
+  });
+  window.addEventListener('focus', () => {
+    const before = stamps; stamps = null;
+    if (!before || !before.quiet || before.at !== calls || projectFile() !== before.file) return;
+    call('file_stamps', before.file).then((now) => {
+      if (calls !== before.at) return;
+      const names = [...new Set(Object.keys({ ...before.s, ...now }).filter((k) => before.s[k] !== now[k]).map((k) => k.split('/').pop()))];
+      if (!names.length) return;
+      if (unsaved()) { disk = { names }; render(); return; }
+      reloadAll().then(() => toast(`${diskNames(names)} changed on disk. Reloaded.`, 'refresh'));
+    }).catch(() => {});
+  });
+  const diskNames = (names) => (names.length > 2 ? `${names.slice(0, 2).join(', ')} and ${names.length - 2} more` : names.join(' and '));
+  const diskBanner = () => `<div class="disk-banner" style="margin-bottom:var(--space-4)">${banner('warn', `<b>${esc(diskNames(disk.names))} changed on disk since you opened ${disk.names.length === 1 ? 'it' : 'them'}.</b> Your unsaved changes are still on this page.`,
+    '<button class="btn btn--secondary btn--sm" data-action="disk-reload">Reload (lose my changes)</button><button class="btn btn--secondary btn--sm" data-action="disk-keep">Keep mine (overwrite the file)</button>')}</div>`;
+  ACTIONS['disk-reload'] = () => { GUARDS.filter((g) => g.screen === route().a).forEach((g) => g.reset()); disk = null; S.dirty = false; reloadAll().then(() => toast('Reloaded from disk', 'refresh')); };
+  ACTIONS['disk-keep'] = () => { disk = null; render(); toast('Your changes stay. Saving writes them over the file.', 'info'); };
+  window.addEventListener('hashchange', () => { if (disk && !unsaved()) disk = null; });
+
+  /* ---------- keyboard: F6 moves between the rail, the page and the status bar; Ctrl+O opens a project (APP-27) ---------- */
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'F6') {
+      e.preventDefault();
+      const regions = ['#nav', '#main', '#status'].map((x) => $(x)).filter(Boolean), at = regions.findIndex((r) => r.contains(document.activeElement));
+      const n = regions.length, next = regions[at < 0 ? (e.shiftKey ? n - 1 : 0) : (at + (e.shiftKey ? n - 1 : 1)) % n];
+      const first = next.id === 'main' ? null : next.querySelector('a[href]:not([aria-disabled="true"]), button:not([disabled]), select, input');
+      if (!first) next.setAttribute('tabindex', '-1');
+      (first || next).focus();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'o' && !$('#overlay').innerHTML && S.backend !== 'no') {
+      e.preventDefault();
+      const open = () => ACTIONS['open-project'] && ACTIONS['open-project']();
+      if (!leaving(open)) open();
+    }
   });
 
   /* ---------- a form drafted on the page and saved together (docs/ui/editing.md) ----------
@@ -368,7 +427,7 @@
     };
     ACTIONS[o.prefix + 'save'] = () => { D.save(); };
     let then = null;  // where the person was going when the leave dialog opened
-    GUARDS.push({ screen: o.screen, dirty: () => D.dirty() && !D.saving, ask: (next) => {
+    GUARDS.push({ screen: o.screen, dirty: () => D.dirty() && !D.saving, reset: () => D.reset(), ask: (next) => {
       then = next;
       const c = n(D.draft), bad = n(D.errors), why = bad ? `${bad} ${bad === 1 ? 'field needs' : 'fields need'} fixing before you can save.` : '';
       dialog({ title: 'Save the changes first?', body: `<p>You have ${c} unsaved change${c === 1 ? '' : 's'} on this page. They are saved to ${esc(o.file)}.</p>${bad ? `<p class="small" id="${o.prefix}leave-why" style="color:var(--color-danger-text);display:flex;gap:6px">${icon('error')}${esc(why)}</p>` : ''}`,
@@ -385,5 +444,5 @@
     return D;
   }
 
-  window.App = { $, $$, esc, S, ACTIONS, SCREENS, badge, verified, banner, tabs, field, input, select, pageHead, dialog, closeDialog, toast, go, render, setAppInfo, checkList, route, hasProject, hasSub, curProject, curSub, renderStatus, draftForm, changedField, changedCell, fixLine, whereToFix, fix, fixButtons };
+  window.App = { onDiskChange, $, $$, esc, S, ACTIONS, SCREENS, badge, verified, banner, tabs, field, input, select, pageHead, dialog, closeDialog, toast, go, render, setAppInfo, checkList, route, hasProject, hasSub, curProject, curSub, renderStatus, draftForm, changedField, changedCell, fixLine, whereToFix, fix, fixButtons };
 })();

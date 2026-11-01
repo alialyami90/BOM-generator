@@ -1050,6 +1050,11 @@ records:
           coil_note: Coil resistance 28 kOhm; contacts 8 A, 2 kVA, 400 VAC max
         sources:
         - https://uk.rs-online.com/web/p/power-relays/0376824
+        inrush_basis: not_given
+        inrush_note: 'M42 (ALI-9): no coil or supply inrush is published; contractor library v2
+          searched the Finder 40 Series catalogue (VIII-2026), p. 3
+          (data/device-db/contractor-2026-10-31/sources.csv). A load-side current there is a contact
+          rating, not coil inrush.'
       mid:
         model: 55.34 4CO 7 A, 230 V AC coil, gold contacts
         ordering_code: 55.34.8.230.5040
@@ -1075,6 +1080,11 @@ records:
         sources:
         - https://www.buerklin.com/en/p/finder/industrial-relays/55-34-8-230-0050/34G2569
         - https://powermatic.net/part/finder/55.34.8.230.5040/826418
+        inrush_basis: not_given
+        inrush_note: 'M42 (ALI-9): no coil or supply inrush is published; contractor library v2
+          searched the Finder 55 Series catalogue (IX-2026), p. 4
+          (data/device-db/contractor-2026-10-31/sources.csv). A load-side current there is a contact
+          rating, not coil inrush.'
       high:
         model: 55.34 4CO 230 V AC with LED + test button
         ordering_code: 55.34.8.230.0050
@@ -1096,6 +1106,11 @@ records:
         power_note: 'Bürklin: coil 230 V AC, 1.5 VA'
         sources:
         - https://www.buerklin.com/en/p/finder/industrial-relays/55-34-8-230-0050/34G2569
+        inrush_basis: not_given
+        inrush_note: 'M42 (ALI-9): no coil or supply inrush is published; contractor library v2
+          searched the Finder 55 Series catalogue (IX-2026), p. 4
+          (data/device-db/contractor-2026-10-31/sources.csv). A load-side current there is a contact
+          rating, not coil inrush.'
   - make: Weidmuller
     manufacturer: Weidmuller Interface GmbH & Co. KG
     tiers:
@@ -1122,6 +1137,11 @@ records:
         sources:
         - https://uk.misumi-ec.com/pdf/ds/WML1/7760056190_DRM570730LT_AU_eng.pdf
         - https://uk.misumi-ec.com/pdf/ds/WML1/7760056086_DRM570730_eng.pdf
+        inrush_basis: not_given
+        inrush_note: 'M42 (ALI-9): no coil or supply inrush is published; contractor library v2
+          searched the Weidmuller data sheet DRM570730, p. 2
+          (data/device-db/contractor-2026-10-31/sources.csv). A load-side current there is a contact
+          rating, not coil inrush.'
       mid:
         model: D-SERIES DRM570730LT
         ordering_code: '7760056104'
@@ -1143,6 +1163,11 @@ records:
         sources:
         - https://uk.misumi-ec.com/pdf/ds/WML1/7760056190_DRM570730LT_AU_eng.pdf
         - https://www.distrelec.ch/en/industrial-relay-4co-ac-230v-5a-plug-in-terminal-series-drm-weidmueller-7760056104/p/30166857
+        inrush_basis: not_given
+        inrush_note: 'M42 (ALI-9): no coil or supply inrush is published; contractor library v2
+          searched the Weidmuller data sheet DRM570730LT, p. 2
+          (data/device-db/contractor-2026-10-31/sources.csv). A load-side current there is a contact
+          rating, not coil inrush.'
       high:
         model: D-SERIES DRM570730LT AU (gold)
         ordering_code: '7760056190'
@@ -1166,6 +1191,11 @@ records:
           coil_note: Pull-in 184 VAC, drop-out 69 VAC typical
         sources:
         - https://uk.misumi-ec.com/pdf/ds/WML1/7760056190_DRM570730LT_AU_eng.pdf
+        inrush_basis: not_given
+        inrush_note: 'M42 (ALI-9): no coil or supply inrush is published; contractor library v2
+          searched the Weidmuller data sheet DRM570730LT AU, p. 2
+          (data/device-db/contractor-2026-10-31/sources.csv). A load-side current there is a contact
+          rating, not coil inrush.'
   sources:
   - https://www.phoenixcontact.com/fr/produits/2903685/pdf
   - https://shop.shortec.com/phoenix-contact/2903685-rel-ir4l-230ac4x21au/

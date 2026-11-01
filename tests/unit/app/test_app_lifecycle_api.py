@@ -5,6 +5,7 @@ gets back, the recent list and the backups a delete leaves.
 """
 
 import json
+import os
 import shutil
 from pathlib import Path
 from typing import Any
@@ -134,3 +135,44 @@ def test_deleting_a_project_in_a_git_folder_is_refused_with_the_reason(
     assert error["kind"] == "edit_refused"
     assert ".git" in error["message"]
     assert project.is_file()
+
+
+def test_a_deleted_project_is_listed_for_30_days(app: api.Api, project: Path) -> None:
+    """APP-26: Home keeps "Restore deleted project" for 30 days (docs/ui/editing.md)."""
+    saved = Path(ok(app.delete_project(str(project)))["saved"])
+
+    [row] = ok(app.deleted_projects())
+    assert row["file"] == str(saved)
+    assert row["name"] == "jfgp2-pkg3"
+    assert row["deleted"]
+    old = saved.stat().st_mtime - 31 * 24 * 3600
+    os.utime(saved, (old, old))
+    assert ok(app.deleted_projects()) == []
+    assert saved.is_file()  # hidden, not removed
+
+
+def test_restoring_a_deleted_project_brings_it_back_and_takes_it_off_the_list(
+    app: api.Api, project: Path
+) -> None:
+    saved = ok(app.delete_project(str(project)))["saved"]
+
+    restored = ok(app.restore_deleted_project(saved))
+    assert Path(restored["project_file"]) == project
+    assert project.is_file()
+    assert ok(app.deleted_projects()) == []
+
+
+def test_file_stamps_name_each_project_file_with_its_modified_time(
+    app: api.Api, project: Path
+) -> None:
+    """APP-25: the page compares these when the window comes back into focus."""
+    stamps = ok(app.file_stamps(str(project)))
+    assert "project.yaml" in stamps
+    assert "substations/gis01/substation.yaml" in stamps
+    assert "substations/gis01/panels/ws.yaml" in stamps
+    substation = project.parent / "substations" / "gis01" / "substation.yaml"
+    later = substation.stat().st_mtime + 5
+    os.utime(substation, (later, later))
+    again = ok(app.file_stamps(str(project)))
+    assert again["substations/gis01/substation.yaml"] != stamps["substations/gis01/substation.yaml"]
+    assert again["project.yaml"] == stamps["project.yaml"]
