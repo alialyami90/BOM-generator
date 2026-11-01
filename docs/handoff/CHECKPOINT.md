@@ -3,6 +3,15 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-11-01: v0.3.4 released (A1, lead)
+
+- **Base:** main `b930913` (#314). Docs-only PR.
+- **Done:** v0.3.4 is published with `bomgen-setup-0.3.4.exe` and psa-devices 1.15.0: the v0.3
+  roadmap M35–M47 (#297–#313), including the fixes from a fresh-project pre-release check
+  (recheck clean).
+- **Waiting:** Ali's answers on the "v0.3.4 review list" Claude Doc and his Windows drag-and-drop
+  test (ALI-8).
+
 ## 2026-11-01: v0.3.3 released (A1, lead)
 
 - **Base:** main `5ad88c5` (#294). Docs-only PR.

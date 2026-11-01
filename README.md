@@ -13,8 +13,9 @@ setup, and page headers/footers.
 
 ## Status
 
-v0.3.3 is released ([`CHANGELOG.md`](CHANGELOG.md)). The rest of the v0.3
-roadmap, M35 to M47 in `docs/plan.md`, is on `main` for the next release.
+v0.3.4 is released ([`CHANGELOG.md`](CHANGELOG.md)) and finishes the v0.3
+roadmap, M35 to M47 in `docs/plan.md`. The next work waits on Ali's review of
+it.
 
 Done in v0.1:
 
