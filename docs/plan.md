@@ -976,7 +976,7 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
   [`superpowers/plans/2026-10-31-m33-sheet-consistency.md`](superpowers/plans/2026-10-31-m33-sheet-consistency.md).
 - **M34 — Larger fans for hot cabinets.** A forced cabinet keeps two fans and steps up to the
   smallest of the catalogue's `larger_fans` whose pair moves its required airflow (ADR 0029,
-  Proposed; audit 2026-10-31, ENG-6). Plan:
+  accepted by Ali 2026-11-01; audit 2026-10-31, ENG-6). Plan:
   [`superpowers/plans/2026-10-31-m34-larger-fans.md`](superpowers/plans/2026-10-31-m34-larger-fans.md).
 - **M31 — Port plan inputs for a fresh project.** Parts row inputs for the L2 link and the RTAC
   COM ports (app, #283), seeded by library category when a row is added or its part changes,
@@ -1372,7 +1372,7 @@ SEL-3355 serves as DA server, operator and engineering workstation, so it keeps 
 Keyboard & Mouse and Cable Manager have no level and keep today's tags. Confirm they stay outside
 the device tag rule.
 
-**Q61 — Sheet 4's header row height** (M33; audit 2026-10-31, ENG-11). *Open.* The spec
+**Q61 — Sheet 4's header row height** (M33; audit 2026-10-31, ENG-11). *Answered 2026-11-01: follow the spec, 53.1 on sheet 4.* The spec
 (Formatting, panel BOM) gives header row 2 a height of 26.25, or 53.1 on sheet 4; the writer uses
 26.25 on every sheet. M33 left it out as a spec-versus-code question. To ask Ali: follow the
 spec, or change the spec to 26.25?
