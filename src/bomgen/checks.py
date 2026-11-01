@@ -32,8 +32,10 @@ SPEED_ORDER = (PortSpeed.M10, PortSpeed.M100, PortSpeed.G1, PortSpeed.G10)
 def check_report(loaded: LoadedSubstation, result: BuildResult) -> CheckReport:
     """Every engine check of one built substation, panel by panel."""
     items: list[CheckItem] = []
-    for panel in loaded.panels:
-        items += sfp_slot_checks(panel, expand_devices(panel, loaded.library))
+    expanded = [(panel, expand_devices(panel, loaded.library)) for panel in loaded.panels]
+    for panel, rows in expanded:
+        items += sfp_slot_checks(panel, rows)
+    items += duplicate_tag_checks(expanded)
     items += dc_main_checks(result.mains)
     items += branch_mcb_checks(result.branch_mcbs)
     tables: list[BomTable] = [*result.panels, *([result.loose] if result.loose else [])]
@@ -98,6 +100,33 @@ def sfp_slot_checks(panel: Panel, rows: Sequence[DeviceRow]) -> list[CheckItem]:
             )
         )
     return items
+
+
+def duplicate_tag_checks(
+    panels: Iterable[tuple[Panel, Sequence[DeviceRow]]],
+) -> list[CheckItem]:
+    """A failure per tag that two device units share (ADR 0030). Units of parts with no
+    type code carry a label, such as "Keyboard & Mouse", not a device tag."""
+    owners: dict[str, list[str]] = {}
+    for panel, rows in panels:
+        for row in rows:
+            if row.instance.tag_type is None and row.device.tag_type is None:
+                continue
+            for tag in row.unit_tags:
+                if tag is not None:
+                    owners.setdefault(tag, []).append(panel.id)
+    return [
+        CheckItem(
+            check="duplicate_tag",
+            status=CheckStatus.FAIL,
+            panel_id=panel_ids[0],
+            subject=tag,
+            message=f"{len(panel_ids)} device units share this tag "
+            f"({', '.join(dict.fromkeys(panel_ids))}): each needs its own",
+        )
+        for tag, panel_ids in owners.items()
+        if len(panel_ids) > 1
+    ]
 
 
 def _short_speeds(needed: Counter[PortSpeed], slots: Counter[PortSpeed]) -> list[PortSpeed]:

@@ -853,3 +853,21 @@ def test_r5_a_rack_firewall_in_a_generated_panel_counts_its_cable_manager(
     rows = expand_devices(panel, library)
     (manager,) = [i for i in accessories(panel, rows, library) if i.line.tag == "Cable Manager"]
     assert manager.line.qty == 7  # FOPP, L2, 3 x L1, EXT switch and now the firewall
+
+
+@pytest.mark.parametrize(
+    ("role", "code"), [("operator_ws", "OWS"), ("engineering_ws", "EWS"), ("da_server", "SRV")]
+)
+def test_workstation_roles_write_their_type_code_on_the_row(
+    example: LoadedSubstation, role: str, code: str
+) -> None:
+    # ADR 0030: the three workstation rows share one library part, so the role names them
+    ws = Equipment(id="ws", part_id="SEL-3355", role=role)
+    loaded = with_changes(example, equipment=[*example.substation.equipment, ws])
+    panels = layout_preview(loaded).panels
+    (row,) = [d for p in panels for d in p.devices if d.part_id == "SEL-3355"]
+    assert row.tag_type == code
+
+
+def test_other_roles_leave_the_row_type_code_to_the_library(example: LoadedSubstation) -> None:
+    assert all(d.tag_type is None for p in layout_preview(example).panels for d in p.devices)

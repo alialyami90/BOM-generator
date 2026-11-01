@@ -139,7 +139,7 @@ def test_nameplates_sheet(formulas: openpyxl.Workbook) -> None:
     ]
     assert sheet["A4"].value == "=A3+1"
     assert [sheet.cell(r, 3).value for r in range(28, 31)] == [
-        "SRV/OAS/EAS",
+        "L2_SRV/OAS/EAS_A01",  # ADR 0030
         "MONITOR",
         "Keyboard & Mouse",
     ]

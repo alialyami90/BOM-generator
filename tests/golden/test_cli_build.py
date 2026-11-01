@@ -51,7 +51,7 @@ def test_build_prints_and_writes_the_check_report(tmp_path: Path) -> None:
     # 125 V DC rating under the 140 V battery float, and the hwio entry with no part
     # number (ADR 0024). 50 of the passes are the branch MCBs (plan Q35).
     assert result.stdout.splitlines()[-1] == "0 failed, 4 warnings, 64 passed"
-    assert "PASS  psa1  PSA1-EXT-FW-A  sfp_slots  2 SFPs in 2 SFP slots" in result.stdout
+    assert "PASS  psa1  PSA1-EXT-FW-A01  sfp_slots  2 SFPs in 2 SFP slots" in result.stdout
     report = json.loads((tmp_path / FILE_NAME).with_suffix(".checks.json").read_text("utf-8"))
     assert report["failed"] is False
     assert len(report["items"]) == 68

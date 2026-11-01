@@ -23,7 +23,9 @@ SWITCHES = (
     switch("EXT", "EXT"),
     powered("FW", "firewall", tag_type="FW", purdue_level="EXT"),
     device("FOPP", "patch_panel", tag_type="FOPP", tag_pattern="{prefix}-FOPP-CCR-{lan}01"),
-    powered("GW", "gateway", tag_type="GW", tag_pattern="{prefix}-DHPCC-GW-{lan_index}"),
+    powered("GW", "gateway", tag_type="GW", purdue_level="L2"),
+    powered("GPS", "gps_clock", tag_type="GPS", purdue_level="L2"),
+    powered("WS", "workstation", tag_type="SRV/OAS/EAS", purdue_level="L2"),
 )
 
 
@@ -63,10 +65,10 @@ def test_first_nn_below_the_running_count_is_an_error() -> None:
         rows({"part_id": "L1", "qty": 2}, {"part_id": "L1", "first_nn": 12}, lib_devices=SWITCHES)
 
 
-def test_ext_switch_and_firewall_take_lan_letter_only() -> None:
+def test_ext_switch_and_firewall_get_side_and_running_number() -> None:
     ext, fw = rows({"part_id": "EXT"}, {"part_id": "FW"}, lib_devices=SWITCHES)
-    assert ext.tag == "PSA1-EXT-ESW-A"
-    assert fw.tag == "PSA1-EXT-FW-A"
+    assert ext.tag == "PSA1-EXT-ESW-A01"
+    assert fw.tag == "PSA1-EXT-FW-A01"
 
 
 def test_fopp_tag_pattern() -> None:
@@ -74,11 +76,46 @@ def test_fopp_tag_pattern() -> None:
     assert row.tag == "PSA1-FOPP-CCR-A01"
 
 
-def test_gateway_numbers_by_lan_index() -> None:
+def test_gateway_is_level_type_side_and_number() -> None:
     (row_a,) = rows({"part_id": "GW"}, lib_devices=SWITCHES)
     (row_b,) = rows({"part_id": "GW"}, lib_devices=SWITCHES, lan="B", tag_prefix="PSA2")
-    assert row_a.tag == "PSA1-DHPCC-GW-1"
-    assert row_b.tag == "PSA2-DHPCC-GW-2"
+    assert row_a.tag == "PSA1-L2-GW-A01"
+    assert row_b.tag == "PSA2-L2-GW-B01"
+
+
+def test_two_gateways_in_a_panel_number_01_and_02() -> None:
+    first, second = rows({"part_id": "GW"}, {"part_id": "GW"}, lib_devices=SWITCHES)
+    assert (first.tag, second.tag) == ("PSA1-L2-GW-A01", "PSA1-L2-GW-A02")
+
+
+def test_numbering_is_per_level_type_and_side() -> None:
+    a1, b1, a2 = rows(
+        {"part_id": "GW"}, {"part_id": "GW", "lan": "B"}, {"part_id": "GW"}, lib_devices=SWITCHES
+    )
+    assert (a1.tag, b1.tag, a2.tag) == ("PSA1-L2-GW-A01", "PSA1-L2-GW-B01", "PSA1-L2-GW-A02")
+
+
+def test_gps_clock_in_a_panel_without_lan_is_side_a_and_plates_l2_gps_a01() -> None:
+    (row,) = rows({"part_id": "GPS"}, lib_devices=SWITCHES, lan=None, tag_prefix="PSA3")
+    assert row.tag == "PSA3-L2-GPS-A01"
+    assert short_tag(row.unit_tags[0], row.device, "PSA3") == "L2_GPS_A01"
+
+
+def test_workstation_row_type_code_replaces_the_librarys() -> None:
+    ows, ews, srv = rows(
+        {"part_id": "WS", "tag_type": "OWS"},
+        {"part_id": "WS", "tag_type": "EWS"},
+        {"part_id": "WS", "tag_type": "SRV"},
+        lib_devices=SWITCHES,
+        tag_prefix="PSA2",
+        lan=None,
+    )
+    assert (ows.tag, ews.tag, srv.tag) == ("PSA2-L2-OWS-A01", "PSA2-L2-EWS-A01", "PSA2-L2-SRV-A01")
+
+
+def test_workstation_without_a_row_type_code_keeps_the_librarys() -> None:
+    (row,) = rows({"part_id": "WS"}, lib_devices=SWITCHES, tag_prefix="WS", lan=None)
+    assert row.tag == "WS-L2-SRV/OAS/EAS-A01"
 
 
 def test_lan_b_swaps_letter_and_prefix() -> None:
@@ -103,8 +140,8 @@ def test_fans_and_thermostats_number_units() -> None:
 
 
 def test_type_code_without_level_is_prefix_and_type() -> None:
-    (row,) = rows({"part_id": "GPS"}, lib_devices=(powered("GPS", "gps_clock", tag_type="GPS"),))
-    assert row.tag == "PSA1-GPS"
+    (row,) = rows({"part_id": "MON"}, lib_devices=(powered("MON", "monitor", tag_type="MONITOR"),))
+    assert row.tag == "PSA1-MONITOR"
 
 
 def test_panel_tag_override_wins() -> None:
@@ -148,14 +185,14 @@ def test_description_fills_lan_level_purpose(template: str, expected: str) -> No
     assert describe(l1, "A", "for PCC") == expected
 
 
-def test_ext_device_in_a_panel_without_lan_has_no_dangling_hyphen() -> None:
+def test_ext_device_in_a_panel_without_lan_is_side_a() -> None:
     (row,) = rows({"part_id": "EXT"}, lib_devices=SWITCHES, lan=None, tag_prefix="PSA3")
-    assert row.tag == "PSA3-EXT-ESW"
+    assert row.tag == "PSA3-EXT-ESW-A01"
 
 
-def test_numbered_device_in_a_panel_without_lan_keeps_its_number() -> None:
+def test_numbered_device_in_a_panel_without_lan_is_side_a() -> None:
     (row,) = rows({"part_id": "L2"}, lib_devices=SWITCHES, lan=None, tag_prefix="PSA3")
-    assert row.tag == "PSA3-L2-ESW-01"
+    assert row.tag == "PSA3-L2-ESW-A01"
 
 
 def test_short_tag_drops_the_panel_prefix_and_uses_underscores() -> None:

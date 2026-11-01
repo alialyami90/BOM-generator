@@ -12,6 +12,8 @@ every cabinet where the workbook varies its spelling (plan Q34):
   without doubled spaces ('Panel 3'!C53 "DC COR Circuits", 'Aux'!C34 "AC Circuits").
 - The console's CINC reads "Main Auxiliary AC Supply" ('Aux'!C17 "Non-UPS AC Supply") and
   its branch loads are named by tag ('Aux'!C25 "OAS PS1" for WS-SRV/OAS/EAS).
+- Branch loads and plates name devices by their ADR 0030 tags (L2_GPS_A01, EXT_FW_A01), not
+  the workbook's (GPS, EXT_FW_A).
 - DC branches follow group B order (Derivation rules -> DC distribution): in cabinet 003
   RTAC (row 5) is Q1.2 and HWIO (row 6) Q1.3; the workbook has them the other way round.
 """
@@ -79,14 +81,14 @@ def dc_feed(prefix: str, feed: int, main_a: int, loads: list[str], spares: int) 
     return [mcb(f"{prefix}-Q{feed}", main_a, f"Main DC supply-{feed}"), *used, *spare]
 
 
-def network_cabinet(prefix: str, lan: str, gateway: int, socket: bool) -> list[Row]:
+def network_cabinet(prefix: str, lan: str, socket: bool) -> list[Row]:
     """Cabinets 001 ('Panel 1' rows 27-77) and 002 ('Panel 2' rows 28-80)."""
     loads = [
         f"L2_ESW_{lan}01",
         *(f"L1_ESW_{lan}{n}" for n in range(11, 17)),
-        f"EXT_ESW_{lan}",
-        f"DHPCC_GW_{gateway}",
-        f"EXT_FW_{lan}",
+        f"EXT_ESW_{lan}01",
+        f"L2_GW_{lan}01",
+        f"EXT_FW_{lan}01",
     ]
     ac = [
         mcb(f"{prefix}-CINC", 16 if socket else 6, "Main Auxiliary AC Supply"),
@@ -124,8 +126,8 @@ def network_cabinet(prefix: str, lan: str, gateway: int, socket: bool) -> list[R
     return [*ac, *dc, *terminals, *grounding, nameplate(11)]
 
 
-PSA1_E_TO_H = network_cabinet("PSA1", "A", 1, socket=False)
-PSA2_E_TO_H = network_cabinet("PSA2", "B", 2, socket=True)
+PSA1_E_TO_H = network_cabinet("PSA1", "A", socket=False)
+PSA2_E_TO_H = network_cabinet("PSA2", "B", socket=True)
 
 # 'Panel 3' rows 22-68; plan Q22: the XRTAC strips sit before grounding (rows 65-68).
 PSA3_E_TO_H: list[Row] = [
@@ -136,8 +138,8 @@ PSA3_E_TO_H: list[Row] = [
     mcb("PSA3-C4", 1, "TH-3"),  # 26
     mcb("PSA3-C5", 2, "SPARE"),  # 27
     (None, "AC Auxiliary Contacts (for MCB CINC, C2, C3)", 3, *AUX_CONTACT, 3),  # 28
-    *dc_feed("PSA3", 1, 6, ["GPS", "RTAC", "HWIO"], 1),  # 30-34
-    *dc_feed("PSA3", 2, 6, ["GPS", "RTAC", "HWIO"], 1),  # 35-39
+    *dc_feed("PSA3", 1, 6, ["L2_GPS_A01", "L2_RTAC_A01", "HWIO"], 1),  # 30-34
+    *dc_feed("PSA3", 2, 6, ["L2_GPS_A01", "L2_RTAC_A01", "HWIO"], 1),  # 35-39
     mcb("PSA3-QCOD-1", 2, "Annunciator"),  # 40
     mcb("PSA3-QCOD-2", 2, "SPARE"),  # 41
     (None, "DC Auxiliary Contacts (For MCB Q1, Q2)", 2, *AUX_CONTACT, 2),  # 42
@@ -176,7 +178,7 @@ PSA3_E_TO_H: list[Row] = [
     ),  # 60-61, 65-68
     busbar("AC SAFETY POWER-GROUND", AC_SAFETY_GROUND),  # 63
     busbar("INSTRUMENT-GROUND", INSTRUMENT_GROUND),  # 64
-    nameplate(3),  # GPS, RTAC, HWIO (ADR 0026)
+    nameplate(3),  # L2_GPS_A01, L2_RTAC_A01, HWIO (ADR 0026, ADR 0030)
 ]
 
 # 'Aux' rows 17-45. The console's DC rows follow the spec order Q1, Q1.n, Q2, Q2.n
@@ -188,8 +190,8 @@ WS_E_TO_H: list[Row] = [
     mcb("WS-C2", 1, "TH-1"),  # 19
     mcb("WS-C3", 1, "SPARE"),  # 20
     (None, "AC Auxiliary Contacts (for MCB CINC)", 1, *AUX_CONTACT, 0),  # 21
-    *dc_feed("WS", 1, 6, ["SRV/OAS/EAS"], 1),  # 23, 25-26
-    *dc_feed("WS", 2, 6, ["SRV/OAS/EAS"], 1),  # 24, 27-28
+    *dc_feed("WS", 1, 6, ["L2_SRV/OAS/EAS_A01"], 1),  # 23, 25-26
+    *dc_feed("WS", 2, 6, ["L2_SRV/OAS/EAS_A01"], 1),  # 24, 27-28
     # Plan Q22: the QCOD MCBs are 2 A, A9F74202 ('Aux'!F29:G30 read A9F74201).
     mcb("WS-QCOD-1", 2, "Monitor"),  # 29
     mcb("WS-QCOD-2", 2, "SPARE"),  # 30
@@ -206,5 +208,5 @@ WS_E_TO_H: list[Row] = [
     strip("WS-X4-COD", "Change-over Circuits", 6),  # 39
     strip("WS-XIP", "Interpanel Wiring", 12),  # 40
     busbar("POWER-GROUND", POWER_GROUND),  # 45
-    nameplate(3),  # SRV/OAS/EAS, MONITOR, Keyboard & Mouse (ADR 0026)
+    nameplate(3),  # L2_SRV/OAS/EAS_A01, MONITOR, Keyboard & Mouse (ADR 0026)
 ]

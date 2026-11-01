@@ -69,6 +69,7 @@ class DeviceInstance(InputModel):
     part_id: PartId
     qty: PositiveInt = 1
     tag: str | None = None
+    tag_type: str | None = None  # the type code instead of the library's (ADR 0030)
     purpose: str | None = None
     lan: Lan | None = None
     hwio_points: NonNegativeInt | None = None  # the row's HWIO total, overriding the library's

@@ -151,7 +151,7 @@ devices:
     ordering_code: "3555#0KVC"
     description_template: "Protocol Gateway {purpose}"
     tag_type: GW
-    tag_pattern: "{prefix}-DHPCC-GW-{lan_index}"
+    purdue_level: L2  # ADR 0030: station level
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 73  # 'Power Consumption'!I10
@@ -192,7 +192,7 @@ devices:
       GPS Clock with Antenna and accessories (SNTP/IRIG-B), 125VDC redundant,
       100mbps SFP ports redundant
     tag_type: GPS
-    tag_pattern: "{prefix}-GPS"
+    purdue_level: L2  # ADR 0030: station level
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 50  # 'Power Consumption'!I49
@@ -216,7 +216,7 @@ devices:
     ordering_code: "3555#F2R2"
     description_template: "PSA RTAC and Data Concentrator for DCS"
     tag_type: RTAC
-    tag_pattern: "{prefix}-RTAC"
+    purdue_level: L2  # ADR 0030: station level
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 62  # 'Power Consumption'!I50
@@ -306,7 +306,7 @@ devices:
     ordering_code: "3355#F5P8"
     description_template: "PSA DA Server/Operator/Engineering Automation Workstation"
     tag_type: SRV/OAS/EAS
-    tag_pattern: "{prefix}-SRV/OAS/EAS"
+    purdue_level: L2  # ADR 0030: station level
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 91  # 'Power Consumption'!I68
@@ -1536,7 +1536,7 @@ devices:
     ordering_code: 6MF2803-1AA00 + PS-8622 6MF2862-2AA00
     description_template: Protocol Gateway {purpose}
     tag_type: GW
-    tag_pattern: '{prefix}-DHPCC-GW-{lan_index}'
+    purdue_level: L2  # ADR 0030: station level
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 15
@@ -1555,7 +1555,7 @@ devices:
     ordering_code: 6MF2805-0AA00 + PS-8642 6MF2864-2AA00
     description_template: Protocol Gateway {purpose}
     tag_type: GW
-    tag_pattern: '{prefix}-DHPCC-GW-{lan_index}'
+    purdue_level: L2  # ADR 0030: station level
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 56
@@ -1574,7 +1574,7 @@ devices:
     ordering_code: 2 x 6MF2805-0AA00 + 2 x PS-8642 6MF2864-2AA00 + CI Ethernet modules (CI codes not verified)
     description_template: Protocol Gateway {purpose}
     tag_type: GW
-    tag_pattern: '{prefix}-DHPCC-GW-{lan_index}'
+    purdue_level: L2  # ADR 0030: station level
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 112
@@ -1593,7 +1593,7 @@ devices:
     ordering_code: 1KGT036300R0001 (+ 560PSU01 rack PSU, believed 1KGT006600R0002)
     description_template: Protocol Gateway {purpose}
     tag_type: GW
-    tag_pattern: '{prefix}-DHPCC-GW-{lan_index}'
+    purdue_level: L2  # ADR 0030: station level
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 44.3
@@ -1799,7 +1799,7 @@ devices:
     ordering_code: microSyncHR
     description_template: GPS Clock with Antenna and accessories (SNTP/IRIG-B), 125VDC redundant, 100mbps SFP ports redundant
     tag_type: GPS
-    tag_pattern: '{prefix}-GPS'
+    purdue_level: L2  # ADR 0030: station level
     supply_type: VDC
     voltage_v: 48
     unit_power_w: 30.2
@@ -1831,7 +1831,7 @@ devices:
     ordering_code: LANTIME M600/GPS/PTPv2
     description_template: GPS Clock with Antenna and accessories (SNTP/IRIG-B), 125VDC redundant, 100mbps SFP ports redundant
     tag_type: GPS
-    tag_pattern: '{prefix}-GPS'
+    purdue_level: L2  # ADR 0030: station level
     supply_type: VAC
     voltage_v: 230
     unit_power_w: 25
@@ -1860,7 +1860,7 @@ devices:
     ordering_code: IMS-LANTIME M1000S with 2 x IMS-PWR AD10
     description_template: GPS Clock with Antenna and accessories (SNTP/IRIG-B), 125VDC redundant, 100mbps SFP ports redundant
     tag_type: GPS
-    tag_pattern: '{prefix}-GPS'
+    purdue_level: L2  # ADR 0030: station level
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 100
@@ -1892,7 +1892,7 @@ devices:
     ordering_code: 1201B/C with Power Supply A01 + B01
     description_template: GPS Clock with Antenna and accessories (SNTP/IRIG-B), 125VDC redundant, 100mbps SFP ports redundant
     tag_type: GPS
-    tag_pattern: '{prefix}-GPS'
+    purdue_level: L2  # ADR 0030: station level
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 30
@@ -1924,7 +1924,7 @@ devices:
     ordering_code: 1206B/C with Power Supply A01 + B01
     description_template: GPS Clock with Antenna and accessories (SNTP/IRIG-B), 125VDC redundant, 100mbps SFP ports redundant
     tag_type: GPS
-    tag_pattern: '{prefix}-GPS'
+    purdue_level: L2  # ADR 0030: station level
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 75
@@ -1956,7 +1956,7 @@ devices:
     ordering_code: 6MF2803-1AA00 + PS-8622 6MF2862-2AA00
     description_template: PSA RTAC and Data Concentrator for DCS
     tag_type: RTAC
-    tag_pattern: '{prefix}-RTAC'
+    purdue_level: L2  # ADR 0030: station level
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 15
@@ -1981,7 +1981,7 @@ devices:
     ordering_code: 6MF2805-0AA00 + PS-8642 6MF2864-2AA00
     description_template: PSA RTAC and Data Concentrator for DCS
     tag_type: RTAC
-    tag_pattern: '{prefix}-RTAC'
+    purdue_level: L2  # ADR 0030: station level
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 56
@@ -2006,7 +2006,7 @@ devices:
     ordering_code: 2 x 6MF2805-0AA00 + 2 x PS-8642 6MF2864-2AA00 + CI Ethernet modules (CI codes not verified)
     description_template: PSA RTAC and Data Concentrator for DCS
     tag_type: RTAC
-    tag_pattern: '{prefix}-RTAC'
+    purdue_level: L2  # ADR 0030: station level
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 112
@@ -2031,7 +2031,7 @@ devices:
     ordering_code: 1KGT036300R0001 (+ 560PSU01 rack PSU, believed 1KGT006600R0002)
     description_template: PSA RTAC and Data Concentrator for DCS
     tag_type: RTAC
-    tag_pattern: '{prefix}-RTAC'
+    purdue_level: L2  # ADR 0030: station level
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 44.3
@@ -2418,7 +2418,7 @@ devices:
     ordering_code: ECU-4553-R12SAE
     description_template: PSA DA Server/Operator/Engineering Automation Workstation
     tag_type: SRV/OAS/EAS
-    tag_pattern: '{prefix}-SRV/OAS/EAS'
+    purdue_level: L2  # ADR 0030: station level
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 10
@@ -2437,7 +2437,7 @@ devices:
     ordering_code: ECU-4784-D55SBE
     description_template: PSA DA Server/Operator/Engineering Automation Workstation
     tag_type: SRV/OAS/EAS
-    tag_pattern: '{prefix}-SRV/OAS/EAS'
+    purdue_level: L2  # ADR 0030: station level
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 25
@@ -2456,7 +2456,7 @@ devices:
     ordering_code: ECU-4784-E56SAE
     description_template: PSA DA Server/Operator/Engineering Automation Workstation
     tag_type: SRV/OAS/EAS
-    tag_pattern: '{prefix}-SRV/OAS/EAS'
+    purdue_level: L2  # ADR 0030: station level
     supply_type: VDC
     voltage_v: 125
     unit_power_w: 35
