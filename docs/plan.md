@@ -1,6 +1,6 @@
 # Plan: Substation SCADA BOM generator
 
-Status: implemented. M0–M34 are released (v0.3.3, 2026-11-01). M35–M44 are the remaining roadmap.
+Status: implemented. M0–M34 are released (v0.3.3, 2026-11-01). M35–M47 are the remaining roadmap.
 Ali's v0.2 and v0.3 points and their milestones are in [`backlog.md`](backlog.md). Changes go
 through the review flow in `CLAUDE.md`.
 Spec: [`docs/spec/generator-spec-v2.md`](spec/generator-spec-v2.md). Sections are
@@ -1017,21 +1017,25 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
   `description_template` from its device-db tier, as an override in `data/library/additions.yaml`;
   a figure the tier does not give is left out. A test checks every alternative's description
   against its data. psa-devices 1.14.0; originals unchanged.
-- **M44 — Tags for the contractor's networked parts.** The Cisco, SEL and RUGGEDCOM switches get
+- **M44 — Tags for the contractor's networked parts.** *Done (#310).* The Cisco, SEL and RUGGEDCOM switches get
   `tag_type: ESW`, the eight FortiGates `EXT` and `FW` as FGR-60F, and the 21 Hubbell FEUR shelves
   the FOPP's type and pattern (ADR 0030, Q58), so they print with a tag and a nameplate. A test
   holds every networked part to a level and a type (pre-release check 2026-11-01, bugs 1 and 2).
-  psa-devices 1.15.0.
-- **M45 — Pre-release check fixes (engine).** An annunciator equipment row is not racked: the
+  NAP-K55 also ships its LPA37-696 wall-mount kit as a loose item, for M45. psa-devices 1.15.0.
+- **M45 — Pre-release check fixes (engine).** *Done (#311).* An annunciator equipment row is not racked: the
   build lists it in loose material with its part's `loose_items` as its kit, fed from panel 001
   (design §10, Q51; Ali, plan M1c). A new `untagged_device` check warns for a switch, firewall,
   gateway, patch panel, clock, RTAC, I/O chassis or workstation that prints with no tag, which
   `duplicate_tag` cannot see. The automatic L1 pick takes only L1 parts; the untagged
   IE-4010-16S12P lacked a `tag_type`, which M44 adds.
-- **M46 — A link with no SFP.** An equipment row's L2 link whose speed and media no library SFP
+- **M46 — A link with no SFP.** *Done (#312).* An equipment row's L2 link whose speed and media no library SFP
   serves is a located problem on Checks and Build (`equipment[i].l2_speed`, with its line), and
   Where to fix lands on the link field on Parts, instead of "The engine stopped". The Parts row and
   an L2 switch's SFP row with no candidate say so.
+- **M47 — Numbering edits and seeded rows.** *Done (#309).* Editing a `generated_panels` value
+  drops its `# ASSUMED` mark, as a confirmed project.yaml field does, and rows written by Start
+  parts and Add a device lead with `id`, `part_id` and `role` (pre-release check 2026-11-01,
+  findings 6 and 7).
 
 ## 5. Testing strategy
 
