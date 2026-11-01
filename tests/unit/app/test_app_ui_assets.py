@@ -879,3 +879,19 @@ def test_library_catalogues_are_edited_as_pending_changes_by_brand() -> None:
     edit = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
     assert edit.count("App.cataloguesStale();") == 3  # discard, its Undo, apply
     assert "App.cataloguesStale();" in (UI_DIR / "screens-libcsv.js").read_text(encoding="utf-8")
+
+
+def test_the_rail_says_parts_is_not_set_up_or_counts_unknown_parts() -> None:
+    """APP-24: "Not set up" on a new substation, else the rows whose part is missing."""
+    ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    assert "noParts() ? `${icon('warn')}Not set up`" in ui
+    assert "sp.parts.rows.filter((x) => x.part_id && !x.known).length" in ui
+    assert "navItem('#/parts', 'parts', 'Parts', partsTail" in ui
+
+
+def test_a_generated_panel_edits_the_shared_numbering_patterns() -> None:
+    """ALI-5, ALI-13: the cabinet name, number, tag prefix and sheet name patterns."""
+    js = (UI_DIR / "screens-panel-editor.js").read_text(encoding="utf-8")
+    assert "if (k === 'g') return [['generated_panels', a], 'text'];" in js
+    for field in ("cabinet_name", "cabinet_number", "tag_prefix", "sheet_name"):
+        assert f"edit('g.{field}'" in js

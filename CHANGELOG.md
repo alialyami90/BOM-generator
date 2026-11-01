@@ -9,6 +9,12 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Add a device on Parts offers Monitor and Keyboard and mouse (M38, APP-23),
+  and the rail shows "Not set up" on Parts until a substation has its first
+  parts, or how many rows name a part the library lacks (APP-24). A
+  generated panel's Enclosure tab edits the numbering every generated panel
+  shares: the cabinet name, cabinet number, tag prefix and sheet name
+  patterns, where {n} is the panel number (ALI-5, ALI-13).
 - Library › Catalogues edits every brand set (M36, APP-20). A switch picks
   MCBs, aux contacts, terminal blocks, busbars or housekeeping; one tab per
   brand with the default marked; rows are edited in place, with Add rating or

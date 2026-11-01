@@ -121,6 +121,9 @@
     const r = route().a, np = hasProject(), p = curProject();
     const ns = hasSub();
     const noParts = () => { const sp = App.sub && App.sub.peek(); return !!sp && !!sp.equipment && !sp.equipment.length; };  // Device preview waits for the first parts
+    /* APP-24: "Not set up" until the first parts; else a count of rows whose part the library lacks, as on Checks */
+    const unknown = () => { const sp = App.sub && App.sub.peek(); return sp && sp.parts ? sp.parts.rows.filter((x) => x.part_id && !x.known).length : 0; };
+    const partsTail = !ns ? '' : noParts() ? `${icon('warn')}Not set up` : unknown() ? `${icon('error')}${unknown()} ${unknown() === 1 ? 'error' : 'errors'}` : '';
     const v = ns && S.verify && S.verify.key === `${S.project.file}#${S.sub}` ? S.verify : null;  // the last checks of the open substation
     const buildTail = v ? (v.errors ? `${icon('error')}Blocked` : `${icon('check')}Ready`) : '';
     const checksTail = v ? (v.errors ? `${icon('error')}${v.errors} ${v.errors === 1 ? 'error' : 'errors'}` : v.failed ? `${icon('error')}Failed` : `${icon('check')}Clear`) : '';
@@ -134,7 +137,7 @@
       ${navItem('#/project', 'project', esc(p.name), projTail, p.status === 'bad' ? 'bad' : p.status === 'warn' ? 'warn' : 'ok', false, r === 'project')}
       <div class="nav-group">Substation</div>${switcher}
       ${navItem('#/settings', 'file', 'Settings', '', 'ok', !ns, r === 'settings')}
-      ${navItem('#/parts', 'parts', 'Parts', '', 'ok', !ns, r === 'parts')}
+      ${navItem('#/parts', 'parts', 'Parts', partsTail, partsTail ? (noParts() ? 'warn' : 'bad') : 'ok', !ns, r === 'parts')}
       ${navItem('#/device-preview', 'elevation', 'Device preview', '', '', !ns || noParts(), r === 'device-preview')}
       ${navItem('#/panels', 'panels', 'Panels', ns ? esc(App.panelCount && App.panelCount() != null ? App.panelCount() : curSub().panels) : '', '', !ns, r === 'panels')}
       ${navItem('#/loose', 'pkg', 'Loose material', App.looseCount && App.looseCount() != null ? String(App.looseCount()) : '', '', !ns, r === 'loose')}
