@@ -7,6 +7,13 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- The installer ships psa-devices 1.12.0 with SEL's -2 generation computers:
+  SEL-3555-2 and SEL-3355-2 at 45 W, SEL-3560E and SEL-3560S at 35 W. Each is
+  SEL's typical figure (25-50 % load) with its SEL-9331 supplies, as Ali
+  chose for plan Q54.
+
 ## [0.3.3] - 2026-11-01
 
 ### Added
