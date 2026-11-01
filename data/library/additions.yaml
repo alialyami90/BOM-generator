@@ -498,6 +498,32 @@ devices:
       - { count: 8, speed: 1G, kind: sfp_slot }
       - { count: 4, speed: 10G, kind: sfp_slot }
       - { count: 4, speed: 25G, kind: sfp_slot }
+  - part_id: SK3244-FAN-EC  # Rittal SK 3244.500 variant datasheet (rittal.com pdf-creator, us-en 3244500)
+    category: "fan"
+    alt_group: "SK3244-FAN-EC"
+    make: "Rittal"
+    model: "SK 3244.500"
+    ordering_code: "SK 3244.500"
+    description_template: "200-240V AC EC Inlet and Exhaust Fan, Throughput: 485 m3/h with outlet filter, 80W"
+    tag_type: "FAN"
+    supply_type: "VAC"
+    voltage_v: 230
+    unit_power_w: 80  # rated power Pel, 50 and 60 Hz
+    load_type: "INTERMITTENT"
+    height_u: 0
+  - part_id: SK3244-FAN  # Rittal SK 3244.100 variant datasheet (rittal.com pdf-creator, uk-en 3244100)
+    category: "fan"
+    alt_group: "SK3244-FAN"
+    make: "Rittal"
+    model: "SK 3244.100"
+    ordering_code: "SK 3244.100"
+    description_template: "230V AC Inlet and Exhaust Fan, Throughput: 520 m3/h with outlet filter, 138W"
+    tag_type: "FAN"
+    supply_type: "VAC"
+    voltage_v: 230
+    unit_power_w: 138  # 60 Hz: the tender text's 138 W; the technical data says 135 W
+    load_type: "INTERMITTENT"
+    height_u: 0
 catalogue_brands:
   mcb:
     - id: hager-mcn-2p  # AC set: Hager gives no DC rating, so no dc_rating_v
@@ -532,3 +558,8 @@ overrides:  # values the shipped library changes in the example's parts and cata
     housekeeping:
       fan:  # plan Q29: per fan, with the SK 3243.200 outlet filter at 60 Hz
         airflow_m3h: 460
+      # ADR 0029: per fan, 60 Hz, one SK 3243.200 outlet filter (the same cut-out). SK 3245.500
+      # (630 m3/h) is left out: IP 51 would lower the cabinet's rating; add it if a project accepts that.
+      larger_fans:
+        - { part_id: SK3244-FAN-EC, airflow_m3h: 485 }
+        - { part_id: SK3244-FAN, airflow_m3h: 520 }

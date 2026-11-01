@@ -60,7 +60,7 @@ def test_the_shipped_library_is_the_example_plus_the_originals_datasheet_figures
     originals = shipped.devices[: len(example.devices)]
 
     assert [d.part_id for d in originals] == [d.part_id for d in example.devices]
-    fan = {"housekeeping": {"fan"}}  # plan Q29: the next tests
+    fan = {"housekeeping": {"fan", "larger_fans"}}  # plan Q29, ADR 0029: the next tests
     assert shipped.catalogues.model_dump(exclude=fan) == example.catalogues.model_dump(exclude=fan)
     brands = shipped.catalogue_brands.model_dump(exclude={"mcb"})  # mcb: the next tests
     assert brands == example.catalogue_brands.model_dump(exclude={"mcb"})
@@ -274,3 +274,20 @@ def test_an_override_of_a_part_the_example_lacks_is_refused() -> None:
 
     with pytest.raises(ValueError, match="NOPE"):
         build.build(EXAMPLE.read_text(encoding="utf-8"), {}, additions)
+
+
+def test_the_larger_fans_are_rittal_units_above_460_m3h_with_their_watts(
+    shipped: Library,
+) -> None:
+    # ADR 0029: 60 Hz airflow with one SK 3243.200 outlet filter, the 460 m3/h basis.
+    fans = {
+        fan.part_id: (fan.airflow_m3h, part.unit_power_w)
+        for fan in shipped.catalogues.housekeeping.larger_fans
+        if (part := shipped.get(fan.part_id)) and part.category == "fan"
+    }
+
+    assert fans == {
+        "SK3244-FAN-EC": (485, 80),
+        "SK3244-FAN": (520, 138),
+    }  # SK 3245.500 (630 m3/h) is IP 51, so it is left out
+    assert load_library(EXAMPLE).catalogues.housekeeping.larger_fans == []
