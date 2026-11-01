@@ -134,7 +134,7 @@ PyYAML (ADR 0021). Don't change `examples/` values the goldens check without a s
 2. **Finding 31: `di_inputs` for the SEL-2244-2 alternatives.** Record each module's digital input count
    in `data/device-db/sel-automation.yaml`, then set `di_inputs` on its library part (same two-PR route).
    Check how the engine uses `di_inputs` first.
-3. **Move the M14 generator into the repo** before task 1's second PR: make it idempotent (skip existing
+3. *Done (M41a):* `data/device-db/tools/library_entries.py`. **Move the M14 generator into the repo** before task 1's second PR: make it idempotent (skip existing
    part ids), put it under `data/device-db/tools/`, and make it pass ruff and mypy.
 
 Don't: put the originals' inrush or input range in `examples/library.yaml` (Q38; it moves the goldens);
