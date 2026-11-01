@@ -395,7 +395,7 @@
     const base = part.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^[^a-z0-9]+|-+$/g, '') || 'device';
     const row = { id: freeId(base, p.equipment.map((e) => e.id)), part_id: part, role: ROLE_OF[el.dataset.c] || 'other' };
     if (v('pa-red').checked) row.redundant = true;
-    Bridge.call('add_equipment', S.project.file, S.sub, row, null).then(() => { App.closeDialog(); sub().reload(); App.network.reload(); App.devicePreview.reload(); App.render(); toast(`Added ${row.id}`, 'check'); })
+    Bridge.call('add_equipment', S.project.file, S.sub, row, null, true).then(() => { App.closeDialog(); sub().reload(); App.network.reload(); App.devicePreview.reload(); App.render(); toast(`Added ${row.id}`, 'check'); })
       .catch((e) => { v('pa-err').innerHTML = `${icon('error')}<span>${esc(e.message)}</span>`; });
   };
   /* Accessories are loose material items, written at once (decision 2 of the M23 plan). */

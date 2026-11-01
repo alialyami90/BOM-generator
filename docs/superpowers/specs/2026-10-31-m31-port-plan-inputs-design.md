@@ -1,6 +1,7 @@
 # M31 Port plan inputs for a fresh project (design note)
 
-- Status: Draft for A1 (no code)
+- Status: Built with option C (A1, 2026-11-01): RTAC COM ports stay 0, firewall SFPs follow
+  its SFP slots; Ali's card on the defaults is open
 - Date: 2026-10-31
 - Audit finding: ENG-3 (audit 2026-10-31, `engine.md`)
 - Spec sections: Inputs, 2 (network port plan); Network accessories (group C)

@@ -88,6 +88,18 @@ def test_an_added_equipment_row_is_written_at_the_end(app: api.Api, project: Pat
     assert substation_yaml(project)["equipment"][-1]["part_id"] == "SEL-2488"
 
 
+def test_a_row_added_from_the_parts_page_gets_its_l2_link_defaults(
+    app: api.Api, project: Path
+) -> None:
+    # M31: the Add dialog seeds the link; Undo (seed off) puts a row back as it was written.
+    row = {"id": "gw-2", "part_id": "SEL-3555-GW", "role": "other"}
+    ok(app.add_equipment(str(project), SUB, row, None, True))
+    added = substation_yaml(project)["equipment"][-1]
+    assert (added["l2_ports"], added["l2_speed"]) == (1, "1G")
+    ok(app.add_equipment(str(project), SUB, {**row, "id": "gw-3"}, None))
+    assert "l2_ports" not in substation_yaml(project)["equipment"][-1]
+
+
 def test_a_removed_row_comes_back_at_its_place_on_undo(app: api.Api, project: Path) -> None:
     before = substation_yaml(project)["equipment"]
     at = [e["id"] for e in before].index("gps")
