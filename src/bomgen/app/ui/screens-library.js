@@ -87,11 +87,10 @@
 
   /* Devices, and the commodity catalogues the engine picks MCBs, terminal blocks and busbars from. */
   function contents() {
-    const cat = LIB.overview && LIB.overview.catalogues;
-    if (!cat) return devicesView();
+    if (!(LIB.overview && LIB.overview.catalogues)) return devicesView();
     const t = S.tab.libview === 'catalogues' ? 'catalogues' : 'devices';
     return `${tabs('libview', [['devices', 'Devices', badge('plain', devices().length)], ['catalogues', 'Catalogues']], t, 'Library contents')}
-      <div role="tabpanel" aria-labelledby="tab-libview-${t}">${t === 'catalogues' ? cataloguesView(cat) : devicesView()}</div>`;
+      <div role="tabpanel" aria-labelledby="tab-libview-${t}">${t === 'catalogues' ? cataloguesView() : devicesView()}</div>`;
   }
 
   function filtered() {
@@ -130,59 +129,137 @@
       <div class="table-foot"><span>${a.rows.length - 1} in group <span class="mono">${esc(a.group)}</span></span><a href="#/library/device/${encodeURIComponent(id)}" data-action="compare-full">Compare in full</a></div></div>`;
   }
   ACTIONS['compare-full'] = () => { S.tab.devEdit = 'alternatives'; return true; };
-  function detail(d, o) {  // o: a catalogue entry's heading and Overview, in place of a device's
+  function detail(d) {
     const t = S.tab.libdetail;
     const tabsList = [['overview', 'Overview'], ['datasheet', 'Datasheet'], ['alternatives', 'Alternatives']];
     let body = '';
-    if (t === 'overview') body = o ? o.kv : `<dl class="kv"><dt>Part ID</dt><dd class="mono">${esc(d.id)}</dd><dt>Make</dt><dd>${esc(d.make)}</dd><dt>Model</dt><dd>${esc(d.model)}</dd><dt>Ordering code</dt><dd class="mono">${esc(d.code || '—')}</dd><dt>Category</dt><dd>${esc(catName(d.cat))}</dd><dt>Tag</dt><dd class="mono">${d.tagType ? esc(d.tagType) + (d.level ? ' · ' + esc(d.level) : '') : '—'}</dd><dt>Supply</dt><dd>${esc(d.supply)}</dd><dt>Power</dt><dd>${esc(d.power || '—')}</dd><dt>Rated power</dt><dd class="num" style="text-align:left">${d.w != null ? d.w + ' W' : '—'}</dd><dt>Branch MCB</dt><dd>Sized by the engine${d.mcb ? ` <span class="muted">(the library's ${esc(d.mcb)} is deprecated, ADR 0019)</span>` : ''}</dd></dl>`;
+    if (t === 'overview') body = `<dl class="kv"><dt>Part ID</dt><dd class="mono">${esc(d.id)}</dd><dt>Make</dt><dd>${esc(d.make)}</dd><dt>Model</dt><dd>${esc(d.model)}</dd><dt>Ordering code</dt><dd class="mono">${esc(d.code || '—')}</dd><dt>Category</dt><dd>${esc(catName(d.cat))}</dd><dt>Tag</dt><dd class="mono">${d.tagType ? esc(d.tagType) + (d.level ? ' · ' + esc(d.level) : '') : '—'}</dd><dt>Supply</dt><dd>${esc(d.supply)}</dd><dt>Power</dt><dd>${esc(d.power || '—')}</dd><dt>Rated power</dt><dd class="num" style="text-align:left">${d.w != null ? d.w + ' W' : '—'}</dd><dt>Branch MCB</dt><dd>Sized by the engine${d.mcb ? ` <span class="muted">(the library's ${esc(d.mcb)} is deprecated, ADR 0019)</span>` : ''}</dd></dl>`;
     else if (t === 'datasheet') body = d.ds ? `${d.ds.summary ? `<p style="margin-bottom:var(--space-3)">${esc(d.ds.summary)}</p>` : ''}<dl class="kv"><dt>Supply range</dt><dd>${esc(d.ds.supply)}</dd><dt>Typical power</dt><dd>${esc(d.ds.typical)}</dd><dt>Maximum power</dt><dd>${esc(d.ds.max)}</dd><dt>Ports</dt><dd>${esc(d.ds.ports)}</dd><dt>Dimensions</dt><dd>${esc(d.ds.dims)}</dd><dt>Weight</dt><dd>${esc(d.ds.weight)}</dd><dt>Operating temperature</dt><dd>${esc(d.ds.temp)}</dd><dt>Certifications</dt><dd>${esc(d.ds.certs)}</dd>${d.ds.url ? `<dt>Datasheet</dt><dd class="row" style="gap:4px;flex-wrap:nowrap"><span class="mono small" style="overflow-wrap:anywhere">${esc(d.ds.url)}</span><button class="btn btn--ghost btn--icon btn--sm" data-action="copy" data-v="${esc(d.ds.url)}" aria-label="Copy the datasheet link">${icon('copy')}</button></dd>` : ''}</dl>
       ${(d.src || []).length ? `<div class="section" style="margin-top:var(--space-4);padding-bottom:0"><h3>Sources</h3><ul style="margin:var(--space-2) 0 0;padding-left:18px">${d.src.map((x) => `<li style="overflow-wrap:anywhere">${esc(x)}</li>`).join('')}</ul></div>` : ''}` : `<p class="muted">No datasheet recorded for this device.</p>`;
-    else body = `${o ? '' : altCompact(d.id)}${d.alt ? `<details class="section" style="margin-top:var(--space-4)"><summary>Researched brands <span class="muted small">(device database)</span></summary>
+    else body = `${altCompact(d.id)}${d.alt ? `<details class="section" style="margin-top:var(--space-4)"><summary>Researched brands <span class="muted small">(device database)</span></summary>
       ${d.alt.map((a) => `<h3 style="margin-top:var(--space-4)">${esc(a.brand)}</h3><div class="table-wrap" style="margin-top:6px"><table class="table"><thead><tr><th style="width:56px">Tier</th><th>Model</th><th>Data</th><th style="width:40px"><span class="sr-only">Copy</span></th></tr></thead><tbody>${a.rows.map((r) => `<tr><td>${esc(r.tier)}</td><td><span class="mono nowrap">${esc(r.model)}</span><span class="cell-sub">${r.same_as ? `Same as ${esc(r.same_as)}` : esc(r.sub || '')}</span></td><td>${verified(r.verified)}</td><td style="width:40px"><button class="btn btn--ghost btn--icon btn--sm" data-action="copy" data-v="${esc(r.model)}" aria-label="Copy ${esc(r.model)}">${icon('copy')}</button></td></tr>`).join('')}</tbody></table></div>`).join('')}</details>` : ''}`;
-    const what = o ? 'Catalogue entry detail' : 'Device detail';
-    return `<aside class="detail" aria-label="${what}"><h2 class="mono" style="font-size:18px;font-family:var(--font-mono)">${o ? o.title : esc(d.id)}</h2><p class="muted" style="margin-bottom:var(--space-3)">${o ? o.sub : makeModel(d)}</p>${o ? '' : `<a class="btn btn--secondary btn--sm" style="margin-bottom:var(--space-3)" href="#/library/device/${encodeURIComponent(d.id)}">${icon('edit')}Edit device</a>`}
+    const what = 'Device detail';
+    return `<aside class="detail" aria-label="${what}"><h2 class="mono" style="font-size:18px;font-family:var(--font-mono)">${esc(d.id)}</h2><p class="muted" style="margin-bottom:var(--space-3)">${makeModel(d)}</p><a class="btn btn--secondary btn--sm" style="margin-bottom:var(--space-3)" href="#/library/device/${encodeURIComponent(d.id)}">${icon('edit')}Edit device</a>
       ${tabs('libdetail', tabsList, t, what)}<div role="tabpanel" aria-labelledby="tab-libdetail-${t}">${body}</div></aside>`;
   }
 
-  /* ---------- Catalogues (read-only; editing them is M16) ---------- */
-  const firstLine = (text) => String(text || '').split('\n')[0];
+  /* ---------- Catalogues (M36; docs/ui/editing.md "Catalogues tab") ----------
+     Each catalogue has brand tabs, the default first. A cell edit becomes a pending change as soon
+     as it leaves the cell; a change the library refuses stays in the table with the reason. */
   const ROLES = {
     lamp: 'Cabinet lamp', door_switch: 'Door switch', fan: 'Fan', vent_filter: 'Vent filter', thermostat: 'Thermostat', ipr_kit: 'IPR kit',
     change_over_diode_negative: 'Change-over diode, negative', change_over_diode_positive: 'Change-over diode, positive', socket: 'Socket', nameplate: 'Device nameplate'
   };
-  const withRecord = (e) => {
-    const r = (e.record && LIB.overview.records[e.record]) || null;
-    return { ...e, make: e.make || (r && r.make) || '', verified: r ? r.verified : null, ds: r ? datasheet(r) : null, alt: r && r.alternatives.length ? alternatives(r) : null, src: r ? r.sources : null };
+  const OPTIONAL = ['door_switch', 'nameplate'];
+  const KINDS = [['mcb', 'MCBs'], ['aux_contact', 'Aux contacts'], ['terminal_blocks', 'Terminal blocks'], ['busbars', 'Busbars'], ['housekeeping', 'Housekeeping']];
+  const COLS = {  // [field, heading, mono, wide]
+    mcb: [['rating_a', 'Rating (A)', true], ['code', 'Ordering code', true]],
+    terminal_blocks: [['key', 'Type', true], ['make', 'Make'], ['ordering_code', 'Ordering code', true]],
+    busbars: [['key', 'Key', true], ['tag', 'Tag', true], ['description', 'Description', false, true]]
   };
-  const catalogueEntries = (c) => [
-    ...c.mcb.ratings.map((m) => ({ key: `mcb.${m.rating_a}`, section: 'MCB', title: m.code, name: `${m.rating_a} A`, make: c.mcb.make, model: `${c.mcb.family}, ${c.mcb.poles}-pole, ${m.rating_a} A`, code: m.code, record: m.record })),
-    { key: 'aux_contact', section: 'Auxiliary contact', title: c.aux_contact.ordering_code, name: c.aux_contact.model, make: c.aux_contact.make, model: c.aux_contact.model, code: c.aux_contact.ordering_code, record: c.aux_contact.record },
-    ...c.terminal_blocks.map((b) => ({ key: `terminal_blocks.${b.type}`, section: 'Terminal block', title: b.ordering_code, name: b.type, make: b.make, model: b.type, code: b.ordering_code, record: b.record })),
-    ...c.busbars.map((b) => ({ key: `busbars.${b.key}`, section: 'Busbar', title: b.tag || b.key, name: b.tag || b.key, make: '', model: firstLine(b.description), code: '', description: b.description, record: b.record }))
-  ].map(withRecord);
-  const catKv = (e) => `<dl class="kv"><dt>Catalogue</dt><dd>${esc(e.section)}</dd>${e.make ? `<dt>Make</dt><dd>${esc(e.make)}</dd>` : ''}<dt>${e.description ? 'Description' : 'Model'}</dt><dd style="white-space:pre-line">${esc(e.description || e.model)}</dd>${e.code ? `<dt>Ordering code</dt><dd class="mono">${esc(e.code)}</dd>` : ''}<dt>Datasheet record</dt><dd class="mono">${esc(e.record || '—')}</dd></dl>`;
-  function cataloguesView(c) {
-    const all = catalogueEntries(c), quality = hasDeviceDb() || all.some((e) => e.verified);
-    const sel = all.find((e) => e.key === S.selectedCatalogue) || all[0];
-    const data = (e) => (quality ? `<td style="white-space:nowrap">${e.verified ? verified(e.verified) : '<span class="muted">No record</span>'}</td>` : '');
-    const tr = (e, cells) => `<tr class="clickable" tabindex="0" data-action="lib-select-cat" data-id="${esc(e.key)}" aria-selected="${sel.key === e.key}">${cells}${data(e)}</tr>`;
-    const table = (title, lede, head, rows) => `<section style="margin-bottom:var(--space-5)"><h3>${title}</h3>${lede ? `<p class="muted small" style="margin:2px 0 0">${lede}</p>` : ''}
-      <div class="table-wrap" style="margin-top:var(--space-2)"><table class="table"><thead><tr>${head.map((h) => `<th>${h}</th>`).join('')}${quality ? '<th>Data</th>' : ''}</tr></thead><tbody>${rows}</tbody></table></div></section>`;
-    const of = (prefix) => all.filter((e) => e.key.startsWith(prefix));
-    const kit = c.housekeeping;
-    return `<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,400px);gap:var(--space-5);align-items:start;margin-top:var(--space-4)"><div>
-      ${table('Miniature circuit breakers', `${esc(c.mcb.make)} ${esc(c.mcb.family)}, ${c.mcb.poles}-pole. The engine sizes each MCB and takes the code for its rating from here.`, ['Rating', 'Ordering code'],
-        of('mcb.').map((e) => tr(e, `<td class="nowrap">${esc(e.name)}</td><td class="mono">${esc(e.code)}</td>`)).join(''))}
-      ${table('Auxiliary alarm contact', '', ['Make and model', 'Ordering code'], of('aux_contact').map((e) => tr(e, `<td>${esc(e.make)} <span class="muted">${esc(e.model)}</span></td><td class="mono">${esc(e.code)}</td>`)).join(''))}
-      ${table('Terminal blocks', '', ['Type', 'Make', 'Ordering code'], of('terminal_blocks.').map((e) => tr(e, `<td class="mono nowrap">${esc(e.name)}</td><td>${esc(e.make)}</td><td class="mono">${esc(e.code)}</td>`)).join(''))}
-      ${table('Busbars', '', ['Tag', 'Description'], of('busbars.').map((e) => tr(e, `<td class="mono nowrap">${esc(e.name)}</td><td>${esc(e.model)}</td>`)).join(''))}
-      ${table('Housekeeping kit', 'Each role is a part in the device list. Select one to open it there.', ['Role', 'Part ID', ''],
-        kit.map((h) => `<tr ${h.in_library ? `class="clickable" tabindex="0" data-action="lib-goto-device" data-id="${esc(h.part_id)}"` : ''}><td>${esc(ROLES[h.role] || h.role)}</td><td class="mono">${esc(h.part_id)}</td><td class="muted">${esc(h.detail || '')}</td>${quality ? `<td style="white-space:nowrap">${LIB.overview.records[h.part_id] ? verified(LIB.overview.records[h.part_id].verified) : '<span class="muted">No record</span>'}</td>` : ''}</tr>`).join(''))}
-      <p class="muted small">Standard enclosure: ${c.enclosure_u} U.</p></div>
-      ${detail(sel, { title: esc(sel.title), sub: `${esc(sel.section)}${sel.make ? ` · ${esc(sel.make)}` : ''}`, kv: catKv(sel) })}</div>`;
+  const BLANK = { mcb: { rating_a: '', code: '' }, terminal_blocks: { key: '', make: '', ordering_code: '' }, busbars: { key: '', tag: '', description: '' } };
+  const CAT = { state: 'idle', data: null, draft: {}, error: {} };
+  App.cataloguesStale = () => { CAT.state = 'idle'; CAT.draft = {}; CAT.error = {}; };
+  const catKind = () => (KINDS.some(([k]) => k === S.tab.catkind) ? S.tab.catkind : 'mcb');
+  const brandsOf = (kind) => CAT.data.kinds[kind];
+  const catBrand = (kind) => brandsOf(kind).find((b) => b.id === S.tab[`cb_${kind}`]) || brandsOf(kind)[0];
+  const draftKey = (kind, b) => `${kind}/${b.id}`;
+  const valueOf = (kind, b) => CAT.draft[draftKey(kind, b)] || b.value;
+  /* The datasheet record of a default-brand row, from the overview (backlog v0.2 point 1). */
+  function recordOf(kind, row) {
+    const c = LIB.overview && LIB.overview.catalogues; if (!c) return null;
+    const id = kind === 'mcb' ? (c.mcb.ratings.find((m) => m.rating_a === row.rating_a) || {}).record
+      : kind === 'aux_contact' ? c.aux_contact.record
+      : kind === 'terminal_blocks' ? (c.terminal_blocks.find((t) => t.type === row.key) || {}).record
+      : kind === 'busbars' ? (c.busbars.find((t) => t.key === row.key) || {}).record : row.part_id;
+    return (id && LIB.overview.records[id]) || null;
   }
-  ACTIONS['lib-select-cat'] = (el) => { S.selectedCatalogue = el.dataset.id; S.tab.libdetail = 'overview'; App.render(); };
-  ACTIONS['lib-goto-device'] = (el) => { S.tab.libview = 'devices'; S.selectedDevice = el.dataset.id; S.tab.libdetail = 'overview'; App.render(); };
+  function cataloguesView() {
+    if (CAT.state === 'idle') {
+      CAT.state = 'loading';
+      Bridge.call('library_catalogues').then((d) => { CAT.data = d; CAT.state = 'loaded'; App.render(); })
+        .catch((e) => { CAT.state = 'failed'; CAT.failed = e.message; App.render(); });
+    }
+    if (CAT.state === 'failed') return `<div style="margin-top:var(--space-4)">${banner('bad', `<b>The catalogues could not be read.</b> ${esc(CAT.failed)}`)}</div>`;
+    if (!CAT.data) return '<p class="muted" style="margin-top:var(--space-4)">Reading the catalogues…</p>';
+    const kind = catKind(), b = catBrand(kind), key = draftKey(kind, b), v = valueOf(kind, b);
+    const quality = b.default && !b.changed && hasDeviceDb();  // the records describe the installed default
+    const switcher = `<div class="segmented" role="group" aria-label="Catalogue">${KINDS.map(([k, t]) => `<button data-action="cat-kind" data-kind="${k}" aria-pressed="${k === kind}">${t}${brandsOf(k).some((x) => x.changed) ? ' <span class="chg" aria-hidden="true"></span>' : ''}</button>`).join('')}</div>`;
+    const brandTabs = tabs(`cb_${kind}`, brandsOf(kind).map((x) => [x.id, x.label.length > 34 ? x.label.slice(0, 32) + '…' : x.label, `${x.default ? ` ${badge('info', 'Default')}` : ''}${x.changed ? '<span class="chg" aria-hidden="true"></span><span class="sr-only">, pending</span>' : ''}`, x.label]), b.id, 'Brands');
+    const actions = `<div class="row cat-actions">${b.default ? '<span class="muted small">Projects use the default unless they pick another brand.</span>' : `<button class="btn btn--secondary btn--sm" data-action="cat-default" ${CAT.draft[key] ? 'disabled title="Finish or undo the row first"' : ''}>Make ${esc(b.label)} the default</button>`}<span class="sp"></span><button class="btn btn--secondary btn--sm" data-action="cat-add-brand">${icon('plus')}Add brand…</button></div>`;
+    const name = b.default ? '' : `<div class="cat-name">${field('Brand name', input('cat-name', v.name || '', { placeholder: b.label }).replace('<input ', '<input data-cat="name" '), 'Shown on the brand tab and in the project\'s brand selects.')}</div>`;
+    const err = CAT.error[key] ? `<div class="cat-err" role="alert">${banner('bad', `<b>Not added to the pending changes.</b> ${esc(CAT.error[key])}`, `<button class="btn btn--secondary btn--sm" data-action="cat-revert">Undo my edit</button>`)}</div>` : '';
+    return `<div class="cat" style="margin-top:var(--space-4)">${switcher}${brandTabs}<div role="tabpanel" aria-labelledby="tab-cb_${kind}-${b.id}">${actions}${err}${name}${catTable(kind, b, v, quality)}</div>
+      ${kind === 'mcb' ? `<p class="muted small">${esc(b.label)}${b.ac_rated === false ? ', DC only: a substation can pick it for the DC branches' : ''}. The engine sizes each MCB and takes the code for its rating from here. Standard enclosure: ${CAT.data.enclosure_u || (LIB.overview.catalogues || {}).enclosure_u || 42} U.</p>` : ''}</div>`;
+  }
+  const cell = (kind, i, f, val, o = {}) => {
+    const id = `cat-${i}-${f}`, label = `${(COLS[kind] || []).concat([['make', 'Make'], ['model', 'Model'], ['ordering_code', 'Ordering code']]).find(([x]) => x === f)[1]}, row ${i + 1}`;
+    return o.wide ? `<textarea class="input cat-cell" id="${id}" rows="${String(val).split('\n').length}" data-cat="${i}.${f}" aria-label="${esc(label)}">${esc(val)}</textarea>`
+      : `<input class="input cat-cell${o.mono ? ' input--mono' : ''}${o.num ? ' input--num' : ''}" id="${id}" value="${esc(val)}" data-cat="${i}.${f}" aria-label="${esc(label)}">`;
+  };
+  const dataCell = (quality, kind, row) => (quality ? `<td class="nowrap">${(() => { const r = recordOf(kind, row); return r ? verified(r.verified) : '<span class="muted">No record</span>'; })()}</td>` : '');
+  function catTable(kind, b, v, quality) {
+    const head = (cols, del) => `<thead><tr>${cols.map((h) => `<th>${h}</th>`).join('')}${quality ? '<th>Data</th>' : ''}${del ? '<th><span class="sr-only">Remove</span></th>' : ''}</tr></thead>`;
+    if (kind === 'aux_contact') {
+      return `<div class="table-wrap"><table class="table cat-table">${head(['Make', 'Model', 'Ordering code'])}<tbody><tr>${['make', 'model', 'ordering_code'].map((f) => `<td>${cell(kind, 0, f, v[f], { mono: f === 'ordering_code' })}</td>`).join('')}${dataCell(quality, kind, v)}</tr></tbody></table></div>`;
+    }
+    if (kind === 'housekeeping') {
+      const parts = CAT.data.parts;
+      return `<div class="table-wrap"><table class="table cat-table">${head(['Role', 'Part'])}<tbody>${v.rows.map((r, i) => `<tr><td>${esc(ROLES[r.role] || r.role)}</td><td><select class="select" id="cat-${i}-part_id" data-cat="${i}.part_id" aria-label="Part for ${esc(ROLES[r.role] || r.role)}">${OPTIONAL.includes(r.role) ? `<option value="" ${!r.part_id ? 'selected' : ''}>None</option>` : ''}${parts.map((p) => `<option value="${esc(p)}" ${p === r.part_id ? 'selected' : ''}>${esc(p)}</option>`).join('')}</select></td>${dataCell(quality, kind, r)}</tr>`).join('')}</tbody></table>
+        <div class="table-foot"><span>Each role is a part in the device list.</span></div></div>`;
+    }
+    const cols = COLS[kind];
+    const rows = v.rows.map((r, i) => `<tr>${cols.map(([f, , mono, wide]) => `<td${wide ? ' class="cat-wide"' : f === 'rating_a' ? ' class="cat-num"' : ''}>${cell(kind, i, f, r[f], { mono, wide, num: f === 'rating_a' })}</td>`).join('')}${dataCell(quality, kind, r)}<td class="cat-del"><button class="btn btn--ghost btn--icon btn--sm btn--del" data-action="cat-remove" data-i="${i}" aria-label="Remove ${esc(String(r[cols[0][0]] || 'the new row'))}" ${v.rows.length < 2 ? 'disabled title="A catalogue keeps at least one row"' : ''}>${icon('trash')}</button></td></tr>`).join('');
+    const fill = v.rows.some((r) => cols.some(([f]) => r[f] === '')) ? '<span class="muted small">Fill in the new row to add it to the pending changes.</span>' : '';
+    return `<div class="table-wrap"><table class="table cat-table">${head(cols.map(([, h]) => h), true)}<tbody>${rows}</tbody></table>
+      <div class="table-foot"><button class="btn btn--ghost btn--sm" data-action="cat-add-row">${icon('plus')}${kind === 'mcb' ? 'Add rating' : 'Add row'}</button>${fill}</div></div>`;
+  }
+  /* Send the brand's rows; the reply is the catalogues and the pending set. */
+  function sendCatalogue(kind, b, value) {
+    const key = draftKey(kind, b), cols = COLS[kind];
+    CAT.draft[key] = value; delete CAT.error[key];
+    if (cols && value.rows.some((r) => cols.some(([f]) => r[f] === ''))) return;  // a new row is still blank: kept as typed
+    const render = () => { const at = document.activeElement && document.activeElement.id; App.render(); const n = at && document.getElementById(at); n && n.focus(); };
+    const sent = kind === 'mcb' ? { ...value, rows: value.rows.map((r) => ({ ...r, rating_a: /^\d+$/.test(String(r.rating_a).trim()) ? Number(r.rating_a) : r.rating_a })) } : value;
+    Bridge.call('set_library_catalogue', kind, b.id, sent).then((r) => {
+      delete CAT.draft[key]; CAT.data = r.catalogues; App.setPending(r.pending); render();
+    }).catch((e) => { CAT.error[key] = e.message.replace(/^The library cannot take this change: /, ''); render(); });
+  }
+  document.addEventListener('change', (e) => {
+    const f = e.target.dataset && e.target.dataset.cat; if (f == null || !CAT.data) return;
+    const kind = catKind(), b = catBrand(kind), value = JSON.parse(JSON.stringify(valueOf(kind, b)));
+    if (f === 'name') value.name = e.target.value.trim() || null;
+    else { const [i, field] = f.split('.'); if (value.rows) value.rows[+i][field] = e.target.value; else value[field] = e.target.value; }
+    sendCatalogue(kind, b, value);
+  });
+  ACTIONS['cat-kind'] = (el) => { S.tab.catkind = el.dataset.kind; App.render(); };
+  ACTIONS['cat-add-row'] = () => { const kind = catKind(), b = catBrand(kind), value = JSON.parse(JSON.stringify(valueOf(kind, b))); value.rows.push({ ...BLANK[kind] }); CAT.draft[draftKey(kind, b)] = value; App.render(); const n = document.getElementById(`cat-${value.rows.length - 1}-${COLS[kind][0][0]}`); n && n.focus(); };
+  ACTIONS['cat-remove'] = (el) => { const kind = catKind(), b = catBrand(kind), value = JSON.parse(JSON.stringify(valueOf(kind, b))); value.rows.splice(+el.dataset.i, 1); sendCatalogue(kind, b, value); };
+  ACTIONS['cat-revert'] = () => { const kind = catKind(), key = draftKey(kind, catBrand(kind)); delete CAT.draft[key]; delete CAT.error[key]; App.render(); };
+  const catReply = (r, text) => { closeDialog(); CAT.data = r.catalogues; App.setPending(r.pending); App.render(); toast(text, 'check'); };
+  const KIND_NAME = { mcb: 'MCB', aux_contact: 'aux contact', terminal_blocks: 'terminal block', busbars: 'busbar', housekeeping: 'housekeeping' };
+  ACTIONS['cat-default'] = () => {
+    const kind = catKind(), b = catBrand(kind), now = brandsOf(kind)[0];
+    dialog({ title: `Make ${esc(b.label)} the default?`, body: `<p>Projects that use the default ${KIND_NAME[kind]} set get ${esc(b.label)} once the change is applied. ${esc(now.label)} stays in the library as a brand of its own.</p><p class="muted">A project or substation that picked ${esc(b.label)} by name picks Default instead after this.</p>`,
+      actions: `<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="cat-default-do">Make default</button>` });
+  };
+  ACTIONS['cat-default-do'] = () => {
+    const kind = catKind(), b = catBrand(kind);
+    Bridge.call('make_default_brand', kind, b.id).then((r) => { S.tab[`cb_${kind}`] = 'default'; catReply(r, `${b.label} is the default, pending`); }).catch((e) => { closeDialog(); toast(e.message, 'error'); });
+  };
+  ACTIONS['cat-add-brand'] = () => {
+    const kind = catKind(), b = catBrand(kind);
+    dialog({ title: `Add a ${KIND_NAME[kind]} brand`, body: `<div class="form">${field('Brand id', input('cat-new-id', '', { mono: true, placeholder: 'for example abb-s200' }), 'Lowercase letters, digits and dashes. Projects pick the brand by it.')}
+      ${field('Name', input('cat-new-name', '', { placeholder: 'for example ABB S200' }), 'Optional. The tab shows it.')}
+      ${field('Start from', select('cat-new-from', brandsOf(kind).map((x) => [x.id, `${x.label}${x.default ? ' (default)' : ''}`]), b.id), 'Its rows are copied, so only the codes need typing.')}<p class="err small" id="cat-new-err" hidden></p></div>`,
+      actions: `<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="cat-add-brand-do">Add brand</button>` });
+  };
+  ACTIONS['cat-add-brand-do'] = () => {
+    const kind = catKind(), id = $('#cat-new-id').value.trim(), name = $('#cat-new-name').value.trim(), from = $('#cat-new-from').value, bad = $('#cat-new-err');
+    const say = (t) => { bad.textContent = t; bad.hidden = false; $('#cat-new-id').setAttribute('aria-invalid', 'true'); $('#cat-new-id').focus(); };
+    if (!/^[a-z0-9][a-z0-9-]*$/.test(id)) { say('Use lowercase letters, digits and dashes, starting with a letter or digit.'); return; }
+    Bridge.call('add_catalogue_brand', kind, id, name, from).then((r) => { S.tab[`cb_${kind}`] = id; catReply(r, `Brand ${name || id} added, pending`); }).catch((e) => say(e.message.replace(/^The library cannot take this change: /, '')));
+  };
 
   ACTIONS['lib-select'] = (el) => { S.selectedDevice = el.dataset.id; S.tab.libdetail = 'overview'; App.render(); };
   document.addEventListener('keydown', (e) => { const r = e.target.closest && e.target.closest('tr.clickable[data-action^="lib-"]'); if (r && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); r.click(); } });

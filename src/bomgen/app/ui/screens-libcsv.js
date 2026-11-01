@@ -78,7 +78,7 @@
     el.disabled = true;
     const p = CSV.preview;
     Bridge.call('add_library_csv', CSV.path).then((page) => {
-      App.setPending(page);
+      App.setPending(page); App.cataloguesStale();
       CSV.added = p.added.length + p.changed.length + p.removed.length + p.catalogues.length; CSV.step = 'done'; App.render();
     }).catch((e) => { el.disabled = false; fail(e); });
   };
