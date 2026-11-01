@@ -142,6 +142,14 @@ height, ports) and the MCB brand sets. Ali chose to keep the iC60N as the defaul
     (`SEL-3555-GW` and `SEL-3555-RTAC`, low and high); Arbiter 1202B/C (`SEL-2488` mid);
     Hitachi low and high for `SEL-2240`; Siemens SIMATIC IPC427E, IPC647E and IPC847E
     (`SEL-3355`). They stay in `data/device-db` and join psa-devices once a figure is found.
+    *Researched again 2026-11-01 (M41b):* the SCALANCE tier now has the 125 V DC EEC code
+    6GK5324-4GG10-4JR2 with its data sheet's 42 W and 60-250 V DC range, and the Arbiter
+    1202B/C has its catalogue page's 30 W maximum. The other nine publish no figure (the RTU540
+    is discontinued, the 560CMG10 does not exist, and the IPC pages give only supply ratings);
+    they say `power_basis: not_given` with what was searched.
 31. **DI-module alternatives carry no `di_inputs`.** Their input counts differ from the
     original's and were not researched per module, so the library leaves the field out.
     A project that swaps in one of them needs the count added first. (`SEL-2244-2`)
+    *Researched 2026-11-01 (M41b):* the Siemens tiers give 16, 32 and 32 inputs (one or two
+    SICAM A8000 DI-8112 or DI-8113 modules of 16 inputs each, RS listings). The Hitachi tiers'
+    boards are not identified, so they still have none.
