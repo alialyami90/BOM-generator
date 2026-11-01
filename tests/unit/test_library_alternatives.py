@@ -269,3 +269,55 @@ def test_the_librarys_default_dc_set_needs_a_dc_rating() -> None:
     data["catalogues"]["mcb_dc"] = {k: v for k, v in ABB_MCB.items() if k != "id"}
     with pytest.raises(ValidationError, match=r"catalogues\.mcb_dc needs dc_rating_v"):
         Library.model_validate(data)
+
+
+# The unset mcb_dc fallback is worked out when it is needed, not stored (plan M40).
+
+
+@pytest.mark.parametrize(
+    "choice",
+    [
+        CatalogueChoice(mcb="abb-s200m"),
+        CatalogueChoice(mcb="abb-s200m", mcb_dc="c60h-dc"),
+        CatalogueChoice(mcb_dc="c60h-dc"),
+    ],
+)
+def test_a_resolved_library_validates_again(choice: CatalogueChoice) -> None:
+    resolved = resolve_catalogues(library_with_a_dc_brand(), choice)
+    assert Library.model_validate(resolved.model_dump()) == resolved
+
+
+def test_an_unset_mcb_dc_is_not_stored() -> None:
+    resolved = resolve_catalogues(library_with_a_dc_brand(), CatalogueChoice(mcb="abb-s200m"))
+    assert resolved.catalogues.mcb_dc is None
+    assert resolved.catalogues.dc_mcb.make == "ABB"
+
+
+def test_an_mcb_brand_sizes_dc_over_the_librarys_own_dc_set() -> None:
+    # ADR 0023 point 2: {mcb: brand} with no mcb_dc sizes DC with that brand.
+    data = library_with_brands()
+    data["catalogue_brands"]["mcb"].append(dict(DC_MCB))
+    data["catalogues"]["mcb_dc"] = {k: v for k, v in DC_MCB.items() if k != "id"}
+    library = Library.model_validate(data)
+    resolved = resolve_catalogues(library, CatalogueChoice(mcb="abb-s200m"))
+    assert resolved.catalogues.dc_mcb.make == "ABB"
+    assert Library.model_validate(resolved.model_dump()) == resolved
+
+
+def test_with_no_mcb_choice_the_librarys_own_dc_set_stays() -> None:
+    data = library_with_brands()
+    data["catalogues"]["mcb_dc"] = {k: v for k, v in DC_MCB.items() if k != "id"}
+    library = Library.model_validate(data)
+    resolved = resolve_catalogues(library, CatalogueChoice(terminal_blocks="weidmuller"))
+    assert resolved.catalogues.dc_mcb.family == "C60H-DC 2P"
+
+
+def test_mcb_dc_default_beside_a_brand_validates_again_with_a_dc_rated_default() -> None:
+    # mcb_dc: default stores the library's default set, which must then carry dc_rating_v,
+    # as the shipped and example iC60N sets do (dc_rating_v 125).
+    data = library_with_brands()
+    data["catalogues"]["mcb"]["dc_rating_v"] = 125
+    data["catalogue_brands"]["mcb"].append(dict(DC_MCB))
+    library = Library.model_validate(data)
+    resolved = resolve_catalogues(library, CatalogueChoice(mcb="abb-s200m", mcb_dc=DEFAULT_BRAND))
+    assert Library.model_validate(resolved.model_dump()) == resolved
