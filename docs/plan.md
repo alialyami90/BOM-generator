@@ -1,6 +1,6 @@
 # Plan: Substation SCADA BOM generator
 
-Status: implemented. M0–M34 are released (v0.3.2, 2026-11-01), except M30, which is on main.
+Status: implemented. M0–M34 are released (v0.3.3, 2026-11-01). M35–M42 are the remaining roadmap.
 Ali's v0.2 and v0.3 points and their milestones are in [`backlog.md`](backlog.md). Changes go
 through the review flow in `CLAUDE.md`.
 Spec: [`docs/spec/generator-spec-v2.md`](spec/generator-spec-v2.md). Sections are
@@ -987,9 +987,26 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
   parts are L2 (psa-devices 1.10.0). The workstation roles give OWS, EWS and SRV. A
   `duplicate_tag` check fails a shared tag (ADR 0030, accepted by Ali 2026-11-01; audit 2026-10-31, ENG-1, APP-9,
   ALI-16; Q56 to Q60).
-- **M40 — Unset `mcb_dc` worked out, not stored.** A choice of `mcb` with no `mcb_dc` leaves the
-  resolved `catalogues.mcb_dc` unset, so `dc_mcb` falls back to the chosen brand (ADR 0023 point
-  2) and a resolved library validates again. Sizing and goldens are unchanged.
+- **M35 — Auto-layout rules in the spec.** The generator spec gains the auto-layout rules (32U
+  and overflow to a new panel, the A/B split, priority order, waist height and rack start) from
+  ADR 0013 and M21 (audit 2026-10-31, ALI-14; backlog point 9). Docs only.
+- **M36 — Library catalogue brands in the app.** The Library Catalogues tab lists every brand set
+  and edits it, as the UI design shows (audit 2026-10-31, APP-20).
+- **M37 — Settings YAML and defaults.** YAML edits on Settings can be applied, and the constants
+  table shows each default (audit 2026-10-31, APP-21, APP-22).
+- **M38 — Add a device and the rail.** Add a device offers a monitor and a peripheral, and the rail
+  shows "Not set up"; the generated-panel template can be edited in the app if it still can't be
+  (audit 2026-10-31, APP-23, APP-24, ALI-5, ALI-13).
+- **M39 — Desktop conveniences.** File changed on disk, restore a deleted project, F6 and Ctrl+O,
+  library version prompts and Go to field, as the UI design shows (audit 2026-10-31, APP-25 to
+  APP-29).
+- **M40 — The unset DC MCB choice is derived.** The resolved library stores `mcb_dc` only when it
+  is written, keeping ADR 0023 point 2; no output changes (handoff NEXT section 6).
+- **M41 — Alternatives' power and inputs.** The M14 generator moves into
+  `data/device-db/tools/`; findings 30 and 31 get sourced power figures and `di_inputs`; the newly
+  powered tiers join the shipped library (handoff NEXT section 7).
+- **M42 — Cited inrush for the shipped library.** Datasheet inrush for the parts that have none,
+  in batches, each a psa-devices release; `examples/` is unchanged (Q38) (audit 2026-10-31, ALI-9).
 
 ## 5. Testing strategy
 

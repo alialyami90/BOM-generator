@@ -81,9 +81,10 @@ rather than copy it.
   #194, #198–#201.
 - **Numbers (2026-11-01, after v0.3.3).** ADRs 0001–0027, 0029 and 0030 are Accepted and 0028 is
   Rejected; the next free ADR is **0031**. Q56–Q61 are answered; the next free question is
-  **Q62** and the next milestone **M35**. Q51 (annunciator), Q54 (power of the -2 SEL computers)
-  and Q55 (categories for the contractor's other part types) are open.
-- **Changelog** has a `[0.3.3]` section, and `[Unreleased]` is empty.
+  **Q62** and the next milestone **M43** (M35–M42 are the remaining roadmap in plan section 4).
+  Q54 is answered (typical, psa-devices 1.12.0, #296). Q51 (annunciator) and Q55 (categories for
+  the contractor's other part types) are open.
+- **Changelog** has a `[0.3.3]` section; `[Unreleased]` has psa-devices 1.12.0 (#296).
 - **Next work:** Ali's feedback on v0.3.3; ALI-14 (auto-layout rules into the spec).
 
 ### Verification (`f2234f7`, after #227)
