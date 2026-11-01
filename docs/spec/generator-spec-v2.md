@@ -260,7 +260,7 @@ A = 1.8\,H\,(W + D) + 1.4\,W\,D \qquad \Delta T = \frac{P_{W}}{A \times 5.5}
 
 A = 4.848 m² and ΔT = 6.96 °C; because ΔT < 10 °C the sheet concludes natural convection is enough, which is why the console BOM has vent filters and no fans.
 
-**Rule for the tool:** compute both checks for every cabinet. If natural-convection ΔT ≤ (TMax − TInt), specify filters + 1 thermostat; otherwise specify fans whose throughput ≥ required airflow, plus the fan thermostats and their AC branches. That decision feeds back into groups D, E and G of the BOM.
+**Rule for the tool:** compute both checks for every cabinet. If natural-convection ΔT ≤ (TMax − TInt), specify filters + 1 thermostat; otherwise specify fans whose throughput ≥ required airflow, plus the fan thermostats and their AC branches. That decision feeds back into groups D, E and G of the BOM. A forced cabinet keeps two fans: the catalogue fan, or else the smallest of the catalogue's `larger_fans` whose pair moves the required airflow; when none is enough, the largest is fitted and the airflow check fails (ADR 0029).
 
 ## Relationships between sheets
 

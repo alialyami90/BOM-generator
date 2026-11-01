@@ -1,6 +1,6 @@
 # 0029. Larger fans for hot cabinets
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-11-01)
 - Date: 2026-10-31
 - Spec sections: Heat Dissipation and Heat Calculations sheets ("Rule for the tool"); Derivation
   rules → Housekeeping kit (group D); Inputs, 1. Device library (commodity catalogues)
@@ -11,8 +11,8 @@
 always fitted two of the one catalogue fan (`housekeeping.fan`), so a hotter cabinet only failed
 the airflow check (audit 2026-10-31, ENG-6). The spec doesn't say how to get more airflow. Ali
 was offered three options on a card (A1, 2026-10-31): a bigger fan with the pair kept, more fan
-pairs, or no change. Option 1, a bigger fan, was recommended and is built here. It can be
-reverted if Ali picks another option.
+pairs, or no change. Option 1, a bigger fan, was recommended and is built here. Ali picked it
+("Bigger fan per cabinet") and accepted this ADR on 2026-11-01.
 
 ## Decision
 
