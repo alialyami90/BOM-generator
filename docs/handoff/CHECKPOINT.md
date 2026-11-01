@@ -3,6 +3,15 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-11-01: v0.3.2 released (A1, lead)
+
+- **Base:** main `e887fac` (#280). Docs-only PR.
+- **Done:** v0.3.2 is published with `bomgen-setup-0.3.2.exe`: the audit fixes M27, M28, M29, M31,
+  M32, M33 and M34 (#270–#275, #277, #278, #281–#285). ADR 0028 was rejected and reverted (#285)
+  before the release.
+- **Waiting:** M30 tags (A3, ADR 0030); A4's docs catch-up; Ali's cards on ADR 0029, devices on
+  generated panels, Q51, Q54 and Q55.
+
 ## 2026-10-31: v0.3.1 released (A1, lead)
 
 - **Base:** main `f0fa53c` (#268). Docs-only PR.

@@ -55,6 +55,9 @@ replaced entry "superseded by …".
   ASCII or escapes.
 - Docs-only PRs skip lint, mypy and pytest in CI ("Detect code changes"); `ci-status` is the check that
   must be green. Still run ruff locally.
+- CI runs Python 3.12 and the container may run 3.13: mypy on 3.12 needs an annotation on a list
+  literal of mixed dicts that 3.13 infers (M27, `test: type the start_parts rows`). Annotate typed
+  list literals in tests.
 - A push cancels the previous run, whose `ci-status` then shows failure on the old sha. Check the newest
   run before fixing anything.
 
@@ -70,6 +73,12 @@ replaced entry "superseded by …".
 - Some early PRs show "closed, not merged" because they landed as commits; check `git log origin/main`.
 - Read a PR's own description for the "why" of a change before guessing (#178).
 - Keep ADR edits in their own `docs(adr): …` PR, not mixed into a docs update (#167 → #170).
+
+- **Parallel PRs and the changelog (2026-11-01).** Every PR adds to `[Unreleased]`, so parallel PRs
+  conflict there. Merge them one at a time, have each owner merge main (not rebase), and keep the
+  release PR last; merge main into it after each merge and rerun CI.
+- **Hold a release for a rejected ADR.** A Proposed ADR can merge before Ali answers. If he rejects
+  it, revert it on main before the release PR merges (ADR 0028 → #285), not after.
 
 ### Reviewing a PR
 
