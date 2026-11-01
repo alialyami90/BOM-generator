@@ -141,6 +141,8 @@ On `main` for the next release (the v0.3 roadmap, M35 to M47):
   fibre shelves.
 - M45: an annunciator row goes to loose material with its wall-mount kit,
   and an `untagged_device` check warns for a networked device with no tag.
+- M46: an L2 link with no matching library SFP is a located problem on
+  Parts, Checks and Build instead of stopping the engine.
 - M47: an edited panel-numbering pattern is no longer marked ASSUMED.
 
 The terms project, substation, side and stream are defined in `docs/plan.md` →

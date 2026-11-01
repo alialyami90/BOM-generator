@@ -213,7 +213,7 @@ release, and never make the launcher bundle or import any library but the one de
 
 ## 11. Documentation and changelog
 
-After every non-docs merge (`git log --oneline 723507a..origin/main`; move this sha forward after each
+After every non-docs merge (`git log --oneline ff1efe9..origin/main`; move this sha forward after each
 pass):
 1. For each non-docs PR: `pull_request_read get` for its description and `git show -s --format=%B <sha>`
    for the squash message. One entry under `[Unreleased]` in Added/Changed/Fixed, newest first, PR
