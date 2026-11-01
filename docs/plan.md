@@ -1340,20 +1340,20 @@ BOM group (spec: How each panel BOM groups its materials; Inputs the tool needs,
 Recommendation: no change until a project needs one; the 25 parts stay in
 `data/device-db/contractor-2026-10-31/`. Ask Ali when a project does.
 
-**Q56 — Level of the HWIO chassis** (ADR 0030). *Open.* The Axion I/O chassis (SEL-2240) has no
+**Q56 — Level of the HWIO chassis** (ADR 0030). *Answered 2026-11-01: keep it as it is.* The Axion I/O chassis (SEL-2240) has no
 L2 link. Is it L1 (bay I/O) or L2? Until Ali decides, it keeps PSA3-HWIO.
 
-**Q57 — Tag of the workstation monitor** (ADR 0030). *Open.* NAP-F23 is a workstation peripheral
+**Q57 — Tag of the workstation monitor** (ADR 0030). *Answered 2026-11-01: keep it as it is.* NAP-F23 is a workstation peripheral
 with no network link. Does it get a level, side and number? Until Ali decides, it keeps
 WS-MONITOR.
 
-**Q58 — Level of the FOPP** (ADR 0030). *Open.* PSA1-FOPP-CCR-A01 has a side and a number, and
+**Q58 — Level of the FOPP** (ADR 0030). *Answered 2026-11-01: keep it as it is.* PSA1-FOPP-CCR-A01 has a side and a number, and
 CCR stands where the level goes. Keep it, or make it L2 or L3? Until Ali decides, it is unchanged.
 
-**Q59 — Type code of the example's combined workstation** (ADR 0030). *Open.* The example's one
+**Q59 — Type code of the example's combined workstation** (ADR 0030). *Answered 2026-11-01: it keeps SRV/OAS/EAS.* The example's one
 SEL-3355 serves as DA server, operator and engineering workstation, so it keeps SRV/OAS/EAS
 (WS-L2-SRV/OAS/EAS-A01). The `da_server` role gives SRV. Are both codes right?
 
-**Q60 — Housekeeping and accessory tags** (ADR 0030). *Open.* IL, FAN, TH, IPR, COD, FILTER,
+**Q60 — Housekeeping and accessory tags** (ADR 0030). *Answered 2026-11-01: they keep their short labels.* IL, FAN, TH, IPR, COD, FILTER,
 Keyboard & Mouse and Cable Manager have no level and keep today's tags. Confirm they stay outside
 the device tag rule.

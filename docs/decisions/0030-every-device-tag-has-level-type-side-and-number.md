@@ -76,6 +76,8 @@ decides:
 - Q60: Housekeeping and accessories (IL, FAN, TH, IPR, COD, FILTER, Keyboard & Mouse, Cable
   Manager) stay as they are.
 
+Ali answered all five on 2026-11-01: each keeps today's tag.
+
 ## Consequences
 
 - Every device unit has its own tag, plate and MCB load name. A duplicate fails the build's
