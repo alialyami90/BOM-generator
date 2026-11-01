@@ -225,6 +225,80 @@ devices:
     inrush_ms: 36
     input_v_min: 85
     input_v_max: 300
+  - part_id: SEL-3555-2  # SEL-3555-2 Data Sheet PDS3555-02 Date Code 20250730, p. 13
+    category: "rtac"
+    alt_group: "SEL-3555-2"
+    make: "SEL"
+    model: "SEL-3555-2"
+    description_template: "Real-time automation controller, 3U rack, 125 VDC dual SEL-9331 HV supplies, alarm contact"
+    tag_type: "RTAC"
+    purdue_level: "L2"  # ADR 0030: station level
+    supply_type: "VDC"
+    voltage_v: 125
+    unit_power_w: 45  # plan Q54: typical, 35 W base + 10 W second supply (min 35, max 63)
+    load_type: "CONTINUOUS"
+    power_supplies: 2
+    hwio_points: 1
+    height_u: 3
+    inrush_a: 12.8
+    inrush_ms: 9
+    input_v_min: 100
+    input_v_max: 300
+  - part_id: SEL-3355-2  # SEL-3355-2 Data Sheet PDS3355-04 Date Code 20260521, p. 11
+    category: "workstation"
+    alt_group: "SEL-3355-2"
+    make: "SEL"
+    model: "SEL-3355-2"
+    description_template: "Automation workstation, 3U rack, 125 VDC dual SEL-9331 HV supplies, alarm contact"
+    tag_type: "SRV/OAS/EAS"
+    purdue_level: "L2"  # ADR 0030: station level
+    supply_type: "VDC"
+    voltage_v: 125
+    unit_power_w: 45  # plan Q54: typical, 35 W base + 10 W second supply (min 35, max 63)
+    load_type: "CONTINUOUS"
+    power_supplies: 2
+    hwio_points: 1
+    height_u: 3
+    inrush_a: 12.8
+    inrush_ms: 9
+    input_v_min: 100
+    input_v_max: 300
+  - part_id: SEL-3560E  # SEL-3560 Data Sheet PDS3560-01 Date Code 20241218, p. 14
+    category: "rtac"
+    alt_group: "SEL-3560E"
+    make: "SEL"
+    model: "SEL-3560E"
+    description_template: "Compact RTAC, surface mount, 125 VDC with internal SEL-9331 HV supply, alarm contact"
+    tag_type: "RTAC"
+    purdue_level: "L2"  # ADR 0030: station level
+    supply_type: "VDC"
+    voltage_v: 125
+    unit_power_w: 35  # plan Q54: typical, 25 W base + 10 W SEL-9331 (min 25, max 50)
+    load_type: "CONTINUOUS"
+    power_supplies: 1
+    hwio_points: 1
+    height_u: 0
+    inrush_a: 20
+    input_v_min: 100
+    input_v_max: 300
+  - part_id: SEL-3560S  # SEL-3560 Data Sheet PDS3560-01 Date Code 20241218, p. 14
+    category: "rtac"
+    alt_group: "SEL-3560S"
+    make: "SEL"
+    model: "SEL-3560S"
+    description_template: "Compact RTAC, surface mount, 125 VDC with external SEL-9331 HV supply, alarm contact"
+    tag_type: "RTAC"
+    purdue_level: "L2"  # ADR 0030: station level
+    supply_type: "VDC"
+    voltage_v: 125
+    unit_power_w: 35  # plan Q54: typical, 25 W base + 10 W SEL-9331 (min 25, max 50)
+    load_type: "CONTINUOUS"
+    power_supplies: 1
+    hwio_points: 1
+    height_u: 0
+    inrush_a: 20
+    input_v_min: 100
+    input_v_max: 300
   - part_id: SEL-2407  # SEL-2407 Satellite-Synchronized Clock Instruction Manual PM2407-01 Date Code 20250918, p. 1
     category: "gps_clock"
     alt_group: "SEL-2407"

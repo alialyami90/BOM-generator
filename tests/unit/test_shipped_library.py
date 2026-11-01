@@ -291,3 +291,21 @@ def test_the_larger_fans_are_rittal_units_above_460_m3h_with_their_watts(
         "SK3244-FAN": (520, 138),
     }  # SK 3245.500 (630 m3/h) is IP 51, so it is left out
     assert load_library(EXAMPLE).catalogues.housekeeping.larger_fans == []
+
+
+def test_q54_the_sel_2_computers_use_their_typical_power(shipped: Library) -> None:
+    # Plan Q54 (Ali, 2026-11-01): SEL's typical figure, 25-50 % load, with the
+    # SEL-9331 supplies fitted (10 W each).
+    by_id = {d.part_id: d for d in shipped.devices}
+    expected = {
+        "SEL-3555-2": ("rtac", 45, 2, 3),
+        "SEL-3355-2": ("workstation", 45, 2, 3),
+        "SEL-3560E": ("rtac", 35, 1, 0),
+        "SEL-3560S": ("rtac", 35, 1, 0),
+    }
+
+    for part_id, (category, watts, supplies, height) in expected.items():
+        part = by_id[part_id]
+        assert (part.category, part.supply_type, part.voltage_v) == (category, "VDC", 125)
+        assert (part.unit_power_w, part.power_supplies, part.height_u) == (watts, supplies, height)
+        assert part.purdue_level == "L2"  # ADR 0030: station level
