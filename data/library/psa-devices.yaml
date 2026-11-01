@@ -5175,19 +5175,6 @@ devices:
     unit_power_w: 138  # 60 Hz: the tender text's 138 W; the technical data says 135 W
     load_type: "INTERMITTENT"
     height_u: 0
-  - part_id: SK3245-FAN-EC  # Rittal SK 3245.500 variant datasheet (rittal.com pdf-creator, us-en 3245500)
-    category: "fan"
-    alt_group: "SK3245-FAN-EC"
-    make: "Rittal"
-    model: "SK 3245.500"
-    ordering_code: "SK 3245.500"
-    description_template: "200-240V AC EC Inlet and Exhaust Fan, Throughput: 630 m3/h with outlet filter, 165W, IP 51"
-    tag_type: "FAN"
-    supply_type: "VAC"
-    voltage_v: 230
-    unit_power_w: 165  # rated power Pel, 50 and 60 Hz
-    load_type: "INTERMITTENT"
-    height_u: 0
 catalogues:
   enclosure_u: 42  # rack units of the standard enclosure (ADR 0013)
   mcb:  # spec: Derivation rules -> Breaker part numbers
@@ -5238,7 +5225,6 @@ catalogues:
     larger_fans:  # override (data/library/additions.yaml)
       - { part_id: SK3244-FAN-EC, airflow_m3h: 485 }
       - { part_id: SK3244-FAN, airflow_m3h: 520 }
-      - { part_id: SK3245-FAN-EC, airflow_m3h: 630 }
     vent_filter: { part_id: SK3238-FILTER }
     thermostat: { part_id: SK3110-TH }
     ipr_kit: { part_id: IPR-2903685 }

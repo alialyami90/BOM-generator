@@ -289,6 +289,5 @@ def test_the_larger_fans_are_rittal_units_above_460_m3h_with_their_watts(
     assert fans == {
         "SK3244-FAN-EC": (485, 80),
         "SK3244-FAN": (520, 138),
-        "SK3245-FAN-EC": (630, 165),
-    }
+    }  # SK 3245.500 (630 m3/h) is IP 51, so it is left out
     assert load_library(EXAMPLE).catalogues.housekeeping.larger_fans == []

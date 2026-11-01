@@ -10,10 +10,11 @@ project uses [Semantic Versioning](https://semver.org/).
 ### Added
 
 - The installer ships psa-devices 1.11.0, whose housekeeping catalogue lists
-  three larger fans for ADR 0029: Rittal SK 3244.500 (485 m³/h, 80 W),
-  SK 3244.100 (520 m³/h, 138 W) and SK 3245.500 (630 m³/h, 165 W, IP 51),
-  each at 60 Hz with one SK 3243.200 outlet filter, the 460 m³/h basis. They
-  fit the same 292 mm cut-out and outlet filter as the SK 3243.100.
+  two larger fans for ADR 0029: Rittal SK 3244.500 (485 m³/h, 80 W) and
+  SK 3244.100 (520 m³/h, 138 W), each at 60 Hz with one SK 3243.200 outlet
+  filter, the 460 m³/h basis. They fit the same 292 mm cut-out and outlet
+  filter as the SK 3243.100. The 630 m³/h SK 3245.500 is left out because it
+  is IP 51.
 
 ### Changed
 
