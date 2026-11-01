@@ -153,3 +153,16 @@ height, ports) and the MCB brand sets. Ali chose to keep the iC60N as the defaul
     *Researched 2026-11-01 (M41b):* the Siemens tiers give 16, 32 and 32 inputs (one or two
     SICAM A8000 DI-8112 or DI-8113 modules of 16 inputs each, RS listings). The Hitachi tiers'
     boards are not identified, so they still have none.
+32. **No published inrush to apply (audit ALI-9, M42).** 91 powered parts of psa-devices 1.13.0
+    have no `inrush_a`. Contractor library v2 searched the full datasheet or manual of 63 of
+    them and found no supply inrush (`inrush_a` `not_given` in
+    `contractor-2026-10-31/sources.csv`, with document and page), and the SICAM A8000 PS-8642
+    data sheet, the Meinberg LANTIME M1000/S manual and the Rittal SK 3244.100 page give none
+    either. Every device-db tier without a figure says `inrush_basis: not_given`. The parts
+    with no device-db record are cited in the same CSV: C9300-24T-A (Cisco hardware
+    installation guide, technical specifications, p. 6), RST2228-28SFP-HV (C79000-G8976-1359-20,
+    p. 58), SEL-2743 and SEL-2744 (switch manuals, p. 15), SEL-2407 (PM2407-01, p. 31), and the
+    FortiGate 60F, 70F, Rugged 70F, 121G, 401G, 701G, 600F and 601F data sheets. The SK 3244.500
+    and SK 3244.100 fans' Rittal pages give rated current only. Their branches stay sized from
+    running current and the 2 A floor (ADR 0019); a figure joins the library when a maker
+    publishes one.
