@@ -50,7 +50,7 @@ select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "PT", "N"]
 
 [tool.mypy]
 python_version = "3.12"
-files = ["src", "tests"]
+files = ["src", "tests", "data/device-db/tools"]
 strict = true
 plugins = ["pydantic.mypy"]
 

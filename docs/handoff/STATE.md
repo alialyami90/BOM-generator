@@ -227,8 +227,10 @@ publishing. Release runs never cancel each other; PR runs do.
 | Shipped library | `data/library/psa-devices.yaml` | **Generated** by `data/library/build.py` | `release.yml` packs it as psa-devices 1.1.0 |
 | Shipped library checks | `tests/unit/test_shipped_library.py` (5 tests), `tests/unit/engine/test_engine_shipped_library.py` (6 tests, #171) | — | CI |
 
-The engine never reads `data/device-db/` directly. **Off-repo:** the M14 generator and research files
-are in the project files folder `/mnt/project-files/handoff/03-device-db/`
+The engine never reads `data/device-db/` directly. The M14 generator is
+`data/device-db/tools/library_entries.py` (M41a: idempotent, appends to `data/library/additions.yaml`).
+**Off-repo:** the M14 research files and the original scripts are in the project files folder
+`/mnt/project-files/handoff/03-device-db/`
 (`q38-shipped-library.patch` there is obsolete; #161 merged it).
 
 ### `data/device-db` layout
@@ -248,7 +250,8 @@ repo root; it imports `bomgen.io.round_trip` from `src/`, so not with `-I`), `m1
 by it), `assemble.py` and `layout_data.py` (merged the research into `data/device-db`), and
 `research-m14/` (briefs, inputs, raw outputs). `library_entries.py` was written against the
 **pre-M14** `examples/library.yaml` and is **not idempotent**: on today's file it appends a second
-copy. To add parts now, edit `examples/library.yaml` by hand or adapt the script.
+copy. To add parts now, run the in-repo `data/device-db/tools/library_entries.py` (M41a): it skips
+part ids the example or the additions already have and appends to `data/library/additions.yaml`.
 
 Rules it applied:
 - **Part id** `f"{original}.{slug(make)}-{TIER}"`, upper case (`SEL-2730M-EXT.MOXA-LOW`).
@@ -297,7 +300,7 @@ Rules it applied:
 - Data gaps (not bugs): finding 30 (11 alternatives have no power figure, so they are not library
   parts); finding 31 (SEL-2244-2 alternatives have no `di_inputs`); 83 of 378 alternative tiers are
   `verified: false` (codes from a naming pattern; check before ordering).
-- Risks: the generator is off-repo and not idempotent. Any edit to `examples/library.yaml` must be
+- Risks: any edit to `examples/library.yaml` must be
   followed by `python data/library/build.py`, or
   `test_the_shipped_library_is_up_to_date_with_its_sources` fails and the shipped-library engine test
   may shift. Bumping psa-devices past 1.1.0 means changing `examples/project.yaml` `library:` and
