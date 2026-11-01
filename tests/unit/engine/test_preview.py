@@ -175,8 +175,8 @@ def test_an_ac_branch_mcb_is_reported_with_its_numbers(example: LoadedSubstation
     items = [
         x
         for x in check_report(laid_out, build(laid_out)).items
-        if x.check == "branch_mcb" and "DHPCC_GW_1" in x.message
+        if x.check == "branch_mcb" and "L2_GW_A01" in x.message
     ]
     assert [(x.panel_id, x.message) for x in items] == [
-        ("psa1", "2 A for DHPCC_GW_1: running 0.41 A, floor 2 A; set by floor")
+        ("psa1", "2 A for L2_GW_A01: running 0.41 A, floor 2 A; set by floor")
     ]

@@ -262,7 +262,7 @@ def test_the_gateway_tags_name_no_project(shipped: Library) -> None:
     gateways = [d for d in shipped.devices if d.alt_group == "SEL-3555-GW"]
 
     assert len(gateways) == 5
-    assert {d.tag_pattern for d in gateways} == {"{prefix}-GW-{lan_index}"}
+    assert {(d.tag_pattern, d.purdue_level) for d in gateways} == {(None, "L2")}  # ADR 0030
 
 
 def test_an_override_of_a_part_the_example_lacks_is_refused() -> None:

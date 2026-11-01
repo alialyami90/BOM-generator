@@ -4,7 +4,8 @@ Rows are (ITEM DESIGNATION, DESCRIPTION, QUANTITY, MAKE, MODEL, ORDERING CODE, H
 columns B-H of "Columns of a panel BOM", transcribed from the example workbook's hidden
 master sheets (ADR 0010 item 10; plan Q23: masters, not issued sheets). The trailing
 comment is the workbook row. Cell text is trimmed. Where the generator deliberately
-differs from the workbook, the value is a named constant explaining why.
+differs from the workbook, the value is a named constant explaining why. Device tags follow
+ADR 0030 (level, type, side and number), not the workbook (e.g. PSA3-GPS is PSA3-L2-GPS-A01).
 """
 
 from bomgen.models.bom import QtySum
@@ -73,7 +74,7 @@ PSA1_A_TO_D: list[Row] = [
         10,
     ),  # 9
     (
-        "PSA1-EXT-ESW-A",
+        "PSA1-EXT-ESW-A01",
         "LAN-A Industrial Ethernet switch (EXT) (16 MM Ports, 4 RJ45)",
         1,
         "SEL",
@@ -82,7 +83,7 @@ PSA1_A_TO_D: list[Row] = [
         1,
     ),  # 10
     (
-        "PSA1-DHPCC-GW-1",
+        "PSA1-L2-GW-A01",
         "Protocol Gateway for Dhahran PCC connection",
         1,
         "SEL",
@@ -91,7 +92,7 @@ PSA1_A_TO_D: list[Row] = [
         0,
     ),  # 11
     (
-        "PSA1-EXT-FW-A",
+        "PSA1-EXT-FW-A01",
         "Industrial Firewall for External Systems",
         1,
         "Fortigate",
@@ -136,7 +137,7 @@ PSA1_A_TO_D: list[Row] = [
         0,
     ),  # 16
     (
-        "EXT-FW-A SFP (MM)",
+        "EXT-FW-A01 SFP (MM)",
         "Industrial SFP (1Gig, MM)",
         2,
         "Fortigate",
@@ -228,7 +229,7 @@ PSA2_A_TO_D: list[Row] = [
         10,
     ),  # 9
     (
-        "PSA2-EXT-ESW-B",
+        "PSA2-EXT-ESW-B01",
         "LAN-B Industrial Ethernet switch (EXT) (16 MM Ports, 4 RJ45)",
         1,
         "SEL",
@@ -237,7 +238,7 @@ PSA2_A_TO_D: list[Row] = [
         1,
     ),  # 10
     (
-        "PSA2-DHPCC-GW-2",
+        "PSA2-L2-GW-B01",
         "Protocol Gateway for Dhahran PCC connection",
         1,
         "SEL",
@@ -246,7 +247,7 @@ PSA2_A_TO_D: list[Row] = [
         0,
     ),  # 11
     (
-        "PSA2-EXT-FW-B",
+        "PSA2-EXT-FW-B01",
         "Industrial Firewall for External Systems",
         1,
         "Fortigate",
@@ -291,7 +292,7 @@ PSA2_A_TO_D: list[Row] = [
         0,
     ),  # 16
     (
-        "EXT-FW-B SFP (MM)",
+        "EXT-FW-B01 SFP (MM)",
         "Industrial SFP (1Gig, MM)",
         2,
         "Fortigate",
@@ -362,7 +363,7 @@ PSA3_A_TO_D: list[Row] = [
         0,
     ),  # 3
     (
-        "PSA3-GPS",
+        "PSA3-L2-GPS-A01",
         GPS_CLOCK,
         1,
         "SEL",
@@ -371,7 +372,7 @@ PSA3_A_TO_D: list[Row] = [
         1,
     ),  # 4
     (
-        "PSA3-RTAC",
+        "PSA3-L2-RTAC-A01",
         "PSA RTAC and Data Concentrator for DCS",
         1,
         "SEL",
@@ -456,7 +457,7 @@ WS_A_TO_D: list[Row] = [
         0,
     ),  # 3
     (
-        "WS-SRV/OAS/EAS",
+        "WS-L2-SRV/OAS/EAS-A01",
         "PSA DA Server/Operator/Engineering Automation Workstation",
         1,
         "SEL",

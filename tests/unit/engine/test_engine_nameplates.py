@@ -60,12 +60,13 @@ def test_nameplate_text_is_the_mcb_short_tag(built: BuildResult) -> None:
 
 
 def test_din_rail_units_get_a_plate(built: BuildResult) -> None:
-    assert "EXT_FW_A" in plates(built, "psa1")  # the firewall sits on DIN rail
+    assert "EXT_FW_A01" in plates(built, "psa1")  # the firewall sits on DIN rail
 
 
 def test_kit_children_and_housekeeping_get_no_plate(built: BuildResult) -> None:
-    assert plates(built, "psa3") == ["GPS", "RTAC", "HWIO"]  # not the Axion modules, IL or TH
-    assert plates(built, "ws") == ["SRV/OAS/EAS", "MONITOR", "Keyboard & Mouse"]
+    # not the Axion modules, IL or TH
+    assert plates(built, "psa3") == ["L2_GPS_A01", "L2_RTAC_A01", "HWIO"]
+    assert plates(built, "ws") == ["L2_SRV/OAS/EAS_A01", "MONITOR", "Keyboard & Mouse"]
 
 
 def test_each_plate_names_its_device(built: BuildResult) -> None:
@@ -89,7 +90,7 @@ def test_no_nameplate_role_means_no_row(example: LoadedSubstation, built: BuildR
 LIB = f.library(
     f.switch("L1", "L1"),
     f.powered("KB", "component", tag_type="KB"),
-    f.powered("GW", "gateway", tag_type="GW", tag_pattern="{prefix}-DHPCC-GW-{lan_index}"),
+    f.powered("GW", "gateway", tag_type="GW", purdue_level="L2"),
     f.device("CABLE"),
 )
 
@@ -113,10 +114,8 @@ def test_a_panel_with_no_tagged_units_has_no_plates_and_no_row() -> None:
     assert nameplate_item(p, LIB, 0) is None
 
 
-# Tag naming conventions: every unit has its own tag (ENG-15).
+# Tag naming conventions: every unit has its own tag (ENG-15, ADR 0030).
 
 
-@pytest.mark.xfail(strict=True, reason="ENG-1: the gateway pattern numbers by LAN, not by unit")
-def test_two_units_of_one_tag_pattern_in_a_panel_get_different_tags() -> None:
-    texts = plate_texts({"part_id": "GW"}, {"part_id": "GW"})
-    assert len(set(texts)) == 2
+def test_two_gateways_in_a_panel_get_different_plates() -> None:
+    assert plate_texts({"part_id": "GW"}, {"part_id": "GW"}) == ["L2_GW_A01", "L2_GW_A02"]

@@ -68,7 +68,7 @@ def test_spare_ports_give_formula_quantity() -> None:
 def test_sfp_choice_prefers_host_make() -> None:
     plans = {"FW": {"downlinks": [{"count": 2, "speed": "1G", "media": "MM"}]}}
     items = build([{"part_id": "FW"}], plans)
-    assert summary(items) == [("EXT-FW-A SFP (MM)", 2, "FR-SX")]
+    assert summary(items) == [("EXT-FW-A01 SFP (MM)", 2, "FR-SX")]
 
 
 def test_sfp_falls_back_to_library_order() -> None:

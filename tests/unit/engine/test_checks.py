@@ -1,6 +1,7 @@
 """Step 15 check report (spec: Data model and generation order, step 15; plan M7, Q3)."""
 
 import json
+from typing import Any
 
 import pytest
 from engine_factories import device, library, panel, powered, switch
@@ -10,6 +11,7 @@ from bomgen.checks import (
     dc_float_checks,
     dc_main_checks,
     di_capacity_check,
+    duplicate_tag_checks,
     external_ac_checks,
     l2_link_checks,
     library_check,
@@ -452,3 +454,36 @@ def test_a_networked_device_without_an_l2_link_warns() -> None:
             message="no L2 link (l2_ports is 0), so the L2 switch gets no SFP for it",
         )
     ]
+
+
+# Tag naming conventions (ADR 0030): every device unit has its own tag.
+
+TAGGED = library(
+    powered("GPS", "gps_clock", tag_type="GPS", tag_pattern="{prefix}-GPS"),
+    powered("GW", "gateway", tag_type="GW", purdue_level="L2"),
+    device("KBM", "peripheral", tag_pattern="Keyboard & Mouse"),
+)
+
+
+def tag_items(*panels: tuple[str, list[dict[str, Any]]]) -> list[CheckItem]:
+    built = [panel(devices, id=pid, tag_prefix="PSA1") for pid, devices in panels]
+    return duplicate_tag_checks([(p, expand_devices(p, TAGGED)) for p in built])
+
+
+def test_a_tag_two_device_units_share_is_an_error() -> None:
+    items = tag_items(("psa1", [{"part_id": "GPS"}]), ("psa3", [{"part_id": "GPS"}]))
+    assert items == [
+        CheckItem(
+            check="duplicate_tag",
+            status=CheckStatus.FAIL,
+            panel_id="psa1",
+            subject="PSA1-GPS",
+            message="2 device units share this tag (psa1, psa3): each needs its own",
+        )
+    ]
+
+
+def test_numbered_device_tags_and_untyped_labels_pass() -> None:
+    # two gateways number A01, A02; "Keyboard & Mouse" is a label, not a device tag
+    devices = [{"part_id": "GW"}, {"part_id": "GW"}, {"part_id": "KBM"}, {"part_id": "KBM"}]
+    assert tag_items(("psa1", devices)) == []

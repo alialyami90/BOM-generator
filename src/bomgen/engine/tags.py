@@ -1,7 +1,8 @@
 """Device tags (spec: Tag naming conventions).
 
-Device tags follow ``<PANEL>-<LEVEL>-<TYPE>-<LAN><NN>``; a library ``tag_pattern`` or a
-panel ``tag`` overrides that. A row of several units carries one range or list tag.
+Device tags follow ``<PANEL>-<LEVEL>-<TYPE>-<SIDE><NN>`` (ADR 0030); a library
+``tag_pattern`` or a panel ``tag`` overrides that. A row of several units carries one range or
+list tag.
 """
 
 from dataclasses import dataclass
@@ -9,11 +10,20 @@ from dataclasses import dataclass
 from bomgen.io.mirror import lan_index
 from bomgen.models.library import Category, DeviceType, PurdueLevel
 from bomgen.models.panel import Lan
+from bomgen.models.substation import EquipmentRole
 
-# First NN per Purdue level; EXT devices carry the LAN letter only.
+# First NN per Purdue level.
 FIRST_NUMBER: dict[PurdueLevel, int] = {PurdueLevel.L2: 1, PurdueLevel.L1: 11, PurdueLevel.L3: 1}
 # Housekeeping parts whose units are always numbered: FAN-1,2, TH-1,2,3, WS-TH-1.
 NUMBERED_CATEGORIES = frozenset({Category.FAN, Category.THERMOSTAT})
+# The workstation roles share one library part, so the role gives the type code (ADR 0030).
+ROLE_TYPES: dict[EquipmentRole, str] = {
+    EquipmentRole.OPERATOR_WS: "OWS",
+    EquipmentRole.ENGINEERING_WS: "EWS",
+    EquipmentRole.DA_SERVER: "SRV",
+}
+# The side of a device in a panel without a LAN (ADR 0030).
+DEFAULT_SIDE = "A"
 
 
 @dataclass(frozen=True)
@@ -39,14 +49,16 @@ def device_tags(
     qty: int,
     start: int,
     override: str | None = None,
+    tag_type: str | None = None,
 ) -> Tags:
-    """Tags for ``qty`` units of ``device``, numbered from ``start``."""
+    """Tags for ``qty`` units of ``device``, numbered from ``start``; ``tag_type`` replaces
+    the library's type code."""
     numbers = range(start, start + qty)
     if override is not None:
         units = (override,) if qty == 1 else tuple(f"{override}-{n}" for n in range(1, qty + 1))
         return Tags(override, units)
     level = device.purdue_level.value if device.purdue_level else ""
-    type_code = device.tag_type or ""
+    type_code = tag_type or device.tag_type or ""
     if device.tag_pattern is not None:
         fields = {
             "prefix": prefix,
@@ -57,14 +69,11 @@ def device_tags(
         }
         units = tuple(device.tag_pattern.format(**fields, nn=f"{n:02d}") for n in numbers)
         return Tags(_range(units), units)
-    if device.tag_type is None:
+    if not type_code:
         return Tags(None, (None,) * qty)
     if device.purdue_level is not None:
-        head = f"{prefix}-{level}-{type_code}"
-        if device.purdue_level is PurdueLevel.EXT and qty == 1:
-            tag = f"{head}-{lan}" if lan else head
-            return Tags(tag, (tag,))
-        units = tuple(f"{head}-{lan or ''}{n:02d}" for n in numbers)
+        head = f"{prefix}-{level}-{type_code}-{lan or DEFAULT_SIDE}"
+        units = tuple(f"{head}{n:02d}" for n in numbers)
         return Tags(_range(units), units)
     if device.category in NUMBERED_CATEGORIES or qty > 1:
         units = tuple(f"{prefix}-{type_code}-{n}" for n in numbers)

@@ -128,6 +128,18 @@
           ],
           "default": null,
           "title": "Tag"
+        },
+        "tag_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tag Type"
         }
       },
       "required": [

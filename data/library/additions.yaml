@@ -194,6 +194,8 @@ devices:
     make: "SEL"
     model: "SEL-3530-4"
     description_template: "Real-time automation controller, 1U rack with bracket, 125 VDC HV supply, two Ethernet ports, 1 DI and alarm contact"
+    tag_type: "RTAC"
+    purdue_level: "L2"  # ADR 0030: station level
     supply_type: "VDC"
     voltage_v: 125
     unit_power_w: 30
@@ -210,6 +212,8 @@ devices:
     make: "SEL"
     model: "SEL-3350-1"
     description_template: "Real-time automation controller, 3U rack, 125 VDC dual HV supplies, 48 serial ports, I/O expansion with 25 DI"
+    tag_type: "RTAC"
+    purdue_level: "L2"  # ADR 0030: station level
     supply_type: "VDC"
     voltage_v: 125
     unit_power_w: 62
@@ -227,6 +231,8 @@ devices:
     make: "SEL"
     model: "SEL-2407"
     description_template: "Satellite-synchronized GPS clock with IRIG-B outputs"
+    tag_type: "GPS"
+    purdue_level: "L2"  # ADR 0030: station level
     supply_type: "VDC"
     voltage_v: 125
     unit_power_w: 15
@@ -522,12 +528,6 @@ overrides:  # values the shipped library changes in the example's parts and cata
       ordering_code: "SK 3243.200"
     NAP-K55:  # wall mounted: no rack space (data/device-db, contractor v2)
       height_u: 0
-    SEL-3555-GW: &gateway  # plan M28: no project name in the tag
-      tag_pattern: "{prefix}-GW-{lan_index}"
-    SEL-3555-GW.SIEMENS-LOW: *gateway
-    SEL-3555-GW.SIEMENS-MID: *gateway
-    SEL-3555-GW.SIEMENS-HIGH: *gateway
-    SEL-3555-GW.HITACHI-ENERGY-MID: *gateway
   catalogues:
     housekeeping:
       fan:  # plan Q29: per fan, with the SK 3243.200 outlet filter at 60 Hz

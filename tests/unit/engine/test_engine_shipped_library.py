@@ -19,10 +19,10 @@ from bomgen.models.report import CheckReport, CheckStatus
 REPO = Path(__file__).resolve().parents[3]
 SHIPPED = REPO / "data" / "library" / "psa-devices.yaml"
 SEL_LOADS = {
-    ("psa1", "GW_1"),  # SEL-3555-GW, with the shipped library's neutral tag
-    ("psa2", "GW_2"),
-    ("psa3", "RTAC"),  # SEL-3555-RTAC
-    ("ws", "SRV/OAS/EAS"),  # SEL-3355
+    ("psa1", "L2_GW_A01"),  # SEL-3555-GW (ADR 0030 tags)
+    ("psa2", "L2_GW_B01"),
+    ("psa3", "L2_RTAC_A01"),  # SEL-3555-RTAC
+    ("ws", "L2_SRV/OAS/EAS_A01"),  # SEL-3355
 }
 
 Built = tuple[BuildResult, CheckReport]

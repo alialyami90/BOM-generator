@@ -46,7 +46,7 @@ def test_device_preview_page_labels_each_unit_by_its_row(tmp_path: Path, project
     page = device_preview_page(project, "gis01", LibraryStore(tmp_path / "libraries"))
     json.dumps(page)
 
-    assert unit(page, "PSA1-GPS")["label"] == "Time server clock"
+    assert unit(page, "PSA1-L2-GPS-A01")["label"] == "Time server clock"
     assert unit(page, "PSA1-L2-ESW-A01")["label"] == "L2 switch"
     assert page["waist_u"] == 18
     assert page["saved_at"]
@@ -71,7 +71,7 @@ def test_a_pin_by_top_u_is_written_and_the_page_shows_it_pinned(
         )
     )
 
-    rtac = unit(ok(app.device_preview(str(project), "gis01")), "PSA2-RTAC")
+    rtac = unit(ok(app.device_preview(str(project), "gis01")), "PSA2-L2-RTAC-B01")
 
     assert (rtac["pinned"], rtac["top_u"]) == (True, 10)
 
@@ -86,7 +86,7 @@ def test_unpin_removes_only_that_override(app: api.Api, project: Path) -> None:
     ok(app.set_layout_overrides(str(project), "gis01", pins[1:]))
 
     page = ok(app.device_preview(str(project), "gis01"))
-    assert unit(page, "PSA2-RTAC")["pinned"] is False
+    assert unit(page, "PSA2-L2-RTAC-B01")["pinned"] is False
     assert (unit(page, "PSA1-HWIO")["pinned"], unit(page, "PSA1-HWIO")["top_u"]) == (True, 8)
 
 

@@ -31,7 +31,7 @@ from bomgen.engine.sizing import (
     size_network,
     switch_ports,
 )
-from bomgen.engine.tags import first_number
+from bomgen.engine.tags import ROLE_TYPES, first_number
 from bomgen.io.derived import effective_part_id
 from bomgen.io.loader import LoadedSubstation, load_substation
 from bomgen.io.references import NETWORK_DEVICES
@@ -820,6 +820,7 @@ def _rows(panel: PanelFill, loaded: LoadedSubstation) -> list[DeviceInstance]:
             DeviceInstance(
                 part_id=first.part_id,
                 qty=len(run),
+                tag_type=ROLE_TYPES.get(entry.role),
                 purpose=entry.purpose,
                 lan=_LAN[first.side],
                 hwio_points=entry.hwio_points,  # a row total, as on DeviceInstance

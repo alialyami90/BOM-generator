@@ -80,17 +80,17 @@ def test_cabinet_titles(result: BuildResult) -> None:
 
 
 def test_spec_tags(result: BuildResult) -> None:
-    # Tag naming conventions (plan section 5, "Tags").
+    # Tag naming conventions (plan section 5, "Tags"), as ADR 0030 amends them.
     tags = {p.panel_id: {line.tag for line in p.lines} for p in result.panels}
     assert {
         "PSA1-L2-ESW-A01",
         "PSA1-L1-ESW-A11 to A16",
-        "PSA1-EXT-ESW-A",
-        "PSA1-EXT-FW-A",
+        "PSA1-EXT-ESW-A01",
+        "PSA1-EXT-FW-A01",
         "PSA1-FOPP-CCR-A01",
-        "PSA1-DHPCC-GW-1",
+        "PSA1-L2-GW-A01",
     } <= tags["psa1"]
-    assert {"PSA2-L2-ESW-B01", "PSA2-L1-ESW-B11 to B16", "PSA2-DHPCC-GW-2"} <= tags["psa2"]
+    assert {"PSA2-L2-ESW-B01", "PSA2-L1-ESW-B11 to B16", "PSA2-L2-GW-B01"} <= tags["psa2"]
 
 
 def test_fopp_children_and_pigtails_equal_cores(result: BuildResult) -> None:
