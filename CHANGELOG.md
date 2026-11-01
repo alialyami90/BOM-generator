@@ -13,6 +13,11 @@ project uses [Semantic Versioning](https://semver.org/).
   SEL-3555-2 and SEL-3355-2 at 45 W, SEL-3560E and SEL-3560S at 35 W. Each is
   SEL's typical figure (25-50 % load) with its SEL-9331 supplies, as Ali
   chose for plan Q54.
+- `data/device-db/tools/library_entries.py`, the M14 generator, is in the
+  repo. It turns the device database's alternative tiers into shipped-library
+  parts, appends only the ones the library lacks to
+  `data/library/additions.yaml`, and lists the powered tiers it skips for want
+  of a power figure.
 
 ## [0.3.3] - 2026-11-01
 
