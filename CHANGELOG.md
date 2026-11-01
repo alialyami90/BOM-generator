@@ -9,6 +9,12 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- The plan and backlog catch up with v0.3.2 and the audit of 2026-10-31: the
+  plan's status line, done markers on M19 to M22, M25 and M26, entries for
+  M27, M28, M29 and M32, question Q61 (sheet 4's header height), and Ali's
+  v0.3 points in the backlog. Stale M5 and M10 notes and the Q52 and Q53 ADR
+  statuses are fixed.
+
 - Every device with a level is tagged level, type, side and number (M30,
   ADR 0030): the time server's plate reads L2_GPS_A01, the
   gateways PSA1-L2-GW-A01 and PSA2-L2-GW-B01, and the EXT switch and

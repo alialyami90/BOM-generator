@@ -5,12 +5,23 @@ current: when a point's status or milestone changes, update its row here.
 
 ## v0.3: Ali's feedback on v0.2.1
 
-Nothing yet. When the feedback arrives, number the points below (1, 2, …), propose a milestone for
-each in [`plan.md`](plan.md) (from M19), and record decisions as ADRs (from 0024) or plan questions
-(from Q42).
+Ali's requests from 2026-10-28 to 2026-10-31, and the work done for each point. The milestones are
+in [`plan.md`](plan.md) from "M19–M24" on, and the decisions are ADRs 0024 to 0030 and plan
+questions Q42 to Q61. The audit of 2026-10-31 (point 10) checked every point; its ids (ALI-, APP-,
+ENG-, DOC-) are in the Status column.
 
 | # | Point (Ali) | Milestone | Status |
 | --- | --- | --- | --- |
+| 1 | Replace the network section with part picking: a part per role from a dropdown, a free-text part number for the BOM, overrides that change panels, MCBs, power and heat, an SFP model per media, a plus sign to add devices, MCB and terminal block brands, a cable manager per network device (2026-10-31). | M20, M22, M23 | Done in v0.3.0 (#239, #240, #244; ADR 0024). |
+| 2 | Order the devices inside a panel by priority, and put the KVM and console at waist height, with the waist height and rack start in mm as settings (2026-10-31). | M21, M29 | Done: the engine in v0.3.0 (#241), the two settings on the project Overview in v0.3.2 (#274). |
+| 3 | A preview of the devices before the layout: a table and a panel elevation, with the MCB per device (2026-10-31). | M24 | Done in v0.3.0 (#245, #247). |
+| 4 | Drag and drop in both panel views (2026-10-31, Q50), single devices or an A/B pair (2026-10-28). | M19, M24 | Done (#238, #247). On the Panels board a pair moves together and Alt moves one unit, as it has since v0.2, so the audit's ALI-17 does not hold. Not yet checked by hand on Windows (ALI-8). |
+| 5 | One AC branch MCB per VAC device, after the socket, raising CINC (2026-10-31, Q52). | M25 | Done in v0.3.0 (#248, #252; ADR 0025). |
+| 6 | Device nameplates like the example's L2_ESW_A01 and L2_GPS_A01 (2026-10-31, Q53). | M26, M30 | The nameplate row and sheet in v0.3.0 (#253, #256; ADR 0026). Every device tag has level, type, side and number on main (#287; ADR 0030, Q56 to Q60). |
+| 7 | Operator workstation, engineering workstation, DA server, KVM, console and annunciator as their own part rows (2026-10-31). | M23, M28, M30 | The rows are done (#244), and the three computer roles get the tags OWS, EWS and SRV (#287). KVM and console stay empty by Ali's choice. NAP-K55 can be picked since psa-devices 1.9.0 (#275). A panel-mounted annunciator: Q51. |
+| 8 | Review the contractor's consolidated library and use it in the app, v1 then v2 (2026-10-31). | M28 | Done: v1 in psa-devices 1.2.0 to 1.7.0, v2 in 1.8.0 and 1.9.0 (#270, #271, #275). What is still open is in `data/device-db/contractor-return-v2-2026-10-31.md` (#277). |
+| 9 | Catch the spec up (2026-10-30). | docs | Spec v2.1 covers nameplates, part overrides and the new port speeds, and the tag section follows ADR 0030 (#288). The auto-layout rules are not in it yet (ALI-14). |
+| 10 | Audit the specs and docs against the app (2026-10-31). | M27–M34 | Done ([audit](https://claude.ai/artifact/5JGc6RakHiQyFunApSao4H)). M27 to M29 and M31 to M34 shipped in v0.3.2; M30 is on main. |
 
 ## v0.2 (shipped in v0.2.0)
 
