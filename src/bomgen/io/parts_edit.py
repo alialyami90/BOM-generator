@@ -49,6 +49,7 @@ CATEGORY_LINKS = {
     Category.RTAC: (2, "1G"),
     Category.WORKSTATION: (1, "1G"),
 }
+FIREWALL_SFPS = 2  # a firewall's own MM SFPs, at most its SFP slots (A1, 2026-11-01)
 LINK_KEYS = ("l2_ports", "l2_speed", "port_plan")
 SIZED_ROLES = (EquipmentRole.L1_SWITCH.value, EquipmentRole.L2_SWITCH.value)
 NO_L2 = "Pick the L2 switch first: the network is sized from it."
@@ -57,15 +58,18 @@ OLD_PART_KEYS = ("overrides", "sfp", "ordering_code")
 
 
 def link_defaults(part: DeviceType | None, role: object) -> dict[str, Any]:
-    """The L2 link a new row of ``part`` starts with, and a firewall's own SFPs, one per SFP
-    slot; empty for a sized switch or a part with no link (M31)."""
+    """The L2 link a new row of ``part`` starts with, and a firewall's own SFPs, two or its SFP
+    slots if fewer; empty for a sized switch or a part with no link (M31)."""
     if part is None or role in SIZED_ROLES or part.category not in CATEGORY_LINKS:
         return {}
     ports, speed = CATEGORY_LINKS[part.category]
     seeded: dict[str, Any] = {"l2_ports": ports, "l2_speed": speed}
-    slots = [g for g in part.ports if g.kind is PortKind.SFP_SLOT]
-    if part.category is Category.FIREWALL and slots:
-        downlinks = [{"count": g.count, "speed": g.speed.value, "media": "MM"} for g in slots]
+    downlinks, left = [], FIREWALL_SFPS
+    for group in part.ports if part.category is Category.FIREWALL else ():
+        if group.kind is PortKind.SFP_SLOT and left:
+            count, left = min(group.count, left), left - min(group.count, left)
+            downlinks.append({"count": count, "speed": group.speed.value, "media": "MM"})
+    if downlinks:
         seeded["port_plan"] = {"downlinks": downlinks}
     return seeded
 

@@ -295,3 +295,10 @@ def test_an_added_row_gets_the_defaults_for_the_fields_it_leaves_out() -> None:
     lib = load_project(EXAMPLES / "project.yaml").library
     row = {"id": "gw-2", "role": "other", "part_id": "SEL-3555-GW", "l2_speed": "100M"}
     assert parts_edit.with_link_defaults(row, lib) == {**row, "l2_ports": 1}
+
+
+def test_a_firewall_with_many_sfp_slots_is_seeded_two_sfps() -> None:
+    # A1, 2026-11-01: min(2, the part's SFP slots); FGR-60F.CISCO-HIGH has 10 slots.
+    lib = load_project(EXAMPLES / "project.yaml").library
+    seeded = parts_edit.link_defaults(lib.get("FGR-60F.CISCO-HIGH"), "firewall")
+    assert seeded["port_plan"] == {"downlinks": [{"count": 2, "speed": "1G", "media": "MM"}]}

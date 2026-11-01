@@ -16,7 +16,8 @@ project uses [Semantic Versioning](https://semver.org/).
 - A device added on Parts, or picked when a substation starts, comes with
   its link to the L2 switch filled in by category (M31, audit ENG-3):
   gateways, firewalls and workstations 1 x 1G, the GPS clock 1 x 100M, the
-  RTAC 2 x 1G, and a firewall one MM SFP per SFP slot. A changed part takes
+  RTAC 2 x 1G, and a firewall two MM SFPs (fewer if it has fewer SFP
+  slots). A changed part takes
   the new part's link unless the row was edited. The check report warns
   about a networked device with no L2 link.
 - Hand-written panels in the panel editor (M32b). Add hand-written panel… on
