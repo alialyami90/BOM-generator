@@ -23,11 +23,11 @@ ENG-, DOC-) are in the Status column.
 | 9 | Catch the spec up (2026-10-30). | docs | Spec v2.1 covers nameplates, part overrides and the new port speeds, and the tag section follows ADR 0030 (#288). *Done:* the auto-layout rules are in its "Automatic panel layout" section (ALI-14, M35). |
 | 10 | Audit the specs and docs against the app (2026-10-31). | M27–M34 | Done ([audit](https://claude.ai/artifact/5JGc6RakHiQyFunApSao4H)). M27 to M29 and M31 to M34 shipped in v0.3.2, M30 in v0.3.3. The rest of the audit is M35 to M43 on main (below). |
 
-
 ### v0.3 roadmap
 
 The audit's remaining points and the handoff's open items are milestones M35 to M47 in
 [`plan.md`](plan.md) section 4, one PR each:
+
 - M35: the spec's auto-layout rules.
 - M36 to M39: the app's Catalogues tab, Settings YAML, Add a device and desktop conveniences.
 - M40: the derived DC MCB choice.
