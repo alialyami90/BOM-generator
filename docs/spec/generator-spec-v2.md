@@ -14,7 +14,7 @@ The example covers 4 cabinets and 1 loose-material list:
 - **WS Console** (861-GIS01-PSA-0010) – server/operator workstation, monitor, keyboard
 - **Loose material** – wall annunciator, HMI software, GPS antenna kit, cables, fibre patch cords
 
-Read this spec in order: sheet map, BOM grouping, columns, naming, derivation rules, the three calculation sheets, formatting, output requirements, then the input schema for the tool.
+Read this spec in order: sheet map, BOM grouping, columns, naming, derivation rules, the three calculation sheets, formatting, output requirements, the automatic panel layout, then the input schema for the tool.
 
 ## Workbook map
 
@@ -354,6 +354,33 @@ The tool shall write a single Excel workbook in which every printed sheet has a 
 - Header and footer must fit within the top margin (3.0 cm BOM, 1.9 cm calculations) and bottom margin (2.0 cm BOM, 1.9 cm calculations) so they never overlap the table.
 - Page numbering restarts on each sheet.
 
+## Automatic panel layout
+
+The tool can fill the substation's panels itself from its equipment list (ADR 0013, rules R5–R9 and their amendments). The example keeps its hand-written panels; `bomgen build --no-layout` builds from hand-written panels only.
+
+**Panel capacity**
+
+- Every panel is the enclosure's 42U (`enclosure_u`) less `spares.rack_u_reserved` (10U), so 32U are usable. Blank space has no BOM row (Q25).
+- A rack-mounted switch, firewall or patch panel carries a 1U cable manager directly under it, and the pair is one block with no blank plate inside (Q32). `cable_manager` on the equipment entry or panel row gives or removes it on a switch, patch panel, firewall or gateway; a gateway has none unless it is set. The BOM counts the cable managers from the generated rows.
+- A 1U blank plate (`layout.blank_plate_u`) goes between two rack neighbours when the upper block ends in an active device. A block that ends in its cable manager needs none. A panel fits when Σ block U + p × blank plate U ≤ 32, where p counts the rack blocks, except the lowest, that carry no cable manager. DIN-rail parts take 0U.
+- When the next unit does not fit, the layout opens a new panel. A unit taller than a whole panel is a layout error.
+
+**Which panel**
+
+- Units go into panels in equipment order. The A unit of every redundant pair goes into an odd panel and its B unit into the next even panel, in lock-step, so panel 1 and panel 2 hold the two sides of the same pairs.
+- A common device (no side) goes into one of those same panels, the one with the most free U; there is no separate common panel (Q26).
+- `layout.removed` leaves a unit out before the fill. `layout.overrides` then move a device or a pair, in order, and a later move of a unit replaces an earlier one. Every move pins the unit, also when it names the panel the fill chose. A move that does not fit is an error on the check report.
+
+**Where in the panel**
+
+- Rack units stack top to bottom by priority: 1 the time server (`gps_clock`); 2 network (`network_switch`, `patch_panel`, `firewall`, `gateway`); 3 servers and workstations (`workstation`); 4 the rest. Ties keep equipment order. The BOM row order (group B) stays equipment order.
+- A KVM or console (`kvm`, `console`) sits with its bottom edge at waist height: U = round((`waist_height_mm` − `rack_start_mm`) / 44.45), counted from 1 at the bottom of the rack space, with the project's `defaults.layout` (ASSUMED 1000 mm and 200 mm, U18). A second one sits directly above it with the normal clearance. The other units fill from the top down to it, and those that do not fit above go below it in stack order. A panel fits only when every unit gets a place. A panel too short for the anchor is a layout error naming the panel, and its units stack from the top.
+- A move may give a `position` among the panel's rack devices (1 = top) or a `top_u`, the U the top of the unit's block sits on, but not both. A `top_u` unit is placed first, then the waist anchor, then the rest from the top in stack order. A `position` wins over the priority and the anchor. A `top_u` block that leaves the rack or overlaps another fixed block or the anchor is a layout error naming the panel.
+
+**Output**
+
+Generated panels are written as ordinary panel files with a `generated` header, B panels in full rather than as mirrors. Each rack unit gets its top U and whether it is pinned. The rest of the generation order then runs on them as on hand-written panels.
+
 ## Inputs the tool needs
 
 Three input sets rebuild the whole workbook: a device library (one record per part number), a panel definition (which devices go in which cabinet), and project settings (header/footer data and design constants). Everything else in this spec is derived.
@@ -397,6 +424,7 @@ The library also holds the commodity catalogues: MCBs by rating (1/2/6/10/16 A �
 - Options: aux socket (rating), smoke detector, change-over diodes (auto when single-PSU DC loads exist), ventilation mode (auto from heat check, or forced), spare branches per DC feed and on AC, main MCB override, inter-panel terminal count, grounding busbars.
 - Catalogue choice: `catalogue_choice` with a brand id or `default` per catalogue (`mcb`, `mcb_dc`, `aux_contact`, `terminal_blocks`, `busbars`, `housekeeping`); unset keys follow the project's choice, and `mcb_dc` must be a DC-rated set (ADR 0023).
 - Equipment: per device, a library `part_id` and optionally `ordering_code` (the part number printed in BOM col G instead of the library's), `overrides` of the library's `height_u`, `unit_power_w`, `supply_type`, `voltage_v`, `power_supplies`, `inrush_a` and `load_type` for this design, and, on the L1 and L2 switches, `sfp`: one SFP part per port speed and media (ADR 0024). On a switch, patch panel, firewall or gateway, `cable_manager` true or false gives or removes its 1U cable manager in the panel and on the BOM; unset keeps the category's rule (ADR 0013).
+- Layout: `layout.blank_plate_u`, `layout.overrides` (device and pair moves with an optional `position` or `top_u`) and `layout.removed`, for the automatic panel layout.
 - Loose material: `loose_material.host_panel`, the panel whose document the Loose Material sheet is issued under, and `items[]`, each a library `part_id` with quantity, tag, children and `fed_from`, or a free-text `description` with quantity and tag (ADR 0022).
 - BOM document data for its page header/footer: supplier document number, revision, issue date.
 - Revision: changed rows/cells to highlight yellow.
@@ -406,7 +434,7 @@ The library also holds the commodity catalogues: MCBs by rating (1/2/6/10/16 A �
 - Header and footer data: project name, substation name, company logo image, supplier document numbers for Power Consumption, Heat Dissipation and Heat Calculations, revision and issue date per document.
 - Output: file name pattern, sheet names.
 - Design constants: DC 125 V, AC 230 V, power margin 25%, current factor 1.3, BTU factor 3.41, TMax 35 °C, TInt 25 °C, air constant 4.1 m³K/Wh, steel coefficient 5.5 W/m²°C, minimum main MCB 6 A, minimum branch MCB 2 A (`min_branch_mcb_a`), shortest inrush that sizes a branch 10 ms (`inrush_min_ms`), battery float voltage 140 V (`dc_float_v`).
-- Defaults for every substation: the catalogue choice (`defaults.catalogue_choice`) and the spares. The loose material is per substation (above), not a project list.
+- Defaults for every substation: the catalogue choice (`defaults.catalogue_choice`), the spares, and the layout heights `defaults.layout.waist_height_mm` and `rack_start_mm` (Automatic panel layout). The loose material is per substation (above), not a project list.
 
 ## Data model and generation order
 

@@ -20,7 +20,7 @@ ENG-, DOC-) are in the Status column.
 | 6 | Device nameplates like the example's L2_ESW_A01 and L2_GPS_A01 (2026-10-31, Q53). | M26, M30 | The nameplate row and sheet in v0.3.0 (#253, #256; ADR 0026). Every device tag has level, type, side and number on main (#287; ADR 0030, Q56 to Q60). |
 | 7 | Operator workstation, engineering workstation, DA server, KVM, console and annunciator as their own part rows (2026-10-31). | M23, M28, M30 | The rows are done (#244), and the three computer roles get the tags OWS, EWS and SRV (#287). KVM and console stay empty by Ali's choice. NAP-K55 can be picked since psa-devices 1.9.0 (#275). A panel-mounted annunciator: Q51. |
 | 8 | Review the contractor's consolidated library and use it in the app, v1 then v2 (2026-10-31). | M28 | Done: v1 in psa-devices 1.2.0 to 1.7.0, v2 in 1.8.0 and 1.9.0 (#270, #271, #275). What is still open is in `data/device-db/contractor-return-v2-2026-10-31.md` (#277). |
-| 9 | Catch the spec up (2026-10-30). | docs | Spec v2.1 covers nameplates, part overrides and the new port speeds, and the tag section follows ADR 0030 (#288). The auto-layout rules are not in it yet (ALI-14). |
+| 9 | Catch the spec up (2026-10-30). | docs | Spec v2.1 covers nameplates, part overrides and the new port speeds, and the tag section follows ADR 0030 (#288). *Done:* the auto-layout rules are in its "Automatic panel layout" section (ALI-14, M35). |
 | 10 | Audit the specs and docs against the app (2026-10-31). | M27–M34 | Done ([audit](https://claude.ai/artifact/5JGc6RakHiQyFunApSao4H)). M27 to M29 and M31 to M34 shipped in v0.3.2; M30 is on main. |
 
 ## v0.2 (shipped in v0.2.0)

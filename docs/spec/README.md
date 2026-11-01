@@ -14,6 +14,7 @@ distribution (group F)").
 | `generator-spec-v2.md` | v2.1 + ADR 0027 (31 Oct 2026) | Hand-edited: the `ports` row of "Inputs the tool needs" lists the port speeds; 2.5G, 5G and 25G are never sized for SFPs (ADR 0027, accepted by Ali 2026-10-31) |
 | `generator-spec-v2.md` | v2.1 + ADR 0030 (1 Nov 2026) | Hand-edited: "Tag naming conventions" gives every device with a level its level, type, side and number, and the duplicate-tag failure (ADR 0030, accepted by Ali 2026-11-01) |
 | `generator-spec-v2.md` | v2.1 + ADR 0029 (1 Nov 2026) | Hand-edited: "Rule for the tool" (heat) says how a forced cabinet steps up to a larger fan (ADR 0029, accepted by Ali 2026-11-01) |
+| `generator-spec-v2.md` | v2.1 + ADR 0013 layout (1 Nov 2026) | Hand-edited: new section "Automatic panel layout" with the rules of ADR 0013 R5–R9 and its amendments (Q25, Q26, Q32, M17, M21, M22, M24), all accepted; the layout inputs under "Inputs the tool needs" (audit ALI-14) |
 
 The export replaces the doc's embedded "workbook data flow" diagram with a text
 placeholder under "Relationships between sheets"; the surrounding text describes
