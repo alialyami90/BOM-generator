@@ -9,8 +9,20 @@ rather than copy it.
 
 ## 1. Overview (2026-11-01)
 
-- Repo `alialyami90/BOM-generator`, default branch `main`, at `5ad88c5` (#294, the v0.3.3
+- Repo `alialyami90/BOM-generator`, default branch `main`, at `b930913` (#314, the v0.3.4
   release). Check open PRs with `list_pull_requests` before starting.
+- **v0.3.4 is released** (#314, 2026-11-01) with `bomgen-setup-0.3.4.exe` and psa-devices 1.15.0.
+  It finishes the v0.3 roadmap, M35–M47 (#297–#313): the spec's "Automatic panel layout" section
+  (M35, ALI-14), Library › Catalogues brand editing (M36), Settings YAML apply and defaults
+  (M37), monitor and keyboard parts, Parts "Not set up" and generated-panel numbering in the app
+  (M38), desktop conveniences (M39), the derived DC MCB choice (M40), alternatives' power and
+  di_inputs with the M14 generator in the repo (M41), no published inrush to apply (M42),
+  alternatives' own descriptions (M43), and the fixes from a fresh-project pre-release check
+  (M44 tags for the contractor's networked parts, M45 annunciator to loose material and the
+  `untagged_device` warning, M46 a missing SFP located on Parts, M47 numbering polish). The
+  recheck is in `/mnt/project-files/pre-release-check/findings-2.md` (clean). Ali's open
+  questions are in the Claude Doc "v0.3.4 review list"
+  (https://claude.ai/artifact/M6ZNouNYca7EJ8qdPaS3BV).
 - **v0.3.3 is released** (#294, 2026-11-01) and completes the audit's fix plan: M30 device tags
   (#287, ADR 0030 Accepted; edge cases Q56–Q60 keep today's tags, #289), larger fans in
   psa-devices 1.11.0 (#292: Rittal SK 3244.500 485 m³/h and SK 3244.100 520 m³/h; the IP 51
@@ -79,13 +91,14 @@ rather than copy it.
   round-trip writers (ADR 0021), and the loose material sheet and page (ADR 0020, ADR 0022). v0.2.1 is
   the UI polish pass from [`docs/ui/polish-v02.md`](../ui/polish-v02.md) (items 1–16, #205–#208) plus
   #194, #198–#201.
-- **Numbers (2026-11-01, after v0.3.3).** ADRs 0001–0027, 0029 and 0030 are Accepted and 0028 is
-  Rejected; the next free ADR is **0031**. Q56–Q61 are answered; the next free question is
-  **Q62** and the next milestone **M43** (M35–M42 are the remaining roadmap in plan section 4).
-  Q54 is answered (typical, psa-devices 1.12.0, #296). Q51 (annunciator) and Q55 (categories for
-  the contractor's other part types) are open.
-- **Changelog** has a `[0.3.3]` section; `[Unreleased]` has psa-devices 1.12.0 (#296).
-- **Next work:** Ali's feedback on v0.3.3; ALI-14 (auto-layout rules into the spec).
+- **Numbers (2026-11-01, after v0.3.4).** ADRs 0001–0027, 0029 and 0030 are Accepted and 0028 is
+  Rejected; the next free ADR is **0031**. Q54 and Q56–Q61 are answered; the next free question is
+  **Q62** and the next milestone **M48**. Q51 (annunciator) and Q55 (categories for the
+  contractor's other part types) are open.
+- **Changelog** has a `[0.3.4]` section, and `[Unreleased]` is empty.
+- **Next work:** Ali's answers on the v0.3.4 review list (keyboard nameplate, a DC supply-voltage
+  check, Q51, Q55, reviewer mode, Q11/Q23/ASSUMED seeds) and his hand test of drag and drop on
+  Windows (ALI-8).
 
 ### Verification (`f2234f7`, after #227)
 
