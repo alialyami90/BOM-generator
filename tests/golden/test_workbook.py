@@ -44,7 +44,7 @@ def formulas(path: Path) -> openpyxl.Workbook:
 # Loose Material sheet (ADR 0020) added its own HWIO total; the device nameplate row
 # (ADR 0026) adds one SR.NO formula per panel, and the Nameplates sheet one per plate
 # after the first (28 plates).
-FORMULA_COUNT = 939  # ADR 0028: 16 own-branch P cells are values
+FORMULA_COUNT = 955
 
 
 def formula_cells(book: openpyxl.Workbook) -> list[tuple[str, str]]:

@@ -1,6 +1,6 @@
 # 0028. Power Consumption follows the branch MCB
 
-- Status: Proposed
+- Status: Rejected (Ali, 2026-11-01, kept the spec formula)
 - Date: 2026-10-31
 - Spec sections: Power Consumption sheet → Formulas; Relationships between sheets; ADR 0019; ADR 0025
 
@@ -38,3 +38,9 @@ the change here.
 - The spec's Formulas line (P = ⌈O⌉, V = 125/230) needs a note pointing here once Ali accepts.
 - P is now a value on most rows, so editing W in Excel doesn't change it; the BOM's group F
   rating, which P now mirrors, doesn't change in Excel either.
+
+## Outcome
+
+Ali rejected this decision on 2026-11-01 and kept the spec formula. Both decisions were
+reverted: P is `=ROUNDUP(O,0)` on every row, and V is the system voltage (125 V DC, 230 V AC),
+as the spec's Formulas line gives. The golden formula count is back to 955.

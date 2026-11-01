@@ -34,7 +34,7 @@ def test_sizing_columns_n_to_r() -> None:
     power = line()
     assert power.current_a == pytest.approx(77 / 125)  # N
     assert power.current_with_margin_a == pytest.approx(1.3 * 77 / 125)  # O
-    assert power.device_mcb_a == 1  # P = ROUNDUP(O, 0) on a row with no branch of its own
+    assert power.device_mcb_a == 1  # P = ROUNDUP(O, 0)
     assert power.main_contribution_a == pytest.approx(6 * 1.3 * 77 / 125)  # Q (= R)
 
 
@@ -62,8 +62,3 @@ def test_checks_pass_on_the_boundary() -> None:
         panel_id="p", heat_w=1, h_m=1, w_m=1, d_m=1, area_m2=1, delta_t_c=10, limit_c=10
     )
     assert natural.passes
-
-
-def test_p_is_the_rows_own_branch_mcb_when_it_has_one() -> None:
-    # ADR 0028: the rating group F or E prints for the row's units.
-    assert line().model_copy(update={"branch_mcb_a": 6}).device_mcb_a == 6

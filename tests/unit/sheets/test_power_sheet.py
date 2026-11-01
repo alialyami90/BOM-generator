@@ -27,7 +27,7 @@ def pline(
 
 DC, AC = SupplyType.VDC, SupplyType.VAC
 L2 = pline("psa1", 5, DC, 77)
-L1 = pline("psa1", 6, DC, 77, qty=6).model_copy(update={"branch_mcb_a": 6})
+L1 = pline("psa1", 6, DC, 77, qty=6)
 LAMP = pline("psa1", 16, AC, 11)
 WS = pline("ws", 3, DC, 91)
 ANN = pline(None, 0, DC, 100)
@@ -132,7 +132,7 @@ def test_power_and_sizing_formulas(sheet: PowerSheet) -> None:
     assert text(m, "J8") == "=F8*I8"
     assert text(m, "N8") == "=I8/125"
     assert text(m, "O8") == "=N8*1.3"
-    assert text(m, "P7") == "=ROUNDUP(O7,0)"  # no branch of its own
+    assert text(m, "P8") == "=ROUNDUP(O8,0)"
     assert text(m, "Q8") == "=O8*F8"
     assert text(m, "R8") == "=Q8"
     assert text(m, "N14") == "=I14/230"
@@ -253,8 +253,3 @@ def test_no_power_footnotes_writes_no_rows(sheet: PowerSheet) -> None:
 def test_long_power_footnote_line_counts_as_wrapped_lines() -> None:
     # B:L hold about 255 characters, so a 300-character line wraps onto two.
     assert footnoted("x" * 300).model.rows[45].height == 30
-
-
-def test_p_is_the_rows_branch_mcb_rating_as_a_value(sheet: PowerSheet) -> None:
-    # ADR 0028: group F's rating; a formula cannot repeat the ADR 0019 sizing.
-    assert value(sheet.model, "P8") == 6
