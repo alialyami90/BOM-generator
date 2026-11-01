@@ -280,6 +280,8 @@ body:has(.savebar) .toasts { bottom: 136px; }  /* above the save bar */
 .code .src { padding: 8px 12px; min-width: 0; }
 .code .gut .e { color: var(--color-danger-text); font-weight: 700; }
 .code .src .e { background: var(--color-danger-soft); text-decoration: underline wavy var(--color-danger); text-underline-offset: 3px; }
+.code--edit textarea.src { font: inherit; line-height: 19.4px; color: var(--color-text); background: transparent; border: 0; resize: none; outline: none; white-space: pre; overflow: hidden; width: 100%; box-sizing: border-box; }
+.code--edit:focus-within { outline: var(--size-focus-ring) solid var(--color-focus); outline-offset: 1px; }
 .code .k { color: var(--color-action-text); } .code .s { color: var(--color-success); } .code .c { color: var(--color-text-muted); font-style: italic; } .code .n { color: var(--color-warning); }
 .diff-list { display: grid; gap: 0; }
 .diff-list details { border-top: 1px solid var(--color-border); }

@@ -329,19 +329,22 @@
       return `<div class="savebar${bad ? ' savebar--bad' : ''}" role="region" aria-label="Unsaved changes"><span class="savebar-msg">${D.saving ? '<span class="spinner"></span><b>Saving…</b>' : bad ? fixLine(`${o.prefix}first-bad`, bad) : `<span class="dot dot--warn" aria-hidden="true"></span><b>${c} unsaved change${c === 1 ? '' : 's'}</b> · saved to ${esc(o.file)}`}</span>
         <span class="sp"></span><button class="btn btn--secondary" data-action="${o.prefix}discard" ${D.saving ? 'disabled' : ''}>Discard</button><button class="btn btn--primary" data-action="${o.prefix}save" ${D.saving || bad ? 'disabled' : ''}>${icon('save')}${esc(o.label)} <kbd class="kbd">Ctrl+S</kbd></button></div>`;
     };
-    document.addEventListener('change', (e) => {
-      const id = e.target.id || '';
-      if (!id.startsWith(o.prefix) || route().a !== o.screen) return;
-      const key = id.slice(o.prefix.length), sp = o.spec(key);
-      if (!sp) return;
-      const typed = e.target.type === 'checkbox' ? String(e.target.checked) : e.target.value, value = D.set(key, typed);
-      queueMicrotask(render);
-      if (value == null) return;  // unchanged, unreadable or emptied (removed on save)
+    D.apply = (key, typed) => {  // draft a typed value and ask the engine about it, as a field change does
+      const sp = o.spec(key), value = D.set(key, typed);
+      if (!sp || value == null) return;  // unchanged, unreadable or emptied (removed on save)
       o.check(sp[0], value).then((msg) => {
         if (D.draft[key] !== typed || (D.errors[key] || null) === (msg || null)) return;  // a render would drop what is being typed elsewhere
         if (msg) D.errors[key] = msg; else delete D.errors[key];
         render();
       }).catch(() => {});
+    };
+    document.addEventListener('change', (e) => {
+      const id = e.target.id || '';
+      if (!id.startsWith(o.prefix) || route().a !== o.screen) return;
+      const key = id.slice(o.prefix.length);
+      if (!o.spec(key)) return;
+      D.apply(key, e.target.type === 'checkbox' ? String(e.target.checked) : e.target.value);
+      queueMicrotask(render);
     });
     ACTIONS[o.prefix + 'first-bad'] = () => {  // the first refused field on the page
       const key = Object.keys(D.errors).find((k) => document.getElementById(o.prefix + k)), el = key && document.getElementById(o.prefix + key);

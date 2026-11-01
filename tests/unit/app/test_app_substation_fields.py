@@ -138,3 +138,53 @@ def test_the_page_lists_the_brands_and_whose_choice_applies(app: api.Api, projec
     page = ok(app.open_substation(str(project), SUB))
     assert page["catalogue_choice"] == {"mcb": "default"}
     assert "project_choice" in page
+
+
+# Settings, YAML tab: a whole substation.yaml checked, then applied to the form (plan M37, APP-21).
+
+FORM = [["substation", "name"], ["constants", "t_max_c"], ["output", "file_name"]]
+
+
+def sub_text(project: Path) -> str:
+    return (project.parent / "substations" / SUB / "substation.yaml").read_text("utf-8")
+
+
+def test_checking_settings_yaml_gives_the_form_values_and_writes_nothing(
+    app: api.Api, project: Path
+) -> None:
+    before = sub_text(project)
+    text = before.replace('name: "GIS Substation"', 'name: "GIS Two"', 1)
+    text += "constants:\n  t_max_c: 40\n"
+    check = ok(app.check_substation_yaml(str(project), SUB, text, FORM))
+    assert check["problems"] == []
+    assert check["values"] == {
+        "substation.name": "GIS Two",
+        "constants.t_max_c": 40,
+        "output.file_name": "{doc_no}_PSA_BOM_Rev{rev}.xlsx",
+    }
+    assert check["other_changes"] == []
+    assert sub_text(project) == before
+
+
+def test_settings_yaml_problems_carry_their_line(app: api.Api, project: Path) -> None:
+    text = sub_text(project) + "constants:\n  t_max_c: hot\n"
+    check = ok(app.check_substation_yaml(str(project), SUB, text, FORM))
+    (problem,) = check["problems"]
+    assert (problem["location"], problem["line"]) == ("constants.t_max_c", len(text.splitlines()))
+
+
+def test_a_missing_form_value_is_none_and_changes_outside_the_form_are_named(
+    app: api.Api, project: Path
+) -> None:
+    text = sub_text(project).replace("  ied_count: 40", "  ied_count: 41", 1)
+    text = text.replace('  name: "GIS Substation"\n', "", 1)
+    check = ok(app.check_substation_yaml(str(project), SUB, text, FORM))
+    assert check["values"]["substation.name"] is None
+    assert check["other_changes"] == ["network"]
+
+
+def test_settings_yaml_that_does_not_parse_has_no_values(app: api.Api, project: Path) -> None:
+    check = ok(app.check_substation_yaml(str(project), SUB, "substation: [gis01\n", FORM))
+    assert check["problems"]
+    assert check["problems"][0]["line"]
+    assert check["values"] is None

@@ -17,8 +17,8 @@ from typing import TYPE_CHECKING, Any
 
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 
-from bomgen.io.edit import EditError, EditResult, edit_file, substation_file
-from bomgen.io.errors import Loc, format_location
+from bomgen.io.edit import EditError, EditResult, commit, edit_file, substation_file
+from bomgen.io.errors import InputError, Issue, Loc, format_location
 from bomgen.io.loader import LoadedProject, LoadedSubstation
 from bomgen.io.panel_edit import panel_file
 from bomgen.io.round_trip import (
@@ -32,7 +32,7 @@ from bomgen.io.round_trip import (
     set_comment,
     set_entry,
 )
-from bomgen.io.yaml_source import read_yaml
+from bomgen.io.yaml_source import pending_texts, read_yaml
 
 if TYPE_CHECKING:
     from bomgen.library_store.store import LibraryStore
@@ -236,6 +236,34 @@ def validate_field(
         if _related(issue.location, location):
             return issue.message
     return None
+
+
+@dataclass(frozen=True)
+class YamlCheck:
+    """What a file's new text would do (the app's YAML tab, plan M37)."""
+
+    issues: tuple[Issue, ...]  # the problems the text causes, in any file of the project
+    data: dict[str, Any] | None  # the parsed text; None when it does not parse
+
+
+def check_yaml(
+    project_file: Path,
+    text: str,
+    *,
+    substation: str | None = None,
+    panel: str | None = None,
+    store: LibraryStore | None = None,
+) -> YamlCheck:
+    """Check ``text`` as the target file's new content against the whole project; nothing
+    is written. Issue lines are lines of ``text``."""
+    file = target_file(project_file, substation, panel)
+    result = commit(project_file, substation, {file: text}, store=store, dry_run=True)
+    try:
+        with pending_texts({file: text}):
+            data: dict[str, Any] | None = read_yaml(file).data
+    except InputError:
+        data = None
+    return YamlCheck(() if result.written else result.issues, data)
 
 
 def _related(issue_location: str, location: str) -> bool:

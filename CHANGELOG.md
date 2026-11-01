@@ -20,6 +20,10 @@ project uses [Semantic Versioning](https://semver.org/).
   SEL-3555-2 and SEL-3355-2 at 45 W, SEL-3560E and SEL-3560S at 35 W. Each is
   SEL's typical figure (25-50 % load) with its SEL-9331 supplies, as Ali
   chose for plan Q54.
+- Settings › YAML can be edited. Each change is checked as you type, with
+  the problem on its line, and "Apply to form" drafts the Settings fields
+  from the text once it has no errors; Revert puts the saved file back. The
+  Design constants table says "Default" on each unchanged row (M37).
 - `data/device-db/tools/library_entries.py`, the M14 generator, is in the
   repo. It turns the device database's alternative tiers into shipped-library
   parts, appends only the ones the library lacks to

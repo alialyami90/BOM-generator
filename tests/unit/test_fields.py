@@ -191,3 +191,32 @@ def test_new_nested_mappings_are_written_in_block_style(project: Path) -> None:
     path = ("spares", "port_fraction")
     assert fields.set_field(project, path, 0.25, substation="gis01").written
     assert "\nspares:\n  port_fraction: 0.25\n" in substation_yaml(project).read_text("utf-8")
+
+
+# The YAML tab: a whole file's new text, checked before it is applied (plan M37, APP-21).
+
+
+def test_check_yaml_reads_a_sound_text_without_writing_it(project: Path) -> None:
+    file = substation_yaml(project)
+    before = file.read_text("utf-8")
+    text = before.replace('name: "GIS Substation"', 'name: "GIS Two"', 1)
+    check = fields.check_yaml(project, text, substation="gis01")
+    assert check.issues == ()
+    assert check.data is not None
+    assert check.data["substation"]["name"] == "GIS Two"
+    assert file.read_text("utf-8") == before
+
+
+def test_check_yaml_reports_a_refused_value_on_its_line(project: Path) -> None:
+    text = substation_yaml(project).read_text("utf-8") + "constants:\n  t_max_c: hot\n"
+    check = fields.check_yaml(project, text, substation="gis01")
+    (issue,) = check.issues
+    assert (issue.location, issue.line) == ("constants.t_max_c", len(text.splitlines()))
+    assert check.data is not None  # it parses; the value is refused
+
+
+def test_check_yaml_reports_a_syntax_error_on_its_line(project: Path) -> None:
+    check = fields.check_yaml(project, "substation:\n  id: [gis01\n", substation="gis01")
+    (issue,) = check.issues
+    assert issue.line is not None
+    assert check.data is None
