@@ -994,6 +994,9 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
   and edits it, as the UI design shows (audit 2026-10-31, APP-20).
 - **M37 — Settings YAML and defaults.** YAML edits on Settings can be applied, and the constants
   table shows each default (audit 2026-10-31, APP-21, APP-22).
+  *Done.* Apply refuses a text that changes keys with no Settings field (network, equipment and
+  the like) and names them; those are edited on their own pages. "Default" on unchanged rows
+  follows screens.md "Settings" and the audit, replacing polish-v02 item 13.
 - **M38 — Add a device and the rail.** Add a device offers a monitor and a peripheral, and the rail
   shows "Not set up"; the generated-panel template can be edited in the app if it still can't be
   (audit 2026-10-31, APP-23, APP-24, ALI-5, ALI-13).

@@ -133,7 +133,7 @@
     <div class="table-wrap" style="max-width:860px"><table class="table"><thead><tr><th>Constant</th><th class="num" style="width:130px">Value</th><th>Unit</th><th style="width:230px">Default</th></tr></thead>
     <tbody>${p.constants.map((c) => { const [label, unit] = CONSTANTS[c.key] || [c.key, ''], key = 'c_' + c.key, pc = PCT.has(c.key), d = pc ? Math.round(c.default * 1000) / 10 : c.default; const reset = key in ST.draft && ST.draft[key] === '';
       return `<tr><td>${esc(label)}<span class="cell-sub mono">${esc(c.key)}</span>${ST.errors[key] ? `<span class="err small">${icon('error')}<span>${ST.err(key)}</span></span>` : ''}</td><td${App.changedCell(key in ST.draft)[0]}>${App.changedCell(key in ST.draft)[1]}<label class="sr-only" for="st-${key}">${esc(label)}</label>${text(key, { num: true, mono: true, placeholder: String(d) })}</td><td class="muted">${esc(pc ? '%' : unit)}</td>
-        <td>${reset ? '<span class="muted small">Reset on save</span>' : c.changed ? `${badge('info', `Changed from ${d}`)} <button class="btn btn--ghost btn--sm" data-action="st-reset" data-key="${key}">Reset</button>` : ''}</td></tr>`; }).join('')}</tbody></table>
+        <td>${reset ? '<span class="muted small">Reset on save</span>' : c.changed ? `${badge('info', `Changed from ${d}`)} <button class="btn btn--ghost btn--sm" data-action="st-reset" data-key="${key}">Reset</button>` : '<span class="muted small">Default</span>'}</td></tr>`; }).join('')}</tbody></table>
     <div class="table-foot"><span>${plural(changedRows.length, 'constant')} changed for this substation</span><span>${changedRows.length ? '<button class="btn btn--ghost btn--sm" data-action="st-reset-all">Reset all to defaults</button>' : ''}</span></div></div>`; };
   /* A tab with unsaved or refused values says so, since the save bar counts every tab. */
   const TAB_OF = (key) => (key === 'name' || key.startsWith('brand_') ? 'general' : key.startsWith('calc_') ? 'documents' : key.startsWith('c_') ? 'constants' : 'output');
@@ -144,19 +144,87 @@
   }
   ACTIONS['st-reset'] = (el) => { ST.set(el.dataset.key, ''); S.dirty = true; App.render(); };
   ACTIONS['st-reset-all'] = () => { SUB.page.constants.filter((c) => c.changed).forEach((c) => ST.set('c_' + c.key, '')); S.dirty = true; App.render(); };
-  const hl = (line) => esc(line).replace(/^(\s*)(- )?([A-Za-z_][\w]*)(:)/, '$1$2<span class="k">$3</span>$4').replace(/(#.*)$/, '<span class="c">$1</span>');
-  function yaml(p) {
-    const lines = p.yaml.replace(/\n$/, '').split('\n');
-    const errs = {}; p.problems.filter((x) => x.line && x.file === p.file).forEach((x) => { errs[x.line] = (errs[x.line] ? errs[x.line] + ' ' : '') + x.message; });
-    const n = Object.keys(errs).length, name = p.file.split(/[\\/]/).slice(-3).join('/');
-    return `<div class="toolbar"><span class="mono" style="font-size:12.5px">${esc(name)}</span>${n ? badge('bad', plural(n, 'error'), 'error') : badge('ok', 'No errors', 'check')}<span class="sp"></span><span class="muted small">${icon('lock')} Read-only in the app for now</span></div>
-      <div class="code" role="textbox" aria-readonly="true" aria-multiline="true" aria-label="${esc(name)} source" tabindex="0">
-        <div class="gut" aria-hidden="true">${lines.map((_, i) => `<div class="${errs[i + 1] ? 'e' : ''}">${i + 1}</div>`).join('')}</div>
-        <div class="src">${lines.map((l, i) => `<div class="${errs[i + 1] ? 'e' : ''}">${hl(l) || ' '}</div>`).join('')}</div></div>
-      ${Object.entries(errs).map(([line, m]) => `<div class="err small" style="color:var(--color-danger-text);margin-top:8px;display:flex;gap:6px">${icon('error')}<span>Line ${line}: ${esc(m)}</span></div>`).join('')}`;
+  /* ---------- YAML: substation.yaml edited as text, checked by the engine, applied to the form (M37) ---------- */
+  const YT = { text: null, check: null, seq: 0, timer: 0 };  // null text: the saved file, unedited
+  /* Every Settings field, by its form key and its path in substation.yaml. */
+  function formKeys(p) {
+    return ['name', 'document', 'file_name', ...KINDS.map(([k]) => 'brand_' + k), ...p.calculations.map((c) => 'calc_' + c.key),
+      ...Object.keys(SHEET_LABELS).map((k) => 'sheet_' + k), ...p.constants.map((c) => 'c_' + c.key)];
   }
+  function yamlErrors(p) {  // line -> message, from the edited text's check or else the saved file's problems
+    const errs = {}, list = YT.text == null ? p.problems.filter((x) => x.file === p.file) : (YT.check ? YT.check.problems : []);
+    list.filter((x) => x.line).forEach((x) => { errs[x.line] = (errs[x.line] ? errs[x.line] + ' ' : '') + x.message; });
+    return [errs, YT.text == null ? [] : (YT.check ? YT.check.problems.filter((x) => !x.line) : [])];
+  }
+  function yamlParts(p) {
+    const text = YT.text == null ? p.yaml : YT.text, lines = text.replace(/\n$/, '').split('\n'), [errs, loose] = yamlErrors(p);
+    const n = Object.keys(errs).length + loose.length, edited = YT.text != null && YT.text !== p.yaml;
+    const ready = edited && YT.check && YT.check.text === YT.text && !n;
+    return {
+      badge: !edited || YT.check && YT.check.text === YT.text ? (n ? badge('bad', plural(n, 'error'), 'error') : badge('ok', 'No errors', 'check')) : '<span class="muted small"><span class="spinner"></span> Checking…</span>',
+      gut: lines.map((_, i) => `<div class="${errs[i + 1] ? 'e' : ''}">${i + 1}</div>`).join(''),
+      msgs: [...Object.entries(errs).map(([line, m]) => [`Line ${line}: ${m}`]), ...loose.map((x) => [`${x.location ? x.location + ': ' : ''}${x.message}`])]
+        .map(([m]) => `<div class="err small" style="color:var(--color-danger-text);margin-top:8px;display:flex;gap:6px">${icon('error')}<span>${esc(m)}</span></div>`).join(''),
+      rows: lines.length + 1, edited, ready
+    };
+  }
+  function yaml(p) {
+    const name = p.file.split(/[\\/]/).slice(-3).join('/'), y = yamlParts(p);
+    return `<div class="toolbar"><span class="mono" style="font-size:12.5px">${esc(name)}</span><span id="yt-badge">${y.badge}</span><span class="sp"></span>
+        <button class="btn btn--secondary btn--sm" data-action="yt-revert" id="yt-revert" ${y.edited ? '' : 'disabled'}>Revert</button>
+        <button class="btn btn--primary btn--sm" data-action="yt-apply" id="yt-apply" ${y.ready ? '' : 'disabled'}>${icon('check')}Apply to form</button></div>
+      <p class="muted small" style="margin:0 0 var(--space-2)">Apply to form drafts the Settings fields from this text; Save writes them. Other keys are edited on their own pages.</p>
+      <div class="code code--edit"><div class="gut" id="yt-gut" aria-hidden="true">${y.gut}</div>
+        <label class="sr-only" for="yt-src">${esc(name)} source</label><textarea id="yt-src" class="src" spellcheck="false" wrap="off" rows="${y.rows}">${esc(YT.text == null ? p.yaml : YT.text)}</textarea></div>
+      <div id="yt-msgs">${y.msgs}</div>`;
+  }
+  function yamlPatch() {  // update around the editor without a render, which would drop the caret
+    const p = SUB.page; if (!p || !document.getElementById('yt-src')) return;
+    const y = yamlParts(p);
+    document.getElementById('yt-badge').innerHTML = y.badge;
+    document.getElementById('yt-gut').innerHTML = y.gut;
+    document.getElementById('yt-msgs').innerHTML = y.msgs;
+    document.getElementById('yt-src').rows = y.rows;
+    document.getElementById('yt-apply').disabled = !y.ready;
+    document.getElementById('yt-revert').disabled = !y.edited;
+  }
+  function yamlCheck() {
+    const p = SUB.page, text = YT.text, seq = ++YT.seq;
+    const paths = formKeys(p).map((k) => stSpec(k)[0]);
+    Bridge.call('check_substation_yaml', S.project.file, S.sub, text, paths)
+      .then((r) => { if (seq === YT.seq) { YT.check = { ...r, text }; yamlPatch(); } })
+      .catch((err) => { if (seq === YT.seq) toast(err.message, 'error'); });
+  }
+  document.addEventListener('input', (e) => {
+    if (e.target.id !== 'yt-src') return;
+    YT.text = e.target.value; yamlPatch();
+    clearTimeout(YT.timer); YT.timer = setTimeout(yamlCheck, 350);
+  });
+  ACTIONS['yt-revert'] = () => { Object.assign(YT, { text: null, check: null }); YT.seq++; App.render(); };
+  ACTIONS['yt-apply'] = () => {
+    const p = SUB.page, c = YT.check;
+    if (!c || c.text !== YT.text || !c.values) return;
+    if (c.other_changes.length) {
+      toast(`Not applied: ${c.other_changes.join(', ')} ${c.other_changes.length === 1 ? 'has' : 'have'} no field on Settings. Revert ${c.other_changes.length === 1 ? 'that change' : 'those changes'} or edit ${c.other_changes.length === 1 ? 'it' : 'them'} on ${c.other_changes.length === 1 ? 'its' : 'their'} own page.`, 'error');
+      return;
+    }
+    let n = 0;
+    formKeys(p).forEach((key) => {
+      const v = c.values[stSpec(key)[0].join('.')], before = key in ST.draft;
+      const row = key.startsWith('c_') && p.constants.find((x) => 'c_' + x.key === key);
+      let typed = v == null ? '' : PCT.has(key.slice(2)) && row ? String(Math.round(v * 1000) / 10) : String(v);
+      if (row && v == null && !row.changed) typed = String(stSaved(key));  // not written, and not written before
+      ST.apply(key, typed);
+      if (key in ST.draft || before) n += 1;
+    });
+    S.dirty = ST.dirty();
+    Object.assign(YT, { text: null, check: null }); YT.seq++;
+    toast(n ? `Applied to the form: ${plural(Object.keys(ST.draft).length, 'unsaved change')}` : 'The form already matches the YAML', 'check');
+    App.render();
+  };
 
   /* The Parts screen (screens-parts.js) shares this substation page; it loads parts_page, a superset. */
   /* peek: the open substation's page if it is already loaded, without loading it (the rail asks on every render). */
   App.sub = { real, page, waiting, problems, resets: [], reload: () => { SUB.state = 'idle'; }, set: (p) => { SUB.page = p; }, peek: () => (real() && SUB.key === `${S.project.file}#${S.sub}` ? SUB.page : null) };
+  App.sub.resets.push(() => Object.assign(YT, { text: null, check: null }));
 })();

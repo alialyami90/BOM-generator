@@ -51,6 +51,7 @@ from bomgen.app.projects import RecentProjects, free_id, project_files, summariz
 from bomgen.app.substations import (
     ProjectInvalidError,
     SubstationNotFoundError,
+    check_settings_yaml,
     resolve,
     substation_page,
 )
@@ -952,6 +953,22 @@ class Api:
                 value,
                 substation=substation_id,
                 store=self._library_store(),
+            )
+
+    @endpoint
+    def check_substation_yaml(
+        self,
+        project_file: str,
+        substation_id: str,
+        text: str,
+        paths: Sequence[Sequence[str]],
+    ) -> dict[str, Any]:
+        """``text`` as the new substation.yaml: its problems with their lines, the value at
+        each Settings field path and the keys it changes outside them (plan M37). Nothing is
+        written; Apply to form drafts the values."""
+        with self._substation(substation_id), _edit_refusals():
+            return check_settings_yaml(
+                Path(project_file), substation_id, text, paths, self._library_store()
             )
 
     @endpoint

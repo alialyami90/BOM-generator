@@ -374,7 +374,8 @@ def test_settings_names_the_resolved_brand_and_the_register_key() -> None:
     assert '<div class="form form--2" style="margin-top:var(--space-3)">${KINDS.map(' in sub
     assert "`Same as the project (${from})`" in sub
     assert "const docOpts = (p) => p.documents.map((d) => [d.key, d.key]);" in sub
-    assert "data-key=\"${key}\">Reset</button>` : ''}</td></tr>`" in sub  # no "Default" on each row
+    # M37 (audit APP-22) puts "Default" back on unchanged rows, as screens.md "Settings" shows.
+    assert "Reset</button>` : '<span class=\"muted small\">Default</span>'}</td></tr>`" in sub
 
 
 def test_the_register_rows_are_two_lines() -> None:
@@ -861,3 +862,17 @@ def test_parts_rows_edit_the_l2_link_and_the_rtac_com_ports() -> None:
     assert "r.serial_ports == null ? ''" in link  # only an RTAC row has COM ports
     assert "${linkRow(r)}${sfpRows(r)}" in js
     assert "'eofcl'.includes(k[0])" in js  # the row shows its unsaved mark
+
+
+def test_settings_yaml_is_checked_by_the_engine_and_applied_to_the_form() -> None:
+    """M37 (audit APP-21): components.md "YAML editor"; Apply stays off while an error remains."""
+    sub = (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
+    css = (UI_DIR / "styles.css").read_text(encoding="utf-8")
+    assert "Read-only in the app for now" not in sub
+    assert "Bridge.call('check_substation_yaml', S.project.file, S.sub, text, paths)" in sub
+    assert "const ready = edited && YT.check && YT.check.text === YT.text && !n;" in sub
+    assert "id=\"yt-apply\" ${y.ready ? '' : 'disabled'}>${icon('check')}Apply to form" in sub
+    assert "ACTIONS['yt-revert']" in sub
+    assert "if (c.other_changes.length) {" in sub  # a change with no Settings field is not applied
+    assert "ST.apply(key, typed);" in sub
+    assert ".code--edit textarea.src {" in css

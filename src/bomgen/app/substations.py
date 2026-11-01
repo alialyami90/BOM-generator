@@ -7,6 +7,7 @@ the substation writes itself (``docs/ui/screens.md``, Substation settings).
 
 from __future__ import annotations
 
+import copy
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any, NamedTuple
@@ -16,7 +17,9 @@ from pydantic import BaseModel, ValidationError
 from bomgen.app.projects import brands, load_with_issues, project_only
 from bomgen.engine.errors import EngineError
 from bomgen.engine.layout import LayoutIssue, with_layout
+from bomgen.io.edit import substation_file
 from bomgen.io.errors import InputError, Issue
+from bomgen.io.fields import check_yaml
 from bomgen.io.loader import LoadedSubstation, load_library
 from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.errors import LibraryPackageError
@@ -281,3 +284,60 @@ def substation_page(project_file: Path, substation_id: str, store: LibraryStore)
         substation = None
     library = _library(project_file, found.project, store)
     return _page(project_file, found.project, found.file, substation, None, found.problems, library)
+
+
+_MISSING = object()
+
+
+def check_settings_yaml(
+    project_file: Path,
+    substation_id: str,
+    text: str,
+    paths: Sequence[Sequence[str]],
+    store: LibraryStore,
+) -> dict[str, Any]:
+    """``text`` as the new substation.yaml, checked and read for the Settings form (plan M37):
+    its problems with their lines, the value at each of ``paths`` (``None`` when absent), and
+    the top-level keys it changes outside them. Nothing is written."""
+    file = substation_file(project_file, substation_id)
+    check = check_yaml(project_file, text, substation=substation_id, store=store)
+    problems = [
+        {"file": str(i.file), "location": i.location, "message": i.message, "line": i.line}
+        for i in check.issues
+    ]
+    if check.data is None:
+        return {"problems": problems, "values": None, "other_changes": []}
+    values = {}
+    for path in paths:
+        found = _at(check.data, path)
+        values[".".join(path)] = None if found is _MISSING else found
+    saved = read_yaml(file).data
+    new, old = _without(check.data, paths), _without(saved, paths)
+    other = [key for key in dict.fromkeys([*old, *new]) if old.get(key) != new.get(key)]
+    return {"problems": problems, "values": values, "other_changes": other}
+
+
+def _at(data: Any, path: Sequence[str]) -> Any:
+    for key in path:
+        if not isinstance(data, dict) or key not in data:
+            return _MISSING
+        data = data[key]
+    return data
+
+
+def _without(data: dict[str, Any], paths: Sequence[Sequence[str]]) -> dict[str, Any]:
+    """``data`` without the values at ``paths``, and without mappings that leaves empty."""
+    data = copy.deepcopy(data)
+    for path in paths:
+        parents = [data]
+        for key in path[:-1]:
+            child = parents[-1].get(key) if isinstance(parents[-1], dict) else None
+            if not isinstance(child, dict):
+                break
+            parents.append(child)
+        else:
+            parents[-1].pop(path[-1], None)
+            for depth in range(len(path) - 1, 0, -1):
+                if parents[depth] == {}:
+                    parents[depth - 1].pop(path[depth - 1], None)
+    return data
