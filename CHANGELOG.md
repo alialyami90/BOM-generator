@@ -9,6 +9,13 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Desktop conveniences (M39, APP-25 to APP-28). When the window comes back
+  into focus and someone else changed a project file, the app reloads it and
+  says so, or, over unsaved changes, asks: Reload (lose my changes) or Keep
+  mine. Home offers Restore deleted project… for 30 days. F6 moves between
+  the rail, the page and the status bar, and Ctrl+O opens a project folder.
+  Project › Overview offers Record <active version> in this project when the
+  recorded library differs, with Undo.
 - Add a device on Parts offers Monitor and Keyboard and mouse (M38, APP-23),
   and the rail shows "Not set up" on Parts until a substation has its first
   parts, or how many rows name a part the library lacks (APP-24). A

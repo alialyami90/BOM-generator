@@ -10,6 +10,7 @@
 
   /* ---------- data: the file's list (data) and the draft the page edits ---------- */
   const LM = { key: '', state: 'idle', data: null, error: null };
+  App.onDiskChange(() => { LM.state = 'idle'; });
   let draft = null;  // { rows: [{ orig, base, item }], removed: [orig], host }
   let saving = false, refusal = '';
   const clean = (item) => {  // the keys the writers take, without the empty ones

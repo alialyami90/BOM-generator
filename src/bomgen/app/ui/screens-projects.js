@@ -35,9 +35,15 @@
   const projects = () => PROJECTS.rows.map(view);
   function loadProjects() {
     PROJECTS.state = 'loading';
-    return Bridge.call('list_projects').then((rows) => { PROJECTS.rows = rows; }).catch(fail)
+    const deleted = Bridge.call('deleted_projects').then((rows) => { DELETED.rows = rows; }).catch(() => { DELETED.rows = []; });
+    return Promise.all([Bridge.call('list_projects').then((rows) => { PROJECTS.rows = rows; }).catch(fail), deleted])
       .then(() => { PROJECTS.state = 'loaded'; PROJECTS.once = true; App.render(); });
   }
+  App.onDiskChange(() => {
+    if (!S.project || !S.project.file) return null;
+    const sub = S.sub;
+    return Bridge.call('open_project', S.project.file).then((page) => { const tab = S.tab.project; S.project = view(page); S.sub = sub; S.tab.project = tab; }).catch(() => {});
+  });
   function openProject(file, tab = 'substations') {
     return Bridge.call('open_project', file).then((page) => {
       S.project = view(page); S.proj = S.project.id; S.sub = null; S.dirty = false;
@@ -69,7 +75,7 @@
     const loading = !PROJECTS.once;
     return `<div class="page">
       ${pageHead('Projects', 'Every project on this PC. A project holds several substations, each with its own panels and workbook.',
-        `<button class="btn btn--secondary" data-action="import-project">${icon('download')}Import project file…</button><button class="btn btn--secondary" data-action="open-project">${icon('folder')}Open folder…</button><button class="btn btn--primary" data-action="new-project">${icon('plus')}New project…</button>`)}
+        `${DELETED.rows.length ? `<button class="btn btn--ghost" data-action="restore-deleted">${icon('history')}Restore deleted project…</button>` : ''}<button class="btn btn--secondary" data-action="import-project">${icon('download')}Import project file…</button><button class="btn btn--secondary" data-action="open-project">${icon('folder')}Open folder…</button><button class="btn btn--primary" data-action="new-project">${icon('plus')}New project…</button>`)}
       ${S.launch === 'bomproj' ? `<div style="margin-bottom:var(--space-4)">${banner('info', `<b>You opened a project file.</b> <span class="mono">${esc(S.launchFile)}</span> is not added yet. Review what it contains before it is imported.`, `<button class="btn btn--primary btn--sm" data-action="import-launched">Review import…</button>`)}</div>` : ''}
       ${loading ? '<p class="muted">Reading the projects on this PC…</p>' : rows.length ? `<div class="table-wrap"><table class="table table--comfort">
         <thead><tr><th>Project</th><th>Client</th><th class="num">Substations</th><th>Library</th><th>Last changed</th><th>Status</th></tr></thead>
@@ -83,6 +89,23 @@
         <div class="banner banner--info">${icon('info')}<div class="grow"><b>Got a device library update?</b><div class="small">Update packages are .bomlib files. Import one to review what it changes before it is installed.</div></div><a class="btn btn--secondary" href="#/library/import">Import update…</a></div>
       </div>
     </div>`;
+  };
+  /* APP-28: the project builds with the version it records; this records the active one. */
+  ACTIONS['po-record-lib'] = (el) => {
+    const was = S.project.library.builtWith, now = S.project.library.active;
+    el.disabled = true;
+    const record = (v) => Bridge.call('set_project_field', S.project.file, ['library', 'version'], v).then((page) => { const tab = S.tab.project; S.project = view(page); S.tab.project = tab; App.render(); });
+    record(now).then(() => toast(`The project records ${now} now`, 'check', () => record(was).catch(fail))).catch((e) => { el.disabled = false; fail(e); });
+  };
+  /* APP-26: a deleted project's .bomproj is offered back for 30 days. */
+  const DELETED = { rows: [] };
+  ACTIONS['restore-deleted'] = () => dialog({ title: 'Restore a deleted project', body: `<p class="muted">Deleted projects are kept for 30 days. Restoring one puts its folder back in the workspace.</p>
+    <div class="table-wrap" style="margin-top:var(--space-3)"><table class="table"><thead><tr><th>Project</th><th>Deleted</th><th><span class="sr-only">Restore</span></th></tr></thead><tbody>${DELETED.rows.map((r, i) => `<tr><td class="mono">${esc(r.name)}</td><td>${esc(day(r.deleted))}</td><td style="text-align:right"><button class="btn btn--secondary btn--sm" data-action="restore-deleted-do" data-i="${i}">Restore</button></td></tr>`).join('')}</tbody></table></div><div id="rd-err" class="err small" role="alert"></div>`,
+    actions: '<button class="btn btn--secondary" data-action="close">Close</button>' });
+  ACTIONS['restore-deleted-do'] = (el) => {
+    const r = DELETED.rows[+el.dataset.i]; el.disabled = true;
+    Bridge.call('restore_deleted_project', r.file).then((x) => { closeDialog(); PROJECTS.state = 'idle'; toast(`Restored ${r.name}`, 'check'); openProject(x.project_file); })
+      .catch((e) => { el.disabled = false; document.getElementById('rd-err').innerHTML = `${icon('error')}<span>${esc(e.message)}</span>`; });
   };
   ACTIONS['open-proj'] = (el) => {
     closeDialog();
@@ -171,7 +194,7 @@
       <p class="lede">The project records which library version it was built with, so a colleague can reproduce the workbook. All its substations use the same version.</p>
       <dl class="kv"><dt>Library</dt><dd>${esc(p.library.name)}</dd><dt>Built with</dt><dd>${esc(p.library.builtWith)} ${p.library.local ? badge('plain', "The project's own library file") : p.library.note ? badge('warn', 'Differs from active', 'warn') : badge('ok', 'Matches active', 'check')}</dd><dt>Active on this PC</dt><dd>${esc(p.library.active)}</dd></dl>
       ${p.library.note ? `<p class="small" style="margin-top:var(--space-2);color:var(--color-warning)">${esc(p.library.note)}</p>` : ''}
-      <div class="row" style="margin-top:var(--space-3)"><button class="btn btn--secondary" data-action="goto" data-to="#/library">Open library</button></div>
+      <div class="row" style="margin-top:var(--space-3)">${p.real && p.library.note && !p.library.local && p.library.active !== '—' && p.library.active !== p.library.builtWith ? `<button class="btn btn--primary" data-action="po-record-lib">Record ${esc(p.library.active)} in this project</button>` : ''}<button class="btn btn--secondary" data-action="goto" data-to="#/library">Open library</button></div>
     </div>
     ${p.real && Object.keys(p.brands).length ? `<div class="span-2 section" style="margin:0">
       <h3>Catalogue brands</h3>

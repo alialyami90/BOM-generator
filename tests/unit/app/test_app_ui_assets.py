@@ -916,3 +916,34 @@ def test_a_generated_panel_edits_the_shared_numbering_patterns() -> None:
     assert "if (k === 'g') return [['generated_panels', a], 'text'];" in js
     for field in ("cabinet_name", "cabinet_number", "tag_prefix", "sheet_name"):
         assert f"edit('g.{field}'" in js
+
+
+def test_a_file_changed_on_disk_reloads_or_asks() -> None:
+    """APP-25: stamps on blur and focus; reload quietly, or a banner over unsaved changes."""
+    ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    assert "window.addEventListener('blur'" in ui
+    assert "call('file_stamps', before.file)" in ui
+    assert "changed on disk. Reloaded." in ui
+    assert 'data-action="disk-reload">Reload (lose my changes)' in ui
+    assert 'data-action="disk-keep">Keep mine (overwrite the file)' in ui
+    for name in ("substation", "panels", "device-preview", "panel-editor", "verify", "loose"):
+        assert "App.onDiskChange(" in (UI_DIR / f"screens-{name}.js").read_text("utf-8")
+
+
+def test_f6_moves_between_regions_and_ctrl_o_opens_a_project() -> None:
+    """APP-27: docs/ui/screens.md "Keyboard"."""
+    ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    assert "e.key === 'F6'" in ui
+    assert "['#nav', '#main', '#status']" in ui
+    assert "e.key.toLowerCase() === 'o'" in ui
+    assert "ACTIONS['open-project']" in ui
+
+
+def test_home_restores_deleted_projects_and_overview_records_the_library() -> None:
+    """APP-26 and APP-28."""
+    js = (UI_DIR / "screens-projects.js").read_text(encoding="utf-8")
+    assert "Bridge.call('deleted_projects')" in js
+    assert "Bridge.call('restore_deleted_project', r.file)" in js
+    assert "Restore deleted project…" in js
+    assert "Record ${esc(p.library.active)} in this project" in js
+    assert "['library', 'version']" in js
