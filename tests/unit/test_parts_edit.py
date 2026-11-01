@@ -223,3 +223,82 @@ def test_a_sized_l1_without_a_part_takes_the_switch_default(project: Path) -> No
     assert parts_edit.set_cable_manager(project, "gis01", L1, False).written
 
     assert equipment(project)[L1].cable_manager is False
+
+
+# M31 (design note 2026-10-31, ENG-3): a new row's L2 link and own SFPs, seeded by the
+# library part's category so a fresh project gets its network accessories.
+
+FW = 5  # the example's ext-fw row (FGR-60F, two 1G SFP slots)
+
+
+def started(project: Path) -> dict[str, Equipment]:
+    empty(project)
+    rows: list[dict[str, object]] = [
+        {"role": "l2_switch", "part_id": "RST2228-L2", "redundant": True},
+        {"role": "other", "part_id": "SEL-3555-GW", "redundant": True},
+        {"role": "firewall", "part_id": "FGR-60F", "redundant": True},
+        {"role": "time_server", "part_id": "SEL-2488"},
+        {"role": "other", "part_id": "SEL-3555-RTAC"},
+        {"role": "da_server", "part_id": "SEL-3355"},
+        {"role": "other", "part_id": "SEL-2240"},
+    ]
+    assert parts_edit.start_parts(project, "gis01", rows).written
+    return {e.part_id or e.id: e for e in equipment(project)}
+
+
+def link(row: Equipment) -> tuple[int, str]:
+    return row.l2_ports, row.l2_speed.value
+
+
+def test_start_parts_seeds_each_networked_rows_l2_link_by_category(project: Path) -> None:
+    rows = started(project)
+    assert link(rows["SEL-3555-GW"]) == (1, "1G")
+    assert link(rows["FGR-60F"]) == (1, "1G")
+    assert link(rows["SEL-2488"]) == (1, "100M")
+    assert link(rows["SEL-3555-RTAC"]) == (2, "1G")
+    assert link(rows["SEL-3355"]) == (1, "1G")
+
+
+def test_rows_without_an_l2_link_are_not_seeded(project: Path) -> None:
+    rows = started(project)
+    assert rows["SEL-2240"].l2_ports == 0  # I/O chassis
+    assert rows["RST2228-L2"].l2_ports == 0  # the switches are sized, not linked
+    assert "l2_ports" not in text(project).split("SEL-2240")[1].split("}")[0]
+
+
+def test_a_firewalls_own_sfps_follow_its_sfp_slots(project: Path) -> None:
+    plan = started(project)["FGR-60F"].port_plan
+    assert plan is not None
+    assert [(a.count, a.speed.value, a.media.value) for a in plan.downlinks] == [(2, "1G", "MM")]
+
+
+def test_the_rtac_com_ports_stay_for_the_engineer_to_enter(project: Path) -> None:
+    assert started(project)["SEL-3555-RTAC"].port_plan is None
+
+
+def test_a_new_part_reseeds_a_link_still_at_the_old_parts_defaults(project: Path) -> None:
+    rows = started(project)
+    index = list(rows).index("FGR-60F")
+    parts_edit.set_equipment_part(project, "gis01", index, "FGR-60F.CISCO-LOW")  # RJ45 only
+    row = equipment(project)[index]
+    assert (link(row), row.port_plan) == ((1, "1G"), None)
+
+
+def test_a_new_part_keeps_a_link_the_engineer_changed(project: Path) -> None:
+    fields.set_field(project, ("equipment", GW, "l2_ports"), 3, substation="gis01")
+    other = "SEL-3555-GW.SIEMENS-LOW"
+    parts_edit.set_equipment_part(project, "gis01", GW, other)
+    assert equipment(project)[GW].l2_ports == 3
+
+
+def test_an_added_row_gets_the_defaults_for_the_fields_it_leaves_out() -> None:
+    lib = load_project(EXAMPLES / "project.yaml").library
+    row = {"id": "gw-2", "role": "other", "part_id": "SEL-3555-GW", "l2_speed": "100M"}
+    assert parts_edit.with_link_defaults(row, lib) == {**row, "l2_ports": 1}
+
+
+def test_a_firewall_with_many_sfp_slots_is_seeded_two_sfps() -> None:
+    # A1, 2026-11-01: min(2, the part's SFP slots); FGR-60F.CISCO-HIGH has 10 slots.
+    lib = load_project(EXAMPLES / "project.yaml").library
+    seeded = parts_edit.link_defaults(lib.get("FGR-60F.CISCO-HIGH"), "firewall")
+    assert seeded["port_plan"] == {"downlinks": [{"count": 2, "speed": "1G", "media": "MM"}]}

@@ -956,11 +956,19 @@ class Api:
 
     @endpoint
     def add_equipment(
-        self, project_file: str, substation_id: str, row: dict[str, Any], index: int | None
+        self,
+        project_file: str,
+        substation_id: str,
+        row: dict[str, Any],
+        index: int | None,
+        seed: bool = False,
     ) -> dict[str, Any]:
         """Insert an equipment row (at the end when ``index`` is None); refused with the
-        model's message, e.g. for an id the substation already has. Returns the page."""
+        model's message, e.g. for an id the substation already has. ``seed`` fills the L2
+        link defaults of a new row (M31); Undo leaves it off. Returns the page."""
         store = self._library_store()
+        if seed:
+            row = parts_edit.seeded_row(Path(project_file), row, store=store)
         with self._substation(substation_id), _edit_refusals():
             result = insert_item(
                 Path(project_file),

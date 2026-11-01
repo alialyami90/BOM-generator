@@ -8,6 +8,7 @@ L1 switch. Every writer is checked against the whole project before it writes.
 
 from __future__ import annotations
 
+import json
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -18,9 +19,11 @@ from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from bomgen.engine.layout import CABLE_MANAGED
 from bomgen.io.edit import EditError, EditResult, edit_substation, substation_file
 from bomgen.io.errors import InputError
-from bomgen.io.loader import load_project
+from bomgen.io.loader import load_library, load_project
 from bomgen.io.round_trip import insert_entry, load_text, remove_entry, set_entry
-from bomgen.models.library import Category, DeviceType
+from bomgen.io.yaml_source import read_yaml
+from bomgen.models.library import Category, DeviceType, Library, PortKind
+from bomgen.models.project import Project
 from bomgen.models.substation import EquipmentRole, PartOverrides
 
 if TYPE_CHECKING:
@@ -38,9 +41,71 @@ ROLE_IDS = {
     EquipmentRole.CONSOLE: "console",
     EquipmentRole.ANNUNCIATOR: "ann",
 }
+# a networked row's L2 link per unit, by library category (M31 design note): ports, speed
+CATEGORY_LINKS = {
+    Category.GATEWAY: (1, "1G"),
+    Category.FIREWALL: (1, "1G"),
+    Category.GPS_CLOCK: (1, "100M"),
+    Category.RTAC: (2, "1G"),
+    Category.WORKSTATION: (1, "1G"),
+}
+FIREWALL_SFPS = 2  # a firewall's own MM SFPs, at most its SFP slots (A1, 2026-11-01)
+LINK_KEYS = ("l2_ports", "l2_speed", "port_plan")
+SIZED_ROLES = (EquipmentRole.L1_SWITCH.value, EquipmentRole.L2_SWITCH.value)
 NO_L2 = "Pick the L2 switch first: the network is sized from it."
 # what a part change clears: it described the old part (decision 1 of the M23 plan)
 OLD_PART_KEYS = ("overrides", "sfp", "ordering_code")
+
+
+def link_defaults(part: DeviceType | None, role: object) -> dict[str, Any]:
+    """The L2 link a new row of ``part`` starts with, and a firewall's own SFPs, two or its SFP
+    slots if fewer; empty for a sized switch or a part with no link (M31)."""
+    if part is None or role in SIZED_ROLES or part.category not in CATEGORY_LINKS:
+        return {}
+    ports, speed = CATEGORY_LINKS[part.category]
+    seeded: dict[str, Any] = {"l2_ports": ports, "l2_speed": speed}
+    downlinks, left = [], FIREWALL_SFPS
+    for group in part.ports if part.category is Category.FIREWALL else ():
+        if group.kind is PortKind.SFP_SLOT and left:
+            count, left = min(group.count, left), left - min(group.count, left)
+            downlinks.append({"count": count, "speed": group.speed.value, "media": "MM"})
+    if downlinks:
+        seeded["port_plan"] = {"downlinks": downlinks}
+    return seeded
+
+
+def with_link_defaults(row: Mapping[str, Any], library: Library | None) -> dict[str, Any]:
+    """``row`` with the link defaults for the keys it leaves out."""
+    part = library.get(row["part_id"]) if library and row.get("part_id") else None
+    return {**link_defaults(part, row.get("role")), **row}
+
+
+def seeded_row(
+    project_file: Path, row: Mapping[str, Any], *, store: LibraryStore | None = None
+) -> dict[str, Any]:
+    """A row the Parts page adds, with the link defaults of its part."""
+    return with_link_defaults(row, _library_of(project_file, store))
+
+
+def _plain(value: object) -> object:
+    """A value read from the YAML file as plain dicts, lists and scalars."""
+    return json.loads(json.dumps(value, default=str))
+
+
+def _library_of(project_file: Path, store: LibraryStore | None) -> Library | None:
+    """The project's library on its own: a new substation may not load yet."""
+    from bomgen.library_store.errors import LibraryPackageError
+
+    try:
+        selection = Project.model_validate(read_yaml(project_file).data).library
+        if selection.file is not None:
+            return load_library(project_file.parent / selection.file)
+        from bomgen.library_store.store import LibraryStore, default_library_home
+
+        store = store or LibraryStore(default_library_home())
+        return load_library(store.library_file(selection.name, selection.version))
+    except (InputError, ValidationError, OSError, LibraryPackageError):
+        return None
 
 
 def _entry(data: CommentedMap, index: int) -> CommentedMap:
@@ -205,12 +270,25 @@ def set_equipment_part(
     if row.get("part_id") == part_id:
         return EditResult(False, ()), ()
     cleared = tuple(k for k in OLD_PART_KEYS if k in row)
+    library = _library_of(project_file, store)
+    old_part = library.get(str(row.get("part_id"))) if library else None
+    new_part = library.get(part_id) if library else None
+    role = row.get("role")
+    written = {k: _plain(row[k]) for k in LINK_KEYS if k in row}
+    reseed = written == link_defaults(old_part, role)  # the engineer changed nothing
 
     def change(data: CommentedMap) -> None:
         target = _entry(data, index)
         set_entry(target, "part_id", part_id)
         for key in cleared:
             remove_entry(target, key)
+        if reseed:
+            seeded = link_defaults(new_part, role)
+            for key in LINK_KEYS:
+                if key in seeded:
+                    set_entry(target, key, seeded[key])
+                elif key in target:
+                    remove_entry(target, key)
 
     return edit_substation(project_file, substation_id, change, store=store), cleared
 
@@ -234,6 +312,8 @@ def start_parts(
         raise EditError(NO_L2)
     if not any(r["role"] == EquipmentRole.L1_SWITCH for r in picked):
         picked.append({"role": EquipmentRole.L1_SWITCH.value, "redundant": True})
+    library = _library_of(project_file, store)
+    picked = [with_link_defaults(r, library) for r in picked]
     taken: set[str] = set()
     for r in picked:
         if not r.get("id"):
