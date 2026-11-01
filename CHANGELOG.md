@@ -61,6 +61,11 @@ project uses [Semantic Versioning](https://semver.org/).
   inputs or product name (M43), for example the SCALANCE XR324-4M EEC as
   "8 MM Ports, 16 RJ45" and the SoftMaker suites under their own names. A
   figure the device database lacks is left out of the text.
+- The installer ships psa-devices 1.15.0. The contractor's switches (Cisco
+  IE-4010-16S12P and C9300-24T-A, RUGGEDCOM RST2228-28SFP-HV, SEL-2743 and
+  SEL-2744), the eight FortiGates and the 21 Hubbell FEUR fibre shelves now
+  carry a tag type and level, so they print with a tag and a nameplate. The
+  automatic L1 pick, the IE-4010, prints L1-ESW-A11 like the RST2228 (M44).
 
 ### Fixed
 

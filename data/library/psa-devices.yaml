@@ -4670,6 +4670,7 @@ devices:
     model: "C9300-24T-A"
     ordering_code: "C9300-24T-A + C9300-NM-8X + PWR-C1-350WAC-P"
     description_template: "Catalyst 9300 data-only switch, 1U rack, 24 x 1G RJ45 and C9300-NM-8X with 8 x 10G SFP+ cages, separate 1G RJ45 management, one PWR-C1-350WAC-P at 230 VAC, Network Advantage"
+    tag_type: "ESW"  # M44: as the RST2228 switches (ADR 0030)
     supply_type: "VAC"
     voltage_v: 230
     unit_power_w: 395
@@ -4691,6 +4692,7 @@ devices:
     model: "IE-4010-16S12P"
     ordering_code: "IE-4010-16S12P + 2 x PWR-RGD-AC-DC-H"
     description_template: "Industrial Ethernet switch, 1U rack, 16 x 1G SFP cages and 12 x 1G RJ45, PoE disabled, two PWR-RGD-AC-DC-H supplies at 125 VDC"
+    tag_type: "ESW"  # M44: as the RST2228 switches (ADR 0030)
     supply_type: "VDC"
     voltage_v: 125
     unit_power_w: 70
@@ -4713,6 +4715,7 @@ devices:
     model: "RUGGEDCOM RST2228"
     ordering_code: "6GK6222-6AB00-5CC0-Z A00+B06+C06+D06+E06+F06+G06"
     description_template: "Rugged managed Layer 2 switch, 24 gigabit SFP and 4 ten-gigabit SFP+ ports, dual 125 VDC supply, 1U rack"
+    tag_type: "ESW"  # M44: as the RST2228 switches (ADR 0030)
     supply_type: "VDC"
     voltage_v: 125
     unit_power_w: 77
@@ -4732,6 +4735,7 @@ devices:
     make: "SEL"
     model: "SEL-2743"
     description_template: "Managed Ethernet switch"
+    tag_type: "ESW"  # M44: as the RST2228 switches (ADR 0030)
     supply_type: "VDC"
     voltage_v: 125
     unit_power_w: 80
@@ -4751,6 +4755,7 @@ devices:
     make: "SEL"
     model: "SEL-2744"
     description_template: "Managed Ethernet switch"
+    tag_type: "ESW"  # M44: as the RST2228 switches (ADR 0030)
     supply_type: "VDC"
     voltage_v: 125
     unit_power_w: 80
@@ -4772,6 +4777,8 @@ devices:
     model: "FortiGate 121G"
     ordering_code: "FG-121G"
     description_template: "FortiGate 121G next-generation firewall, 480 GB SSD, dual AC supplies, 1U rack mount"
+    tag_type: "FW"  # M44: as FGR-60F (ADR 0030)
+    purdue_level: "EXT"
     supply_type: "VAC"
     voltage_v: 230
     unit_power_w: 47
@@ -4794,6 +4801,8 @@ devices:
     model: "FortiGate 60F"
     ordering_code: "FG-60F"
     description_template: "FortiGate 60F firewall, 230 VAC via included external DC adapter"
+    tag_type: "FW"  # M44: as FGR-60F (ADR 0030)
+    purdue_level: "EXT"
     supply_type: "VAC"
     voltage_v: 230
     unit_power_w: 12.43
@@ -4812,6 +4821,8 @@ devices:
     model: "FortiGate 70F"
     ordering_code: "FG-70F"
     description_template: "FortiGate 70F firewall, 230 VAC via included external DC adapter"
+    tag_type: "FW"  # M44: as FGR-60F (ADR 0030)
+    purdue_level: "EXT"
     supply_type: "VAC"
     voltage_v: 230
     unit_power_w: 12.43
@@ -4830,6 +4841,8 @@ devices:
     model: "FortiGate Rugged 70F"
     ordering_code: "FGR-70F"
     description_template: "FortiGate Rugged 70F firewall, dual DC inputs, 125 VDC planning feed"
+    tag_type: "FW"  # M44: as FGR-60F (ADR 0030)
+    purdue_level: "EXT"
     supply_type: "VDC"
     voltage_v: 125
     unit_power_w: 18
@@ -4977,6 +4990,8 @@ devices:
     model: "FortiGate 401G"
     ordering_code: "FG-401G"
     description_template: "FortiGate 401G next-generation firewall, 960 GB SSD, dual AC supplies, 1U rack mount"
+    tag_type: "FW"  # M44: as FGR-60F (ADR 0030)
+    purdue_level: "EXT"
     supply_type: "VAC"
     voltage_v: 230
     unit_power_w: 295
@@ -5000,6 +5015,8 @@ devices:
     model: "FortiGate 701G"
     ordering_code: "FG-701G"
     description_template: "FortiGate 701G next-generation firewall, 960 GB SSD, dual AC supplies, 1U rack mount"
+    tag_type: "FW"  # M44: as FGR-60F (ADR 0030)
+    purdue_level: "EXT"
     supply_type: "VAC"
     voltage_v: 230
     unit_power_w: 295
@@ -5023,6 +5040,8 @@ devices:
     model: "FEUR12LCDM"
     ordering_code: "FEUR12LCDM"
     description_template: "Loaded fiber shelf, 12 fiber positions, LC duplex, MM"
+    tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
+    tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
   - part_id: HUBBELL-FEUR12LCDOM3  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
@@ -5031,6 +5050,8 @@ devices:
     model: "FEUR12LCDOM3"
     ordering_code: "FEUR12LCDOM3"
     description_template: "Loaded fiber shelf, 12 fiber positions, LC duplex, OM3"
+    tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
+    tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
   - part_id: HUBBELL-FEUR12LCDSM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
@@ -5039,6 +5060,8 @@ devices:
     model: "FEUR12LCDSM"
     ordering_code: "FEUR12LCDSM"
     description_template: "Loaded fiber shelf, 12 fiber positions, LC duplex, SM"
+    tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
+    tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
   - part_id: HUBBELL-FEUR12SCM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
@@ -5047,6 +5070,8 @@ devices:
     model: "FEUR12SCM"
     ordering_code: "FEUR12SCM"
     description_template: "Loaded fiber shelf, 12 fiber positions, SC duplex, MM"
+    tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
+    tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
   - part_id: HUBBELL-FEUR12SCOM3  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
@@ -5055,6 +5080,8 @@ devices:
     model: "FEUR12SCOM3"
     ordering_code: "FEUR12SCOM3"
     description_template: "Loaded fiber shelf, 12 fiber positions, SC duplex, OM3"
+    tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
+    tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
   - part_id: HUBBELL-FEUR12SCSM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
@@ -5063,6 +5090,8 @@ devices:
     model: "FEUR12SCSM"
     ordering_code: "FEUR12SCSM"
     description_template: "Loaded fiber shelf, 12 fiber positions, SC duplex, SM"
+    tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
+    tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
   - part_id: HUBBELL-FEUR12STM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
@@ -5071,6 +5100,8 @@ devices:
     model: "FEUR12STM"
     ordering_code: "FEUR12STM"
     description_template: "Loaded fiber shelf, 12 fiber positions, ST, MM"
+    tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
+    tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
   - part_id: HUBBELL-FEUR24LCDM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
@@ -5079,6 +5110,8 @@ devices:
     model: "FEUR24LCDM"
     ordering_code: "FEUR24LCDM"
     description_template: "Loaded fiber shelf, 24 fiber positions, LC duplex, MM"
+    tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
+    tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
   - part_id: HUBBELL-FEUR24LCDOM3  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
@@ -5087,6 +5120,8 @@ devices:
     model: "FEUR24LCDOM3"
     ordering_code: "FEUR24LCDOM3"
     description_template: "Loaded fiber shelf, 24 fiber positions, LC duplex, OM3"
+    tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
+    tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
   - part_id: HUBBELL-FEUR24LCDSM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
@@ -5095,6 +5130,8 @@ devices:
     model: "FEUR24LCDSM"
     ordering_code: "FEUR24LCDSM"
     description_template: "Loaded fiber shelf, 24 fiber positions, LC duplex, SM"
+    tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
+    tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
   - part_id: HUBBELL-FEUR24SCM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
@@ -5103,6 +5140,8 @@ devices:
     model: "FEUR24SCM"
     ordering_code: "FEUR24SCM"
     description_template: "Loaded fiber shelf, 24 fiber positions, SC duplex, MM"
+    tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
+    tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
   - part_id: HUBBELL-FEUR24SCOM3  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
@@ -5111,6 +5150,8 @@ devices:
     model: "FEUR24SCOM3"
     ordering_code: "FEUR24SCOM3"
     description_template: "Loaded fiber shelf, 24 fiber positions, SC duplex, OM3"
+    tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
+    tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
   - part_id: HUBBELL-FEUR24SCSM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
@@ -5119,6 +5160,8 @@ devices:
     model: "FEUR24SCSM"
     ordering_code: "FEUR24SCSM"
     description_template: "Loaded fiber shelf, 24 fiber positions, SC duplex, SM"
+    tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
+    tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
   - part_id: HUBBELL-FEUR24STM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
@@ -5127,6 +5170,8 @@ devices:
     model: "FEUR24STM"
     ordering_code: "FEUR24STM"
     description_template: "Loaded fiber shelf, 24 fiber positions, ST, MM"
+    tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
+    tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
   - part_id: HUBBELL-FEUR48LCDM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
@@ -5135,6 +5180,8 @@ devices:
     model: "FEUR48LCDM"
     ordering_code: "FEUR48LCDM"
     description_template: "Loaded fiber shelf, 48 fiber positions, LC duplex, MM"
+    tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
+    tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
   - part_id: HUBBELL-FEUR48LCDOM3  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
@@ -5143,6 +5190,8 @@ devices:
     model: "FEUR48LCDOM3"
     ordering_code: "FEUR48LCDOM3"
     description_template: "Loaded fiber shelf, 48 fiber positions, LC duplex, OM3"
+    tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
+    tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
   - part_id: HUBBELL-FEUR48LCDSM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
@@ -5151,6 +5200,8 @@ devices:
     model: "FEUR48LCDSM"
     ordering_code: "FEUR48LCDSM"
     description_template: "Loaded fiber shelf, 48 fiber positions, LC duplex, SM"
+    tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
+    tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
   - part_id: HUBBELL-FEUR48SCM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
@@ -5159,6 +5210,8 @@ devices:
     model: "FEUR48SCM"
     ordering_code: "FEUR48SCM"
     description_template: "Loaded fiber shelf, 48 fiber positions, SC duplex, MM"
+    tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
+    tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
   - part_id: HUBBELL-FEUR48SCOM3  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
@@ -5167,6 +5220,8 @@ devices:
     model: "FEUR48SCOM3"
     ordering_code: "FEUR48SCOM3"
     description_template: "Loaded fiber shelf, 48 fiber positions, SC duplex, OM3"
+    tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
+    tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
   - part_id: HUBBELL-FEUR48SCSM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
@@ -5175,6 +5230,8 @@ devices:
     model: "FEUR48SCSM"
     ordering_code: "FEUR48SCSM"
     description_template: "Loaded fiber shelf, 48 fiber positions, SC duplex, SM"
+    tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
+    tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
   - part_id: HUBBELL-FEURFSPD  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
@@ -5183,6 +5240,8 @@ devices:
     model: "FEURFSPD"
     ordering_code: "FEURFSPD"
     description_template: "Unloaded FSP adapter-panel fiber shelf, maximum 72 LC fiber positions"
+    tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
+    tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
   - part_id: FG-600F  # FortiGate 600F Series, p. 7
     category: "firewall"
@@ -5191,6 +5250,8 @@ devices:
     model: "FG-600F"
     ordering_code: "FG-600F"
     description_template: "FortiGate firewall, dual AC supplies, 1U rack"
+    tag_type: "FW"  # M44: as FGR-60F (ADR 0030)
+    purdue_level: "EXT"
     supply_type: "VAC"
     voltage_v: 230
     unit_power_w: 255
@@ -5212,6 +5273,8 @@ devices:
     model: "FG-601F"
     ordering_code: "FG-601F"
     description_template: "FortiGate firewall, dual AC supplies, 1U rack"
+    tag_type: "FW"  # M44: as FGR-60F (ADR 0030)
+    purdue_level: "EXT"
     supply_type: "VAC"
     voltage_v: 230
     unit_power_w: 260
