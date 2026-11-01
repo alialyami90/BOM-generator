@@ -99,6 +99,7 @@ A milestone with several modules may group them in a subfolder,
 | `app/test_app_hand_panels.py` | M32b | hand-written panels: add to `manual_panels`, per-field edits, delete only when nothing names the panel |
 | `app/test_app_library_catalogues.py` | M36 | Library › Catalogues: brand sets per catalogue edited as pending changes, Add brand, Make default |
 | `test_device_db_tools.py` | M41 | the M14 generator in `data/device-db/tools/`: alternative tiers as library parts, idempotent, skipped tiers listed |
+| `engine/test_annunciator_row.py` | M45 | an annunciator equipment row goes to loose material with its part's `loose_items` as its kit, fed from panel 001 |
 
 `builders.py`, `engine/engine_factories.py`, `project_store/project_builders.py`
 and `writer/writer_helpers.py` hold the small builders those tests share.
