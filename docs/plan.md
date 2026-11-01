@@ -1376,3 +1376,5 @@ the device tag rule.
 (Formatting, panel BOM) gives header row 2 a height of 26.25, or 53.1 on sheet 4; the writer uses
 26.25 on every sheet. M33 left it out as a spec-versus-code question. To ask Ali: follow the
 spec, or change the spec to 26.25?
+"Sheet 4" is read as the console panel (`kind: console`): the example's sheet 4 is the WS
+console, and the kind names the same cabinet in any project (A1, 2026-11-01).

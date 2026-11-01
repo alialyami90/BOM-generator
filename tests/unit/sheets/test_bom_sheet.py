@@ -6,6 +6,7 @@ import pytest
 
 from bomgen.models.bom import BomLine, Group, LooseTable, PanelBom, QtySum
 from bomgen.models.calc import LineRef
+from bomgen.models.panel import PanelKind
 from bomgen.models.sheet import Borders, BorderStyle, CellStyle, Formula, SheetModel
 from bomgen.sheets.bom_sheet import HEADERS, BomSheet, bom_sheet, loose_sheet
 
@@ -172,6 +173,12 @@ LOOSE = LooseTable(
         line(Group.B, "FO", qty="1 Lot", revised=frozenset({"E"})),
     ),
 )
+
+
+def test_console_header_row_is_53_1() -> None:
+    # Formatting, panel BOM sheets: "53.1 on sheet 4", the example's console (plan Q61).
+    console = panel(*LINES).model_copy(update={"kind": PanelKind.CONSOLE})
+    assert bom_sheet(console).model.rows[2].height == 53.1
 
 
 @pytest.fixture

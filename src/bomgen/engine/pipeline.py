@@ -151,6 +151,7 @@ def _finish(
     return PanelBom(
         panel_id=panel.id,
         sheet_name=panel.sheet_name,
+        kind=panel.kind,
         title=(panel.cabinet_number, f"{substation} - {panel.cabinet_name}"),
         lines=mark_revisions(panel, flatten(items)),
     )

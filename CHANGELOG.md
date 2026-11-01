@@ -18,6 +18,12 @@ project uses [Semantic Versioning](https://semver.org/).
   fails a tag that two devices share. The installer ships psa-devices
   1.10.0: gateway, GPS, RTAC and workstation parts are L2.
 
+### Fixed
+
+- The console's BOM sheet has a 53.1 pt header row, as the spec's
+  Formatting gives for sheet 4, the example's WS console (plan Q61, audit
+  ENG-11). The other panel sheets keep 26.25.
+
 ## [0.3.2] - 2026-11-01
 
 ### Added

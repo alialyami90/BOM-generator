@@ -93,6 +93,13 @@ def test_sheet_order(formulas: openpyxl.Workbook) -> None:
     ]  # fmt: skip
 
 
+def test_header_row_is_53_1_on_the_console_sheet(formulas: openpyxl.Workbook) -> None:
+    # Formatting, panel BOM sheets: "Row 26.25 (53.1 on sheet 4)"; the example's sheet 4 is
+    # the WS console, read as the console panel (plan Q61).
+    heights = {name: formulas[name].row_dimensions[2].height for name in ("1", "2", "3", "4")}
+    assert heights == {"1": 26.25, "2": 26.25, "3": 26.25, "4": 53.1}
+
+
 def test_bom_sheet_merges(formulas: openpyxl.Workbook) -> None:
     # Formatting → BOM sheets: the merged title; a designation spanning its kit rows; make
     # and model spanning the kit children that leave them empty.
