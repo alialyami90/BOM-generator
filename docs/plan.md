@@ -964,6 +964,10 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
   smallest of the catalogue's `larger_fans` whose pair moves its required airflow (ADR 0029,
   Proposed; audit 2026-10-31, ENG-6). Plan:
   [`superpowers/plans/2026-10-31-m34-larger-fans.md`](superpowers/plans/2026-10-31-m34-larger-fans.md).
+- **M31 — Port plan inputs for a fresh project.** Parts row inputs for the L2 link and the RTAC
+  COM ports (app, #283), seeded by library category when a row is added or its part changes,
+  and an `l2_link` check (audit 2026-10-31, ENG-3). Design:
+  [`superpowers/specs/2026-10-31-m31-port-plan-inputs-design.md`](superpowers/specs/2026-10-31-m31-port-plan-inputs-design.md).
 
 ## 5. Testing strategy
 

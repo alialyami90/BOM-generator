@@ -16,6 +16,7 @@ from collections.abc import Iterable, Sequence
 from bomgen.engine.network import port_plan
 from bomgen.engine.units import DeviceRow, expand_devices
 from bomgen.io.loader import LoadedSubstation
+from bomgen.io.parts_edit import CATEGORY_LINKS
 from bomgen.library_store.store import LibraryRef, library_mismatch
 from bomgen.models.bom import BomTable, BuildResult, LooseTable, PanelBom, QtySum
 from bomgen.models.calc import BranchMcb, DcMains, HeatResult
@@ -43,6 +44,7 @@ def check_report(loaded: LoadedSubstation, result: BuildResult) -> CheckReport:
     if di is not None:
         items.append(di)
     items += part_number_checks(loaded.substation.equipment, loaded.library)
+    items += l2_link_checks(loaded.substation.equipment, loaded.library)
     items += external_ac_checks(result.loose, loaded.library)
     return CheckReport(items=tuple(items))
 
@@ -346,6 +348,24 @@ def part_number_checks(equipment: Iterable[Equipment], library: Library) -> list
                 status=CheckStatus.WARN,
                 subject=entry.id,
                 message="no part number; the BOM prints the library model",
+            )
+        )
+    return items
+
+
+def l2_link_checks(equipment: Iterable[Equipment], library: Library) -> list[CheckItem]:
+    """A warning per networked equipment entry with no L2 link (M31)."""
+    items = []
+    for entry in equipment:
+        part = library.get(entry.part_id) if entry.part_id is not None else None
+        if part is None or part.category not in CATEGORY_LINKS or entry.l2_ports:
+            continue
+        items.append(
+            CheckItem(
+                check="l2_link",
+                status=CheckStatus.WARN,
+                subject=entry.id,
+                message="no L2 link (l2_ports is 0), so the L2 switch gets no SFP for it",
             )
         )
     return items

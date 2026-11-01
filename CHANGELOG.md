@@ -13,6 +13,12 @@ project uses [Semantic Versioning](https://semver.org/).
   (10M, 100M, 1G, 10G) and media (MM, SM, RJ45) on one line under the row's
   data, and an RTAC row its COM ports used. The sized switches and the patch
   panel have no link line. They save with the rest of Parts.
+- A device added on Parts, or picked when a substation starts, comes with
+  its link to the L2 switch filled in by category (M31, audit ENG-3):
+  gateways, firewalls and workstations 1 x 1G, the GPS clock 1 x 100M, the
+  RTAC 2 x 1G, and a firewall one MM SFP per SFP slot. A changed part takes
+  the new part's link unless the row was edited. The check report warns
+  about a networked device with no L2 link.
 - Hand-written panels in the panel editor (M32b). Add hand-written panel… on
   Panels asks for a name, cabinet number, kind and first device, writes
   `panels/<id>.yaml` listed last in `manual_panels`, and opens it on Devices.

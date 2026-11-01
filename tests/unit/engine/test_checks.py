@@ -11,6 +11,7 @@ from bomgen.checks import (
     dc_main_checks,
     di_capacity_check,
     external_ac_checks,
+    l2_link_checks,
     library_check,
     part_number_checks,
     render_json,
@@ -432,3 +433,22 @@ def test_an_ac_loose_load_is_reported_as_left_out_of_the_totals() -> None:
         )
     ]
     assert external_ac_checks(None, lib) == []
+
+
+def test_a_networked_device_without_an_l2_link_warns() -> None:
+    # M31: with no L2 link the device gets no downlink SFP on the L2 switch.
+    lib = library(powered("GW", "gateway"), powered("IO", "io_chassis"))
+    equipment = [
+        Equipment(id="gw", part_id="GW", role="other"),
+        Equipment(id="gw-2", part_id="GW", role="other", l2_ports=1),
+        Equipment(id="io", part_id="IO", role="other"),
+        Equipment(id="l1", role="l1_switch", redundant=True),
+    ]
+    assert l2_link_checks(equipment, lib) == [
+        CheckItem(
+            check="l2_link",
+            status=CheckStatus.WARN,
+            subject="gw",
+            message="no L2 link (l2_ports is 0), so the L2 switch gets no SFP for it",
+        )
+    ]
