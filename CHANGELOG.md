@@ -56,6 +56,11 @@ project uses [Semantic Versioning](https://semver.org/).
   interposing-relay alternatives say `inrush_basis: not_given` with the
   documents searched, and their branches stay sized from running current and
   the 2 A floor.
+- The installer ships psa-devices 1.14.0. 51 alternatives that printed their
+  original's description now give their own ports, power, supply, digital
+  inputs or product name (M43), for example the SCALANCE XR324-4M EEC as
+  "8 MM Ports, 16 RJ45" and the SoftMaker suites under their own names. A
+  figure the device database lacks is left out of the text.
 
 ### Fixed
 
