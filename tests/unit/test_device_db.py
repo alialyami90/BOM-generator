@@ -301,3 +301,12 @@ def test_finding_31_the_sicam_di_modules_give_16_inputs_each() -> None:
     inputs = [_tier("SEL-2244-2", "Siemens", tier).get("di_inputs") for tier in TIERS]
 
     assert inputs == [16, 32, 32]
+
+
+@pytest.mark.parametrize("record", RECORDS, ids=_ids(RECORDS))
+def test_ali_9_a_powered_tier_without_inrush_says_none_is_published(
+    record: dict[str, Any],
+) -> None:
+    for tier in _tiers(record):
+        if tier["supply_type"] != "none" and "inrush_a" not in tier:
+            assert tier.get("inrush_basis") == "not_given", tier["model"]

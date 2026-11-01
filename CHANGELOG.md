@@ -44,6 +44,11 @@ project uses [Semantic Versioning](https://semver.org/).
   (42 W) and Arbiter 1202B/C (30 W) alternatives and six Weidmüller and Brady
   nameplate alternatives, and the SEL-2244-2 Siemens alternatives count 16,
   32 and 32 digital inputs (M41c).
+- The device database records that no datasheet publishes inrush for the
+  parts that lack it (M42, ALI-9, finding 32): the Finder and Weidmüller
+  interposing-relay alternatives say `inrush_basis: not_given` with the
+  documents searched, and their branches stay sized from running current and
+  the 2 A floor.
 
 ### Fixed
 

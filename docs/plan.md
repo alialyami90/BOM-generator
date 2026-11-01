@@ -1008,8 +1008,10 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
 - **M41 — Alternatives' power and inputs.** The M14 generator moves into
   `data/device-db/tools/`; findings 30 and 31 get sourced power figures and `di_inputs`; the newly
   powered tiers join the shipped library (handoff NEXT section 7).
-- **M42 — Cited inrush for the shipped library.** Datasheet inrush for the parts that have none,
-  in batches, each a psa-devices release; `examples/` is unchanged (Q38) (audit 2026-10-31, ALI-9).
+- **M42 — Cited inrush for the shipped library.** No datasheet publishes an inrush figure for the
+  parts that have none, so the device-db records say `inrush_basis: not_given` with the sources
+  searched and branches stay sized from running current and the 2 A floor; finding 32 in
+  `docs/device-db-findings.md` records it (audit 2026-10-31, ALI-9).
 
 ## 5. Testing strategy
 
