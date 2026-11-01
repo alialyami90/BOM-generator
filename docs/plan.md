@@ -1017,6 +1017,12 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
   `description_template` from its device-db tier, as an override in `data/library/additions.yaml`;
   a figure the tier does not give is left out. A test checks every alternative's description
   against its data. psa-devices 1.14.0; originals unchanged.
+- **M45 — Pre-release check fixes (engine).** An annunciator equipment row is not racked: the
+  build lists it in loose material with its part's `loose_items` as its kit, fed from panel 001
+  (design §10, Q51; Ali, plan M1c). A new `untagged_device` check warns for a switch, firewall,
+  gateway, patch panel, clock, RTAC, I/O chassis or workstation that prints with no tag, which
+  `duplicate_tag` cannot see. The automatic L1 pick takes only L1 parts; the untagged
+  IE-4010-16S12P lacked a `tag_type`, which M44 adds.
 
 ## 5. Testing strategy
 
@@ -1355,6 +1361,7 @@ Preview's panel elevation gets dragging too (M24).
 goes to loose material by default, with a "Mount in panel" switch on its Parts row for a panel
 annunciator. No M22 spec or engine rule covers the switch yet, so M23 leaves it out. To ask Ali:
 is a panel-mounted annunciator needed, and if so, which panel takes it?
+M45 makes the default real: an annunciator row goes to loose material, fed from panel 001.
 
 **Q52 — AC branch MCBs for VAC devices** (M25). *Resolved 2026-10-31:* Ali chose "one AC branch
 MCB per VAC unit, after the socket". A1 approved the rest (ADR 0025, accepted by Ali 2026-10-31): branches in group B

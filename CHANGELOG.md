@@ -64,6 +64,10 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- A substation's annunciator row now goes to loose material with its
+  wall-mount kit, fed from panel 001, instead of into a rack (M45, design
+  §10). The checks warn when a switch, firewall, gateway or other device that
+  should carry a tag prints without one (untagged_device).
 - A substation that picks an MCB brand without a DC brand no longer stores
   that brand as its DC set: the DC branches still size with it (ADR 0023),
   and the resolved library validates again when the brand has no DC rating

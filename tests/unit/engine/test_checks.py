@@ -19,6 +19,7 @@ from bomgen.checks import (
     render_json,
     render_text,
     sfp_slot_checks,
+    untagged_device_checks,
     ventilation_checks,
 )
 from bomgen.engine.units import expand_devices
@@ -462,6 +463,7 @@ TAGGED = library(
     powered("GPS", "gps_clock", tag_type="GPS", tag_pattern="{prefix}-GPS"),
     powered("GW", "gateway", tag_type="GW", purdue_level="L2"),
     device("KBM", "peripheral", tag_pattern="Keyboard & Mouse"),
+    powered("FW", "firewall", model="FortiGate 60F"),  # no level, no type code
 )
 
 
@@ -487,3 +489,18 @@ def test_numbered_device_tags_and_untyped_labels_pass() -> None:
     # two gateways number A01, A02; "Keyboard & Mouse" is a label, not a device tag
     devices = [{"part_id": "GW"}, {"part_id": "GW"}, {"part_id": "KBM"}, {"part_id": "KBM"}]
     assert tag_items(("psa1", devices)) == []
+
+
+def test_a_device_that_should_carry_a_tag_but_has_none_warns() -> None:
+    # M45: a firewall part with no type code prints untagged; duplicate_tag cannot see it
+    built = panel([{"part_id": "FW", "qty": 2}, {"part_id": "GW"}, {"part_id": "KBM"}], id="psa1")
+    assert untagged_device_checks([(built, expand_devices(built, TAGGED))]) == [
+        CheckItem(
+            check="untagged_device",
+            status=CheckStatus.WARN,
+            panel_id="psa1",
+            subject="FW",
+            message="FortiGate 60F prints with no device tag, so it gets no nameplate and its "
+            "MCB is named by its model: give the library part a tag_type and purdue_level",
+        )
+    ]
