@@ -10,6 +10,7 @@ from dataclasses import dataclass
 
 from bomgen.models.bom import BomLine, BomTable, Group, LooseTable, PanelBom, QtySum
 from bomgen.models.calc import LineRef
+from bomgen.models.panel import PanelKind
 from bomgen.models.sheet import (
     CellRange,
     CellStyle,
@@ -33,6 +34,7 @@ SPACER_COL = 9  # I
 
 TITLE_HEIGHT = 90.0
 HEADER_HEIGHT = 26.25
+CONSOLE_HEADER_HEIGHT = 53.1  # Formatting: "53.1 on sheet 4", the console (plan Q61)
 LINE_HEIGHT = 26.25  # per line of wrapped text
 BODY_MIN_HEIGHT = 30.0
 LONG_CODE_HEIGHT = 52.5
@@ -50,18 +52,23 @@ class BomSheet:
 
 def bom_sheet(panel: PanelBom, header_footer: HeaderFooter | None = None) -> BomSheet:
     """Lay out ``panel``'s BOM on its own sheet."""
-    return _table_sheet(panel.sheet_name, panel, panel.panel_id, header_footer)
+    header = CONSOLE_HEADER_HEIGHT if panel.kind is PanelKind.CONSOLE else HEADER_HEIGHT
+    return _table_sheet(panel.sheet_name, panel, panel.panel_id, header_footer, header)
 
 
 def loose_sheet(
     name: str, loose: LooseTable, header_footer: HeaderFooter | None = None
 ) -> BomSheet:
     """Lay out the loose-material table on its own sheet ``name`` (ADR 0020)."""
-    return _table_sheet(name, loose, None, header_footer)
+    return _table_sheet(name, loose, None, header_footer, HEADER_HEIGHT)
 
 
 def _table_sheet(
-    name: str, table: BomTable, panel_id: str | None, header_footer: HeaderFooter | None
+    name: str,
+    table: BomTable,
+    panel_id: str | None,
+    header_footer: HeaderFooter | None,
+    header_height: float,
 ) -> BomSheet:
     """``table`` with its title in row 1, header in row 2 and lines from row 3; the
     rows map ``LineRef(panel_id, line)``."""
@@ -72,7 +79,7 @@ def _table_sheet(
     sheet.width(SPACER_COL, SPACER_WIDTH)
 
     _title(sheet, 1, table.title)
-    _header(sheet, 2, HEADER_HEIGHT)
+    _header(sheet, 2, header_height)
     sheet.set(2, HWIO_COL, HWIO_HEADER, styles.BOM_HEADER)
     line_rows = _lines(sheet, table, first_row=3)
     rows = {LineRef(panel_id=panel_id, line=i): r for i, r in line_rows.items()}

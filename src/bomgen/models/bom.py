@@ -12,6 +12,7 @@ from pydantic import Field, NonNegativeInt, PositiveInt
 
 from bomgen.models.calc import BranchMcb, DcMains, HeatResult, PowerConsumption
 from bomgen.models.output import OutputModel
+from bomgen.models.panel import PanelKind
 
 Column = Literal["A", "B", "C", "D", "E", "F", "G", "H"]
 
@@ -89,6 +90,7 @@ class PanelBom(BomTable):
 
     panel_id: str
     sheet_name: str
+    kind: PanelKind = PanelKind.NETWORK  # the console's header row is taller (plan Q61)
 
 
 class LooseTable(BomTable):
