@@ -45,7 +45,8 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
   either. Don't move golden values without an ADR. Only Ali marks ADRs Accepted. Don't commit `.xlsx`.
   Don't force-push (LESSONS "Branch restart"). Don't bump the version outside a release PR (on main it
   publishes at once). Don't push tags.
-- Next free numbers: ADR 0028, Q56, milestone M27.
+- Next free numbers: ADR 0030 (M30 is taking it; check `docs/decisions/README.md`), Q56,
+  milestone M35. M30 is in progress.
 
 ## 3. Questions for Ali (one card each, recommendation marked)
 
