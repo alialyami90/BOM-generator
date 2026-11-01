@@ -987,32 +987,32 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
   parts are L2 (psa-devices 1.10.0). The workstation roles give OWS, EWS and SRV. A
   `duplicate_tag` check fails a shared tag (ADR 0030, accepted by Ali 2026-11-01; audit 2026-10-31, ENG-1, APP-9,
   ALI-16; Q56 to Q60).
-- **M35 — Auto-layout rules in the spec.** The generator spec gains the auto-layout rules (32U
+- **M35 — Auto-layout rules in the spec.** *Done (#298).* The generator spec gains the auto-layout rules (32U
   and overflow to a new panel, the A/B split, priority order, waist height and rack start) from
   ADR 0013 and M21 (audit 2026-10-31, ALI-14; backlog point 9). Docs only.
-- **M36 — Library catalogue brands in the app.** The Library Catalogues tab lists every brand set
+- **M36 — Library catalogue brands in the app.** *Done (#301).* The Library Catalogues tab lists every brand set
   and edits it, as the UI design shows (audit 2026-10-31, APP-20).
 - **M37 — Settings YAML and defaults.** YAML edits on Settings can be applied, and the constants
   table shows each default (audit 2026-10-31, APP-21, APP-22).
-  *Done.* Apply refuses a text that changes keys with no Settings field (network, equipment and
+  *Done (#303).* Apply refuses a text that changes keys with no Settings field (network, equipment and
   the like) and names them; those are edited on their own pages. "Default" on unchanged rows
   follows screens.md "Settings" and the audit, replacing polish-v02 item 13.
-- **M38 — Add a device and the rail.** Add a device offers a monitor and a peripheral, and the rail
+- **M38 — Add a device and the rail.** *Done (#304).* Add a device offers a monitor and a peripheral, and the rail
   shows "Not set up"; the generated-panel template can be edited in the app if it still can't be
   (audit 2026-10-31, APP-23, APP-24, ALI-5, ALI-13).
-- **M39 — Desktop conveniences.** File changed on disk, restore a deleted project, F6 and Ctrl+O,
+- **M39 — Desktop conveniences.** *Done (#306).* File changed on disk, restore a deleted project, F6 and Ctrl+O,
   library version prompts and Go to field, as the UI design shows (audit 2026-10-31, APP-25 to
   APP-29).
-- **M40 — The unset DC MCB choice is derived.** The resolved library stores `mcb_dc` only when it
+- **M40 — The unset DC MCB choice is derived.** *Done (#299).* The resolved library stores `mcb_dc` only when it
   is written, keeping ADR 0023 point 2; no output changes (handoff NEXT section 6).
-- **M41 — Alternatives' power and inputs.** The M14 generator moves into
+- **M41 — Alternatives' power and inputs.** *Done (#300, #302, #305; psa-devices 1.13.0).* The M14 generator moves into
   `data/device-db/tools/`; findings 30 and 31 get sourced power figures and `di_inputs`; the newly
   powered tiers join the shipped library (handoff NEXT section 7).
-- **M42 — Cited inrush for the shipped library.** No datasheet publishes an inrush figure for the
+- **M42 — Cited inrush for the shipped library.** *Done (#307).* No datasheet publishes an inrush figure for the
   parts that have none, so the device-db records say `inrush_basis: not_given` with the sources
   searched and branches stay sized from running current and the 2 A floor; finding 32 in
   `docs/device-db-findings.md` records it (audit 2026-10-31, ALI-9).
-- **M43 — Alternatives describe themselves.** Each alternative whose inherited description
+- **M43 — Alternatives describe themselves.** *Done (#308).* Each alternative whose inherited description
   contradicts its own ports, power, supply, input count or name gets its own
   `description_template` from its device-db tier, as an override in `data/library/additions.yaml`;
   a figure the tier does not give is left out. A test checks every alternative's description

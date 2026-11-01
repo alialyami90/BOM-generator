@@ -13,8 +13,8 @@ setup, and page headers/footers.
 
 ## Status
 
-v0.3.3 is released ([`CHANGELOG.md`](CHANGELOG.md)) and completes the fixes
-from the specs-vs-app audit. The next work waits on Ali's feedback on it.
+v0.3.3 is released ([`CHANGELOG.md`](CHANGELOG.md)). The rest of the v0.3
+roadmap, M35 to M47 in `docs/plan.md`, is on `main` for the next release.
 
 Done in v0.1:
 
@@ -123,6 +123,22 @@ preview"):
 - v0.3.3: every device tag has level, type, side and number (L2_GPS_A01) with
   a duplicate-tag check (ADR 0030), larger Rittal fans in psa-devices 1.11.0
   (ADR 0029), and the console sheet's 53.1 pt header row.
+
+On `main` for the next release (the v0.3 roadmap, M35 to M47):
+
+- M35: the spec's "Automatic panel layout" section.
+- M36: Library › Catalogues edits every brand set: MCBs, aux contacts,
+  terminal blocks, busbars and housekeeping.
+- M37: Settings › YAML can be edited and applied to the form, and the design
+  constants show their defaults.
+- M38: Add a device offers a monitor and a keyboard and mouse, the rail shows
+  "Not set up" on Parts, and a generated panel's Enclosure tab edits the
+  panel numbering.
+- M39: the app reloads a project file changed on disk, Home restores a
+  deleted project, and F6 and Ctrl+O work.
+- M41 to M44: psa-devices 1.15.0, with the alternatives' own power, inputs
+  and descriptions, and tags for the contractor's switches, firewalls and
+  fibre shelves.
 
 The terms project, substation, side and stream are defined in `docs/plan.md` →
 "Glossary".
