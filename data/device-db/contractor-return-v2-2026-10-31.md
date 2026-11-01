@@ -34,7 +34,7 @@ nothing more is asked for them.
 | --- | ---: | --- |
 | Configuration | 185 on 123 parts | The configured code a panel orders, chosen by an engineer or from the maker's configurator. Mostly SEL relays, RTACs, Axion nodes, computers and switches; the Nozomi parts; the zenon licence; the FOPP pigtails. The 125 V DC preference fixes the supply only. |
 | Identity | 4 | SEL-3555-GW, SEL-3555-RTAC, SEL-3355 and NAP-F23: the `#` codes could not be decoded from public documents. The maker's configuration confirmation or a quote settles them. |
-| Power (plan Q54) | 4 | SEL-3555-2, SEL-3355-2, SEL-3560E and SEL-3560S: SEL publishes minimum, typical and maximum figures. Which one the library uses waits on Ali's choice. |
+| Power (plan Q54) | 4 | SEL-3555-2, SEL-3355-2, SEL-3560E and SEL-3560S: SEL publishes minimum, typical and maximum figures. Settled: Ali chose typical on 2026-11-01 (psa-devices 1.12.0). |
 
 Two configuration rows need a correction rather than a choice. RST2228-L1-24MM's code has
 `A05`, which is not a valid service-panel option (finding 4 in `docs/device-db-findings.md`).

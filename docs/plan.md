@@ -1339,13 +1339,15 @@ approved the rest (ADR 0026, accepted by Ali 2026-10-31): group B units with a t
 the part from a new optional housekeeping role (NAMEPLATE-0828805, researched by A4); the sheet
 after Loose Material.
 
-**Q54 — Power of the -2 generation SEL computers** (contractor delivery 2026-10-31). *Open.* The
-delivery gives SEL-3555-2 and SEL-3355-2 480 W each (2 x 240 W, the SEL-9331 HV supply's peak
-input burden, PDS3555-02 p. 11 and PDS3355-04 p. 8) and SEL-3560E and SEL-3560S 240 W each (one
-supply's peak burden, PDS3560-01 p. 11), all basis computed or assumed. The library's SEL-3555-GW is
-73 W, SEL-3555-RTAC 62 W and SEL-3355 91 W. These four parts stay out of the shipped library and in
-`data/device-db/contractor-2026-10-31/`. To ask Ali: use the supply-burden ceilings as unit power,
-or wait for measured or typical consumption figures?
+**Q54 — Power of the -2 generation SEL computers** (contractor delivery 2026-10-31). *Answered
+by Ali 2026-11-01: typical, applied in psa-devices 1.12.0.* The delivery gave SEL-3555-2 and
+SEL-3355-2 480 W each (2 x 240 W, the SEL-9331 HV supply's peak input burden, PDS3555-02 p. 11 and
+PDS3355-04 p. 8) and SEL-3560E and SEL-3560S 240 W each (one supply's peak burden, PDS3560-01
+p. 11), all basis computed or assumed. SEL also publishes minimum, typical (25-50 % load) and
+maximum consumption (PDS3555-02 p. 13, PDS3355-04 p. 11, PDS3560-01 p. 14). The library uses
+typical with the SEL-9331 supplies fitted: 45 W for the SEL-3555-2 and SEL-3355-2 (35 W base plus
+10 W for the second supply) and 35 W for the SEL-3560E and SEL-3560S (25 W base plus 10 W for the
+SEL-9331). For comparison, the library's SEL-3555-GW is 73 W, SEL-3555-RTAC 62 W and SEL-3355 91 W.
 
 **Q55 — Categories for the contractor's other part types** (contractor delivery 2026-10-31).
 *Open.* Five of the delivery's categories have no library category: security_sensor (15 parts),

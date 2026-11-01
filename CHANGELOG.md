@@ -9,6 +9,15 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- The installer ships psa-devices 1.12.0 with SEL's -2 generation computers:
+  SEL-3555-2 and SEL-3355-2 at 45 W, SEL-3560E and SEL-3560S at 35 W. Each is
+  SEL's typical figure (25-50 % load) with its SEL-9331 supplies, as Ali
+  chose for plan Q54.
+
+## [0.3.3] - 2026-11-01
+
+### Added
+
 - The installer ships psa-devices 1.11.0, whose housekeeping catalogue lists
   two larger fans for ADR 0029: Rittal SK 3244.500 (485 m³/h, 80 W) and
   SK 3244.100 (520 m³/h, 138 W), each at 60 Hz with one SK 3243.200 outlet
@@ -664,7 +673,8 @@ project uses [Semantic Versioning](https://semver.org/).
   airflow; future library defaults use 0 W for the SK 3110 thermostat and
   460 m³/h for the SK 3243.100 fan with its outlet filter (#12).
 
-[Unreleased]: https://github.com/alialyami90/BOM-generator/compare/v0.3.2...HEAD
+[Unreleased]: https://github.com/alialyami90/BOM-generator/compare/v0.3.3...HEAD
+[0.3.3]: https://github.com/alialyami90/BOM-generator/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/alialyami90/BOM-generator/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/alialyami90/BOM-generator/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/alialyami90/BOM-generator/compare/v0.2.1...v0.3.0

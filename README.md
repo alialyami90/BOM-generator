@@ -13,8 +13,8 @@ setup, and page headers/footers.
 
 ## Status
 
-v0.3.2 is released ([`CHANGELOG.md`](CHANGELOG.md)), with the first fixes
-from the specs-vs-app audit. Next: device tags in the L2_GPS_A01 pattern (M30).
+v0.3.3 is released ([`CHANGELOG.md`](CHANGELOG.md)) and completes the fixes
+from the specs-vs-app audit. The next work waits on Ali's feedback on it.
 
 Done in v0.1:
 
@@ -120,6 +120,9 @@ preview"):
 - v0.3.2: a new substation works from its first parts to Build, the panel
   editor, L2 link inputs on Parts, an unsaved-changes prompt, larger fans for
   hot cabinets and Power Consumption fixes.
+- v0.3.3: every device tag has level, type, side and number (L2_GPS_A01) with
+  a duplicate-tag check (ADR 0030), larger Rittal fans in psa-devices 1.11.0
+  (ADR 0029), and the console sheet's 53.1 pt header row.
 
 The terms project, substation, side and stream are defined in `docs/plan.md` →
 "Glossary".
@@ -190,9 +193,9 @@ on Windows and the XDG data directory elsewhere (override with
 `BOMGEN_LIBRARY_HOME`).
 
 ```bash
-bomgen library pack data/library/psa-devices.yaml --name psa-devices --version 1.11.0
-bomgen library import psa-devices-1.11.0.bomlib --dry-run   # show the part diff only
-bomgen library import psa-devices-1.11.0.bomlib             # verify, install, activate
+bomgen library pack data/library/psa-devices.yaml --name psa-devices --version 1.12.0
+bomgen library import psa-devices-1.12.0.bomlib --dry-run   # show the part diff only
+bomgen library import psa-devices-1.12.0.bomlib             # verify, install, activate
 bomgen library list                                        # installed versions
 bomgen library rollback psa-devices                        # back to the previous version
 bomgen library export psa-devices                          # back up the active version as a .bomlib
@@ -209,7 +212,7 @@ from (for example `1.1.0+local.1`) and activated; the release version stays
 installed.
 
 ```bash
-bomgen library export-csv psa-devices                      # writes psa-devices-1.11.0-csv.zip
+bomgen library export-csv psa-devices                      # writes psa-devices-1.12.0-csv.zip
 bomgen library export-csv psa-devices --out csv/           # or one .csv file per table
 bomgen library import-csv psa-devices csv/ --dry-run       # every check and what would change
 bomgen library import-csv psa-devices csv/ --notes "new SEL alternatives"

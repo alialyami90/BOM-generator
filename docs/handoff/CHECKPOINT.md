@@ -3,6 +3,15 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-11-01: v0.3.3 released (A1, lead)
+
+- **Base:** main `5ad88c5` (#294). Docs-only PR.
+- **Done:** v0.3.3 is published with `bomgen-setup-0.3.3.exe` and psa-devices 1.11.0: M30 device
+  tags (#287, ADR 0030 Accepted), larger fans (#292, ADR 0029 Accepted), console header 53.1 pt
+  (#293). Docs: #288–#291. The audit's fix plan is complete.
+- **Waiting:** Ali's feedback on v0.3.3; Q51, Q54 and Q55 open; ALI-14 (auto-layout rules into the
+  spec) for a later spec PR.
+
 ## 2026-11-01: v0.3.2 released (A1, lead)
 
 - **Base:** main `e887fac` (#280). Docs-only PR.
