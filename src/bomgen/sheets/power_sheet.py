@@ -200,10 +200,7 @@ class _Layout:
         sheet.set(row, N, Formula(text=f"=I{row}/{volts}", result=line.current_a), data)
         o = Formula(text=f"=N{row}*{factor}", result=line.current_with_margin_a)
         sheet.set(row, O, o, data)
-        p: CellValue = line.branch_mcb_a  # ADR 0028: the row's own branch MCB
-        if p is None:
-            p = Formula(text=f"=ROUNDUP(O{row},0)", result=line.device_mcb_a)
-        sheet.set(row, P, p, data)
+        sheet.set(row, P, Formula(text=f"=ROUNDUP(O{row},0)", result=line.device_mcb_a), data)
         sheet.set(row, Q, Formula(text=f"=O{row}*F{row}", result=line.main_contribution_a), data)
         sheet.set(row, R, Formula(text=f"=Q{row}", result=line.main_contribution_a), data)
         sheet.height(row, ROW_HEIGHT)

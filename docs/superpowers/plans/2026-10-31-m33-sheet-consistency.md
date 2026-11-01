@@ -9,7 +9,7 @@ strict expected failure.
 
 **Tasks** (test first in each):
 
-1. **ENG-4, ENG-5 (ADR 0028).** `PowerLine.branch_mcb_a` holds the row's own branch rating from
+1. **ENG-4, ENG-5 (ADR 0028, rejected by Ali on 2026-11-01 and reverted).** `PowerLine.branch_mcb_a` holds the row's own branch rating from
    `dc_dist.branch_sizing`; `power_sheet` writes it in P as a value, else `=ROUNDUP(O,0)`. Power
    lines take the part's `voltage_v`. The pipeline passes the fed loose items to `power_consumption`.
 2. **ENG-8.** `checks.external_ac_checks` warns for each AC loose load, which External Equipment
