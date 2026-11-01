@@ -89,6 +89,17 @@ A milestone with several modules may group them in a subfolder,
 | `app/test_app_lifecycle_api.py` | M17d | create, rename and delete projects and substations in the app: ids from names, copies, backups before a delete, the first core switches |
 | `test_loose_edit.py` | M18 | loose-material writers: library and free-text items, move, remove, host panel, per-field checks (ADR 0022) |
 | `app/test_app_loose_api.py` | M18 | the Loose material page's API: the list with its library parts, add, edit, move and remove, refused edits not written, per-field messages, the host panel's document |
+| `engine/test_layout_write.py` | M19 | `write_generated_panels`: the panel files `bomgen layout` and the app's Lay out panels button write |
+| `test_derived_parts.py` | M20 | derived parts: an equipment entry's part number, overrides and SFP choice (ADR 0024) |
+| `test_parts_edit.py`, `app/test_app_parts_api.py` | M23 | the Parts page: its writers and its API (ADR 0024) |
+| `engine/test_preview.py`, `app/test_app_device_preview_api.py` | M24 | the device preview: every generated unit with its U, MCBs and strips, and the page's API |
+| `engine/test_engine_nameplates.py`, `sheets/test_nameplate_sheet.py` | M26 | device nameplates: one BOM row per panel, the plates' text and the Nameplates sheet (ADR 0026) |
+| `test_ci_workflow.py` | CI | the CI workflow's docs-only gating keeps `docs/ui/` and `data/` out of the skip (ADR 0006) |
+| `app/test_app_panel_page.py` | M32a | the panel editor's page: header facts, enclosure, document, options, devices and their source, port plans, YAML |
+| `app/test_app_hand_panels.py` | M32b | hand-written panels: add to `manual_panels`, per-field edits, delete only when nothing names the panel |
+| `app/test_app_library_catalogues.py` | M36 | Library › Catalogues: brand sets per catalogue edited as pending changes, Add brand, Make default |
+| `test_device_db_tools.py` | M41 | the M14 generator in `data/device-db/tools/`: alternative tiers as library parts, idempotent, skipped tiers listed |
+| `engine/test_annunciator_row.py` | M45 | an annunciator equipment row goes to loose material with its part's `loose_items` as its kit, fed from panel 001 |
 
 `builders.py`, `engine/engine_factories.py`, `project_store/project_builders.py`
 and `writer/writer_helpers.py` hold the small builders those tests share.
