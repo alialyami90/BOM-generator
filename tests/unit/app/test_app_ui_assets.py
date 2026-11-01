@@ -876,3 +876,21 @@ def test_settings_yaml_is_checked_by_the_engine_and_applied_to_the_form() -> Non
     assert "if (c.other_changes.length) {" in sub  # a change with no Settings field is not applied
     assert "ST.apply(key, typed);" in sub
     assert ".code--edit textarea.src {" in css
+
+
+def test_library_catalogues_are_edited_as_pending_changes_by_brand() -> None:
+    """M36 (APP-20): a catalogue switch, brand tabs, rows in place, Add brand, Make default."""
+    js = (UI_DIR / "screens-library.js").read_text(encoding="utf-8")
+    view = js[js.index("function cataloguesView()") :]
+    assert "Bridge.call('library_catalogues')" in view
+    assert (
+        "[['mcb', 'MCBs'], ['aux_contact', 'Aux contacts'], ['terminal_blocks', 'Terminal blocks']"
+        in js
+    )
+    assert "Bridge.call('set_library_catalogue', kind, b.id, sent)" in js
+    assert "Bridge.call('add_catalogue_brand', kind, id, name, from)" in js
+    assert "Bridge.call('make_default_brand', kind, b.id)" in js
+    assert "return;  // a new row is still blank: kept as typed" in js
+    edit = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
+    assert edit.count("App.cataloguesStale();") == 3  # discard, its Undo, apply
+    assert "App.cataloguesStale();" in (UI_DIR / "screens-libcsv.js").read_text(encoding="utf-8")

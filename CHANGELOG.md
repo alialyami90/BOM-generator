@@ -9,6 +9,13 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Library › Catalogues edits every brand set (M36, APP-20). A switch picks
+  MCBs, aux contacts, terminal blocks, busbars or housekeeping; one tab per
+  brand with the default marked; rows are edited in place, with Add rating or
+  Add row and a per-row remove; housekeeping roles pick a library part. Add
+  brand… copies another brand's rows, and Make default swaps a brand with the
+  default set. Every edit is a pending change, and one the library refuses
+  stays in the table with the reason.
 - The installer ships psa-devices 1.12.0 with SEL's -2 generation computers:
   SEL-3555-2 and SEL-3355-2 at 45 W, SEL-3560E and SEL-3560S at 35 W. Each is
   SEL's typical figure (25-50 % load) with its SEL-9331 supplies, as Ali
@@ -17,6 +24,11 @@ project uses [Semantic Versioning](https://semver.org/).
   the problem on its line, and "Apply to form" drafts the Settings fields
   from the text once it has no errors; Revert puts the saved file back. The
   Design constants table says "Default" on each unchanged row (M37).
+- `data/device-db/tools/library_entries.py`, the M14 generator, is in the
+  repo. It turns the device database's alternative tiers into shipped-library
+  parts, appends only the ones the library lacks to
+  `data/library/additions.yaml`, and lists the powered tiers it skips for want
+  of a power figure.
 
 ### Fixed
 

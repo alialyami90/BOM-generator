@@ -30,6 +30,7 @@ from pydantic import BaseModel, ValidationError
 
 from bomgen import __version__
 from bomgen.app import library_csv
+from bomgen.app.catalogue_edit import CatalogueEditError
 from bomgen.app.catalogues import catalogues_page
 from bomgen.app.device_preview import device_preview_page
 from bomgen.app.editing import (
@@ -450,6 +451,32 @@ class Api:
             return self._editor().add(edits, record_edits or ())
         except (EditRefusedError, ValidationError) as exc:
             raise AppError("invalid_edit", f"The library cannot take this change: {exc}") from exc
+
+    @endpoint
+    def library_catalogues(self) -> dict[str, Any]:
+        """The Catalogues tab: each catalogue's brand sets as rows, pending edits applied."""
+        return self._editor().catalogues()
+
+    def _catalogue_edit(self, action: str, kind: str, *args: Any) -> dict[str, Any]:
+        try:
+            return self._editor().edit_catalogue(action, kind, *args)
+        except (CatalogueEditError, EditRefusedError, ValidationError) as exc:
+            raise AppError("invalid_edit", f"The library cannot take this change: {exc}") from exc
+
+    @endpoint
+    def set_library_catalogue(self, kind: str, brand: str, value: dict[str, Any]) -> dict[str, Any]:
+        """Give a brand of a catalogue the page's rows, as a pending change."""
+        return self._catalogue_edit("set", kind, brand, value)
+
+    @endpoint
+    def add_catalogue_brand(self, kind: str, brand: str, name: str, copy_of: str) -> dict[str, Any]:
+        """Add a brand to a catalogue as a copy of another brand's rows, as a pending change."""
+        return self._catalogue_edit("add", kind, brand, name, copy_of)
+
+    @endpoint
+    def make_default_brand(self, kind: str, brand: str) -> dict[str, Any]:
+        """Make a brand the catalogue's default; the old default becomes a brand."""
+        return self._catalogue_edit("default", kind, brand)
 
     @endpoint
     def library_alternatives(self, part_id: str) -> dict[str, Any]:

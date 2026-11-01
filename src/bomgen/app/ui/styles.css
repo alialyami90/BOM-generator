@@ -588,3 +588,17 @@ body.is-dragging-dev { user-select: none; }
 .dp-bar { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; padding: var(--space-2) var(--space-3); margin-bottom: var(--space-3); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-sm); }
 .dp-bar > span:first-child { margin-right: auto; }
 .dp-pn { min-width: 160px; max-width: 260px; overflow-wrap: anywhere; }  /* long ordering codes wrap; the rest of the row stays on one line */
+
+/* Library › Catalogues (M36) */
+.cat .tabs { margin-top: var(--space-3); }
+.cat-actions { margin: var(--space-3) 0; gap: var(--space-3); align-items: center; }
+.cat-err { margin-bottom: var(--space-3); }
+.cat-name { max-width: 420px; margin-bottom: var(--space-3); }
+.cat .tabs { flex-wrap: wrap; }
+.cat-table .cat-num { width: 140px; }
+.cat-table .cat-cell { width: 100%; }
+.cat-table textarea.cat-cell { resize: vertical; min-height: 34px; padding-top: 6px; line-height: 1.4; }
+.cat-table .cat-wide { width: 55%; }
+.cat-table .cat-del { width: 40px; }
+.cat-table .select { width: 100%; font-family: var(--font-mono); font-size: 13px; }
+.cat .table-foot { gap: var(--space-3); }
