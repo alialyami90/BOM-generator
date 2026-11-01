@@ -1156,7 +1156,7 @@ devices:
     make: Moxa
     model: PT-7528 series
     ordering_code: PT-7528-12MSC-12TX-4GSFP-HV-HV
-    description_template: LAN-{lan} Industrial Ethernet switch (Level-1) (24 MM FO Ports)
+    description_template: "LAN-{lan} Industrial Ethernet switch (Level-1) (12 MM FO Ports, 12 RJ45)"  # override (data/library/additions.yaml)
     tag_type: ESW
     purdue_level: L1
     supply_type: VDC
@@ -1192,7 +1192,7 @@ devices:
     make: Moxa
     model: PT-7528 series
     ordering_code: PT-7528-20MSC-4TX-4GSFP-HV-HV
-    description_template: LAN-{lan} Industrial Ethernet switch (Level-1) (24 MM FO Ports)
+    description_template: "LAN-{lan} Industrial Ethernet switch (Level-1) (20 MM FO Ports, 4 RJ45)"  # override (data/library/additions.yaml)
     tag_type: ESW
     purdue_level: L1
     supply_type: VDC
@@ -1228,7 +1228,7 @@ devices:
     make: Moxa
     model: PT-G7728
     ordering_code: PT-G7728 + 6 x LM-7000H-4GSFP + 2 x PWR-HV-NP
-    description_template: LAN-{lan} Industrial Ethernet switch (Level-1) (24 MM FO Ports)
+    description_template: "LAN-{lan} Industrial Ethernet switch (Level-1) (24 SFP Ports, 2 RJ45)"  # override (data/library/additions.yaml)
     tag_type: ESW
     purdue_level: L1
     supply_type: VDC
@@ -1263,7 +1263,7 @@ devices:
     make: Cisco
     model: Catalyst IE9320
     ordering_code: IE-9320-26S2C-E + 2 x PWR-RGD-AC-DC-H
-    description_template: LAN-{lan} Industrial Ethernet switch (Level-1) (24 MM FO Ports)
+    description_template: "LAN-{lan} Industrial Ethernet switch (Level-1) (24 SFP Ports)"  # override (data/library/additions.yaml)
     tag_type: ESW
     purdue_level: L1
     supply_type: VDC
@@ -1298,7 +1298,7 @@ devices:
     make: Cisco
     model: Catalyst IE9320
     ordering_code: IE-9320-22S2C4X-E + 2 x PWR-RGD-AC-DC-H
-    description_template: LAN-{lan} Industrial Ethernet switch (Level-1) (24 MM FO Ports)
+    description_template: "LAN-{lan} Industrial Ethernet switch (Level-1) (24 SFP Ports)"  # override (data/library/additions.yaml)
     tag_type: ESW
     purdue_level: L1
     supply_type: VDC
@@ -1333,7 +1333,7 @@ devices:
     make: Cisco
     model: Catalyst IE9320
     ordering_code: IE-9320-22S2C4X-A + 2 x PWR-RGD-AC-DC-H
-    description_template: LAN-{lan} Industrial Ethernet switch (Level-1) (24 MM FO Ports)
+    description_template: "LAN-{lan} Industrial Ethernet switch (Level-1) (24 SFP Ports)"  # override (data/library/additions.yaml)
     tag_type: ESW
     purdue_level: L1
     supply_type: VDC
@@ -1368,7 +1368,7 @@ devices:
     make: Moxa
     model: PT-7528 series
     ordering_code: PT-7528-12MSC-12TX-4GSFP-HV-HV
-    description_template: LAN-{lan} Industrial Ethernet switch (EXT) (16 MM Ports, 4 RJ45)
+    description_template: "LAN-{lan} Industrial Ethernet switch (EXT) (12 MM Ports, 12 RJ45)"  # override (data/library/additions.yaml)
     tag_type: ESW
     purdue_level: EXT
     supply_type: VDC
@@ -1403,7 +1403,7 @@ devices:
     make: Moxa
     model: PT-7528 series
     ordering_code: PT-7528-20MSC-4TX-4GSFP-HV-HV
-    description_template: LAN-{lan} Industrial Ethernet switch (EXT) (16 MM Ports, 4 RJ45)
+    description_template: "LAN-{lan} Industrial Ethernet switch (EXT) (20 MM Ports, 4 RJ45)"  # override (data/library/additions.yaml)
     tag_type: ESW
     purdue_level: EXT
     supply_type: VDC
@@ -1438,7 +1438,7 @@ devices:
     make: Moxa
     model: PT-G7728
     ordering_code: PT-G7728 + 4 x LM-7000H-4GSFP + 1 x LM-7000H-4GTX + 2 x PWR-HV-NP
-    description_template: LAN-{lan} Industrial Ethernet switch (EXT) (16 MM Ports, 4 RJ45)
+    description_template: "LAN-{lan} Industrial Ethernet switch (EXT) (16 SFP Ports, 6 RJ45)"  # override (data/library/additions.yaml)
     tag_type: ESW
     purdue_level: EXT
     supply_type: VDC
@@ -1472,7 +1472,7 @@ devices:
     make: Siemens
     model: RUGGEDCOM RSG2300
     ordering_code: 6GK6023-0AS23-3DC0-Z A05+B05+C08+D08
-    description_template: LAN-{lan} Industrial Ethernet switch (EXT) (16 MM Ports, 4 RJ45)
+    description_template: "LAN-{lan} Industrial Ethernet switch (EXT) (4 MM Ports, 24 RJ45)"  # override (data/library/additions.yaml)
     tag_type: ESW
     purdue_level: EXT
     supply_type: VDC
@@ -1805,7 +1805,7 @@ devices:
     make: Meinberg
     model: microSyncHR
     ordering_code: microSyncHR
-    description_template: GPS Clock with Antenna and accessories (SNTP/IRIG-B), 125VDC redundant, 100mbps SFP ports redundant
+    description_template: "GPS Clock with Antenna and accessories (SNTP/IRIG-B), 48VDC"  # override (data/library/additions.yaml)
     tag_type: GPS
     purdue_level: L2  # ADR 0030: station level
     supply_type: VDC
@@ -1837,7 +1837,7 @@ devices:
     make: Meinberg
     model: LANTIME M600/GPS PTP (LANTIME PTP Grandmaster)
     ordering_code: LANTIME M600/GPS/PTPv2
-    description_template: GPS Clock with Antenna and accessories (SNTP/IRIG-B), 125VDC redundant, 100mbps SFP ports redundant
+    description_template: "GPS Clock with Antenna and accessories (SNTP/IRIG-B), 230VAC"  # override (data/library/additions.yaml)
     tag_type: GPS
     purdue_level: L2  # ADR 0030: station level
     supply_type: VAC
@@ -2331,7 +2331,8 @@ devices:
     make: Siemens
     model: SICAM A8000 DI-8112 (16 DI, 110 VDC) x1
     ordering_code: 6MF2811-2AA00
-    description_template: Digital Input Module-24DI (125V DC)
+    description_template: "Digital Input Module-16DI (110V DC)"  # override (data/library/additions.yaml)
+    di_inputs: 16  # override (data/library/additions.yaml)
     terminals:
       - strip: XDIP{slot}
         block: UT-2.5-MT
@@ -2339,7 +2340,6 @@ devices:
         first_slot: D
         description: Knife Disconnect Terminal Blocks For Axion "{slot} Slot" (DI)
     alt_group: SEL-2244-2
-    di_inputs: 16  # override (data/library/additions.yaml)
     tier: low
 
   - part_id: SEL-2244-2.SIEMENS-MID
@@ -2348,7 +2348,8 @@ devices:
     make: Siemens
     model: SICAM A8000 DI-8112 (16 DI, 110 VDC) x2
     ordering_code: 6MF2811-2AA00
-    description_template: Digital Input Module-24DI (125V DC)
+    description_template: "Digital Input Module-32DI (110V DC)"  # override (data/library/additions.yaml)
+    di_inputs: 32  # override (data/library/additions.yaml)
     terminals:
       - strip: XDIP{slot}
         block: UT-2.5-MT
@@ -2356,7 +2357,6 @@ devices:
         first_slot: D
         description: Knife Disconnect Terminal Blocks For Axion "{slot} Slot" (DI)
     alt_group: SEL-2244-2
-    di_inputs: 32  # override (data/library/additions.yaml)
     tier: mid
 
   - part_id: SEL-2244-2.SIEMENS-HIGH
@@ -2365,7 +2365,8 @@ devices:
     make: Siemens
     model: SICAM A8000 DI-8113 (16 DI, 220 VDC) x2
     ordering_code: 6MF2811-3AA00
-    description_template: Digital Input Module-24DI (125V DC)
+    description_template: "Digital Input Module-32DI (220V DC)"  # override (data/library/additions.yaml)
+    di_inputs: 32  # override (data/library/additions.yaml)
     terminals:
       - strip: XDIP{slot}
         block: UT-2.5-MT
@@ -2373,7 +2374,6 @@ devices:
         first_slot: D
         description: Knife Disconnect Terminal Blocks For Axion "{slot} Slot" (DI)
     alt_group: SEL-2244-2
-    di_inputs: 32  # override (data/library/additions.yaml)
     tier: high
 
   - part_id: SEL-2244-2.HITACHI-ENERGY-LOW
@@ -2381,7 +2381,7 @@ devices:
     height_u: 0
     make: Hitachi Energy
     model: RTU540 compact unit with on-board DI
-    description_template: Digital Input Module-24DI (125V DC)
+    description_template: "Digital Input Module"  # override (data/library/additions.yaml)
     terminals:
       - strip: XDIP{slot}
         block: UT-2.5-MT
@@ -2396,7 +2396,7 @@ devices:
     height_u: 0
     make: Hitachi Energy
     model: RTU560 binary input board, 16 DI, 110-125 VDC
-    description_template: Digital Input Module-24DI (125V DC)
+    description_template: "Digital Input Module (110-125V DC)"  # override (data/library/additions.yaml)
     terminals:
       - strip: XDIP{slot}
         block: UT-2.5-MT
@@ -2411,7 +2411,7 @@ devices:
     height_u: 0
     make: Hitachi Energy
     model: RTU560 binary input board with SOE time stamping, 110-125 VDC
-    description_template: Digital Input Module-24DI (125V DC)
+    description_template: "Digital Input Module (110-125V DC)"  # override (data/library/additions.yaml)
     terminals:
       - strip: XDIP{slot}
         block: UT-2.5-MT
@@ -3008,7 +3008,7 @@ devices:
     make: STEGO
     model: LED 025 (magnetic, on/off switch)
     ordering_code: 02540.0-00
-    description_template: Illumination Lamp with Door switch, 11W
+    description_template: "Illumination Lamp with on/off switch, 5W"  # override (data/library/additions.yaml)
     tag_type: IL
     tag_pattern: '{prefix}-IL'
     supply_type: VAC
@@ -3024,7 +3024,7 @@ devices:
     make: STEGO
     model: LED 025 (screw mount, on/off switch)
     ordering_code: 02540.0-01
-    description_template: Illumination Lamp with Door switch, 11W
+    description_template: "Illumination Lamp with on/off switch, 5W"  # override (data/library/additions.yaml)
     tag_type: IL
     tag_pattern: '{prefix}-IL'
     supply_type: VAC
@@ -3040,7 +3040,7 @@ devices:
     make: STEGO
     model: SL 025 LED light
     ordering_code: 02533.1-00
-    description_template: Illumination Lamp with Door switch, 11W
+    description_template: "Illumination Lamp, 4W"  # override (data/library/additions.yaml)
     tag_type: IL
     tag_pattern: '{prefix}-IL'
     supply_type: VAC
@@ -3056,7 +3056,7 @@ devices:
     make: nVent Hoffman
     model: EL LED enclosure light 900 lm
     ordering_code: EL900D
-    description_template: Illumination Lamp with Door switch, 11W
+    description_template: "Illumination Lamp with Door switch, 9W"  # override (data/library/additions.yaml)
     tag_type: IL
     tag_pattern: '{prefix}-IL'
     supply_type: VAC
@@ -3072,7 +3072,7 @@ devices:
     make: nVent Hoffman
     model: EL LED enclosure light with socket 1200 lm
     ordering_code: EL1200DS-BF
-    description_template: Illumination Lamp with Door switch, 11W
+    description_template: "Illumination Lamp with socket, 12W"  # override (data/library/additions.yaml)
     tag_type: IL
     tag_pattern: '{prefix}-IL'
     supply_type: VAC
@@ -3088,7 +3088,7 @@ devices:
     make: nVent Hoffman
     model: EL LED enclosure light with motion sensor 1200 lm
     ordering_code: EL1200M
-    description_template: Illumination Lamp with Door switch, 11W
+    description_template: "Illumination Lamp with motion sensor, 12W"  # override (data/library/additions.yaml)
     tag_type: IL
     tag_pattern: '{prefix}-IL'
     supply_type: VAC
@@ -3104,7 +3104,7 @@ devices:
     make: Pfannenberg
     model: PF 65.000 230 V
     ordering_code: '11665104055'
-    description_template: '230V AC Inlet and Exhaust Fan, Throughput: 716 m3/h, 87W'
+    description_template: "230V AC Inlet and Exhaust Fan, Throughput: 505 m3/h with filter, 65W"  # override (data/library/additions.yaml)
     tag_type: FAN
     supply_type: VAC
     voltage_v: 230
@@ -3119,7 +3119,7 @@ devices:
     make: Pfannenberg
     model: PF 66.000 230 V
     ordering_code: '11666102055'
-    description_template: '230V AC Inlet and Exhaust Fan, Throughput: 716 m3/h, 87W'
+    description_template: "230V AC Inlet and Exhaust Fan, Throughput: 445 m3/h with filter, 160W"  # override (data/library/additions.yaml)
     tag_type: FAN
     supply_type: VAC
     voltage_v: 230
@@ -3134,7 +3134,7 @@ devices:
     make: Pfannenberg
     model: PF 67.000 230 V
     ordering_code: '11667103055'
-    description_template: '230V AC Inlet and Exhaust Fan, Throughput: 716 m3/h, 87W'
+    description_template: "230V AC Inlet and Exhaust Fan, Throughput: 625 m3/h with filter, 140W"  # override (data/library/additions.yaml)
     tag_type: FAN
     supply_type: VAC
     voltage_v: 230
@@ -3149,7 +3149,7 @@ devices:
     make: STEGO
     model: Filter Fan Plus FPI 230 V (257 mm)
     ordering_code: 01873.0-30
-    description_template: '230V AC Inlet and Exhaust Fan, Throughput: 716 m3/h, 87W'
+    description_template: "230V AC Inlet and Exhaust Fan, Throughput: 271 m3/h with filter, 64W"  # override (data/library/additions.yaml)
     tag_type: FAN
     supply_type: VAC
     voltage_v: 230
@@ -3164,7 +3164,7 @@ devices:
     make: STEGO
     model: Filter Fan Plus FPI 230 V (322 mm)
     ordering_code: 01874.0-30
-    description_template: '230V AC Inlet and Exhaust Fan, Throughput: 716 m3/h, 87W'
+    description_template: "230V AC Inlet and Exhaust Fan, Throughput: 373 m3/h with filter, 95W"  # override (data/library/additions.yaml)
     tag_type: FAN
     supply_type: VAC
     voltage_v: 230
@@ -3179,7 +3179,7 @@ devices:
     make: STEGO
     model: FPI/FPO 018 230 V
     ordering_code: 01884.0-01
-    description_template: '230V AC Inlet and Exhaust Fan, Throughput: 716 m3/h, 87W'
+    description_template: "230V AC Inlet and Exhaust Fan, Throughput: 599 m3/h with filter, 140W"  # override (data/library/additions.yaml)
     tag_type: FAN
     supply_type: VAC
     voltage_v: 230
@@ -3266,7 +3266,7 @@ devices:
     make: Pfannenberg
     model: FLZ 530 (NO, 0-60 C)
     ordering_code: '17121000000'
-    description_template: Thermostat, 30W
+    description_template: "Thermostat"  # override (data/library/additions.yaml)
     tag_type: TH
     alt_group: SK3110-TH
     tier: low
@@ -3277,7 +3277,7 @@ devices:
     make: Pfannenberg
     model: FLZ 510 (change-over)
     ordering_code: '17103000010'
-    description_template: Thermostat, 30W
+    description_template: "Thermostat"  # override (data/library/additions.yaml)
     tag_type: TH
     alt_group: SK3110-TH
     tier: mid
@@ -3288,7 +3288,7 @@ devices:
     make: Pfannenberg
     model: FLZ dual thermostat NO/NO
     ordering_code: '17143000010'
-    description_template: Thermostat, 30W
+    description_template: "Thermostat"  # override (data/library/additions.yaml)
     tag_type: TH
     alt_group: SK3110-TH
     tier: high
@@ -3299,7 +3299,7 @@ devices:
     make: STEGO
     model: KTS 011 (NO, 0-60 C)
     ordering_code: 01141.0-00
-    description_template: Thermostat, 30W
+    description_template: "Thermostat"  # override (data/library/additions.yaml)
     tag_type: TH
     alt_group: SK3110-TH
     tier: low
@@ -3310,7 +3310,7 @@ devices:
     make: STEGO
     model: ZR 011 double thermostat (NC/NO, 0-60 C)
     ordering_code: 01172.0-00
-    description_template: Thermostat, 30W
+    description_template: "Thermostat"  # override (data/library/additions.yaml)
     tag_type: TH
     alt_group: SK3110-TH
     tier: mid
@@ -3321,7 +3321,7 @@ devices:
     make: STEGO
     model: ETR 011 electronic thermostat
     ordering_code: 01131.0-00
-    description_template: Thermostat, 30W
+    description_template: "Thermostat, 1W"  # override (data/library/additions.yaml)
     tag_type: TH
     supply_type: VAC
     voltage_v: 230
@@ -4068,7 +4068,7 @@ devices:
     make: SoftMaker
     model: SoftMaker FreeOffice
     ordering_code: FreeOffice (free download, no SKU)
-    description_template: Microsoft Office 2021
+    description_template: "SoftMaker FreeOffice"  # override (data/library/additions.yaml)
     alt_group: MS-OFFICE-2021
     tier: low
 
@@ -4078,7 +4078,7 @@ devices:
     make: SoftMaker
     model: SoftMaker Office Standard 2024
     ordering_code: BN-0015-E
-    description_template: Microsoft Office 2021
+    description_template: "SoftMaker Office Standard 2024"  # override (data/library/additions.yaml)
     alt_group: MS-OFFICE-2021
     tier: mid
 
@@ -4088,7 +4088,7 @@ devices:
     make: SoftMaker
     model: SoftMaker Office Professional 2024
     ordering_code: BN-0016-E
-    description_template: Microsoft Office 2021
+    description_template: "SoftMaker Office Professional 2024"  # override (data/library/additions.yaml)
     alt_group: MS-OFFICE-2021
     tier: high
 
@@ -4098,7 +4098,7 @@ devices:
     make: Corel WordPerfect Office
     model: WordPerfect Office 2021 Standard (ESD)
     ordering_code: ESDWP2021STDEF
-    description_template: Microsoft Office 2021
+    description_template: "Corel WordPerfect Office 2021 Standard"  # override (data/library/additions.yaml)
     alt_group: MS-OFFICE-2021
     tier: low
 
@@ -4108,7 +4108,7 @@ devices:
     make: Corel WordPerfect Office
     model: WordPerfect Office 2021 Standard (volume licence)
     ordering_code: LCWP2021ML1
-    description_template: Microsoft Office 2021
+    description_template: "Corel WordPerfect Office 2021 Standard"  # override (data/library/additions.yaml)
     alt_group: MS-OFFICE-2021
     tier: mid
 
@@ -4118,7 +4118,7 @@ devices:
     make: Corel WordPerfect Office
     model: WordPerfect Office 2021 Professional (volume licence)
     ordering_code: LCWP2021PRML1
-    description_template: Microsoft Office 2021
+    description_template: "Corel WordPerfect Office 2021 Professional"  # override (data/library/additions.yaml)
     alt_group: MS-OFFICE-2021
     tier: high
 
@@ -4182,7 +4182,7 @@ devices:
     height_u: 0
     make: Times Microwave Systems
     model: LMR-240 cable assembly with TNC male connectors, 50 ft
-    description_template: 50 ft (15 Meters) LMR-400 cable
+    description_template: "50 ft (15 Meters) LMR-240 cable"  # override (data/library/additions.yaml)
     alt_group: SEL-C961-050
     tier: low
 
@@ -4211,7 +4211,7 @@ devices:
     height_u: 0
     make: Meinberg
     model: Meinberg antenna cable (per length)
-    description_template: 50 ft (15 Meters) LMR-400 cable
+    description_template: "50 ft (15 Meters) antenna cable"  # override (data/library/additions.yaml)
     alt_group: SEL-C961-050
     tier: low
 
@@ -4220,7 +4220,7 @@ devices:
     height_u: 0
     make: Meinberg
     model: Meinberg low-loss antenna cable (per length)
-    description_template: 50 ft (15 Meters) LMR-400 cable
+    description_template: "50 ft (15 Meters) low-loss antenna cable"  # override (data/library/additions.yaml)
     alt_group: SEL-C961-050
     tier: mid
 
@@ -4229,7 +4229,7 @@ devices:
     height_u: 0
     make: Meinberg
     model: Meinberg fiber-optic antenna link
-    description_template: 50 ft (15 Meters) LMR-400 cable
+    description_template: "Fiber-optic antenna link"  # override (data/library/additions.yaml)
     alt_group: SEL-C961-050
     tier: high
 
@@ -4285,7 +4285,7 @@ devices:
     height_u: 0
     make: Times Microwave Systems
     model: LMR-240 cable assembly with TNC male connectors, 25 ft
-    description_template: 25 ft (7 Meters) LMR-400 cable
+    description_template: "25 ft (7 Meters) LMR-240 cable"  # override (data/library/additions.yaml)
     alt_group: SEL-C961-025
     tier: low
 
@@ -4314,7 +4314,7 @@ devices:
     height_u: 0
     make: Meinberg
     model: Meinberg antenna cable (per length)
-    description_template: 25 ft (7 Meters) LMR-400 cable
+    description_template: "25 ft (7 Meters) antenna cable"  # override (data/library/additions.yaml)
     alt_group: SEL-C961-025
     tier: low
 
@@ -4323,7 +4323,7 @@ devices:
     height_u: 0
     make: Meinberg
     model: Meinberg low-loss antenna cable (per length)
-    description_template: 25 ft (7 Meters) LMR-400 cable
+    description_template: "25 ft (7 Meters) low-loss antenna cable"  # override (data/library/additions.yaml)
     alt_group: SEL-C961-025
     tier: mid
 
@@ -4332,7 +4332,7 @@ devices:
     height_u: 0
     make: Meinberg
     model: Meinberg fiber-optic antenna link
-    description_template: 25 ft (7 Meters) LMR-400 cable
+    description_template: "Fiber-optic antenna link"  # override (data/library/additions.yaml)
     alt_group: SEL-C961-025
     tier: high
 
@@ -5261,7 +5261,7 @@ devices:
     make: Siemens
     model: SCALANCE XR324-4M EEC
     ordering_code: 6GK5324-4GG10-4JR2
-    description_template: LAN-{lan} Industrial Ethernet switch (EXT) (16 MM Ports, 4 RJ45)
+    description_template: LAN-{lan} Industrial Ethernet switch (EXT) (8 MM Ports, 16 RJ45)
     tag_type: ESW
     purdue_level: EXT
     supply_type: VDC
