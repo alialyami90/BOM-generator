@@ -129,11 +129,13 @@
         ${first}${missing ? `<option value="${esc(r.part_id)}" selected>${esc(r.part_id)}</option>` : ''}${opts.map((o) => `<option value="${esc(o.part_id)}" ${o.part_id === v ? 'selected' : ''}>${esc(partText(o))}</option>`).join('')}</select>`)}
       ${missing ? `<span class="err small" id="${id}-missing">${icon('error')}<span>Not in ${esc(p.project.library.name)} ${esc(p.project.library.version)}. Pick another part.</span></span>` : ''}${err(key)}</div>`;
   }
+  /* M46: a link the library has no SFP for stops the build; say so on the row first. */
+  const noSfp = (speed, media) => `<span class="err small">${icon('warn')}<span>No ${esc(speed)} ${esc(media)} SFP in the library: pick another speed or media, or add the SFP to the library.</span></span>`;
   function sfpRows(r) {
     return r.sfp.map((f) => {
       const key = `f.${r.index}.${f.speed}.${f.media}`;
       return `<div class="prow-sub"><span class="prow-sub-what">${esc(f.speed)} · ${esc(f.media)} SFP</span>
-        ${mark(key, select(`p-${key}`, [['', 'Automatic: same make first'], ...f.candidates.map((c) => [c, c])], shown(key)).replace('<select ', `<select aria-label="SFP for ${esc(f.speed)} ${esc(f.media)}, ${esc(r.label)}" `))}</div>`;
+        ${mark(key, select(`p-${key}`, [['', 'Automatic: same make first'], ...f.candidates.map((c) => [c, c])], shown(key)).replace('<select ', `<select aria-label="SFP for ${esc(f.speed)} ${esc(f.media)}, ${esc(r.label)}" `))}</div>${f.candidates.length ? '' : `<div class="prow-err">${noSfp(f.speed, f.media)}</div>`}`;
     }).join('');
   }
   function linkRow(r) {  // M31: how the device reaches the L2 switch, and an RTAC's COM ports
@@ -143,7 +145,7 @@
     const speed = select(id(k('l2_speed')), ['10M', '100M', '1G', '10G'], String(shown(k('l2_speed')))).replace('<select ', `<select aria-label="Link speed, ${esc(r.label)}" `);
     const media = select(id(k('l2_media')), ['MM', 'SM', 'RJ45'], String(shown(k('l2_media')))).replace('<select ', `<select aria-label="Link media, ${esc(r.label)}" `);
     const serial = r.serial_ports == null ? '' : `<span class="prow-link-com"><label class="prow-sub-what" for="${id(com)}">COM ports used</label>${mark(com, input(id(com), shown(com), { num: true, mono: true, invalid: !!PF.errors[com] }))}</span>`;
-    const errs = [...Object.keys(LINK).map(k), com].map(err).join('');
+    const errs = [...Object.keys(LINK).map(k), com].map(err).join('') + (r.link.no_sfp ? noSfp(r.link.l2_speed, r.link.l2_media) : '');
     return `<div class="prow-sub prow-link"><span class="prow-sub-what">Link to the L2 switch</span>${mark(k('l2_ports'), ports)}<span class="muted" aria-hidden="true">×</span>${mark(k('l2_speed'), speed)}${mark(k('l2_media'), media)}${serial}</div>${errs ? `<div class="prow-err">${errs}</div>` : ''}`;
   }
   function accessories(p, r) {

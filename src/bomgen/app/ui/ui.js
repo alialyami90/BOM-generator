@@ -229,6 +229,7 @@
     if (!/substation\.yaml$/.test(file)) return { label: 'Open the project', hash: '#/project', focus: null };
     const [head, rest = ''] = loc.split(/\.(.*)/s), key = rest.split(/[.[]/)[0];
     let m;
+    if ((m = /^equipment\[(\d+)\]\.(l2_ports|l2_speed|l2_media)$/.exec(loc))) return { label: 'Go to the row', hash: '#/parts', focus: id(`p-l.${m[1]}.${m[2]}`) };  // M46
     if ((m = /^equipment\[(\d+)\]/.exec(loc))) return { label: 'Go to the row', hash: '#/parts', focus: id(`p-e.${m[1]}.part_id`) };
     if (head === 'network') return { label: 'Go to the field', hash: '#/parts', focus: id(`p-n.${key}`) };
     if (head === 'spares') return { label: 'Go to the field', hash: '#/parts', focus: id(`p-s.${key}`) };

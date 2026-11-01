@@ -17,6 +17,7 @@ from bomgen.app.loose import _records
 from bomgen.app.substations import _library, resolve, substation_page
 from bomgen.engine.errors import EngineError
 from bomgen.engine.layout import CABLE_MANAGED, layout_preview
+from bomgen.engine.network import unserved_links
 from bomgen.io.derived import effective_part_id
 from bomgen.io.errors import InputError
 from bomgen.io.loader import LoadedSubstation
@@ -237,6 +238,7 @@ def _row(
             "l2_ports": entry.l2_ports,
             "l2_speed": entry.l2_speed.value,
             "l2_media": entry.l2_media.value,
+            "no_sfp": library is not None and bool(unserved_links([entry], library)),  # M46
         },
         "serial_ports": (entry.port_plan.serial_ports if entry.port_plan else 0)
         if category is Category.RTAC

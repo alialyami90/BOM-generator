@@ -947,3 +947,15 @@ def test_home_restores_deleted_projects_and_overview_records_the_library() -> No
     assert "Restore deleted project…" in js
     assert "Record ${esc(p.library.active)} in this project" in js
     assert "['library', 'version']" in js
+
+
+def test_a_link_with_no_library_sfp_is_flagged_on_its_parts_row() -> None:
+    """M46: the Parts row warns, and Where to fix lands on the link field."""
+    js = PARTS.read_text(encoding="utf-8")
+    ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    assert "(r.link.no_sfp ? noSfp(r.link.l2_speed, r.link.l2_media) : '')" in js
+    assert (
+        "${f.candidates.length ? '' : `<div class=\"prow-err\">${noSfp(f.speed, f.media)}</div>`}"
+        in js
+    )
+    assert "focus: id(`p-l.${m[1]}.${m[2]}`) };  // M46" in ui

@@ -17,8 +17,11 @@ from bomgen.app.substations import Resolved, resolve
 from bomgen.build import build_substation, workbook_name
 from bomgen.checks import check_report
 from bomgen.engine.errors import EngineError
+from bomgen.engine.network import unserved_links
 from bomgen.engine.pipeline import build as build_bom
 from bomgen.io.errors import InputError
+from bomgen.io.loader import LoadedSubstation
+from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.store import LibraryStore
 from bomgen.models.project import _FILE_NAME_FORBIDDEN
 from bomgen.models.report import CheckStatus
@@ -64,8 +67,28 @@ def _not_ready(found: Resolved) -> list[dict[str, Any]]:
     elif not loaded.panels:
         location, message = "panels", "No panels yet: lay them out on Panels."
     else:
-        return []
+        return _unserved_links(found.file, loaded)
     return [{"level": "error", "file": found.file, "location": location, "message": message}]
+
+
+def _unserved_links(file: Path, loaded: LoadedSubstation) -> list[dict[str, Any]]:
+    """Each L2 link no library SFP serves, on its Parts row, before the engine stops on it."""
+    source = read_yaml(file)
+    problems = []
+    for index in unserved_links(loaded.substation.equipment, loaded.library):
+        entry = loaded.substation.equipment[index]
+        link = f"{entry.l2_speed.value} {entry.l2_media.value}"
+        problems.append(
+            {
+                "level": "error",
+                "file": file,
+                "location": f"equipment[{index}].l2_speed",
+                "line": source.line_for(("equipment", index, "l2_speed")),
+                "message": f"no SFP in the library for {link}, so the L2 switch cannot take "
+                f"{entry.id}'s link: pick another speed or media, or add a {link} SFP.",
+            }
+        )
+    return problems
 
 
 def checks_page(project_file: Path, substation_id: str, store: LibraryStore) -> dict[str, Any]:
