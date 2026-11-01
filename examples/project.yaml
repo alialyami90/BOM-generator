@@ -12,7 +12,7 @@ project:
 
 library:  # the installed library; `file` loads this folder's copy instead
   name: psa-devices
-  version: 1.12.0
+  version: 1.13.0
   file: library.yaml
 
 documents:  # the register: every key names its substation (Q24)
