@@ -987,6 +987,9 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
   parts are L2 (psa-devices 1.10.0). The workstation roles give OWS, EWS and SRV. A
   `duplicate_tag` check fails a shared tag (ADR 0030, accepted by Ali 2026-11-01; audit 2026-10-31, ENG-1, APP-9,
   ALI-16; Q56 to Q60).
+- **M40 — Unset `mcb_dc` worked out, not stored.** A choice of `mcb` with no `mcb_dc` leaves the
+  resolved `catalogues.mcb_dc` unset, so `dc_mcb` falls back to the chosen brand (ADR 0023 point
+  2) and a resolved library validates again. Sizing and goldens are unchanged.
 
 ## 5. Testing strategy
 

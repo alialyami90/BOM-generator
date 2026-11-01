@@ -590,8 +590,6 @@ def resolve_catalogues(library: Library, choice: CatalogueChoice) -> Library:
     update: dict[str, object] = {}
     for kind in CatalogueChoice.model_fields:
         brand_id = getattr(choice, kind)
-        if kind == "mcb_dc" and brand_id is None:
-            brand_id = choice.mcb  # the DC set follows the AC choice unless one is given
         if brand_id is None or brand_id == DEFAULT_BRAND:
             continue
         brands = getattr(library.catalogue_brands, _brand_list(kind))
@@ -602,6 +600,8 @@ def resolve_catalogues(library: Library, choice: CatalogueChoice) -> Library:
         update[kind] = _plain(kind, brand)
     if choice.mcb_dc == DEFAULT_BRAND and "mcb" in update:
         update["mcb_dc"] = library.catalogues.dc_mcb  # the default DC set, not the AC brand
+    elif choice.mcb_dc is None and "mcb" in update:
+        update["mcb_dc"] = None  # DC follows the chosen mcb brand (ADR 0023 point 2)
     if not update:
         return library
     catalogues = library.catalogues.model_copy(update=update)

@@ -14,6 +14,13 @@ project uses [Semantic Versioning](https://semver.org/).
   SEL's typical figure (25-50 % load) with its SEL-9331 supplies, as Ali
   chose for plan Q54.
 
+### Fixed
+
+- A substation that picks an MCB brand without a DC brand no longer stores
+  that brand as its DC set: the DC branches still size with it (ADR 0023),
+  and the resolved library validates again when the brand has no DC rating
+  (M40).
+
 ## [0.3.3] - 2026-11-01
 
 ### Added

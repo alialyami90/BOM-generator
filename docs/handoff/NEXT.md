@@ -97,7 +97,7 @@ Follow STATE.md → "How a release happens".
 
 ## 6. Input models and I/O
 
-1. **Compute the unset `mcb_dc` fallback instead of storing it** (not urgent).
+1. *Done (M40).* **Compute the unset `mcb_dc` fallback instead of storing it** (not urgent).
    - Store `mcb_dc` in the resolved catalogues only when it is written (a brand id or `default`);
      otherwise leave the library's own `catalogues.mcb_dc`, or `None`. `Catalogues.dc_mcb` already falls
      back to `mcb`.
