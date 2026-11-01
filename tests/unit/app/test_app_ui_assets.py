@@ -753,6 +753,12 @@ def test_where_to_fix_leads_each_located_problem_to_its_page() -> None:
             "pe-doc",
         ),
         (
+            {"file": sub, "location": "generated_panels.cabinet_number"},
+            "Open the panel",
+            "#/panels/psa1/enclosure",
+            "pe-g.cabinet_number",
+        ),
+        (
             {"file": "/w/gis01/panels/ws.yaml", "location": "devices[0].part_id"},
             "Open the panel",
             "#/panels/ws/devices",

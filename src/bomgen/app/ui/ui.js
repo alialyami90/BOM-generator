@@ -240,6 +240,7 @@
       if (key === 'options') { const k = rest.split('.')[1]; return { label: 'Open the panel', hash: `${base}/options`, focus: k ? id(`pe-o.all.${k}`) : null, scope: 'all' }; }
       if (key === 'enclosure') { const k = rest.split('.').slice(1).join('.'); return { label: 'Open the panel', hash: `${base}/enclosure`, focus: k ? id(`pe-e.${k}`) : null }; }
       if (key === 'document') return { label: 'Open the panel', hash: `${base}/document`, focus: id('pe-doc') };
+      if (['cabinet_name', 'cabinet_number', 'tag_prefix', 'sheet_name'].includes(key)) return { label: 'Open the panel', hash: `${base}/enclosure`, focus: id(`pe-g.${key}`) };
       return line;
     }
     if (loc === 'equipment') return { label: 'Open Parts', hash: '#/parts', focus: null };
