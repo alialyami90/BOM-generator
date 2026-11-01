@@ -67,8 +67,7 @@ def build(loaded: LoadedSubstation) -> BuildResult:
     if material is None and loaded.panels:  # devices' own loose items still need a sheet
         material = LooseMaterial(host_panel=loaded.panels[0].id)
     loose = loose_table(material, substation, [(d.panel, d.rows) for d in drafts], library)
-    fed = {item.part_id for item in loose_items if item.part_id and item.fed_from}
-    power = power_consumption(panels, loose, library, loaded.constants, fed)
+    power = power_consumption(panels, loose, library, loaded.constants)
     heat = heat_result(
         [(d.panel, d.ventilation, FORCED_FANS * d.fan.airflow_m3h) for d in drafts],
         power,

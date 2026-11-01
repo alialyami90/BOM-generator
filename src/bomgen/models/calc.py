@@ -32,7 +32,6 @@ class PowerLine(OutputModel):
     unit_w: NonNegativeFloat
     load_type: LoadType
     current_factor: PositiveFloat
-    branch_mcb_a: PositiveInt | None = None  # the row's own branch MCB (ADR 0028)
 
     @property
     def supply_label(self) -> str:
@@ -56,9 +55,7 @@ class PowerLine(OutputModel):
 
     @property
     def device_mcb_a(self) -> int:
-        """P: the row's own branch MCB rating, else ⌈O⌉ (ADR 0028)."""
-        if self.branch_mcb_a is not None:
-            return self.branch_mcb_a
+        """P = ⌈O⌉."""
         return math.ceil(self.current_with_margin_a)
 
     @property

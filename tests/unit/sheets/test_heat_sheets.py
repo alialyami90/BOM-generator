@@ -325,10 +325,10 @@ def test_steel_coefficient_box_stays_apart_from_the_constants_box() -> None:
     assert formula(m, "D16").text == "=G9/(D13*$M$7)"
 
 
-def test_a_vac_group_b_device_is_an_ac_row_at_its_own_voltage_on_both_sheets() -> None:
-    # ADR 0025: a VAC group B unit sits in its cabinet's AUX AC LOAD block; ADR 0028: at
-    # its own voltage, with its AC branch rating in P. Heat Dissipation reads that row.
-    gw = pline("psa1", 4, AC, 73).model_copy(update={"voltage_v": 120, "branch_mcb_a": 2})
+def test_a_vac_group_b_device_is_an_ac_row_on_both_sheets() -> None:
+    # ADR 0025: a VAC group B unit sits in its cabinet's AUX AC LOAD block, at the AC
+    # system voltage (spec: Power Consumption formulas). Heat Dissipation reads that row.
+    gw = pline("psa1", 4, AC, 73)
     power_model = POWER.model_copy(
         update={
             "cabinets": (
@@ -346,8 +346,9 @@ def test_a_vac_group_b_device_is_an_ac_row_at_its_own_voltage_on_both_sheets() -
     p, row = power.model, power.rows[gw.source]
     assert value(p, "B10") == "AUX AC LOAD"
     assert row == 13  # the first row of the AC block
-    assert [value(p, f"{c}{row}") for c in "CDP"] == ["120V", "VAC", 2]
-    assert formula(p, f"N{row}").text == f"=I{row}/120"
+    assert [value(p, f"{c}{row}") for c in "CD"] == ["230V", "VAC"]
+    assert formula(p, f"N{row}").text == f"=I{row}/230"
+    assert formula(p, f"P{row}").text == f"=ROUNDUP(O{row},0)"
 
     heat = HeatResult(
         dissipation=(CabinetHeat(panel_id="psa1", lines=tuple(map(heat_line, (L1, gw, LAMP)))),),
