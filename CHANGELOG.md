@@ -7,6 +7,8 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-11-01
+
 ### Added
 
 - The installer ships psa-devices 1.11.0, whose housekeeping catalogue lists
@@ -664,7 +666,8 @@ project uses [Semantic Versioning](https://semver.org/).
   airflow; future library defaults use 0 W for the SK 3110 thermostat and
   460 m³/h for the SK 3243.100 fan with its outlet filter (#12).
 
-[Unreleased]: https://github.com/alialyami90/BOM-generator/compare/v0.3.2...HEAD
+[Unreleased]: https://github.com/alialyami90/BOM-generator/compare/v0.3.3...HEAD
+[0.3.3]: https://github.com/alialyami90/BOM-generator/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/alialyami90/BOM-generator/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/alialyami90/BOM-generator/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/alialyami90/BOM-generator/compare/v0.2.1...v0.3.0

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "bomgen"
-version = "0.3.2"
+version = "0.3.3"
 description = "Generates the substation SCADA / PSA BOM workbook (.xlsx) from a device library, panel definitions and project settings."
 readme = "README.md"
 requires-python = ">=3.12"
