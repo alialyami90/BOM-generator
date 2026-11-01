@@ -11,6 +11,10 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Parts rows set each device's link to the L2 switch (M31): ports, speed
+  (10M, 100M, 1G, 10G) and media (MM, SM, RJ45) on one line under the row's
+  data, and an RTAC row its COM ports used. The sized switches and the patch
+  panel have no link line. They save with the rest of Parts.
 - Hand-written panels in the panel editor (M32b). Add hand-written panel… on
   Panels asks for a name, cabinet number, kind and first device, writes
   `panels/<id>.yaml` listed last in `manual_panels`, and opens it on Devices.
