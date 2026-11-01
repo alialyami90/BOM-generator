@@ -1,6 +1,6 @@
 # Plan: Substation SCADA BOM generator
 
-Status: implemented. M0–M34 are released (v0.3.3, 2026-11-01). M35–M43 are the remaining roadmap.
+Status: implemented. M0–M34 are released (v0.3.3, 2026-11-01). M35–M44 are the remaining roadmap.
 Ali's v0.2 and v0.3 points and their milestones are in [`backlog.md`](backlog.md). Changes go
 through the review flow in `CLAUDE.md`.
 Spec: [`docs/spec/generator-spec-v2.md`](spec/generator-spec-v2.md). Sections are
@@ -1017,6 +1017,11 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
   `description_template` from its device-db tier, as an override in `data/library/additions.yaml`;
   a figure the tier does not give is left out. A test checks every alternative's description
   against its data. psa-devices 1.14.0; originals unchanged.
+- **M44 — Tags for the contractor's networked parts.** The Cisco, SEL and RUGGEDCOM switches get
+  `tag_type: ESW`, the eight FortiGates `EXT` and `FW` as FGR-60F, and the 21 Hubbell FEUR shelves
+  the FOPP's type and pattern (ADR 0030, Q58), so they print with a tag and a nameplate. A test
+  holds every networked part to a level and a type (pre-release check 2026-11-01, bugs 1 and 2).
+  psa-devices 1.15.0.
 
 ## 5. Testing strategy
 
