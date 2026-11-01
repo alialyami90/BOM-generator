@@ -7,6 +7,8 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.4] - 2026-11-01
+
 ### Added
 
 - Desktop conveniences (M39, APP-25 to APP-28). When the window comes back
@@ -745,7 +747,8 @@ project uses [Semantic Versioning](https://semver.org/).
   airflow; future library defaults use 0 W for the SK 3110 thermostat and
   460 m³/h for the SK 3243.100 fan with its outlet filter (#12).
 
-[Unreleased]: https://github.com/alialyami90/BOM-generator/compare/v0.3.3...HEAD
+[Unreleased]: https://github.com/alialyami90/BOM-generator/compare/v0.3.4...HEAD
+[0.3.4]: https://github.com/alialyami90/BOM-generator/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/alialyami90/BOM-generator/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/alialyami90/BOM-generator/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/alialyami90/BOM-generator/compare/v0.3.0...v0.3.1
