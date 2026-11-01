@@ -2339,6 +2339,7 @@ devices:
         first_slot: D
         description: Knife Disconnect Terminal Blocks For Axion "{slot} Slot" (DI)
     alt_group: SEL-2244-2
+    di_inputs: 16  # override (data/library/additions.yaml)
     tier: low
 
   - part_id: SEL-2244-2.SIEMENS-MID
@@ -2355,6 +2356,7 @@ devices:
         first_slot: D
         description: Knife Disconnect Terminal Blocks For Axion "{slot} Slot" (DI)
     alt_group: SEL-2244-2
+    di_inputs: 32  # override (data/library/additions.yaml)
     tier: mid
 
   - part_id: SEL-2244-2.SIEMENS-HIGH
@@ -2371,6 +2373,7 @@ devices:
         first_slot: D
         description: Knife Disconnect Terminal Blocks For Axion "{slot} Slot" (DI)
     alt_group: SEL-2244-2
+    di_inputs: 32  # override (data/library/additions.yaml)
     tier: high
 
   - part_id: SEL-2244-2.HITACHI-ENERGY-LOW
@@ -5249,6 +5252,124 @@ devices:
     unit_power_w: 138  # 60 Hz: the tender text's 138 W; the technical data says 135 W
     load_type: "INTERMITTENT"
     height_u: 0
+  # Alternative tiers from data/device-db (M14 rules), appended by
+  # data/device-db/tools/library_entries.py (M41c): the two that got a power figure in M41b
+  # (finding 30) and the six nameplate tiers.
+  - part_id: SEL-2730M-EXT.SIEMENS-LOW
+    category: network_switch
+    height_u: 1
+    make: Siemens
+    model: SCALANCE XR324-4M EEC
+    ordering_code: 6GK5324-4GG10-4JR2
+    description_template: LAN-{lan} Industrial Ethernet switch (EXT) (16 MM Ports, 4 RJ45)
+    tag_type: ESW
+    purdue_level: EXT
+    supply_type: VDC
+    voltage_v: 125
+    unit_power_w: 42
+    load_type: CONTINUOUS
+    power_supplies: 2
+    input_v_min: 60
+    input_v_max: 250
+    hwio_points: 1
+    ports:
+      - count: 16
+        speed: 1G
+        media: RJ45
+        kind: fixed
+        usable_for: any
+      - count: 8
+        speed: 100M
+        media: MM
+        kind: fixed
+        usable_for: ied
+    alt_group: SEL-2730M-EXT
+    tier: low
+  - part_id: SEL-2488.ARBITER-SYSTEMS-MID
+    category: gps_clock
+    height_u: 1
+    make: Arbiter Systems
+    model: Model 1202B/C GNSS Synchronized Clock (100 ns)
+    ordering_code: 1202B/C with Power Supply A01 + B01
+    description_template: GPS Clock with Antenna and accessories (SNTP/IRIG-B), 125VDC redundant, 100mbps SFP ports redundant
+    tag_type: GPS
+    purdue_level: L2
+    supply_type: VDC
+    voltage_v: 125
+    unit_power_w: 30
+    load_type: CONTINUOUS
+    power_supplies: 2
+    input_v_min: 100
+    input_v_max: 350
+    hwio_points: 1
+    loose_items:
+      - part_id: SEL-9524B.ARBITER-SYSTEMS-MID
+        qty: 1
+        tag: Time Server Accessories
+      - part_id: SEL-C961-050
+        qty: 1
+      - part_id: SEL-915900139
+        qty: 1
+      - part_id: SEL-C961-025
+        qty: 1
+      - part_id: SEL-915900043
+        qty: 1
+    alt_group: SEL-2488
+    tier: mid
+  - part_id: NAMEPLATE-0828805.WEIDMULLER-LOW
+    category: accessory
+    height_u: 0
+    make: Weidmuller
+    model: CC 30/60 MM WS
+    ordering_code: '2005330000'
+    description_template: Device nameplate, white PVC plate 60 x 30 mm, self-adhesive
+    alt_group: NAMEPLATE-0828805
+    tier: low
+  - part_id: NAMEPLATE-0828805.WEIDMULLER-MID
+    category: accessory
+    height_u: 0
+    make: Weidmuller
+    model: CC 30/60 K MC NE WS
+    ordering_code: '1934390000'
+    description_template: Device nameplate, white PVC plate 60 x 30 mm, self-adhesive
+    alt_group: NAMEPLATE-0828805
+    tier: mid
+  - part_id: NAMEPLATE-0828805.WEIDMULLER-HIGH
+    category: accessory
+    height_u: 0
+    make: Weidmuller
+    model: CC 30/60 MC NEUTRAL WS
+    ordering_code: '1934420000'
+    description_template: Device nameplate, white PVC plate 60 x 30 mm, self-adhesive
+    alt_group: NAMEPLATE-0828805
+    tier: high
+  - part_id: NAMEPLATE-0828805.BRADY-LOW
+    category: accessory
+    height_u: 0
+    make: Brady
+    model: EPREP label B-7593 48 x 19 mm, black
+    ordering_code: PTLEP-08-7593-BK
+    description_template: Device nameplate, white PVC plate 60 x 30 mm, self-adhesive
+    alt_group: NAMEPLATE-0828805
+    tier: low
+  - part_id: NAMEPLATE-0828805.BRADY-MID
+    category: accessory
+    height_u: 0
+    make: Brady
+    model: EPREP label B-7593 30 x 40 mm, white
+    ordering_code: '312120'
+    description_template: Device nameplate, white PVC plate 60 x 30 mm, self-adhesive
+    alt_group: NAMEPLATE-0828805
+    tier: mid
+  - part_id: NAMEPLATE-0828805.BRADY-HIGH
+    category: accessory
+    height_u: 0
+    make: Brady
+    model: BMP71 raised panel engraved-plate label 3 x 1 in, black
+    ordering_code: M71EP-176-593-BK
+    description_template: Device nameplate, white PVC plate 60 x 30 mm, self-adhesive
+    alt_group: NAMEPLATE-0828805
+    tier: high
 catalogues:
   enclosure_u: 42  # rack units of the standard enclosure (ADR 0013)
   mcb:  # spec: Derivation rules -> Breaker part numbers

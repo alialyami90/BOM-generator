@@ -88,7 +88,10 @@ def test_each_addition_is_a_valid_part_new_to_the_example() -> None:
     for entry in additions:
         part = DeviceType.model_validate(entry)
         assert part.part_id not in example_ids
-        assert part.alt_group == part.part_id  # its own group until alternatives are researched
+        if part.tier is None:
+            assert part.alt_group == part.part_id  # its own group until alternatives are researched
+        else:  # an alternative tier from data/device-db joins its example original (M41c)
+            assert part.alt_group in example_ids
 
 
 def test_the_originals_carry_their_datasheet_inrush_and_input_range(shipped: Library) -> None:
@@ -309,3 +312,23 @@ def test_q54_the_sel_2_computers_use_their_typical_power(shipped: Library) -> No
         assert (part.category, part.supply_type, part.voltage_v) == (category, "VDC", 125)
         assert (part.unit_power_w, part.power_supplies, part.height_u) == (watts, supplies, height)
         assert part.purdue_level == "L2"  # ADR 0030: station level
+
+
+def test_m41c_the_newly_powered_alternatives_and_nameplate_tiers_are_parts(
+    shipped: Library,
+) -> None:
+    by_id = {d.part_id: d for d in shipped.devices}
+
+    scalance, arbiter = by_id["SEL-2730M-EXT.SIEMENS-LOW"], by_id["SEL-2488.ARBITER-SYSTEMS-MID"]
+    assert (scalance.unit_power_w, scalance.ordering_code) == (42, "6GK5324-4GG10-4JR2")
+    assert (arbiter.unit_power_w, arbiter.alt_group) == (30, "SEL-2488")
+    plates = [d for d in shipped.devices if d.alt_group == "NAMEPLATE-0828805" and d.tier]
+    assert len(plates) == 6
+
+
+def test_finding_31_the_sicam_di_modules_give_their_inputs(shipped: Library) -> None:
+    by_id = {d.part_id: d for d in shipped.devices}
+
+    inputs = [by_id[f"SEL-2244-2.SIEMENS-{tier}"].di_inputs for tier in ("LOW", "MID", "HIGH")]
+
+    assert inputs == [16, 32, 32]

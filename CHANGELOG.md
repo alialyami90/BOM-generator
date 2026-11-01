@@ -40,6 +40,10 @@ project uses [Semantic Versioning](https://semver.org/).
   6GK5324-4GG10-4JR2, at 42 W, and the Arbiter 1202B/C at 30 W. The nine
   that publish none say so (`power_basis: not_given`). The SEL-2244-2 Siemens
   alternatives give their digital input count, `di_inputs` (finding 31).
+- The installer ships psa-devices 1.13.0. It adds the SCALANCE XR324-4M EEC
+  (42 W) and Arbiter 1202B/C (30 W) alternatives and six Weidmüller and Brady
+  nameplate alternatives, and the SEL-2244-2 Siemens alternatives count 16,
+  32 and 32 digital inputs (M41c).
 
 ### Fixed
 
