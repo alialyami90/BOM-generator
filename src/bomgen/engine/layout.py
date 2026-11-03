@@ -860,6 +860,8 @@ def _rows(panel: PanelFill, loaded: LoadedSubstation) -> list[DeviceInstance]:
         first = run[0]
         entry = entries[first.device]
         start = first_number(devices[first.part_id]) + first.n - 1 if first.n > 1 else None
+        if entry.first_nn is not None:  # the engineer's first number (plan M59)
+            start = entry.first_nn + first.n - 1
         # the BOM counts a generated panel's managers from the layout (ADR 0013, Q32)
         managed = None
         if devices[first.part_id].category in NETWORK_DEVICES:
@@ -868,7 +870,8 @@ def _rows(panel: PanelFill, loaded: LoadedSubstation) -> list[DeviceInstance]:
             DeviceInstance(
                 part_id=first.part_id,
                 qty=len(run),
-                tag_type=ROLE_TYPES.get(entry.role),
+                tag=entry.tag,
+                tag_type=entry.tag_type or ROLE_TYPES.get(entry.role),
                 purpose=entry.purpose,
                 lan=_LAN[first.side],
                 hwio_points=entry.hwio_points,  # a row total, as on DeviceInstance

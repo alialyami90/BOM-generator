@@ -19,6 +19,9 @@ project uses [Semantic Versioning](https://semver.org/).
   need more slots than are free (M49).
 - Parts › Network fine tuning has *Most panels*: the layout opens no panel past it, and Panels lists
   each device that doesn't fit with the rack units it is short (M62).
+- Each Parts row has *BOM text*: purpose, tag, type code, first number and HWIO points, with the
+  generated tags as placeholders. A first number of 21 on the L1 row prints PSA1-L1-ESW-A21 onward,
+  and a tag another unit already has is flagged on the row (M59).
 
 ## [0.3.4] - 2026-11-01
 
