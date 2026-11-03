@@ -1091,15 +1091,42 @@
     },
     "SfpChoice": {
       "additionalProperties": false,
-      "description": "The SFP model picked for one port speed and media of a switch (ADR 0024).",
+      "description": "The SFP model picked for one port speed and media of a switch (ADR 0024), and the\nspare and extra SFPs on each of its BOM rows (plan M49). No ``part_id`` keeps the\nautomatic pick; no ``spare`` keeps the project's.",
       "properties": {
+        "extra": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Extra",
+          "type": "integer"
+        },
         "media": {
           "$ref": "#/$defs/Media"
         },
         "part_id": {
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
-          "title": "Part Id",
-          "type": "string"
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Part Id"
+        },
+        "spare": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Spare"
         },
         "speed": {
           "$ref": "#/$defs/PortSpeed"
@@ -1107,8 +1134,7 @@
       },
       "required": [
         "speed",
-        "media",
-        "part_id"
+        "media"
       ],
       "title": "SfpChoice",
       "type": "object"

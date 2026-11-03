@@ -18,12 +18,14 @@ from bomgen.app.substations import _library, resolve, substation_page
 from bomgen.engine.errors import EngineError
 from bomgen.engine.layout import CABLE_MANAGED, layout_preview
 from bomgen.engine.network import unserved_links
+from bomgen.engine.rules_text import sfp_rule, sfp_spare_rule
 from bomgen.io.derived import effective_part_id
 from bomgen.io.errors import InputError
 from bomgen.io.loader import LoadedSubstation
 from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.store import LibraryStore
 from bomgen.models.library import Category, DeviceType, Library, Media
+from bomgen.models.output import Derived
 from bomgen.models.project import Project
 from bomgen.models.substation import Equipment, EquipmentRole, Substation
 
@@ -151,13 +153,17 @@ def row_label(entry: Equipment, library: Library) -> str:
     return _label(entry, _category(entry, part))
 
 
-def _sfp_needs(loaded: LoadedSubstation) -> dict[str, set[tuple[str, str]]]:
-    """The (speed, media) pairs each sized switch entry's ports use, from the layout."""
+SfpCounts = dict[tuple[str, str], tuple[int, int]]  # (speed, media) -> (links, spare)
+
+
+def _sfp_needs(loaded: LoadedSubstation) -> dict[str, SfpCounts]:
+    """The (speed, media) pairs each sized switch entry's ports use, from the layout, with
+    the links and automatic spare of the first panel row that hosts it (plan M49)."""
     try:
         result = layout_preview(loaded)
     except EngineError:
         return {}
-    needs: dict[str, set[tuple[str, str]]] = {}
+    needs: dict[str, SfpCounts] = {}
     for entry in loaded.substation.equipment:
         if entry.role not in SIZED or entry.part_id is None:
             continue
@@ -170,10 +176,38 @@ def _sfp_needs(loaded: LoadedSubstation) -> dict[str, set[tuple[str, str]]]:
             plan = panel.port_plans.get(str(key))
             if plan is None:
                 continue
+            counts: SfpCounts = {}
             for a in (*plan.uplinks_l3, *plan.uplinks, *plan.downlinks):
                 if a.media is not Media.RJ45:
-                    needs.setdefault(entry.id, set()).add((a.speed.value, a.media.value))
+                    links, spare = counts.get((a.speed.value, a.media.value), (0, 0))
+                    counts[(a.speed.value, a.media.value)] = (links + a.count, spare + a.spare)
+            needs.setdefault(entry.id, {})
+            for pair, value in counts.items():
+                needs[entry.id].setdefault(pair, value)
     return needs
+
+
+def _sfp(
+    entry: Equipment, speed: str, media: str, counts: tuple[int, int], candidates: list[str]
+) -> dict[str, Any]:
+    """One SFP sub-row of a switch: its part choice and its quantity per BOM row."""
+    choice = next((c for c in entry.sfp if (c.speed.value, c.media.value) == (speed, media)), None)
+    used, auto = counts
+    override = choice.spare if choice is not None else None
+    extra = choice.extra if choice is not None else 0
+    spare = auto if override is None else override
+    rule = sfp_spare_rule(auto, l1=entry.role is EquipmentRole.L1_SWITCH)
+    return {
+        "speed": speed,
+        "media": media,
+        "choice": choice.part_id if choice is not None else None,
+        "candidates": candidates,
+        "used": used,
+        "spare": Derived[int](value=auto, rule=rule, override=override).model_dump(mode="json"),
+        "extra": extra,
+        "total": used + spare + extra,
+        "rule": sfp_rule(used, spare, extra),
+    }
 
 
 def _serves(device: DeviceType, speed: str, media: str) -> bool:
@@ -187,23 +221,21 @@ def _row(
     index: int,
     entry: Equipment,
     library: Library | None,
-    needs: set[tuple[str, str]],
+    needs: SfpCounts,
     loose: list[dict[str, Any]],
     host_panel: str | None,
 ) -> dict[str, Any]:
     part = library.get(entry.part_id) if library and entry.part_id else None
     category = _category(entry, part)
     default = category in CABLE_MANAGED  # the layout's rule (ADR 0013, amended)
-    chosen = {(c.speed.value, c.media.value): c.part_id for c in entry.sfp}
     sfp = [
-        {
-            "speed": speed,
-            "media": media,
-            "choice": chosen.get((speed, media)),
-            "candidates": [d.part_id for d in _parts(library) if _serves(d, speed, media)]
-            if library
-            else [],
-        }
+        _sfp(
+            entry,
+            speed,
+            media,
+            needs[(speed, media)],
+            [d.part_id for d in _parts(library) if _serves(d, speed, media)] if library else [],
+        )
         for speed, media in sorted(needs)
     ]
     accessories = None
@@ -290,7 +322,7 @@ def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
     return page | {
         "parts": {
             "rows": [
-                _row(i, e, library, needs.get(e.id, set()), loose, host)
+                _row(i, e, library, needs.get(e.id, {}), loose, host)
                 for i, e in enumerate(substation.equipment)
             ],
             "options": {

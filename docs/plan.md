@@ -249,6 +249,8 @@ equipment:                             # what the layout places (design 3.2)
   # l2_ports, l2_speed (default 1G), l2_media (default MM)
   # purpose, hwio_points: copied onto each row the layout writes (as on a panel row)
   # port_plan: per unit, scaled by the row's qty; not on l1_switch or l2_switch (sized)
+  # sfp (l1_switch, l2_switch): [{ speed, media, part_id?, spare?, extra? }]: the SFP part, and the
+  #   spare (default spares.sfp_per_l1 on L1, else 0) and extra SFPs on each BOM row (M49)
 network:
   ied_count: 40                        # never a BOM row (R4)
   topology: star                       # star | ring
@@ -1068,7 +1070,8 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M48 — Derived-value component and the override contract.** *Lead.* In review. The main MCB is the
   first derived value; the SFP, housekeeping and terminal rule texts land with M49, M56 and M57, which put
   those values on screen.
-- **M49 — SFP quantities per switch.** *W4.* Planned.
+- **M49 — SFP quantities per switch.** *W4.* In review. `sfp` choices take `spare` and `extra` per BOM
+  row and `part_id` became optional; extras warn on the slot check, never fail.
 - **M50 — Enclosure and kind per generated panel, bottom entry.** *W3; spec sentence.* Planned.
 - **M51 — New-substation setup instead of ASSUMED seeds.** *W5; Q62.* Planned.
 - **M52 — Design basis model and tab.** *W5; ADR 0031.* Planned.

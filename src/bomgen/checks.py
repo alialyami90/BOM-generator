@@ -88,16 +88,32 @@ def sfp_slot_checks(panel: Panel, rows: Sequence[DeviceRow]) -> list[CheckItem]:
         short = _short_speeds(needed, slots)
         total_slots = sum(slots.values())
         message = f"{sfps} SFPs in {total_slots} SFP slots"
+        values: dict[str, int | float | str] = {"sfps": sfps, "slots": total_slots}
+        status = CheckStatus.FAIL if short else CheckStatus.PASS
         if short:
             message += f"; too few slots for the {', '.join(s.value for s in short)} SFPs"
+        # extra SFPs (plan M49) warn, never fail, when the free slots can't take them
+        extra: Counter[PortSpeed] = Counter()
+        for choice in row.device.sfp_choice:
+            if choice.extra and choice.media is not Media.RJ45:
+                extra[choice.speed] += choice.extra
+        if extra:
+            values["extra"] = sum(extra.values())
+            over = _short_speeds(needed + extra, slots)
+            if over and not short:
+                status = CheckStatus.WARN
+                message += (
+                    f"; the {values['extra']} extra SFPs need more "
+                    f"{', '.join(s.value for s in over)} slots than are free"
+                )
         items.append(
             CheckItem(
                 check="sfp_slots",
-                status=CheckStatus.FAIL if short else CheckStatus.PASS,
+                status=status,
                 panel_id=panel.id,
                 subject=subject,
                 message=message,
-                values={"sfps": sfps, "slots": total_slots},
+                values=values,
             )
         )
     return items

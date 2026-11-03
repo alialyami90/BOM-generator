@@ -15,8 +15,8 @@
   const LINK = { l2_ports: 'int', l2_speed: 'choice', l2_media: 'choice' };  // the row's link to the L2 switch
   const BRANDS = [['mcb', 'MCB make and series, AC'], ['mcb_dc', 'MCB make and series, DC'], ['terminal_blocks', 'Terminal blocks']];
   const pct = (v) => Math.round(v * 1000) / 10;
-  function spec(key) {  // [path, kind]; keys are n.<field>, s.<spare>, b.<brand>, e.<row>.<field>, l.<row>.<link field>, c.<row> (COM ports), o.<row>.<value>, f.<row>.<speed>.<media>
-    const [kind, a, b, c] = key.split('.');
+  function spec(key) {  // [path, kind]; keys are n.<field>, s.<spare>, b.<brand>, e.<row>.<field>, l.<row>.<link field>, c.<row> (COM ports), o.<row>.<value>, f.<row>.<speed>.<media>[.spare|.extra]
+    const [kind, a, b, c, d] = key.split('.');
     if (kind === 'n') return [['network', a], NET[a]];
     if (kind === 's') return [['spares', a], SPARES[a][2]];
     if (kind === 'b') return [['catalogue_choice', a], 'choice'];
@@ -24,13 +24,14 @@
     if (kind === 'l') return [['equipment', Number(a), b], LINK[b]];
     if (kind === 'c') return [['equipment', Number(a), 'port_plan', 'serial_ports'], 'int'];
     if (kind === 'o') return [['equipment', Number(a), 'overrides', b], VALUES.find((v) => v[0] === b)[2]];
+    if (kind === 'f' && d) return [['equipment', Number(a), 'sfp', b, c, d], 'int'];  // M49: spare or extra
     if (kind === 'f') return [['equipment', Number(a), 'sfp', b, c], 'choice'];
     return null;
   }
   const rowAt = (i) => sub().page().parts.rows[i];
   function saved(key) {
     const p = sub().page(); if (!p || !p.parts) return '';
-    const [kind, a, b, c] = key.split('.');
+    const [kind, a, b, c, d] = key.split('.');
     if (kind === 'n') { const v = p.network[a]; return a === 'ied_count' && !v ? '' : typeof v === 'boolean' ? String(v) : v; }
     if (kind === 's') { const r = p.spares.find((x) => x.key === a); return r ? (a === 'port_fraction' ? pct(r.value) : r.value) : ''; }
     if (kind === 'b') return p.catalogue_choice[a] || '';
@@ -40,7 +41,11 @@
     if (kind === 'l') return r.link ? r.link[b] : '';
     if (kind === 'c') return r.serial_ports == null ? '' : r.serial_ports;
     if (kind === 'o') { const v = b in r.overrides ? r.overrides[b] : r.library ? r.library[b] : null; return v == null ? '' : v; }
-    if (kind === 'f') { const f = r.sfp.find((x) => x.speed === b && x.media === c); return (f && f.choice) || ''; }
+    if (kind === 'f') {
+      const f = r.sfp.find((x) => x.speed === b && x.media === c); if (!f) return '';
+      if (d === 'spare') return f.spare.override == null ? '' : f.spare.override;  /* empty: the project's spare */
+      return d === 'extra' ? f.extra : f.choice || '';
+    }
     return '';
   }
   let cleared = '';  // what a part change cleared, said once the save is done
@@ -48,6 +53,7 @@
     const f = S.project.file, sid = S.sub;
     if (path[0] === 'equipment' && path[2] === 'overrides') return Bridge.call('set_part_override', f, sid, path[1], path[3], value);
     if (path[0] === 'equipment' && path[2] === 'cable_manager') return Bridge.call('set_cable_manager', f, sid, path[1], value === true);  // written only when it differs from the default
+    if (path[0] === 'equipment' && path[2] === 'sfp' && path[5]) return Bridge.call('set_sfp_count', f, sid, path[1], path[3], path[4], path[5], value);
     if (path[0] === 'equipment' && path[2] === 'sfp') return Bridge.call('set_sfp_choice', f, sid, path[1], path[3], path[4], value || null);
     if (path[0] === 'equipment' && path[2] === 'part_id' && value) {
       return Bridge.call('set_equipment_part', f, sid, path[1], value).then((r) => {
@@ -134,8 +140,24 @@
     return r.sfp.map((f) => {
       const key = `f.${r.index}.${f.speed}.${f.media}`;
       return `<div class="prow-sub"><span class="prow-sub-what">${esc(f.speed)} · ${esc(f.media)} SFP</span>
-        ${mark(key, select(`p-${key}`, [['', 'Automatic: same make first'], ...f.candidates.map((c) => [c, c])], shown(key)).replace('<select ', `<select aria-label="SFP for ${esc(f.speed)} ${esc(f.media)}, ${esc(r.label)}" `))}</div>${f.candidates.length ? '' : `<div class="prow-err">${noSfp(f.speed, f.media)}</div>`}`;
+        ${mark(key, select(`p-${key}`, [['', 'Automatic: same make first'], ...f.candidates.map((c) => [c, c])], shown(key)).replace('<select ', `<select aria-label="SFP for ${esc(f.speed)} ${esc(f.media)}, ${esc(r.label)}" `))}</div>${sfpCounts(r, f, key)}${f.candidates.length ? '' : `<div class="prow-err">${noSfp(f.speed, f.media)}</div>`}`;
     }).join('');
+  }
+  /* M49: the SFPs on each BOM row of the switch: links (the sizing's), spare and extra (derived values), total. */
+  function sfpCounts(r, f, base) {
+    const what = `${f.speed} ${f.media} SFPs, ${r.label}`, sk = `${base}.spare`, xk = `${base}.extra`;
+    const dv = (key, label, auto) => {
+      const v = shown(key), id = `p-${key}`;
+      if (UI.editing === key) return App.derived(key, { editing: true, id, label, control: input(id, v, { mono: true, num: true, invalid: !!PF.errors[key] }).replace('class="input', 'class="dv-input input').replace('<input ', `<input data-dv="${key}" aria-label="${label}, ${esc(what)}" `) });
+      return App.derived(key, { label, shown: v === '' ? String(auto) : v, auto: String(auto), overridden: v !== '' && v !== String(auto), changed: key in PF.draft, bad: !!PF.errors[key], edit: 'pp-edit', reset: 'pp-reset' });
+    };
+    const dirty = sk in PF.draft || xk in PF.draft, errs = [sk, xk].map(err).join('');
+    return `<div class="prow-strip prow-sfp" role="group" aria-label="${esc(what)}">
+      <span class="dv" title="From the switch sizing"><span class="dv-label">Links</span><span class="dv-val">${f.used}</span></span>
+      ${dv(sk, 'Spare', f.spare.value)}${dv(xk, 'Extra', 0)}
+      <span class="dv" title="${esc(f.rule)}"><span class="dv-label">Each BOM row</span><span class="dv-val">${dirty ? '…' : f.total}</span></span>
+      <span class="dv-rule">${dirty ? 'Save to update the total.' : `${esc(f.rule)}.${r.role === 'l1_switch' ? ` Automatic spare ${esc(f.spare.rule)}.` : ''} Extra SFPs add to the BOM, not to the port budget.`}</span>
+    </div>${errs ? `<div class="prow-err">${errs}</div>` : ''}`;
   }
   function linkRow(r) {  // M31: how the device reaches the L2 switch, and an RTAC's COM ports
     if (!r.link || !r.part_id) return '';
@@ -355,7 +377,10 @@
   const keep = (fn) => { const m = document.getElementById('main'), y = m ? m.scrollTop : 0; fn(); App.render(); if (m) m.scrollTop = y; };
   ACTIONS['pp-tuning'] = () => keep(() => { const p = sub().page(); UI.tuning = !(UI.tuning == null ? !p.equipment.length : UI.tuning); });
   ACTIONS['pp-edit'] = (el) => { keep(() => { UI.editing = el.dataset.key; }); const c = document.getElementById('p-' + el.dataset.key); if (c) { c.focus(); if (c.select) c.select(); } };
-  const resetTo = (key) => { const r = rowAt(Number(key.split('.')[1])); PF.set(key, libValue(r, key.split('.')[2])); S.dirty = PF.dirty(); };
+  const resetTo = (key) => {
+    const [kind, i, f] = key.split('.');
+    PF.set(key, kind === 'f' ? (key.endsWith('.extra') ? '0' : '') : libValue(rowAt(Number(i)), f)); S.dirty = PF.dirty();  /* f: an SFP spare or extra (M49) */
+  };
   ACTIONS['pp-expand'] = (el) => { const i = +el.dataset.i; keep(() => UI.expanded.add(i)); const b = document.querySelector(`[data-action="pp-edit"][data-key^="o.${i}."]`); if (b) b.focus(); };
   ACTIONS['pp-reset'] = (el) => keep(() => resetTo(el.dataset.key));
   ACTIONS['pp-reset-all'] = (el) => keep(() => VALUES.forEach(([f]) => { const key = `o.${el.dataset.i}.${f}`, r = rowAt(Number(el.dataset.i)); if (r.library && shown(key) !== libValue(r, f)) resetTo(key); }));
