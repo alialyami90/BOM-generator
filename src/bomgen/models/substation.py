@@ -5,6 +5,7 @@ ADR 0013 (equipment, network, spares, layout). Paths stay as written (relative t
 substation file); the loader resolves them and applies the project defaults.
 """
 
+from datetime import date
 from enum import StrEnum
 from pathlib import Path
 from string import Formatter
@@ -23,7 +24,7 @@ from pydantic import (
     model_validator,
 )
 
-from bomgen.models._base import DocumentKey, ExcelSheetName, InputModel, PartId
+from bomgen.models._base import DocumentKey, ExcelSheetName, InputModel, PartId, Rev
 from bomgen.models.library import (
     CatalogueChoice,
     Category,
@@ -364,6 +365,41 @@ class DesignBasis(InputModel):
         return value
 
 
+NonBlank = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
+Sha256 = Annotated[str, StringConstraints(pattern=r"^[0-9a-f]{64}$")]
+
+
+class AcceptedWarning(InputModel):
+    """A check warning the engineer accepted, with the reason (ADR 0036). It matches a
+    warning by check id, panel and subject."""
+
+    check: str
+    panel_id: str | None = None
+    subject: str | None = None
+    reason: NonBlank
+    by: str | None = None
+    date: date
+
+
+class Checks(InputModel):
+    accepted: list[AcceptedWarning] = Field(default_factory=list)
+
+
+class IssueRecord(InputModel):
+    """One issued workbook (ADR 0036): ``file`` is relative to ``substation.yaml`` when
+    inside the project folder, ``sha256`` the file as written."""
+
+    rev: Rev
+    date: date
+    file: Path
+    sha256: Sha256
+    description: str
+    prepared: str | None = None
+    checked: str | None = None
+    approved: str | None = None
+    accepted_warnings: list[AcceptedWarning] = Field(default_factory=list)
+
+
 class Substation(InputModel):
     """The substation file (``substation.yaml``)."""
 
@@ -382,6 +418,8 @@ class Substation(InputModel):
     layout: Layout = Field(default_factory=Layout)
     generated_panels: GeneratedPanels | None = None
     design_basis: DesignBasis | None = None  # ADR 0031
+    issues: list[IssueRecord] = Field(default_factory=list)  # ADR 0036, in issue order
+    checks: Checks | None = None  # ADR 0036
 
     @model_validator(mode="after")
     def _consistent(self) -> "Substation":
@@ -390,6 +428,10 @@ class Substation(InputModel):
         )
         if both:
             raise ValueError(f"listed in both panels and manual_panels: {', '.join(both)}")
+        revs = [record.rev for record in self.issues]
+        twice = next((rev for rev in revs if revs.count(rev) > 1), None)
+        if twice is not None:
+            raise ValueError(f"rev '{twice}' is recorded twice in issues")
         if self.equipment:
             for role in (EquipmentRole.L1_SWITCH, EquipmentRole.L2_SWITCH):
                 entries = [e for e in self.equipment if e.role is role]

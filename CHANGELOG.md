@@ -86,6 +86,11 @@ project uses [Semantic Versioning](https://semver.org/).
   the cabinets and the loose material, with where it is used. Turn it on with the switch on Build;
   Preview shows it as a tab, and *Export summary as CSV* writes the same lines for a purchasing
   system. Each quantity is a formula over the BOM sheets, so a hand edit in Excel carries through.
+- Recorded issues (M66a, ADR 0036): `bomgen build --issue "<description>"` records the rev, date,
+  file hash and the prepared, checked and approved names in `substation.yaml`; the next build
+  compares with that issue on its own, or warns and builds without it when the file has changed.
+  A Revision History sheet lists every recorded issue and the current revision. Warnings accepted
+  in `checks.accepted` show their reason in the check report and stop counting as open.
 
 ### Changed
 

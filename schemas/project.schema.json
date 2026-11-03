@@ -294,6 +294,30 @@
       "additionalProperties": false,
       "description": "One document of the project's register; ``key`` is what panels and sheets name.",
       "properties": {
+        "approved": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Approved"
+        },
+        "checked": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checked"
+        },
         "doc_no": {
           "title": "Doc No",
           "type": "string"
@@ -307,6 +331,18 @@
           "pattern": "^[a-z0-9][a-z0-9_-]*$",
           "title": "Key",
           "type": "string"
+        },
+        "prepared": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prepared"
         },
         "rev": {
           "minLength": 1,

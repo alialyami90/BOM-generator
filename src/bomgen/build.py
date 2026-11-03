@@ -6,17 +6,22 @@ happens next. Errors keep their types: ``EngineError`` from the engine, ``Writer
 (or ``OSError``) from writing.
 """
 
+import os
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 
 from bomgen.checks import check_report
 from bomgen.checks import render_json as render_checks_json
 from bomgen.engine.errors import EngineError
 from bomgen.engine.pipeline import build as build_bom
+from bomgen.io.errors import InputError
+from bomgen.io.fields import insert_item
 from bomgen.io.loader import LoadedSubstation
 from bomgen.models.bom import BuildResult
 from bomgen.models.report import CheckReport, PreviousIssue, RevisionReport
-from bomgen.revision import compare_with_previous
+from bomgen.models.substation import IssueRecord
+from bomgen.revision import compare_with_previous, file_sha256
 from bomgen.sheets.workbook import build_workbook
 from bomgen.writer import write_workbook
 
@@ -70,3 +75,48 @@ def build_substation(
         report = check_report(target, result)
         path.with_suffix(".checks.json").write_text(render_checks_json(report), encoding="utf-8")
     return BuildOutcome(path, result, revisions, report, tuple(s.name for s in workbook.sheets))
+
+
+def issue_refusal(target: LoadedSubstation) -> str | None:
+    """Why ``target`` can't be built as issued: its main document's rev is recorded."""
+    rev = target.documents[target.substation.document].rev
+    if rev in {record.rev for record in target.substation.issues}:
+        return f"Rev {rev} is already issued; change the document's rev in the register first."
+    return None
+
+
+def record_issue(
+    project_file: Path,
+    target: LoadedSubstation,
+    path: Path,
+    description: str,
+    *,
+    today: date | None = None,
+) -> IssueRecord:
+    """Append the issue of the workbook at ``path`` to ``target``'s ``issues`` (ADR 0036):
+    the main document's rev and names, the file's hash, the acceptances in force."""
+    document = target.documents[target.substation.document]
+    folder = target.file.parent
+    resolved = path.resolve()
+    inside = resolved.is_relative_to(project_file.parent.resolve())
+    file = Path(os.path.relpath(resolved, folder.resolve())) if inside else resolved
+    checks = target.substation.checks
+    record = IssueRecord(
+        rev=document.rev,
+        date=today or date.today(),
+        file=file,
+        sha256=file_sha256(path),
+        description=description,
+        prepared=document.prepared,
+        checked=document.checked,
+        approved=document.approved,
+        accepted_warnings=list(checks.accepted) if checks else [],
+    )
+    value = record.model_dump(mode="json", exclude_none=True, exclude_defaults=True)
+    value |= {"rev": record.rev, "date": record.date.isoformat(), "file": file.as_posix()}
+    result = insert_item(
+        project_file, ("issues",), None, value, substation=target.substation.substation.id
+    )
+    if not result.written:
+        raise InputError(list(result.issues))
+    return record

@@ -1,5 +1,68 @@
 {
   "$defs": {
+    "AcceptedWarning": {
+      "additionalProperties": false,
+      "description": "A check warning the engineer accepted, with the reason (ADR 0036). It matches a\nwarning by check id, panel and subject.",
+      "properties": {
+        "by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "By"
+        },
+        "check": {
+          "title": "Check",
+          "type": "string"
+        },
+        "date": {
+          "format": "date",
+          "title": "Date",
+          "type": "string"
+        },
+        "panel_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Panel Id"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "subject": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Subject"
+        }
+      },
+      "required": [
+        "check",
+        "reason",
+        "date"
+      ],
+      "title": "AcceptedWarning",
+      "type": "object"
+    },
     "BaseFrame": {
       "additionalProperties": false,
       "description": "The plinth under the enclosure (spec: Inputs, 2. Panel definition).",
@@ -198,6 +261,20 @@
       ],
       "title": "Category",
       "type": "string"
+    },
+    "Checks": {
+      "additionalProperties": false,
+      "properties": {
+        "accepted": {
+          "items": {
+            "$ref": "#/$defs/AcceptedWarning"
+          },
+          "title": "Accepted",
+          "type": "array"
+        }
+      },
+      "title": "Checks",
+      "type": "object"
     },
     "ConstantOverrides": {
       "additionalProperties": false,
@@ -890,6 +967,91 @@
       "title": "IedRow",
       "type": "object"
     },
+    "IssueRecord": {
+      "additionalProperties": false,
+      "description": "One issued workbook (ADR 0036): ``file`` is relative to ``substation.yaml`` when\ninside the project folder, ``sha256`` the file as written.",
+      "properties": {
+        "accepted_warnings": {
+          "items": {
+            "$ref": "#/$defs/AcceptedWarning"
+          },
+          "title": "Accepted Warnings",
+          "type": "array"
+        },
+        "approved": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Approved"
+        },
+        "checked": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checked"
+        },
+        "date": {
+          "format": "date",
+          "title": "Date",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "file": {
+          "format": "path",
+          "title": "File",
+          "type": "string"
+        },
+        "prepared": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prepared"
+        },
+        "rev": {
+          "minLength": 1,
+          "title": "Rev",
+          "type": [
+            "string",
+            "integer"
+          ]
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rev",
+        "date",
+        "file",
+        "sha256",
+        "description"
+      ],
+      "title": "IssueRecord",
+      "type": "object"
+    },
     "Layout": {
       "additionalProperties": false,
       "description": "Layout inputs; the usable U per panel is computed, not written (ADR 0013).",
@@ -1536,6 +1698,17 @@
             "integer"
           ]
         },
+        "revision_history": {
+          "default": "Revision History",
+          "maxLength": 31,
+          "minLength": 1,
+          "pattern": "^(?!')(?:[^\\[\\]:*?/\\\\']|'(?!$))*$",
+          "title": "Revision History",
+          "type": [
+            "string",
+            "integer"
+          ]
+        },
         "summary_bom": {
           "default": "Summary BOM",
           "maxLength": 31,
@@ -1777,6 +1950,17 @@
       ],
       "default": null
     },
+    "checks": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Checks"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
     "constants": {
       "anyOf": [
         {
@@ -1821,6 +2005,13 @@
         }
       ],
       "default": null
+    },
+    "issues": {
+      "items": {
+        "$ref": "#/$defs/IssueRecord"
+      },
+      "title": "Issues",
+      "type": "array"
     },
     "layout": {
       "$ref": "#/$defs/Layout"

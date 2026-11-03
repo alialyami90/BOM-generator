@@ -24,7 +24,7 @@ from bomgen.models.library import Category, Library, Media, PortKind, PortSpeed,
 from bomgen.models.panel import Panel, Ventilation
 from bomgen.models.project import DesignConstants, RegisterEntry
 from bomgen.models.report import CheckItem, CheckReport, CheckStatus
-from bomgen.models.substation import Equipment
+from bomgen.models.substation import AcceptedWarning, Equipment
 
 SPEED_ORDER = (PortSpeed.M10, PortSpeed.M100, PortSpeed.G1, PortSpeed.G10)
 
@@ -54,7 +54,36 @@ def check_report(loaded: LoadedSubstation, result: BuildResult) -> CheckReport:
     items += l2_link_checks(loaded.substation.equipment, loaded.library)
     items += external_ac_checks(result.loose, loaded.library)
     items += document_number_checks(loaded.documents)
+    report = CheckReport(items=tuple(items))
+    checks = loaded.substation.checks
+    return apply_acceptances(report, checks.accepted) if checks else report
+
+
+def _matches(item: CheckItem, accepted: AcceptedWarning) -> bool:
+    return (accepted.check, accepted.panel_id, accepted.subject) == (
+        item.check,
+        item.panel_id,
+        item.subject,
+    )
+
+
+def apply_acceptances(report: CheckReport, accepted: Sequence[AcceptedWarning]) -> CheckReport:
+    """Each warning an acceptance matches carries its reason (ADR 0036); failures never."""
+    items = []
+    for item in report.items:
+        found = next((a for a in accepted if _matches(item, a)), None)
+        if item.status is CheckStatus.WARN and found is not None:
+            item = item.model_copy(update={"accepted": found.reason})
+        items.append(item)
     return CheckReport(items=tuple(items))
+
+
+def unused_acceptances(
+    report: CheckReport, accepted: Sequence[AcceptedWarning]
+) -> list[AcceptedWarning]:
+    """Acceptances no warning in ``report`` matches any more, kept until removed."""
+    warnings = [i for i in report.items if i.status is CheckStatus.WARN]
+    return [a for a in accepted if not any(_matches(i, a) for i in warnings)]
 
 
 def sfp_slot_checks(panel: Panel, rows: Sequence[DeviceRow]) -> list[CheckItem]:
@@ -549,9 +578,17 @@ def render_text(report: CheckReport) -> str:
             if where
             else f"{item.status.value.upper():<4}  "
         )
-        lines.append(f"{head}{item.check}  {item.message}")
+        note = f"  (accepted: {item.accepted})" if item.accepted else ""
+        lines.append(f"{head}{item.check}  {item.message}{note}")
+    warnings = report.count(CheckStatus.WARN)
+    accepted = warnings - report.open_warnings
+    warned = (
+        f"{report.open_warnings} open warnings ({accepted} accepted)"
+        if accepted
+        else f"{warnings} warnings"
+    )
     lines.append(
-        f"{report.count(CheckStatus.FAIL)} failed, {report.count(CheckStatus.WARN)} warnings, "
+        f"{report.count(CheckStatus.FAIL)} failed, {warned}, "
         f"{report.count(CheckStatus.PASS)} passed"
     )
     return "\n".join(lines) + "\n"
@@ -560,6 +597,10 @@ def render_text(report: CheckReport) -> str:
 def render_json(report: CheckReport) -> str:
     data = {
         "failed": report.failed,
-        "items": [item.model_dump(mode="json") for item in report.items],
+        # an acceptance's reason only when there is one, so older reports read the same
+        "items": [
+            item.model_dump(mode="json", exclude=None if item.accepted else {"accepted"})
+            for item in report.items
+        ],
     }
     return json.dumps(data, indent=2, ensure_ascii=False) + "\n"

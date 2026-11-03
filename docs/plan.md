@@ -181,6 +181,7 @@ library:                               # the installed library (ADR 0008)
 documents:                             # the register (Q24); every key names its substation
   - { key: gis01-bom,   substation: gis01, doc_no: "...-001", rev: "02", issue_date: 2026-10-28 }
   - { key: gis01-power, substation: gis01, doc_no: "...-002", rev: "00", issue_date: 2026-10-28 }
+  # optional per entry: prepared, checked, approved (ADR 0036; the Revision History sheet prints them)
 defaults:                              # inherited key by key by every substation
   constants:                           # defaults = spec values
     dc_voltage_v: 125
@@ -226,9 +227,14 @@ output:
   file_name: "{doc_no}_PSA_BOM_Rev{rev}.xlsx"   # OUT-2
   sheet_names: { loose_material: "Loose Material", power_consumption: "Power Consumption",
                  heat_dissipation: "Heat Dissipation", heat_calculations: "Heat Calculations",
-                 summary_bom: "Summary BOM" }
+                 summary_bom: "Summary BOM", revision_history: "Revision History" }
   include: [summary_bom]                # optional sheets to write (ADR 0035); default none
   power_footnotes: ["*Printer Power Consumption: 622 watts (Printing), …"]  # rows after NOTES; optional
+issues:                                # recorded issues, in order (ADR 0036); `bomgen build --issue`
+  - { rev: "01", date: 2026-10-20, file: out/..._Rev01.xlsx, sha256: "…64 hex…",
+      description: "For review", prepared: "…", checked: "…", approved: "…", accepted_warnings: [] }
+checks:                                # warnings accepted with a reason (ADR 0036)
+  accepted: [{ check: dc_float, subject: "Acti9 2P", reason: "…", by: "…", date: 2026-11-03 }]
 constants: { t_max_c: 40 }             # optional overrides of the project defaults
 spares: { port_fraction: 0.25 }        # optional overrides of the project defaults
 catalogue_choice: { mcb: abb-s200m, mcb_dc: schneider-c60h-dc }   # optional; key by key; mcb_dc unset = as mcb (ADR 0023)
@@ -1174,7 +1180,7 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M63 — Summary BOM.** *W2; ADR 0035.* In review. `engine/summary.py` groups every panel's and the loose material's lines by (make, model, ordering code), free text by (make, description), a text quantity on its own; `sheets/summary_sheet.py` writes it after Heat Calculations when `output.include` has `summary_bom`, quantities as `SUM` formulas over the BOM sheets' quantity cells. Build has the switch and *Export summary as CSV*; Preview a *Summary BOM* tab.
 - **M64 — Spares list.** *W2; ADR 0035, Q65.* Planned.
 - **M65 — Cable schedule.** *W2; ADR 0035, Q66.* Planned.
-- **M66 — Revision history and recorded issues.** *W2; ADR 0036, Q67.* Planned.
+- **M66 — Revision history and recorded issues.** *W2; ADR 0036, Q67.* Split. **M66a** (engine, CLI) in review: `issues:` records, `checks.accepted:`, register names, the Revision History sheet, the automatic compare with the last recorded issue when its hash matches (else a warning and the picker), `bomgen build --issue`. **M66b** (app) planned: Build as issued, Accept with reason on Checks, names in Settings › Documents, Preview tab. The history sheet is written whenever it has rows; it has no `output.include` switch.
 - **M67 — Record sources and lifecycle.** *W1; ADR 0037 (accepted).* In two PRs so that W5's M53
   gets the state field early. **M67a** (merged, #331): `state`, `successor`, `sources` and the change
   fields on `DeviceType`, the successor reference check, `devices.csv` columns, the schema. **M67b**

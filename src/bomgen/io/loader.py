@@ -109,11 +109,10 @@ def load_substation(
 ) -> LoadedSubstation:
     """Load the project that lists ``substation_file`` and return that substation."""
     target = substation_file.resolve()
-    for folder in target.parents:
-        candidate = folder / PROJECT_FILE
-        if candidate.is_file() and target in _listed_substations(candidate):
-            loaded = load_project(candidate, store=store)
-            return next(s for s in loaded.substations if s.file.resolve() == target)
+    candidate = project_file_of(substation_file)
+    if candidate is not None:
+        loaded = load_project(candidate, store=store)
+        return next(s for s in loaded.substations if s.file.resolve() == target)
     if not substation_file.is_file():
         read_yaml(substation_file)  # raises "file not found"
     message = (
@@ -121,6 +120,16 @@ def load_substation(
         "add it to the project's substations"
     )
     raise InputError([Issue(substation_file, "", message)])
+
+
+def project_file_of(substation_file: Path) -> Path | None:
+    """The project file in a folder above that lists ``substation_file``."""
+    target = substation_file.resolve()
+    for folder in target.parents:
+        candidate = folder / PROJECT_FILE
+        if candidate.is_file() and target in _listed_substations(candidate):
+            return candidate
+    return None
 
 
 def _listed_substations(project_file: Path) -> set[Path]:
