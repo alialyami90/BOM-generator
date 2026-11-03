@@ -150,6 +150,13 @@ with the save bar; everything on it is saved together.
 
 - **Layout:** the two columns of the old Network page. Left, top to bottom:
   1. **Field network:** Field IEDs (required on a new substation) and Topology (Star or Ring), as before.
+     Once the substation has rows, a **Quick count / IED schedule** switch sits above them (M60, ADR
+     0034). The schedule shows the IED table (bay, IED, qty, ports per side as text such as
+     `2x100M MM + 1x1G RJ45`, attached to Both, A only or B only, lands on L1 or L2, notes, remove with
+     Undo), **Add a row** and **Import CSV…**, whose dialog lists the rows, the skipped rows with their
+     problems and how many rows it replaces. Field IEDs then reads the count from the schedule, and the
+     Result card adds the IED ports per speed and media on each side. Quick count is disabled while the
+     schedule has rows.
   2. **Network fine tuning**, a disclosure under them, closed once the substation is set up. Closed, it
      is one muted summary line ("Star · 1 uplink per L1 · A–B interlink · 20% ports kept free · 4 U kept
      free"); open, it holds switches per ring (Ring only), L1 uplinks per switch, A–B interlink, L3

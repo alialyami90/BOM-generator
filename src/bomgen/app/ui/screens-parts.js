@@ -14,6 +14,9 @@
   const EQ = { part_id: 'choice', ordering_code: 'text', qty: 'int', redundant: 'bool', cable_manager: 'bool', alarm_on_branch_mcb: 'bool', purpose: 'text', tag: 'text', tag_type: 'text', first_nn: 'int', hwio_points: 'int' };
   /* M59: the row's BOM text, [field, label, placeholder when unset] */
   const BOM_TEXT = [['purpose', 'Purpose', () => 'None'], ['tag', 'Tag', (r) => r.tags.join(', ') || 'Generated'], ['tag_type', 'Type code', () => 'From the library'], ['first_nn', 'First number', () => 'Automatic'], ['hwio_points', 'HWIO points', () => 'From the library']];
+  /* M60: one IED schedule row (ADR 0034); ports is text such as "2x100M MM + 1x1G RJ45" */
+  const IED = { bay: 'text', name: 'text', qty: 'int', ports: 'text', attachment: 'choice', lands_on: 'choice', notes: 'text' };
+  const ATTACH = [['dual', 'Both'], ['single_a', 'A only'], ['single_b', 'B only']], LANDS = [['l1', 'L1'], ['l2', 'L2']];
   const LINK = { l2_ports: 'int', l2_speed: 'choice', l2_media: 'choice' };  // the row's link to the L2 switch
   const BRANDS = [['mcb', 'MCB make and series, AC'], ['mcb_dc', 'MCB make and series, DC'], ['terminal_blocks', 'Terminal blocks']];
   const pct = (v) => Math.round(v * 1000) / 10;
@@ -22,6 +25,7 @@
     if (kind === 'n') return [['network', a], NET[a]];
     if (kind === 's') return [['spares', a], SPARES[a][2]];
     if (kind === 'y') return [['layout', a], 'int'];  // M62: y.max_panels
+    if (kind === 'i') return [['network', 'ied_schedule', Number(a), b], IED[b]];  // M60: i.<row>.<field>
     if (kind === 'b') return [['catalogue_choice', a], 'choice'];
     if (kind === 'e') return [['equipment', Number(a), b], EQ[b]];
     if (kind === 'l') return [['equipment', Number(a), b], LINK[b]];
@@ -39,6 +43,7 @@
     if (kind === 's') { const r = p.spares.find((x) => x.key === a); return r ? (SPARES[a][2] === 'pct' ? pct(r.value) : r.value) : ''; }
     if (kind === 'b') return p.catalogue_choice[a] || '';
     if (kind === 'y') return p[a] == null ? '' : p[a];
+    if (kind === 'i') { const r = p.parts.ieds[Number(a)]; if (!r) return ''; const v = b === 'ports' ? r.ports_text : r[b]; return v == null ? '' : v; }
     const r = rowAt(Number(a)); if (!r) return '';
     if (kind === 'e' && b === 'cable_manager') return r.cable_manager ? String(r.cable_manager.on) : '';
     if (kind === 'e' && b === 'alarm_on_branch_mcb') return r.alarm ? String(r.alarm.on) : '';  // M58
@@ -57,6 +62,7 @@
   let cleared = '';  // what a part change cleared, said once the save is done
   function write(path, value) {
     const f = S.project.file, sid = S.sub;
+    if (path[1] === 'ied_schedule') return Bridge.call('set_ied_field', f, sid, path[2], path[3], value);
     if (path[0] === 'equipment' && path[2] === 'overrides') return Bridge.call('set_part_override', f, sid, path[1], path[3], value);
     if (path[0] === 'equipment' && path[2] === 'cable_manager') return Bridge.call('set_cable_manager', f, sid, path[1], value === true);  // written only when it differs from the default
     if (path[0] === 'equipment' && path[2] === 'sfp' && path[5]) return Bridge.call('set_sfp_count', f, sid, path[1], path[3], path[4], path[5], value);
@@ -75,7 +81,7 @@
   }
   const PF = App.draftForm({
     prefix: 'p-', screen: 'parts', file: 'substation.yaml', label: 'Save parts', spec, saved,
-    check: (path, value) => (path[2] === 'sfp' || path[2] === 'cable_manager' || path[2] === 'alarm_on_branch_mcb' ? Promise.resolve(null) : Bridge.call('check_substation_field', S.project.file, S.sub, path, value)),
+    check: (path, value) => (path[1] === 'ied_schedule' || path[2] === 'sfp' || path[2] === 'cable_manager' || path[2] === 'alarm_on_branch_mcb' ? Promise.resolve(null) : Bridge.call('check_substation_field', S.project.file, S.sub, path, value)),
     write,
     done: (page) => {
       if (page && page.parts) sub().set(page); else sub().reload();
@@ -83,8 +89,8 @@
       if (cleared) { toast(cleared, 'info'); cleared = ''; }
     }
   });
-  const UI = { tuning: null, editing: '', menu: -1, addOpen: false, fresh: null, expanded: new Set(), bomText: new Set() };  // fresh: a new substation's rows before the first save
-  sub().resets.push(() => { PF.reset(); Object.assign(UI, { tuning: null, editing: '', menu: -1, addOpen: false, fresh: null, expanded: new Set(), bomText: new Set() }); });
+  const UI = { tuning: null, editing: '', menu: -1, addOpen: false, fresh: null, expanded: new Set(), bomText: new Set(), iedMode: null };  // fresh: a new substation's rows before the first save
+  sub().resets.push(() => { PF.reset(); Object.assign(UI, { tuning: null, editing: '', menu: -1, addOpen: false, fresh: null, expanded: new Set(), bomText: new Set(), iedMode: null }); });
   const shown = (key) => { const v = PF.shown(key); return v == null ? '' : String(v); };
   const mark = (key, html) => PF.mark(key, html);
   const err = (key) => (PF.errors[key] ? `<span class="err small" id="p-${key}-err">${icon('error')}<span>${PF.err(key)}</span></span>` : '');
@@ -311,7 +317,7 @@
       <div class="prow-fields">${ctl}</div></div>`;
   }
   function setupCard(p, rows) {
-    const hasIed = !!(+shown('n.ied_count') && !PF.errors['n.ied_count']), picked = rows.filter((d) => d.part_id).length;
+    const hasIed = !!((+shown('n.ied_count') && !PF.errors['n.ied_count']) || p.parts.ieds.length), picked = rows.filter((d) => d.part_id).length;
     const step = (done, now, title, text) => `<li class="${done ? 'done' : now ? 'now' : ''}">${icon(done ? 'check' : 'info')}<div><b>${title}</b><div class="muted small">${text}</div></div></li>`;
     return `<div class="setup" style="margin-bottom:var(--space-5)"><h3>Set up ${esc(p.name)}</h3><p class="muted small" style="margin-top:var(--space-1)">Pick a part for each device. The panels are laid out from the picks.</p>
       <ol>${step(hasIed, !hasIed, 'Enter the number of field IEDs', 'It sizes the L1 switches. It is never listed in the BOM.')}
@@ -339,6 +345,31 @@
         ${numField('y.max_panels', 'Most panels', '', 'Empty: as many as the devices need. A device that does not fit is listed on Panels.')}
       </div>` : ''}</div>`;
   }
+  /* ---------- the IED schedule (M60, ADR 0034) ---------- */
+  function iedMode(p, schedule) {
+    const rows = p.parts.ieds.length, dirty = PF.dirty();
+    const why = rows ? `Remove the ${plural(rows, 'row')} of the schedule to size from a count again.` : '';
+    return `<div class="row" style="margin-top:var(--space-3);gap:var(--space-3)"><div class="segmented" role="radiogroup" aria-label="How the L1 switches are sized">
+        <button role="radio" data-action="pp-ied-mode" data-m="count" aria-checked="${!schedule}" aria-pressed="${!schedule}" ${rows || dirty ? `disabled title="${esc(why || 'Save or discard the changes first')}"` : ''}>Quick count</button>
+        <button role="radio" data-action="pp-ied-mode" data-m="schedule" aria-checked="${schedule}" aria-pressed="${schedule}" ${dirty && !schedule ? 'disabled title="Save or discard the changes first"' : ''}>IED schedule</button></div>
+      <span class="muted small">${schedule ? 'Each IED row sizes the L1 switches by port speed and media.' : 'One number: every IED port of an L1 switch counts.'}</span></div>`;
+  }
+  function iedTable(p) {
+    const rows = p.parts.ieds, dirty = PF.dirty();
+    const cell = (i, f, opts) => { const key = `i.${i}.${f}`, id = `p-${key}`, v = shown(key);
+      const ctl = f === 'attachment' ? select(id, ATTACH, v) : f === 'lands_on' ? select(id, LANDS, v)
+        : input(id, v, { mono: f === 'qty' || f === 'ports', num: f === 'qty', invalid: !!PF.errors[key], ...(opts || {}) });
+      return `<td>${mark(key, ctl.replace(/<(input|select) /, `<$1 aria-label="${esc(IED_LABEL[f])}, row ${i + 1}" `))}${err(key)}</td>`; };
+    const body = rows.map((r, i) => `<tr>${cell(i, 'bay')}${cell(i, 'name')}${cell(i, 'qty')}${cell(i, 'ports', { placeholder: '1x100M MM' })}${cell(i, 'attachment')}${cell(i, 'lands_on')}${cell(i, 'notes')}
+        <td><button class="btn btn--ghost btn--sm btn--icon" data-action="pp-ied-rm" data-i="${i}" aria-label="Remove ${esc(r.bay)} ${esc(r.name)}" ${dirty ? 'disabled title="Save or discard the changes first"' : ''}>${icon('trash')}</button></td></tr>`).join('');
+    return `<div style="margin-top:var(--space-4)"><h4 id="h-ied">IED schedule</h4>
+      <p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">Ports are per side: write count x speed media, for example <span class="mono">2x100M MM + 1x1G RJ45</span>. A row landing on L2 adds to the L2 ports. Never listed in the BOM.</p>
+      ${rows.length ? `<div class="table-wrap"><table class="table ied-table" aria-labelledby="h-ied"><thead><tr><th>Bay</th><th>IED</th><th class="num">Qty</th><th>Ports per side</th><th>Attached to</th><th>Lands on</th><th>Notes</th><th><span class="sr-only">Remove</span></th></tr></thead><tbody>${body}</tbody></table></div>`
+        : '<div class="empty small"><b>No IED rows yet.</b> Add the IEDs by bay, or import the protection design\'s CSV.</div>'}
+      <div class="row" style="margin-top:var(--space-3)"><button class="btn btn--secondary btn--sm" data-action="pp-ied-add" ${dirty ? 'disabled title="Save or discard the changes first"' : ''}>${icon('plus')}Add a row</button>
+        <button class="btn btn--secondary btn--sm" data-action="pp-ied-csv" ${dirty ? 'disabled title="Save or discard the changes first"' : ''}>Import CSV…</button></div></div>`;
+  }
+  const IED_LABEL = { bay: 'Bay', name: 'IED', qty: 'Quantity', ports: 'Ports per side', attachment: 'Attached to', lands_on: 'Lands on', notes: 'Notes' };
   function brands(p) {
     if (!Object.keys(p.brands).length) return '';
     const name = (kind, id) => ((p.brands[kind] || []).find((b) => b.id === id) || { name: id }).name;
@@ -357,17 +388,20 @@
     const p = sub().page(); if (!p) return sub().waiting('Parts');
     if (!p.parts) { if (p.network) sub().reload(); return `<div class="page">${pageHead('Parts', 'Pick a library part for each device.')}${sub().problems(p)}</div>`; }
     const fresh = !p.equipment.length, rows = fresh ? freshRows(p) : p.parts.rows, topo = shown('n.topology');
-    const unset = !shown('n.ied_count');
+    const schedule = !fresh && (UI.iedMode || (p.parts.ieds.length ? 'schedule' : 'count')) === 'schedule';
+    const unset = !schedule && !shown('n.ied_count');
     const gen = fresh ? '' : PF.dirty() ? `<button class="btn btn--secondary" disabled title="Save your changes first." aria-describedby="pp-gen-why">${icon('elevation')}Generate preview</button><span id="pp-gen-why" class="sr-only">Save your changes first.</span>` : `<a class="btn btn--secondary" href="#/device-preview">${icon('elevation')}Generate preview</a>`;
     return `<div class="page">${pageHead('Parts', 'Pick a library part for each device. The panels, MCBs, power and heat follow from these picks.', gen)}
       ${sub().problems(p)}${fresh ? setupCard(p, rows) : ''}
       <div class="net-grid">
         <div class="stack" style="gap:var(--space-6)">
           <section aria-labelledby="h-fn"><h3 id="h-fn">Field network</h3>
+            ${fresh ? '' : iedMode(p, schedule)}
             <div class="form form--2" style="margin-top:var(--space-3)">
-              ${mark('n.ied_count', field('Field IEDs', `<div class="input-affix">${input('p-n.ied_count', shown('n.ied_count'), { num: true, mono: true, invalid: !!PF.errors['n.ied_count'] || unset, placeholder: unset ? 'Required' : '' })}<span class="affix">IEDs</span></div>`, 'Never listed in the BOM. Only used to size the L1 switches.', PF.errors['n.ied_count'] ? PF.err('n.ied_count') : unset ? 'Enter the number of field IEDs, for example 40.' : ''))}
+              ${schedule ? field('Field IEDs', `<p class="small" style="margin:6px 0 0">${plural(p.parts.ieds.reduce((n, r) => n + r.qty, 0), 'IED')} in the schedule below.</p>`, 'Counted from the schedule. Never listed in the BOM.') : mark('n.ied_count', field('Field IEDs', `<div class="input-affix">${input('p-n.ied_count', shown('n.ied_count'), { num: true, mono: true, invalid: !!PF.errors['n.ied_count'] || unset, placeholder: unset ? 'Required' : '' })}<span class="affix">IEDs</span></div>`, 'Never listed in the BOM. Only used to size the L1 switches. Every IED port of an L1 switch counts.', PF.errors['n.ied_count'] ? PF.err('n.ied_count') : unset ? 'Enter the number of field IEDs, for example 40.' : ''))}
               ${mark('n.topology', field('Topology', select('p-n.topology', [['star', 'Star'], ['ring', 'Ring']], topo), topo === 'ring' ? 'L1 switches are joined in rings. Two ports close each ring.' : 'Each L1 switch has one uplink to its L2 switch plus an A–B interlink.'))}
             </div>
+            ${schedule ? iedTable(p) : ''}
             ${tuning(p)}</section>
           <section aria-labelledby="h-dev"><h3 id="h-dev">Devices</h3>
             <p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">The layout fills the panels in this order. The part number is printed on the BOM; leave it empty to print the library's code. Click a value under a part to change it for this design only.</p>
@@ -452,6 +486,37 @@
       sub().reload(); App.network.reload(); App.devicePreview.reload(); App.render();
       toast(`Removed ${label}`, 'trash', () => Bridge.call('add_equipment', file, sid, r.row, i).then(() => { sub().reload(); App.render(); }).catch(fail));
     }).catch(fail);
+  };
+  ACTIONS['pp-ied-mode'] = (el) => keep(() => { UI.iedMode = el.dataset.m; });
+  ACTIONS['pp-ied-add'] = () => {
+    const rows = sub().page().parts.ieds, last = rows[rows.length - 1];
+    Bridge.call('add_ied_row', S.project.file, S.sub, { bay: last ? last.bay : 'E01', name: 'IED' }, null).then((page) => {
+      UI.iedMode = 'schedule'; reloaded(page);
+      const el = document.getElementById(`p-i.${rows.length}.name`); if (el) { el.focus(); el.select(); }
+    }).catch(fail);
+  };
+  ACTIONS['pp-ied-rm'] = (el) => {
+    const i = +el.dataset.i, file = S.project.file, sid = S.sub, r = sub().page().parts.ieds[i];
+    Bridge.call('remove_ied_row', file, sid, i).then((d) => {
+      reloaded(d.page);
+      toast(`Removed ${r.bay} ${r.name}`, 'trash', () => Bridge.call('add_ied_row', file, sid, d.row, i).then(reloaded).catch(fail));
+    }).catch(fail);
+  };
+  ACTIONS['pp-ied-csv'] = () => Bridge.call('choose_file', 'csv').then((path) => {
+    if (!path) return;
+    return Bridge.call('import_ied_csv', S.project.file, S.sub, path, true).then((d) => {
+      const probs = d.problems.length ? `<p class="small" style="margin-top:var(--space-3)">${plural(d.problems.length, 'row')} with a problem ${d.problems.length === 1 ? 'is' : 'are'} skipped:</p><ul class="small" style="margin:4px 0 0;padding-left:18px">${d.problems.slice(0, 8).map((x) => `<li>Row ${x.row}${x.column ? `, <span class="mono">${esc(x.column)}</span>` : ''}: ${esc(x.message)}</li>`).join('')}</ul>` : '';
+      const refused = d.refused.length ? banner('bad', `<b>The schedule cannot be saved.</b> ${esc(d.refused.join('; '))}`) : '';
+      const list = d.rows.length ? `<div class="table-wrap" style="margin-top:var(--space-3);max-height:240px"><table class="table table--plain"><thead><tr><th>Bay</th><th>IED</th><th class="num">Qty</th><th>Ports per side</th><th>Attached to</th><th>Lands on</th></tr></thead><tbody>${d.rows.map((r) => `<tr><td>${esc(r.bay)}</td><td>${esc(r.name)}</td><td class="num">${r.qty}</td><td class="mono">${esc(r.ports_text)}</td><td>${esc((ATTACH.find((a) => a[0] === r.attachment) || [, r.attachment])[1])}</td><td>${r.lands_on.toUpperCase()}</td></tr>`).join('')}</tbody></table></div>` : '';
+      App.dialog({ title: `Import ${esc(d.file)}`, body: `${refused}<p>${plural(d.rows.length, 'IED row')} to import.${d.replaces ? ` ${d.replaces === 1 ? 'It replaces the row' : `They replace the ${d.replaces} rows`} of the schedule.` : ' They replace the IED count.'}</p>${list}${probs}`,
+        actions: `<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="pp-ied-import" data-path="${esc(path)}" ${d.can_import ? '' : 'disabled'}>Import ${plural(d.rows.length, 'row')}</button>` });
+    });
+  }).catch(fail);
+  ACTIONS['pp-ied-import'] = (el) => {
+    el.disabled = true;
+    Bridge.call('import_ied_csv', S.project.file, S.sub, el.dataset.path, false).then((page) => {
+      App.closeDialog(); UI.iedMode = 'schedule'; reloaded(page); toast(`Imported ${plural(page.parts.ieds.length, 'IED row')}`, 'check');
+    }).catch((e) => { el.disabled = false; fail(e); });
   };
   ACTIONS['pp-add'] = () => keep(() => { UI.addOpen = !UI.addOpen; UI.menu = -1; });
   /* Add a device: the model takes no row without a part, so the part is picked first. */

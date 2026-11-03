@@ -14,6 +14,10 @@ project uses [Semantic Versioning](https://semver.org/).
   L1 or L2. The L1 switches are sized against their port groups per speed and media, ports on SFP
   slots become L1 downlinks (and SFPs), L2 rows add to the L2 demand, and a sizing error names the
   speed and media no switch serves ("1G RJ45"). The example keeps `ied_count` (M60a, ADR 0034).
+- Parts: a Quick count / IED schedule switch with the schedule's table (bay, IED, qty, ports per
+  side, attachment, landing, notes), Add a row, remove with Undo and Import CSV… with a review of
+  the rows and the skipped ones; the Result card shows the IED ports per speed and media on each
+  side, and a schedule no L1 switch serves names what does not fit (M60b, ADR 0034).
 - Library parts carry a lifecycle state (draft, reviewed, released, obsolete; released by
   default), an obsolete part's successor, and a source for each sized figure: power, inrush,
   height, maximum input voltage and ports, each from a datasheet, the contractor, a measurement or

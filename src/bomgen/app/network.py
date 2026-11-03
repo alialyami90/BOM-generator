@@ -82,6 +82,25 @@ def _base(loaded: LoadedSubstation, part_id: str) -> str:
     return found.derived_from if found and found.derived_from else part_id
 
 
+def _ied_ports(loaded: LoadedSubstation) -> list[dict[str, Any]] | None:
+    """The schedule's ports per speed and media on each side, by where they land; None for
+    the quick count (ADR 0034)."""
+    schedule = loaded.substation.network.ied_schedule
+    if not schedule:
+        return None
+    found: dict[tuple[str, str, str], dict[str, Any]] = {}
+    for row in schedule:
+        sides = {"dual": "ab", "single_a": "a", "single_b": "b"}[row.attachment]
+        for need in row.ports:
+            key = (need.speed.value, need.media.value, row.lands_on)
+            entry = found.setdefault(
+                key, {"speed": key[0], "media": key[1], "lands_on": key[2], "a": 0, "b": 0}
+            )
+            for side in sides:
+                entry[side] += row.qty * need.count
+    return list(found.values())
+
+
 def _network(loaded: LoadedSubstation, page: dict[str, Any]) -> None:
     result = layout_preview(loaded)
     plan = result.plan
@@ -100,6 +119,7 @@ def _network(loaded: LoadedSubstation, page: dict[str, Any]) -> None:
             "l2_per_side": plan.l2_per_side,
             "l2_usable_ports": plan.l2_usable_ports,
             "l2_demand_per_side": plan.l2_demand_per_side,
+            "ied_ports": _ied_ports(loaded),
         },
         "panels": _board(loaded, result),
         "issues": [

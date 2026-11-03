@@ -280,6 +280,8 @@ Part picking design §3 and §4 (ADR 0024 when M20 lands). All fields write `sub
 | Field | Control | Writes | Validation sentence |
 | --- | --- | --- | --- |
 | Field IEDs | Number, required | `network.ied_count` | "Enter the number of field IEDs, for example 40." |
+| Sized from (M60) | Quick count or IED schedule (segmented); Quick count is disabled while the schedule has rows | — | — |
+| IED schedule (M60) | A table, one row per bay and IED type: bay, IED, qty, ports per side (text, `2x100M MM + 1x1G RJ45`), attached to (Both, A only, B only), lands on (L1, L2), notes; **Add a row** (the first replaces the count), remove with Undo, **Import CSV…** (`bay,name,qty,ports,attachment,lands_on[,notes]`, a dry-run review, replaces the rows) | `network.ied_schedule[i].*` | "'fast' is not a port: write count x speed media, e.g. 2x100M MM" · the CSV: "Enter a whole number, 1 or more." and the like, per row and column |
 | Topology | Star or Ring (segmented) | `network.topology` | — |
 | Network fine tuning | Number fields in a disclosure: switches per ring (Ring), L1 uplinks per switch, A–B interlink, L3 uplinks per L2, ports kept free (%), DC branches per feed, AC branches, rack U kept free, most panels (M62; empty: as many as needed) | `network.*`, `spares.*`, `layout.max_panels` | As today's Network fields; changed ones are marked |
 | Part | Device picker filtered to the row's category | `equipment[i].part_id` | "Pick a part from the library." (empty on save) · "Not in psa-devices 1.1.0. Pick another part." |
