@@ -566,11 +566,11 @@ consume `BuildResult`.
 | `engine/enclosure.py` | group A: the enclosure row |
 | `engine/kits.py` | step 2: device rows with kit children (group B), and `loose_table` (None with no rows) |
 | `engine/network.py` | group C: SFPs, cable managers, serial cables |
-| `engine/housekeeping.py` | group D: lamp, fans, filters, thermostats, IPR kit, change-over diodes, socket |
-| `engine/ac_dist.py` | group E: CINC and the AC branches, from `catalogues.mcb` |
+| `engine/housekeeping.py` | group D: lamp, fans, filters, thermostats, heater, hygrostat, smoke detector, IPR kit, change-over diodes, socket; `kit_counts` reads `options.housekeeping` over the spec's kit (ADR 0032) |
+| `engine/ac_dist.py` | group E: CINC and the AC branches, from `catalogues.mcb`; `housekeeping_branches` rates each kit branch from `branch_ratings`, the part's AC watts or the spec's value, with its rule (`BuildResult.housekeeping`) |
 | `engine/dc_dist.py` | group F: Q1/Q2 mains, Q1.n/Q2.n branches, spares, QCODs, `branch_sizing` (ADR 0019), all from `catalogues.dc_mcb` (ADR 0023) |
 | `engine/mcb.py` | `rating_at_least`, `rating_above`, `mcb_line` take an `McbCatalogue`; aux contact rows; `alarms_wired` |
-| `engine/terminals.py` | group G: terminal strips (X1, X3-AC, X4-DC1/DC2, XDIN, …); `unit_strips` for the preview |
+| `engine/terminals.py` | group G: terminal strips (X1, X3-AC, X4-DC1/DC2, XDIN, …); `strip_table` gives each strip its rule, the spare fraction and the panel's quantity and block overrides (ADR 0033, `BuildResult.strips`); THF follows the kit (ADR 0032); `unit_strips` for the preview |
 | `engine/grounding.py` | group H: grounding busbars |
 | `engine/nameplates.py` | group H: the nameplate row (last) and each plate's text, the MCB short tag (M26, ADR 0026) |
 | `engine/preview.py` | `device_preview(loaded, overrides)`: every unit with its U, MCBs (`BranchMcb.unit_tag`, `feed`) and strips (M24) |

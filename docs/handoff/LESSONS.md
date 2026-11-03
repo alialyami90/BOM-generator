@@ -397,6 +397,13 @@ The rules are in ADR 0013 and the design spec (R1–R10).
   `bomgen.models.calc`.
 - A golden expecting `set_by == "floor"` for every branch failed on the annunciator; check what each
   example load is before writing the expected value.
+- Overrides on generated panels merge shallowly: `options_by_panel[n]` replaces a whole option, so
+  a panel's own `terminal_overrides` or `housekeeping` map drops the shared one for that panel (M57,
+  M56b). The UI says so instead of merging keys.
+- A derived value with no spec rule (a heater breaker without watts) is an engine error that names
+  both fixes, rather than a guessed rating (M56a).
+- `BuildResult` carries each table the editor shows (`strips`, `housekeeping`, `spares`) so the page
+  never recomputes engine rules; the BOM rows are written from the same objects.
 - `resolve_catalogues(library, CatalogueChoice(...))` lets engine tests cover brand choices without the
   loader; `engine_factories.library(mcb_brands=[...])` fills `catalogue_brands.mcb`.
 

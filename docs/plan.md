@@ -1123,16 +1123,16 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M53 — Vendor list and part lifecycle states.** *W5; ADRs 0031 and 0037.* Planned.
 - **M54 — Design-basis checks.** *W5.* Planned.
 - **M55 — Substation templates.** *W5; Q63.* Planned.
-- **M56 — Housekeeping editor.** *W3; ADR 0032.* In two PRs. **M56a** (in review): the engine.
+- **M56 — Housekeeping editor.** *W3; ADR 0032.* Done, in two PRs. **M56a** (#340): the engine.
   `PanelOptions.housekeeping` (counts, heater, hygrostat, `branch_ratings`), `smoke_detector` none,
   terminals or supplied, the library's heater, hygrostat and smoke detector roles; branches sized
   from the part's AC watts, never below the spec's rating, each with its rule
   (`BuildResult.housekeeping`); THF adds 3 per fan and 2 per thermostat beyond the spec's kit, and a
-  heater or hygrostat brings its part's own strips. **M56b** (in review): the panel editor's
+  heater or hygrostat brings its part's own strips. **M56b** (#345): the panel editor's
   *Cabinet housekeeping* section under Options (counts, heater, hygrostat, each load's breaker as a
   derived value) and the heater, hygrostat and smoke detector roles in Library › Catalogues. The
   socket stays a rating; a pick list from the library's sockets is left for later.
-- **M57 — Terminals tab.** *W3; ADR 0033.* In review. `spares.terminals_fraction` and
+- **M57 — Terminals tab.** *W3; ADR 0033.* Done (#336). `spares.terminals_fraction` and
   `PanelOptions.terminal_block_overrides`; `BuildResult.strips` carries each strip's rule; the panel
   editor's Terminals tab replaces the read-only terminal overrides of Options.
 - **M58 — Grounding, spare breaker ratings, alarm on branch trip.** *W3; spec sentence.* Done (#332).
