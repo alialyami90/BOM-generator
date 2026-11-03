@@ -9,7 +9,7 @@
 
   /* ---------- the draft form: every field is saved together with the save bar ---------- */
   const NET = { ied_count: 'int', topology: 'choice', ring_max_switches: 'int', l1_uplinks_per_switch: 'int', l1_interlink: 'bool', l3_uplinks_per_l2: 'int' };
-  const SPARES = { port_fraction: ['Ports kept free on each switch', '%', 'pct'], sfp_per_l1: ['Spare SFPs on each L1', '', 'int'], dc_branches_per_feed: ['Spare DC branches per feed', '', 'int'], ac_branches: ['Spare AC branches', '', 'int'], rack_u_reserved: ['Rack space kept free', 'U', 'int'] };
+  const SPARES = { port_fraction: ['Ports kept free on each switch', '%', 'pct'], sfp_per_l1: ['Spare SFPs on each L1', '', 'int'], dc_branches_per_feed: ['Spare DC branches per feed', '', 'int'], ac_branches: ['Spare AC branches', '', 'int'], rack_u_reserved: ['Rack space kept free', 'U', 'int'], terminals_fraction: ['Spare terminals on each wiring strip', '%', 'pct'] };
   const VALUES = [['height_u', 'Height', 'int'], ['unit_power_w', 'Power', 'num'], ['supply_type', 'Supply', 'choice'], ['voltage_v', 'Voltage', 'int'], ['power_supplies', 'Supplies', 'int'], ['inrush_a', 'Inrush', 'num'], ['load_type', 'Load', 'choice']];
   const EQ = { part_id: 'choice', ordering_code: 'text', qty: 'int', redundant: 'bool', cable_manager: 'bool', alarm_on_branch_mcb: 'bool', purpose: 'text', tag: 'text', tag_type: 'text', first_nn: 'int', hwio_points: 'int' };
   /* M59: the row's BOM text, [field, label, placeholder when unset] */
@@ -36,7 +36,7 @@
     const p = sub().page(); if (!p || !p.parts) return '';
     const [kind, a, b, c, d] = key.split('.');
     if (kind === 'n') { const v = p.network[a]; return a === 'ied_count' && !v ? '' : typeof v === 'boolean' ? String(v) : v; }
-    if (kind === 's') { const r = p.spares.find((x) => x.key === a); return r ? (a === 'port_fraction' ? pct(r.value) : r.value) : ''; }
+    if (kind === 's') { const r = p.spares.find((x) => x.key === a); return r ? (SPARES[a][2] === 'pct' ? pct(r.value) : r.value) : ''; }
     if (kind === 'b') return p.catalogue_choice[a] || '';
     if (kind === 'y') return p[a] == null ? '' : p[a];
     const r = rowAt(Number(a)); if (!r) return '';
@@ -79,7 +79,7 @@
     write,
     done: (page) => {
       if (page && page.parts) sub().set(page); else sub().reload();
-      App.network.reload(); App.devicePreview.reload();
+      App.network.reload(); App.devicePreview.reload(); App.panelEditor.reload();
       if (cleared) { toast(cleared, 'info'); cleared = ''; }
     }
   });
@@ -325,7 +325,7 @@
     const ring = shown('n.topology') === 'ring', open = UI.tuning == null ? !p.equipment.length : UI.tuning;
     const sp = (k) => p.spares.find((x) => x.key === k);
     const summary = `${ring ? `Rings of up to ${shown('n.ring_max_switches')}` : 'Star'} · ${plural(+shown('n.l1_uplinks_per_switch'), 'uplink')} per L1 · ${shown('n.l1_interlink') === 'true' ? 'A–B interlink' : 'no interlink'} · ${shown('s.port_fraction')}% ports kept free · ${shown('s.rack_u_reserved')} U kept free${shown('y.max_panels') ? ` · at most ${plural(+shown('y.max_panels'), 'panel')}` : ''}`;
-    const changedSpare = (k) => { const r = sp(k); if (!r || !r.changed) return 'Project default.'; const d = k === 'port_fraction' ? pct(r.default) : r.default; return `Changed from ${d}${SPARES[k][1] && SPARES[k][1] !== '%' ? ' ' + SPARES[k][1] : SPARES[k][1]}.`; };
+    const changedSpare = (k) => { const r = sp(k); if (!r || !r.changed) return 'Project default.'; const d = SPARES[k][2] === 'pct' ? pct(r.default) : r.default; return `Changed from ${d}${SPARES[k][1] && SPARES[k][1] !== '%' ? ' ' + SPARES[k][1] : SPARES[k][1]}.`; };
     return `<div class="disclosure"><button class="disclosure-head" data-action="pp-tuning" aria-expanded="${open}" aria-controls="ft-body">${icon(open ? 'chevd' : 'chevr')}<b>Network fine tuning</b><span class="muted small">${open ? 'Ring size, uplinks and spares' : esc(summary)}</span></button>
       ${open ? `<div id="ft-body" class="form form--3 disclosure-body">
         ${ring ? numField('n.ring_max_switches', 'Switches per ring', '', 'Most L1 switches in one ring.') : ''}

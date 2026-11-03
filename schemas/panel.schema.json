@@ -533,6 +533,13 @@
           "title": "Smoke Detector",
           "type": "boolean"
         },
+        "terminal_block_overrides": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Terminal Block Overrides",
+          "type": "object"
+        },
         "terminal_overrides": {
           "additionalProperties": {
             "minimum": 0,

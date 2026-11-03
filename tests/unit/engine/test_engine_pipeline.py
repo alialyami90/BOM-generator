@@ -1,6 +1,7 @@
 """Pipeline for groups A-H and the loose-material table (spec: Data model and
 generation order, steps 1-11; How each panel BOM groups its materials -> Loose material)."""
 
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -315,3 +316,19 @@ def test_build_result_carries_power_and_heat_per_cabinet() -> None:
     dc = result.power.cabinets[0].dc
     assert dc is not None
     assert dc.lines[0].source.line == 1  # the L2 switch row of p1
+
+
+def test_build_result_carries_each_panels_strips_as_the_bom_writes_them() -> None:
+    result = build(loaded())
+    assert [s.panel_id for s in result.strips] == ["p1", "p2"]
+    g_rows = [(line.tag, line.qty) for line in result.panels[0].lines if line.group is Group.G]
+    strips = [(f"PSA1-{s.code}", s.qty) for s in result.strips[0].strips]
+    assert strips == g_rows
+
+
+def test_spare_terminals_fraction_reaches_the_bom() -> None:
+    result = build(replace(loaded(), spares=Spares(terminals_fraction=0.1)))
+    (x3,) = [s for s in result.strips[0].strips if s.code == "X3-AC"]
+    (line,) = [x for x in result.panels[0].lines if x.tag == "PSA1-X3-AC"]
+    assert line.qty == x3.auto_qty
+    assert x3.rule.endswith(f"+10% spare = {x3.auto_qty}")

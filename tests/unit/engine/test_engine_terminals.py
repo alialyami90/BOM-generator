@@ -8,9 +8,9 @@ from engine_factories import device, library, panel, powered
 
 from bomgen.engine.errors import EngineError
 from bomgen.engine.items import flatten
-from bomgen.engine.terminals import StripInputs, terminal_strips
+from bomgen.engine.terminals import StripInputs, strip_table, terminal_strips
 from bomgen.engine.units import expand_devices
-from bomgen.models.bom import Group
+from bomgen.models.bom import Group, StripRow
 from bomgen.models.library import Library
 from bomgen.models.panel import Ventilation
 
@@ -229,3 +229,56 @@ def test_strip_without_placeholder_sums_its_units() -> None:
     assert [(x.tag, x.description, x.qty) for x in lines if x.tag == "PSA1-XRLY"] == [
         ("PSA1-XRLY", "Terminal Blocks For XRLY", 6)
     ]
+
+
+# --- ADR 0033: the quantities are defaults, with a rule, a spare fraction and a block type ---
+
+
+def table(strip_inputs: StripInputs, **fields: Any) -> dict[str, StripRow]:
+    p = panel([{"part_id": "SW"}], **fields)
+    library_ = lib()
+    return {r.code: r for r in strip_table(p, library_, expand_devices(p, library_), strip_inputs)}
+
+
+def test_spare_fraction_rounds_up_before_override() -> None:
+    # 10% on Cabinet 001: X3-AC 12 -> 14, X4-DC1 32 -> 36; an override still wins.
+    spared = inputs(spare_fraction=0.1)
+    result = strips(spared, options={"terminal_overrides": {"THF": 10}})
+    assert (result["X3-AC"], result["X4-DC1"], result["X-AC"]) == (14, 36, 7)
+    assert result["THF"] == 10
+    assert strips(inputs(spare_fraction=0.0))["X3-AC"] == 12
+
+
+def test_spare_fraction_leaves_device_strips_alone() -> None:
+    rows = table(inputs(spare_fraction=0.5, xdin_default=21), options={})
+    assert all(not r.spared for r in rows.values() if r.code.startswith("XD"))
+
+
+def test_rule_text_names_the_mcb_count() -> None:
+    rows = table(inputs(spare_fraction=0.1))
+    assert rows["X3-AC"].rule == "2 x 6 AC MCBs = 12, +10% spare = 14"
+    assert (
+        rows["X4-DC1"].rule
+        == "2 x (13 branches + 1) = 28, up to a multiple of 8 = 32, +10% spare = 36"
+    )
+    assert (rows["X3-AC"].auto_qty, rows["X3-AC"].qty, rows["X3-AC"].override) == (14, 14, None)
+
+
+def test_override_keeps_the_rule_and_says_so() -> None:
+    rows = table(inputs(), options={"terminal_overrides": {"THF": 10}})
+    thf = rows["THF"]
+    assert (thf.auto_qty, thf.override, thf.qty) == (12, 10, 10)
+    assert thf.rule == "12: two fans and three thermostats"
+
+
+def test_block_type_override_changes_part_number() -> None:
+    p = panel([{"part_id": "SW"}], options={"terminal_block_overrides": {"X3-AC": "UT-16"}})
+    library_ = lib()
+    lines = flatten(terminal_strips(p, library_, expand_devices(p, library_), inputs()))
+    x3 = next(x for x in lines if x.tag == "PSA1-X3-AC")
+    assert (x3.model, x3.ordering_code) == ("UT-16", "3044199")
+
+
+def test_block_type_override_of_a_missing_strip_is_an_error() -> None:
+    with pytest.raises(EngineError, match="XYZ"):
+        strips(inputs(), options={"terminal_block_overrides": {"XYZ": "UT-16"}})

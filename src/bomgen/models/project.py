@@ -146,6 +146,7 @@ class Spares(InputModel):
     dc_branches_per_feed: NonNegativeInt = 3
     ac_branches: NonNegativeInt = 1
     rack_u_reserved: NonNegativeInt = 10
+    terminals_fraction: Annotated[float, Field(ge=0, le=1)] = 0.0  # ADR 0033
 
 
 def merge_defaults[M: InputModel](base: M, override: InputModel | None) -> M:
