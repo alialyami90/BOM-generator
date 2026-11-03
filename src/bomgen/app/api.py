@@ -501,6 +501,50 @@ class Api:
         return self._editor().health(parts_in_use(files))
 
     @endpoint
+    def propose_library_edit(
+        self,
+        project_file: str,
+        substation_id: str,
+        index: int,
+        field: str,
+        kind: str,
+        ref: str,
+        keep_released: bool = False,
+    ) -> dict[str, Any]:
+        """Send equipment row ``index``'s override of ``field`` to the installed library as a
+        pending edit with its source (``kind``, ``ref``); returns the pending set (M69)."""
+        store = self._library_store()
+        with self._substation(substation_id):
+            found = resolve(Path(project_file), substation_id, store)
+        editor = self._editor()
+        if found.project.library.file is not None or found.project.library.name != editor.name:
+            raise AppError(
+                "invalid_edit",
+                f"This project is built with its own library, not {editor.name}; "
+                "change that library's file instead.",
+            )
+        if found.loaded is None:
+            raise AppError("project_invalid", "Fix the substation's problems on Checks first.")
+        equipment = found.loaded.substation.equipment
+        entry = equipment[index] if 0 <= index < len(equipment) else None
+        values = entry.overrides.values() if entry and entry.overrides else {}
+        if entry is None or entry.part_id is None or field not in values:
+            raise AppError("invalid_edit", f"This row does not override {field}.")
+        value = values[field]
+        origin = f"{found.project.project.name} · {substation_id}"
+        try:
+            return editor.propose(
+                entry.part_id,
+                field,
+                value.value if isinstance(value, Enum) else value,
+                {"kind": kind, "ref": ref.strip()},
+                origin,
+                keep_released=keep_released,
+            )
+        except (EditRefusedError, ValidationError) as exc:
+            raise AppError("invalid_edit", f"The library cannot take this change: {exc}") from exc
+
+    @endpoint
     def library_alternatives(self, part_id: str) -> dict[str, Any]:
         """The device and its alternatives (same `alt_group`) with the figures they differ in."""
         try:

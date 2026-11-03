@@ -587,3 +587,76 @@ def test_health_lists_the_weak_spots_as_rows(app: api.Api) -> None:
 
     assert set(health) >= {"assumed", "alone", "mcb_gaps", "housekeeping_gaps"}
     assert all({"part_id", "name"} <= set(row) for row in health["alone"])
+
+
+# -- propose from project (M69) ---------------------------------------------------------------
+
+
+def project_on_installed_library(tmp_path: Path) -> tuple[str, int]:
+    """The example project in the workspace, built with the installed library; the RTAC's row."""
+    folder = tmp_path / "workspace" / "jfgp2"
+    shutil.copytree(EXAMPLES, folder)
+    text = (folder / "project.yaml").read_text(encoding="utf-8")
+    text = text.replace("  file: library.yaml\n", "").replace("version: 1.16.0", "version: 1.0.0")
+    (folder / "project.yaml").write_text(text, encoding="utf-8")
+    equipment = read_yaml(folder / "substations" / "gis01" / "substation.yaml").data["equipment"]
+    index = next(i for i, e in enumerate(equipment) if e.get("part_id") == PART)
+    return str(folder / "project.yaml"), index
+
+
+def test_propose_from_project_creates_pending_edit_with_source(
+    app: api.Api, tmp_path: Path
+) -> None:
+    project, index = project_on_installed_library(tmp_path)
+    ok(app.set_part_override(project, "gis01", index, "unit_power_w", 31.5))
+
+    ok(app.propose_library_edit(project, "gis01", index, "unit_power_w", "measured", "bench test"))
+
+    device = ok(app.library_device(PART))["device"]
+    assert device["unit_power_w"] == 31.5
+    assert device["sources"]["unit_power_w"] == {
+        "kind": "measured",
+        "ref": "bench test",
+        "date": None,
+    }
+    assert device["state"] == "draft"
+    review = ok(app.library_health())["review"]
+    assert [r["part_id"] for r in review] == [PART]
+    assert "JAFURAH JFGP2" in review[0]["note"]
+    assert "bench test" in review[0]["note"]
+
+
+def test_a_released_part_stays_released_when_the_owner_confirms(
+    app: api.Api, tmp_path: Path
+) -> None:
+    project, index = project_on_installed_library(tmp_path)
+    ok(app.set_part_override(project, "gis01", index, "unit_power_w", 31.5))
+
+    ok(
+        app.propose_library_edit(
+            project, "gis01", index, "unit_power_w", "datasheet", "p. 4", keep_released=True
+        )
+    )
+
+    assert ok(app.library_device(PART))["device"]["state"] == "released"
+
+
+def test_a_value_the_row_does_not_override_cannot_be_proposed(app: api.Api, tmp_path: Path) -> None:
+    project, index = project_on_installed_library(tmp_path)
+
+    error = refused(
+        app.propose_library_edit(project, "gis01", index, "unit_power_w", "measured", "x")
+    )
+
+    assert error["kind"] == "invalid_edit"
+    assert ok(app.library_pending())["count"] == 0
+
+
+def test_a_project_on_its_own_library_file_cannot_propose(app: api.Api, tmp_path: Path) -> None:
+    folder = tmp_path / "workspace" / "jfgp2"
+    shutil.copytree(EXAMPLES, folder)
+    project = str(folder / "project.yaml")
+
+    error = refused(app.propose_library_edit(project, "gis01", 0, "unit_power_w", "measured", "x"))
+
+    assert error["kind"] == "invalid_edit"

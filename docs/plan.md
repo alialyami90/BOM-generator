@@ -1154,14 +1154,18 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
   library that uses these fields needs this app, every shipped part sourced (psa-devices 1.16.0,
   Q69), the assumed power and inrush check. **M67c** (merged, #337): the device editor's state,
   successor and Sources column, the Library state badge and *Assumed values* filter, the Parts chip.
-- **M68 — Review queue and health.** *W1.* In review. `library_store/health.py` measures parts by
+- **M68 — Review queue and health.** *W1.* Merged (#339). `library_store/health.py` measures parts by
   state, assumed figures, parts without an alternative, obsolete parts the projects on this PC pick,
   MCB brand sets missing a rating of the default set, and housekeeping roles the default fills that a
   brand leaves empty. Library gains *Review* (draft and reviewed parts with their missing sources:
   *Mark reviewed*, *Release*, *Send back…* with a note kept on the part) and *Health* (a card per
   measure). Every action is a pending edit; anyone using the app may release, as the app has no
   owner role.
-- **M69 — Propose from project.** *W1.* Planned.
+- **M69 — Propose from project.** *W1.* In review. Parts: a row with saved overrides has *Propose
+  for the library…*; the dialog picks the value, the source (measured or datasheet) and a reference,
+  and whether a released part stays released. `propose_library_edit` adds the value, its source, a
+  note naming the project and substation, and state draft (unless kept released) to the installed
+  library's pending set; Library › Review lists it. A project on its own library file cannot propose.
 
 ## 5. Testing strategy
 
