@@ -255,6 +255,11 @@ equipment:                             # what the layout places (design 3.2)
   #   spare (default spares.sfp_per_l1 on L1, else 0) and extra SFPs on each BOM row (M49)
 network:
   ied_count: 40                        # never a BOM row (R4)
+  ied_schedule:                        # instead of ied_count (ADR 0034, M60): rows of
+    - { bay: E01, name: SEL-411L, qty: 4,  # ports per side; default one 100M MM
+        ports: [{ count: 1, speed: 100M, media: MM }],
+        attachment: dual,                #   dual | single_a | single_b
+        lands_on: l1, notes: "" }        #   l1 | l2 (an L2 row adds to the L2 demand)
   topology: star                       # star | ring
   ring_max_switches: 6
   l1_uplinks_per_switch: 1
@@ -1123,7 +1128,7 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M59 — BOM text per row on Parts.** *W4.* Done (#326). Equipment gains `tag`, `tag_type` and `first_nn`;
   Parts has a *BOM text* section per row. The hand-written panel editor's tag fields came from W3 in a
   follow-up PR: tag, type code and first number under each Devices row, with the duplicate-tag check.
-- **M60 — IED schedule.** *W4; ADR 0034.* Planned.
+- **M60 — IED schedule.** *W4; ADR 0034.* M60a (model and sizing) in review; M60b (Parts screen, CSV import) planned.
 - **M61 — External links.** *W4; Q64.* Planned.
 - **M62 — Panel count control.** *W4; Q68.* Done (#325). ADR 0013 amendment: `layout.max_panels`
   caps the fill (R5, R6): a pair opens only while both its panels are within the cap, a common device
@@ -1559,3 +1564,10 @@ parts carry the spec's example workbook power, which their datasheet does not st
 Source them as `assumed` naming the workbook (recommended: Parts and Checks then flag them until
 someone confirms the watts), as `datasheet` citing the workbook, or with a fifth source kind for
 the client's documents (amends ADR 0037)? Until Ali answers, M67b ships them as `assumed`.
+
+**Q70 — The quick IED count on mixed-media L1 switches** (M60, ADR 0034 item 4). *Open.* A
+schedule matches each IED port to a switch port of its speed and media (fixed ports their own,
+SFP slots any media of their speed). Should `ied_count` keep today's rule, every IED port counts
+whatever its speed and media (recommended: no project's switch count moves), or act strictly as
+n dual 100M MM IEDs, so copper and 1G IED ports stop counting? The two differ only on L1 switches
+with IED ports of more than one speed or media. Until Ali answers, M60a keeps today's rule.

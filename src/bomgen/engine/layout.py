@@ -23,8 +23,11 @@ from bomgen.engine.sizing import (
     L2Link,
     NetworkInputs,
     NetworkPlan,
+    ied_l2_links,
+    ied_ports_per_side,
     l1_links,
     l1_reserved_ports,
+    l1_slot_downlinks,
     l2_port_plan,
     pick_l1_switch,
     rank_l1_switches,
@@ -670,8 +673,10 @@ class LayoutResult:
 
 def network_inputs(loaded: LoadedSubstation) -> NetworkInputs:
     network = loaded.substation.network
+    schedule = network.ied_schedule
     return NetworkInputs(
-        ied_count=network.ied_count,
+        ied_count=sum(row.qty for row in schedule) if schedule else network.ied_count,
+        ied_ports_per_side=ied_ports_per_side(schedule) if schedule else None,
         topology=network.topology,
         ring_max_switches=network.ring_max_switches,
         l1_uplinks_per_switch=network.l1_uplinks_per_switch,
@@ -705,7 +710,7 @@ def _links(loaded: LoadedSubstation, side: Side) -> list[L2Link]:
         L2Link(e.id, e.l2_ports, e.l2_speed, e.l2_media)
         for e in loaded.substation.equipment
         if e.l2_ports and (e.redundant or e.side in (Side.NONE, side))
-    ]
+    ] + ied_l2_links(loaded.substation.network.ied_schedule, side.value)
 
 
 def _units(loaded: LoadedSubstation, plan: NetworkPlan, issues: list[LayoutIssue]) -> list[Unit]:
@@ -776,7 +781,7 @@ def _side_ports(
         L2Link(e.id, e.l2_ports, e.l2_speed, e.l2_media)  # per entry, as R2 counts them
         for e in loaded.substation.equipment
         if e.l2_ports and counts.get(e.id)
-    ]
+    ] + ied_l2_links(loaded.substation.network.ied_schedule, side.value)
     l1 = sum(
         n for device, n in counts.items() if _entry(loaded, device).role is EquipmentRole.L1_SWITCH
     )
@@ -797,7 +802,7 @@ def _capacity_issues(
     issues = []
     for side, ports in sides.items():
         letter = side.value.upper()
-        if ports.l1_switches * plan.l1_usable_ports < plan.ied_count:
+        if ports.l1_switches < plan.l1_by_side[0 if side is Side.A else 1]:
             issues.append(
                 LayoutIssue(
                     "port-capacity",
@@ -913,7 +918,9 @@ def _port_plans(
         count = len(l1_units) * l1_reserved_ports(net)
         spare = loaded.spares.sfp_per_l1 * len({x.side for x in l1_units})
         uplink = PortAllocation(count=count, speed=PortSpeed.G1, media=Media.MM, spare=spare)
-        plans.setdefault(plan.l1_part_id, []).append(PortPlan(uplinks=[uplink]))
+        plans.setdefault(plan.l1_part_id, []).append(
+            PortPlan(uplinks=[uplink], downlinks=_l1_downlinks(panel, fills, loaded, net, sides))
+        )
     for side in (Side.A, Side.B):
         l2_units = [
             x
@@ -949,6 +956,40 @@ def _port_plans(
         )
         for part, parts in plans.items()
     }
+
+
+def _l1_downlinks(
+    panel: PanelFill,
+    fills: Sequence[PanelFill],
+    loaded: LoadedSubstation,
+    net: NetworkInputs,
+    sides: dict[Side, _SidePorts],
+) -> list[PortAllocation]:
+    """The scheduled IED ports on the L1 switches' SFP slots, in the first panel holding
+    each side's L1 switches (ADR 0034, item 3); the quick count has none."""
+    if net.ied_ports_per_side is None:
+        return []
+    entries = {e.id: e for e in loaded.substation.equipment}
+    devices = {d.part_id: d for d in loaded.library.devices}
+    allocations = []
+    for side in (Side.A, Side.B):
+        l1 = [
+            x
+            for p in fills
+            for x in p.units
+            if entries[x.device].role is EquipmentRole.L1_SWITCH and x.side is side
+        ]
+        home = next((p for p in fills if any(x in p.units for x in l1)), None)
+        if home is not panel:
+            continue
+        demand = net.ied_ports_per_side.get(side.value, {})
+        part = switch_ports(devices[l1[0].part_id])
+        slots = l1_slot_downlinks(part, sides[side].l1_switches, demand)
+        allocations += [
+            PortAllocation(count=count, speed=speed, media=media)
+            for (speed, media), count in slots.items()
+        ]
+    return allocations
 
 
 def _all_l2(fills: Sequence[PanelFill], entries: dict[str, Equipment], side: Side) -> list[Unit]:
