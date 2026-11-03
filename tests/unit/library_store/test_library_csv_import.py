@@ -158,6 +158,78 @@ def test_the_round_trip_keeps_every_field_and_the_order(
     assert preview.library.part_ids() == edited.part_ids()
 
 
+def test_state_successor_and_sources_survive_the_round_trip(
+    tmp_path: Path, store: LibraryStore, base: Library
+) -> None:
+    data = base.model_dump(mode="json")
+    switch = next(d for d in data["devices"] if d["part_id"] == SWITCH)
+    switch.update(
+        state="obsolete",
+        successor=RTAC,
+        changed_by="ali",
+        changed_on="2026-11-03",
+        note="replaced, see ECN 12",
+        sources={
+            "unit_power_w": {"kind": "datasheet", "ref": "RST2228 p. 12", "date": "2026-10-31"},
+            "ports": {"kind": "contractor", "ref": "a|b, devices.csv"},
+        },
+    )
+    edited = Library.model_validate(data)
+    out = tmp_path / "lifecycle.zip"
+    export_csv(edited, out, name="psa", based_on="1.0.0")
+
+    preview = _preview(store, out)
+
+    assert preview.problems == []
+    assert preview.library == edited
+
+
+def test_a_bad_source_cell_is_a_problem_on_its_column(store: LibraryStore, folder: Path) -> None:
+    _edit(
+        folder,
+        "devices.csv",
+        lambda rows: _set(rows, SWITCH, source_unit_power_w="guess|somewhere|"),
+    )
+
+    preview = _preview(store, folder)
+
+    assert [(p.table, p.column, p.key) for p in preview.problems] == [
+        ("devices.csv", "source_unit_power_w", SWITCH)
+    ]
+
+
+def test_a_source_cell_without_kind_and_ref_is_a_problem(store: LibraryStore, folder: Path) -> None:
+    _edit(folder, "devices.csv", lambda rows: _set(rows, SWITCH, source_unit_power_w="datasheet"))
+
+    preview = _preview(store, folder)
+
+    assert [(p.column, p.message) for p in preview.problems] == [
+        ("source_unit_power_w", "Write the source as kind|ref|date, for example datasheet|p. 12|.")
+    ]
+
+
+def test_a_missing_source_column_keeps_the_sources_the_library_has(
+    store: LibraryStore, folder: Path, base: Library
+) -> None:
+    data = base.model_dump(mode="json")
+    switch = next(d for d in data["devices"] if d["part_id"] == SWITCH)
+    switch["sources"] = {"unit_power_w": {"kind": "measured", "ref": "site test"}}
+    save_local_version(store, "psa", Library.model_validate(data))
+    columns = [c for c in TABLES["devices.csv"] if c != "source_unit_power_w"]
+    buffer = io.StringIO(newline="")
+    writer = csv.DictWriter(
+        buffer, fieldnames=columns, lineterminator="\r\n", extrasaction="ignore"
+    )
+    writer.writeheader()
+    writer.writerows(_read(folder, "devices.csv"))
+    (folder / "devices.csv").write_bytes(buffer.getvalue().encode("utf-8-sig"))
+
+    preview = _preview(store, folder)
+
+    assert preview.library is not None
+    assert _device(preview.library, SWITCH).sources["unit_power_w"].ref == "site test"
+
+
 def _with_dc_only_brand(library: Library) -> Library:
     mcb = library.catalogues.mcb.model_dump(mode="json", exclude_none=True)
     brand = {**mcb, "id": "dc-only", "name": "DC only", "ac_rated": False}

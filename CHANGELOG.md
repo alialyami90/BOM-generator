@@ -9,6 +9,12 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Library parts carry a lifecycle state (draft, reviewed, released, obsolete; released by
+  default), an obsolete part's successor, and a source for each sized figure: power, inrush,
+  height, maximum input voltage and ports, each from a datasheet, the contractor, a measurement or
+  assumed. `devices.csv` exports and imports them as `state`, `successor` and `source_<field>`
+  (`kind|ref|date`). Nothing in a BOM changes (M67a, ADR 0037).
+
 - The panel editor's main MCB shows the engine's rating with the rule it came from ("10 A: next
   standard size above 7.1 A, minimum 6 A"); click it to type your own, *Use automatic* to go back
   (M48). Part overrides on Parts use the same derived-value look, and leaving a value with Tab now
@@ -24,6 +30,10 @@ project uses [Semantic Versioning](https://semver.org/).
   and a tag another unit already has is flagged on the row (M59).
 - A generated panel can have its own enclosure and kind: the panel editor's Enclosure tab gains
   *All generated panels* / *This panel only* and a Kind select, and cable entry gains Bottom (M50).
+- New substation, for a blank one, asks for its cabinets and documents: cabinet number, name and tag
+  prefix patterns, the enclosure and cable entry, and the BOM, power and heat document numbers,
+  filled in from the previous substation. What you type is written without the ASSUMED mark, and
+  Checks warns while a document number is still TBD (M51).
 - The panel editor's Options tab shows the AC and DC spare breaker ratings with the rule behind
   them; click one to set your own. Grounding busbars are checkboxes from the library's catalogue.
   *Alarm on branch MCB trip* can be switched per Parts row and per hand-written panel row, over the

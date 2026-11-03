@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+import yaml
 
 from bomgen.bundle.container import MANIFEST_NAME, sha256
 from bomgen.io.loader import load_library
@@ -304,3 +305,21 @@ def test_edits_that_change_nothing_are_refused(store: LibraryStore) -> None:
         save_edits(store, "psa", [])
 
     assert caught.value.kind is RefusalKind.NO_CHANGES
+
+
+def test_a_saved_library_leaves_out_lifecycle_defaults() -> None:
+    # ADR 0037: a released part with no sources is written as before, so older apps read it.
+    library = load_library(EXAMPLE_LIBRARY)
+    text = dump_library(library).decode("utf-8")
+    assert "state:" not in text
+    assert "sources:" not in text
+
+
+def test_a_saved_library_keeps_a_set_state_and_its_sources() -> None:
+    data = load_library(EXAMPLE_LIBRARY).model_dump(mode="json")
+    powered = next(d for d in data["devices"] if d.get("unit_power_w") is not None)
+    powered["state"] = "draft"
+    powered["sources"] = {"unit_power_w": {"kind": "assumed", "ref": "no datasheet"}}
+    library = Library.model_validate(data)
+    again = Library.model_validate(yaml.safe_load(dump_library(library)))
+    assert again == library

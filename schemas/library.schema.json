@@ -340,6 +340,31 @@
         "category": {
           "$ref": "#/$defs/Category"
         },
+        "changed_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Changed By"
+        },
+        "changed_on": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Changed On"
+        },
         "children": {
           "items": {
             "$ref": "#/$defs/ChildRule"
@@ -502,6 +527,18 @@
           "default": null,
           "title": "Model"
         },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        },
         "ordering_code": {
           "anyOf": [
             {
@@ -546,6 +583,46 @@
             }
           ],
           "default": null
+        },
+        "sources": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Source"
+          },
+          "propertyNames": {
+            "enum": [
+              "unit_power_w",
+              "inrush_a",
+              "height_u",
+              "input_v_max",
+              "ports"
+            ]
+          },
+          "title": "Sources",
+          "type": "object"
+        },
+        "state": {
+          "default": "released",
+          "enum": [
+            "draft",
+            "reviewed",
+            "released",
+            "obsolete"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "successor": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Successor"
         },
         "supply_type": {
           "anyOf": [
@@ -1250,6 +1327,46 @@
         "rating_a"
       ],
       "title": "SocketRef",
+      "type": "object"
+    },
+    "Source": {
+      "additionalProperties": false,
+      "description": "Where one sized figure of a part comes from (ADR 0037).",
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "kind": {
+          "enum": [
+            "datasheet",
+            "contractor",
+            "assumed",
+            "measured"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "ref": {
+          "minLength": 1,
+          "title": "Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "ref"
+      ],
+      "title": "Source",
       "type": "object"
     },
     "SupplyType": {

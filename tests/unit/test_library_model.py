@@ -420,3 +420,89 @@ def test_a_port_group_can_describe_2_5g_5g_and_25g_ports(speed: str) -> None:
 def test_new_port_speeds_are_never_sfp_picks(speed: str) -> None:
     with pytest.raises(ValidationError, match="not sized for SFPs"):
         SfpChoice.model_validate({"speed": speed, "media": "MM", "part_id": "SFP-X"})
+
+
+# ADR 0037: record lifecycle and sources
+
+
+def test_state_defaults_to_released_so_existing_libraries_mean_what_they_did() -> None:
+    part = device()
+    assert part.state == "released"
+    assert part.successor is None
+    assert part.sources == {}
+
+
+@pytest.mark.parametrize("state", ["draft", "reviewed", "released", "obsolete"])
+def test_state_is_one_of_the_four_lifecycle_states(state: str) -> None:
+    assert device(state=state).state == state
+
+
+def test_unknown_state_is_refused() -> None:
+    with pytest.raises(ValidationError, match="state"):
+        device(state="approved")
+
+
+def test_successor_only_on_an_obsolete_part() -> None:
+    assert device(state="obsolete", successor="SFP-1G-SM").successor == "SFP-1G-SM"
+    with pytest.raises(ValidationError, match="successor is only for an obsolete part"):
+        device(state="released", successor="SFP-1G-SM")
+
+
+def test_successor_is_not_the_part_itself() -> None:
+    with pytest.raises(ValidationError, match="its own successor"):
+        device(state="obsolete", successor="RST2228-L1-24MM")
+
+
+def test_source_per_sized_field() -> None:
+    sources = {
+        "unit_power_w": {"kind": "datasheet", "ref": "RST2228 p. 12", "date": "2026-10-31"},
+        "ports": {"kind": "contractor", "ref": "devices.csv 2026-10-31"},
+    }
+    part = device(sources=sources)
+    assert part.sources["unit_power_w"].kind == "datasheet"
+    assert str(part.sources["unit_power_w"].date) == "2026-10-31"
+    assert part.sources["ports"].date is None
+
+
+@pytest.mark.parametrize("kind", ["datasheet", "contractor", "assumed", "measured"])
+def test_source_kind_is_one_of_four(kind: str) -> None:
+    part = device(sources={"unit_power_w": {"kind": kind, "ref": "x"}})
+    assert part.sources["unit_power_w"].kind == kind
+
+
+def test_source_kind_outside_the_four_is_refused() -> None:
+    with pytest.raises(ValidationError):
+        device(sources={"unit_power_w": {"kind": "guess", "ref": "x"}})
+
+
+def test_source_needs_a_ref() -> None:
+    with pytest.raises(ValidationError):
+        device(sources={"unit_power_w": {"kind": "assumed", "ref": ""}})
+
+
+def test_source_only_for_a_sized_field() -> None:
+    with pytest.raises(ValidationError):
+        device(sources={"make": {"kind": "datasheet", "ref": "x"}})
+
+
+def test_source_for_an_unset_field_is_refused() -> None:
+    with pytest.raises(ValidationError, match="a source for inrush_a, which the part leaves unset"):
+        device(sources={"inrush_a": {"kind": "datasheet", "ref": "x"}})
+    with pytest.raises(ValidationError, match="ports, which the part leaves unset"):
+        DeviceType.model_validate(
+            {**passive_dict(), "sources": {"ports": {"kind": "datasheet", "ref": "x"}}}
+        )
+
+
+def test_height_zero_is_a_set_value_and_takes_a_source() -> None:
+    part = device(height_u=0, sources={"height_u": {"kind": "datasheet", "ref": "DIN rail"}})
+    assert part.sources["height_u"].ref == "DIN rail"
+
+
+def test_change_metadata_is_optional() -> None:
+    part = device(changed_by="ali", changed_on="2026-11-03", note="power from datasheet")
+    assert (part.changed_by, str(part.changed_on), part.note) == (
+        "ali",
+        "2026-11-03",
+        "power from datasheet",
+    )
