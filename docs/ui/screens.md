@@ -234,7 +234,8 @@ with the save bar; everything on it is saved together.
   switch with an "Engine result" footer), Options (spares, ventilation, diodes,
   main MCB override and the AC and DC spare ratings as derived values, socket, terminals, smoke
   detector, grounding busbars as checkboxes from the catalogue, terminal overrides, each override
-  with a warning line; on a hand-written panel the Devices table has *Alarm on breaker trip*,
+  with a warning line; on a hand-written panel the Devices table has *Alarm on breaker trip*, and under each row
+  its tag, type code and first number with the generated tag as placeholder (M59),
   and each Parts row with a branch MCB has the same switch, M58), Document, `panels/<id>.yaml`.
 
 ### Library

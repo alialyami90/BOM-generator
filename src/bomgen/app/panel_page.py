@@ -15,10 +15,12 @@ from typing import Any
 from bomgen.app.network import _board
 from bomgen.app.output import problems_of
 from bomgen.app.substations import resolve
+from bomgen.checks import duplicate_tag_checks
 from bomgen.engine.errors import EngineError
 from bomgen.engine.layout import layout_preview
 from bomgen.engine.mcb import has_branch_mcb
 from bomgen.engine.pipeline import build
+from bomgen.engine.units import expand_devices
 from bomgen.io.edit import panel_options
 from bomgen.io.loader import LoadedSubstation
 from bomgen.io.yaml_source import read_yaml
@@ -90,6 +92,29 @@ def _alarm(loaded: LoadedSubstation, part_id: str) -> dict[str, bool]:
     return {"branch_mcb": has_branch_mcb(found), "alarm_default": found.alarm_on_branch_mcb}
 
 
+def _tagging(loaded: LoadedSubstation, panel: Panel) -> list[dict[str, Any]]:
+    """Per device row: its units' tags (the placeholders of the tag fields) and the
+    duplicate-tag check's sentence when one of them is another unit's too (plan M59)."""
+    blank: list[dict[str, Any]] = [{"tags": [], "duplicate": None} for _ in panel.devices]
+    try:
+        expanded = [(p, expand_devices(p, loaded.library)) for p in loaded.panels]
+    except EngineError:
+        return blank
+    rows = next((r for p, r in expanded if p.id == panel.id), ())
+    if len(rows) != len(panel.devices):
+        return blank
+    duplicate = {
+        item.subject: f"{item.subject}: {item.message}" for item in duplicate_tag_checks(expanded)
+    }
+    return [
+        {
+            "tags": [t for t in row.unit_tags if t is not None],
+            "duplicate": next((duplicate[t] for t in row.unit_tags if t in duplicate), None),
+        }
+        for row in rows
+    ]
+
+
 def part_list(loaded: LoadedSubstation) -> list[dict[str, str]]:
     """Every part of the substation's library, for the hand-written panels' device picker."""
     return [
@@ -142,6 +167,7 @@ def panel_page(
         spares = next((s for s in result.spares if s.panel_id == panel.id), None)
     except EngineError as exc:
         page["engine_error"] = str(exc)
+    tagging = _tagging(loaded, panel)
     page |= {
         "panel": {
             "id": panel.id,
@@ -195,8 +221,9 @@ def panel_page(
                     **d.model_dump(mode="json", exclude_none=True),
                     "label": _part_label(loaded, d.part_id),
                     **_alarm(loaded, d.part_id),
+                    **tagging[i],
                 }
-                for d in panel.devices
+                for i, d in enumerate(panel.devices)
             ]
         ),
         # values the engine derives, each with its rule (plan M48)
