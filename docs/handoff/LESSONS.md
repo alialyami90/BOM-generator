@@ -524,3 +524,10 @@ The rules are in ADR 0013 and the design spec (R1–R10).
   `git add -A`. A merge that showed only the last conflict committed markers into CHANGELOG.md (M26).
 - A test that names the shipped library's version breaks on every bump. Read `name` and `version` from
   `examples/project.yaml` with `read_yaml` (#252, #253).
+- A squash-merged PR leaves its commit on the branch with another hash. Rebase the next milestone with
+  `git rebase --onto origin/main <old milestone commit> <branch>`; a plain rebase replays the old
+  commit and can duplicate a CHANGELOG section that git cannot see as already applied (M67c).
+- The screenshot server (`serve.py`) imports the API once: restart it after adding an endpoint, or
+  the page shows `'Api' object has no attribute …` (M69).
+- `ui.js`'s `input()` and `select()` add `data-dirty="1"`; strip it for controls in a dialog on a form
+  page, so they never count as the page's unsaved edits (M69).
