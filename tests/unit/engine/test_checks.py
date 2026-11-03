@@ -34,7 +34,13 @@ from bomgen.models.calc import (
     LineUpCheck,
     NaturalConvCheck,
 )
-from bomgen.models.library import CatalogueChoice, resolve_catalogues
+from bomgen.models.library import (
+    CatalogueChoice,
+    Media,
+    PortSpeed,
+    SfpChoice,
+    resolve_catalogues,
+)
 from bomgen.models.panel import Ventilation
 from bomgen.models.project import DesignConstants
 from bomgen.models.report import CheckItem, CheckReport, CheckStatus
@@ -504,3 +510,30 @@ def test_a_device_that_should_carry_a_tag_but_has_none_warns() -> None:
             "MCB is named by its model: give the library part a tag_type and purdue_level",
         )
     ]
+
+
+def sfp_items_with_extra(extra: int) -> list[CheckItem]:
+    """The SW host carrying ``extra`` 1G MM SFPs on its derived part (plan M49)."""
+    lib = library(SLOTTED, NO_INVENTORY, *SFPS)
+    choice = SfpChoice(speed=PortSpeed.G1, media=Media.MM, extra=extra)
+    devices = [
+        d.model_copy(update={"sfp_choice": [choice]}) if d.part_id == "SW" else d
+        for d in lib.devices
+    ]
+    lib = lib.model_copy(update={"devices": devices})
+    p = panel([{"part_id": "SW"}], port_plans={"SW": {"downlinks": [mm(1), mm(1, "100M")]}})
+    return sfp_slot_checks(p, expand_devices(p, lib))
+
+
+def test_sfp_extra_within_free_slots_passes() -> None:
+    (item,) = sfp_items_with_extra(1)
+    assert item.status is CheckStatus.PASS
+
+
+def test_sfp_extra_beyond_slots_warns() -> None:
+    (item,) = sfp_items_with_extra(2)
+    assert item.status is CheckStatus.WARN
+    assert item.message == (
+        "2 SFPs in 4 SFP slots; the 2 extra SFPs need more 1G slots than are free"
+    )
+    assert item.values == {"sfps": 2, "slots": 4, "extra": 2}

@@ -3,6 +3,17 @@
 Ali's feedback after each release, point by point, and the work done for each point. Keep this file
 current: when a point's status or milestone changes, update its row here.
 
+## v0.4: engineer-controlled workflow
+
+Ali's requests from 2026-11-03: a review of the engineering workflow from a SCADA engineer's view
+([review](superpowers/specs/2026-11-03-engineering-workflow-review.md)), a plan for agents
+([plan](superpowers/plans/2026-11-03-agent-implementation-plan.md)), and delivering it with the agent
+team.
+
+| # | Point (Ali) | Milestone | Status |
+| --- | --- | --- | --- |
+| 1 | Engineer-controlled workflow: every derived value shown with its rule and overridable, a design basis, panel detailing and network inputs, issue outputs and a reviewed library (2026-11-03). | M48–M69 | Planned in six workstreams ([`plan.md`](plan.md) "M48–M69"). |
+
 ## v0.3: Ali's feedback on v0.2.1
 
 Ali's requests from 2026-10-28 to 2026-10-31, and the work done for each point. The milestones are

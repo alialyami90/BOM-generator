@@ -24,7 +24,7 @@ from collections.abc import Callable, Iterator, Mapping, Sequence
 from datetime import UTC, date, datetime
 from enum import Enum
 from pathlib import Path, PurePath
-from typing import Any, Protocol
+from typing import Any, Literal, Protocol
 
 from pydantic import BaseModel, ValidationError
 
@@ -1131,6 +1131,32 @@ class Api:
             substation_id,
             functools.partial(
                 parts_edit.set_sfp_choice, index=index, speed=speed, media=media, part_id=part_id
+            ),
+        )
+
+    @endpoint
+    def set_sfp_count(
+        self,
+        project_file: str,
+        substation_id: str,
+        index: int,
+        speed: str,
+        media: str,
+        field: Literal["spare", "extra"],
+        value: int | None,
+    ) -> dict[str, Any]:
+        """Set the spare or extra SFPs per BOM row for one speed and media of a switch row;
+        a spare of ``None`` is the project's, an extra of 0 none (plan M49)."""
+        return self._parts_write(
+            project_file,
+            substation_id,
+            functools.partial(
+                parts_edit.set_sfp_count,
+                index=index,
+                speed=speed,
+                media=media,
+                field=field,
+                value=value,
             ),
         )
 

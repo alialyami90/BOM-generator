@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from pydantic import ValidationError
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
@@ -204,12 +204,44 @@ def set_sfp_choice(
 ) -> EditResult:
     """Choose the SFP for ``speed`` and ``media`` on equipment row ``index``; ``None``
     goes back to the automatic pick, and the last choice removed takes ``sfp`` with it."""
+    return _set_sfp(project_file, substation_id, index, speed, media, "part_id", part_id, store)
+
+
+def set_sfp_count(
+    project_file: Path,
+    substation_id: str,
+    index: int,
+    speed: str,
+    media: str,
+    field: Literal["spare", "extra"],
+    value: int | None,
+    *,
+    store: LibraryStore | None = None,
+) -> EditResult:
+    """Set the spare or extra SFPs for ``speed`` and ``media`` on each BOM row of switch
+    ``index`` (plan M49); a spare of ``None`` and an extra of 0 go back to the default."""
+    return _set_sfp(project_file, substation_id, index, speed, media, field, value, store)
+
+
+def _set_sfp(
+    project_file: Path,
+    substation_id: str,
+    index: int,
+    speed: str,
+    media: str,
+    key: str,
+    value: str | int | None,
+    store: LibraryStore | None,
+) -> EditResult:
+    """Write ``key`` on the row's SFP choice for ``speed`` and ``media``. The default
+    removes the key, and a choice left with no key, or ``sfp`` left empty, goes too."""
+    unset = value is None or (key == "extra" and value == 0)
 
     def change(data: CommentedMap) -> None:
         row = _entry(data, index)
         choices = row.get("sfp")
         if not isinstance(choices, CommentedSeq):
-            if part_id is None:
+            if unset:
                 return
             set_entry(row, "sfp", [])
             choices = row["sfp"]
@@ -221,17 +253,19 @@ def set_sfp_choice(
             ),
             None,
         )
-        if part_id is None:
+        if unset:
             if at is not None:
-                remove_entry(choices, at)
+                if key in choices[at]:
+                    remove_entry(choices[at], key)
+                if not set(choices[at]) - {"speed", "media"}:
+                    remove_entry(choices, at)
             if not choices:
                 remove_entry(row, "sfp")
             return
-        choice = {"speed": speed, "media": media, "part_id": part_id}
         if at is None:
-            insert_entry(choices, len(choices), choice)
+            insert_entry(choices, len(choices), {"speed": speed, "media": media, key: value})
         else:
-            set_entry(choices[at], "part_id", part_id)
+            set_entry(choices[at], key, value)
 
     return edit_substation(project_file, substation_id, change, store=store)
 

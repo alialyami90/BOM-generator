@@ -485,6 +485,13 @@ The rules are in ADR 0013 and the design spec (R1–R10).
 
 ### E2E and checking
 
+- **W4 (2026-11-03).** The example's panels are hand-written, so the Parts page's SFP and tag values
+  come from `layout_preview` (generated: 3 L1 per side, `=6+3`), not the golden `=24+3`. To see the
+  BOM follow an equipment input, copy `examples`, set `fed_from: psa1`, run
+  `bomgen layout -s <copy>/substations/gis01/substation.yaml --force`, then `pipeline.build`.
+- `model_copy(update=…)` on an input model skips validation, so a test that sets a field the model
+  lacks still runs; build the changed model with `model_validate` when the field is new.
+
 - **Dead-code scan:** `pip install vulture && vulture src --min-confidence 80` is clean except
   `api.py` `FileDialogWindow.create_file_dialog(file_types=...)`, a Protocol parameter it cannot see
   used (audit 2026-10-30). Don't re-investigate it.

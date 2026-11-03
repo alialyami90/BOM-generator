@@ -20,6 +20,7 @@ from bomgen.engine.kits import annunciator_items, loose_table, main_equipment
 from bomgen.engine.nameplates import nameplate_item, nameplates
 from bomgen.engine.network import accessories
 from bomgen.engine.power import power_consumption
+from bomgen.engine.rules_text import main_mcb_rule
 from bomgen.engine.terminals import StripInputs, terminal_strips
 from bomgen.engine.thermal import choose_fan, choose_ventilation, heat_result, ventilation_heat_w
 from bomgen.engine.units import DeviceRow, expand_devices, lookup
@@ -132,6 +133,7 @@ def _draft(
         design_current_a=dc.design_current_a,
         rating_a=dc.main_a,
         rule_rating_a=dc.rule_main_a,
+        rule=main_mcb_rule(dc.rule_main_a, dc.design_current_a, constants.min_main_mcb_a),
     )
     branch_mcbs = (*dc.branch_mcbs, *ac.branch_mcbs)
     return _PanelDraft(panel, rows, ventilation, fan, items, strip_inputs, mains, branch_mcbs)

@@ -247,8 +247,11 @@ equipment:                             # what the layout places (design 3.2)
   # role: l1_switch | l2_switch | ext_switch | firewall | fopp | other
   # redundant (one unit per side) or side: none | a | b; qty (not on l1_switch);
   # l2_ports, l2_speed (default 1G), l2_media (default MM)
-  # purpose, hwio_points: copied onto each row the layout writes (as on a panel row)
+  # purpose, hwio_points, tag, tag_type, first_nn: copied onto each row the layout writes (as on a
+  #   panel row; first_nn numbers the entry's first unit, later units count on) (M59)
   # port_plan: per unit, scaled by the row's qty; not on l1_switch or l2_switch (sized)
+  # sfp (l1_switch, l2_switch): [{ speed, media, part_id?, spare?, extra? }]: the SFP part, and the
+  #   spare (default spares.sfp_per_l1 on L1, else 0) and extra SFPs on each BOM row (M49)
 network:
   ied_count: 40                        # never a BOM row (R4)
   topology: star                       # star | ring
@@ -258,6 +261,8 @@ network:
   l3_uplinks_per_l2: 2
 layout:                                # panel capacity = enclosure_u − rack_u_reserved
   blank_plate_u: 1                     # space only, no BOM row (Q25)
+  max_panels: 4                        # optional cap (M62): no panel past it; a unit that does not
+                                       #   fit is a panel-limit error naming it and the U short
   overrides:                           # written by the UI's Panels board; equipment ids
     - { device: l1, unit: 3, side: a, panel: 3 }   # unit 1-based; side for redundant
     - { pair: l1, unit: 2, panel: [3, 4] }         # both sides; no unit = every pair
@@ -1037,6 +1042,65 @@ its section 8 is the milestone table. Each milestone is one PR, and Ali's answer
   parts and Add a device lead with `id`, `part_id` and `role` (pre-release check 2026-11-01,
   findings 6 and 7).
 
+### M48–M69 — Engineer-controlled workflow
+
+Ali's request "read the implementation plan for AI agents, assign the agents team jobs and start work"
+(2026-11-03). The review is
+[`superpowers/specs/2026-11-03-engineering-workflow-review.md`](superpowers/specs/2026-11-03-engineering-workflow-review.md)
+and each milestone's full entry (goal, model, engine, IO, API, UI, tests, acceptance) is in
+[`superpowers/plans/2026-11-03-agent-implementation-plan.md`](superpowers/plans/2026-11-03-agent-implementation-plan.md),
+whose fixed rules apply to every milestone below. ADR numbers 0031 to 0037 and questions Q62 to Q67
+are reserved as that plan assigns them, so parallel workstreams never pick the same number.
+
+**Workstreams.** Phase order is the plan's (A to F). The milestones run as six workstreams, each in
+its own thread, so that two workstreams rarely touch the same files. Within a workstream the order
+is the one listed; a milestone that waits on another workstream says so.
+
+| Workstream | Milestones, in order | Owns | Waits on |
+| --- | --- | --- | --- |
+| Lead | M48, then review, merge, releases, `docs/handoff/` | `models/output.py`, the `derived()` component in `ui.js`, ADRs 0032 to 0034 | Nothing |
+| W1 Library | M67, M68, M69 | `models/library.py`, `library_store/`, `data/library/`, Library screens, ADR 0037 | Nothing |
+| W2 Issue outputs | M63, M66, M64, M65 | `engine/summary.py`, `spares.py`, `cables.py`, `revision.py`, `sheets/`, `writer/`, Build and Preview, ADRs 0035 and 0036 | M48 for code; M52 before M64; M61 before M65 |
+| W3 Panel detailing | M50, M57, M58, M56 | `models/panel.py`, `engine/ac_dist.py`, `dc_dist.py`, `terminals.py`, `housekeeping.py`, `enclosure.py`, `thermal.py`, panel editor | M48; Ali's acceptance of ADRs 0032 and 0033 before M56 and M57 |
+| W4 Parts and network | M49, M59, M62, M60, M61 | `engine/network.py`, `sizing.py`, `io/parts_edit.py`, `io/ied_csv.py`, Parts screen | M48; M52 and Ali's acceptance of ADR 0034 before M60 |
+| W5 Setup and design basis | M51, M52, M55, M53, M54 | `io/lifecycle.py`, `models/substation.py` design basis, `models/project.py` vendor lists, `engine/tags.py`, Projects and Substation screens, ADR 0031 | M50 before M51; M67's state field before M53 |
+
+Files every workstream touches (`checks.py`, `engine/layout.py`, `io/fields.py`, `CHANGELOG.md`,
+this section, `schemas/`, `docs/ui/editing.md`) take additive changes only: rebase on `main` before
+merge and keep the other workstream's lines. Releases follow the plan's phases (v0.4.0 after A and
+B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
+
+- **M48 — Derived-value component and the override contract.** *Lead.* In review. The main MCB is the
+  first derived value; the SFP, housekeeping and terminal rule texts land with M49, M56 and M57, which put
+  those values on screen.
+- **M49 — SFP quantities per switch.** *W4.* Done (#323). `sfp` choices take `spare` and `extra` per BOM
+  row and `part_id` became optional; extras warn on the slot check, never fail.
+- **M50 — Enclosure and kind per generated panel, bottom entry.** *W3; spec sentence.* Planned.
+- **M51 — New-substation setup instead of ASSUMED seeds.** *W5; Q62.* Planned.
+- **M52 — Design basis model and tab.** *W5; ADR 0031.* Planned.
+- **M53 — Vendor list and part lifecycle states.** *W5; ADRs 0031 and 0037.* Planned.
+- **M54 — Design-basis checks.** *W5.* Planned.
+- **M55 — Substation templates.** *W5; Q63.* Planned.
+- **M56 — Housekeeping editor.** *W3; ADR 0032.* Planned.
+- **M57 — Terminals tab.** *W3; ADR 0033.* Planned.
+- **M58 — Grounding, spare breaker ratings, alarm on branch trip.** *W3; spec sentence.* Planned.
+- **M59 — BOM text per row on Parts.** *W4.* Done (#326). Equipment gains `tag`, `tag_type` and `first_nn`;
+  Parts has a *BOM text* section per row. The hand-written panel editor's tag fields are left to W3,
+  which owns that screen.
+- **M60 — IED schedule.** *W4; ADR 0034.* Planned.
+- **M61 — External links.** *W4; Q64.* Planned.
+- **M62 — Panel count control.** *W4; Q68.* Done (#325). ADR 0013 amendment: `layout.max_panels`
+  caps the fill (R5, R6): a pair opens only while both its panels are within the cap, a common device
+  only into a panel within it, and a unit that fits nowhere is a `panel-limit` layout error naming the
+  unit and the U it is short. Moves past the cap are unknown panels. "Exactly n" waits on Q68.
+- **M63 — Summary BOM.** *W2; ADR 0035.* Planned.
+- **M64 — Spares list.** *W2; ADR 0035, Q65.* Planned.
+- **M65 — Cable schedule.** *W2; ADR 0035, Q66.* Planned.
+- **M66 — Revision history and recorded issues.** *W2; ADR 0036, Q67.* Planned.
+- **M67 — Record sources and lifecycle.** *W1; ADR 0037.* Planned.
+- **M68 — Review queue and health.** *W1.* Planned.
+- **M69 — Propose from project.** *W1.* Planned.
+
 ## 5. Testing strategy
 
 - **Unit (TDD):** one test per rule, named after it, in `tests/unit/`.
@@ -1431,7 +1495,13 @@ spec, or change the spec to 26.25?
 "Sheet 4" is read as the console panel (`kind: console`): the example's sheet 4 is the WS
 console, and the kind names the same cabinet in any project (A1, 2026-11-01).
 
-**Q67 — Where prepared, checked and approved names print** (M66; ADR 0036). Open. The register
+**Q67 — Where prepared, checked and approved names print** (M66; ADR 0036). *Answered 2026-11-03: the history sheet only, footer as it is.* The register
 gains the three names per document. They print on the Revision History sheet (ADR 0035) for each
 recorded issue. To ask Ali: the history sheet only, with the footer as it is (recommended); also in
 every sheet's page header; or on a cover sheet.
+
+**Q68 — "Exactly n panels"** (M62). The plan offers Automatic, Exactly n and At most n. The fill
+already opens the fewest panels, so Exactly n only differs from At most n when the devices fit in
+fewer: spread them evenly, keep the spare panels empty, or offer At most n only (recommended: the
+Panels board already opens a new pair when a device is dragged onto it). M62 ships At most n
+(`layout.max_panels`) while Ali answers.

@@ -1,6 +1,6 @@
 # 0036. Recorded issues
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-11-03)
 - Date: 2026-11-03
 - Spec sections: Output requirements (OUT-2, OUT-8); Inputs the tool needs (document register)
 
@@ -38,7 +38,8 @@ the agent implementation plan reserves this ADR for milestone M66. The sheet its
    more is shown as unused and kept until removed. The issue record copies those in force.
    (The plan put the list only on the record; it also needs a home before the first issue.)
 5. **Names.** `RegisterEntry` gains optional `prepared`, `checked`, `approved`, edited per
-   document in Settings › Documents. Where they print is Q67.
+   document in Settings › Documents. They print on the Revision History sheet only; page headers
+   and footers stay as they are (Q67, Ali 2026-11-03).
 6. **Previous issues outside the tool** keep working through the picker; a record can't be made
    for a file the tool didn't write.
 
