@@ -91,6 +91,12 @@ project uses [Semantic Versioning](https://semver.org/).
   compares with that issue on its own, or warns and builds without it when the file has changed.
   A Revision History sheet lists every recorded issue and the current revision. Warnings accepted
   in `checks.accepted` show their reason in the check report and stop counting as open.
+- The app records issues too (M66b, ADR 0036). Build has *Build as issued…*: it asks for a
+  description, builds, then records the rev unless a check failed. Without a chosen previous issue
+  every build compares with the last recorded one, or says why it can't. Checks has *Accept…* on
+  a warning (a reason and an optional name) and lists acceptances no warning matches any more,
+  each with *Remove*. The register has Prepared, Checked and Approved per document. Preview shows
+  the Revision History tab.
 
 ### Changed
 

@@ -398,3 +398,155 @@ def test_export_summary_csv_writes_the_sheet_rows(
     assert mcb[2] == "77"
     assert mcb[6].startswith("1: PSA1-C2")
     assert len(rows) == 64
+
+
+# -- Recorded issues and accepted warnings (ADR 0036, plan M66b) --
+
+
+def substation_yaml(project: Path) -> dict[str, Any]:
+    return read_yaml(project.parent / SUBSTATION).data
+
+
+def test_build_target_has_no_record_before_the_first_issue(app: api.Api, project: Path) -> None:
+    target = ok(app.build_target(str(project), "gis01"))
+    assert target["issue"] == {"refusal": None, "record": None}
+
+
+def test_build_as_issued_records_the_issue(app: api.Api, project: Path) -> None:
+    folder = project.parent / "substations" / "gis01" / "out"
+    result = ok(app.build_workbook(str(project), "gis01", str(folder), issue="For review"))
+
+    assert Path(result["path"]).is_file()
+    assert result["issued"] == {"rev": "02", "file": f"out/{WORKBOOK}"}
+    assert result["not_issued"] is None
+    (recorded,) = substation_yaml(project)["issues"]
+    assert recorded["rev"] == "02"
+    assert recorded["description"] == "For review"
+    target = ok(app.build_target(str(project), "gis01"))
+    assert target["issue"]["record"] == {"rev": "02", "file": f"out/{WORKBOOK}", "warning": None}
+    assert "Rev 02 is already issued" in target["issue"]["refusal"]
+
+
+def test_a_recorded_rev_is_not_issued_again(app: api.Api, project: Path, tmp_path: Path) -> None:
+    ok(app.build_workbook(str(project), "gis01", str(tmp_path / "a"), issue="For review"))
+    envelope = app.build_workbook(str(project), "gis01", str(tmp_path / "b"), issue="Again")
+    assert refused(envelope) == "already_issued"
+    assert not (tmp_path / "b").exists()
+
+
+def test_build_as_issued_needs_a_description(app: api.Api, project: Path, tmp_path: Path) -> None:
+    envelope = app.build_workbook(str(project), "gis01", str(tmp_path), issue="  ")
+    assert refused(envelope) == "bad_description"
+
+
+def test_a_failed_check_writes_the_workbook_but_records_nothing(
+    app: api.Api, project: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    failed = CheckReport(
+        items=(CheckItem(check="dc_main", status=CheckStatus.FAIL, panel_id="psa1", message="x"),)
+    )
+    monkeypatch.setattr(build, "check_report", lambda loaded, result: failed)
+
+    result = ok(app.build_workbook(str(project), "gis01", str(tmp_path), issue="For review"))
+
+    assert Path(result["path"]).is_file()
+    assert result["issued"] is None
+    assert result["not_issued"] == "Not recorded as issued: a check failed."
+    assert "issues" not in substation_yaml(project)
+
+
+def test_the_next_build_compares_with_the_recorded_issue(
+    app: api.Api, project: Path, tmp_path: Path
+) -> None:
+    folder = project.parent / "substations" / "gis01" / "out"
+    ok(app.build_workbook(str(project), "gis01", str(folder), issue="For review"))
+
+    result = ok(app.build_workbook(str(project), "gis01", str(tmp_path / "next")))
+
+    assert result["revisions"]["previous"] == WORKBOOK
+    assert result["record_warning"] is None
+
+
+def test_a_changed_recorded_file_warns_and_compares_with_nothing(
+    app: api.Api, project: Path, tmp_path: Path
+) -> None:
+    folder = project.parent / "substations" / "gis01" / "out"
+    ok(app.build_workbook(str(project), "gis01", str(folder), issue="For review"))
+    with (folder / WORKBOOK).open("ab") as file:
+        file.write(b"edited")
+
+    target = ok(app.build_target(str(project), "gis01"))
+    result = ok(app.build_workbook(str(project), "gis01", str(tmp_path / "next")))
+
+    message = f"Rev 02's recorded file out/{WORKBOOK} has changed since it was issued"
+    assert target["issue"]["record"]["warning"].startswith(message)
+    assert result["record_warning"].startswith(message)
+    assert result["revisions"] is None
+
+
+def test_a_chosen_previous_issue_wins_over_the_record(
+    app: api.Api, project: Path, tmp_path: Path
+) -> None:
+    folder = project.parent / "substations" / "gis01" / "out"
+    chosen = ok(app.build_workbook(str(project), "gis01", str(tmp_path / "chosen"), "x.xlsx"))
+    ok(app.build_workbook(str(project), "gis01", str(folder), issue="For review"))
+
+    result = ok(
+        app.build_workbook(str(project), "gis01", str(tmp_path / "next"), compare=chosen["path"])
+    )
+
+    assert result["revisions"]["previous"] == "x.xlsx"
+
+
+def first_warning(app: api.Api, project: Path) -> dict[str, Any]:
+    items = ok(app.run_checks(str(project), "gis01"))["engine"]["items"]
+    return next(i for i in items if i["status"] == "warn")
+
+
+def test_accept_a_warning_with_a_reason(app: api.Api, project: Path) -> None:
+    item = first_warning(app, project)
+
+    page = ok(
+        app.accept_warning(
+            str(project), "gis01", item["check"], item["panel_id"], item["subject"], "Agreed", "Ali"
+        )
+    )
+
+    key = ("check", "panel_id", "subject")
+    same = next(i for i in page["engine"]["items"] if all(i[k] == item[k] for k in key))
+    assert same["accepted"] == "Agreed"
+    assert page["unused"] == []
+    (accepted,) = substation_yaml(project)["checks"]["accepted"]
+    assert accepted["reason"] == "Agreed"
+    assert accepted["by"] == "Ali"
+
+
+def test_an_acceptance_needs_a_reason(app: api.Api, project: Path) -> None:
+    item = first_warning(app, project)
+    envelope = app.accept_warning(
+        str(project), "gis01", item["check"], item["panel_id"], item["subject"], " "
+    )
+    assert refused(envelope) == "invalid_edit"
+
+
+def test_an_unused_acceptance_is_listed_until_removed(app: api.Api, project: Path) -> None:
+    page = ok(app.accept_warning(str(project), "gis01", "dc_main", "psa1", "gone", "Old"))
+    assert page["unused"] == [
+        {"index": 0, "check": "dc_main", "panel_id": "psa1", "subject": "gone", "reason": "Old"}
+    ]
+
+    page = ok(app.remove_acceptance(str(project), "gis01", 0))
+
+    assert page["unused"] == []
+    assert "checks" not in substation_yaml(project)
+
+
+def test_an_accepted_warning_leaves_builds_flag_count(app: api.Api, project: Path) -> None:
+    flags = ok(app.build_target(str(project), "gis01"))["flags"]
+    item = first_warning(app, project)
+    ok(
+        app.accept_warning(
+            str(project), "gis01", item["check"], item["panel_id"], item["subject"], "Ok"
+        )
+    )
+    assert ok(app.build_target(str(project), "gis01"))["flags"] == flags - 1

@@ -137,3 +137,21 @@ def test_summary_tab_only_when_included(app: api.Api, project: Path, page: Any) 
     mcb = next(r for r in summary["rows"] if r["ordering_code"] == "A9F74202")
     assert mcb["qty"] == 77
     assert mcb["where_used"].startswith("1: PSA1-C2")
+
+
+def test_revision_history_tab_once_a_name_is_set(app: api.Api, project: Path, page: Any) -> None:
+    # ADR 0035/0036: the sheet is written once the main document has a name or a record.
+    assert page["history"] is None
+    ok(app.set_project_field(str(project), ["documents", 0, "prepared"], "A. Engineer"))
+    history = ok(app.preview_substation(str(project), "gis01"))["history"]
+    assert history["sheet"] == "Revision History"
+    assert history["rows"] == [
+        {
+            "rev": "02",
+            "date": "2026-10-28",
+            "description": "",
+            "prepared": "A. Engineer",
+            "checked": None,
+            "approved": None,
+        }
+    ]

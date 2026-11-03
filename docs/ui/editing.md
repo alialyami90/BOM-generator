@@ -257,6 +257,7 @@ shows what a new record starts with. Labels are the user-facing words; model nam
 | Document no. | Text, mono | One per row |
 | Rev | Text, mono | e.g. 02 |
 | Issue date | Text, mono, ISO date | An assumed date shows **Assumed date** with a **Confirm** button |
+| Prepared, Checked, Approved | Text | Optional names; printed on the Revision History sheet only (ADR 0036, Q67) |
 | Name | Shown in the row; edited in the dialog | |
 | Used by | Read-only | Sheet or panel that picks the document |
 | Add / remove | **Add** per substation band; trash per row | Remove is disabled while *Used by* is set |
