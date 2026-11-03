@@ -1,6 +1,6 @@
 # 0037. Record lifecycle and sources
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-11-03)
 - Date: 2026-11-03
 - Spec sections: Inputs the tool needs → 1. Device library; Validation and warnings
 
