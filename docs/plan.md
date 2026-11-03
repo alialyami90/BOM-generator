@@ -1138,9 +1138,15 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
   fields on `DeviceType`, the successor reference check, `devices.csv` columns, the schema. **M67b**
   (merged, #335): a sized change needs its source, the save writes who, when and the note, a
   library that uses these fields needs this app, every shipped part sourced (psa-devices 1.16.0,
-  Q69), the assumed power and inrush check. **M67c** (in review): the device editor's state,
+  Q69), the assumed power and inrush check. **M67c** (merged, #337): the device editor's state,
   successor and Sources column, the Library state badge and *Assumed values* filter, the Parts chip.
-- **M68 — Review queue and health.** *W1.* Planned.
+- **M68 — Review queue and health.** *W1.* In review. `library_store/health.py` measures parts by
+  state, assumed figures, parts without an alternative, obsolete parts the projects on this PC pick,
+  MCB brand sets missing a rating of the default set, and housekeeping roles the default fills that a
+  brand leaves empty. Library gains *Review* (draft and reviewed parts with their missing sources:
+  *Mark reviewed*, *Release*, *Send back…* with a note kept on the part) and *Health* (a card per
+  measure). Every action is a pending edit; anyone using the app may release, as the app has no
+  owner role.
 - **M69 — Propose from project.** *W1.* Planned.
 
 ## 5. Testing strategy

@@ -607,3 +607,9 @@ body.is-dragging-dev { user-select: none; }
 .cat-table .cat-del { width: 40px; }
 .cat-table .select { width: 100%; font-family: var(--font-mono); font-size: 13px; }
 .cat .table-foot { gap: var(--space-3); }
+
+/* Library › Health (M68): one card per measure */
+.health-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--space-4); align-items: start; }
+.health-list { margin: var(--space-2) 0 0; padding-left: 18px; max-height: 320px; overflow-y: auto; }
+.health-list li { margin-bottom: var(--space-1); overflow-wrap: anywhere; }
+.health-list .cell-sub { display: block; font-size: 12px; color: var(--color-text-muted); line-height: 1.25; }

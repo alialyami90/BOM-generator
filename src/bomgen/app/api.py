@@ -48,7 +48,13 @@ from bomgen.app.output import OutputRefusedError, build_file, build_target, chec
 from bomgen.app.panel_page import PanelNotFoundError, panel_page, part_list
 from bomgen.app.parts import parts_page
 from bomgen.app.preview import preview_page
-from bomgen.app.projects import RecentProjects, free_id, project_files, summarize
+from bomgen.app.projects import (
+    RecentProjects,
+    free_id,
+    project_files,
+    project_only,
+    summarize,
+)
 from bomgen.app.substations import (
     ProjectInvalidError,
     SubstationNotFoundError,
@@ -77,6 +83,7 @@ from bomgen.io.loader import PROJECT_FILE, load_library
 from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.csv_export import GROUPS as CSV_GROUPS
 from bomgen.library_store.device_db import DeviceRecord, load_device_records
+from bomgen.library_store.health import parts_in_use
 from bomgen.library_store.manifest import Manifest
 from bomgen.library_store.preview import preview_library_import
 from bomgen.library_store.service import import_library
@@ -478,6 +485,20 @@ class Api:
     def make_default_brand(self, kind: str, brand: str) -> dict[str, Any]:
         """Make a brand the catalogue's default; the old default becomes a brand."""
         return self._catalogue_edit("default", kind, brand)
+
+    @endpoint
+    def library_health(self) -> dict[str, Any]:
+        """The Library's Review and Health tabs: parts by state, what to review, what is weak,
+        and where the projects on this PC use an obsolete part (M68)."""
+        files: dict[str, Path] = {}
+        for project_file in project_files(self._workspace(), self._recent()):
+            project = project_only(project_file)
+            if project is None:
+                continue
+            for path in project.substations:
+                file = project_file.parent / path
+                files[f"{project.project.name} · {file.parent.name}"] = file
+        return self._editor().health(parts_in_use(files))
 
     @endpoint
     def library_alternatives(self, part_id: str) -> dict[str, Any]:

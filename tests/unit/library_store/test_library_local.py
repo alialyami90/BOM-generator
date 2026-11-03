@@ -412,6 +412,19 @@ def test_the_save_stamps_who_when_and_the_note_on_the_parts_it_touched(
     assert (untouched.changed_by, untouched.changed_on, untouched.note) == (None, None, None)
 
 
+def test_a_note_given_on_the_part_is_kept_over_the_saves_note(store: LibraryStore) -> None:
+    library = _active(store)
+    part = library.devices[0].part_id
+
+    save_local_version(
+        store, "psa", _edited(library, state="draft", note="power not confirmed"), note="review"
+    )
+
+    sent_back = _active(store).get(part)
+    assert sent_back is not None
+    assert sent_back.note == "power not confirmed"
+
+
 def test_the_stamp_alone_is_not_a_change(store: LibraryStore) -> None:
     library = _active(store)
     save_local_version(store, "psa", _edited(library, make="Acme"))
