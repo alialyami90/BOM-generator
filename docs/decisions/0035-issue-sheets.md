@@ -53,10 +53,10 @@ workbook would move `tests/golden/test_workbook.py` (sheet list, formula count) 
    are not compared or highlighted; a changed quantity shows on the BOM sheet it comes from.
 6. **CSV.** After a build the app can export the Summary BOM as CSV (UTF-8 with BOM, the sheet's
    columns, quantities as values) for procurement systems.
-7. **Spec.** M63 adds the four rows to the Workbook map and extends OUT-3's sentence with "then
-   Summary BOM, Spare Parts, Cable Schedule and Revision History when each is written (ADR 0035)",
-   in its PR, with Ali's go-ahead. The spares percentage (Q65) and cable lengths (Q66) are asked
-   when M64 and M65 start.
+7. **Spec.** Each milestone adds its own sheet's row to the Workbook map and its name to OUT-3's
+   order, in its PR, with Ali's go-ahead: M63 adds "then Summary BOM when `output.include` names
+   it (ADR 0035)". The spares percentage (Q65) and cable lengths (Q66) are asked when M64 and M65
+   start.
 
 ## Consequences
 
