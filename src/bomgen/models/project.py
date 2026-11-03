@@ -42,6 +42,7 @@ class SheetNames(InputModel):
     heat_dissipation: ExcelSheetName = "Heat Dissipation"
     heat_calculations: ExcelSheetName = "Heat Calculations"
     summary_bom: ExcelSheetName = "Summary BOM"  # ADR 0035
+    revision_history: ExcelSheetName = "Revision History"  # ADR 0035, ADR 0036
 
 
 OptionalSheet = Literal["summary_bom"]  # ADR 0035: written only when included
@@ -191,6 +192,9 @@ class RegisterEntry(DocumentInfo):
     key: DocumentKey
     substation: PanelId
     title: str | None = None
+    prepared: str | None = None  # ADR 0036: printed on the Revision History sheet (Q67)
+    checked: str | None = None
+    approved: str | None = None
 
 
 class LayoutDefaults(InputModel):

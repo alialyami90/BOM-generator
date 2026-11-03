@@ -36,6 +36,7 @@ The workbook holds hidden master BOMs that drive the calculations, visible issue
 | Heat Dissipation | Visible | W and BTU/h per powered device per cabinet | Reads Power Consumption; feeds Heat Calculations |
 | Heat Calculations | Visible | Fan airflow check for the 3 PSA cabinets, natural-convection check for the WS console | Reads Heat Dissipation totals |
 | Summary BOM | Visible, when included (ADR 0035) | Every part totalled by ordering code across the cabinets and loose material, with where it is used | Reads the BOM sheets' quantity cells |
+| Revision History | Visible, when the substation has a recorded issue or names (ADR 0036) | One row per recorded issue, then the current revision, with prepared, checked and approved names | Fed by `issues:` and the register |
 
 All printable sheets use A4 and page-break preview. Panel BOMs print portrait; the three calculation sheets print landscape.
 
@@ -326,12 +327,12 @@ The tool shall write a single Excel workbook in which every printed sheet has a 
 | --- | --- |
 | OUT-1 | Output is one .xlsx file (Office Open XML, no macros) that opens in Excel 2016 or later without a repair prompt. |
 | OUT-2 | File name is configurable; default `<project doc no.>_PSA_BOM_Rev<rev>.xlsx`. |
-| OUT-3 | Sheet order: one BOM sheet per cabinet in panel order, then Loose Material when the substation has any, then Nameplates when any panel has a nameplate row (ADR 0026), then Power Consumption, Heat Dissipation, Heat Calculations, then Summary BOM when `output.include` names it (ADR 0035). Sheet names are configurable (`output.sheet_names`, including `loose_material`, `nameplates` and `summary_bom`). |
+| OUT-3 | Sheet order: one BOM sheet per cabinet in panel order, then Loose Material when the substation has any, then Nameplates when any panel has a nameplate row (ADR 0026), then Power Consumption, Heat Dissipation, Heat Calculations, then Summary BOM when `output.include` names it (ADR 0035), then Revision History when there is a recorded issue or a prepared, checked or approved name (ADR 0036). Sheet names are configurable (`output.sheet_names`, including `loose_material`, `nameplates`, `summary_bom` and `revision_history`). |
 | OUT-4 | Each BOM sheet carries the HWIO column hidden, so no separate master sheets are needed. |
 | OUT-5 | Calculated cells are live Excel formulas, not pasted values: SR.NO, Power Consumption references to BOM cells, J = F × I, block totals × 1.25, summary sums, Heat Dissipation references and heat formulas, Heat Calculations airflow and ΔT. The workbook is set to recalculate fully on open. |
 | OUT-6 | Formatting follows the Formatting section: fonts, fills, borders, column widths, row heights, merges, number formats. |
 | OUT-7 | Print setup per sheet: A4, orientation, scale or fit-to-page, margins, print area, repeating title rows 1:2 on BOM sheets, page-break preview view. |
-| OUT-8 | Cells changed since the previous revision can be highlighted yellow (#FFFF00) when a revision comparison is requested. The comparison includes the Loose Material sheet; a previous issue from before v0.2 is compared through the second table of the host panel's sheet, where v0.1 printed it. |
+| OUT-8 | Cells changed since the previous revision can be highlighted yellow (#FFFF00) when a revision comparison is requested. The comparison includes the Loose Material sheet; a previous issue from before v0.2 is compared through the second table of the host panel's sheet, where v0.1 printed it. Without a chosen file, the comparison uses the substation's last recorded issue when its file is unchanged (ADR 0036). |
 
 **Page header (every printed sheet, every page)**
 

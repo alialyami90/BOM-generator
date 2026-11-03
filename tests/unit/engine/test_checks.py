@@ -1,12 +1,14 @@
 """Step 15 check report (spec: Data model and generation order, step 15; plan M7, Q3)."""
 
 import json
+from datetime import date
 from typing import Any
 
 import pytest
 from engine_factories import device, library, panel, powered, switch
 
 from bomgen.checks import (
+    apply_acceptances,
     branch_mcb_checks,
     dc_float_checks,
     dc_main_checks,
@@ -22,6 +24,7 @@ from bomgen.checks import (
     render_text,
     sfp_slot_checks,
     untagged_device_checks,
+    unused_acceptances,
     ventilation_checks,
 )
 from bomgen.engine.units import expand_devices
@@ -46,7 +49,7 @@ from bomgen.models.library import (
 from bomgen.models.panel import Ventilation
 from bomgen.models.project import DesignConstants
 from bomgen.models.report import CheckItem, CheckReport, CheckStatus
-from bomgen.models.substation import Equipment
+from bomgen.models.substation import AcceptedWarning, Equipment
 
 SLOTTED = switch(
     "SW",
@@ -647,3 +650,51 @@ def test_check_report_warns_by_the_design_basis_vendor_list() -> None:
     assert "RST2228-L2" not in flagged
     plain = check_report(loaded, build(loaded)).items
     assert not [i for i in plain if i.check == "vendor_list"]
+
+
+# -- Accepted warnings (ADR 0036, plan M66) --
+
+
+def _warn(check: str = "dc_float", subject: str | None = "Acti9 2P") -> CheckItem:
+    return CheckItem(check=check, status=CheckStatus.WARN, subject=subject, message="m")
+
+
+def _accepted(check: str = "dc_float", subject: str | None = "Acti9 2P") -> AcceptedWarning:
+    return AcceptedWarning(
+        check=check, subject=subject, reason="Vendor letter VL-12", date=date(2026, 11, 3)
+    )
+
+
+def test_accepted_warning_shows_reason() -> None:
+    report = apply_acceptances(CheckReport(items=(_warn(),)), [_accepted()])
+    (item,) = report.items
+    assert item.status is CheckStatus.WARN
+    assert item.accepted == "Vendor letter VL-12"
+    assert report.open_warnings == 0
+
+
+def test_an_acceptance_matches_check_panel_and_subject() -> None:
+    report = apply_acceptances(
+        CheckReport(items=(_warn(subject="Other"), _warn(check="ventilation"))), [_accepted()]
+    )
+    assert [item.accepted for item in report.items] == [None, None]
+    assert report.open_warnings == 2
+
+
+def test_a_failure_is_never_accepted() -> None:
+    failed = CheckItem(check="dc_float", status=CheckStatus.FAIL, subject="Acti9 2P", message="m")
+    report = apply_acceptances(CheckReport(items=(failed,)), [_accepted()])
+    assert report.items[0].accepted is None
+    assert report.failed
+
+
+def test_unused_acceptances_are_listed() -> None:
+    unused = _accepted(subject="Gone")
+    report = apply_acceptances(CheckReport(items=(_warn(),)), [_accepted(), unused])
+    assert unused_acceptances(report, [_accepted(), unused]) == [unused]
+
+
+def test_text_report_marks_an_accepted_warning() -> None:
+    text = render_text(apply_acceptances(CheckReport(items=(_warn(),)), [_accepted()]))
+    assert "accepted: Vendor letter VL-12" in text
+    assert "0 failed, 0 open warnings (1 accepted), 0 passed" in text

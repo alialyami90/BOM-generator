@@ -2,7 +2,8 @@
 
 Sheet order: one BOM sheet per panel in panel order, the Loose Material sheet when the
 substation has loose material, then Power Consumption, Heat Dissipation and Heat
-Calculations, then the Summary BOM when included (ADR 0035).
+Calculations, then the Summary BOM when included (ADR 0035), then the Revision History when there is
+any (ADR 0036).
 """
 
 from pathlib import Path
@@ -16,6 +17,7 @@ from bomgen.sheets import heat_calc_sheet, heat_diss_sheet, styles
 from bomgen.sheets import power_sheet as power_module
 from bomgen.sheets.bom_sheet import BomSheet, bom_sheet, loose_sheet
 from bomgen.sheets.header_footer import bom_header_footer, calc_header_footer, fitting_size
+from bomgen.sheets.history_sheet import history_rows, history_sheet
 from bomgen.sheets.nameplate_sheet import nameplate_sheet
 from bomgen.sheets.power_sheet import BomSource
 from bomgen.sheets.summary_sheet import summary_sheet
@@ -131,6 +133,18 @@ def build_workbook(
                 cells,
                 tables,
                 bom_header_footer(project_name, loaded.substation.substation.name, document, logo),
+            )
+        )
+    history = history_rows(loaded)
+    if history:
+        document = loaded.documents[loaded.substation.document]
+        substation = loaded.substation.substation.name
+        sheets.append(
+            history_sheet(
+                names.revision_history,
+                substation,
+                history,
+                bom_header_footer(project_name, substation, document, logo),
             )
         )
     return WorkbookModel(sheets=tuple(sheets))
