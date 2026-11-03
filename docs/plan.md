@@ -1430,3 +1430,8 @@ the device tag rule.
 spec, or change the spec to 26.25?
 "Sheet 4" is read as the console panel (`kind: console`): the example's sheet 4 is the WS
 console, and the kind names the same cabinet in any project (A1, 2026-11-01).
+
+**Q67 — Where prepared, checked and approved names print** (M66; ADR 0036). Open. The register
+gains the three names per document. They print on the Revision History sheet (ADR 0035) for each
+recorded issue. To ask Ali: the history sheet only, with the footer as it is (recommended); also in
+every sheet's page header; or on a cover sheet.
