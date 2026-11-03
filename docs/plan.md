@@ -1084,7 +1084,7 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M56 — Housekeeping editor.** *W3; ADR 0032.* Planned.
 - **M57 — Terminals tab.** *W3; ADR 0033.* Planned.
 - **M58 — Grounding, spare breaker ratings, alarm on branch trip.** *W3; spec sentence.* Planned.
-- **M59 — BOM text per row on Parts.** *W4.* In review. Equipment gains `tag`, `tag_type` and `first_nn`;
+- **M59 — BOM text per row on Parts.** *W4.* Done (#326). Equipment gains `tag`, `tag_type` and `first_nn`;
   Parts has a *BOM text* section per row. The hand-written panel editor's tag fields are left to W3,
   which owns that screen.
 - **M60 — IED schedule.** *W4; ADR 0034.* Planned.

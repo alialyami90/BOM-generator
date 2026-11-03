@@ -50,6 +50,10 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
 
 ## 3. Questions for Ali (one card each, recommendation marked)
 
+0. **Q68 "Exactly n panels"** (M62, W4): asked on a card 2026-11-03; recommended "At most n only".
+   If Ali picks spreading or spare panels, add `layout.panel_count` on top of `max_panels`
+   (`engine/layout.py` `_Builder`).
+
 1. **What comes after v0.3.1?** Options "Test v0.3.1, send feedback" (recommended: part picking
    shipped and nobody has used it in the field yet) and "I'll describe the next work now".
 2. **ASSUMED seeds:** show the cabinet number pattern, the enclosure and the document number/date
