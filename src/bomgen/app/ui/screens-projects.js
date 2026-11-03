@@ -21,6 +21,7 @@
       substations: row.substations.map((s) => ({ id: s.id, name: s.name, folder: inside(s.file, row.folder), file: s.file, panels: s.panels == null ? '—' : s.panels, changed: day(s.changed), status: s.errors ? 'bad' : 'ok', statusText: s.errors ? `${s.errors} error${s.errors === 1 ? '' : 's'}` : row.status.level === 'bad' ? 'Not checked' : 'Ready', from: '' })),
       documents: (row.documents || []).map((d) => ({ key: d.key, sub: d.substation, label: d.title || d.key, docNo: d.doc_no, rev: d.rev, issue: d.issue_date || '', assumed: false, usedBy: '' })),
       defaults: row.defaults ? defaultsRows(row.defaults) : [], raw: row.defaults || null, brands: row.brands || {}, register: row.register || [], layoutAssumed: row.layout_assumed || {},
+      vendorLists: row.vendor_lists || [], makes: row.makes || [],
       problems: row.problems || [], backups: null, real: true
     };
   }
@@ -120,13 +121,14 @@
   /* ---------- Project page ---------- */
   SCREENS.project = () => {
     const p = curProject();
-    const tabList = [['info', 'Overview'], ['substations', 'Substations', `<span class="count">${p.substations.length}</span>`], ['documents', 'Documents'], ['share', 'Backup and share']];
+    const tabList = [['info', 'Overview'], ['substations', 'Substations', `<span class="count">${p.substations.length}</span>`], ['documents', 'Documents'], ['vendors', 'Vendor lists'], ['share', 'Backup and share']];
     const rb = App.route().b; if (tabList.some(([k]) => k === rb)) S.tab.project = rb;
     const t = S.tab.project;
     const actions = {
       substations: `<button class="btn btn--primary" data-action="new-substation">${icon('plus')}New substation…</button>`,
-      share: `<button class="btn btn--primary" data-action="export-project">${icon('upload')}Export project…</button>` }[t] || '';
-    const body = { info: projectInfo, substations: projectSubs, documents: projectDocs, share: projectShare }[t](p);
+      share: `<button class="btn btn--primary" data-action="export-project">${icon('upload')}Export project…</button>`,
+      vendors: `<button class="btn btn--primary" data-action="vl-edit">${icon('plus')}New vendor list…</button>` }[t] || '';
+    const body = { info: projectInfo, substations: projectSubs, documents: projectDocs, vendors: projectVendors, share: projectShare }[t](p);
     const problems = p.problems && p.problems.length ? `<div style="margin-bottom:var(--space-4)">${banner('bad', `<b>${p.problems.length} ${p.problems.length === 1 ? 'problem' : 'problems'} in the project files.</b> ${problemList(p.problems)}`)}</div>` : '';
     return `<div class="page">${pageHead(esc(p.name), `${p.client ? esc(p.client) + ' · ' : ''}<span class="mono one-line" title="${esc(p.path)}">${esc(p.path)}</span>`, actions, `<a href="#/home">Projects</a>${icon('chevr')}<span>${esc((tabList.find(([k]) => k === t) || [, ''])[1])}</span>`)}
       ${problems}${tabs('project', tabList, t, 'Project sections')}
@@ -258,6 +260,43 @@
       <tbody>${groups.map((g) => `<tr class="band"><td colspan="9"><div class="row"><b>${esc(g.s.name)}</b> <span class="muted">· ${count(g.rows.length, 'document')}</span><span class="sp" style="flex:1"></span><button class="btn btn--ghost btn--sm" data-action="rg-add" data-sub="${esc(g.s.id)}" ${RG.dirty() ? 'disabled title="Save or discard the changes first"' : ''}>${icon('plus')}Add</button></div></td></tr>
         ${g.rows.map((d) => rgRow(p, d)).join('')}`).join('')}</tbody></table>
       <div class="table-foot"><span>${count(p.register.length, 'document')} in ${count(groups.filter((g) => g.rows.length).length, 'substation')} · issue dates are written as YYYY-MM-DD</span></div></div>${RG.bar()}`;
+  };
+  /* ---------- Vendor lists (ADR 0031, plan M53b): a part off a list warns, never stops a build ---------- */
+  const VL_KINDS = [['mcb', 'MCBs, AC'], ['mcb_dc', 'MCBs, DC'], ['aux_contact', 'Aux contacts'], ['terminal_blocks', 'Terminal blocks'], ['busbars', 'Busbars'], ['housekeeping', 'Housekeeping']];
+  const words = (t) => t.split(/[\s,]+/).filter(Boolean);
+  const projectVendors = (p) => `<p class="lede muted" style="max-width:68ch;margin-bottom:var(--space-4)">The makes, brand sets and parts a client allows. A substation picks one on its Design basis tab; Parts marks a part off the list and Checks warns. Nothing stops a build.</p>
+    ${p.vendorLists.length ? `<div class="table-wrap"><table class="table"><caption class="sr-only">Vendor lists</caption><thead><tr><th>List</th><th>Makes</th><th style="width:110px">Brand sets</th><th style="width:150px">Parts allowed / banned</th><th>Used by</th><th style="width:150px"><span class="sr-only">Actions</span></th></tr></thead><tbody>
+    ${p.vendorLists.map((v, i) => `<tr><td><b>${esc(v.name)}</b> <span class="mono small muted">${esc(v.key)}</span></td><td class="wrap">${v.makes.length ? esc(v.makes.join(', ')) : '<span class="muted">Any</span>'}</td>
+      <td>${Object.keys(v.brands).length ? count(Object.keys(v.brands).length, 'catalogue') : '<span class="muted">Any</span>'}</td><td class="mono">${v.parts_allowed.length} / ${v.parts_banned.length}</td>
+      <td class="wrap">${v.used_by == null ? '<span class="muted">Not known</span>' : v.used_by.length ? esc(v.used_by.join(', ')) : '<span class="muted">No substation</span>'}</td>
+      <td style="text-align:right"><button class="btn btn--secondary btn--sm" data-action="vl-edit" data-i="${i}">Edit…</button> <button class="btn btn--ghost btn--sm" data-action="vl-remove" data-i="${i}" aria-label="Remove ${esc(v.name)}">${icon('trash')}</button></td></tr>`).join('')}</tbody></table></div>`
+    : '<div class="empty"><b>No vendor list yet.</b><span class="muted">Add the client\'s approved vendor list to check the parts against it.</span></div>'}`;
+  ACTIONS['vl-edit'] = (el) => {
+    const p = curProject(), i = el.dataset.i == null ? null : Number(el.dataset.i), v = i == null ? { key: '', name: '', makes: [], brands: {}, parts_allowed: [], parts_banned: [] } : p.vendorLists[i];
+    const kind = ([k, label]) => { const sets = p.brands[k] || [], on = v.brands[k]; return `<fieldset class="vl-kind"><legend>${esc(label)}</legend><label class="small"><input type="checkbox" data-vl-any="${k}" ${on ? '' : 'checked'}> Any brand set</label>
+      ${sets.map((b) => `<label class="small"><input type="checkbox" data-vl-kind="${k}" value="${esc(b.id)}" ${on && on.includes(b.id) ? 'checked' : ''}> ${esc(b.name)}</label>`).join('')}</fieldset>`; };
+    dialog({ title: i == null ? 'New vendor list' : `Edit ${v.name}`, body: `<div class="form form--2">
+      ${field('Name', input('vl-name', v.name, { placeholder: 'For example, Client AVL rev 3' }))}
+      ${field('Key', input('vl-key', v.key, { mono: true, placeholder: 'client-avl' }), 'What a design basis names. Lower case, digits and dashes.')}
+      <div class="span-2">${field('Allowed makes', input('vl-makes', v.makes.join(', '), { placeholder: 'Empty: any make' }), `Comma separated. The library has ${esc(p.makes.join(', '))}.`)}</div>
+      ${field('Parts allowed whatever their make', input('vl-allowed', v.parts_allowed.join(', '), { mono: true }))}
+      ${field('Parts banned', input('vl-banned', v.parts_banned.join(', '), { mono: true }), 'A banned part is off the list even if its make is allowed.')}
+      <div class="span-2"><h3 style="margin:var(--space-3) 0 var(--space-2)">Brand sets</h3><div class="vl-kinds">${VL_KINDS.map(kind).join('')}</div></div></div>
+      <div id="vl-err" class="err small" role="alert"></div>`,
+      actions: `<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="vl-save" data-i="${i == null ? '' : i}">Save</button>` });
+  };
+  ACTIONS['vl-save'] = (el) => {
+    const val = (id) => document.getElementById(id).value.trim(), brands = {};
+    VL_KINDS.forEach(([k]) => { if (!document.querySelector(`[data-vl-any="${k}"]`).checked) brands[k] = [...document.querySelectorAll(`[data-vl-kind="${k}"]:checked`)].map((c) => c.value); });
+    const entry = { key: val('vl-key'), name: val('vl-name'), makes: words(val('vl-makes')), parts_allowed: words(val('vl-allowed')), parts_banned: words(val('vl-banned')), brands };
+    const i = el.dataset.i === '' ? null : Number(el.dataset.i);
+    el.disabled = true;
+    Bridge.call('save_vendor_list', curProject().file, i, entry).then((page) => { closeDialog(); S.project = view(page); S.tab.project = 'vendors'; App.render(); toast(`Saved ${entry.name}`, 'check'); })
+      .catch((e) => { el.disabled = false; document.getElementById('vl-err').innerHTML = `${icon('error')}<span>${esc(e.message)}</span>`; });
+  };
+  ACTIONS['vl-remove'] = (el) => {
+    const i = Number(el.dataset.i), v = curProject().vendorLists[i];
+    Bridge.call('remove_vendor_list', curProject().file, i).then((page) => { S.project = view(page); S.tab.project = 'vendors'; App.render(); toast(`Removed ${v.name}`, 'trash'); }).catch(fail);
   };
   const reregister = (page) => { S.project = view(page); S.tab.project = 'documents'; App.render(); };
   ACTIONS['rg-confirm'] = (el) => Bridge.call('confirm_project_field', curProject().file, ['documents', Number(el.dataset.i), 'issue_date'])

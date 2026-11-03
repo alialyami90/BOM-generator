@@ -74,7 +74,8 @@ project uses [Semantic Versioning](https://semver.org/).
 - `project.yaml` can hold client vendor lists (allowed brand sets, makes and parts, banned parts),
   and a design basis names one. Parts lists its parts first and marks a part off the list; Checks
   warns about it, and about a draft or obsolete part with its successor. Nothing stops a build
-  (M53a, ADR 0031).
+  (M53a, ADR 0031). Project › *Vendor lists* adds and edits them: makes, brand sets per catalogue,
+  allowed and banned parts (M53b).
 - Checks compares the substation with its design basis: a DC part rated outside its DC voltage
   fails; an AC part at another voltage, a Purdue level out of scope, a GPS clock with no time
   sync, and EXT devices with no firewall warn. *Go to the field* opens the Design basis tab (M54).

@@ -298,5 +298,30 @@ def summarize(project_file: Path, store: LibraryStore, *, details: bool = False)
             "register": register(project_file, project, loaded) if project else [],
             "layout_assumed": layout_assumed(project_file) if project else {},
             "problems": issues,
+            "vendor_lists": _vendor_lists(project, loaded),
+            "makes": sorted({d.make for d in loaded.library.devices if d.make})
+            if loaded is not None
+            else [],
         }
     return summary
+
+
+def _vendor_lists(project: Project | None, loaded: LoadedProject | None) -> list[dict[str, Any]]:
+    """The project's vendor lists, each with the substations whose design basis names it
+    (``None`` while the project has errors; plan M53b)."""
+    if project is None:
+        return []
+    rows = []
+    for entry in project.vendor_lists:
+        used_by = (
+            [
+                s.substation.substation.id
+                for s in loaded.substations
+                if s.substation.design_basis is not None
+                and s.substation.design_basis.vendor_list == entry.key
+            ]
+            if loaded is not None
+            else None
+        )
+        rows.append(entry.model_dump(mode="json") | {"used_by": used_by})
+    return rows

@@ -1016,6 +1016,41 @@ class Api:
         return summarize(file, store, details=True)
 
     @endpoint
+    def save_vendor_list(
+        self, project_file: str, index: int | None, entry: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Add a vendor list (``index`` None) or replace list ``index``; refused with the
+        model's message. Returns the page (plan M53b)."""
+        file, store = Path(project_file), self._library_store()
+        with _edit_refusals():
+            if index is None:
+                result = insert_item(file, ("vendor_lists",), None, entry, store=store)
+            else:
+                result = set_field(file, ("vendor_lists", index), entry, store=store)
+        _written(result)
+        return summarize(file, store, details=True)
+
+    @endpoint
+    def remove_vendor_list(self, project_file: str, index: int) -> dict[str, Any]:
+        """Remove a vendor list no substation names; returns the page."""
+        file, store = Path(project_file), self._library_store()
+        rows = summarize(file, store, details=True)["vendor_lists"]
+        if not 0 <= index < len(rows):
+            raise AppError("edit_refused", f"There is no vendor list {index + 1}.")
+        if rows[index]["used_by"] is None:
+            raise AppError("edit_refused", "Fix the project's problems first.")
+        if rows[index]["used_by"]:
+            raise AppError(
+                "edit_refused",
+                f"{rows[index]['name']} is the vendor list of {', '.join(rows[index]['used_by'])}. "
+                "Pick another list on their Design basis tab first.",
+            )
+        with _edit_refusals():
+            result = remove_item(file, ("vendor_lists",), index, store=store)
+        _written(result)
+        return summarize(file, store, details=True)
+
+    @endpoint
     def set_project_logo(
         self, project_file: str, source: str | None = None
     ) -> dict[str, Any] | None:

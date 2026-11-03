@@ -1050,3 +1050,11 @@ def test_suggest_cables_dialog_cable_columns_and_preview_tab() -> None:
     preview = (UI_DIR / "screens-preview.js").read_text(encoding="utf-8")
     assert "cablesView(d.cables)" in preview
     assert ".dialog--wide" in (UI_DIR / "styles.css").read_text(encoding="utf-8")
+
+
+def test_project_has_a_vendor_lists_tab() -> None:
+    """Plan M53b: the tab, its dialog and the two endpoints."""
+    proj = (UI_DIR / "screens-projects.js").read_text(encoding="utf-8")
+    assert "['vendors', 'Vendor lists']" in proj
+    assert "Bridge.call('save_vendor_list', curProject().file, i, entry)" in proj
+    assert "Bridge.call('remove_vendor_list', curProject().file, i)" in proj
