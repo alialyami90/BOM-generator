@@ -413,3 +413,15 @@ def test_the_example_carries_the_printer_footnote() -> None:
     (footnote,) = gis01.substation.output.power_footnotes
     assert footnote.startswith("*Printer Power Consumption: 622 watts (Printing), ")
     assert footnote.endswith("0.69 watts (Auto-Off/Auto-On/Wake on\nLAN);")
+
+
+def test_successor_names_a_part_of_the_library(tmp_path: Path) -> None:
+    data = default_library()
+    data["devices"][0].update(state="obsolete", successor="SFP-1G-SM")
+    load_library(library_file_for(tmp_path, data))
+    data["devices"][0]["successor"] = "NOT-THERE"
+    with pytest.raises(InputError) as caught:
+        load_library(library_file_for(tmp_path, data))
+    assert [(i.location, i.message) for i in caught.value.issues] == [
+        ("devices[0].successor", "unknown part_id 'NOT-THERE' (not in library.yaml)")
+    ]

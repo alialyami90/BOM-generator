@@ -41,6 +41,11 @@ class LocalSave:
 def dump_library(library: Library) -> bytes:
     """The `library.yaml` bytes of a library; loading them again gives an equal library."""
     data = library.model_dump(mode="json", exclude_none=True)
+    for device in data["devices"]:  # ADR 0037 defaults, left out so older apps read the file
+        if device.get("state") == "released":
+            del device["state"]
+        if not device.get("sources"):
+            device.pop("sources", None)
     return yaml.safe_dump(data, sort_keys=False, allow_unicode=True).encode("utf-8")
 
 

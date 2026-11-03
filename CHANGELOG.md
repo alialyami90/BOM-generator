@@ -9,6 +9,12 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Library parts carry a lifecycle state (draft, reviewed, released, obsolete; released by
+  default), an obsolete part's successor, and a source for each sized figure: power, inrush,
+  height, maximum input voltage and ports, each from a datasheet, the contractor, a measurement or
+  assumed. `devices.csv` exports and imports them as `state`, `successor` and `source_<field>`
+  (`kind|ref|date`). Nothing in a BOM changes (M67a, ADR 0037).
+
 - The panel editor's main MCB shows the engine's rating with the rule it came from ("10 A: next
   standard size above 7.1 A, minimum 6 A"); click it to type your own, *Use automatic* to go back
   (M48). Part overrides on Parts use the same derived-value look, and leaving a value with Tab now

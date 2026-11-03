@@ -35,6 +35,7 @@ from bomgen.library_store.csv_export import (
     DEFAULT_DC_ID,
     HOUSEKEEPING_ROLES,
     LIST_SEPARATOR,
+    SOURCE_COLUMNS,
     TABLES,
     cell,
 )
@@ -481,6 +482,10 @@ def _devices(
         old = base_by_id.get(pid)
         data = _row_dict(table, cells, TABLES["devices.csv"], old)
         data["part_id"] = pid
+        if not _sources(table, cells, data, old, (pid, row), asm):
+            if skip and old is not None:
+                candidates.append(old)
+            continue
         rows_of: dict[str, list[int]] = {}
         for fld, file in CHILD_TABLES.items():
             if file in tables:
@@ -500,6 +505,45 @@ def _devices(
     asm.devices = candidates
 
 
+SOURCE_FORMAT = "Write the source as kind|ref|date, for example datasheet|p. 12|."
+
+
+def _sources(
+    table: _Table,
+    cells: Mapping[str, str],
+    data: dict[str, Any],
+    old: Mapping[str, Any] | None,
+    at: tuple[str, int],
+    asm: _Assembly,
+) -> bool:
+    """Move the `source_*` cells into `data["sources"]` (ADR 0037); a column the file lacks
+    keeps the installed source. False, with a problem, when a cell is not `kind|ref|date`."""
+    pid, row = at
+    kept = dict((old or {}).get("sources") or {})
+    ok = True
+    for name, column in SOURCE_COLUMNS.items():
+        data.pop(column, None)
+        if column not in table.columns:
+            continue
+        kept.pop(name, None)
+        text = cells.get(column, "").strip()
+        if not text:
+            continue
+        parts = text.split(LIST_SEPARATOR)
+        if len(parts) < 2:
+            asm.problem("devices.csv", row, column, SOURCE_FORMAT, pid)
+            ok = False
+            continue
+        date = parts.pop() if len(parts) > 2 else ""
+        source: dict[str, Any] = {"kind": parts[0], "ref": LIST_SEPARATOR.join(parts[1:])}
+        if date.strip():
+            source["date"] = date.strip()
+        kept[name] = source
+    if kept:
+        data["sources"] = kept
+    return ok
+
+
 def _device_problems(
     error: ValidationError, pid: str, row: int, rows_of: Mapping[str, list[int]], asm: _Assembly
 ) -> None:
@@ -514,6 +558,8 @@ def _device_problems(
             if column == "part_id":
                 column = _REFERENCE_COLUMN.get(fld, "part_id")
             asm.problem(CHILD_TABLES[fld], child_row, column, message, pid)
+        elif loc and loc[0] == "sources" and len(loc) > 1:
+            asm.problem("devices.csv", row, SOURCE_COLUMNS.get(str(loc[1])), message, pid)
         else:
             column = str(loc[0]) if loc else None
             asm.problem("devices.csv", row, column, message, pid)
