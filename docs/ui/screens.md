@@ -118,7 +118,8 @@ line. "Apply to form" is available only when the YAML is valid.
 - **States:** unsaved; invalid field; library older than active.
 
 ### Substation settings
-Only what belongs to this substation: *General* (name, which is also the BOM title line, and a
+Only what belongs to this substation: *Design basis* (voltages, time sync, Purdue scope, tag side
+letters and first numbers, notes: defaults only, ADR 0031), *General* (name, which is also the BOM title line, and a
 read-only "From the project" block with a link to the project page), *Documents*
 (which register entry each calculation sheet prints; cabinet BOMs choose theirs on
 each panel), *Output* (main document, file-name pattern with the resulting name,
@@ -169,6 +170,9 @@ with the save bar; everything on it is saved together.
   The Result card recalculates after each change, as before. Rows with no part number get a warning on
   Checks ("printed with the library model"). A part whose power or inrush is assumed gets an *Assumed
   power* or *Assumed inrush* warning badge under its strip, its title naming what the figure rests on.
+  A row with saved overrides has *Propose for the library…* (M69): a dialog picks the overridden value,
+  where it comes from (Measured or Datasheet), a reference (required) and *Keep the part released*; it
+  adds a pending library change that Library › Review lists with the project's name.
 - **Sized switches:** the L1 and L2 rows show "Sized" for quantity. With no part picked, the sizing picks
   one and the row says so ("The sizing picks the switch"); the strip then reads "Pick the switch to
   change its data." and offers no overrides.

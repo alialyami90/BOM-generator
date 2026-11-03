@@ -31,6 +31,7 @@ from bomgen.library_store.records import apply_record_edits, check_record_field
 from bomgen.library_store.store import LibraryStore
 from bomgen.library_store.versions import Version
 from bomgen.models.library import (
+    SOURCED_FIELDS,
     Category,
     Library,
     LoadType,
@@ -410,6 +411,35 @@ class LibraryEditor:
             "mcb_gaps": [{"brand": b, "missing": m} for b, m in found.mcb_gaps],
             "housekeeping_gaps": [{"brand": b, "roles": r} for b, r in found.housekeeping_gaps],
         }
+
+    def propose(
+        self,
+        part_id: str,
+        field: str,
+        value: object,
+        source: Mapping[str, str],
+        origin: str,
+        *,
+        keep_released: bool = False,
+    ) -> dict[str, Any]:
+        """A project's override of ``field`` as a pending edit of the part, with its source
+        and a note naming ``origin`` (M69). The part goes back to draft for review unless it
+        is released and the owner keeps it so."""
+        library = self._edited(self._ready())
+        device = library.get(part_id)
+        if device is None:
+            raise KeyError(part_id)
+        path = ["devices", part_id]
+        edits: list[dict[str, Any]] = [{"op": "set", "path": [*path, field], "value": value}]
+        if field in SOURCED_FIELDS:
+            sources = device.model_dump(mode="json")["sources"]
+            sources[field] = dict(source)
+            edits.append({"op": "set", "path": [*path, "sources"], "value": sources})
+        if not (keep_released and device.state == "released"):
+            edits.append({"op": "set", "path": [*path, "state"], "value": "draft"})
+        note = f"From project {origin}: {field} {value} ({source['kind']}: {source['ref']})"
+        edits.append({"op": "set", "path": [*path, "note"], "value": note})
+        return self.add(edits)
 
     def catalogues(self) -> dict[str, Any]:
         """The Catalogues tab: every brand set as rows, with the pending edits applied."""

@@ -20,7 +20,7 @@ from bomgen.engine.layout import LayoutIssue, with_layout
 from bomgen.io.edit import substation_file
 from bomgen.io.errors import InputError, Issue
 from bomgen.io.fields import check_yaml
-from bomgen.io.loader import LoadedSubstation, load_library
+from bomgen.io.loader import LoadedSubstation, load_library, with_design_basis
 from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.errors import LibraryPackageError
 from bomgen.library_store.store import LibraryStore
@@ -33,7 +33,7 @@ from bomgen.models.project import (
     Spares,
     merge_defaults,
 )
-from bomgen.models.substation import Substation
+from bomgen.models.substation import Substation, Tagging
 
 CALCULATION_SHEETS = ("power_consumption", "heat_dissipation", "heat_calculations")
 
@@ -161,7 +161,9 @@ def _page(
     }
     if substation is None:
         return page
-    defaults_c = project.defaults.constants if project else DesignConstants()
+    defaults_c = with_design_basis(
+        project.defaults.constants if project else DesignConstants(), substation
+    )
     defaults_s = project.defaults.spares if project else Spares()
     constants = loaded.constants if loaded else _effective(defaults_c, substation.constants)
     spares = loaded.spares if loaded else _effective(defaults_s, substation.spares)
@@ -185,6 +187,7 @@ def _page(
         },
         "constants": _rows(constants, defaults_c, substation.constants),
         "spares": _rows(spares, defaults_s, substation.spares),
+        "design_basis": _design_basis(substation),
         "loose_material": substation.loose_material,
         "equipment": [
             {**e.model_dump(mode="json"), "device": _device(library, e.part_id)}
@@ -205,6 +208,21 @@ def _page(
         "brands": brands(library) if library is not None else {},
     }
     return page
+
+
+def _design_basis(substation: Substation) -> dict[str, Any]:
+    """What the substation writes in its design basis, the tagging in force, and which
+    constants it feeds or the substation's own values override (ADR 0031)."""
+    basis = substation.design_basis
+    written = basis.model_dump(mode="json", exclude_unset=True) if basis else {}
+    own = substation.constants.model_fields_set if substation.constants else set()
+    feeds = {
+        key: "substation" if key in own else "design_basis"
+        for key in ("dc_voltage_v", "ac_voltage_v")
+        if basis is not None and getattr(basis, key) is not None
+    }
+    tagging = basis.tagging if basis else Tagging()
+    return {"written": written, "tagging": tagging.model_dump(mode="json"), "feeds": feeds}
 
 
 class Resolved(NamedTuple):

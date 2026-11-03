@@ -127,7 +127,7 @@
         resetLabel: `Reset ${label.toLowerCase()} to the library's ${esc(FMT[f](lib))}`, resetTitle: 'Reset to the library value', ...(PF.errors[key] ? { shown: v } : {}) });
     }).join('');
     const errs = fields.map(([f]) => err(`o.${r.index}.${f}`)).join('');
-    return `<div class="prow-strip">${vals}${assumedChips(r)}${overridden ? `<button class="btn btn--ghost btn--sm" data-action="pp-reset-all" data-i="${r.index}">Reset all</button>` : ''}</div>${errs ? `<div class="prow-err">${errs}</div>` : ''}`;
+    return `<div class="prow-strip">${vals}${assumedChips(r)}${overridden ? `<button class="btn btn--ghost btn--sm" data-action="pp-reset-all" data-i="${r.index}">Reset all</button>` : ''}${proposeButton(r)}</div>${errs ? `<div class="prow-err">${errs}</div>` : ''}`;
   }
 
   /* ---------- one device row ---------- */
@@ -410,6 +410,33 @@
   };
   ACTIONS['pp-expand'] = (el) => { const i = +el.dataset.i; keep(() => UI.expanded.add(i)); const b = document.querySelector(`[data-action="pp-edit"][data-key^="o.${i}."]`); if (b) b.focus(); };
   ACTIONS['pp-reset'] = (el) => keep(() => resetTo(el.dataset.key));
+  /* M69: a saved override that corrects the library goes there as a pending edit, with where it comes from. */
+  const savedOverrides = (r) => Object.keys(r.overrides || {});
+  const $ = App.$, plain = (html) => html.replace(' data-dirty="1"', '');  // the dialog's controls are not the page's
+  function proposeButton(r) {
+    if (!savedOverrides(r).length) return '';
+    const dirty = Object.keys(PF.draft).some((k) => k.startsWith(`o.${r.index}.`));
+    return `<button class="btn btn--ghost btn--sm" data-action="pp-propose" data-i="${r.index}" ${dirty ? 'disabled title="Save the overrides first"' : ''}>Propose for the library…</button>`;
+  }
+  ACTIONS['pp-propose'] = (el) => {
+    const r = rowAt(+el.dataset.i), fields = savedOverrides(r).map((f) => [f, `${VALUES.find((v) => v[0] === f)[1]}: ${FMT[f](String(r.overrides[f]))}`]);
+    App.dialog({ title: `Propose ${esc(r.part_id)}'s value for the library`, body: `<div class="form">
+        ${field('Value', plain(select('pp-prop-field', fields, fields[0][0])), `Every project on the library uses ${esc(r.part_id)}; once the library change is applied, they all get this value.`)}
+        ${field('Where it comes from', plain(select('pp-prop-kind', [['measured', 'Measured'], ['datasheet', 'Datasheet']], 'measured')), '')}
+        ${field('Reference', plain(input('pp-prop-ref', '', { placeholder: 'for example bench test 2026-11-03, or datasheet p. 4' })), 'Kept with the value, so a reviewer can check it.')}
+        <label class="check"><input type="checkbox" id="pp-prop-keep"> Keep the part released</label><p class="muted small">Otherwise it goes back to draft and waits in Library › Review.</p>
+        <p class="err small" id="pp-prop-err" hidden></p></div>`,
+    actions: `<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="pp-propose-do" data-i="${r.index}">Add to pending changes</button>` });
+  };
+  ACTIONS['pp-propose-do'] = (el) => {
+    const ref = $('#pp-prop-ref').value.trim(), bad = $('#pp-prop-err');
+    const say = (text) => { bad.textContent = text; bad.hidden = false; };
+    if (!ref) { say('Give a reference: the test, the datasheet page, or the document.'); $('#pp-prop-ref').setAttribute('aria-invalid', 'true'); $('#pp-prop-ref').focus(); return; }
+    const r = rowAt(+el.dataset.i);
+    Bridge.call('propose_library_edit', S.project.file, S.sub, r.index, $('#pp-prop-field').value, $('#pp-prop-kind').value, ref, $('#pp-prop-keep').checked)
+      .then((pending) => { App.closeDialog(); if (App.setPending) App.setPending(pending); if (App.healthStale) App.healthStale(); toast(`Proposed for ${r.part_id}, pending in the library`, 'check'); })
+      .catch((e) => say(e.message.replace(/^The library cannot take this change: /, '')));
+  };
   ACTIONS['pp-reset-all'] = (el) => keep(() => VALUES.forEach(([f]) => { const key = `o.${el.dataset.i}.${f}`, r = rowAt(Number(el.dataset.i)); if (r.library && shown(key) !== libValue(r, f)) resetTo(key); }));
   ACTIONS['pp-menu'] = (el) => keep(() => { UI.menu = UI.menu === +el.dataset.i ? -1 : +el.dataset.i; UI.addOpen = false; });
   ACTIONS['pp-move'] = (el) => {

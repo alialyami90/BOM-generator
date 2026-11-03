@@ -195,3 +195,28 @@ def test_an_equipment_part_missing_from_the_library_is_marked_unknown(
     assert rows["fopp"]["device"] == {"known": False}
     assert rows["l2"]["device"]["known"] is True
     assert page["problems"]
+
+
+def test_design_basis_page_reports_sources(app: api.Api, project: Path) -> None:
+    substation = project.parent / SUBSTATION
+    page = ok(app.open_substation(str(project), "gis01"))
+    assert page["design_basis"]["written"] == {}
+    assert page["design_basis"]["tagging"]["first_numbers"] == {"L2": 1, "L1": 11, "L3": 1}
+    assert page["design_basis"]["feeds"] == {}
+
+    edit(
+        substation,
+        "\nequipment:",
+        "\ndesign_basis: { dc_voltage_v: 110, ac_voltage_v: 220 }\n"
+        "constants: { ac_voltage_v: 240 }\n\nequipment:",
+    )
+    page = ok(app.open_substation(str(project), "gis01"))
+    assert page["design_basis"]["written"] == {"dc_voltage_v": 110, "ac_voltage_v": 220}
+    # the design basis feeds DC; the substation's own AC value wins over it
+    assert page["design_basis"]["feeds"] == {
+        "dc_voltage_v": "design_basis",
+        "ac_voltage_v": "substation",
+    }
+    constants = {c["key"]: c for c in page["constants"]}
+    assert (constants["dc_voltage_v"]["value"], constants["dc_voltage_v"]["default"]) == (110, 110)
+    assert constants["ac_voltage_v"]["default"] == 220  # Reset goes back to the design basis

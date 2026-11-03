@@ -372,6 +372,7 @@
     if (!t) return [null, null];
     if (kind === 'text' || kind === 'choice') return [t, null];
     if (kind === 'bool') return [t === 'true', null];
+    if (kind === 'list') return [t.split(/[\s,]+/).filter(Boolean), null];  // e.g. L1,L2 or A,B
     if (kind === 'int') return /^\d+$/.test(t) ? [Number(t), null] : [null, 'Enter a whole number, for example 2.'];
     if (kind === 'num') return /^-?\d+(\.\d+)?$/.test(t) ? [Number(t), null] : [null, 'Enter a number, for example 1.3.'];
     return /^\d+(\.\d+)?$/.test(t) ? [Math.round(Number(t) * 10) / 1000, null] : [null, 'Enter a percentage, for example 20.'];

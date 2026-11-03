@@ -62,7 +62,10 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
    table in Excel's Print Preview?" Options "It fits" (recommended: the size is computed to fit at the
    print scale) and "It overlaps". See section 14 for what each answer means.
 4. **Q23** (issued sheets vs masters): keep the default (the masters) until he answers.
-5. **Q51** (annunciator mounted in a panel), **Q54** (power of the -2 SEL computers) and **Q55**
+5. **Q69** (W1, card sent 2026-11-03): seven original parts carry the example workbook's power, which
+   their datasheet does not state. They ship as `assumed` (recommended). If Ali picks another answer,
+   change the `WORKBOOK` source kind in `data/library/build.py`, rebuild, and record it in plan §6 Q69.
+6. **Q51** (annunciator mounted in a panel), **Q54** (power of the -2 SEL computers) and **Q55**
    (categories for the contractor's other part types) are open in plan §6.
 
 **Next work:** M19–M26 shipped in v0.3.0, and v0.3.1 fixed the blank-substation crash (STATE.md §1). Engine model changes (step 4) come from A4's plan.

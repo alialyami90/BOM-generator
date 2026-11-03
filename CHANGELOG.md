@@ -25,6 +25,9 @@ project uses [Semantic Versioning](https://semver.org/).
   a note) and a Health tab: parts by state, assumed figures, parts with no alternative, obsolete
   parts that projects on this PC still use, and brand sets missing an MCB rating or a housekeeping
   role (M68).
+- Parts can propose a saved override to the library: the value goes into the library's pending
+  changes with its source and a note naming the project, and the part waits in Library › Review
+  (M69).
 
 - The panel editor's main MCB shows the engine's rating with the rule it came from ("10 A: next
   standard size above 7.1 A, minimum 6 A"); click it to type your own, *Use automatic* to go back
@@ -48,6 +51,9 @@ project uses [Semantic Versioning](https://semver.org/).
 - A substation can state its design basis in `design_basis`: DC and AC voltage feed the design
   constants unless the substation sets its own, and `tagging` sets the side letters and first
   numbers that device tags use. Unset, everything builds as before (M52a, ADR 0031).
+- Settings has a *Design basis* tab first: DC and AC voltage, time sync, Purdue scope, tag side
+  letters and first numbers, and notes. Design constants say *From the design basis* on a voltage
+  it sets (M52b).
 - The panel editor's Options tab shows the AC and DC spare breaker ratings with the rule behind
   them; click one to set your own. Grounding busbars are checkboxes from the library's catalogue.
   *Alarm on branch MCB trip* can be switched per Parts row and per hand-written panel row, over the

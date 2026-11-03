@@ -44,13 +44,13 @@
     air_constant_m3k_per_wh: ['Air constant', 'm³·K/Wh'], steel_coefficient_w_per_m2c: ['Sheet-steel heat transfer', 'W/m²·°C'], min_main_mcb_a: ['Minimum main MCB', 'A'],
     min_branch_mcb_a: ['Smallest branch MCB', 'A'], inrush_min_ms: ['Shortest inrush that sizes an MCB', 'ms'], dc_float_v: ['Battery float voltage', 'V']
   };
-  const tabsSettings = [['general', 'General'], ['documents', 'Documents'], ['output', 'Output'], ['constants', 'Design constants'], ['yaml', 'YAML']];
+  const tabsSettings = [['basis', 'Design basis'], ['general', 'General'], ['documents', 'Documents'], ['output', 'Output'], ['constants', 'Design constants'], ['yaml', 'YAML']];
   SCREENS.settings = () => {
     if (!real()) return `<div class="page">${pageHead('Settings')}<div class="empty"><b>Open a substation first.</b></div></div>`;
     const p = page(); if (!p) return waiting('Settings');
     const rb = App.route().b; if (tabsSettings.some(([k]) => k === rb)) S.tab.settings = rb;
     const t = p.calculations || S.tab.settings === 'yaml' ? S.tab.settings : 'yaml';
-    const body = { general, documents, output, constants, yaml }[t](p);
+    const body = { basis, general, documents, output, constants, yaml }[t](p);
     return `<div class="page">${pageHead('Settings', `Settings of ${esc(p.name)} only. Project-wide values are on the project page.`)}
       ${problems(p)}${tabs('settings', tabsSettings.map(([k, l]) => [k, l, tabMark(k)]), t, 'Substation settings')}
       <div role="tabpanel" aria-labelledby="tab-settings-${t}">${body}</div>${ST.bar()}</div>`;
@@ -67,6 +67,7 @@
     if (kind === 'calc') return [['calculations', rest, 'document'], 'choice'];
     if (kind === 'sheet') return [['output', 'sheet_names', rest], 'text'];
     if (kind === 'c') return [['constants', rest], PCT.has(rest) ? 'pct' : rest.endsWith('_a') ? 'int' : 'num'];
+    if (kind === 'db') return DB[rest] || null;
     return null;
   }
   function stSaved(key) {
@@ -79,6 +80,7 @@
     if (kind === 'calc') return (p.calculations.find((c) => c.key === rest) || {}).document || '';
     if (kind === 'sheet') return p.output.sheet_names[rest];
     if (kind === 'c') { const c = p.constants.find((x) => x.key === rest); return c ? (PCT.has(rest) ? Math.round(c.value * 1000) / 10 : c.value) : ''; }
+    if (kind === 'db') return dbSaved(p, rest);
     return '';
   }
   const ST = App.draftForm({
@@ -102,6 +104,39 @@
     const opts = [['', same], ...(p.brands[kind] || []).map((b) => [b.id, b.name])];
     return edit('brand_' + kind, esc(label), choice('brand_' + kind, opts));
   }
+  /* ---------- Design basis (ADR 0031, plan M52b): defaults only; a value set elsewhere wins ---------- */
+  const LEVELS = ['L2', 'L1', 'L3'];
+  const DB = {
+    dc_voltage_v: [['design_basis', 'dc_voltage_v'], 'num'], ac_voltage_v: [['design_basis', 'ac_voltage_v'], 'num'],
+    purdue_scope: [['design_basis', 'purdue_scope'], 'list'], time_sync: [['design_basis', 'time_sync'], 'choice'],
+    side_letters: [['design_basis', 'tagging', 'side_letters'], 'list'], notes: [['design_basis', 'notes'], 'text'],
+    ...Object.fromEntries(LEVELS.map((l) => [`first_${l}`, [['design_basis', 'tagging', 'first_numbers', l], 'int']]))
+  };
+  const SCOPE_ORDER = ['L1', 'L2', 'EXT'];
+  function dbSaved(p, rest) {
+    const w = p.design_basis.written, t = w.tagging || {};
+    if (rest === 'purdue_scope') return w.purdue_scope ? SCOPE_ORDER.filter((l) => w.purdue_scope.includes(l)).join(',') : '';
+    if (rest === 'side_letters') return t.side_letters ? t.side_letters.join(',') : '';
+    if (rest.startsWith('first_')) return (t.first_numbers || {})[rest.slice(6)] ?? '';
+    return w[rest] ?? '';
+  }
+  const SCOPES = [['', 'Not stated'], ['L1,L2', 'L1 and L2'], ['L1,L2,EXT', 'L1, L2 and EXT'], ['L2', 'L2 only'], ['L2,EXT', 'L2 and EXT']];
+  const SYNC = [['', 'Not stated'], ['gps_clock', 'GPS clock'], ['ptp_from_clock', 'PTP from the clock'], ['none', 'None']];
+  const feedLine = (p, key) => { const f = p.design_basis.feeds[key]; return f === 'substation' ? 'This substation sets its own value under Design constants, which wins.' : 'Design constants use it unless this substation sets its own.'; };
+  const basis = (p) => { const tg = p.design_basis.tagging; return `<p class="lede muted" style="max-width:68ch;margin-bottom:var(--space-4)">What the client asked for. It only sets defaults: a value this substation sets itself wins, and Checks compares the substation with it. Empty a field to leave it unstated.</p>
+    <div class="form form--2">
+    ${edit('db_dc_voltage_v', 'DC supply voltage, V', text('db_dc_voltage_v', { num: true, mono: true, placeholder: 'Not stated' }), feedLine(p, 'dc_voltage_v'))}
+    ${edit('db_ac_voltage_v', 'AC supply voltage, V', text('db_ac_voltage_v', { num: true, mono: true, placeholder: 'Not stated' }), feedLine(p, 'ac_voltage_v'))}
+    ${field('LAN redundancy', ro(input('db-redundancy', 'Duplicated LAN, A and B')), 'PRP and HSR are not supported yet.')}
+    ${edit('db_time_sync', 'Time synchronisation', choice('db_time_sync', SYNC))}
+    ${edit('db_purdue_scope', 'Purdue scope', choice('db_purdue_scope', SCOPES), 'The levels the client asked for. It changes no quantity.')}
+    <div class="span-2 section" style="margin:0"><h3>Device tags</h3><p class="lede">Side letters and the first number of each level. Empty uses the standard values.</p>
+      <div class="form form--2" style="margin-top:var(--space-3)">
+      ${edit('db_side_letters', 'Side letters', text('db_side_letters', { mono: true, placeholder: tg.side_letters.join(',') }), 'LAN A, then LAN B, for example A,B.')}
+      ${LEVELS.map((l) => edit(`db_first_${l}`, `First number, ${l}`, text(`db_first_${l}`, { num: true, mono: true, placeholder: String(tg.first_numbers[l]) }))).join('')}
+      </div></div>
+    <div class="span-2">${edit('db_notes', 'Notes', text('db_notes', { placeholder: 'For example, the client specification and its revision' }))}</div>
+    </div>`; };
   const general = (p) => `<div class="form form--2">
     ${edit('name', 'Substation name', text('name'), 'Shown in the app and in each sheet header.')}
     ${field('Substation id', ro(input('s-id', p.id, { mono: true })), 'Names the substation in the register and in tags. Not printed.')}
@@ -133,10 +168,10 @@
     <div class="table-wrap" style="max-width:860px"><table class="table"><thead><tr><th>Constant</th><th class="num" style="width:130px">Value</th><th>Unit</th><th style="width:230px">Default</th></tr></thead>
     <tbody>${p.constants.map((c) => { const [label, unit] = CONSTANTS[c.key] || [c.key, ''], key = 'c_' + c.key, pc = PCT.has(c.key), d = pc ? Math.round(c.default * 1000) / 10 : c.default; const reset = key in ST.draft && ST.draft[key] === '';
       return `<tr><td>${esc(label)}<span class="cell-sub mono">${esc(c.key)}</span>${ST.errors[key] ? `<span class="err small">${icon('error')}<span>${ST.err(key)}</span></span>` : ''}</td><td${App.changedCell(key in ST.draft)[0]}>${App.changedCell(key in ST.draft)[1]}<label class="sr-only" for="st-${key}">${esc(label)}</label>${text(key, { num: true, mono: true, placeholder: String(d) })}</td><td class="muted">${esc(pc ? '%' : unit)}</td>
-        <td>${reset ? '<span class="muted small">Reset on save</span>' : c.changed ? `${badge('info', `Changed from ${d}`)} <button class="btn btn--ghost btn--sm" data-action="st-reset" data-key="${key}">Reset</button>` : '<span class="muted small">Default</span>'}</td></tr>`; }).join('')}</tbody></table>
+        <td>${reset ? '<span class="muted small">Reset on save</span>' : c.changed ? `${badge('info', `Changed from ${d}`)} <button class="btn btn--ghost btn--sm" data-action="st-reset" data-key="${key}">Reset</button>` : `<span class="muted small">${p.design_basis.feeds[c.key] === 'design_basis' ? 'From the design basis' : 'Default'}</span>`}</td></tr>`; }).join('')}</tbody></table>
     <div class="table-foot"><span>${plural(changedRows.length, 'constant')} changed for this substation</span><span>${changedRows.length ? '<button class="btn btn--ghost btn--sm" data-action="st-reset-all">Reset all to defaults</button>' : ''}</span></div></div>`; };
   /* A tab with unsaved or refused values says so, since the save bar counts every tab. */
-  const TAB_OF = (key) => (key === 'name' || key.startsWith('brand_') ? 'general' : key.startsWith('calc_') ? 'documents' : key.startsWith('c_') ? 'constants' : 'output');
+  const TAB_OF = (key) => (key.startsWith('db_') ? 'basis' : key === 'name' || key.startsWith('brand_') ? 'general' : key.startsWith('calc_') ? 'documents' : key.startsWith('c_') ? 'constants' : 'output');
   function tabMark(tab) {
     const bad = Object.keys(ST.errors).filter((k) => TAB_OF(k) === tab).length, changed = Object.keys(ST.draft).filter((k) => TAB_OF(k) === tab).length;
     if (bad) return ` <span class="dot dot--bad" aria-hidden="true"></span><span class="sr-only">(${bad} to fix)</span>`;
@@ -149,7 +184,7 @@
   /* Every Settings field, by its form key and its path in substation.yaml. */
   function formKeys(p) {
     return ['name', 'document', 'file_name', ...KINDS.map(([k]) => 'brand_' + k), ...p.calculations.map((c) => 'calc_' + c.key),
-      ...Object.keys(SHEET_LABELS).map((k) => 'sheet_' + k), ...p.constants.map((c) => 'c_' + c.key)];
+      ...Object.keys(SHEET_LABELS).map((k) => 'sheet_' + k), ...p.constants.map((c) => 'c_' + c.key), ...Object.keys(DB).map((k) => 'db_' + k)];
   }
   function yamlErrors(p) {  // line -> message, from the edited text's check or else the saved file's problems
     const errs = {}, list = YT.text == null ? p.problems.filter((x) => x.file === p.file) : (YT.check ? YT.check.problems : []);
