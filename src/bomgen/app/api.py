@@ -679,7 +679,13 @@ class Api:
             reply["substation"] = self._new_substation(made.project_file, substation, None)
         return reply
 
-    def _new_substation(self, project_file: Path, name: str, copy_from: str | None) -> str:
+    def _new_substation(
+        self,
+        project_file: Path,
+        name: str,
+        copy_from: str | None,
+        setup: Mapping[str, Any] | None = None,
+    ) -> str:
         if not name.strip():
             raise AppError("invalid_edit", "A substation needs a name.")
         substation_id = free_id(name, project_file.parent / lifecycle.SUBSTATIONS)
@@ -689,17 +695,41 @@ class Api:
                 substation_id,
                 name.strip(),
                 copy_from=copy_from,
+                setup=_dated([], setup or {}),
                 store=self._library_store(),
             )
         _written(result)
         return substation_id
 
     @endpoint
+    def new_substation_form(self, project_file: str, name: str = "") -> dict[str, Any]:
+        """The New substation dialog's setup step (plan M51): the seeds a blank substation
+        gets, and the defaults it shows, the last listed substation's when there is one."""
+        file = Path(project_file)
+        substation_id = free_id(name or "substation", file.parent / lifecycle.SUBSTATIONS)
+        seeds = lifecycle.new_substation_seeds(substation_id, today=date.today())
+        previous = _previous_generated_panels(file)
+        defaults = dict(seeds)
+        if previous is not None:
+            old_id, panels = previous
+            for key in ("cabinet_name", "tag_prefix"):
+                defaults[key] = panels.get(key) or seeds[key]
+            number = str(panels.get("cabinet_number") or seeds["cabinet_number"])
+            defaults["cabinet_number"] = number.replace(old_id.upper(), substation_id.upper())
+            defaults["enclosure"] = seeds["enclosure"] | dict(panels.get("enclosure") or {})
+        return {"seeds": seeds, "defaults": defaults, "previous": previous and previous[0]}
+
+    @endpoint
     def create_substation(
-        self, project_file: str, name: str, copy_from: str | None = None
+        self,
+        project_file: str,
+        name: str,
+        copy_from: str | None = None,
+        setup: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """Add a substation, blank or a copy of ``copy_from``; its folder comes from the name."""
-        return {"id": self._new_substation(Path(project_file), name, copy_from)}
+        """Add a substation, blank or a copy of ``copy_from``; its folder comes from the name.
+        ``setup`` holds the values a blank one's setup step changed (plan M51)."""
+        return {"id": self._new_substation(Path(project_file), name, copy_from, setup)}
 
     @endpoint
     def rename_project(self, project_file: str, name: str) -> dict[str, Any]:
@@ -1726,3 +1756,17 @@ class Api:
             "library_note": result.library_note,
             "manifest": result.manifest,
         }
+
+
+def _previous_generated_panels(project_file: Path) -> tuple[str, Mapping[str, Any]] | None:
+    """The id and ``generated_panels`` of the last listed substation that has them."""
+    listed = read_yaml(project_file).data.get(lifecycle.SUBSTATIONS) or []
+    for path in reversed(listed):
+        file = project_file.parent / str(path)
+        if not file.is_file():
+            continue
+        data = read_yaml(file).data
+        panels = data.get("generated_panels")
+        if isinstance(panels, Mapping):
+            return str((data.get("substation") or {}).get("id") or file.parent.name), panels
+    return None

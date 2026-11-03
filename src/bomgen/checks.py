@@ -11,7 +11,7 @@ renders the report as text or JSON and exits non-zero when a check fails.
 
 import json
 from collections import Counter
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 
 from bomgen.engine.network import port_plan
 from bomgen.engine.units import DeviceRow, expand_devices
@@ -22,7 +22,7 @@ from bomgen.models.bom import BomTable, BuildResult, LooseTable, PanelBom, QtySu
 from bomgen.models.calc import BranchMcb, DcMains, HeatResult
 from bomgen.models.library import Category, Library, Media, PortKind, PortSpeed, SupplyType
 from bomgen.models.panel import Panel, Ventilation
-from bomgen.models.project import DesignConstants
+from bomgen.models.project import DesignConstants, RegisterEntry
 from bomgen.models.report import CheckItem, CheckReport, CheckStatus
 from bomgen.models.substation import Equipment
 
@@ -49,6 +49,7 @@ def check_report(loaded: LoadedSubstation, result: BuildResult) -> CheckReport:
     items += part_number_checks(loaded.substation.equipment, loaded.library)
     items += l2_link_checks(loaded.substation.equipment, loaded.library)
     items += external_ac_checks(result.loose, loaded.library)
+    items += document_number_checks(loaded.documents)
     return CheckReport(items=tuple(items))
 
 
@@ -474,6 +475,20 @@ def external_ac_checks(loose: LooseTable | None, library: Library) -> list[Check
             )
         )
     return items
+
+
+def document_number_checks(documents: Mapping[str, RegisterEntry]) -> list[CheckItem]:
+    """A warning per register document of the substation still numbered "TBD" (plan M51)."""
+    return [
+        CheckItem(
+            check="document_number_placeholder",
+            status=CheckStatus.WARN,
+            subject=key,
+            message="document number is still TBD; type it in the register before issuing",
+        )
+        for key, entry in documents.items()
+        if entry.doc_no.strip().upper() == "TBD"
+    ]
 
 
 def library_check(recorded: LibraryRef, active: LibraryRef | None) -> CheckItem:

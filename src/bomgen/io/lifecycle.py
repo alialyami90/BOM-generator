@@ -102,11 +102,14 @@ def create_substation(
     *,
     copy_from: str | None = None,
     today: date | None = None,
+    setup: Mapping[str, Any] | None = None,
     store: LibraryStore | None = None,
 ) -> EditResult:
     """Add substation ``substation_id``: blank, or a copy of substation ``copy_from`` with
     its panels, settings and register documents. A blank substation gets three register
-    documents (BOM, power, heat) whose number and date are marked ``ASSUMED``."""
+    documents (BOM, power, heat); ``setup`` gives the values of
+    ``new_substation_seeds`` the engineer typed, and those not given keep the seed marked
+    ``ASSUMED``."""
     if not _ID.fullmatch(substation_id):
         raise EditError(
             f"substation id '{substation_id}' must be lower case letters, digits, - or _"
@@ -115,8 +118,11 @@ def create_substation(
     if folder.exists():
         raise EditError(f"{SUBSTATIONS}/{substation_id} already exists")
     project = load_text(project_file.read_text(encoding="utf-8-sig"))
+    assumed: set[tuple[int, str]] = set()
     if copy_from is None:
-        texts, entries = _blank(folder, substation_id, name, today or date.today())
+        texts, entries, assumed = _blank(
+            folder, substation_id, name, today or date.today(), setup or {}
+        )
     else:
         texts, entries = _copy(project_file, project, copy_from, folder, substation_id, name)
     keys = {e.get("key") for e in project.get("documents") or []}
@@ -126,10 +132,10 @@ def create_substation(
 
     def change(root: CommentedMap) -> None:
         documents = _list(root, "documents")
-        for entry in entries:
+        for index, entry in enumerate(entries):
             set_entry(documents, len(documents), entry)
-            if copy_from is None:
-                for field in ("doc_no", "issue_date"):
+            for field in ("doc_no", "issue_date"):
+                if (index, field) in assumed:
                     set_comment(documents[len(documents) - 1], field, "ASSUMED")
         listed = _list(root, SUBSTATIONS)
         set_entry(listed, len(listed), f"{SUBSTATIONS}/{substation_id}/substation.yaml")
@@ -139,11 +145,41 @@ def create_substation(
     return commit(project_file, substation_id, texts, store=store)
 
 
+def new_substation_seeds(substation_id: str, *, today: date) -> dict[str, Any]:
+    """What a blank substation gets for each value of the New substation dialog's setup step
+    (plan M51) that the dialog leaves unset; the example project's values."""
+    return {
+        "cabinet_number": f"{substation_id.upper()}-PSA-{{n:04d}}",
+        "cabinet_name": "PSA Cabinet - {n:03d}",
+        "tag_prefix": "PSA{n}",
+        "enclosure": {
+            "make": "Rawabi",
+            "model": "Fixed Frame",
+            "ordering_code": "Fixed Frame",
+            "h_mm": 2100,
+            "d_mm": 1000,
+            "w_mm": 800,
+            "base_frame": {"h_mm": 100, "d_mm": 950, "w_mm": 750},
+            "cable_entry": "top",
+        },
+        "documents": {
+            kind: {"doc_no": "TBD", "rev": "00", "issue_date": today}
+            for kind in ("bom", "power", "heat")
+        },
+    }
+
+
 def _blank(
-    folder: Path, substation_id: str, name: str, today: date
-) -> tuple[dict[Path, str | None], list[dict[str, Any]]]:
+    folder: Path,
+    substation_id: str,
+    name: str,
+    today: date,
+    setup: Mapping[str, Any],
+) -> tuple[dict[Path, str | None], list[dict[str, Any]], set[tuple[int, str]]]:
+    seeds = new_substation_seeds(substation_id, today=today)
     keys = {kind: f"{substation_id}-{kind}" for kind in ("bom", "power", "heat")}
     sheet = {"scope": name}
+    given_docs: Mapping[str, Mapping[str, Any]] = setup.get("documents") or {}
     data = {
         "substation": {"id": substation_id, "name": name},
         "document": keys["bom"],
@@ -155,40 +191,30 @@ def _blank(
         "panels": [],
         "generated_panels": {  # as the example project's; equipment needs it (ADR 0013)
             "id": "psa{n}",
-            "cabinet_number": f"{substation_id.upper()}-PSA-{{n:04d}}",
-            "cabinet_name": "PSA Cabinet - {n:03d}",
-            "tag_prefix": "PSA{n}",
+            "cabinet_number": setup.get("cabinet_number") or seeds["cabinet_number"],
+            "cabinet_name": setup.get("cabinet_name") or seeds["cabinet_name"],
+            "tag_prefix": setup.get("tag_prefix") or seeds["tag_prefix"],
             "sheet_name": "{n}",
             "kind": "network",
-            "enclosure": {
-                "make": "Rawabi",
-                "model": "Fixed Frame",
-                "ordering_code": "Fixed Frame",
-                "h_mm": 2100,
-                "d_mm": 1000,
-                "w_mm": 800,
-                "base_frame": {"h_mm": 100, "d_mm": 950, "w_mm": 750},
-                "cable_entry": "top",
-            },
+            "enclosure": seeds["enclosure"] | dict(setup.get("enclosure") or {}),
             "document": keys["bom"],
             "options": {"inter_panel_terminals": 40},  # network cabinets (spec, XIP)
         },
     }
-    entries = [
-        {
-            "key": key,
-            "substation": substation_id,
-            "doc_no": "TBD",
-            "rev": DoubleQuotedScalarString("00"),  # a revision stays text
-            "issue_date": today,
-        }
-        for key in keys.values()
-    ]
+    entries = []
+    assumed: set[tuple[int, str]] = set()  # (entry, field) left at the seed
+    for index, (kind, key) in enumerate(keys.items()):
+        given = given_docs.get(kind) or {}
+        document = seeds["documents"][kind] | {k: v for k, v in given.items() if v}
+        document["rev"] = DoubleQuotedScalarString(document["rev"])  # a revision stays text
+        entries.append({"key": key, "substation": substation_id, **document})
+        assumed |= {(index, field) for field in ("doc_no", "issue_date") if not given.get(field)}
     root = _map(data)
     for field in ("cabinet_number", "enclosure"):  # no source names them for a new substation
-        set_comment(root["generated_panels"], field, "ASSUMED")
+        if not setup.get(field):
+            set_comment(root["generated_panels"], field, "ASSUMED")
     texts: dict[Path, str | None] = {folder / "substation.yaml": dump_text(root)}
-    return texts, entries
+    return texts, entries, assumed
 
 
 def _copy(

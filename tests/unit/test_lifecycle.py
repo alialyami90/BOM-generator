@@ -213,3 +213,76 @@ def test_a_copied_substation_keeps_its_sources_generated_panels(project: Path) -
     assert seeded is not None
     assert seeded.cabinet_number == "861-GIS01-PSA-{n:04d}"  # the source's block, as written
     assert seeded.document == "gis02-bom"
+
+
+# --- the New substation dialog's setup step (plan M51) ---
+
+SETUP = {
+    "cabinet_number": "DHN-SCADA-{n:03d}",
+    "cabinet_name": "SCADA Cabinet {n}",
+    "tag_prefix": "SC{n}",
+    "enclosure": {"make": "Rittal", "model": "VX25", "h_mm": 2000, "cable_entry": "bottom"},
+    "documents": {
+        "bom": {"doc_no": "DHN-BOM-001", "rev": "01", "issue_date": date(2026, 11, 3)},
+        "power": {"doc_no": "DHN-PWR-001"},
+    },
+}
+
+
+def test_a_new_substation_writes_given_values_without_assumed(tmp_path: Path) -> None:
+    project_file = new_project(tmp_path)
+    assert create_substation(project_file, "s1", "Dhahran", today=TODAY, setup=SETUP).written
+    (target,) = load_project(project_file).substations
+    seeded = target.substation.generated_panels
+    assert seeded is not None
+    assert seeded.cabinet_number == "DHN-SCADA-{n:03d}"
+    assert seeded.cabinet_name == "SCADA Cabinet {n}"
+    assert seeded.tag_prefix == "SC{n}"
+    assert (seeded.enclosure.make, seeded.enclosure.model) == ("Rittal", "VX25")
+    assert seeded.enclosure.h_mm == 2000
+    assert seeded.enclosure.d_mm == 1000  # not given: the seed's
+    assert seeded.enclosure.cable_entry == "bottom"
+    bom = target.documents["s1-bom"]
+    assert (bom.doc_no, bom.rev, bom.issue_date) == ("DHN-BOM-001", "01", date(2026, 11, 3))
+    assert target.documents["s1-power"].doc_no == "DHN-PWR-001"
+    sub_file = project_file.parent / "substations" / "s1" / "substation.yaml"
+    assumed = set(fields.assumed_fields(sub_file)) | set(fields.assumed_fields(project_file))
+    assert ("generated_panels", "cabinet_number") not in assumed
+    assert ("generated_panels", "enclosure") not in assumed
+    assert ("documents", 0, "doc_no") not in assumed
+    assert ("documents", 0, "issue_date") not in assumed
+    assert ("documents", 1, "doc_no") not in assumed
+
+
+def test_unset_values_keep_assumed_seed(tmp_path: Path) -> None:
+    project_file = new_project(tmp_path)
+    setup = {"cabinet_name": "SCADA Cabinet {n}"}
+    assert create_substation(project_file, "s1", "Dhahran", today=TODAY, setup=setup).written
+    (target,) = load_project(project_file).substations
+    seeded = target.substation.generated_panels
+    assert seeded is not None
+    assert seeded.cabinet_number == "S1-PSA-{n:04d}"
+    assert seeded.enclosure.make == "Rawabi"
+    assert target.documents["s1-heat"].doc_no == "TBD"
+    sub_file = project_file.parent / "substations" / "s1" / "substation.yaml"
+    assumed = set(fields.assumed_fields(sub_file)) | set(fields.assumed_fields(project_file))
+    assert ("generated_panels", "cabinet_number") in assumed
+    assert ("generated_panels", "enclosure") in assumed
+    assert ("documents", 2, "doc_no") in assumed
+    assert ("documents", 2, "issue_date") in assumed
+
+
+def test_a_setup_value_the_model_refuses_writes_nothing(tmp_path: Path) -> None:
+    project_file = new_project(tmp_path)
+    result = create_substation(
+        project_file, "s1", "Dhahran", today=TODAY, setup={"tag_prefix": "bad prefix {n}"}
+    )
+    assert not result.written
+    assert not (project_file.parent / "substations" / "s1").exists()
+
+
+def test_new_substation_seeds_follow_the_id() -> None:
+    seeds = lifecycle.new_substation_seeds("gis02", today=TODAY)
+    assert seeds["cabinet_number"] == "GIS02-PSA-{n:04d}"
+    assert seeds["enclosure"]["make"] == "Rawabi"
+    assert seeds["documents"]["bom"] == {"doc_no": "TBD", "rev": "00", "issue_date": TODAY}

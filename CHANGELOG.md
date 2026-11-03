@@ -24,6 +24,10 @@ project uses [Semantic Versioning](https://semver.org/).
   and a tag another unit already has is flagged on the row (M59).
 - A generated panel can have its own enclosure and kind: the panel editor's Enclosure tab gains
   *All generated panels* / *This panel only* and a Kind select, and cable entry gains Bottom (M50).
+- New substation, for a blank one, asks for its cabinets and documents: cabinet number, name and tag
+  prefix patterns, the enclosure and cable entry, and the BOM, power and heat document numbers,
+  filled in from the previous substation. What you type is written without the ASSUMED mark, and
+  Checks warns while a document number is still TBD (M51).
 
 ## [0.3.4] - 2026-11-01
 
