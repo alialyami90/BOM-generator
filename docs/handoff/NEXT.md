@@ -67,6 +67,14 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
 
 ## 4. When Ali's feedback arrives
 
+**Workflow review (2026-11-03).** Ali asked for a top-to-bottom review of the engineering workflow from a
+SCADA engineer's view and a plan for agents. Both are in the repo and waiting for his comments before any
+milestone is planned in `docs/plan.md`:
+[`docs/superpowers/specs/2026-11-03-engineering-workflow-review.md`](../superpowers/specs/2026-11-03-engineering-workflow-review.md)
+(review, features F1–F16, phases A–F) and
+[`docs/superpowers/plans/2026-11-03-agent-implementation-plan.md`](../superpowers/plans/2026-11-03-agent-implementation-plan.md)
+(milestones M48–M69, ADRs 0031–0037, Q62–Q67). Ali chose to review the docs first.
+
 Write it into `docs/backlog.md` as numbered points (as for v0.2), propose milestones in `docs/plan.md`
 (from M27), give decisions an ADR (0028 on) or a plan question (Q56 on), and deliver one PR per
 milestone.
