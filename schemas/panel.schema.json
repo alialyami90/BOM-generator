@@ -226,6 +226,105 @@
       "title": "Enclosure",
       "type": "object"
     },
+    "HousekeepingOptions": {
+      "additionalProperties": false,
+      "description": "The housekeeping kit's counts and branch ratings (ADR 0032); unset is the spec's.",
+      "properties": {
+        "branch_ratings": {
+          "additionalProperties": {
+            "exclusiveMinimum": 0,
+            "type": "integer"
+          },
+          "propertyNames": {
+            "enum": [
+              "lamp",
+              "fan",
+              "thermostat",
+              "heater"
+            ]
+          },
+          "title": "Branch Ratings",
+          "type": "object"
+        },
+        "fans": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fans"
+        },
+        "filters": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Filters"
+        },
+        "heater": {
+          "default": false,
+          "title": "Heater",
+          "type": "boolean"
+        },
+        "hygrostat": {
+          "default": false,
+          "title": "Hygrostat",
+          "type": "boolean"
+        },
+        "lamps": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lamps"
+        },
+        "thermostats_forced": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Thermostats Forced"
+        },
+        "thermostats_natural": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Thermostats Natural"
+        }
+      },
+      "title": "HousekeepingOptions",
+      "type": "object"
+    },
     "Media": {
       "enum": [
         "MM",
@@ -502,6 +601,9 @@
           "title": "Grounding Busbars",
           "type": "array"
         },
+        "housekeeping": {
+          "$ref": "#/$defs/HousekeepingOptions"
+        },
         "inter_panel_terminals": {
           "anyOf": [
             {
@@ -529,9 +631,14 @@
           "title": "Main Mcb Override A"
         },
         "smoke_detector": {
-          "default": true,
+          "default": "terminals",
+          "enum": [
+            "none",
+            "terminals",
+            "supplied"
+          ],
           "title": "Smoke Detector",
-          "type": "boolean"
+          "type": "string"
         },
         "terminal_block_overrides": {
           "additionalProperties": {

@@ -29,7 +29,7 @@
 
   /* ---------- the form: keys e.<enclosure field>, doc, o.<all|panel>.<option>, p.<row>.… ---------- */
   const ENC = { make: 'text', model: 'text', ordering_code: 'text', h_mm: 'int', d_mm: 'int', w_mm: 'int', cable_entry: 'choice', 'base_frame.h_mm': 'int', 'base_frame.d_mm': 'int', 'base_frame.w_mm': 'int' };
-  const OPT = { dc_spare_branches_per_feed: 'int', ac_spare_branches: 'int', ventilation: 'choice', change_over_diodes: 'choice', main_mcb_override_a: 'int', ac_spare_rating_a: 'int', dc_spare_rating_a: 'int', aux_socket_a: 'int', inter_panel_terminals: 'int', smoke_detector: 'bool' };
+  const OPT = { dc_spare_branches_per_feed: 'int', ac_spare_branches: 'int', ventilation: 'choice', change_over_diodes: 'choice', main_mcb_override_a: 'int', ac_spare_rating_a: 'int', dc_spare_rating_a: 'int', aux_socket_a: 'int', inter_panel_terminals: 'int', smoke_detector: 'choice' };
   const PORT = { count: 'int', speed: 'choice', media: 'choice', spare: 'int' };
   const TERM = { t: 'terminal_overrides', tb: 'terminal_block_overrides' };  // t.<all|panel>.<strip>, tb.… (ADR 0033)
   function spec(key) {  // [path in substation.yaml, kind]
@@ -380,7 +380,7 @@
     ['main_mcb_override_a', 'Main MCB override', 'A', 'Empty uses the sizing rule.'],
     ['aux_socket_a', 'Auxiliary socket', 'A', 'Empty means no socket.'],
     ['inter_panel_terminals', 'Inter-panel terminals', ''],
-    ['smoke_detector', 'Smoke detector', [['true', 'Yes'], ['false', 'No']]]];
+    ['smoke_detector', 'Smoke detector', [['terminals', 'Terminals only, detector by others'], ['supplied', 'Supplied with the panel'], ['none', 'None']]]];  // ADR 0032
   const shownValue = (o, opts) => { const v = str(o); const hit = Array.isArray(opts) && opts.find(([x]) => x === v); return hit ? hit[1] : v || 'None'; };
   function options(p) {
     const own = S.optScope === 'own', n = p.panel.number, scope = own ? String(n) : 'all';

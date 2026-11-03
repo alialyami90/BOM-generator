@@ -80,8 +80,11 @@ def test_enclosure_is_set_for_every_generated_panel(project: Path) -> None:
 def test_panel_option_is_set_and_removed_again(project: Path) -> None:
     assert edit.set_option(project, "gis01", "smoke_detector", False, panel=3).written
     options = {o.key: o for o in edit.panel_options(loaded(project), 3)}
-    assert (options["smoke_detector"].value, options["smoke_detector"].own) == (False, True)
-    assert options["smoke_detector"].shared is True
+    assert (options["smoke_detector"].value, options["smoke_detector"].own) == (
+        "none",
+        True,
+    )  # false reads as none (ADR 0032)
+    assert options["smoke_detector"].shared == "terminals"
     assert options["inter_panel_terminals"].own is False
     assert options["inter_panel_terminals"].value == 40
 

@@ -198,3 +198,53 @@ def test_alarm_toggle_on_an_ac_unit_overrides_the_library() -> None:
     alarmed = SERVER | {"alarm_on_branch_mcb": True}
     rows = server_table(ac(off, library(SWITCH, alarmed), Ventilation.FORCED))
     assert rows[-1] == (None, "AC Auxiliary Contacts (for MCB CINC, C2, C3)", 3, 3)
+
+
+def kit_branches(lib: Library, **options: Any) -> list[tuple[Any, ...]]:
+    p = panel([{"part_id": "SW"}], options=options)
+    return [
+        (b.tag, b.load, b.rating_a, b.rule_rating_a)
+        for b in ac(p, lib, Ventilation.FORCED).housekeeping
+    ]
+
+
+def test_fixed_rating_when_part_has_no_watts() -> None:
+    """ADR 0032 item 4; the lamp keeps 1 A below the 2 A branch floor."""
+    branches = kit_branches(library(SWITCH))
+    assert branches == [
+        ("PSA1-C1", "Illumination Lamp", 1, 1),
+        ("PSA1-C2", "Fan-1 and TH-1", 2, 2),
+        ("PSA1-C3", "Fan-2 and TH-2", 2, 2),
+        ("PSA1-C4", "TH-3", 1, 1),
+    ]
+    p = panel([{"part_id": "SW"}])
+    (lamp, *_rest) = ac(p, library(SWITCH), Ventilation.FORCED).housekeeping
+    assert lamp.rule == "1 A: the spec's lamp rating"
+
+
+def test_branch_rating_from_part_watts_when_given() -> None:
+    hot = {"supply_type": "VAC", "voltage_v": None, "power_supplies": 0, "unit_power_w": 900}
+    lib = library(
+        SWITCH, powered("BIGFAN", "fan", **hot), fan={"part_id": "BIGFAN", "airflow_m3h": 358}
+    )
+    p = panel([{"part_id": "SW"}])
+    fan_branch = ac(p, lib, Ventilation.FORCED).housekeeping[1]
+    assert fan_branch.rating_a > 2
+    assert "from the part's watts" in fan_branch.rule
+
+
+def test_heater_branch_follows_the_thermostats_and_is_sized_from_its_watts() -> None:
+    heater = powered(
+        "HEATER", "component", supply_type="VAC", voltage_v=None, power_supplies=0, unit_power_w=400
+    )
+    lib = library(SWITCH, heater, heater={"part_id": "HEATER"})
+    branches = kit_branches(lib, housekeeping={"heater": True})
+    assert branches[-1][:2] == ("PSA1-C5", "Heater")
+    assert branches[-1][2] >= 2
+
+
+def test_branch_ratings_option_wins_and_keeps_the_rule() -> None:
+    branches = kit_branches(library(SWITCH), housekeeping={"branch_ratings": {"fan": 6}})
+    assert branches[1] == ("PSA1-C2", "Fan-1 and TH-1", 6, 2)
+    rows = build(housekeeping={"branch_ratings": {"fan": 6}})
+    assert rows[2][1] == "6A, 2P MCB For Fan-1 and TH-1"

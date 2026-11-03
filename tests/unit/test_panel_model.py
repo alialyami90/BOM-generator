@@ -94,7 +94,7 @@ def test_panel_from_plan_example_validates() -> None:
 
 def test_panel_options_defaults() -> None:
     options = PanelOptions()
-    assert options.smoke_detector is True
+    assert options.smoke_detector == "terminals"
     assert options.change_over_diodes == "auto"
     assert options.ventilation is Ventilation.AUTO
     assert options.dc_spare_branches_per_feed == 1
@@ -295,3 +295,9 @@ def test_spare_ratings_and_alarm_toggle_default_to_the_rules() -> None:
     assert (options.ac_spare_rating_a, options.dc_spare_rating_a) == (None, None)
     assert DeviceInstance(part_id="FW").alarm_on_branch_mcb is None
     assert DeviceInstance(part_id="FW", alarm_on_branch_mcb=False).alarm_on_branch_mcb is False
+
+
+def test_smoke_detector_true_or_false_reads_as_before_adr_0032() -> None:
+    assert PanelOptions.model_validate({"smoke_detector": True}).smoke_detector == "terminals"
+    assert PanelOptions.model_validate({"smoke_detector": False}).smoke_detector == "none"
+    assert PanelOptions().housekeeping.fans is None

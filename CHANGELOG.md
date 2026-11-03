@@ -56,6 +56,11 @@ project uses [Semantic Versioning](https://semver.org/).
   shown with the rule behind it ("2 x 6 AC MCBs = 12"); click a quantity to set your own, or pick
   another block type. *Spare terminals* (Project › Overview, Parts › Network fine tuning) adds a
   share to each wiring strip, rounded up: 10% makes X3-AC 14 and X4-DC1 36 in Cabinet 001 (M57).
+- A panel's housekeeping kit is now an input: the number of lamps, fans, thermostats and filters,
+  a heater or hygrostat (from the library's new heater and hygrostat roles), and whether the smoke
+  detector is supplied, only wired to terminals, or left out. Housekeeping breakers are sized from
+  the part's AC watts when it gives them, never below the spec's rating, and a panel can set its
+  own. With nothing set every BOM is as before (M56a, ADR 0032).
 - A hand-written panel's Devices rows take a tag, type code and first number, with the generated
   tag as placeholder and a shared tag flagged on the row (M59). Moving, adding or removing a device
   there no longer writes the page's own fields into the panel file.
