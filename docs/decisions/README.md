@@ -36,3 +36,6 @@ An ADR stays "Proposed" until Ali accepts it in review.
 | 0028 | [Power Consumption follows the branch MCB](0028-power-consumption-follows-the-branch-mcb.md) | Rejected (Ali, 2026-11-01) |
 | 0029 | [Larger fans for hot cabinets](0029-larger-fans-for-hot-cabinets.md) | Accepted (Ali, 2026-11-01) |
 | 0030 | [Every device tag has level, type, side and number](0030-every-device-tag-has-level-type-side-and-number.md) | Accepted (Ali, 2026-11-01) |
+| 0032 | [Housekeeping as panel inputs](0032-housekeeping-as-panel-inputs.md) | Proposed |
+| 0033 | [Terminal rules as panel inputs](0033-terminal-rules-as-panel-inputs.md) | Proposed |
+| 0034 | [IED schedule](0034-ied-schedule.md) | Proposed |
