@@ -220,3 +220,24 @@ def test_check_yaml_reports_a_syntax_error_on_its_line(project: Path) -> None:
     (issue,) = check.issues
     assert issue.line is not None
     assert check.data is None
+
+
+def test_own_enclosure_and_kind_round_trip_and_removal_returns_to_shared(project: Path) -> None:
+    # Plan M50: enclosure_by_panel and kind_by_panel are written and removed as fields.
+    shared = gis01(project).substation.generated_panels
+    assert shared is not None
+    own = shared.enclosure.model_dump(mode="json", exclude_none=True)
+    path = ("generated_panels", "enclosure_by_panel", 2)
+    assert fields.set_field(project, path, own, substation="gis01").written
+    assert fields.set_field(project, (*path, "w_mm"), 600, substation="gis01").written
+    kind = ("generated_panels", "kind_by_panel", 2)
+    assert fields.set_field(project, kind, "control", substation="gis01").written
+    generated = gis01(project).substation.generated_panels
+    assert generated is not None
+    assert generated.enclosure_by_panel[2].w_mm == 600
+    assert generated.kind_by_panel == {2: "control"}
+    assert fields.remove_field(project, path, substation="gis01").written
+    assert fields.remove_field(project, kind, substation="gis01").written
+    text = substation_yaml(project).read_text("utf-8")
+    assert "enclosure_by_panel" not in text
+    assert "kind_by_panel" not in text

@@ -50,6 +50,13 @@ def test_enclosure_without_base_frame_skips_that_line() -> None:
     assert item.line.description == "Cabinet : H2100 x D1000 x W800 mm\nCable Entry: Side Entry"
 
 
+def test_bottom_entry_text() -> None:
+    p = panel([{"part_id": "LAMP"}])
+    enclosure = p.enclosure.model_copy(update={"cable_entry": CableEntry.BOTTOM})
+    item = enclosure_item(p.model_copy(update={"enclosure": enclosure}))
+    assert item.line.description.endswith("\nCable Entry: Bottom Entry")
+
+
 def test_children_follow_parent_with_blank_designation() -> None:
     lib = library(*KIT)
     p = panel([{"part_id": "FOPP", "purpose": "L2-L3 Interface"}])

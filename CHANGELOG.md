@@ -13,6 +13,8 @@ project uses [Semantic Versioning](https://semver.org/).
   standard size above 7.1 A, minimum 6 A"); click it to type your own, *Use automatic* to go back
   (M48). Part overrides on Parts use the same derived-value look, and leaving a value with Tab now
   closes its input.
+- A generated panel can have its own enclosure and kind: the panel editor's Enclosure tab gains
+  *All generated panels* / *This panel only* and a Kind select, and cable entry gains Bottom (M50).
 
 ## [0.3.4] - 2026-11-01
 

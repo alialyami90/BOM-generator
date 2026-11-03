@@ -241,6 +241,8 @@ class GeneratedPanels(InputModel):
     document: DocumentKey
     options: dict[str, Any] = Field(default_factory=dict)  # every generated panel
     options_by_panel: dict[PositiveInt, dict[str, Any]] = Field(default_factory=dict)
+    enclosure_by_panel: dict[PositiveInt, Enclosure] = Field(default_factory=dict)  # plan M50
+    kind_by_panel: dict[PositiveInt, PanelKind] = Field(default_factory=dict)
 
     @field_validator("id", "cabinet_number", "cabinet_name", "tag_prefix", "sheet_name")
     @classmethod

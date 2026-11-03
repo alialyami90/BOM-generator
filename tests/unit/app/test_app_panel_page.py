@@ -85,6 +85,38 @@ def test_options_of_a_generated_panel_say_which_are_its_own(app: api.Api, genera
     assert first["aux_socket_a"]["own"] is False
 
 
+def test_enclosure_scope_own_and_shared(app: api.Api, generated: Path) -> None:
+    # Plan M50: a generated panel may take its own enclosure and kind; the page says which.
+    page = ok(app.panel_page(str(generated), "gis01", "psa2"))
+    assert page["shared"] == {
+        "enclosure": page["enclosure"],
+        "kind": "network",
+        "own_enclosure": False,
+        "own_kind": False,
+    }
+    narrow = page["enclosure"] | {"w_mm": 600, "cable_entry": "bottom"}
+    assert ok(app.set_enclosure(str(generated), "gis01", narrow, 2))["written"]
+    path: list[str | int] = ["generated_panels", "kind_by_panel", 2]
+    ok(app.set_substation_field(str(generated), "gis01", path, "control"))
+
+    page = ok(app.panel_page(str(generated), "gis01", "psa2"))
+    assert (page["enclosure"]["w_mm"], page["shared"]["enclosure"]["w_mm"]) == (600, 800)
+    assert (page["panel"]["kind"], page["shared"]["kind"]) == ("control", "network")
+    assert page["shared"]["own_enclosure"] is page["shared"]["own_kind"] is True
+    first = ok(app.panel_page(str(generated), "gis01", "psa1"))
+    assert (first["enclosure"]["w_mm"], first["panel"]["kind"]) == (800, "network")
+    assert ok(app.panel_page(str(generated), "gis01", "ws"))["shared"] is None
+
+    ok(app.set_substation_field(str(generated), "gis01", path, None))
+    ok(
+        app.set_substation_field(
+            str(generated), "gis01", ["generated_panels", "enclosure_by_panel", 2], None
+        )
+    )
+    page = ok(app.panel_page(str(generated), "gis01", "psa2"))
+    assert page["shared"]["own_enclosure"] is page["shared"]["own_kind"] is False
+
+
 def test_devices_of_a_generated_panel_say_where_they_came_from(
     app: api.Api, generated: Path
 ) -> None:

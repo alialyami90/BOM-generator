@@ -276,6 +276,9 @@ generated_panels:                      # needed when equipment is given; {n} = p
   document: gis01-bom
   options: { dc_spare_branches_per_feed: 3 }   # every generated panel
   options_by_panel: { 2: { aux_socket_a: 10 } }
+  enclosure_by_panel: { 3: { make: Rawabi, model: "Fixed Frame", h_mm: 2100, d_mm: 1000,
+                             w_mm: 600, cable_entry: bottom } }   # optional, whole enclosure (M50)
+  kind_by_panel: { 3: control }        # optional; unset panels take `kind` (M50)
 ```
 
 **Loading rules.** Substation `constants`, `spares` and `catalogue_choice` replace only the keys
@@ -379,7 +382,7 @@ enclosure:
   d_mm: 1000
   w_mm: 800
   base_frame: { h_mm: 100, d_mm: 950, w_mm: 750 }   # optional plinth
-  cable_entry: top                     # top | side
+  cable_entry: top                     # top | side | bottom
 devices:                               # group B display order
   - { part_id: FOPP-96SM, qty: 1, purpose: "L2-L3 uplink to CCR" }
   - { part_id: RST2228-L2, qty: 1 }
@@ -1069,7 +1072,7 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
   first derived value; the SFP, housekeeping and terminal rule texts land with M49, M56 and M57, which put
   those values on screen.
 - **M49 — SFP quantities per switch.** *W4.* Planned.
-- **M50 — Enclosure and kind per generated panel, bottom entry.** *W3; spec sentence.* Planned.
+- **M50 — Enclosure and kind per generated panel, bottom entry.** *W3; spec sentence.* In review.
 - **M51 — New-substation setup instead of ASSUMED seeds.** *W5; Q62.* Planned.
 - **M52 — Design basis model and tab.** *W5; ADR 0031.* Planned.
 - **M53 — Vendor list and part lifecycle states.** *W5; ADRs 0031 and 0037.* Planned.

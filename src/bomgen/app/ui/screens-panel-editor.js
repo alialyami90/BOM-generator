@@ -34,6 +34,8 @@
   function spec(key) {  // [path in substation.yaml, kind]
     const [k, a, ...r] = key.split('.');
     if (k === 'e') { const f = [a, ...r].join('.'); return ENC[f] ? [['generated_panels', 'enclosure', ...f.split('.')], ENC[f]] : null; }
+    if (k === 'eo') { const f = r.join('.'); return ENC[f] ? [['generated_panels', 'enclosure_by_panel', Number(a), ...r], ENC[f]] : null; }  // plan M50
+    if (k === 'kind') return [a === 'all' ? ['generated_panels', 'kind'] : ['generated_panels', 'kind_by_panel', Number(a)], 'choice'];
     if (k === 'doc') return [['generated_panels', 'document'], 'choice'];
     if (k === 'g') return [['generated_panels', a], 'text'];  // a numbering pattern every generated panel shares
     if (k === 'o') return OPT[r[0]] ? [a === 'all' ? ['generated_panels', 'options', r[0]] : ['generated_panels', 'options_by_panel', Number(a), r[0]], OPT[r[0]]] : null;
@@ -44,7 +46,9 @@
   function saved(key) {
     const p = PE.page; if (!p || !p.panel) return '';
     const [k, a, ...r] = key.split('.');
-    if (k === 'e') return str([a, ...r].reduce((o, x) => (o == null ? o : o[x]), p.enclosure));
+    if (k === 'e') return str([a, ...r].reduce((o, x) => (o == null ? o : o[x]), p.shared ? p.shared.enclosure : p.enclosure));
+    if (k === 'eo') return p.shared && p.shared.own_enclosure ? str(r.reduce((o, x) => (o == null ? o : o[x]), p.enclosure)) : '';
+    if (k === 'kind') return a === 'all' ? str(p.shared && p.shared.kind) : p.shared && p.shared.own_kind ? p.panel.kind : '';
     if (k === 'doc') return p.document;
     if (k === 'g') return p.template ? str(p.template[a]) : '';
     if (k === 'o') {
@@ -135,7 +139,7 @@
   /* ---------- the page ---------- */
   const TABS = [['enclosure', 'Enclosure'], ['devices', 'Devices'], ['ports', 'Port plans'], ['options', 'Options'], ['document', 'Document'], ['yaml', 'YAML']];
   const KIND = { network: 'Network', control: 'Control', console: 'Console' };
-  const TAB_OF = (key) => ({ c: 'enclosure', e: 'enclosure', g: 'enclosure', doc: 'document', o: 'options', p: 'ports', d: 'devices' })[key.split('.')[0]];
+  const TAB_OF = (key) => ({ c: 'enclosure', e: 'enclosure', eo: 'enclosure', kind: 'enclosure', g: 'enclosure', doc: 'document', o: 'options', p: 'ports', d: 'devices' })[key.split('.')[0]];
   function tabMark(tab) {
     const bad = Object.keys(F.errors).filter((k) => TAB_OF(k) === tab).length, n = Object.keys(F.draft).filter((k) => TAB_OF(k) === tab).length;
     if (bad) return ` <span class="dot dot--bad" aria-hidden="true"></span><span class="sr-only">(${bad} to fix)</span>`;
@@ -170,18 +174,41 @@
       <div role="tabpanel" aria-labelledby="tab-panel-${t}" style="margin-top:var(--space-4)">${body}</div>${F.bar()}</div>`;
   };
 
-  /* ---------- Enclosure: shared by every generated panel ---------- */
-  const enclosure = () => `<div style="margin-bottom:var(--space-4)">${banner('info', 'The numbering and the enclosure are shared by every generated panel. A change here applies to each of them.')}</div>${numbering()}<h3 style="margin-bottom:var(--space-3)">Enclosure</h3>${encFields()}`;
+  /* ---------- Enclosure: shared by every generated panel, or this panel's own (plan M50) ---------- */
+  const KINDS = [['network', 'Network cabinet'], ['control', 'Control'], ['console', 'Console']];
+  function enclosure(p) {
+    const own = S.encScope === 'own', n = p.panel.number, sh = p.shared, busy = PD.dirty() ? 'disabled title="Save or discard the changes first"' : '';
+    const scope = `<div class="field" style="margin-bottom:var(--space-4)"><span class="label" id="pe-escope-l">Apply to</span><div class="segmented" role="radiogroup" aria-labelledby="pe-escope-l">
+        <label><input type="radio" name="pe-escope" value="all" data-action="pe-escope" ${own ? '' : 'checked'}><span>All generated panels</span></label><label><input type="radio" name="pe-escope" value="own" data-action="pe-escope" ${own ? 'checked' : ''}><span>This panel only</span></label></div>
+      <span class="help">${own ? `The kind and enclosure you set here are kept for ${esc(p.panel.cabinet_name)} only.` : 'The numbering, kind and enclosure apply to every generated panel that has none of its own.'}</span></div>`;
+    const kindHelp = own ? (sh.own_kind ? badge('info', `Own value · shared ${KINDS.find(([k]) => k === sh.kind)[1]}`) : '') : sh.own_kind ? `<span class="muted small">This panel has its own kind.</span>` : '';
+    const kind = `<div class="form form--3" style="margin-bottom:var(--space-5)">${edit(own ? `kind.${n}` : 'kind.all', 'Kind', choice(own ? `kind.${n}` : 'kind.all', own ? [['', `Shared: ${KINDS.find(([k]) => k === sh.kind)[1]}`], ...KINDS] : KINDS), kindHelp)}</div>`;
+    if (!own) return `${scope}${numbering()}${kind}<h3 style="margin-bottom:var(--space-3)">Enclosure</h3>${sh.own_enclosure ? `<p class="muted small" style="margin:0 0 var(--space-3)">This panel has its own enclosure, so a change here does not reach it.</p>` : ''}${encFields('e')}`;
+    const head = `<div style="display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-3)"><h3 style="margin:0">Enclosure</h3>`;
+    if (!sh.own_enclosure) return `${scope}${kind}${head}</div><p class="muted" style="margin:0 0 var(--space-3)">This panel uses the shared enclosure, H${sh.enclosure.h_mm} × D${sh.enclosure.d_mm} × W${sh.enclosure.w_mm} mm.</p>
+      <button class="btn btn--secondary btn--sm" data-action="pe-enc-own" ${busy}>Give this panel its own enclosure</button>`;
+    return `${scope}${kind}${head}${badge('info', 'Own value')}<span class="sp"></span><button class="btn btn--ghost btn--sm" data-action="pe-enc-shared" ${busy}>Use the shared enclosure</button></div>${encFields(`eo.${n}`)}`;
+  }
+  ACTIONS['pe-escope'] = (el) => { S.encScope = el.value; App.render(); };
+  /* Taking or dropping an own enclosure writes at once: a copy of the shared one, or none. */
+  function writeEnclosure(call, said) {
+    call.then((r) => {
+      if (r && r.written === false) { toast(`Not changed. ${(r.issues[0] && r.issues[0].message) || 'The enclosure was refused.'}`, 'error'); return; }
+      changed(); toast(said); App.render();
+    }).catch((e) => toast(`Not changed. ${e.message}`, 'error'));
+  }
+  ACTIONS['pe-enc-own'] = () => { const p = PE.page; writeEnclosure(Bridge.call('set_enclosure', S.project.file, S.sub, p.shared.enclosure, p.panel.number), `${p.panel.cabinet_name} has its own enclosure`); };
+  ACTIONS['pe-enc-shared'] = () => { const p = PE.page; writeEnclosure(Bridge.call('set_substation_field', S.project.file, S.sub, ['generated_panels', 'enclosure_by_panel', p.panel.number], null), `${p.panel.cabinet_name} uses the shared enclosure`); };
   /* ALI-5, ALI-13: the generated panels' numbering, written as patterns where {n} is the panel number. */
   const numbering = () => `<section class="section" style="margin:0 0 var(--space-5)"><h3>Numbering</h3>
     <p class="muted small" style="margin:2px 0 var(--space-3)">{n} is the panel number; {n:04d} pads it to four digits. This panel reads ${esc(PE.page.panel.cabinet_number)}.</p>
     <div class="form form--2">${edit('g.cabinet_name', 'Cabinet name', text('g.cabinet_name', { mono: true }), 'Printed in the sheet header.')}${edit('g.cabinet_number', 'Cabinet number', text('g.cabinet_number', { mono: true }))}
     ${edit('g.tag_prefix', 'Tag prefix', text('g.tag_prefix', { mono: true }), 'Starts every tag in the panel.')}${edit('g.sheet_name', 'Sheet name', text('g.sheet_name', { mono: true }), 'The workbook tab.')}</div></section>`;
-  const encFields = () => `<div class="form form--3">
-    ${edit('e.make', 'Make', text('e.make'))}${edit('e.model', 'Model', text('e.model'))}${edit('e.ordering_code', 'Ordering code', text('e.ordering_code', { mono: true, placeholder: 'Optional' }))}
-    ${edit('e.h_mm', 'Height', num('e.h_mm', 'mm'))}${edit('e.d_mm', 'Depth', num('e.d_mm', 'mm'))}${edit('e.w_mm', 'Width', num('e.w_mm', 'mm'))}
-    ${edit('e.base_frame.h_mm', 'Base frame height', num('e.base_frame.h_mm', 'mm'))}${edit('e.base_frame.d_mm', 'Base frame depth', num('e.base_frame.d_mm', 'mm'))}${edit('e.base_frame.w_mm', 'Base frame width', num('e.base_frame.w_mm', 'mm'))}
-    ${edit('e.cable_entry', 'Cable entry', choice('e.cable_entry', [['top', 'Top'], ['side', 'Side']]))}</div>`;
+  const encFields = (e = 'e') => `<div class="form form--3">
+    ${edit(`${e}.make`, 'Make', text(`${e}.make`))}${edit(`${e}.model`, 'Model', text(`${e}.model`))}${edit(`${e}.ordering_code`, 'Ordering code', text(`${e}.ordering_code`, { mono: true, placeholder: 'Optional' }))}
+    ${edit(`${e}.h_mm`, 'Height', num(`${e}.h_mm`, 'mm'))}${edit(`${e}.d_mm`, 'Depth', num(`${e}.d_mm`, 'mm'))}${edit(`${e}.w_mm`, 'Width', num(`${e}.w_mm`, 'mm'))}
+    ${edit(`${e}.base_frame.h_mm`, 'Base frame height', num(`${e}.base_frame.h_mm`, 'mm'))}${edit(`${e}.base_frame.d_mm`, 'Base frame depth', num(`${e}.base_frame.d_mm`, 'mm'))}${edit(`${e}.base_frame.w_mm`, 'Base frame width', num(`${e}.base_frame.w_mm`, 'mm'))}
+    ${edit(`${e}.cable_entry`, 'Cable entry', choice(`${e}.cable_entry`, [['top', 'Top'], ['side', 'Side'], ['bottom', 'Bottom']]))}</div>`;
 
   /* ---------- Devices: what the layout placed, read-only ---------- */
   const ROLES = { fopp: 'Fibre patch panel', l2_switch: 'L2 switch', l1_switch: 'L1 switch', ext_switch: 'External switch', firewall: 'Firewall' };

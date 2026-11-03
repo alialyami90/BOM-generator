@@ -31,7 +31,8 @@
     "CableEntry": {
       "enum": [
         "top",
-        "side"
+        "side",
+        "bottom"
       ],
       "title": "CableEntry",
       "type": "string"

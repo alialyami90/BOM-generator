@@ -34,6 +34,7 @@ class PanelKind(StrEnum):
 class CableEntry(StrEnum):
     TOP = "top"
     SIDE = "side"
+    BOTTOM = "bottom"
 
 
 class Ventilation(StrEnum):

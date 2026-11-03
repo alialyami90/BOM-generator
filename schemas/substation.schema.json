@@ -31,7 +31,8 @@
     "CableEntry": {
       "enum": [
         "top",
-        "side"
+        "side",
+        "bottom"
       ],
       "title": "CableEntry",
       "type": "string"
@@ -570,6 +571,13 @@
         "enclosure": {
           "$ref": "#/$defs/Enclosure"
         },
+        "enclosure_by_panel": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Enclosure"
+          },
+          "title": "Enclosure By Panel",
+          "type": "object"
+        },
         "id": {
           "title": "Id",
           "type": "string"
@@ -577,6 +585,13 @@
         "kind": {
           "$ref": "#/$defs/PanelKind",
           "default": "network"
+        },
+        "kind_by_panel": {
+          "additionalProperties": {
+            "$ref": "#/$defs/PanelKind"
+          },
+          "title": "Kind By Panel",
+          "type": "object"
         },
         "options": {
           "additionalProperties": true,
