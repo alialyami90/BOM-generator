@@ -871,3 +871,45 @@ def test_workstation_roles_write_their_type_code_on_the_row(
 
 def test_other_roles_leave_the_row_type_code_to_the_library(example: LoadedSubstation) -> None:
     assert all(d.tag_type is None for p in layout_preview(example).panels for d in p.devices)
+
+
+def test_max_panels_caps_fill() -> None:
+    """M62: with a cap the fill opens no panel past it; a unit that doesn't fit is an
+    error naming the unit and the U short."""
+    units = [x for n in range(1, 18) for x in pair("sw", n)]  # 33 U each side
+    layout = fill(units, replace(RULES, max_panels=2))
+    assert [p.number for p in layout.panels] == [1, 2]
+    assert kinds(layout) == ["panel-limit"]
+    assert layout.issues[0].subject == "sw#17"
+    assert layout.issues[0].message == "sw#17 does not fit in 2 panels: 1 U short"
+
+
+def test_max_panels_takes_a_common_device_in_the_last_panel() -> None:
+    units = [x for n in range(1, 17) for x in pair("sw", n)]  # 31 U each side
+    layout = fill([*units, u("rtac", 1, NONE, h=2, rank=1)], replace(RULES, max_panels=3))
+    assert where(layout)["rtac#1/none"] == 3
+    assert layout.issues == []
+
+
+def test_max_panels_above_the_need_changes_nothing() -> None:
+    units = [x for n in range(1, 18) for x in pair("sw", n)]
+    assert where(fill(units, replace(RULES, max_panels=4))) == where(fill(units, RULES))
+
+
+def test_max_panels_of_one_refuses_a_redundant_pair() -> None:
+    layout = fill([*pair("sw", 1), u("gps", 1, NONE, rank=1)], replace(RULES, max_panels=1))
+    assert where(layout) == {"gps#1/none": 1}
+    assert [(i.kind, i.message) for i in layout.issues] == [
+        ("panel-limit", "sw#1 does not fit in 1 panel: it needs a panel for each side")
+    ]
+
+
+def test_max_panels_of_the_substation_reaches_the_fill(example: LoadedSubstation) -> None:
+    """M62 on the example: its devices fill two panels, so a cap of 2 changes nothing,
+    and a cap of 1 refuses the redundant devices by name."""
+    loaded = example
+    two = layout_preview(loaded, LayoutInputs(max_panels=2))
+    assert [p.id for p in two.panels] == [p.id for p in layout_preview(loaded).panels]
+    one = layout_preview(loaded, LayoutInputs(max_panels=1))
+    assert {i.subject for i in one.report.issues if i.kind == "panel-limit"} >= {"l2#1", "fopp#1"}
+    assert one.report.has_errors

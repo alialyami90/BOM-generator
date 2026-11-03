@@ -19,6 +19,7 @@
     const [kind, a, b, c, d] = key.split('.');
     if (kind === 'n') return [['network', a], NET[a]];
     if (kind === 's') return [['spares', a], SPARES[a][2]];
+    if (kind === 'y') return [['layout', a], 'int'];  // M62: y.max_panels
     if (kind === 'b') return [['catalogue_choice', a], 'choice'];
     if (kind === 'e') return [['equipment', Number(a), b], EQ[b]];
     if (kind === 'l') return [['equipment', Number(a), b], LINK[b]];
@@ -35,6 +36,7 @@
     if (kind === 'n') { const v = p.network[a]; return a === 'ied_count' && !v ? '' : typeof v === 'boolean' ? String(v) : v; }
     if (kind === 's') { const r = p.spares.find((x) => x.key === a); return r ? (a === 'port_fraction' ? pct(r.value) : r.value) : ''; }
     if (kind === 'b') return p.catalogue_choice[a] || '';
+    if (kind === 'y') return p[a] == null ? '' : p[a];
     const r = rowAt(Number(a)); if (!r) return '';
     if (kind === 'e' && b === 'cable_manager') return r.cable_manager ? String(r.cable_manager.on) : '';
     if (kind === 'e') { const v = r[b]; return v == null ? '' : typeof v === 'boolean' ? String(v) : v; }
@@ -302,7 +304,7 @@
   function tuning(p) {
     const ring = shown('n.topology') === 'ring', open = UI.tuning == null ? !p.equipment.length : UI.tuning;
     const sp = (k) => p.spares.find((x) => x.key === k);
-    const summary = `${ring ? `Rings of up to ${shown('n.ring_max_switches')}` : 'Star'} · ${plural(+shown('n.l1_uplinks_per_switch'), 'uplink')} per L1 · ${shown('n.l1_interlink') === 'true' ? 'A–B interlink' : 'no interlink'} · ${shown('s.port_fraction')}% ports kept free · ${shown('s.rack_u_reserved')} U kept free`;
+    const summary = `${ring ? `Rings of up to ${shown('n.ring_max_switches')}` : 'Star'} · ${plural(+shown('n.l1_uplinks_per_switch'), 'uplink')} per L1 · ${shown('n.l1_interlink') === 'true' ? 'A–B interlink' : 'no interlink'} · ${shown('s.port_fraction')}% ports kept free · ${shown('s.rack_u_reserved')} U kept free${shown('y.max_panels') ? ` · at most ${plural(+shown('y.max_panels'), 'panel')}` : ''}`;
     const changedSpare = (k) => { const r = sp(k); if (!r || !r.changed) return 'Project default.'; const d = k === 'port_fraction' ? pct(r.default) : r.default; return `Changed from ${d}${SPARES[k][1] && SPARES[k][1] !== '%' ? ' ' + SPARES[k][1] : SPARES[k][1]}.`; };
     return `<div class="disclosure"><button class="disclosure-head" data-action="pp-tuning" aria-expanded="${open}" aria-controls="ft-body">${icon(open ? 'chevd' : 'chevr')}<b>Network fine tuning</b><span class="muted small">${open ? 'Ring size, uplinks and spares' : esc(summary)}</span></button>
       ${open ? `<div id="ft-body" class="form form--3 disclosure-body">
@@ -311,6 +313,7 @@
         ${mark('n.l1_interlink', field('A–B interlink', select('p-n.l1_interlink', [['true', 'Yes'], ['false', 'No']], shown('n.l1_interlink'))))}
         ${numField('n.l3_uplinks_per_l2', 'L3 uplinks per L2', '')}
         ${Object.entries(SPARES).map(([k, [label, unit]]) => numField(`s.${k}`, label, unit, changedSpare(k))).join('')}
+        ${numField('y.max_panels', 'Most panels', '', 'Empty: as many as the devices need. A device that does not fit is listed on Panels.')}
       </div>` : ''}</div>`;
   }
   function brands(p) {

@@ -273,7 +273,7 @@ Part picking design §3 and §4 (ADR 0024 when M20 lands). All fields write `sub
 | --- | --- | --- | --- |
 | Field IEDs | Number, required | `network.ied_count` | "Enter the number of field IEDs, for example 40." |
 | Topology | Star or Ring (segmented) | `network.topology` | — |
-| Network fine tuning | Number fields in a disclosure: switches per ring (Ring), L1 uplinks per switch, A–B interlink, L3 uplinks per L2, ports kept free (%), DC branches per feed, AC branches, rack U kept free | `network.*`, `spares.*` | As today's Network fields; changed ones are marked |
+| Network fine tuning | Number fields in a disclosure: switches per ring (Ring), L1 uplinks per switch, A–B interlink, L3 uplinks per L2, ports kept free (%), DC branches per feed, AC branches, rack U kept free, most panels (M62; empty: as many as needed) | `network.*`, `spares.*`, `layout.max_panels` | As today's Network fields; changed ones are marked |
 | Part | Device picker filtered to the row's category | `equipment[i].part_id` | "Pick a part from the library." (empty on save) · "Not in psa-devices 1.1.0. Pick another part." |
 | Part number | Text, mono, optional | `equipment[i].ordering_code` | None; empty means the library model is printed, and Checks warns |
 | Qty | Number ≥ 1; "Sized" on L1 and L2 | `equipment[i].qty` | "Enter a whole number, 1 or more." |

@@ -406,3 +406,17 @@ def test_sfp_spare_and_extra_are_set_from_the_parts_page(app: api.Api, project: 
     (sfp,) = row(page["parts"], "l1")["sfp"]
     assert (sfp["spare"]["override"], sfp["extra"], sfp["total"]) == (1, 2, 9)
     assert sfp["rule"] == "6 links + 1 spare + 2 extra"
+
+
+def test_the_panel_cap_is_set_on_parts_and_reported_on_the_board(
+    app: api.Api, project: Path
+) -> None:
+    """M62: Parts writes layout.max_panels; the page and the layout preview give it back."""
+    page = ok(app.parts_page(str(project), "gis01"))
+    assert page["max_panels"] is None
+
+    page = ok(app.set_substation_field(str(project), "gis01", ["layout", "max_panels"], 1))
+
+    assert page["max_panels"] == 1
+    issues = ok(app.substation_layout(str(project), "gis01"))["issues"]
+    assert any("does not fit in 1 panel" in i["message"] for i in issues)

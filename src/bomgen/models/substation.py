@@ -215,6 +215,7 @@ class Layout(InputModel):
     blank_plate_u: NonNegativeInt = 1
     overrides: list[DeviceMove | PairMove] = Field(default_factory=list)
     removed: list[UnitRef] = Field(default_factory=list)  # units left out of the layout
+    max_panels: PositiveInt | None = None  # the most panels the fill may open (plan M62)
 
 
 def _check_number_template(value: str) -> str:

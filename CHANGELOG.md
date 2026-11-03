@@ -17,6 +17,8 @@ project uses [Semantic Versioning](https://semver.org/).
   rule behind it. Set the spare to replace the project's spare SFPs for that speed and media, or add
   extra SFPs; the BOM quantity stays a formula such as `=6+3+2`, and Checks warns when the extras
   need more slots than are free (M49).
+- Parts › Network fine tuning has *Most panels*: the layout opens no panel past it, and Panels lists
+  each device that doesn't fit with the rack units it is short (M62).
 
 ## [0.3.4] - 2026-11-01
 
