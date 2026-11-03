@@ -125,6 +125,36 @@ def test_clearing_the_last_sfp_choice_removes_sfp(project: Path) -> None:
     assert text(project) == before
 
 
+def test_sfp_spare_and_extra_round_trip(project: Path) -> None:
+    assert parts_edit.set_sfp_count(project, "gis01", L1, "1G", "MM", "spare", 5).written
+    assert parts_edit.set_sfp_count(project, "gis01", L1, "1G", "MM", "extra", 2).written
+
+    (choice,) = equipment(project)[L1].sfp
+    assert (choice.part_id, choice.spare, choice.extra) == (None, 5, 2)
+
+
+def test_clearing_the_sfp_part_keeps_its_spare_and_extra(project: Path) -> None:
+    sfp = next(d.part_id for d in load_project(project).library.devices if d.category == "sfp")
+    parts_edit.set_sfp_choice(project, "gis01", L1, "1G", "MM", sfp)
+    parts_edit.set_sfp_count(project, "gis01", L1, "1G", "MM", "extra", 2)
+
+    assert parts_edit.set_sfp_choice(project, "gis01", L1, "1G", "MM", None).written
+
+    (choice,) = equipment(project)[L1].sfp
+    assert (choice.part_id, choice.extra) == (None, 2)
+
+
+def test_clearing_the_sfp_counts_removes_sfp(project: Path) -> None:
+    before = text(project)
+    parts_edit.set_sfp_count(project, "gis01", L1, "1G", "MM", "spare", 0)
+    parts_edit.set_sfp_count(project, "gis01", L1, "1G", "MM", "extra", 2)
+
+    parts_edit.set_sfp_count(project, "gis01", L1, "1G", "MM", "spare", None)
+    parts_edit.set_sfp_count(project, "gis01", L1, "1G", "MM", "extra", 0)
+
+    assert text(project) == before
+
+
 def test_changing_the_part_clears_its_overrides_sfp_choices_and_part_number(
     project: Path,
 ) -> None:
@@ -312,3 +342,20 @@ def test_a_firewall_with_many_sfp_slots_is_seeded_two_sfps() -> None:
     lib = load_project(EXAMPLES / "project.yaml").library
     seeded = parts_edit.link_defaults(lib.get("FGR-60F.CISCO-HIGH"), "firewall")
     assert seeded["port_plan"] == {"downlinks": [{"count": 2, "speed": "1G", "media": "MM"}]}
+
+
+def test_bom_text_fields_round_trip(project: Path) -> None:
+    """M59: purpose, tag, type code, first number and HWIO points are equipment fields."""
+    values = {
+        "purpose": "for the PCC link",
+        "tag": "PSA1-GW-PCC",
+        "tag_type": "PCC",
+        "first_nn": 21,
+        "hwio_points": 12,
+    }
+    for name, value in values.items():
+        path = ("equipment", GW, name)
+        assert fields.set_field(project, path, value, substation="gis01").written
+
+    row = equipment(project)[GW]
+    assert {name: getattr(row, name) for name in values} == values

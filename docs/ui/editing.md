@@ -274,14 +274,16 @@ Part picking design §3 and §4 (ADR 0024 when M20 lands). All fields write `sub
 | --- | --- | --- | --- |
 | Field IEDs | Number, required | `network.ied_count` | "Enter the number of field IEDs, for example 40." |
 | Topology | Star or Ring (segmented) | `network.topology` | — |
-| Network fine tuning | Number fields in a disclosure: switches per ring (Ring), L1 uplinks per switch, A–B interlink, L3 uplinks per L2, ports kept free (%), DC branches per feed, AC branches, rack U kept free | `network.*`, `spares.*` | As today's Network fields; changed ones are marked |
+| Network fine tuning | Number fields in a disclosure: switches per ring (Ring), L1 uplinks per switch, A–B interlink, L3 uplinks per L2, ports kept free (%), DC branches per feed, AC branches, rack U kept free, most panels (M62; empty: as many as needed) | `network.*`, `spares.*`, `layout.max_panels` | As today's Network fields; changed ones are marked |
 | Part | Device picker filtered to the row's category | `equipment[i].part_id` | "Pick a part from the library." (empty on save) · "Not in psa-devices 1.1.0. Pick another part." |
 | Part number | Text, mono, optional | `equipment[i].ordering_code` | None; empty means the library model is printed, and Checks warns |
 | Qty | Number ≥ 1; "Sized" on L1 and L2 | `equipment[i].qty` | "Enter a whole number, 1 or more." |
 | A and B | Checkbox | `equipment[i].redundant` | — |
 | Cable manager | Switch, network rows only; starts at the part category's default | `equipment[i].cable_manager`, written only when it differs from the default | — |
 | Detail values | Height (U), power (W), supply (AC or DC), voltage (V), supplies (0, 1, 2), inrush (A), load type | `equipment[i].overrides.<field>` | The library check's sentence for that field, for example "A part on AC has no second supply: set supplies to 0 or 1." |
+| BOM text (M59) | A disclosure per row: purpose, tag, type code, first number, HWIO points; the placeholders are the generated tags and the library's values; a tag another unit has shows the duplicate-tag sentence on the row | `equipment[i].purpose`, `.tag`, `.tag_type`, `.first_nn`, `.hwio_points` | "Enter a whole number, for example 2." for the numbers |
 | SFP per media and speed | Select, first option automatic | `equipment[i].sfp[]` | "Pick an SFP for 1G multi-mode, or leave it automatic." |
+| SFP spare and extra (M49) | Derived values under each SFP select: Links (read-only), Spare (automatic: the project's spares on L1 rows, else 0), Extra, the total of each BOM row and its rule | `equipment[i].sfp[].spare`, `.extra`; empty spare and extra 0 remove the key | "Enter a whole number, for example 2." |
 | Time accessories | The library part's own accessories, read-only; added ones: quantity, remove; *Add accessory* | `loose_material.items` rows, linked to the time server row by part (M23 decision 2); no `time_accessory` role is written | "Enter a whole number, 1 or more." |
 | Row order | Move up / Move down in the row menu | the order of `equipment` | — |
 | MCB make and series | Two selects (AC, DC) | `catalogue_choice.mcb`, `catalogue_choice.mcb_dc` | As in Settings |

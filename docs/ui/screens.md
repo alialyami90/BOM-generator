@@ -406,8 +406,9 @@ reviewed by the design owner and is the intended behaviour; the prototype in
   - A category the library has no parts for (KVM, console) shows "The library has no
     KVM parts yet." on its row instead of a select, and is disabled in the *Add a
     device* menu with the same sentence.
-  - SFP sub-rows show the media and speed without the engine's count, and the first
-    option reads "Automatic: same make first".
+  - SFP sub-rows show the media and speed, and the first option reads "Automatic: same
+    make first". Under each, the links, spare, extra and total of each BOM row with the
+    rule (M49); spare and extra are derived values set through the save bar.
   - Time accessories write at once, not through the save bar. *Add accessory* needs
     the loose material's host panel; without one the row points to Loose material.
   - At 20 or more rows a row's strip stays open while one of its values is being edited

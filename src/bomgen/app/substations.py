@@ -191,6 +191,7 @@ def _page(
             for e in substation.equipment
         ],
         "network": substation.network,
+        "max_panels": substation.layout.max_panels,  # M62: None lets the fill open any
         "panels": len(loaded.panels) if loaded else None,
         # brand sets: the substation's own choice wins over the project's, key by key
         "catalogue_choice": (

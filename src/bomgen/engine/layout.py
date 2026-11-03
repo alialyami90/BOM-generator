@@ -65,6 +65,7 @@ IssueKind = Literal[
     "waist-height",
     "pin-overlaps",
     "pin-outside-rack",
+    "panel-limit",
 ]
 WARNING_KINDS: frozenset[IssueKind] = frozenset(
     {"stale-override", "stale-removal", "replaced-panel"}
@@ -99,6 +100,7 @@ class LayoutRules:
     capacity_u: int = 32
     blank_plate_u: int = 1
     waist_u: int | None = None  # where a KVM or console's bottom edge goes; None: no anchor
+    max_panels: int | None = None  # the fill opens no panel past it (plan M62)
 
 
 RACK_UNIT_MM = 44.45
@@ -344,6 +346,26 @@ class _Builder:
             self.open_pair()
         return self.panels[number - 1] if 1 <= number <= len(self.panels) else None
 
+    def can_open(self, both: bool) -> bool:
+        """Whether a new pair may open under the panel cap: both its panels, or its A
+        panel only for a common device."""
+        cap = self.rules.max_panels
+        return cap is None or len(self.panels) + (2 if both else 1) <= cap
+
+    def refuse(self, key: str, trials: Iterable[PanelFill]) -> None:
+        """A unit the capped panels cannot take, with the U it is short in the best one."""
+        short = min(
+            used_u(trial.stack(), self.rules.blank_plate_u) - self.rules.capacity_u
+            for trial in trials
+        )
+        self.issues.append(
+            LayoutIssue(
+                "panel-limit",
+                key,
+                f"{key} does not fit in {_panels(self.rules.max_panels)}: {short} U short",
+            )
+        )
+
     def check_height(self, unit: Unit) -> bool:
         if unit.block_u <= self.rules.capacity_u:
             return True
@@ -368,7 +390,18 @@ class _Builder:
                 current[0 if side is Side.A else 1].fits(x, self.rules)
                 for side, x in halves.items()
             )
+            if current is None and not self.can_open(both=True):
+                key = next(iter(halves.values())).key
+                message = f"{key} does not fit in 1 panel: it needs a panel for each side"
+                self.issues.append(LayoutIssue("panel-limit", key, message))
+                continue
             if current is None or not fits or any(tall):
+                if current is not None and not any(tall) and not self.can_open(both=True):
+                    self.refuse(
+                        next(iter(halves.values())).key,
+                        [_with(current[0 if s is Side.A else 1], x) for s, x in halves.items()],
+                    )
+                    continue
                 current = self.open_pair()
             for side, x in halves.items():
                 current[0 if side is Side.A else 1].add(x)
@@ -376,8 +409,13 @@ class _Builder:
     def place_common(self, units: Sequence[Unit]) -> None:
         for unit in sorted(units, key=_order):
             tall = not self.check_height(unit)
-            best = max(self.panels, key=lambda p: (p.free_u(self.rules), -p.number), default=None)
+            cap = self.rules.max_panels
+            usable = [p for p in self.panels if cap is None or p.number <= cap]
+            best = max(usable, key=lambda p: (p.free_u(self.rules), -p.number), default=None)
             if tall or best is None or not best.fits(unit, self.rules):
+                if best is not None and not tall and not self.can_open(both=False):
+                    self.refuse(unit.key, [_with(p, unit) for p in usable])
+                    continue
                 best = self.open_pair()[0]
             best.add(unit)
 
@@ -448,6 +486,14 @@ class _Builder:
                     )
                 )
         return Layout(self.panels, self.issues)
+
+
+def _panels(count: int | None) -> str:
+    return f"{count} panel" + ("" if count == 1 else "s")
+
+
+def _with(panel: PanelFill, unit: Unit) -> PanelFill:
+    return PanelFill(panel.number, [*panel.units, unit], dict(panel.pins), dict(panel.fixed))
 
 
 def _pin_issues(panel: PanelFill, rules: LayoutRules) -> list[LayoutIssue]:
@@ -814,6 +860,8 @@ def _rows(panel: PanelFill, loaded: LoadedSubstation) -> list[DeviceInstance]:
         first = run[0]
         entry = entries[first.device]
         start = first_number(devices[first.part_id]) + first.n - 1 if first.n > 1 else None
+        if entry.first_nn is not None:  # the engineer's first number (plan M59)
+            start = entry.first_nn + first.n - 1
         # the BOM counts a generated panel's managers from the layout (ADR 0013, Q32)
         managed = None
         if devices[first.part_id].category in NETWORK_DEVICES:
@@ -822,7 +870,8 @@ def _rows(panel: PanelFill, loaded: LoadedSubstation) -> list[DeviceInstance]:
             DeviceInstance(
                 part_id=first.part_id,
                 qty=len(run),
-                tag_type=ROLE_TYPES.get(entry.role),
+                tag=entry.tag,
+                tag_type=entry.tag_type or ROLE_TYPES.get(entry.role),
                 purpose=entry.purpose,
                 lan=_LAN[first.side],
                 hwio_points=entry.hwio_points,  # a row total, as on DeviceInstance
@@ -945,6 +994,7 @@ def layout_preview(loaded: LoadedSubstation, overrides: LayoutInputs | None = No
         capacity_u=loaded.panel_capacity_u,
         blank_plate_u=inputs.blank_plate_u,
         waist_u=waist_u(loaded.project.defaults.layout),
+        max_panels=inputs.max_panels,
     )
     plan, net, candidates = _size(loaded)
     issues: list[LayoutIssue] = []

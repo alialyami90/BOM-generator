@@ -183,11 +183,15 @@ class LooseItem(InputModel):
 
 
 class SfpChoice(InputModel):
-    """The SFP model picked for one port speed and media of a switch (ADR 0024)."""
+    """The SFP model picked for one port speed and media of a switch (ADR 0024), and the
+    spare and extra SFPs on each of its BOM rows (plan M49). No ``part_id`` keeps the
+    automatic pick; no ``spare`` keeps the project's."""
 
     speed: SizedSpeed
     media: Media
-    part_id: PartId
+    part_id: PartId | None = None
+    spare: NonNegativeInt | None = None
+    extra: NonNegativeInt = 0
 
 
 AltGroup = Annotated[str, StringConstraints(pattern=r"^[A-Z0-9][A-Z0-9-]*$")]
