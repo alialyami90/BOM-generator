@@ -24,6 +24,10 @@ project uses [Semantic Versioning](https://semver.org/).
   and a tag another unit already has is flagged on the row (M59).
 - A generated panel can have its own enclosure and kind: the panel editor's Enclosure tab gains
   *All generated panels* / *This panel only* and a Kind select, and cable entry gains Bottom (M50).
+- The panel editor's Options tab shows the AC and DC spare breaker ratings with the rule behind
+  them; click one to set your own. Grounding busbars are checkboxes from the library's catalogue.
+  *Alarm on branch MCB trip* can be switched per Parts row and per hand-written panel row, over the
+  library's value (M58).
 
 ## [0.3.4] - 2026-11-01
 

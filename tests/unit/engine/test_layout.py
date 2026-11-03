@@ -974,3 +974,15 @@ def test_equipment_tag_fields_copied_to_generated_rows(example: LoadedSubstation
 
 def result_library(loaded: LoadedSubstation) -> Any:
     return derive_parts(loaded.library, loaded.substation)[0]
+
+
+def test_equipment_alarm_toggle_reaches_the_generated_rows(example: LoadedSubstation) -> None:
+    # Plan M58: Equipment.alarm_on_branch_mcb is written onto the rows the layout makes.
+    equipment = [
+        e.model_copy(update={"alarm_on_branch_mcb": False}) if e.id == "ext-fw" else e
+        for e in example.substation.equipment
+    ]
+    first = layout_substation(with_changes(example, equipment=equipment)).panels[0]
+    fw = next(d for d in first.devices if d.part_id == "FGR-60F")
+    assert fw.alarm_on_branch_mcb is False
+    assert {d.alarm_on_branch_mcb for d in first.devices if d is not fw} == {None}

@@ -41,6 +41,18 @@
       "additionalProperties": false,
       "description": "A device placed in a panel, in group B display order.",
       "properties": {
+        "alarm_on_branch_mcb": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alarm On Branch Mcb"
+        },
         "cable_manager": {
           "anyOf": [
             {
@@ -426,6 +438,19 @@
           "title": "Ac Spare Branches",
           "type": "integer"
         },
+        "ac_spare_rating_a": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ac Spare Rating A"
+        },
         "aux_socket_a": {
           "anyOf": [
             {
@@ -456,6 +481,19 @@
           "minimum": 0,
           "title": "Dc Spare Branches Per Feed",
           "type": "integer"
+        },
+        "dc_spare_rating_a": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dc Spare Rating A"
         },
         "grounding_busbars": {
           "items": {

@@ -10,7 +10,7 @@ from typing import Annotated, Literal
 
 from pydantic import Field, NonNegativeInt, PositiveInt
 
-from bomgen.models.calc import BranchMcb, DcMains, HeatResult, PowerConsumption
+from bomgen.models.calc import BranchMcb, DcMains, HeatResult, PowerConsumption, SpareRatings
 from bomgen.models.output import OutputModel
 from bomgen.models.panel import PanelKind
 
@@ -121,4 +121,5 @@ class BuildResult(OutputModel):
     heat: HeatResult | None = None
     mains: tuple[DcMains, ...] = ()
     branch_mcbs: tuple[BranchMcb, ...] = ()
+    spares: tuple[SpareRatings, ...] = ()  # the spare breakers' rule ratings (plan M58)
     nameplates: tuple[PanelNameplates, ...] = ()  # empty when the library has no nameplate

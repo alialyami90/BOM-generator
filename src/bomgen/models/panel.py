@@ -76,6 +76,7 @@ class DeviceInstance(InputModel):
     hwio_points: NonNegativeInt | None = None  # the row's HWIO total, overriding the library's
     first_nn: PositiveInt | None = None  # first {nn} of the row, continuing a range (ADR 0013)
     cable_manager: bool | None = None  # None: the category's rule (ADR 0013, amended)
+    alarm_on_branch_mcb: bool | None = None  # None: the library's value (plan M58)
 
 
 class PortAllocation(InputModel):
@@ -106,6 +107,8 @@ class PanelOptions(InputModel):
     dc_spare_branches_per_feed: NonNegativeInt = 1
     ac_spare_branches: NonNegativeInt = 1
     main_mcb_override_a: PositiveInt | None = None
+    ac_spare_rating_a: PositiveInt | None = None  # None: the largest housekeeping branch
+    dc_spare_rating_a: PositiveInt | None = None  # None: the largest device branch
     inter_panel_terminals: NonNegativeInt | None = None
     terminal_overrides: dict[str, NonNegativeInt] = Field(default_factory=dict)
     grounding_busbars: list[str] = Field(

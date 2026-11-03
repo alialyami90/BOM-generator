@@ -181,3 +181,20 @@ def test_a_vac_unit_excluded_from_power_gets_no_branch() -> None:
     circuits = with_server(part={"excluded_from_power": True})
     assert circuits.mcbs == 6
     assert circuits.branch_mcbs == []
+
+
+def test_spare_rating_override() -> None:
+    # Plan M58: the panel may set the AC spare's rating; unset, the largest housekeeping branch.
+    rows = build(ac_spare_rating_a=6)
+    assert rows[5] == ("PSA1-C5", "6A, 2P MCB For SPARE", 1, "A9F74206", 0)
+    assert ac(panel([{"part_id": "SW"}]), library(SWITCH), Ventilation.FORCED).rule_spare_a == 2
+
+
+def test_alarm_toggle_on_an_ac_unit_overrides_the_library() -> None:
+    p = panel([{"part_id": "SW"}, {"part_id": "SRV", "alarm_on_branch_mcb": True}])
+    rows = server_table(ac(p, library(SWITCH, SERVER), Ventilation.FORCED))
+    assert rows[-1] == (None, "AC Auxiliary Contacts (for MCB CINC, C2, C3, C5)", 4, 4)
+    off = panel([{"part_id": "SW"}, {"part_id": "SRV", "alarm_on_branch_mcb": False}])
+    alarmed = SERVER | {"alarm_on_branch_mcb": True}
+    rows = server_table(ac(off, library(SWITCH, alarmed), Ventilation.FORCED))
+    assert rows[-1] == (None, "AC Auxiliary Contacts (for MCB CINC, C2, C3)", 3, 3)

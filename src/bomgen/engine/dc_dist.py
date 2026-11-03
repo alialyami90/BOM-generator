@@ -43,6 +43,7 @@ class DcCircuits:
     main_a: int
     rule_main_a: int  # the rating without main_mcb_override_a
     branch_mcbs: list[BranchMcb]
+    rule_spare_a: int = 0  # the spares' rating without dc_spare_rating_a (plan M58)
 
 
 @dataclass(frozen=True)
@@ -151,7 +152,7 @@ def dc_distribution(
         sizing = branch_sizing(row.device, library, constants)
         for unit_tag in row.unit_tags:
             name = short_tag(unit_tag, row.device, panel.tag_prefix)
-            alarm = row.device.alarm_on_branch_mcb
+            alarm = row.alarmed
             branches.append(_Branch(name, sizing.rating_a, alarm, sizing, unit_tag))
     if not branches and not fed:
         return DcCircuits([], 0, 0, 0.0, 0, 0, [])
@@ -159,7 +160,10 @@ def dc_distribution(
     mcb = library.catalogues.dc_mcb
     floor_a = rating_at_least(mcb, constants.min_branch_mcb_a)
     spare_a = max((b.rating for b in branches), default=floor_a)
-    branches += [_Branch("SPARE", spare_a, False, None)] * panel.options.dc_spare_branches_per_feed
+    own_spare_a = panel.options.dc_spare_rating_a or spare_a
+    branches += [
+        _Branch("SPARE", own_spare_a, False, None)
+    ] * panel.options.dc_spare_branches_per_feed
     rule_main_a = rating_at_least(mcb, max(current, constants.min_main_mcb_a))
     main_a = panel.options.main_mcb_override_a or rule_main_a
 
@@ -204,4 +208,5 @@ def dc_distribution(
         main_a=main_a,
         rule_main_a=rule_main_a,
         branch_mcbs=sized,
+        rule_spare_a=spare_a,
     )

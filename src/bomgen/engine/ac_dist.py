@@ -33,6 +33,7 @@ class AcCircuits:
     items: list[BomItem]
     mcbs: int  # breakers including CINC, for the X3-AC strip
     branch_mcbs: list[BranchMcb] = field(default_factory=list)  # the AC units' branches
+    rule_spare_a: int = 0  # the spare's rating without ac_spare_rating_a (plan M58)
 
 
 def ac_distribution(
@@ -56,14 +57,15 @@ def ac_distribution(
     prefix = panel.tag_prefix
     first = len(loads) + 1  # the first AC unit's C number
     units = [
-        (row.device, tag)
+        (row, tag)
         for row in rows
         if row.device.supply_type is SupplyType.VAC and not row.device.excluded_from_power
         for tag in row.unit_tags
     ]
     branch_mcbs: list[BranchMcb] = []
     alarmed_units: list[str] = []
-    for n, (device, tag) in enumerate(units, start=first):
+    for n, (row, tag) in enumerate(units, start=first):
+        device = row.device
         sizing = branch_sizing(device, library, constants)
         name = short_tag(tag, device, prefix)
         loads.append((name, sizing.rating_a))
@@ -76,15 +78,16 @@ def ac_distribution(
                 **sizing.model_dump(),
             )
         )
-        if device.alarm_on_branch_mcb:
+        if row.alarmed:
             alarmed_units.append(f"C{n}")
-    loads += [("SPARE", spare_a)] * panel.options.ac_spare_branches
+    own_spare_a = panel.options.ac_spare_rating_a or spare_a
+    loads += [("SPARE", own_spare_a)] * panel.options.ac_spare_branches
 
     mcb = library.catalogues.mcb  # the AC choice; the DC branches take dc_mcb (ADR 0023)
     cinc_a = CINC_A if socket_a is None else rating_above(mcb, socket_a)
     if branch_mcbs:  # CINC carries the AC units too (ADR 0025)
         largest = max(b.rating_a for b in branch_mcbs)
-        design = sum(unit_current(device, constants) for device, _tag in units)
+        design = sum(unit_current(row.device, constants) for row, _tag in units)
         cinc_a = max(cinc_a, rating_above(mcb, largest), rating_at_least(mcb, design))
     lines = [mcb_line(mcb, Group.E, f"{prefix}-CINC", cinc_a, "Main Auxiliary AC Supply")]
     lines += [
@@ -96,4 +99,4 @@ def ac_distribution(
     description = f"AC Auxiliary Contacts (for MCB {', '.join(alarmed)})"
     hwio = len(alarmed) if alarms_wired(panel) else 0
     lines.append(aux_contact_line(library, Group.E, description, len(alarmed), hwio))
-    return AcCircuits([BomItem(line) for line in lines], len(loads) + 1, branch_mcbs)
+    return AcCircuits([BomItem(line) for line in lines], len(loads) + 1, branch_mcbs, spare_a)

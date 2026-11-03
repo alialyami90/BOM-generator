@@ -27,3 +27,17 @@ def sfp_spare_rule(spare: int, *, l1: bool) -> str:
     if l1:
         return f"{spare}: the project's spare SFPs per L1 row"
     return "0: the project sets spare SFPs on L1 rows only"
+
+
+def ac_spare_rule(rating_a: int) -> str:
+    """An AC spare branch (spec: Derivation rules -> AC distribution, plan M58)."""
+    return f"{rating_a} A: the largest housekeeping branch"
+
+
+def dc_spare_rule(rating_a: int, *, branches: int) -> str:
+    """A DC spare branch on each feed (spec: Derivation rules -> DC distribution, plan M58)."""
+    if not branches:
+        return f"{rating_a} A: the minimum branch MCB"
+    return f"{rating_a} A: the largest of {branches} device branch" + (
+        "" if branches == 1 else "es"
+    )
