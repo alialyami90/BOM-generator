@@ -1092,7 +1092,7 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M62 — Panel count control.** *W4; Q68.* Done (#325). ADR 0013 amendment: `layout.max_panels`
   caps the fill (R5, R6): a pair opens only while both its panels are within the cap, a common device
   only into a panel within it, and a unit that fits nowhere is a `panel-limit` layout error naming the
-  unit and the U it is short. Moves past the cap are unknown panels. "Exactly n" waits on Q68.
+  unit and the U it is short. Moves past the cap are unknown panels. No "Exactly n" (Q68).
 - **M63 — Summary BOM.** *W2; ADR 0035.* Planned.
 - **M64 — Spares list.** *W2; ADR 0035, Q65.* Planned.
 - **M65 — Cable schedule.** *W2; ADR 0035, Q66.* Planned.
@@ -1495,8 +1495,8 @@ spec, or change the spec to 26.25?
 "Sheet 4" is read as the console panel (`kind: console`): the example's sheet 4 is the WS
 console, and the kind names the same cabinet in any project (A1, 2026-11-01).
 
-**Q68 — "Exactly n panels"** (M62). The plan offers Automatic, Exactly n and At most n. The fill
+**Q68 — "Exactly n panels"** (M62). *Answered 2026-11-03: offer At most n only.* The plan offers Automatic, Exactly n and At most n. The fill
 already opens the fewest panels, so Exactly n only differs from At most n when the devices fit in
 fewer: spread them evenly, keep the spare panels empty, or offer At most n only (recommended: the
 Panels board already opens a new pair when a device is dragged onto it). M62 ships At most n
-(`layout.max_panels`) while Ali answers.
+(`layout.max_panels`); there is no `panel_count`.
