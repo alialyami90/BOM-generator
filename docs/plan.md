@@ -1115,11 +1115,11 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M65 — Cable schedule.** *W2; ADR 0035, Q66.* Planned.
 - **M66 — Revision history and recorded issues.** *W2; ADR 0036, Q67.* Planned.
 - **M67 — Record sources and lifecycle.** *W1; ADR 0037 (accepted).* In two PRs so that W5's M53
-  gets the state field early. **M67a** (in review): `state`, `successor`, `sources` and the change
+  gets the state field early. **M67a** (merged, #331): `state`, `successor`, `sources` and the change
   fields on `DeviceType`, the successor reference check, `devices.csv` columns, the schema. **M67b**
-  (in review): a sized change needs its source, the save writes who, when and the note, a
+  (merged, #335): a sized change needs its source, the save writes who, when and the note, a
   library that uses these fields needs this app, every shipped part sourced (psa-devices 1.16.0,
-  Q69), the assumed power and inrush check. **M67c** (planned): the device editor's state,
+  Q69), the assumed power and inrush check. **M67c** (in review): the device editor's state,
   successor and Sources column, the Library state badge and *Assumed values* filter, the Parts chip.
 - **M68 — Review queue and health.** *W1.* Planned.
 - **M69 — Propose from project.** *W1.* Planned.

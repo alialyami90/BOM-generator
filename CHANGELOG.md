@@ -17,6 +17,10 @@ project uses [Semantic Versioning](https://semver.org/).
 - psa-devices 1.16.0: every part says where its power, inrush, height, input voltage and ports
   come from: the device database's datasheet, the contractor's cited document, or assumed with
   the reason. Checks warns when a picked part's power or inrush is assumed (M67b, ADR 0037).
+- The device editor shows a part's state, its successor when obsolete, and a Sources table beside
+  the sized figures; changing a figure asks for its source before you save. Library marks draft,
+  reviewed and obsolete parts and filters to *Assumed values*; Parts badges an assumed power or
+  inrush (M67c, ADR 0037).
 
 - The panel editor's main MCB shows the engine's rating with the rule it came from ("10 A: next
   standard size above 7.1 A, minimum 6 A"); click it to type your own, *Use automatic* to go back

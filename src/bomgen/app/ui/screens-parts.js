@@ -98,6 +98,9 @@
     voltage_v: (v) => (v === '' ? '—' : `${v} V`), power_supplies: (v) => `${v}`, inrush_a: (v) => (v === '' ? '—' : `${v} A`),
     load_type: (v) => ({ CONTINUOUS: 'Continuous', INTERMITTENT: 'Intermittent' })[v] || '—'
   };
+  /* ADR 0037: a figure the library assumes; the title says what it rests on. */
+  const ASSUMED = { unit_power_w: 'Assumed power', inrush_a: 'Assumed inrush' };
+  const assumedChips = (r) => (r.assumed || []).map((a) => `<span title="${esc(`The library assumes this: ${a.ref}. Override it here or confirm it in the library.`)}">${App.badge('warn', ASSUMED[a.field], 'warn')}</span>`).join('');
   const libValue = (r, f) => (r.library[f] == null ? '' : String(r.library[f]));
   function strip(r) {
     if (!r.part_id) return `<div class="prow-strip"><span class="muted small">${r.sized ? 'Pick the switch to change its data.' : 'Pick a part to see its data.'}</span></div>`;
@@ -124,7 +127,7 @@
         resetLabel: `Reset ${label.toLowerCase()} to the library's ${esc(FMT[f](lib))}`, resetTitle: 'Reset to the library value', ...(PF.errors[key] ? { shown: v } : {}) });
     }).join('');
     const errs = fields.map(([f]) => err(`o.${r.index}.${f}`)).join('');
-    return `<div class="prow-strip">${vals}${overridden ? `<button class="btn btn--ghost btn--sm" data-action="pp-reset-all" data-i="${r.index}">Reset all</button>` : ''}</div>${errs ? `<div class="prow-err">${errs}</div>` : ''}`;
+    return `<div class="prow-strip">${vals}${assumedChips(r)}${overridden ? `<button class="btn btn--ghost btn--sm" data-action="pp-reset-all" data-i="${r.index}">Reset all</button>` : ''}</div>${errs ? `<div class="prow-err">${errs}</div>` : ''}`;
   }
 
   /* ---------- one device row ---------- */
