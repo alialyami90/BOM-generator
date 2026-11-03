@@ -375,7 +375,18 @@ def test_settings_names_the_resolved_brand_and_the_register_key() -> None:
     assert "`Same as the project (${from})`" in sub
     assert "const docOpts = (p) => p.documents.map((d) => [d.key, d.key]);" in sub
     # M37 (audit APP-22) puts "Default" back on unchanged rows, as screens.md "Settings" shows.
-    assert "Reset</button>` : '<span class=\"muted small\">Default</span>'}</td></tr>`" in sub
+    # ... and "From the design basis" on one the design basis feeds (plan M52b).
+    assert "=== 'design_basis' ? 'From the design basis' : 'Default'}</span>`}</td></tr>`" in sub
+
+
+def test_settings_opens_the_design_basis_tab_before_general() -> None:
+    """Plan M52b: the design basis tab, its fields written under design_basis."""
+    sub = (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
+    assert "const tabsSettings = [['basis', 'Design basis'], ['general', 'General']," in sub
+    assert "dc_voltage_v: [['design_basis', 'dc_voltage_v'], 'num']" in sub
+    assert "[['design_basis', 'tagging', 'first_numbers', l], 'int']" in sub
+    ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    assert "if (kind === 'list') return [t.split(/[\\s,]+/).filter(Boolean), null];" in ui
 
 
 def test_the_register_rows_are_two_lines() -> None:

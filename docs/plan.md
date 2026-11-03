@@ -1116,8 +1116,10 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M52 — Design basis model and tab.** *W5; ADR 0031.* Split. M52a (model, loader, tags) in review:
   `substation.design_basis`; its voltages feed the constants under the substation's own, and
   `engine/tags.py` reads side letters and first numbers from its `tagging`. A hand-written panel's
-  tags and port-plan keys are written in the file, so they don't follow new side letters. M52b (the
-  tab and `design_basis_page`) planned.
+  tags and port-plan keys are written in the file, so they don't follow new side letters. M52b in
+  review: Settings › *Design basis* tab; the substation page carries `design_basis` (written values,
+  tagging in force, which voltages it feeds) instead of a separate `design_basis_page`. The spares
+  policy and vendor list get their fields with M64 and M53.
 - **M53 — Vendor list and part lifecycle states.** *W5; ADRs 0031 and 0037.* Planned.
 - **M54 — Design-basis checks.** *W5.* Planned.
 - **M55 — Substation templates.** *W5; Q63.* Planned.
