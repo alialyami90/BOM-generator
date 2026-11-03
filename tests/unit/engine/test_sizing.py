@@ -8,17 +8,22 @@ from bomgen.engine.sizing import (
     SizingError,
     SwitchPorts,
     Topology,
+    ied_l2_links,
+    ied_ports_per_side,
     l1_links,
     l1_port_plan,
     l1_reserved_ports,
+    l1_slot_downlinks,
     l2_port_plan,
     pick_l1_switch,
     rank_l1_switches,
     size_network,
+    switch_ports,
     usable_ports,
 )
-from bomgen.models.library import Media, PortSpeed
+from bomgen.models.library import DeviceType, Media, PortSpeed
 from bomgen.models.panel import PortAllocation
+from bomgen.models.substation import IedRow, PortNeed
 
 # 24 fixed IED ports and 4 SFP slots that may take anything (the design's reading).
 L1_ANY = SwitchPorts("L1-ANY", ied=24, uplink=0, any=4)
@@ -208,3 +213,109 @@ def test_r4_ied_count_never_reaches_a_port_plan() -> None:
         text = port_plan.model_dump_json().lower()
         assert "37" not in text
         assert "ied" not in text
+
+
+# The IED schedule (ADR 0034): ports per speed and media per side.
+MM100, RJ1G, RJ100 = (
+    (PortSpeed.M100, Media.MM),
+    (PortSpeed.G1, Media.RJ45),
+    (PortSpeed.M100, Media.RJ45),
+)
+
+
+def l1_device(part_id: str, *groups: dict[str, object]) -> SwitchPorts:
+    uplinks = {"count": 4, "speed": "1G", "kind": "sfp_slot", "usable_for": "uplink"}
+    return switch_ports(
+        DeviceType.model_validate(
+            {
+                "part_id": part_id,
+                "category": "network_switch",
+                "purdue_level": "L1",
+                "make": "M",
+                "model": part_id,
+                "description_template": part_id,
+                "ports": [*groups, uplinks],
+            }
+        )
+    )
+
+
+def group(count: int, speed: str, media: str | None = None) -> dict[str, object]:
+    kind = "sfp_slot" if media is None else "fixed"
+    return {"count": count, "speed": speed, "media": media, "kind": kind, "usable_for": "ied"}
+
+
+L1_MM = l1_device("L1-MM", group(24, "100M", "MM"))
+L1_MIXED = l1_device("L1-MIX", group(20, "100M", "MM"), group(4, "1G", "RJ45"))
+L1_SLOTS = l1_device("L1-SLOTS", group(22, "100M"), group(2, "100M"))
+
+
+def schedule(
+    a: dict[tuple[PortSpeed, Media], int], b: dict[tuple[PortSpeed, Media], int] | None = None
+) -> NetworkInputs:
+    return NetworkInputs(ied_count=0, ied_ports_per_side={"a": a, "b": a if b is None else b})
+
+
+def test_schedule_sums_ports_per_speed_and_media_per_side() -> None:
+    rows = [
+        IedRow(bay="E01", name="P", qty=40),
+        IedRow(bay="E02", name="C", qty=8, ports=[PortNeed(speed=PortSpeed.G1, media=Media.RJ45)]),
+    ]
+    assert ied_ports_per_side(rows) == {"a": {MM100: 40, RJ1G: 8}, "b": {MM100: 40, RJ1G: 8}}
+
+
+def test_single_attached_ied_counts_on_side_a_only() -> None:
+    rows = [IedRow(bay="E01", name="M", qty=3, attachment="single_a", ports=[PortNeed(count=2)])]
+    assert ied_ports_per_side(rows) == {"a": {MM100: 6}, "b": {}}
+
+
+def test_row_landing_on_l2_adds_l2_demand() -> None:
+    rows = [
+        IedRow(bay="E01", name="P", qty=4),
+        IedRow(bay="H01", name="GW", qty=2, lands_on="l2", ports=[PortNeed(speed=PortSpeed.G1)]),
+    ]
+    assert ied_ports_per_side(rows) == {"a": {MM100: 4}, "b": {MM100: 4}}
+    (link_a,) = ied_l2_links(rows, "a")
+    assert (link_a.ports, link_a.speed, link_a.media) == (2, PortSpeed.G1, Media.MM)
+    net = NetworkInputs(ied_count=0)
+    plan = size_network(net, L1_RST, L2_RST, [link_a])
+    assert plan.l2_demand_per_side == 0 + 2
+
+
+def test_quick_count_equals_schedule_of_100m_mm_dual() -> None:
+    for l1 in (L1_MM, L1_SLOTS):
+        quick = size_network(NetworkInputs(ied_count=48), l1, L2_RST, [])
+        scheduled = size_network(schedule({MM100: 48}), l1, L2_RST, [])
+        assert (scheduled.l1_per_side, scheduled.l1_usable_ports) == (
+            quick.l1_per_side,
+            quick.l1_usable_ports,
+        ), l1.part_id
+
+
+def test_schedule_fills_fixed_ports_of_its_media_then_sfp_slots() -> None:
+    # 20 MM and 4 RJ45 per switch: 16 MM and 3 RJ45 usable after the 20 % spare.
+    plan = size_network(schedule({MM100: 40, RJ1G: 8}), L1_MIXED, L2_RST, [])
+    assert plan.l1_per_side == 3  # 8 RJ45 need three switches' 3 ports each
+
+
+def test_schedule_fails_naming_the_speed_and_media_no_port_serves() -> None:
+    with pytest.raises(SizingError, match="1G RJ45"):
+        size_network(schedule({MM100: 40, RJ1G: 8}), L1_MM, L2_RST, [])
+
+
+def test_schedule_ranks_only_switches_that_serve_its_mix() -> None:
+    ranked = rank_l1_switches([L1_MM, L1_MIXED], schedule({MM100: 40, RJ1G: 8}))
+    assert [c.ports.part_id for c in ranked] == ["L1-MIX"]
+    with pytest.raises(SizingError, match="1G RJ45"):
+        pick_l1_switch([L1_MM], schedule({MM100: 40, RJ1G: 8}))
+
+
+def test_single_attached_side_sets_the_l1_count_per_side() -> None:
+    plan = size_network(schedule({MM100: 40}, {MM100: 10}), L1_MM, L2_RST, [])
+    assert plan.l1_per_side == 3  # side A: 40 / 19
+    assert plan.l1_by_side == (3, 1)
+
+
+def test_schedule_ports_on_sfp_slots_become_l1_downlinks() -> None:
+    assert l1_slot_downlinks(L1_SLOTS, 2, {MM100: 30, RJ100: 4}) == {MM100: 30, RJ100: 4}
+    assert l1_slot_downlinks(L1_MM, 2, {MM100: 30}) == {}

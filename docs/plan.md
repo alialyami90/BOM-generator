@@ -255,6 +255,11 @@ equipment:                             # what the layout places (design 3.2)
   #   spare (default spares.sfp_per_l1 on L1, else 0) and extra SFPs on each BOM row (M49)
 network:
   ied_count: 40                        # never a BOM row (R4)
+  ied_schedule:                        # instead of ied_count (ADR 0034, M60): rows of
+    - { bay: E01, name: SEL-411L, qty: 4,  # ports per side; default one 100M MM
+        ports: [{ count: 1, speed: 100M, media: MM }],
+        attachment: dual,                #   dual | single_a | single_b
+        lands_on: l1, notes: "" }        #   l1 | l2 (an L2 row adds to the L2 demand)
   topology: star                       # star | ring
   ring_max_switches: 6
   l1_uplinks_per_switch: 1
@@ -1142,21 +1147,23 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
   and roles (no `qty`, `tag`, `first_nn`) and loose items (no `fed_from`). New substation › Start
   from offers them; Settings › General has *Save as template…*. A loose list's `host_panel` is not
   checked while the substation has no panels, so a new one can carry its loose items.
-- **M56 — Housekeeping editor.** *W3; ADR 0032.* In two PRs. **M56a** (in review): the engine.
+- **M56 — Housekeeping editor.** *W3; ADR 0032.* Done, in two PRs. **M56a** (#340): the engine.
   `PanelOptions.housekeeping` (counts, heater, hygrostat, `branch_ratings`), `smoke_detector` none,
   terminals or supplied, the library's heater, hygrostat and smoke detector roles; branches sized
   from the part's AC watts, never below the spec's rating, each with its rule
   (`BuildResult.housekeeping`); THF adds 3 per fan and 2 per thermostat beyond the spec's kit, and a
-  heater or hygrostat brings its part's own strips. **M56b** (planned): the panel editor's
-  *Cabinet housekeeping* section and the Library roles.
-- **M57 — Terminals tab.** *W3; ADR 0033.* In review. `spares.terminals_fraction` and
+  heater or hygrostat brings its part's own strips. **M56b** (#345): the panel editor's
+  *Cabinet housekeeping* section under Options (counts, heater, hygrostat, each load's breaker as a
+  derived value) and the heater, hygrostat and smoke detector roles in Library › Catalogues. The
+  socket stays a rating; a pick list from the library's sockets is left for later.
+- **M57 — Terminals tab.** *W3; ADR 0033.* Done (#336). `spares.terminals_fraction` and
   `PanelOptions.terminal_block_overrides`; `BuildResult.strips` carries each strip's rule; the panel
   editor's Terminals tab replaces the read-only terminal overrides of Options.
 - **M58 — Grounding, spare breaker ratings, alarm on branch trip.** *W3; spec sentence.* Done (#332).
 - **M59 — BOM text per row on Parts.** *W4.* Done (#326). Equipment gains `tag`, `tag_type` and `first_nn`;
   Parts has a *BOM text* section per row. The hand-written panel editor's tag fields came from W3 in a
   follow-up PR: tag, type code and first number under each Devices row, with the duplicate-tag check.
-- **M60 — IED schedule.** *W4; ADR 0034.* Planned.
+- **M60 — IED schedule.** *W4; ADR 0034.* M60a (model and sizing) in review; M60b (Parts screen, CSV import) planned.
 - **M61 — External links.** *W4; Q64.* Planned.
 - **M62 — Panel count control.** *W4; Q68.* Done (#325). ADR 0013 amendment: `layout.max_panels`
   caps the fill (R5, R6): a pair opens only while both its panels are within the cap, a common device
@@ -1173,14 +1180,18 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
   library that uses these fields needs this app, every shipped part sourced (psa-devices 1.16.0,
   Q69), the assumed power and inrush check. **M67c** (merged, #337): the device editor's state,
   successor and Sources column, the Library state badge and *Assumed values* filter, the Parts chip.
-- **M68 — Review queue and health.** *W1.* In review. `library_store/health.py` measures parts by
+- **M68 — Review queue and health.** *W1.* Merged (#339). `library_store/health.py` measures parts by
   state, assumed figures, parts without an alternative, obsolete parts the projects on this PC pick,
   MCB brand sets missing a rating of the default set, and housekeeping roles the default fills that a
   brand leaves empty. Library gains *Review* (draft and reviewed parts with their missing sources:
   *Mark reviewed*, *Release*, *Send back…* with a note kept on the part) and *Health* (a card per
   measure). Every action is a pending edit; anyone using the app may release, as the app has no
   owner role.
-- **M69 — Propose from project.** *W1.* Planned.
+- **M69 — Propose from project.** *W1.* Merged (#342). Parts: a row with saved overrides has *Propose
+  for the library…*; the dialog picks the value, the source (measured or datasheet) and a reference,
+  and whether a released part stays released. `propose_library_edit` adds the value, its source, a
+  note naming the project and substation, and state draft (unless kept released) to the installed
+  library's pending set; Library › Review lists it. A project on its own library file cannot propose.
 
 ## 5. Testing strategy
 
@@ -1603,3 +1614,10 @@ parts carry the spec's example workbook power, which their datasheet does not st
 Source them as `assumed` naming the workbook (recommended: Parts and Checks then flag them until
 someone confirms the watts), as `datasheet` citing the workbook, or with a fifth source kind for
 the client's documents (amends ADR 0037)? Until Ali answers, M67b ships them as `assumed`.
+
+**Q70 — The quick IED count on mixed-media L1 switches** (M60, ADR 0034 item 4). *Open.* A
+schedule matches each IED port to a switch port of its speed and media (fixed ports their own,
+SFP slots any media of their speed). Should `ied_count` keep today's rule, every IED port counts
+whatever its speed and media (recommended: no project's switch count moves), or act strictly as
+n dual 100M MM IEDs, so copper and 1G IED ports stop counting? The two differ only on L1 switches
+with IED ports of more than one speed or media. Until Ali answers, M60a keeps today's rule.

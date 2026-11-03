@@ -238,6 +238,7 @@ publishing. Release runs never cancel each other; PR runs do.
 | Database checks | `tests/unit/test_device_db.py` (18 tests) | README "Record format", "Field rules", "Checks" | CI |
 | Example library | `examples/library.yaml` | The spec's example workbook plus M14 alternatives | Goldens |
 | Shipped library | `data/library/psa-devices.yaml` | **Generated** by `data/library/build.py` | `release.yml` packs it as psa-devices 1.1.0 |
+| Part sources (ADR 0037) | `sources:` on every shipped part | `build.py` `_source`: the contractor's `sources.csv` row when the delivered value matches, the device-db datasheet when it gives the same value, a tier's basis, else `assumed` naming the example workbook (Q69) | `test_shipped_library.py`; the `part_source` check |
 | Shipped library checks | `tests/unit/test_shipped_library.py` (5 tests), `tests/unit/engine/test_engine_shipped_library.py` (6 tests, #171) | — | CI |
 
 The engine never reads `data/device-db/` directly. The M14 generator is
@@ -378,6 +379,12 @@ ADR 0008, ADR 0018.
   for the Datasheet tab; #170 ADR 0018 amendment "device-record edits"; #179 `catalogues.mcb_dc` in the
   CSV as the `default_dc` row, `plain_message` row messages, "Compared with … Saving makes …" wording;
   #165 `ac_rated` CSV column and brand sets counted in `diff_libraries`.
+- M67–M69 (ADR 0037, #331, #335, #337, #339, #342): a part's `state`, `successor`, `sources` per
+  sized field and `changed_by`/`changed_on`/`note`. `save_local_version` refuses a sized change
+  without its source and stamps the parts it touched (a note the set gives a part is kept); a library
+  using these fields raises `min_app_version`. `health.py` measures states, assumed figures, parts
+  without an alternative, obsolete parts in use on this PC, MCB and housekeeping brand gaps (Library ›
+  Review and Health). Parts' *Propose for the library…* calls `propose_library_edit`.
 
 | Module (API re-exported in `__init__.py`) | What it holds |
 | --- | --- |
@@ -559,11 +566,11 @@ consume `BuildResult`.
 | `engine/enclosure.py` | group A: the enclosure row |
 | `engine/kits.py` | step 2: device rows with kit children (group B), and `loose_table` (None with no rows) |
 | `engine/network.py` | group C: SFPs, cable managers, serial cables |
-| `engine/housekeeping.py` | group D: lamp, fans, filters, thermostats, IPR kit, change-over diodes, socket |
-| `engine/ac_dist.py` | group E: CINC and the AC branches, from `catalogues.mcb` |
+| `engine/housekeeping.py` | group D: lamp, fans, filters, thermostats, heater, hygrostat, smoke detector, IPR kit, change-over diodes, socket; `kit_counts` reads `options.housekeeping` over the spec's kit (ADR 0032) |
+| `engine/ac_dist.py` | group E: CINC and the AC branches, from `catalogues.mcb`; `housekeeping_branches` rates each kit branch from `branch_ratings`, the part's AC watts or the spec's value, with its rule (`BuildResult.housekeeping`) |
 | `engine/dc_dist.py` | group F: Q1/Q2 mains, Q1.n/Q2.n branches, spares, QCODs, `branch_sizing` (ADR 0019), all from `catalogues.dc_mcb` (ADR 0023) |
 | `engine/mcb.py` | `rating_at_least`, `rating_above`, `mcb_line` take an `McbCatalogue`; aux contact rows; `alarms_wired` |
-| `engine/terminals.py` | group G: terminal strips (X1, X3-AC, X4-DC1/DC2, XDIN, …); `unit_strips` for the preview |
+| `engine/terminals.py` | group G: terminal strips (X1, X3-AC, X4-DC1/DC2, XDIN, …); `strip_table` gives each strip its rule, the spare fraction and the panel's quantity and block overrides (ADR 0033, `BuildResult.strips`); THF follows the kit (ADR 0032); `unit_strips` for the preview |
 | `engine/grounding.py` | group H: grounding busbars |
 | `engine/nameplates.py` | group H: the nameplate row (last) and each plate's text, the MCB short tag (M26, ADR 0026) |
 | `engine/preview.py` | `device_preview(loaded, overrides)`: every unit with its U, MCBs (`BranchMcb.unit_tag`, `feed`) and strips (M24) |

@@ -2,18 +2,20 @@
 
 Pure functions on small value types; ``engine.layout`` maps the substation onto them.
 Every count here is per side: each IED has an A port and a B port, so ``ied_count``
-IEDs need ``ied_count`` ports on each side.
+IEDs need ``ied_count`` ports on each side. An IED schedule (ADR 0034) gives the ports
+per side by speed and media instead, and the L1 switches are sized against their port
+groups: fixed ports serve their own speed and media, SFP slots any media of their speed.
 """
 
 import math
-from collections.abc import Iterable, Sequence
-from dataclasses import dataclass
+from collections.abc import Iterable, Mapping, Sequence
+from dataclasses import dataclass, field
 from fractions import Fraction
 
 from bomgen.engine.errors import EngineError
-from bomgen.models.library import DeviceType, Media, PortSpeed, PortUse
+from bomgen.models.library import DeviceType, Media, PortKind, PortSpeed, PortUse
 from bomgen.models.panel import PortAllocation, PortPlan
-from bomgen.models.substation import Topology
+from bomgen.models.substation import IedRow, Topology
 
 __all__ = [
     "L1Candidate",
@@ -23,9 +25,12 @@ __all__ = [
     "SizingError",
     "SwitchPorts",
     "Topology",
+    "ied_l2_links",
+    "ied_ports_per_side",
     "l1_links",
     "l1_port_plan",
     "l1_reserved_ports",
+    "l1_slot_downlinks",
     "l2_port_plan",
     "pick_l1_switch",
     "rank_l1_switches",
@@ -39,6 +44,20 @@ class SizingError(EngineError):
     """The network inputs cannot be met by the chosen switches."""
 
 
+Need = tuple[PortSpeed, Media]
+SideKey = str  # "a" or "b"
+
+
+@dataclass(frozen=True)
+class PortPool:
+    """A switch's ports of one speed: fixed ports of one media, or SFP slots (media None)."""
+
+    speed: PortSpeed
+    media: Media | None
+    use: PortUse
+    count: int
+
+
 @dataclass(frozen=True)
 class SwitchPorts:
     """A switch's port count by what each port may connect (library ``usable_for``)."""
@@ -47,6 +66,7 @@ class SwitchPorts:
     ied: int
     uplink: int
     any: int
+    pools: tuple[PortPool, ...] = ()
 
     @property
     def total(self) -> int:
@@ -62,6 +82,8 @@ class NetworkInputs:
     l1_interlink: bool = True
     l3_uplinks_per_l2: int = 2
     port_fraction: float = 0.20
+    # IED ports per side by speed and media, from the schedule; None: the quick count
+    ied_ports_per_side: Mapping[SideKey, Mapping[Need, int]] | None = None
 
 
 @dataclass(frozen=True)
@@ -88,6 +110,7 @@ class NetworkPlan:
     l2_per_side: int
     l2_usable_ports: int
     l2_demand_per_side: int
+    l1_by_side: tuple[int, int] = field(default=(0, 0))  # L1 switches sides A and B need
 
 
 @dataclass(frozen=True)
@@ -103,9 +126,137 @@ def switch_ports(device: DeviceType) -> SwitchPorts:
     counts = dict.fromkeys(PortUse, 0)
     for group in device.ports:
         counts[group.usable_for] += group.count
-    return SwitchPorts(
-        device.part_id, counts[PortUse.IED], counts[PortUse.UPLINK], counts[PortUse.ANY]
+    pools = tuple(
+        PortPool(g.speed, None if g.kind is PortKind.SFP_SLOT else g.media, g.usable_for, g.count)
+        for g in device.ports
     )
+    return SwitchPorts(
+        device.part_id, counts[PortUse.IED], counts[PortUse.UPLINK], counts[PortUse.ANY], pools
+    )
+
+
+def ied_ports_per_side(rows: Iterable[IedRow]) -> dict[SideKey, dict[Need, int]]:
+    """Ports each side's L1 switches take for the schedule rows landing on L1."""
+    sides: dict[SideKey, dict[Need, int]] = {"a": {}, "b": {}}
+    for row in rows:
+        if row.lands_on != "l1":
+            continue
+        for side in _sides(row):
+            for need in row.ports:
+                key = (need.speed, need.media)
+                sides[side][key] = sides[side].get(key, 0) + row.qty * need.count
+    return sides
+
+
+def ied_l2_links(rows: Iterable[IedRow], side: SideKey) -> list["L2Link"]:
+    """The schedule rows landing on L2 directly, as one side's L2 links."""
+    return [
+        L2Link(f"{row.bay} {row.name}", row.qty * need.count, need.speed, need.media)
+        for row in rows
+        if row.lands_on == "l2" and side in _sides(row)
+        for need in row.ports
+    ]
+
+
+def _sides(row: IedRow) -> tuple[SideKey, ...]:
+    return {"dual": ("a", "b"), "single_a": ("a",), "single_b": ("b",)}[row.attachment]
+
+
+def _need_text(need: Need) -> str:
+    return f"{need[0].value} {need[1].value}"
+
+
+def _ied_pools(
+    ports: SwitchPorts, net: NetworkInputs
+) -> dict[tuple[PortSpeed, Media | None], tuple[int, int]]:
+    """Per switch, the IED ports by speed and media (None: SFP slots) as (all, usable):
+    the reserved ports come off the uplink ports first, then the shared ports in order."""
+    left = max(0, l1_reserved_ports(net) - ports.uplink)
+    raw: dict[tuple[PortSpeed, Media | None], int] = {}
+    for pool in ports.pools:
+        if pool.use is PortUse.UPLINK:
+            continue
+        count = pool.count
+        if pool.use is PortUse.ANY:
+            taken = min(left, count)
+            left -= taken
+            count -= taken
+        if count:
+            key = (pool.speed, pool.media)
+            raw[key] = raw.get(key, 0) + count
+    keep = 1 - Fraction(str(net.port_fraction))
+    return {key: (n, math.floor(n * keep)) for key, n in raw.items()}
+
+
+def _overflow(
+    pools: Mapping[tuple[PortSpeed, Media | None], tuple[int, int]],
+    n: int,
+    demand: Mapping[Need, int],
+    *,
+    usable: bool,
+) -> dict[Need, int]:
+    """The demand ``n`` switches' fixed ports leave for their SFP slots."""
+    pick = 1 if usable else 0
+    return {
+        need: over
+        for need, count in demand.items()
+        if (over := count - n * pools.get(need, (0, 0))[pick]) > 0
+    }
+
+
+def _fits(
+    pools: Mapping[tuple[PortSpeed, Media | None], tuple[int, int]],
+    n: int,
+    demand: Mapping[Need, int],
+) -> bool:
+    slots: dict[PortSpeed, int] = {}
+    for (speed, _), over in _overflow(pools, n, demand, usable=True).items():
+        slots[speed] = slots.get(speed, 0) + over
+    return all(over <= n * pools.get((speed, None), (0, 0))[1] for speed, over in slots.items())
+
+
+def _unserved(
+    pools: Mapping[tuple[PortSpeed, Media | None], tuple[int, int]], demand: Mapping[Need, int]
+) -> list[Need]:
+    return [
+        need
+        for need, count in demand.items()
+        if count and not (pools.get(need, (0, 0))[1] or pools.get((need[0], None), (0, 0))[1])
+    ]
+
+
+def _scheduled_count(ports: SwitchPorts, net: NetworkInputs, demand: Mapping[Need, int]) -> int:
+    """The fewest switches whose usable ports take one side's scheduled demand."""
+    demand = {need: count for need, count in demand.items() if count}
+    if not demand:
+        return 0
+    pools = _ied_pools(ports, net)
+    unserved = _unserved(pools, demand)
+    if unserved:
+        names = ", ".join(_need_text(need) for need in unserved)
+        raise SizingError(f"L1 switch {ports.part_id} has no usable port for {names} IEDs")
+    n = math.ceil(sum(demand.values()) / sum(u for _, u in pools.values()))
+    while not _fits(pools, n, demand):
+        n += 1
+    return n
+
+
+def _l1_by_side(ports: SwitchPorts, net: NetworkInputs) -> tuple[int, int]:
+    """L1 switches each side needs (A, B)."""
+    if net.ied_ports_per_side is None:
+        usable = _l1_usable(ports, net)
+        n = math.ceil(net.ied_count / usable) if net.ied_count else 0
+        return (n, n)
+    sides = net.ied_ports_per_side
+    a, b = (_scheduled_count(ports, net, sides.get(side, {})) for side in ("a", "b"))
+    return (a, b)
+
+
+def l1_slot_downlinks(ports: SwitchPorts, n: int, demand: Mapping[Need, int]) -> dict[Need, int]:
+    """One side's scheduled IED ports that land on the ``n`` L1 switches' SFP slots: the
+    demand their fixed ports of the same speed and media do not take (ADR 0034, item 3)."""
+    pools = _ied_pools(ports, NetworkInputs(ied_count=0))
+    return _overflow(pools, n, demand, usable=False)
 
 
 def l1_reserved_ports(net: NetworkInputs) -> int:
@@ -130,6 +281,8 @@ def l1_links(n_l1: int, net: NetworkInputs) -> int:
 
 
 def _l1_usable(ports: SwitchPorts, net: NetworkInputs) -> int:
+    if net.ied_ports_per_side is not None:
+        return sum(u for _, u in _ied_pools(ports, net).values())
     return usable_ports(ports, reserved=l1_reserved_ports(net), port_fraction=net.port_fraction)
 
 
@@ -138,13 +291,32 @@ def rank_l1_switches(candidates: Iterable[SwitchPorts], net: NetworkInputs) -> l
     ranked = []
     for ports in candidates:
         usable = _l1_usable(ports, net)
-        if usable > 0:
+        if usable <= 0:
+            continue
+        if net.ied_ports_per_side is None:
             ranked.append(L1Candidate(ports, math.ceil(net.ied_count / usable), usable))
+            continue
+        try:
+            ranked.append(L1Candidate(ports, max(_l1_by_side(ports, net)), usable))
+        except SizingError:  # its ports don't serve the schedule's mix
+            continue
     return sorted(ranked, key=lambda c: (c.per_side, c.ports.total, c.ports.part_id))
 
 
 def pick_l1_switch(candidates: Iterable[SwitchPorts], net: NetworkInputs) -> SwitchPorts:
+    candidates = list(candidates)
     ranked = rank_l1_switches(candidates, net)
+    if not ranked and net.ied_ports_per_side is not None:
+        demand = {n: c for side in net.ied_ports_per_side.values() for n, c in side.items() if c}
+        served = {
+            need
+            for ports in candidates
+            for need in demand
+            if need not in _unserved(_ied_pools(ports, net), {need: 1})
+        }
+        missing = ", ".join(_need_text(n) for n in demand if n not in served)
+        if missing:
+            raise SizingError(f"no L1 switch in the library has a usable port for {missing} IEDs")
     if not ranked:
         raise SizingError("no L1 switch in the library has a port left for IEDs")
     return ranked[0].ports
@@ -160,7 +332,8 @@ def size_network(
             f"L1 switch {l1.part_id} has no port left for IEDs after "
             f"{l1_reserved_ports(net)} reserved and {net.port_fraction:.0%} spare"
         )
-    n_l1 = math.ceil(net.ied_count / l1_usable) if net.ied_count else 0
+    by_side = _l1_by_side(l1, net)
+    n_l1 = max(by_side)
     links_l1 = l1_links(n_l1, net)
     rings = math.ceil(n_l1 / net.ring_max_switches) if net.topology is Topology.RING else 0
     l2_usable = usable_ports(l2, reserved=net.l3_uplinks_per_l2, port_fraction=net.port_fraction)
@@ -181,6 +354,7 @@ def size_network(
         l2_per_side=max(1, math.ceil(demand / l2_usable)),
         l2_usable_ports=l2_usable,
         l2_demand_per_side=demand,
+        l1_by_side=by_side,
     )
 
 

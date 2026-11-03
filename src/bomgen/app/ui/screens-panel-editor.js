@@ -32,6 +32,9 @@
   const OPT = { dc_spare_branches_per_feed: 'int', ac_spare_branches: 'int', ventilation: 'choice', change_over_diodes: 'choice', main_mcb_override_a: 'int', ac_spare_rating_a: 'int', dc_spare_rating_a: 'int', aux_socket_a: 'int', inter_panel_terminals: 'int', smoke_detector: 'choice' };
   const PORT = { count: 'int', speed: 'choice', media: 'choice', spare: 'int' };
   const TERM = { t: 'terminal_overrides', tb: 'terminal_block_overrides' };  // t.<all|panel>.<strip>, tb.… (ADR 0033)
+  /* hk.<all|panel>.<field>[.<load>]: the housekeeping kit (ADR 0032); a panel's own kit replaces the shared one. */
+  const HK = { lamps: 'int', fans: 'int', thermostats_forced: 'int', thermostats_natural: 'int', filters: 'int', heater: 'choice', hygrostat: 'choice', branch_ratings: 'int' };
+  const dig = (o, path) => path.reduce((x, k) => (x == null ? x : x[k]), o);
   function spec(key) {  // [path in substation.yaml, kind]
     const [k, a, ...r] = key.split('.');
     if (k === 'e') { const f = [a, ...r].join('.'); return ENC[f] ? [['generated_panels', 'enclosure', ...f.split('.')], ENC[f]] : null; }
@@ -41,6 +44,7 @@
     if (k === 'g') return [['generated_panels', a], 'text'];  // a numbering pattern every generated panel shares
     if (k === 'o') return OPT[r[0]] ? [a === 'all' ? ['generated_panels', 'options', r[0]] : ['generated_panels', 'options_by_panel', Number(a), r[0]], OPT[r[0]]] : null;
     if (k === 't' || k === 'tb') return [[...(a === 'all' ? ['generated_panels', 'options'] : ['generated_panels', 'options_by_panel', Number(a)]), TERM[k], r.join('.')], k === 't' ? 'int' : 'choice'];  // ADR 0033
+    if (k === 'hk') return [[...(a === 'all' ? ['generated_panels', 'options'] : ['generated_panels', 'options_by_panel', Number(a)]), 'housekeeping', ...r], HK[r[0]]];  // ADR 0032
     if (k === 'p' && r[0] === 'serial_ports') return [['equipment', Number(a), 'port_plan', 'serial_ports'], 'int'];
     if (k === 'p' && PORT[r[2]]) return [['equipment', Number(a), 'port_plan', r[0], Number(r[1]), r[2]], PORT[r[2]]];
     return null;
@@ -57,6 +61,10 @@
       const o = p.options.find((x) => x.key === r[0]); if (!o) return '';
       return a === 'all' ? str(o.shared) : o.own && Number(a) === p.panel.number ? str(o.value) : '';
     }
+    if (k === 'hk') {
+      const o = p.options.find((x) => x.key === 'housekeeping');
+      return a === 'all' ? str(dig(o.shared, r)) : o.own && Number(a) === p.panel.number ? str(dig(o.value, r)) : '';
+    }
     if (k === 't' || k === 'tb') {
       const o = p.options.find((x) => x.key === TERM[k]), code = r.join('.');
       return a === 'all' ? str(o.shared[code]) : o.own && Number(a) === p.panel.number ? str(o.value[code]) : '';
@@ -71,7 +79,7 @@
     return '';
   }
   /* change_over_diodes is auto, true or false; the select gives text. */
-  const typed = (path, value) => (['change_over_diodes', 'alarm_on_branch_mcb'].includes(path[path.length - 1]) && (value === 'true' || value === 'false') ? value === 'true' : value);
+  const typed = (path, value) => (['change_over_diodes', 'alarm_on_branch_mcb', 'heater', 'hygrostat'].includes(path[path.length - 1]) && (value === 'true' || value === 'false') ? value === 'true' : value);
   const PD = App.draftForm({
     prefix: 'pe-', screen: 'panels', file: 'substation.yaml', label: 'Save the panel', spec, saved,
     check: (path, value) => Bridge.call('check_substation_field', S.project.file, S.sub, path, typed(path, value)),
@@ -90,6 +98,7 @@
     if (k === 'o') return OPT[a] ? [['options', a], OPT[a]] : null;
     if (k === 'd') return DEV[r[0]] ? [['devices', Number(a), r[0]], DEV[r[0]]] : null;
     if (k === 't' || k === 'tb') return [['options', TERM[k], [a, ...r].join('.')], k === 't' ? 'int' : 'choice'];
+    if (k === 'hk') return HK[a] ? [['options', 'housekeeping', a, ...r], HK[a]] : null;
     return null;
   }
   function hSaved(key) {
@@ -101,6 +110,7 @@
     if (k === 'o') { const o = p.options.find((x) => x.key === a); return o && o.own ? str(o.value) : ''; }
     if (k === 'd') { const d = p.devices[Number(a)]; return d ? str(d[r[0]]) : ''; }
     if (k === 't' || k === 'tb') { const o = p.options.find((x) => x.key === TERM[k]); return o && o.own ? str(o.value[[a, ...r].join('.')]) : ''; }
+    if (k === 'hk') { const o = p.options.find((x) => x.key === 'housekeeping'); return o && o.own ? str(dig(o.value, [a, ...r])) : ''; }
     return '';
   }
   let hPanel = '';  // the hand-written panel the draft belongs to
@@ -148,7 +158,7 @@
   /* ---------- the page ---------- */
   const TABS = [['enclosure', 'Enclosure'], ['devices', 'Devices'], ['ports', 'Port plans'], ['options', 'Options'], ['terminals', 'Terminals'], ['document', 'Document'], ['yaml', 'YAML']];
   const KIND = { network: 'Network', control: 'Control', console: 'Console' };
-  const TAB_OF = (key) => ({ c: 'enclosure', e: 'enclosure', eo: 'enclosure', kind: 'enclosure', g: 'enclosure', doc: 'document', o: 'options', t: 'terminals', tb: 'terminals', p: 'ports', d: 'devices' })[key.split('.')[0]];
+  const TAB_OF = (key) => ({ c: 'enclosure', e: 'enclosure', eo: 'enclosure', kind: 'enclosure', g: 'enclosure', doc: 'document', o: 'options', hk: 'options', t: 'terminals', tb: 'terminals', p: 'ports', d: 'devices' })[key.split('.')[0]];
   function tabMark(tab) {
     const bad = Object.keys(F.errors).filter((k) => TAB_OF(k) === tab).length, n = Object.keys(F.draft).filter((k) => TAB_OF(k) === tab).length;
     if (bad) return ` <span class="dot dot--bad" aria-hidden="true"></span><span class="sr-only">(${bad} to fix)</span>`;
@@ -284,7 +294,7 @@
       const ctl = Array.isArray(kind) ? choice(key, [['', `Default: ${shownValue(o.shared, kind)}`], ...kind]) : num(key, kind, { placeholder: `Default: ${str(o.shared) || 'none'}` });
       const note = o.own ? `${badge('info', `Own value · default ${shownValue(o.shared, kind)}`)} <button class="btn btn--ghost btn--sm" data-action="ph-use-default" data-key="${key}">Use the default</button>` : '';
       return edit(key, esc(label), ctl, [help || '', note].filter(Boolean).join(' '));
-    }).join('')}</div>${busbars(p, false)}`;
+    }).join('')}</div>${busbars(p, false)}${kitSection(p, '', false)}`;
   }
   ACTIONS['ph-use-default'] = (el) => { HD.set(el.dataset.key, ''); S.dirty = true; App.render(); };
   /* Delete panel…: the writer refuses while something still names the panel; Undo writes the copy back. */
@@ -395,7 +405,7 @@
       return edit(key, esc(label), ctl, [help || '', note].filter(Boolean).join(' '));
     }).join('');
     return `${scopeField(own, `${own ? `Values you set are kept for ${esc(p.panel.cabinet_name)} only and marked Own value.` : 'Values you set apply to every generated panel that has no value of its own.'}${owned.length ? ` This panel has ${plural(owned.length, 'own value')}.` : ''}`)}
-      <div class="form form--2">${rows}</div>${busbars(p, own)}`;
+      <div class="form form--2">${rows}</div>${busbars(p, own)}${kitSection(p, `${own ? p.panel.number : 'all'}.`, own)}`;
   }
   const scopeField = (own, help) => `<div class="field" style="margin-bottom:var(--space-4)"><span class="label" id="pe-scope-l">Apply to</span><div class="segmented" role="radiogroup" aria-labelledby="pe-scope-l">
         <label><input type="radio" name="pe-scope" value="all" data-action="pe-scope" ${own ? '' : 'checked'}><span>All generated panels</span></label><label><input type="radio" name="pe-scope" value="own" data-action="pe-scope" ${own ? 'checked' : ''}><span>This panel only</span></label></div>
@@ -432,10 +442,10 @@
   const stripTable = (p, block, qty, changed = () => false) => `<div class="table-wrap"><table class="table"><thead><tr><th>Strip</th><th style="width:220px">Block type</th><th>Quantity</th></tr></thead>
     <tbody>${p.terminals.map((s) => `<tr${changed(s) ? ' class="is-changed"' : ''}><td><span class="mono">${esc(s.code)}</span><span class="cell-sub">${esc(s.description)}</span></td><td>${block(s)}</td><td>${qty(s)}</td></tr>`).join('')}</tbody></table>
     <div class="table-foot"><span>${plural(p.terminals.length, 'strip')}</span><span>The spare terminals of Project settings are added to the wiring strips. Strips a device brings stay as its part gives them.</span></div></div>`;
-  function stripQty(key, d, inherited) {
-    if (PE.dv === key) return App.derived(key, { editing: true, id: PFX + key, label: 'Quantity', rule: d.rule, control: num(key, '').replace('<input ', `<input data-pdv="${key}" `) });
-    const eff = str(F.shown(key)) || str(inherited);
-    return App.derived(key, { label: 'Quantity', shown: eff || String(d.value), auto: String(d.value), overridden: !!eff, changed: key in F.draft, bad: !!F.errors[key], rule: d.rule, edit: 'pe-dv-edit', reset: 'pe-dv-reset' });
+  function stripQty(key, d, inherited, label = 'Quantity', unit = '') {
+    if (PE.dv === key) return App.derived(key, { editing: true, id: PFX + key, label, rule: d.rule, control: num(key, unit).replace('<input ', `<input data-pdv="${key}" `) });
+    const eff = str(F.shown(key)) || str(inherited), u = unit ? ` ${unit}` : '';
+    return App.derived(key, { label, shown: `${eff || d.value}${u}`, auto: `${d.value}${u}`, overridden: !!eff, changed: key in F.draft, bad: !!F.errors[key], rule: d.rule, edit: 'pe-dv-edit', reset: 'pe-dv-reset' });
   }
   function terminals(p) {
     if (!p.terminals.length) return `<p class="muted">${p.engine_error ? 'The strips show once the engine runs on this substation.' : 'This panel has no terminal strips.'}</p>`;
@@ -449,6 +459,25 @@
     }, (s) => { const key = `t.${pre}${s.code}`, bad = err(key) || err(`tb.${pre}${s.code}`);
       return stripQty(key, s.qty, inherited(ov, s.code)) + (bad ? `<span class="err small">${icon('error')}<span>${esc(bad)}</span></span>` : '');
     }, (s) => `t.${pre}${s.code}` in F.draft || `tb.${pre}${s.code}` in F.draft);
+  }
+
+  /* ---------- Cabinet housekeeping (ADR 0032): the kit's counts, heater and hygrostat, each load's breaker ---------- */
+  const KIT = [['lamps', 'Lamps'], ['fans', 'Fans', 'With fans'], ['thermostats_forced', 'Thermostats with fans'], ['thermostats_natural', 'Thermostats with filters'], ['filters', 'Vent filters', 'With filters']];
+  const LOADS = { lamp: 'Lamp breaker', fan: 'Fan and thermostat breaker', thermostat: 'Thermostat breaker', heater: 'Heater breaker' };
+  function kitSection(p, pre, own) {
+    const hk = p.housekeeping, o = p.options.find((x) => x.key === 'housekeeping'), inh = (path) => (own && !o.own ? str(dig(o.shared, path)) : '');
+    const shownBool = (v) => (v === true || v === 'true' ? 'Yes' : 'No');
+    const counts = KIT.map(([f, label]) => { const key = `hk.${pre}${f}`, i = inh([f]);
+      return edit(key, esc(label), num(key, '', { placeholder: i ? `Shared: ${i}` : `Spec: ${hk.defaults[f]}` })); }).join('');
+    const extras = [['heater', 'Heater'], ['hygrostat', 'Hygrostat']].map(([f, label]) => { const key = `hk.${pre}${f}`;
+      if (!hk.roles[f]) return field(esc(label), `<span class="muted small">The library has no ${f} part. Add one under Library › Catalogues › Housekeeping.</span>`);
+      return edit(key, esc(label), choice(key, [['', `${own && !o.own ? 'Shared' : 'Default'}: ${shownBool(inh([f]) || false)}`], ['true', 'Yes'], ['false', 'No']]), f === 'heater' ? 'Adds its row, its own breaker and its strips.' : ''); }).join('');
+    const ratings = Object.keys(LOADS).filter((k) => hk.ratings[k]).map((k) => { const key = `hk.${pre}branch_ratings.${k}`;
+      return edit(key, LOADS[k], stripQty(key, hk.ratings[k], inh(['branch_ratings', k]), 'Rating', 'A'), 'Click the rating to type your own.'); }).join('');
+    const note = !p.panel.generated ? '' : own && o.own ? ` ${badge('info', 'Own value')} Once this panel has its own kit, the shared one no longer reaches it.` : !own && o.own ? ' <span class="muted small">This panel has its own kit.</span>' : '';
+    return `<section class="section" style="margin-top:var(--space-5)"><h3>Cabinet housekeeping</h3>
+      <p class="lede">Empty counts use the spec's kit. Fans or filters follow the ventilation.${note}</p>
+      <div class="form form--3">${counts}${extras}</div><div class="form form--2" style="margin-top:var(--space-3)">${ratings}</div></section>`;
   }
 
   /* ---------- Document ---------- */

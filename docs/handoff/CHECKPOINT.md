@@ -3,6 +3,33 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-11-03: W3 Panel detailing, M50, M58, M57, M56 merged (W3)
+
+- **Base:** main `26b9f4a` (#345). Docs-only PR.
+- **Done:** M50 per-panel enclosure and kind (#322), M58 grounding, spare breaker ratings and alarm
+  on branch trip (#332), the M59 follow-up with tag fields on hand-written panel rows (#334), M57
+  Terminals tab (#336, ADR 0033), M56 housekeeping as inputs in two PRs, M56a engine (#340) and
+  M56b panel editor and Library roles (#345, ADR 0032). Spec sentences for M50, M58, M57 and M56
+  are in. Screenshots in `/mnt/project-files/a11-screens/m50/`, `m58/`, `m59-hand-written/`,
+  `m57/`, `m56/`.
+- **Waiting:** Ali's card on how THF counts when the kit changes. Built as recommended: the spec's 12
+  or 5, plus 3 per fan and 2 per thermostat beyond the spec's kit (`engine/terminals.py` `_thf`);
+  a heater or hygrostat brings its library part's own strips. The other option, keep 12 or 5 and
+  override by hand, is a one-function change.
+- **Left for later:** the socket as a pick list from the library's sockets (M56 plan, gap 11).
+
+## 2026-11-03: W1 Library, M67, M68, M69 merged (W1)
+
+- **Base:** main `9b77f6f` (#342). Docs-only PR.
+- **Done:** ADR 0037 accepted (Ali, card). M67 record lifecycle and sources in three PRs: M67a model,
+  CSV and schema (#331), M67b the source rule on saves, who/when/note stamps, every shipped part
+  sourced in psa-devices 1.16.0 and the `part_source` check (#335), M67c the device editor, Library
+  and Parts screens (#337). M68 Library › Review and Health (#339). M69 Propose for the library from
+  Parts (#342). Screenshots in `/mnt/project-files/a11-screens/m67c-lifecycle/`,
+  `m68-review-health/`, `m69-propose/`.
+- **Waiting:** Ali's card on Q69 (seven original parts carry the example workbook's power, which
+  their datasheet does not state; they ship as `assumed` until he answers).
+
 ## 2026-11-03: W4 Parts and network, M49, M62, M59 merged (W4)
 
 - **Base:** main `0370d1d` (#326). Docs-only PR.

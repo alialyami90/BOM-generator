@@ -397,6 +397,13 @@ The rules are in ADR 0013 and the design spec (R1–R10).
   `bomgen.models.calc`.
 - A golden expecting `set_by == "floor"` for every branch failed on the annunciator; check what each
   example load is before writing the expected value.
+- Overrides on generated panels merge shallowly: `options_by_panel[n]` replaces a whole option, so
+  a panel's own `terminal_overrides` or `housekeeping` map drops the shared one for that panel (M57,
+  M56b). The UI says so instead of merging keys.
+- A derived value with no spec rule (a heater breaker without watts) is an engine error that names
+  both fixes, rather than a guessed rating (M56a).
+- `BuildResult` carries each table the editor shows (`strips`, `housekeeping`, `spares`) so the page
+  never recomputes engine rules; the BOM rows are written from the same objects.
 - `resolve_catalogues(library, CatalogueChoice(...))` lets engine tests cover brand choices without the
   loader; `engine_factories.library(mcb_brands=[...])` fills `catalogue_brands.mcb`.
 
@@ -524,3 +531,10 @@ The rules are in ADR 0013 and the design spec (R1–R10).
   `git add -A`. A merge that showed only the last conflict committed markers into CHANGELOG.md (M26).
 - A test that names the shipped library's version breaks on every bump. Read `name` and `version` from
   `examples/project.yaml` with `read_yaml` (#252, #253).
+- A squash-merged PR leaves its commit on the branch with another hash. Rebase the next milestone with
+  `git rebase --onto origin/main <old milestone commit> <branch>`; a plain rebase replays the old
+  commit and can duplicate a CHANGELOG section that git cannot see as already applied (M67c).
+- The screenshot server (`serve.py`) imports the API once: restart it after adding an endpoint, or
+  the page shows `'Api' object has no attribute …` (M69).
+- `ui.js`'s `input()` and `select()` add `data-dirty="1"`; strip it for controls in a dialog on a form
+  page, so they never count as the page's unsaved edits (M69).

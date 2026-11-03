@@ -170,6 +170,9 @@ with the save bar; everything on it is saved together.
   The Result card recalculates after each change, as before. Rows with no part number get a warning on
   Checks ("printed with the library model"). A part whose power or inrush is assumed gets an *Assumed
   power* or *Assumed inrush* warning badge under its strip, its title naming what the figure rests on.
+  A row with saved overrides has *Propose for the library…* (M69): a dialog picks the overridden value,
+  where it comes from (Measured or Datasheet), a reference (required) and *Keep the part released*; it
+  adds a pending library change that Library › Review lists with the project's name.
 - **Sized switches:** the L1 and L2 rows show "Sized" for quantity. With no part picked, the sizing picks
   one and the row says so ("The sizing picks the switch"); the strip then reads "Pick the switch to
   change its data." and offers no overrides.
@@ -235,7 +238,8 @@ with the save bar; everything on it is saved together.
   Kind, with *All generated panels* / *This panel only*, M50), Port plans (a small table per
   switch with an "Engine result" footer), Options (spares, ventilation, diodes,
   main MCB override and the AC and DC spare ratings as derived values, socket, terminals, smoke
-  detector, grounding busbars as checkboxes from the catalogue, each override
+  detector, grounding busbars as checkboxes from the catalogue, Cabinet housekeeping (counts, heater,
+  hygrostat, each breaker as a derived value, M56), each override
   with a warning line; on a hand-written panel the Devices table has *Alarm on breaker trip*, and under each row
   its tag, type code and first number with the generated tag as placeholder (M59),
   and each Parts row with a branch MCB has the same switch, M58), Terminals (one row per group G

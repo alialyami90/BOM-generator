@@ -62,7 +62,14 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
    table in Excel's Print Preview?" Options "It fits" (recommended: the size is computed to fit at the
    print scale) and "It overlaps". See section 14 for what each answer means.
 4. **Q23** (issued sheets vs masters): keep the default (the masters) until he answers.
-5. **Q51** (annunciator mounted in a panel), **Q54** (power of the -2 SEL computers) and **Q55**
+5. **Q69** (W1, card sent 2026-11-03): seven original parts carry the example workbook's power, which
+   their datasheet does not state. They ship as `assumed` (recommended). If Ali picks another answer,
+   change the `WORKBOOK` source kind in `data/library/build.py`, rebuild, and record it in plan §6 Q69.
+6. **THF when the housekeeping kit changes** (W3, card sent 2026-11-03): built as the recommended
+   option, the spec's 12 or 5 plus 3 per fan and 2 per thermostat beyond the spec's kit. If Ali picks
+   "keep 12 or 5, override by hand", make `_thf` in `engine/terminals.py` return the spec's value
+   and update `test_thf_follows_fan_and_thermostat_count`.
+7. **Q51** (annunciator mounted in a panel), **Q54** (power of the -2 SEL computers) and **Q55**
    (categories for the contractor's other part types) are open in plan §6.
 
 **Next work:** M19–M26 shipped in v0.3.0, and v0.3.1 fixed the blank-substation crash (STATE.md §1). Engine model changes (step 4) come from A4's plan.
@@ -261,7 +268,11 @@ No task is open; the next is the model changes (step 4) in A4's plan. Likely wor
   write the failing test named after the rule, change the code, keep the goldens unless an ADR moves
   them. Check `sheets/` when `BuildResult` changes shape.
 
-Don't: revive `DeviceType.min_branch_mcb_a` as a rating input (ADR 0019 item 4); count inrush peaks
+Panel detailing (W3, M50–M58) is done. Open ends: the socket as a pick list from the library's
+sockets (M56 plan, gap 11), and the THF card above.
+
+Don't: give housekeeping branches the 2 A branch floor (ADR 0032 item 4 keeps the lamp at 1 A);
+revive `DeviceType.min_branch_mcb_a` as a rating input (ADR 0019 item 4); count inrush peaks
 under `inrush_min_ms` (item 3); switch the default DC MCB from the iC60N (Q37) or drop the FGR-60F or
 iC60N `dc_float` warnings (Q37, Q41); put CINC on the DC set (group E's AC main, ADR 0023 point 1); read
 `catalogues.mcb` in DC code (pass `library.catalogues.dc_mcb` to the `engine/mcb.py` helpers).
