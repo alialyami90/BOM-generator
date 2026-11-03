@@ -40,7 +40,7 @@ from bomgen.models.project import (
     Spares,
     merge_defaults,
 )
-from bomgen.models.substation import Substation
+from bomgen.models.substation import Substation, Tagging
 
 if TYPE_CHECKING:
     from bomgen.library_store.store import LibraryStore
@@ -63,6 +63,12 @@ class LoadedSubstation:
     panel_files: Mapping[str, Path]  # panel id -> its own file (a mirror's is the mirror file)
     manual_panel_ids: frozenset[str]
     logo: Path | None = None  # the project's logo file, resolved
+
+    @property
+    def tagging(self) -> Tagging:
+        """How device tags print sides and numbers: the design basis's, else today's."""
+        basis = self.substation.design_basis
+        return basis.tagging if basis is not None else Tagging()
 
     @property
     def panel_capacity_u(self) -> int:
@@ -272,7 +278,11 @@ def _load_substation(
             found.append(Issue(panel_source.path, "generated", message, line))
 
     constants = _merged(
-        project.defaults.constants, substation.constants, source, ("constants",), found
+        _with_design_basis(project.defaults.constants, substation),
+        substation.constants,
+        source,
+        ("constants",),
+        found,
     )
     spares = _merged(project.defaults.spares, substation.spares, source, ("spares",), found)
     written = substation.spares.model_fields_set if substation.spares is not None else set()
@@ -301,6 +311,19 @@ def _load_substation(
         panel_files={panel.id: panel_source.path for panel, panel_source in resolved},
         manual_panel_ids=manual_ids,
     )
+
+
+def _with_design_basis(base: DesignConstants, substation: Substation) -> DesignConstants:
+    """The project's constants with the design basis's voltages over them (ADR 0031)."""
+    basis = substation.design_basis
+    if basis is None:
+        return base
+    given = {
+        key: value
+        for key in ("dc_voltage_v", "ac_voltage_v")
+        if (value := getattr(basis, key)) is not None
+    }
+    return base.model_copy(update=given) if given else base
 
 
 def _no_rack_space(reserved: int, library: Library) -> str:

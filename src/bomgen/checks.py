@@ -32,7 +32,10 @@ SPEED_ORDER = (PortSpeed.M10, PortSpeed.M100, PortSpeed.G1, PortSpeed.G10)
 def check_report(loaded: LoadedSubstation, result: BuildResult) -> CheckReport:
     """Every engine check of one built substation, panel by panel."""
     items: list[CheckItem] = []
-    expanded = [(panel, expand_devices(panel, loaded.library)) for panel in loaded.panels]
+    expanded = [
+        (panel, expand_devices(panel, loaded.library, tagging=loaded.tagging))
+        for panel in loaded.panels
+    ]
     for panel, rows in expanded:
         items += sfp_slot_checks(panel, rows)
     items += duplicate_tag_checks(expanded)

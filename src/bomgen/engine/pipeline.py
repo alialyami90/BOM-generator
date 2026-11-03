@@ -21,6 +21,7 @@ from bomgen.engine.nameplates import nameplate_item, nameplates
 from bomgen.engine.network import accessories
 from bomgen.engine.power import power_consumption
 from bomgen.engine.rules_text import ac_spare_rule, dc_spare_rule, main_mcb_rule
+from bomgen.engine.tags import DEFAULT_TAGGING
 from bomgen.engine.terminals import StripInputs, strip_table, terminal_strips
 from bomgen.engine.thermal import choose_fan, choose_ventilation, heat_result, ventilation_heat_w
 from bomgen.engine.units import DeviceRow, expand_devices, lookup
@@ -30,6 +31,7 @@ from bomgen.models.calc import BranchMcb, DcMains, SpareRatings
 from bomgen.models.library import Category, FanRef, Library
 from bomgen.models.panel import Panel, Ventilation
 from bomgen.models.project import DesignConstants, LooseExtra, LooseMaterial
+from bomgen.models.substation import Tagging
 
 
 @dataclass(frozen=True)
@@ -61,7 +63,10 @@ def build(loaded: LoadedSubstation) -> BuildResult:
     ]
     substation = loaded.substation.substation.name
     fraction = loaded.spares.terminals_fraction
-    drafts = [_draft(p, library, loaded.constants, loose_items, fraction) for p in loaded.panels]
+    drafts = [
+        _draft(p, library, loaded.constants, loose_items, fraction, loaded.tagging)
+        for p in loaded.panels
+    ]
     hwio_total = sum(draft.hwio for draft in drafts)
     plates = [nameplates(d.panel, d.rows) for d in drafts]
     panels = tuple(
@@ -110,8 +115,9 @@ def _draft(
     constants: DesignConstants,
     loose: Sequence[LooseExtra],
     spare_fraction: float = 0.0,
+    tagging: Tagging = DEFAULT_TAGGING,
 ) -> _PanelDraft:
-    rows = expand_devices(panel, library)
+    rows = expand_devices(panel, library, tagging=tagging)
     change_over = needs_change_over(panel, library, loose)
     equipment = [
         enclosure_item(panel),

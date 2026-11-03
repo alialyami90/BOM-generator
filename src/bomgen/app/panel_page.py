@@ -97,7 +97,9 @@ def _tagging(loaded: LoadedSubstation, panel: Panel) -> list[dict[str, Any]]:
     duplicate-tag check's sentence when one of them is another unit's too (plan M59)."""
     blank: list[dict[str, Any]] = [{"tags": [], "duplicate": None} for _ in panel.devices]
     try:
-        expanded = [(p, expand_devices(p, loaded.library)) for p in loaded.panels]
+        expanded = [
+            (p, expand_devices(p, loaded.library, tagging=loaded.tagging)) for p in loaded.panels
+        ]
     except EngineError:
         return blank
     rows = next((r for p, r in expanded if p.id == panel.id), ())

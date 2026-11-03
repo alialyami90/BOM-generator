@@ -165,6 +165,40 @@
       "title": "CatalogueChoice",
       "type": "object"
     },
+    "Category": {
+      "enum": [
+        "network_switch",
+        "firewall",
+        "gateway",
+        "patch_panel",
+        "gps_clock",
+        "rtac",
+        "io_chassis",
+        "workstation",
+        "monitor",
+        "peripheral",
+        "sfp",
+        "cable_manager",
+        "serial_cable",
+        "component",
+        "lamp",
+        "door_switch",
+        "fan",
+        "vent_filter",
+        "thermostat",
+        "relay",
+        "socket",
+        "change_over_diode",
+        "annunciator",
+        "software",
+        "cable",
+        "accessory",
+        "kvm",
+        "console"
+      ],
+      "title": "Category",
+      "type": "string"
+    },
     "ConstantOverrides": {
       "additionalProperties": false,
       "description": "Design constants as written in a file; unwritten keys keep the inherited value.",
@@ -247,6 +281,121 @@
         }
       },
       "title": "ConstantOverrides",
+      "type": "object"
+    },
+    "DesignBasis": {
+      "additionalProperties": false,
+      "description": "What the engineer states first (ADR 0031). It only sets defaults: a value the\nsubstation writes itself wins. Unset keys mean today's behaviour.",
+      "properties": {
+        "ac_voltage_v": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ac Voltage V"
+        },
+        "dc_voltage_v": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dc Voltage V"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Notes"
+        },
+        "purdue_scope": {
+          "anyOf": [
+            {
+              "items": {
+                "enum": [
+                  "L1",
+                  "L2",
+                  "EXT"
+                ],
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Purdue Scope"
+        },
+        "redundancy": {
+          "default": "duplicated_lan",
+          "title": "Redundancy",
+          "type": "string"
+        },
+        "spares_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SparesPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "tagging": {
+          "$ref": "#/$defs/Tagging"
+        },
+        "time_sync": {
+          "anyOf": [
+            {
+              "enum": [
+                "gps_clock",
+                "ptp_from_clock",
+                "none"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Time Sync"
+        },
+        "vendor_list": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Vendor List"
+        }
+      },
+      "title": "DesignBasis",
       "type": "object"
     },
     "DeviceMove": {
@@ -1166,6 +1315,16 @@
       "title": "PortSpeed",
       "type": "string"
     },
+    "PurdueLevel": {
+      "enum": [
+        "L1",
+        "L2",
+        "EXT",
+        "L3"
+      ],
+      "title": "PurdueLevel",
+      "type": "string"
+    },
     "SfpChoice": {
       "additionalProperties": false,
       "description": "The SFP model picked for one port speed and media of a switch (ADR 0024), and the\nspare and extra SFPs on each of its BOM rows (plan M49). No ``part_id`` keeps the\nautomatic pick; no ``spare`` keeps the project's.",
@@ -1333,6 +1492,38 @@
       "title": "Spares",
       "type": "object"
     },
+    "SparesPolicy": {
+      "additionalProperties": false,
+      "description": "The spares list's policy (ADR 0031); read by the spares list (plan M64) only.",
+      "properties": {
+        "categories": {
+          "items": {
+            "$ref": "#/$defs/Category"
+          },
+          "title": "Categories",
+          "type": "array"
+        },
+        "minimum_per_part": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Minimum Per Part",
+          "type": "integer"
+        },
+        "percent": {
+          "additionalProperties": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/Category"
+          },
+          "title": "Percent",
+          "type": "object"
+        }
+      },
+      "title": "SparesPolicy",
+      "type": "object"
+    },
     "SubstationInfo": {
       "additionalProperties": false,
       "properties": {
@@ -1360,6 +1551,45 @@
       ],
       "title": "SupplyType",
       "type": "string"
+    },
+    "Tagging": {
+      "additionalProperties": false,
+      "description": "How device tags print their side and number (ADR 0030, 0031); defaults are today's.",
+      "properties": {
+        "first_numbers": {
+          "additionalProperties": {
+            "exclusiveMinimum": 0,
+            "type": "integer"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/PurdueLevel"
+          },
+          "title": "First Numbers",
+          "type": "object"
+        },
+        "side_letters": {
+          "default": [
+            "A",
+            "B"
+          ],
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "pattern": "^[A-Z]$",
+              "type": "string"
+            },
+            {
+              "pattern": "^[A-Z]$",
+              "type": "string"
+            }
+          ],
+          "title": "Side Letters",
+          "type": "array"
+        }
+      },
+      "title": "Tagging",
+      "type": "object"
     },
     "Topology": {
       "enum": [
@@ -1437,6 +1667,17 @@
       "anyOf": [
         {
           "$ref": "#/$defs/ConstantOverrides"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "design_basis": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DesignBasis"
         },
         {
           "type": "null"
