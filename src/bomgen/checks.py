@@ -11,7 +11,7 @@ renders the report as text or JSON and exits non-zero when a check fails.
 
 import json
 from collections import Counter
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 
 from bomgen.engine.network import port_plan
 from bomgen.engine.units import DeviceRow, expand_devices
@@ -22,7 +22,7 @@ from bomgen.models.bom import BomTable, BuildResult, LooseTable, PanelBom, QtySu
 from bomgen.models.calc import BranchMcb, DcMains, HeatResult
 from bomgen.models.library import Category, Library, Media, PortKind, PortSpeed, SupplyType
 from bomgen.models.panel import Panel, Ventilation
-from bomgen.models.project import DesignConstants
+from bomgen.models.project import DesignConstants, RegisterEntry
 from bomgen.models.report import CheckItem, CheckReport, CheckStatus
 from bomgen.models.substation import Equipment
 
@@ -32,7 +32,10 @@ SPEED_ORDER = (PortSpeed.M10, PortSpeed.M100, PortSpeed.G1, PortSpeed.G10)
 def check_report(loaded: LoadedSubstation, result: BuildResult) -> CheckReport:
     """Every engine check of one built substation, panel by panel."""
     items: list[CheckItem] = []
-    expanded = [(panel, expand_devices(panel, loaded.library)) for panel in loaded.panels]
+    expanded = [
+        (panel, expand_devices(panel, loaded.library, tagging=loaded.tagging))
+        for panel in loaded.panels
+    ]
     for panel, rows in expanded:
         items += sfp_slot_checks(panel, rows)
     items += duplicate_tag_checks(expanded)
@@ -47,8 +50,10 @@ def check_report(loaded: LoadedSubstation, result: BuildResult) -> CheckReport:
     if di is not None:
         items.append(di)
     items += part_number_checks(loaded.substation.equipment, loaded.library)
+    items += part_source_checks(loaded.substation.equipment, loaded.library)
     items += l2_link_checks(loaded.substation.equipment, loaded.library)
     items += external_ac_checks(result.loose, loaded.library)
+    items += document_number_checks(loaded.documents)
     return CheckReport(items=tuple(items))
 
 
@@ -438,6 +443,36 @@ def part_number_checks(equipment: Iterable[Equipment], library: Library) -> list
     return items
 
 
+def part_source_checks(equipment: Iterable[Equipment], library: Library) -> list[CheckItem]:
+    """A warning per equipment entry whose part's power or inrush is assumed (ADR 0037)."""
+    items = []
+    for entry in equipment:
+        part = library.get(entry.part_id) if entry.part_id is not None else None
+        if part is None:
+            continue
+        assumed = [
+            (name, source.ref)
+            for name in ("unit_power_w", "inrush_a")
+            if (source := part.sources.get(name)) is not None and source.kind == "assumed"
+        ]
+        if not assumed:
+            continue
+        names = [name for name, _ref in assumed]
+        refs = "; ".join(dict.fromkeys(ref for _name, ref in assumed))
+        verb, them = ("is", "it") if len(names) == 1 else ("are", "them")
+        items.append(
+            CheckItem(
+                check="part_source",
+                status=CheckStatus.WARN,
+                subject=entry.id,
+                message=f"{part.part_id}: {' and '.join(names)} {verb} assumed ({refs}); "
+                f"confirm {them} against a datasheet or a measurement",
+                values={"part_id": part.part_id, "fields": ", ".join(names)},
+            )
+        )
+    return items
+
+
 def l2_link_checks(equipment: Iterable[Equipment], library: Library) -> list[CheckItem]:
     """A warning per networked equipment entry with no L2 link (M31)."""
     items = []
@@ -474,6 +509,20 @@ def external_ac_checks(loose: LooseTable | None, library: Library) -> list[Check
             )
         )
     return items
+
+
+def document_number_checks(documents: Mapping[str, RegisterEntry]) -> list[CheckItem]:
+    """A warning per register document of the substation still numbered "TBD" (plan M51)."""
+    return [
+        CheckItem(
+            check="document_number_placeholder",
+            status=CheckStatus.WARN,
+            subject=key,
+            message="document number is still TBD; type it in the register before issuing",
+        )
+        for key, entry in documents.items()
+        if entry.doc_no.strip().upper() == "TBD"
+    ]
 
 
 def library_check(recorded: LibraryRef, active: LibraryRef | None) -> CheckItem:

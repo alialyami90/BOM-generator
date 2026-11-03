@@ -91,8 +91,16 @@ def _devices(library: Mapping[str, Any] | None) -> dict[str, Mapping[str, Any]]:
     return {device["part_id"]: device for device in library.get("devices") or []}
 
 
+# Written by every local save on the parts it touched (ADR 0037): never a change on its own
+_CHANGE_FIELDS = frozenset({"changed_by", "changed_on", "note"})
+
+
 def _changed_keys(old: Mapping[str, Any], new: Mapping[str, Any]) -> list[str]:
-    return sorted(key for key in old.keys() | new.keys() if old.get(key) != new.get(key))
+    return sorted(
+        key
+        for key in old.keys() | new.keys()
+        if old.get(key) != new.get(key) and key not in _CHANGE_FIELDS
+    )
 
 
 def _brand_changes(old: Mapping[str, Any], new: Mapping[str, Any]) -> list[str]:

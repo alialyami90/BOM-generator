@@ -6,9 +6,10 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 
 from bomgen.engine.errors import EngineError
-from bomgen.engine.tags import device_tags, first_number
+from bomgen.engine.tags import DEFAULT_TAGGING, device_tags, first_number
 from bomgen.models.library import DeviceType, Library
 from bomgen.models.panel import DeviceInstance, Lan, Panel
+from bomgen.models.substation import Tagging
 
 
 @dataclass(frozen=True)
@@ -21,19 +22,31 @@ class DeviceRow:
     tag: str | None
     unit_tags: tuple[str | None, ...]
 
+    @property
+    def alarmed(self) -> bool:
+        """Whether the row's branch MCBs carry an aux contact: the row's choice, else the
+        library's (plan M58)."""
+        own = self.instance.alarm_on_branch_mcb
+        return self.device.alarm_on_branch_mcb if own is None else own
+
 
 def expand_devices(
-    panel: Panel, library: Library, instances: Sequence[DeviceInstance] | None = None
+    panel: Panel,
+    library: Library,
+    instances: Sequence[DeviceInstance] | None = None,
+    *,
+    tagging: Tagging = DEFAULT_TAGGING,
 ) -> tuple[DeviceRow, ...]:
     """Tag ``instances`` (default: the panel's devices) in order, numbering per level, type
-    and side across rows (ADR 0030); a row's ``first_nn`` restarts the count (ADR 0013)."""
+    and side across rows (ADR 0030); a row's ``first_nn`` restarts the count (ADR 0013).
+    ``tagging`` is the design basis's (ADR 0031)."""
     used: Counter[tuple[str | None, str | None, str | None]] = Counter()
     rows: list[DeviceRow] = []
     for instance in panel.devices if instances is None else instances:
         device = lookup(library, instance.part_id)
         lan = instance.lan or panel.lan
         key = (instance.tag_type or device.tag_type, device.purdue_level, lan)
-        first = first_number(device)
+        first = first_number(device, tagging)
         start = next_free = first + used[key]
         if instance.first_nn is not None:
             if instance.first_nn < first:
@@ -55,6 +68,7 @@ def expand_devices(
             start=start,
             override=instance.tag,
             tag_type=instance.tag_type,
+            side_letters=tagging.side_letters,
         )
         used[key] = start - first + instance.qty
         rows.append(DeviceRow(device, instance, lan, tags.row, tags.units))

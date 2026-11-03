@@ -85,6 +85,38 @@ def test_options_of_a_generated_panel_say_which_are_its_own(app: api.Api, genera
     assert first["aux_socket_a"]["own"] is False
 
 
+def test_enclosure_scope_own_and_shared(app: api.Api, generated: Path) -> None:
+    # Plan M50: a generated panel may take its own enclosure and kind; the page says which.
+    page = ok(app.panel_page(str(generated), "gis01", "psa2"))
+    assert page["shared"] == {
+        "enclosure": page["enclosure"],
+        "kind": "network",
+        "own_enclosure": False,
+        "own_kind": False,
+    }
+    narrow = page["enclosure"] | {"w_mm": 600, "cable_entry": "bottom"}
+    assert ok(app.set_enclosure(str(generated), "gis01", narrow, 2))["written"]
+    path: list[str | int] = ["generated_panels", "kind_by_panel", 2]
+    ok(app.set_substation_field(str(generated), "gis01", path, "control"))
+
+    page = ok(app.panel_page(str(generated), "gis01", "psa2"))
+    assert (page["enclosure"]["w_mm"], page["shared"]["enclosure"]["w_mm"]) == (600, 800)
+    assert (page["panel"]["kind"], page["shared"]["kind"]) == ("control", "network")
+    assert page["shared"]["own_enclosure"] is page["shared"]["own_kind"] is True
+    first = ok(app.panel_page(str(generated), "gis01", "psa1"))
+    assert (first["enclosure"]["w_mm"], first["panel"]["kind"]) == (800, "network")
+    assert ok(app.panel_page(str(generated), "gis01", "ws"))["shared"] is None
+
+    ok(app.set_substation_field(str(generated), "gis01", path, None))
+    ok(
+        app.set_substation_field(
+            str(generated), "gis01", ["generated_panels", "enclosure_by_panel", 2], None
+        )
+    )
+    page = ok(app.panel_page(str(generated), "gis01", "psa2"))
+    assert page["shared"]["own_enclosure"] is page["shared"]["own_kind"] is False
+
+
 def test_devices_of_a_generated_panel_say_where_they_came_from(
     app: api.Api, generated: Path
 ) -> None:
@@ -210,3 +242,43 @@ def test_an_edited_numbering_pattern_drops_its_assumed_mark(app: api.Api, genera
     ok(app.set_substation_field(str(generated), "gis01", path, "861-GIS01-XYZ-{n:04d}"))
     line = next(x for x in file.read_text("utf-8").splitlines() if "cabinet_number" in x)
     assert line.strip() == 'cabinet_number: "861-GIS01-XYZ-{n:04d}"'
+
+
+def test_hand_written_rows_carry_the_alarm_toggle_and_its_library_default(
+    app: api.Api, generated: Path
+) -> None:
+    """Plan M58: a row with a branch MCB may turn the alarm on its trip on or off."""
+    path: list[str | int] = ["devices", 0, "alarm_on_branch_mcb"]
+    ok(app.set_panel_field(str(generated), "gis01", "ws", path, True))
+    devices = ok(app.panel_page(str(generated), "gis01", "ws"))["devices"]
+
+    server, monitor, keyboard = devices
+    assert (server["branch_mcb"], server["alarm_default"], server["alarm_on_branch_mcb"]) == (
+        True,
+        False,
+        True,
+    )
+    assert monitor["branch_mcb"] is False  # single-fed, through a QCOD
+    assert "alarm_on_branch_mcb" not in keyboard
+
+
+def test_the_page_lists_the_busbar_catalogue(app: api.Api, generated: Path) -> None:
+    page = ok(app.panel_page(str(generated), "gis01", "psa1"))
+    keys = [b["key"] for b in page["busbars"]]
+    assert {"ac_safety_ground", "instrument_ground"} <= set(keys)
+
+
+def test_hand_written_rows_carry_their_tags_and_a_duplicate_tag(
+    app: api.Api, generated: Path
+) -> None:
+    """Plan M59 on the panel editor: tag, type code and first number on hand-written rows,
+    with the generated tags as placeholders and the duplicate-tag check inline."""
+    server = ok(app.panel_page(str(generated), "gis01", "ws"))["devices"][0]
+    assert server["duplicate"] is None
+    [tag] = server["tags"]
+
+    path: list[str | int] = ["devices", 1, "tag"]
+    ok(app.set_panel_field(str(generated), "gis01", "ws", path, tag))
+    devices = ok(app.panel_page(str(generated), "gis01", "ws"))["devices"]
+    assert devices[1]["tag"] == tag
+    assert devices[0]["duplicate"].startswith(f"{tag}: 2 device units share this tag")

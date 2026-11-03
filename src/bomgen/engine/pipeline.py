@@ -20,16 +20,18 @@ from bomgen.engine.kits import annunciator_items, loose_table, main_equipment
 from bomgen.engine.nameplates import nameplate_item, nameplates
 from bomgen.engine.network import accessories
 from bomgen.engine.power import power_consumption
-from bomgen.engine.rules_text import main_mcb_rule
-from bomgen.engine.terminals import StripInputs, terminal_strips
+from bomgen.engine.rules_text import ac_spare_rule, dc_spare_rule, main_mcb_rule
+from bomgen.engine.tags import DEFAULT_TAGGING
+from bomgen.engine.terminals import StripInputs, strip_table, terminal_strips
 from bomgen.engine.thermal import choose_fan, choose_ventilation, heat_result, ventilation_heat_w
 from bomgen.engine.units import DeviceRow, expand_devices, lookup
 from bomgen.io.loader import LoadedSubstation
-from bomgen.models.bom import BuildResult, PanelBom
-from bomgen.models.calc import BranchMcb, DcMains
+from bomgen.models.bom import BuildResult, PanelBom, PanelStrips
+from bomgen.models.calc import BranchMcb, DcMains, SpareRatings
 from bomgen.models.library import Category, FanRef, Library
 from bomgen.models.panel import Panel, Ventilation
 from bomgen.models.project import DesignConstants, LooseExtra, LooseMaterial
+from bomgen.models.substation import Tagging
 
 
 @dataclass(frozen=True)
@@ -44,6 +46,7 @@ class _PanelDraft:
     strip_inputs: StripInputs
     mains: DcMains
     branch_mcbs: tuple[BranchMcb, ...]
+    spares: SpareRatings
 
     @property
     def hwio(self) -> int:
@@ -59,7 +62,11 @@ def build(loaded: LoadedSubstation) -> BuildResult:
         *annunciator_items(loaded.substation.equipment, library, loaded.panels),
     ]
     substation = loaded.substation.substation.name
-    drafts = [_draft(p, library, loaded.constants, loose_items) for p in loaded.panels]
+    fraction = loaded.spares.terminals_fraction
+    drafts = [
+        _draft(p, library, loaded.constants, loose_items, fraction, loaded.tagging)
+        for p in loaded.panels
+    ]
     hwio_total = sum(draft.hwio for draft in drafts)
     plates = [nameplates(d.panel, d.rows) for d in drafts]
     panels = tuple(
@@ -86,14 +93,31 @@ def build(loaded: LoadedSubstation) -> BuildResult:
         heat=heat,
         mains=tuple(d.mains for d in drafts),
         branch_mcbs=tuple(b for d in drafts for b in d.branch_mcbs),
+        spares=tuple(d.spares for d in drafts),
+        strips=tuple(
+            PanelStrips(
+                panel_id=d.panel.id,
+                strips=tuple(
+                    strip_table(
+                        d.panel, library, d.rows, replace(d.strip_inputs, xdin_default=hwio_total)
+                    )
+                ),
+            )
+            for d in drafts
+        ),
         nameplates=tuple(p for p in plates if p.plates),
     )
 
 
 def _draft(
-    panel: Panel, library: Library, constants: DesignConstants, loose: Sequence[LooseExtra]
+    panel: Panel,
+    library: Library,
+    constants: DesignConstants,
+    loose: Sequence[LooseExtra],
+    spare_fraction: float = 0.0,
+    tagging: Tagging = DEFAULT_TAGGING,
 ) -> _PanelDraft:
-    rows = expand_devices(panel, library)
+    rows = expand_devices(panel, library, tagging=tagging)
     change_over = needs_change_over(panel, library, loose)
     equipment = [
         enclosure_item(panel),
@@ -127,6 +151,7 @@ def _draft(
         change_over=change_over,
         annunciator_feeds=len(annunciators),
         xdin_default=0,
+        spare_fraction=spare_fraction,
     )
     mains = DcMains(
         panel_id=panel.id,
@@ -136,7 +161,17 @@ def _draft(
         rule=main_mcb_rule(dc.rule_main_a, dc.design_current_a, constants.min_main_mcb_a),
     )
     branch_mcbs = (*dc.branch_mcbs, *ac.branch_mcbs)
-    return _PanelDraft(panel, rows, ventilation, fan, items, strip_inputs, mains, branch_mcbs)
+    used = dc.branches_per_feed - panel.options.dc_spare_branches_per_feed
+    spares = SpareRatings(
+        panel_id=panel.id,
+        ac_rule_a=ac.rule_spare_a,
+        ac_rule=ac_spare_rule(ac.rule_spare_a),
+        dc_rule_a=dc.rule_spare_a,
+        dc_rule=dc_spare_rule(dc.rule_spare_a, branches=used) if dc.rule_spare_a else "",
+    )
+    return _PanelDraft(
+        panel, rows, ventilation, fan, items, strip_inputs, mains, branch_mcbs, spares
+    )
 
 
 def _finish(

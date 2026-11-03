@@ -10,7 +10,7 @@ from typing import Annotated, Literal
 
 from pydantic import Field, NonNegativeInt, PositiveInt
 
-from bomgen.models.calc import BranchMcb, DcMains, HeatResult, PowerConsumption
+from bomgen.models.calc import BranchMcb, DcMains, HeatResult, PowerConsumption, SpareRatings
 from bomgen.models.output import OutputModel
 from bomgen.models.panel import PanelKind
 
@@ -111,6 +111,34 @@ class PanelNameplates(OutputModel):
     plates: tuple[Nameplate, ...]
 
 
+class StripRow(OutputModel):
+    """One terminal strip as the Terminals tab shows it (ADR 0033): its automatic quantity
+    with the rule that gave it, the panel's override, and the block type the BOM prints."""
+
+    code: str
+    description: str
+    block: str  # the rule's block type
+    block_override: str | None = None
+    rule: str
+    auto_qty: int  # the rule's quantity with the spare fraction
+    override: int | None = None
+    spared: bool  # the spare fraction applies (not to the devices' own strips)
+
+    @property
+    def qty(self) -> int:
+        return self.auto_qty if self.override is None else self.override
+
+    @property
+    def model(self) -> str:
+        """The block type the BOM prints."""
+        return self.block if self.block_override is None else self.block_override
+
+
+class PanelStrips(OutputModel):
+    panel_id: str
+    strips: tuple[StripRow, ...]
+
+
 class BuildResult(OutputModel):
     """Everything the engine derives from a loaded substation: the BOM tables and the
     calculation sheets' power and heat results (``None`` only in hand-built results)."""
@@ -121,4 +149,6 @@ class BuildResult(OutputModel):
     heat: HeatResult | None = None
     mains: tuple[DcMains, ...] = ()
     branch_mcbs: tuple[BranchMcb, ...] = ()
+    spares: tuple[SpareRatings, ...] = ()  # the spare breakers' rule ratings (plan M58)
+    strips: tuple[PanelStrips, ...] = ()  # group G before the BOM rows (ADR 0033)
     nameplates: tuple[PanelNameplates, ...] = ()  # empty when the library has no nameplate

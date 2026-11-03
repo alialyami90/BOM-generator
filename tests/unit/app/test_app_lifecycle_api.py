@@ -176,3 +176,47 @@ def test_file_stamps_name_each_project_file_with_its_modified_time(
     again = ok(app.file_stamps(str(project)))
     assert again["substations/gis01/substation.yaml"] != stamps["substations/gis01/substation.yaml"]
     assert again["project.yaml"] == stamps["project.yaml"]
+
+
+# --- the New substation dialog's setup step (plan M51) ---
+
+
+def test_new_substation_form_gives_the_seeds_without_a_previous_substation(
+    app: api.Api, tmp_path: Path
+) -> None:
+    made = ok(app.create_project("North Gas Plant", None, "1.0.0", None))
+    form = ok(app.new_substation_form(str(made["project_file"]), "GIS 02"))
+    assert form["previous"] is None
+    assert form["defaults"] == form["seeds"]
+    assert form["seeds"]["cabinet_number"] == "GIS-02-PSA-{n:04d}"
+    assert form["seeds"]["documents"]["bom"]["doc_no"] == "TBD"
+
+
+def test_new_substation_form_prefills_from_previous(app: api.Api, project: Path) -> None:
+    sub = project.parent / "substations" / "gis01" / "substation.yaml"
+    text = sub.read_text("utf-8")
+    previous = read_yaml(sub).data["generated_panels"]
+    form = ok(app.new_substation_form(str(project), "GIS 02"))
+    assert form["previous"] == "gis01"
+    defaults = form["defaults"]
+    assert defaults["cabinet_name"] == previous["cabinet_name"]
+    assert defaults["tag_prefix"] == previous["tag_prefix"]
+    assert defaults["enclosure"]["make"] == previous["enclosure"]["make"]
+    # the previous substation's id in its cabinet number becomes the new one's
+    old = str(previous["cabinet_number"])
+    assert defaults["cabinet_number"] == old.replace("GIS01", "GIS-02")
+    assert defaults["documents"] == form["seeds"]["documents"]  # numbers are per substation
+    assert sub.read_text("utf-8") == text
+
+
+def test_create_substation_writes_the_setup(app: api.Api, project: Path) -> None:
+    setup = {
+        "cabinet_name": "SCADA Cabinet {n}",
+        "documents": {"bom": {"doc_no": "X-001", "issue_date": "2026-11-03"}},
+    }
+    made = ok(app.create_substation(str(project), "GIS 02", None, setup))
+    data = read_yaml(project.parent / "substations" / made["id"] / "substation.yaml").data
+    assert data["generated_panels"]["cabinet_name"] == "SCADA Cabinet {n}"
+    entry = next(d for d in read_yaml(project).data["documents"] if d["key"] == "gis-02-bom")
+    assert entry["doc_no"] == "X-001"
+    assert str(entry["issue_date"]) == "2026-11-03"

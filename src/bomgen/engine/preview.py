@@ -121,7 +121,7 @@ def _units(
 ) -> dict[Unit, PreviewUnit]:
     entries = {e.id: e for e in loaded.substation.equipment}
     tops = fill.placement(rules).tops
-    rows = expand_devices(panel, loaded.library)
+    rows = expand_devices(panel, loaded.library, tagging=loaded.tagging)
     feeds: dict[tuple[str | None, int | None], BranchMcb] = {
         (m.unit_tag, m.feed): m for m in mcbs if m.panel_id == panel.id
     }

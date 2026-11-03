@@ -1,9 +1,11 @@
 """Saving an edited library as a local version, and the .bomlib backup of it (ADR 0018)."""
 
+from datetime import date
 from pathlib import Path
 from typing import Any
 
 import pytest
+import yaml
 
 from bomgen.bundle.container import MANIFEST_NAME, sha256
 from bomgen.io.loader import load_library
@@ -209,8 +211,7 @@ def test_a_base_with_a_damaged_file_is_refused(store: LibraryStore) -> None:
 def test_the_backup_of_an_edited_library_is_a_package_that_imports_elsewhere(
     tmp_path: Path, store: LibraryStore
 ) -> None:
-    edited = _edited(_active(store), make="Acme")
-    save_local_version(store, "psa", edited)
+    save_local_version(store, "psa", _edited(_active(store), make="Acme"))
     backup = tmp_path / "backup.bomlib"
 
     store.export_package("psa", "1.0.0+local.1", backup)
@@ -220,7 +221,7 @@ def test_the_backup_of_an_edited_library_is_a_package_that_imports_elsewhere(
     other = LibraryStore(tmp_path / "other")
     other.import_package(backup)
     assert other.active_version("psa") == "1.0.0+local.1"
-    assert load_library(other.library_file("psa")) == edited
+    assert load_library(other.library_file("psa")) == _active(store)
     assert (other.root / "psa" / "1.0.0+local.1" / "device-db" / "network.yaml").is_file()
 
 
@@ -304,3 +305,128 @@ def test_edits_that_change_nothing_are_refused(store: LibraryStore) -> None:
         save_edits(store, "psa", [])
 
     assert caught.value.kind is RefusalKind.NO_CHANGES
+
+
+def test_a_saved_library_leaves_out_lifecycle_defaults() -> None:
+    # ADR 0037: a released part with no sources is written as before, so older apps read it.
+    library = load_library(EXAMPLE_LIBRARY)
+    text = dump_library(library).decode("utf-8")
+    assert "state:" not in text
+    assert "sources:" not in text
+
+
+def test_a_saved_library_keeps_a_set_state_and_its_sources() -> None:
+    data = load_library(EXAMPLE_LIBRARY).model_dump(mode="json")
+    powered = next(d for d in data["devices"] if d.get("unit_power_w") is not None)
+    powered["state"] = "draft"
+    powered["sources"] = {"unit_power_w": {"kind": "assumed", "ref": "no datasheet"}}
+    library = Library.model_validate(data)
+    again = Library.model_validate(yaml.safe_load(dump_library(library)))
+    assert again == library
+
+
+# ADR 0037 items 4, 5 and 8: a sized change needs its source; the save says who and when
+
+
+def _powered(library: Library) -> str:
+    return next(d.part_id for d in library.devices if d.unit_power_w is not None)
+
+
+def _set_part(library: Library, part_id: str, **changes: Any) -> Library:
+    data = library.model_dump(mode="json")
+    next(d for d in data["devices"] if d["part_id"] == part_id).update(changes)
+    return Library.model_validate(data)
+
+
+def test_changing_a_sized_value_without_its_source_is_refused_naming_the_field(
+    store: LibraryStore,
+) -> None:
+    library = _active(store)
+    part = _powered(library)
+
+    with pytest.raises(LibraryPackageError) as caught:
+        save_local_version(store, "psa", _set_part(library, part, unit_power_w=99.0))
+
+    assert caught.value.kind is RefusalKind.VALIDATION_FAILED
+    assert f"{part}: unit_power_w changed without its source" in str(caught.value)
+    assert store.versions("psa") == ["1.0.0"]
+
+
+def test_a_sized_change_with_its_source_saves(store: LibraryStore) -> None:
+    library = _active(store)
+    part = _powered(library)
+    source = {"kind": "measured", "ref": "site test 2026-11-02"}
+
+    saved = save_local_version(
+        store, "psa", _set_part(library, part, unit_power_w=99.0, sources={"unit_power_w": source})
+    )
+
+    assert saved.diff.changed == {part: ["sources", "unit_power_w"]}
+
+
+def test_assumed_is_a_source(store: LibraryStore) -> None:
+    library = _active(store)
+    part = _powered(library)
+    source = {"kind": "assumed", "ref": "no datasheet figure"}
+
+    save_local_version(
+        store, "psa", _set_part(library, part, unit_power_w=99.0, sources={"unit_power_w": source})
+    )
+
+    assert _active(store).get(part).sources["unit_power_w"].kind == "assumed"  # type: ignore[union-attr]
+
+
+def test_a_new_part_with_sized_values_needs_their_sources(store: LibraryStore) -> None:
+    new = {
+        "part_id": "NEW-1",
+        "category": "component",
+        "description_template": "New part",
+        "height_u": 1,
+    }
+
+    with pytest.raises(LibraryPackageError, match="NEW-1: height_u changed without its source"):
+        save_edits(store, "psa", [Insert(path=["devices"], value=new)])
+
+    new["sources"] = {"height_u": {"kind": "datasheet", "ref": "p. 3"}}
+    assert save_edits(store, "psa", [Insert(path=["devices"], value=new)]).diff.added == ["NEW-1"]
+
+
+def test_the_save_stamps_who_when_and_the_note_on_the_parts_it_touched(
+    store: LibraryStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("bomgen.library_store.local.getpass.getuser", lambda: "ali")
+    library = _active(store)
+    first, second = library.devices[0].part_id, library.devices[1].part_id
+
+    save_local_version(store, "psa", _edited(library, make="Acme"), note="  new make  ")
+
+    saved = _active(store)
+    touched, untouched = saved.get(first), saved.get(second)
+    assert touched is not None
+    assert untouched is not None
+    assert (touched.changed_by, touched.changed_on, touched.note) == (
+        "ali",
+        date.today(),
+        "new make",
+    )
+    assert (untouched.changed_by, untouched.changed_on, untouched.note) == (None, None, None)
+
+
+def test_the_stamp_alone_is_not_a_change(store: LibraryStore) -> None:
+    library = _active(store)
+    save_local_version(store, "psa", _edited(library, make="Acme"))
+
+    with pytest.raises(LibraryPackageError) as caught:
+        save_local_version(store, "psa", _edited(_active(store), note="only a note"))
+
+    assert caught.value.kind is RefusalKind.NO_CHANGES
+
+
+def test_a_save_that_uses_the_lifecycle_fields_needs_this_app_version(
+    store: LibraryStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("bomgen.__version__", "9.9.0")
+
+    saved = save_local_version(store, "psa", _edited(_active(store), make="Acme"))
+
+    assert saved.manifest.min_app_version == "9.9.0"

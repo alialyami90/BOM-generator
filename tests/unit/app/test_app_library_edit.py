@@ -28,6 +28,12 @@ def power(part: str, watts: float) -> dict[str, object]:
     return {"op": "set", "path": ["devices", part, "unit_power_w"], "value": watts}
 
 
+def measured(part: str) -> dict[str, object]:
+    """The source a power change needs (ADR 0037)."""
+    source = {"unit_power_w": {"kind": "measured", "ref": "bench test"}}
+    return {"op": "set", "path": ["devices", part, "sources"], "value": source}
+
+
 # -- the pending set ------------------------------------------------------------------------
 
 
@@ -140,9 +146,17 @@ def test_an_empty_pending_set_has_no_entries(app: api.Api) -> None:
     assert page["next_version"] == "1.0.0+local.1"
 
 
+def test_a_power_edit_without_a_source_is_refused_on_apply_naming_the_field(app: api.Api) -> None:
+    ok(app.add_library_edits([power(PART, 99.5)]))
+    error = refused(app.apply_library_edits("no source"))
+    assert error["kind"] == "validation_failed"
+    assert f"{PART}: unit_power_w changed without its source" in error["message"]
+    assert ok(app.library_pending())["count"] == 1
+
+
 def test_an_edited_device_is_saved_as_a_new_local_version(app: api.Api) -> None:
-    page = ok(app.add_library_edits([power(PART, 99.5)]))
-    assert page["count"] == 1
+    page = ok(app.add_library_edits([power(PART, 99.5), measured(PART)]))
+    assert page["count"] == 2
     assert ok(app.library_device(PART))["device"]["unit_power_w"] == 99.5
     applied = ok(app.apply_library_edits("Checked against the datasheet"))
     assert applied["version"] == "1.0.0+local.1"
@@ -186,14 +200,14 @@ def test_discard_returns_the_edits_for_undo(app: api.Api) -> None:
 def test_pending_keeps_its_base_when_another_version_is_activated(
     app: api.Api, tmp_path: Path
 ) -> None:
-    ok(app.add_library_edits([power(PART, 99.5)]))
+    ok(app.add_library_edits([power(PART, 99.5), measured(PART)]))
     second = tmp_path / "lib2.bomlib"
     pack(EXAMPLES / "library.yaml", second, name=NAME, version="1.1.0")
     LibraryStore(tmp_path / "libraries").import_package(second)
     page = ok(app.library_pending())
     assert page["base"] == "1.0.0"
     assert page["active"] == "1.1.0"
-    assert page["count"] == 1
+    assert page["count"] == 2
     assert ok(app.apply_library_edits(""))["previous"] == "1.0.0"
 
 

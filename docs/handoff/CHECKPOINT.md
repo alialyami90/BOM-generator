@@ -9,8 +9,7 @@ keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detai
 - **Done:** M49 SFP spare and extra per switch (#323), M62 panel cap `layout.max_panels` (#325),
   M59 BOM text per row on Parts (#326). Screenshots in `/mnt/project-files/a11-screens/m49-sfp/`,
   `m62-panels/`, `m59-bom-text/`.
-- **Waiting:** Ali on Q68 ("Exactly n panels", a card in the W4 thread; recommended: At most n
-  only). M60 and M61 wait on M52 and on Ali accepting ADR 0034. W3 to add tag, type code and first
+- **Waiting:** M60 and M61 wait on M52 and on Ali accepting ADR 0034. W3 to add tag, type code and first
   number to hand-written panel rows in the panel editor (the rest of M59).
 
 ## 2026-11-01: v0.3.4 released (A1, lead)

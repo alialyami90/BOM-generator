@@ -1,6 +1,12 @@
 """Rule texts name the numbers their value came from (plan M48, the override contract)."""
 
-from bomgen.engine.rules_text import main_mcb_rule, sfp_rule, sfp_spare_rule
+from bomgen.engine.rules_text import (
+    ac_spare_rule,
+    dc_spare_rule,
+    main_mcb_rule,
+    sfp_rule,
+    sfp_spare_rule,
+)
 
 
 def test_main_mcb_rule_names_the_rating_the_design_current_and_the_minimum() -> None:
@@ -27,3 +33,12 @@ def test_sfp_rule_drops_the_parts_that_are_zero() -> None:
 def test_sfp_spare_rule_names_the_project_spare_on_an_l1_row() -> None:
     assert sfp_spare_rule(3, l1=True) == "3: the project's spare SFPs per L1 row"
     assert sfp_spare_rule(0, l1=False) == "0: the project sets spare SFPs on L1 rows only"
+
+
+def test_ac_spare_rule_names_the_largest_housekeeping_branch() -> None:
+    assert ac_spare_rule(2) == "2 A: the largest housekeeping branch"
+
+
+def test_dc_spare_rule_names_the_largest_device_branch_or_the_floor() -> None:
+    assert dc_spare_rule(2, branches=13) == "2 A: the largest of 13 device branches"
+    assert dc_spare_rule(2, branches=0) == "2 A: the minimum branch MCB"

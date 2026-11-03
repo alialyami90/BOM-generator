@@ -18,6 +18,7 @@ from bomgen.app.substations import _library, resolve, substation_page
 from bomgen.checks import duplicate_tag_checks
 from bomgen.engine.errors import EngineError
 from bomgen.engine.layout import CABLE_MANAGED, LayoutResult, layout_preview, runs
+from bomgen.engine.mcb import has_branch_mcb
 from bomgen.engine.network import unserved_links
 from bomgen.engine.rules_text import sfp_rule, sfp_spare_rule
 from bomgen.engine.units import expand_devices
@@ -183,10 +184,12 @@ def _tag_info(
     expanded = []
     fills = [f for f in result.fills if f.units]
     for panel, fill in zip(result.panels, fills, strict=True):
-        rows = expand_devices(panel, loaded.library)
+        rows = expand_devices(panel, loaded.library, tagging=loaded.tagging)
         expanded.append((panel, rows))
         devices = [d.model_copy(update={"tag": None}) for d in panel.devices]
-        untagged = expand_devices(panel.model_copy(update={"devices": devices}), loaded.library)
+        untagged = expand_devices(
+            panel.model_copy(update={"devices": devices}), loaded.library, tagging=loaded.tagging
+        )
         for run, row, auto in zip(runs(fill), rows, untagged, strict=True):
             entry = run[0].device
             if auto.tag is not None:
@@ -323,6 +326,15 @@ def _row(
             "default": default,
         }
         if category in NETWORK_CATEGORIES
+        else None,
+        # M58: the alarm on its branch MCBs' trip, over the library's value
+        "alarm": {
+            "on": entry.alarm_on_branch_mcb
+            if entry.alarm_on_branch_mcb is not None
+            else part.alarm_on_branch_mcb,
+            "default": part.alarm_on_branch_mcb,
+        }
+        if part is not None and has_branch_mcb(part)
         else None,
     }
 

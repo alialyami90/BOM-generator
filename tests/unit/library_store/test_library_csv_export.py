@@ -17,7 +17,7 @@ from bomgen.library_store.csv_export import (
     library_tables,
 )
 from bomgen.library_store.edit import Insert, apply_edits
-from bomgen.models.library import DeviceType, Library
+from bomgen.models.library import SOURCED_FIELDS, DeviceType, Library
 
 EXAMPLE_LIBRARY = Path(__file__).parents[3] / "examples" / "library.yaml"
 SWITCH = "RST2228-L1-24MM"
@@ -65,9 +65,36 @@ def test_every_device_field_is_a_column_or_a_child_table() -> None:
     }
     columns = set(TABLES["devices.csv"])
 
+    sourced = {f"source_{name}" for name in SOURCED_FIELDS}
+
     assert nested == set(CHILD_TABLES)
-    assert columns | nested | set(LOADER_ONLY) == set(DeviceType.model_fields)
+    assert sourced <= columns
+    assert (columns - sourced) | nested | set(LOADER_ONLY) | {"sources"} == set(
+        DeviceType.model_fields
+    )
     assert columns.isdisjoint(nested)
+
+
+def test_sources_are_a_column_per_sized_field_written_kind_ref_date(library: Library) -> None:
+    data = library.model_dump(mode="json")
+    switch = next(d for d in data["devices"] if d["part_id"] == SWITCH)
+    switch.update(
+        state="obsolete",
+        successor="SEL-3555-RTAC",
+        sources={
+            "unit_power_w": {"kind": "datasheet", "ref": "RST2228 p. 12", "date": "2026-10-31"},
+            "ports": {"kind": "assumed", "ref": "as the example"},
+        },
+    )
+    edited = Library.model_validate(data)
+    row = next(r for r in library_tables(edited)["devices.csv"] if r["part_id"] == SWITCH)
+
+    assert "sources" not in row
+    assert row["state"] == "obsolete"
+    assert row["successor"] == "SEL-3555-RTAC"
+    assert row["source_unit_power_w"] == "datasheet|RST2228 p. 12|2026-10-31"
+    assert row["source_ports"] == "assumed|as the example|"
+    assert row["source_inrush_a"] == ""
 
 
 def test_a_device_is_one_row_with_its_part_id_first_and_in_library_order(

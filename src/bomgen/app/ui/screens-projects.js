@@ -141,6 +141,7 @@
     ['client', 'Client', ['project', 'client'], 'text', '', 'Optional. Printed under the project name.'],
     ['power_margin', 'Power margin', ['defaults', 'constants', 'power_margin'], 'pct', '%', 'Added to the power total.'],
     ['port_fraction', 'Spare ports on each switch', ['defaults', 'spares', 'port_fraction'], 'pct', '%'],
+    ['terminals_fraction', 'Spare terminals', ['defaults', 'spares', 'terminals_fraction'], 'pct', '%', 'Added to each wiring strip, rounded up (ADR 0033).'],
     ['sfp_per_l1', 'Spare SFPs per L1 switch', ['defaults', 'spares', 'sfp_per_l1'], 'int'],
     ['rack_u_reserved', 'Rack space kept free', ['defaults', 'spares', 'rack_u_reserved'], 'int', 'U'],
     ['dc_branches_per_feed', 'Spare DC branches', ['defaults', 'spares', 'dc_branches_per_feed'], 'int', 'per feed'],
@@ -163,7 +164,7 @@
     saved: (key) => saved(curProject(), key),
     check: (path, value) => Bridge.call('check_project_field', curProject().file, path, value),
     write: (path, value) => Bridge.call('set_project_field', curProject().file, path, value),
-    done: (page) => { const tab = S.tab.project; S.project = view(page); S.tab.project = tab; }
+    done: (page) => { const tab = S.tab.project; S.project = view(page); S.tab.project = tab; App.panelEditor.reload(); }
   });
   const shown = (p, key) => PO.shown(key);
   /* A height not in the file is the model's assumed default: Confirm writes it; a marked one loses the mark. */
@@ -319,6 +320,56 @@
       ${field('Name', input('ns-name', '', { placeholder: 'e.g. GIS Substation 02' }), 'The folder is made from the name and stays the same if you rename it later.')}
       <div id="ns-err"></div></div>`,
       actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="new-substation-do">Create substation</button>' });
+    nsButton();
+  };
+  /* A blank substation goes on to "Cabinets and documents" (plan M51); a copy is created at once. */
+  const nsButton = () => { const b = $('.dialog [data-action^="new-substation-"]'), f = $('#ns-from'); if (b && f) { b.dataset.action = f.value ? 'new-substation-do' : 'new-substation-setup'; b.textContent = f.value ? 'Create substation' : 'Next'; } };
+  document.addEventListener('change', (e) => { if (e.target.id === 'ns-from') nsButton(); });
+  const NS = { name: '', form: null };
+  const NS_DOCS = [['bom', 'BOM'], ['power', 'Power sheet'], ['heat', 'Heat sheets']];
+  const nsBody = (d, f) => `<div class="stack">
+      <p class="muted small">${f.previous ? `Filled in from the previous substation (${esc(f.previous)}).` : 'Filled in with the example project\'s values.'} A value you leave as it was is marked assumed until you confirm it.</p>
+      <h3>Cabinets</h3>
+      ${field('Cabinet number', input('ns-cabinet_number', d.cabinet_number, { mono: true }), '{n} is the panel number, e.g. {n:04d} for 0001.')}
+      <div class="row">${field('Cabinet name', input('ns-cabinet_name', d.cabinet_name, { mono: true }))}${field('Tag prefix', input('ns-tag_prefix', d.tag_prefix, { mono: true }))}</div>
+      <h3>Enclosure</h3>
+      <div class="row">${field('Make', input('ns-enc-make', d.enclosure.make))}${field('Model', input('ns-enc-model', d.enclosure.model))}</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-3)">${field('Height, mm', input('ns-enc-h_mm', d.enclosure.h_mm, { num: true }))}${field('Depth, mm', input('ns-enc-d_mm', d.enclosure.d_mm, { num: true }))}${field('Width, mm', input('ns-enc-w_mm', d.enclosure.w_mm, { num: true }))}</div>
+      <div class="row">${field('Base frame height, mm', input('ns-enc-base_h_mm', (d.enclosure.base_frame || {}).h_mm || '', { num: true }))}${field('Cable entry', select('ns-enc-cable_entry', [['top', 'Top'], ['side', 'Side'], ['bottom', 'Bottom']], d.enclosure.cable_entry))}</div>
+      <h3>Documents</h3>
+      ${NS_DOCS.map(([k, label]) => `<div style="display:grid;grid-template-columns:2fr 1fr 1.2fr;gap:var(--space-3)">${field(`${label} number`, input(`ns-doc-${k}-doc_no`, d.documents[k].doc_no, { mono: true }))}${field('Rev', input(`ns-doc-${k}-rev`, d.documents[k].rev, { mono: true }))}${field('Issue date', input(`ns-doc-${k}-issue_date`, d.documents[k].issue_date))}</div>`).join('')}
+      <div id="ns-err"></div></div>`;
+  ACTIONS['new-substation-setup'] = () => {
+    const p = curProject(), name = $('#ns-name').value.trim();
+    if (!name) { $('#ns-name').setAttribute('aria-invalid', 'true'); $('#ns-name').focus(); return; }
+    Bridge.call('new_substation_form', p.file, name).then((f) => {
+      NS.name = name; NS.form = f;
+      dialog({ title: `${esc(name)}: cabinets and documents`, body: nsBody(f.defaults, f),
+        actions: '<button class="btn btn--secondary" data-action="new-substation">Back</button><button class="btn btn--primary" data-action="new-substation-blank-do">Create substation</button>' });
+    }).catch((e) => err('ns-err', e));
+  };
+  /* Only the values that differ from the seeds go to the file; the rest keep their ASSUMED mark. */
+  function nsSetup() {
+    const seeds = NS.form.seeds, v = (id) => $('#' + id).value.trim(), setup = {};
+    ['cabinet_number', 'cabinet_name', 'tag_prefix'].forEach((k) => { if (v(`ns-${k}`) !== String(seeds[k])) setup[k] = v(`ns-${k}`); });
+    const se = seeds.enclosure, enc = {};
+    ['make', 'model'].forEach((k) => { if (v(`ns-enc-${k}`) !== String(se[k])) enc[k] = v(`ns-enc-${k}`); });
+    ['h_mm', 'd_mm', 'w_mm'].forEach((k) => { if (v(`ns-enc-${k}`) !== String(se[k])) enc[k] = Number(v(`ns-enc-${k}`)); });
+    if (v('ns-enc-base_h_mm') !== String(se.base_frame.h_mm)) enc.base_frame = { ...se.base_frame, h_mm: Number(v('ns-enc-base_h_mm')) };
+    if (v('ns-enc-cable_entry') !== se.cable_entry) enc.cable_entry = v('ns-enc-cable_entry');
+    if (Object.keys(enc).length) setup.enclosure = enc;
+    const docs = {};
+    NS_DOCS.forEach(([k]) => { const given = {}; ['doc_no', 'rev', 'issue_date'].forEach((f) => { const x = v(`ns-doc-${k}-${f}`); if (x && x !== String(seeds.documents[k][f])) given[f] = x; }); if (Object.keys(given).length) docs[k] = given; });
+    if (Object.keys(docs).length) setup.documents = docs;
+    return setup;
+  }
+  ACTIONS['new-substation-blank-do'] = (el) => {
+    const p = curProject(), name = NS.name;
+    el.disabled = true;
+    Bridge.call('create_substation', p.file, name, null, nsSetup()).then((made) => {
+      closeDialog(); settle(); toast(`${name} created`, 'check');
+      return openProject(p.file).then(() => openSub(made.id));
+    }).catch((e) => { el.disabled = false; err('ns-err', e); });
   };
   ACTIONS['new-substation-do'] = (el) => {
     const p = curProject(), name = $('#ns-name').value.trim();

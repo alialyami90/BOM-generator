@@ -318,3 +318,54 @@ def test_new_port_speeds_are_not_sized_as_l2_links(speed: str) -> None:
 
     with pytest.raises(ValidationError, match="not sized for SFPs"):
         Substation.model_validate(data)
+
+
+def test_generated_panels_may_set_enclosure_and_kind_per_panel() -> None:
+    # Plan M50: a generated panel may have its own enclosure and kind; unset, the shared ones.
+    data = substation_dict()
+    narrow = ENCLOSURE | {"w_mm": 600, "cable_entry": "bottom"}
+    data["generated_panels"] |= {"enclosure_by_panel": {3: narrow}, "kind_by_panel": {3: "control"}}
+    generated = Substation.model_validate(data).generated_panels
+    assert generated is not None
+    assert generated.enclosure_by_panel[3].w_mm == 600
+    assert generated.enclosure_by_panel[3].cable_entry == "bottom"
+    assert generated.kind_by_panel == {3: "control"}
+    plain = Substation.model_validate(substation_dict()).generated_panels
+    assert plain is not None
+    assert (plain.enclosure_by_panel, plain.kind_by_panel) == ({}, {})
+
+
+# --- design basis (ADR 0031, plan M52) ---
+
+
+def test_design_basis_defaults_match_today() -> None:
+    from bomgen.engine.tags import FIRST_NUMBER
+    from bomgen.models.substation import DesignBasis
+
+    basis = DesignBasis()
+    assert basis.dc_voltage_v is None
+    assert basis.ac_voltage_v is None
+    assert basis.redundancy == "duplicated_lan"
+    assert basis.tagging.side_letters == ("A", "B")
+    assert basis.tagging.first_numbers == FIRST_NUMBER
+    assert basis.spares_policy is None
+    data = substation_dict()
+    assert Substation.model_validate(data).design_basis is None
+
+
+@pytest.mark.parametrize("scheme", ["prp", "hsr"])
+def test_prp_and_hsr_are_refused_until_a_rule_exists(scheme: str) -> None:
+    from bomgen.models.substation import DesignBasis
+
+    with pytest.raises(ValidationError, match="not supported yet"):
+        DesignBasis.model_validate({"redundancy": scheme})
+
+
+def test_tagging_side_letters_are_two_different_capitals() -> None:
+    from bomgen.models.substation import Tagging
+
+    with pytest.raises(ValidationError):
+        Tagging.model_validate({"side_letters": ["A", "A"]})
+    with pytest.raises(ValidationError):
+        Tagging.model_validate({"side_letters": ["a", "b"]})
+    assert Tagging.model_validate({"side_letters": ["X", "Y"]}).side_letters == ("X", "Y")

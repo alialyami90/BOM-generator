@@ -78,7 +78,7 @@ compares the modified time of the open project and substation files.
 | Record | Entry point | What the person enters | What the app fills in |
 | --- | --- | --- | --- |
 | Project | Home › **New project…** (dialog) | Name, client (optional), device library (default: the active one), whether to add a first substation and its name | The folder, named from the project (shown, with "Change where projects are kept"), shared defaults from the spec, an empty document register, the library version stamp |
-| Substation | Project › Substations › **New substation…** (dialog), or **Create from this…** | Start from (blank or a copy), name, first cabinet number, tag prefix | Folder from the name, three calculation documents in the register with blank numbers, a cabinet document per panel when panels appear |
+| Substation | Project › Substations › **New substation…** (dialog), or **Create from this…** | Start from (blank or a copy), name; a blank one then shows *Cabinets and documents*: cabinet number, cabinet name and tag prefix patterns, enclosure (make, model, H × D × W, base frame height, cable entry), and number, revision and issue date of the BOM, power and heat documents, filled in from the previous substation or the example's values (plan M51) | Folder from the name, three calculation documents in the register; a value left as filled in from the seeds is marked assumed, and Checks warns while a document number is TBD |
 | Document | Project › Documents › **Add** (dialog) | Substation, name, number, revision, issue date | The register key |
 | Part row | Parts › **Add a device** (category menu) | The category; then the part, part number, quantity, A and B and overrides in the row | Role from the category; data from the library part |
 | Hand-written panel | Panels › **Add hand-written panel…** | Name, cabinet number, kind | Tag prefix, empty devices |
@@ -208,8 +208,13 @@ for two of them a way to go back.
 
 | Editor control | Model field | What is needed |
 | --- | --- | --- |
-| Enclosure (shared by all generated panels) | `generated_panels.enclosure` | Writer; per-field validation of the `Enclosure` fields. One value for all panels, so no per-panel enclosure is designed. |
+| Enclosure and kind, *All generated panels* | `generated_panels.enclosure`, `generated_panels.kind` | Writer; per-field validation of the `Enclosure` fields. |
+| Enclosure and kind, *This panel only* (M50) | `generated_panels.enclosure_by_panel[n]`, `generated_panels.kind_by_panel[n]` | *Give this panel its own enclosure* writes a copy of the shared one (`set_enclosure` with `panel`), then fields edit it; *Use the shared enclosure* removes it. Kind's empty choice removes `kind_by_panel[n]`. `panel_page` returns `shared` (enclosure, kind, `own_enclosure`, `own_kind`). |
 | Options, *All generated panels* | `generated_panels.options` | Writer; validation by `PanelOptions` for each key. |
+| Spare ratings, grounding busbars (M58) | `options.ac_spare_rating_a`, `dc_spare_rating_a`, `grounding_busbars` | The spare ratings are derived values (`panel_page.derived.ac_spare_a`, `dc_spare_a`, with their rule). The busbars are one checkbox per entry of `panel_page.busbars` (the library's catalogue), written at once with `set_panel_option` or `set_panel_field`; *Use the shared busbars* removes a panel's own list. |
+| Terminals tab (M57, ADR 0033) | `options.terminal_overrides[strip]`, `options.terminal_block_overrides[strip]` (generated: `generated_panels.options` or `options_by_panel[n]`); `spares.terminals_fraction` on Project › Overview and Parts › Network fine tuning | `panel_page.terminals` gives each strip its `block`, `block_override` and `qty` as a derived value with its rule; `terminal_blocks` lists the catalogue's types. Draft keys `t.<all\|n>.<strip>` and `tb.<all\|n>.<strip>` (hand-written: `t.<strip>`); empty removes the override. A panel's own map replaces the shared one. |
+| Tag, type code, first number on a hand-written row (M59) | `devices[].tag`, `tag_type`, `first_nn` | Draft fields under each Devices row; `panel_page` gives each row its unit `tags` (the placeholder) and the `duplicate` sentence of the duplicate-tag check. |
+| Alarm on branch MCB trip (M58) | `equipment[].alarm_on_branch_mcb`, hand-written `devices[].alarm_on_branch_mcb` | Unset follows the library. Parts writes it only when it differs from the library (`parts_page` row `alarm: {on, default}`). A hand-written row offers Library / On / Off where the part has a branch MCB (`devices[].branch_mcb`, `alarm_default`). |
 | Options, *This panel only* | `generated_panels.options_by_panel[n]` | Writer that sets one key for panel `n`, and one that **removes** the key again (the "Own value, use the shared one" link). The reader must report, per option, whether panel `n` has its own value, and the shared value it overrides. |
 | Port plans | `equipment[].port_plan` (`uplinks_l3`, `uplinks`, `downlinks`, `serial_ports`) | Writer per equipment row. The plan is per unit and scaled by the row's `qty`, so a change reaches every panel that holds that device and both sides of a redundant pair; the tab says so. |
 | Document | `generated_panels.document` | Writer; the document must be in the register. |
@@ -368,6 +373,13 @@ Tabs and fields, mapped to the model's `DeviceType`:
 | Datasheet | Supply range, Operating temperature, Typical and Maximum power, Ports, Dimensions, Weight, Certifications, Datasheet link, Data quality, Sources. A datasheet height is labelled **Height in the datasheet** with the help "The layout uses Ports and mounting › Height.", so the two heights never read as one field |
 | Alternatives | Alternative group key and the comparison list below, *Add alternative…* |
 
+Lifecycle and sources (ADR 0037): `state`, `successor`, a `source` per sized field (`unit_power_w`,
+`inrush_a`, `height_u`, `input_v_max`, `ports`) and `changed_by`, `changed_on`, `note` are library fields
+(M67a). Applying a pending set, or importing a CSV, that changes a sized field without that field's source is
+refused with a line naming the part and the field; *assumed* is a source. Each applied set writes `changed_by`,
+`changed_on` and the set's note on the parts it touched (M67b). The editor shows them from M67c: state and
+successor on Identity, a Sources column on Electrical and Ports and mounting.
+
 - **In use:** a banner says how many equipment rows in the open substation use the device, and that an edit
   reaches a project only when it records the version you apply. *Delete…* names the rows that use it and
   warns that the substation will report an error until another part is picked.
@@ -406,6 +418,8 @@ part's alternatives first under "Alternatives to X".
 - **Export…** (dialog): *Spreadsheet (CSV)* or *Backup package (.bomlib)*. CSV: choose tables (devices,
   alternatives, catalogues) and a folder; one file per table, written as UTF-8 with a byte-order mark so Excel
   shows accents and symbols. A note says to keep `part_id` and `alt_group` as they are: they link rows.
+  `devices.csv` has `state`, `successor` and a `source_<field>` column per sized field, written
+  `kind|ref|date` (`datasheet|RST2228 p. 12|2026-10-31`); a blank cell is no source (ADR 0037).
   Backup writes a complete package of the active version that can be kept or handed on as an update.
 - **Import…** is a menu: *Update package (.bomlib)…* (the existing flow) and *Spreadsheet (CSV)…*.
 - **CSV import** (`#/library/csv`) has a review step before anything is added: (1) choose or drop a file;

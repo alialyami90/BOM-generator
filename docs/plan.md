@@ -203,6 +203,7 @@ defaults:                              # inherited key by key by every substatio
     dc_branches_per_feed: 3            # for generated panels; panel options keep their own
     ac_branches: 1
     rack_u_reserved: 10                # 42U enclosure → 32U usable
+    terminals_fraction: 0              # M57, ADR 0033; added to each wiring strip, rounded up
 substations:
   - substations/gis01/substation.yaml
 ```
@@ -281,10 +282,24 @@ generated_panels:                      # needed when equipment is given; {n} = p
   document: gis01-bom
   options: { dc_spare_branches_per_feed: 3 }   # every generated panel
   options_by_panel: { 2: { aux_socket_a: 10 } }
+  enclosure_by_panel: { 3: { make: Rawabi, model: "Fixed Frame", h_mm: 2100, d_mm: 1000,
+                             w_mm: 600, cable_entry: bottom } }   # optional, whole enclosure (M50)
+  kind_by_panel: { 3: control }        # optional; unset panels take `kind` (M50)
+design_basis:                          # optional (ADR 0031, M52); only sets defaults
+  dc_voltage_v: 110                    # over the project's constants, under this file's own
+  ac_voltage_v: 230
+  redundancy: duplicated_lan           # PRP and HSR refused until a rule exists
+  purdue_scope: [L1, L2, EXT]          # checked by M54, changes no quantity
+  time_sync: gps_clock                 # gps_clock | ptp_from_clock | none
+  tagging: { side_letters: [A, B], first_numbers: { L2: 1, L1: 11, L3: 1 } }
+  spares_policy: { percent: { sfp: 10 }, minimum_per_part: 1, categories: [sfp] }  # M64
+  vendor_list: client-avl              # a project vendor list's key (M53)
+  notes: "Client SCADA spec rev 2"
 ```
 
 **Loading rules.** Substation `constants`, `spares` and `catalogue_choice` replace only the keys
-they write; the merged constants are checked again (`t_max_c > t_int_c`). Every
+they write; the merged constants are checked again (`t_max_c > t_int_c`). The design basis's
+voltages sit between the project's constants and the substation's own (ADR 0031). Every
 document key a substation, its calculation sheets, `generated_panels` and its
 panels name must be one of that substation's register entries. Equipment parts
 must exist and carry `height_u`, and the two switch roles must be
@@ -332,6 +347,15 @@ devices:
     inrush_ms: 5                       # optional inrush duration (M15)
     input_v_min: 88                    # optional rated input range, V (check report)
     input_v_max: 150
+    state: released                    # draft | reviewed | released | obsolete (ADR 0037)
+    successor: null                    # an obsolete part's replacement part_id
+    sources:                           # per sized field: unit_power_w, inrush_a, height_u,
+      unit_power_w: { kind: datasheet, ref: "RST2228 datasheet p. 12", date: 2026-10-31 }
+                                       # input_v_max, ports; kind datasheet | contractor |
+                                       # assumed | measured; date optional
+    changed_by: null                   # written by the local save (ADR 0037)
+    changed_on: null
+    note: null
 
 catalogues:                            # the brand set named default
   enclosure_u: 42                      # rack units of the enclosure (ADR 0013)
@@ -384,14 +408,14 @@ enclosure:
   d_mm: 1000
   w_mm: 800
   base_frame: { h_mm: 100, d_mm: 950, w_mm: 750 }   # optional plinth
-  cable_entry: top                     # top | side
+  cable_entry: top                     # top | side | bottom
 devices:                               # group B display order
   - { part_id: FOPP-96SM, qty: 1, purpose: "L2-L3 uplink to CCR" }
   - { part_id: RST2228-L2, qty: 1 }
   - { part_id: RST2228-L1-24MM, qty: 6 }   # first_nn: 15 continues a range (A15 to A16)
   - { part_id: RST2228-EXT, qty: 1 }
   - { part_id: GW-DHPCC, qty: 1, purpose: "for Dhahran PCC connection" }
-  - { part_id: FW-EXT, qty: 1 }
+  - { part_id: FW-EXT, qty: 1 }        # alarm_on_branch_mcb: false overrides the library (M58)
 port_plans:                            # per device, by part_id or tag; allocations are lists
   RST2228-L2:
     uplinks_l3: [{ count: 2, speed: 1G, media: SM }]
@@ -409,8 +433,11 @@ options:
   dc_spare_branches_per_feed: 3        # default 1
   ac_spare_branches: 1
   main_mcb_override_a: null
+  ac_spare_rating_a: null              # M58; null = the largest housekeeping branch
+  dc_spare_rating_a: null              # M58; null = the largest device branch
   inter_panel_terminals: 40
   terminal_overrides: {}               # e.g. { X4-DC1: 32 } where the spec gives no rule
+  terminal_block_overrides: {}         # M57, ADR 0033; e.g. { X3-AC: UT-16 }
   grounding_busbars: [ac_safety_ground, instrument_ground]
 document: gis01-bom                    # register key: this panel's BOM header/footer
 revision:
@@ -1075,29 +1102,44 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
   those values on screen.
 - **M49 — SFP quantities per switch.** *W4.* Done (#323). `sfp` choices take `spare` and `extra` per BOM
   row and `part_id` became optional; extras warn on the slot check, never fail.
-- **M50 — Enclosure and kind per generated panel, bottom entry.** *W3; spec sentence.* Planned.
-- **M51 — New-substation setup instead of ASSUMED seeds.** *W5; Q62.* Planned.
-- **M52 — Design basis model and tab.** *W5; ADR 0031.* Planned.
+- **M50 — Enclosure and kind per generated panel, bottom entry.** *W3; spec sentence.* In review.
+- **M51 — New-substation setup instead of ASSUMED seeds.** *W5; Q62.* Done (#333). A blank substation's
+  dialog has a *Cabinets and documents* step prefilled from the previous substation (Q62's recommended
+  answer); `document_number_placeholder` warns on a TBD number. Checks reads the model, so it flags
+  TBD only, not an ASSUMED comment; the register already shows assumed dates.
+- **M52 — Design basis model and tab.** *W5; ADR 0031.* Split. M52a (model, loader, tags) in review:
+  `substation.design_basis`; its voltages feed the constants under the substation's own, and
+  `engine/tags.py` reads side letters and first numbers from its `tagging`. A hand-written panel's
+  tags and port-plan keys are written in the file, so they don't follow new side letters. M52b (the
+  tab and `design_basis_page`) planned.
 - **M53 — Vendor list and part lifecycle states.** *W5; ADRs 0031 and 0037.* Planned.
 - **M54 — Design-basis checks.** *W5.* Planned.
 - **M55 — Substation templates.** *W5; Q63.* Planned.
 - **M56 — Housekeeping editor.** *W3; ADR 0032.* Planned.
-- **M57 — Terminals tab.** *W3; ADR 0033.* Planned.
-- **M58 — Grounding, spare breaker ratings, alarm on branch trip.** *W3; spec sentence.* Planned.
+- **M57 — Terminals tab.** *W3; ADR 0033.* In review. `spares.terminals_fraction` and
+  `PanelOptions.terminal_block_overrides`; `BuildResult.strips` carries each strip's rule; the panel
+  editor's Terminals tab replaces the read-only terminal overrides of Options.
+- **M58 — Grounding, spare breaker ratings, alarm on branch trip.** *W3; spec sentence.* Done (#332).
 - **M59 — BOM text per row on Parts.** *W4.* Done (#326). Equipment gains `tag`, `tag_type` and `first_nn`;
-  Parts has a *BOM text* section per row. The hand-written panel editor's tag fields are left to W3,
-  which owns that screen.
+  Parts has a *BOM text* section per row. The hand-written panel editor's tag fields came from W3 in a
+  follow-up PR: tag, type code and first number under each Devices row, with the duplicate-tag check.
 - **M60 — IED schedule.** *W4; ADR 0034.* Planned.
 - **M61 — External links.** *W4; Q64.* Planned.
 - **M62 — Panel count control.** *W4; Q68.* Done (#325). ADR 0013 amendment: `layout.max_panels`
   caps the fill (R5, R6): a pair opens only while both its panels are within the cap, a common device
   only into a panel within it, and a unit that fits nowhere is a `panel-limit` layout error naming the
-  unit and the U it is short. Moves past the cap are unknown panels. "Exactly n" waits on Q68.
+  unit and the U it is short. Moves past the cap are unknown panels. No "Exactly n" (Q68).
 - **M63 — Summary BOM.** *W2; ADR 0035.* Planned.
 - **M64 — Spares list.** *W2; ADR 0035, Q65.* Planned.
 - **M65 — Cable schedule.** *W2; ADR 0035, Q66.* Planned.
 - **M66 — Revision history and recorded issues.** *W2; ADR 0036, Q67.* Planned.
-- **M67 — Record sources and lifecycle.** *W1; ADR 0037.* Planned.
+- **M67 — Record sources and lifecycle.** *W1; ADR 0037 (accepted).* In two PRs so that W5's M53
+  gets the state field early. **M67a** (in review): `state`, `successor`, `sources` and the change
+  fields on `DeviceType`, the successor reference check, `devices.csv` columns, the schema. **M67b**
+  (in review): a sized change needs its source, the save writes who, when and the note, a
+  library that uses these fields needs this app, every shipped part sourced (psa-devices 1.16.0,
+  Q69), the assumed power and inrush check. **M67c** (planned): the device editor's state,
+  successor and Sources column, the Library state badge and *Assumed values* filter, the Parts chip.
 - **M68 — Review queue and health.** *W1.* Planned.
 - **M69 — Propose from project.** *W1.* Planned.
 
@@ -1495,13 +1537,30 @@ spec, or change the spec to 26.25?
 "Sheet 4" is read as the console panel (`kind: console`): the example's sheet 4 is the WS
 console, and the kind names the same cabinet in any project (A1, 2026-11-01).
 
+**Q62 — A new substation's seeds** (M51). *Answered 2026-11-03: prefill, previous substation first.* A blank substation gets the example's cabinet
+number pattern, cabinet name, tag prefix, enclosure (Rawabi fixed frame 2100 × 1000 × 800, top entry)
+and "TBD" document numbers, the uncertain ones marked ASSUMED. M51 adds a setup step to the New
+substation dialog. Prefill it with these values, or the previous substation's when there is one
+(recommended), or start it blank so every value is typed? M51 prefills.
+
+**Q63 — Where substation templates live** (M55). In the project folder as
+`templates/*.yaml`, so they travel with the `.bomproj` (recommended), or in the app's home folder,
+shared by every project on the PC? *Answered 2026-11-03: the project folder.*
+
 **Q67 — Where prepared, checked and approved names print** (M66; ADR 0036). *Answered 2026-11-03: the history sheet only, footer as it is.* The register
 gains the three names per document. They print on the Revision History sheet (ADR 0035) for each
 recorded issue. To ask Ali: the history sheet only, with the footer as it is (recommended); also in
 every sheet's page header; or on a cover sheet.
 
-**Q68 — "Exactly n panels"** (M62). The plan offers Automatic, Exactly n and At most n. The fill
+**Q68 — "Exactly n panels"** (M62). *Answered 2026-11-03: offer At most n only.* The plan offers Automatic, Exactly n and At most n. The fill
 already opens the fewest panels, so Exactly n only differs from At most n when the devices fit in
 fewer: spread them evenly, keep the spare panels empty, or offer At most n only (recommended: the
 Panels board already opens a new pair when a device is dragged onto it). M62 ships At most n
-(`layout.max_panels`) while Ali answers.
+(`layout.max_panels`); there is no `panel_count`.
+
+**Q69 — Power figures no datasheet states** (M67, ADR 0037 item 6). *Open.* Seven original
+parts carry the spec's example workbook power, which their datasheet does not state (SEL-3355
+91 W against 189 W at most; SEL-2488, SEL-3555-RTAC, SEL-3555-GW, SEL-2240, NAP-F23, IPR-2903685).
+Source them as `assumed` naming the workbook (recommended: Parts and Checks then flag them until
+someone confirms the watts), as `datasheet` citing the workbook, or with a fifth source kind for
+the client's documents (amends ADR 0037)? Until Ali answers, M67b ships them as `assumed`.

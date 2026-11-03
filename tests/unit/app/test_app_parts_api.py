@@ -447,3 +447,19 @@ def test_a_typed_tag_another_unit_has_is_marked_on_its_row(app: api.Api, project
 
     duplicate = row(ok(app.parts_page(str(project), "gis01"))["parts"], "gps")["duplicate"]
     assert duplicate == "PSA1-L2-ESW-A01: 2 device units share this tag (psa1): each needs its own"
+
+
+def test_a_row_with_branch_mcbs_shows_its_alarm_and_the_library_default(
+    project: Path, store: LibraryStore, substation: Path
+) -> None:
+    """Plan M58: "Alarm on branch MCB trip" with the library's value as the default."""
+    found = parts(project, store)
+    assert row(found, "ext-fw")["alarm"] == {"on": True, "default": True}
+    assert row(found, "fopp")["alarm"] is None  # no supply, no branch MCB
+
+    text = substation.read_text("utf-8")
+    substation.write_text(
+        text.replace("  - id: ext-fw\n", "  - id: ext-fw\n    alarm_on_branch_mcb: false\n"),
+        "utf-8",
+    )
+    assert row(parts(project, store), "ext-fw")["alarm"] == {"on": False, "default": True}

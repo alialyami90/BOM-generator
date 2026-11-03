@@ -15,7 +15,7 @@ import yaml
 
 from bomgen.build import build_substation
 from bomgen.io.loader import load_library, load_substation
-from bomgen.models.library import DeviceType, Library, McbBrand
+from bomgen.models.library import SOURCED_FIELDS, DeviceType, Library, McbBrand
 
 REPO = Path(__file__).resolve().parents[2]
 SHIPPED = REPO / "data" / "library" / "psa-devices.yaml"
@@ -44,6 +44,7 @@ def test_the_shipped_library_is_up_to_date_with_its_sources() -> None:
         EXAMPLE.read_text(encoding="utf-8"),
         build.datasheets(),
         ADDITIONS.read_text(encoding="utf-8"),
+        build.evidence(),
     )
 
     assert SHIPPED.read_text(encoding="utf-8") == expected, (
@@ -55,7 +56,7 @@ def test_the_shipped_library_is_the_example_plus_the_originals_datasheet_figures
     shipped: Library,
 ) -> None:
     example = load_library(EXAMPLE)
-    keys = {"inrush_a", "inrush_ms", "input_v_min", "input_v_max", "make"}
+    keys = {"inrush_a", "inrush_ms", "input_v_min", "input_v_max", "make", "sources"}
     overrides = yaml.safe_load(ADDITIONS.read_text(encoding="utf-8"))["overrides"]
 
     originals = shipped.devices[: len(example.devices)]
@@ -69,7 +70,7 @@ def test_the_shipped_library_is_the_example_plus_the_originals_datasheet_figures
         changed = keys | set(overrides["devices"].get(ours.part_id, {}))
         assert ours.model_dump(exclude=changed) == theirs.model_dump(exclude=changed), ours.part_id
         if ours.tier is not None:
-            tier_keys = set(overrides["devices"].get(ours.part_id, {}))
+            tier_keys = {"sources", *overrides["devices"].get(ours.part_id, {})}
             assert ours.model_dump(exclude=tier_keys) == theirs.model_dump(exclude=tier_keys)
 
 
@@ -79,7 +80,8 @@ def test_the_shipped_library_ends_with_the_additions(shipped: Library) -> None:
 
     assert [d.part_id for d in added] == [a["part_id"] for a in additions]
     for device, entry in zip(added, additions, strict=True):
-        assert device == DeviceType.model_validate(entry), device.part_id
+        expected = DeviceType.model_validate(entry).model_dump(exclude={"sources"})
+        assert device.model_dump(exclude={"sources"}) == expected, device.part_id
 
 
 def test_each_addition_is_a_valid_part_new_to_the_example() -> None:
@@ -277,7 +279,7 @@ def test_an_override_of_a_part_the_example_lacks_is_refused() -> None:
     )
 
     with pytest.raises(ValueError, match="NOPE"):
-        build.build(EXAMPLE.read_text(encoding="utf-8"), {}, additions)
+        build.build(EXAMPLE.read_text(encoding="utf-8"), {}, additions, build.Evidence({}, {}))
 
 
 def test_the_larger_fans_are_rittal_units_above_460_m3h_with_their_watts(
@@ -409,3 +411,60 @@ def test_the_annunciator_brings_its_wall_mount_kit(shipped: Library) -> None:
 
     assert [i.part_id for i in annunciator.loose_items] == ["LPA37-696"]
     assert example.loose_items == []  # the example writes its kit by hand (Q38)
+
+
+# ADR 0037 item 6: every shipped part says where its sized figures come from
+
+
+def test_every_shipped_part_has_a_source_or_assumed(shipped: Library) -> None:
+    missing = [
+        f"{part.part_id}.{name}"
+        for part in shipped.devices
+        for name in SOURCED_FIELDS
+        if getattr(part, name) not in (None, []) and name not in part.sources
+    ]
+    assert missing == []
+
+
+def test_the_shipped_library_is_all_released(shipped: Library) -> None:
+    assert {part.state for part in shipped.devices} == {"released"}
+
+
+def test_a_figure_the_datasheet_gives_is_sourced_to_it(shipped: Library) -> None:
+    switch = shipped.get("RST2228-L1-24MM")
+    assert switch is not None
+    source = switch.sources["unit_power_w"]
+    assert (source.kind, source.ref.endswith("rst2228-brochure-en.pdf")) == ("datasheet", True)
+
+
+def test_a_power_no_datasheet_gives_is_assumed_and_names_the_workbook(shipped: Library) -> None:
+    # Q69: the spec's example workbook figures no datasheet states
+    gateway = shipped.get("SEL-3355")
+    assert gateway is not None
+    source = gateway.sources["unit_power_w"]
+    assert source.kind == "assumed"
+    assert "example workbook" in source.ref
+
+
+def test_a_contractor_part_cites_the_contractors_document(shipped: Library) -> None:
+    switch = shipped.get("C9300-24T-A")
+    assert switch is not None
+    source = switch.sources["input_v_max"]
+    assert source.kind == "contractor"
+    assert "Cisco Catalyst 9300" in source.ref
+
+
+def test_a_figure_the_contractor_assumed_stays_assumed(shipped: Library) -> None:
+    switch = shipped.get("C9300-24T-A")
+    assert switch is not None
+    source = switch.sources["unit_power_w"]
+    assert source.kind == "assumed"
+    assert source.ref.startswith("contractor: Conservative one-PSU")
+
+
+def test_an_alternatives_computed_power_is_sourced_to_its_datasheet(shipped: Library) -> None:
+    moxa = shipped.get("RST2228-L1-24MM.MOXA-LOW")
+    assert moxa is not None
+    source = moxa.sources["unit_power_w"]
+    assert source.kind == "datasheet"
+    assert "0.313 x 110" in source.ref

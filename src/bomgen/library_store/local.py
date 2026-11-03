@@ -7,12 +7,15 @@ version. The edits come from the edit operations or a CSV import; this module on
 
 from __future__ import annotations
 
+import getpass
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
+from typing import Any
 
 import yaml
 
+import bomgen
 from bomgen.bundle.container import sha256
 from bomgen.io.errors import InputError
 from bomgen.io.loader import load_library
@@ -26,7 +29,10 @@ from bomgen.library_store.records import apply_record_edits, changed_records, wr
 from bomgen.library_store.service import validate_library
 from bomgen.library_store.store import LibraryStore
 from bomgen.library_store.versions import Version
-from bomgen.models.library import Library
+from bomgen.models.library import SOURCED_FIELDS, Library
+
+# Who last changed a part, when and why (ADR 0037): written by the save, never a change itself
+CHANGE_FIELDS = ("changed_by", "changed_on", "note")
 
 
 @dataclass(frozen=True)
@@ -41,6 +47,11 @@ class LocalSave:
 def dump_library(library: Library) -> bytes:
     """The `library.yaml` bytes of a library; loading them again gives an equal library."""
     data = library.model_dump(mode="json", exclude_none=True)
+    for device in data["devices"]:  # ADR 0037 defaults, left out so older apps read the file
+        if device.get("state") == "released":
+            del device["state"]
+        if not device.get("sources"):
+            device.pop("sources", None)
     return yaml.safe_dump(data, sort_keys=False, allow_unicode=True).encode("utf-8")
 
 
@@ -72,6 +83,14 @@ def save_local_version(
             f"library {name} {base}: the installed library is damaged", RefusalKind.STORE_DAMAGED
         ) from exc
 
+    unsourced = _unsourced(base_library, library)
+    if unsourced:
+        listed = "\n".join(f"  {line}" for line in unsourced)
+        raise LibraryPackageError(
+            f"the edits leave the library invalid:\n{listed}", RefusalKind.VALIDATION_FAILED
+        )
+    library = _stamped(base_library, library, note)
+
     # Compare dumps of both, so defaults the base file leaves out do not show as edits.
     old_bytes = dump_library(base_library)
     new_bytes = dump_library(library)
@@ -95,7 +114,7 @@ def save_local_version(
         name=name,
         version=str(next_local_version(store, name, Version.parse(base))),
         schema_version=base_contents.manifest.schema_version,
-        min_app_version=base_contents.manifest.min_app_version,
+        min_app_version=_min_app_version(base_contents.manifest.min_app_version, library),
         release_notes=_release_notes(base, diff, records_changed, note),
         created=datetime.now(UTC).replace(microsecond=0),
         files=digests,
@@ -141,6 +160,62 @@ def save_edits(
             f"the edits leave the library invalid:\n{listed}", RefusalKind.VALIDATION_FAILED
         )
     return save_local_version(store, name, result.library, base=base, records=records, note=note)
+
+
+def _unsourced(base: Library, library: Library) -> list[str]:
+    """Each sized field whose value the edits set or changed while its source stayed as it
+    was (ADR 0037 item 4)."""
+    found: list[str] = []
+    for device in library.devices:
+        old = base.get(device.part_id)
+        for name in SOURCED_FIELDS:
+            value = getattr(device, name)
+            if value in (None, []) or (old is not None and getattr(old, name) == value):
+                continue
+            if device.sources.get(name) == (old.sources.get(name) if old else None):
+                found.append(
+                    f"{device.part_id}: {name} changed without its source; give where the value "
+                    "comes from (datasheet, contractor, measured or assumed)"
+                )
+    return found
+
+
+def _stamped(base: Library, library: Library, note: str) -> Library:
+    """`library` with who, when and the note written on each part the edits touched."""
+    stamp = {
+        "changed_by": _user(),
+        "changed_on": date.today().isoformat(),
+        "note": note.strip() or None,
+    }
+    data = library.model_dump(mode="json")
+    for device in data["devices"]:
+        old = base.get(device["part_id"])
+        if old is None or _content(old.model_dump(mode="json")) != _content(device):
+            device.update(stamp)
+    return Library.model_validate(data)
+
+
+def _content(device: Mapping[str, Any]) -> dict[str, Any]:
+    return {k: v for k, v in device.items() if k not in CHANGE_FIELDS}
+
+
+def _user() -> str | None:
+    try:
+        return getpass.getuser()
+    except OSError:  # no login name in the environment
+        return None
+
+
+def _min_app_version(base: str, library: Library) -> str:
+    """The base's requirement, raised to this app when the library uses ADR 0037 fields,
+    which older apps refuse (ADR 0037 item 8)."""
+    uses = any(
+        d.state != "released" or d.sources or any(getattr(d, f) is not None for f in CHANGE_FIELDS)
+        for d in library.devices
+    )
+    if uses and Version.parse(bomgen.__version__) > Version.parse(base):
+        return bomgen.__version__
+    return base
 
 
 def next_local_version(store: LibraryStore, name: str, base: Version) -> Version:

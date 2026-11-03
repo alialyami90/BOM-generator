@@ -9,6 +9,15 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Library parts carry a lifecycle state (draft, reviewed, released, obsolete; released by
+  default), an obsolete part's successor, and a source for each sized figure: power, inrush,
+  height, maximum input voltage and ports, each from a datasheet, the contractor, a measurement or
+  assumed. `devices.csv` exports and imports them as `state`, `successor` and `source_<field>`
+  (`kind|ref|date`). Nothing in a BOM changes (M67a, ADR 0037).
+- psa-devices 1.16.0: every part says where its power, inrush, height, input voltage and ports
+  come from: the device database's datasheet, the contractor's cited document, or assumed with
+  the reason. Checks warns when a picked part's power or inrush is assumed (M67b, ADR 0037).
+
 - The panel editor's main MCB shows the engine's rating with the rule it came from ("10 A: next
   standard size above 7.1 A, minimum 6 A"); click it to type your own, *Use automatic* to go back
   (M48). Part overrides on Parts use the same derived-value look, and leaving a value with Tab now
@@ -22,6 +31,33 @@ project uses [Semantic Versioning](https://semver.org/).
 - Each Parts row has *BOM text*: purpose, tag, type code, first number and HWIO points, with the
   generated tags as placeholders. A first number of 21 on the L1 row prints PSA1-L1-ESW-A21 onward,
   and a tag another unit already has is flagged on the row (M59).
+- A generated panel can have its own enclosure and kind: the panel editor's Enclosure tab gains
+  *All generated panels* / *This panel only* and a Kind select, and cable entry gains Bottom (M50).
+- New substation, for a blank one, asks for its cabinets and documents: cabinet number, name and tag
+  prefix patterns, the enclosure and cable entry, and the BOM, power and heat document numbers,
+  filled in from the previous substation. What you type is written without the ASSUMED mark, and
+  Checks warns while a document number is still TBD (M51).
+- A substation can state its design basis in `design_basis`: DC and AC voltage feed the design
+  constants unless the substation sets its own, and `tagging` sets the side letters and first
+  numbers that device tags use. Unset, everything builds as before (M52a, ADR 0031).
+- The panel editor's Options tab shows the AC and DC spare breaker ratings with the rule behind
+  them; click one to set your own. Grounding busbars are checkboxes from the library's catalogue.
+  *Alarm on branch MCB trip* can be switched per Parts row and per hand-written panel row, over the
+  library's value (M58).
+- The panel editor has a Terminals tab: each terminal strip with its block type and its quantity,
+  shown with the rule behind it ("2 x 6 AC MCBs = 12"); click a quantity to set your own, or pick
+  another block type. *Spare terminals* (Project › Overview, Parts › Network fine tuning) adds a
+  share to each wiring strip, rounded up: 10% makes X3-AC 14 and X4-DC1 36 in Cabinet 001 (M57).
+- A hand-written panel's Devices rows take a tag, type code and first number, with the generated
+  tag as placeholder and a shared tag flagged on the row (M59). Moving, adding or removing a device
+  there no longer writes the page's own fields into the panel file.
+
+### Changed
+
+- Changing a library part's power, inrush, height, input voltage or ports now needs that
+  figure's source in the same change, in the device editor or a CSV import; *assumed* counts.
+  Each save writes who changed the part, when and the note. A library saved this way opens only in
+  this release or later (M67b, ADR 0037).
 
 ## [0.3.4] - 2026-11-01
 

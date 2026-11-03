@@ -11,11 +11,13 @@ from bomgen.checks import (
     dc_float_checks,
     dc_main_checks,
     di_capacity_check,
+    document_number_checks,
     duplicate_tag_checks,
     external_ac_checks,
     l2_link_checks,
     library_check,
     part_number_checks,
+    part_source_checks,
     render_json,
     render_text,
     sfp_slot_checks,
@@ -413,6 +415,35 @@ def test_a_device_without_a_part_number_warns() -> None:
     ]
 
 
+def test_assumed_power_warns() -> None:
+    # ADR 0037: a picked part whose power or inrush is assumed is named, with what it rests on.
+    assumed = {"kind": "assumed", "ref": "no datasheet figure"}
+    sourced = {"kind": "datasheet", "ref": "p. 12"}
+    lib = library(
+        powered(
+            "GUESS", "rtac", inrush_a=20, sources={"unit_power_w": assumed, "inrush_a": assumed}
+        ),
+        powered("READ", "rtac", sources={"unit_power_w": sourced}),
+        powered("BARE", "rtac"),
+    )
+    equipment = [
+        Equipment(id="a", part_id="GUESS", role="other"),
+        Equipment(id="b", part_id="READ", role="other"),
+        Equipment(id="c", part_id="BARE", role="other"),
+        Equipment(id="l1", role="l1_switch", redundant=True),
+    ]
+    assert part_source_checks(equipment, lib) == [
+        CheckItem(
+            check="part_source",
+            status=CheckStatus.WARN,
+            subject="a",
+            message="GUESS: unit_power_w and inrush_a are assumed (no datasheet figure); "
+            "confirm them against a datasheet or a measurement",
+            values={"part_id": "GUESS", "fields": "unit_power_w, inrush_a"},
+        )
+    ]
+
+
 def loose_line(part: str) -> BomLine:
     return BomLine(group=Group.B, description=part, qty=2, part_id=part)
 
@@ -537,3 +568,22 @@ def test_sfp_extra_beyond_slots_warns() -> None:
         "2 SFPs in 4 SFP slots; the 2 extra SFPs need more 1G slots than are free"
     )
     assert item.values == {"sfps": 2, "slots": 4, "extra": 2}
+
+
+def test_tbd_document_number_warns() -> None:
+    from datetime import date
+
+    from bomgen.models.project import RegisterEntry
+
+    def entry(key: str, doc_no: str) -> RegisterEntry:
+        return RegisterEntry(
+            key=key, substation="s1", doc_no=doc_no, rev="00", issue_date=date(2026, 11, 3)
+        )
+
+    items = document_number_checks(
+        {"s1-bom": entry("s1-bom", "TBD"), "s1-power": entry("s1-power", "DHN-PWR-001")}
+    )
+    assert [(i.check, i.status, i.subject) for i in items] == [
+        ("document_number_placeholder", CheckStatus.WARN, "s1-bom")
+    ]
+    assert "TBD" in items[0].message

@@ -859,7 +859,11 @@ def _rows(panel: PanelFill, loaded: LoadedSubstation) -> list[DeviceInstance]:
     for run in runs(panel):
         first = run[0]
         entry = entries[first.device]
-        start = first_number(devices[first.part_id]) + first.n - 1 if first.n > 1 else None
+        start = (
+            first_number(devices[first.part_id], loaded.tagging) + first.n - 1
+            if first.n > 1
+            else None
+        )
         if entry.first_nn is not None:  # the engineer's first number (plan M59)
             start = entry.first_nn + first.n - 1
         # the BOM counts a generated panel's managers from the layout (ADR 0013, Q32)
@@ -877,6 +881,7 @@ def _rows(panel: PanelFill, loaded: LoadedSubstation) -> list[DeviceInstance]:
                 hwio_points=entry.hwio_points,  # a row total, as on DeviceInstance
                 first_nn=start,
                 cable_manager=managed,
+                alarm_on_branch_mcb=entry.alarm_on_branch_mcb,
             )
         )
     return rows
@@ -974,8 +979,8 @@ def _panel(
         tag_prefix=spec.tag_prefix.format(n=n),
         lan="A" if n % 2 else "B",
         sheet_name=spec.sheet_name.format(n=n),
-        kind=spec.kind,
-        enclosure=spec.enclosure,
+        kind=spec.kind_by_panel.get(n, spec.kind),
+        enclosure=spec.enclosure_by_panel.get(n, spec.enclosure),
         devices=_rows(fill, loaded),
         port_plans=_port_plans(fill, fills, loaded, plan, net, sides),
         options=PanelOptions.model_validate(options),

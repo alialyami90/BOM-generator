@@ -9,9 +9,9 @@
 
   /* ---------- the draft form: every field is saved together with the save bar ---------- */
   const NET = { ied_count: 'int', topology: 'choice', ring_max_switches: 'int', l1_uplinks_per_switch: 'int', l1_interlink: 'bool', l3_uplinks_per_l2: 'int' };
-  const SPARES = { port_fraction: ['Ports kept free on each switch', '%', 'pct'], sfp_per_l1: ['Spare SFPs on each L1', '', 'int'], dc_branches_per_feed: ['Spare DC branches per feed', '', 'int'], ac_branches: ['Spare AC branches', '', 'int'], rack_u_reserved: ['Rack space kept free', 'U', 'int'] };
+  const SPARES = { port_fraction: ['Ports kept free on each switch', '%', 'pct'], sfp_per_l1: ['Spare SFPs on each L1', '', 'int'], dc_branches_per_feed: ['Spare DC branches per feed', '', 'int'], ac_branches: ['Spare AC branches', '', 'int'], rack_u_reserved: ['Rack space kept free', 'U', 'int'], terminals_fraction: ['Spare terminals on each wiring strip', '%', 'pct'] };
   const VALUES = [['height_u', 'Height', 'int'], ['unit_power_w', 'Power', 'num'], ['supply_type', 'Supply', 'choice'], ['voltage_v', 'Voltage', 'int'], ['power_supplies', 'Supplies', 'int'], ['inrush_a', 'Inrush', 'num'], ['load_type', 'Load', 'choice']];
-  const EQ = { part_id: 'choice', ordering_code: 'text', qty: 'int', redundant: 'bool', cable_manager: 'bool', purpose: 'text', tag: 'text', tag_type: 'text', first_nn: 'int', hwio_points: 'int' };
+  const EQ = { part_id: 'choice', ordering_code: 'text', qty: 'int', redundant: 'bool', cable_manager: 'bool', alarm_on_branch_mcb: 'bool', purpose: 'text', tag: 'text', tag_type: 'text', first_nn: 'int', hwio_points: 'int' };
   /* M59: the row's BOM text, [field, label, placeholder when unset] */
   const BOM_TEXT = [['purpose', 'Purpose', () => 'None'], ['tag', 'Tag', (r) => r.tags.join(', ') || 'Generated'], ['tag_type', 'Type code', () => 'From the library'], ['first_nn', 'First number', () => 'Automatic'], ['hwio_points', 'HWIO points', () => 'From the library']];
   const LINK = { l2_ports: 'int', l2_speed: 'choice', l2_media: 'choice' };  // the row's link to the L2 switch
@@ -36,11 +36,12 @@
     const p = sub().page(); if (!p || !p.parts) return '';
     const [kind, a, b, c, d] = key.split('.');
     if (kind === 'n') { const v = p.network[a]; return a === 'ied_count' && !v ? '' : typeof v === 'boolean' ? String(v) : v; }
-    if (kind === 's') { const r = p.spares.find((x) => x.key === a); return r ? (a === 'port_fraction' ? pct(r.value) : r.value) : ''; }
+    if (kind === 's') { const r = p.spares.find((x) => x.key === a); return r ? (SPARES[a][2] === 'pct' ? pct(r.value) : r.value) : ''; }
     if (kind === 'b') return p.catalogue_choice[a] || '';
     if (kind === 'y') return p[a] == null ? '' : p[a];
     const r = rowAt(Number(a)); if (!r) return '';
     if (kind === 'e' && b === 'cable_manager') return r.cable_manager ? String(r.cable_manager.on) : '';
+    if (kind === 'e' && b === 'alarm_on_branch_mcb') return r.alarm ? String(r.alarm.on) : '';  // M58
     if (kind === 'e' && r.bom_text && b in r.bom_text) { const v = r.bom_text[b]; return v == null ? '' : v; }
     if (kind === 'e') { const v = r[b]; return v == null ? '' : typeof v === 'boolean' ? String(v) : v; }
     if (kind === 'l') return r.link ? r.link[b] : '';
@@ -66,15 +67,19 @@
         return r.page;
       });
     }
+    if (path[0] === 'equipment' && path[2] === 'alarm_on_branch_mcb') {  // M58: the library's value is no choice
+      const r = rowAt(path[1]);
+      return Bridge.call('set_substation_field', f, sid, path, r && r.alarm && value === r.alarm.default ? null : value);
+    }
     return Bridge.call('set_substation_field', f, sid, path, value);
   }
   const PF = App.draftForm({
     prefix: 'p-', screen: 'parts', file: 'substation.yaml', label: 'Save parts', spec, saved,
-    check: (path, value) => (path[2] === 'sfp' || path[2] === 'cable_manager' ? Promise.resolve(null) : Bridge.call('check_substation_field', S.project.file, S.sub, path, value)),
+    check: (path, value) => (path[2] === 'sfp' || path[2] === 'cable_manager' || path[2] === 'alarm_on_branch_mcb' ? Promise.resolve(null) : Bridge.call('check_substation_field', S.project.file, S.sub, path, value)),
     write,
     done: (page) => {
       if (page && page.parts) sub().set(page); else sub().reload();
-      App.network.reload(); App.devicePreview.reload();
+      App.network.reload(); App.devicePreview.reload(); App.panelEditor.reload();
       if (cleared) { toast(cleared, 'info'); cleared = ''; }
     }
   });
@@ -200,12 +205,13 @@
     const changed = Object.keys(PF.draft).some((k) => k.split('.')[1] === String(r.index) && 'eofcl'.includes(k[0]));
     const opts = p.parts.options[r.category] || [], empty = !opts.length && !r.part_id;
     const fixed = r.sized, dirty = PF.dirty();
-    const pn = `e.${r.index}.ordering_code`, qty = `e.${r.index}.qty`, ab = `e.${r.index}.redundant`, cm = `e.${r.index}.cable_manager`;
+    const pn = `e.${r.index}.ordering_code`, qty = `e.${r.index}.qty`, ab = `e.${r.index}.redundant`, cm = `e.${r.index}.cable_manager`, al = `e.${r.index}.alarm_on_branch_mcb`;
     return `<div class="prow" role="group" aria-label="${esc(r.label)}${r.part_id ? ', ' + esc(r.part_id) : ', no part yet'}">
       <div class="prow-top">
         <span class="prow-role">${changed ? '<span class="chg-dot" aria-hidden="true"></span><span class="sr-only">changed, </span>' : ''}${esc(r.label)} <span class="muted small mono">${esc(r.id)}</span></span>
         <span class="sp"></span>
         ${r.cable_manager ? `<label class="switch prow-cm" title="${r.cable_manager.default ? 'On by default for this part' : 'Off by default for this part'}"><input type="checkbox" id="p-${cm}" ${shown(cm) === 'true' ? 'checked' : ''} data-dirty="1">Cable manager</label>` : ''}
+        ${r.alarm ? `<label class="switch prow-cm" title="The library says ${r.alarm.default ? 'on' : 'off'}. An alarm adds an auxiliary contact on the device's branch MCBs; on an AC branch it is also one HWIO point."><input type="checkbox" id="p-${al}" ${shown(al) === 'true' ? 'checked' : ''} data-dirty="1">Alarm on branch MCB trip</label>` : ''}
         ${empty ? '' : `<label class="check prow-ab"><input type="checkbox" id="p-${ab}" ${shown(ab) === 'true' ? 'checked' : ''} data-dirty="1"> A and B</label>`}
         <div class="prow-menu-wrap"><button class="btn btn--ghost btn--icon btn--sm" data-action="pp-menu" data-i="${r.index}" aria-haspopup="menu" aria-expanded="${UI.menu === r.index}" aria-label="More for ${esc(r.label)}" ${dirty ? 'disabled title="Save or discard the changes first"' : ''}>${icon('dots')}</button>
           ${UI.menu === r.index ? `<div class="menu" role="menu" style="right:0;top:34px"><button role="menuitem" data-action="pp-move" data-i="${r.index}" data-d="-1" ${r.index === 0 ? 'disabled' : ''}>Move up</button><button role="menuitem" data-action="pp-move" data-i="${r.index}" data-d="1" ${last ? 'disabled' : ''}>Move down</button>${fixed ? '' : `<hr><button role="menuitem" class="danger" data-action="pp-remove" data-i="${r.index}">${icon('trash')}Remove</button>`}</div>` : ''}</div>
@@ -319,7 +325,7 @@
     const ring = shown('n.topology') === 'ring', open = UI.tuning == null ? !p.equipment.length : UI.tuning;
     const sp = (k) => p.spares.find((x) => x.key === k);
     const summary = `${ring ? `Rings of up to ${shown('n.ring_max_switches')}` : 'Star'} · ${plural(+shown('n.l1_uplinks_per_switch'), 'uplink')} per L1 · ${shown('n.l1_interlink') === 'true' ? 'A–B interlink' : 'no interlink'} · ${shown('s.port_fraction')}% ports kept free · ${shown('s.rack_u_reserved')} U kept free${shown('y.max_panels') ? ` · at most ${plural(+shown('y.max_panels'), 'panel')}` : ''}`;
-    const changedSpare = (k) => { const r = sp(k); if (!r || !r.changed) return 'Project default.'; const d = k === 'port_fraction' ? pct(r.default) : r.default; return `Changed from ${d}${SPARES[k][1] && SPARES[k][1] !== '%' ? ' ' + SPARES[k][1] : SPARES[k][1]}.`; };
+    const changedSpare = (k) => { const r = sp(k); if (!r || !r.changed) return 'Project default.'; const d = SPARES[k][2] === 'pct' ? pct(r.default) : r.default; return `Changed from ${d}${SPARES[k][1] && SPARES[k][1] !== '%' ? ' ' + SPARES[k][1] : SPARES[k][1]}.`; };
     return `<div class="disclosure"><button class="disclosure-head" data-action="pp-tuning" aria-expanded="${open}" aria-controls="ft-body">${icon(open ? 'chevd' : 'chevr')}<b>Network fine tuning</b><span class="muted small">${open ? 'Ring size, uplinks and spares' : esc(summary)}</span></button>
       ${open ? `<div id="ft-body" class="form form--3 disclosure-body">
         ${ring ? numField('n.ring_max_switches', 'Switches per ring', '', 'Most L1 switches in one ring.') : ''}

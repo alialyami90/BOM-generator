@@ -45,14 +45,11 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
   either. Don't move golden values without an ADR. Only Ali marks ADRs Accepted. Don't commit `.xlsx`.
   Don't force-push (LESSONS "Branch restart"). Don't bump the version outside a release PR (on main it
   publishes at once). Don't push tags.
-- Next free numbers: ADR 0038, Q68, milestone M70 (0031 to 0037, Q62 to Q67 and M48 to M69 are
+- Next free numbers: ADR 0038, Q69, milestone M70 (0031 to 0037, Q62 to Q68 and M48 to M69 are
   reserved by the workflow plan).
 
 ## 3. Questions for Ali (one card each, recommendation marked)
 
-0. **Q68 "Exactly n panels"** (M62, W4): asked on a card 2026-11-03; recommended "At most n only".
-   If Ali picks spreading or spare panels, add `layout.panel_count` on top of `max_panels`
-   (`engine/layout.py` `_Builder`).
 
 1. **What comes after v0.3.1?** Options "Test v0.3.1, send feedback" (recommended: part picking
    shipped and nobody has used it in the field yet) and "I'll describe the next work now".

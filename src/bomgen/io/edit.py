@@ -170,12 +170,17 @@ def set_enclosure(
     substation_id: str,
     enclosure: Mapping[str, Any],
     *,
+    panel: int | None = None,
     store: LibraryStore | None = None,
 ) -> EditResult:
-    """Set ``generated_panels.enclosure``, shared by every generated panel."""
+    """Set ``generated_panels.enclosure``, shared by every generated panel, or panel
+    ``panel``'s own (``enclosure_by_panel``, plan M50)."""
 
     def change(data: CommentedMap) -> None:
-        set_entry(_generated(data), "enclosure", enclosure)
+        if panel is None:
+            set_entry(_generated(data), "enclosure", enclosure)
+        else:
+            set_entry(child_map(_generated(data), "enclosure_by_panel"), panel, enclosure)
 
     return edit_substation(project_file, substation_id, change, store=store)
 

@@ -127,7 +127,7 @@ Only groups A–C are chosen by the engineer; groups D–H and the HWIO column a
 
 - Every DC-powered device has two supplies, PS1 and PS2. Each gets one 2A 2P branch MCB on feed 1 (Q1.n) and one on feed 2 (Q2.n), with the same n on both feeds.
 - n follows group B order, and a multi-quantity row expands to one MCB per unit (6 L1 switches → Q1.2–Q1.7).
-- Spare branches are added per feed: 3 in Cabinets 001/002 (10 used), 1 in Cabinet 003 and the WS console. Make spare count a panel input.
+- Spare branches are added per feed: 3 in Cabinets 001/002 (10 used), 1 in Cabinet 003 and the WS console. Make spare count a panel input. Each spare is rated as the largest device branch on its feed unless the panel sets its own rating (`dc_spare_rating_a`).
 - Branch rating (ADR 0019): each branch MCB is the smallest rating in the chosen DC catalogue that meets every condition that applies: (a) running, at least `current_factor` (1.3) × W ÷ V of one unit; (b) inrush, at least `inrush_a` ÷ the catalogue's magnetic trip multiple, when the device gives an inrush that lasts at least `inrush_min_ms` (10 ms) or of unknown duration and the catalogue has a trip curve or multiple; (c) floor, at least the design constant `min_branch_mcb_a` (2 A). A DC load uses the catalogue's DC multiple when it has one, else the AC multiple or the curve's lower bound. The library's per-device `min_branch_mcb_a` is deprecated: it still parses and the check report warns when it is above the computed rating, but it sets nothing. In the example every device branch computes to 2 A, as the workbook shows.
 - Main MCB (Q1/Q2) rating: 16A where the per-feed design current ΣQ ≈ 7.1 A (Cabinets 001/002), 6A where ΣQ ≈ 1.5 A (Cabinet 003, WS). Implement as "next standard size above ΣQ, minimum 6A" with a manual override.
 - Float voltage (Q37, ADR 0019 point 7): the DC catalogue's `dc_rating_v` and each DC-fed device's `input_v_max` are checked against `dc_float_v` (140 V). A value below it, or a missing catalogue rating, is a warning in the check report, never a change of rating; choosing a DC-rated brand is the project's decision.
@@ -137,15 +137,15 @@ Only groups A–C are chosen by the engineer; groups D–H and the HWIO column a
 **AC distribution (group E)**
 
 - CINC = 6A normally; 16A when the cabinet has a 10A auxiliary socket (Cabinet 002).
-- Branches in this order: C1 lamp 1A; C2 fan-1 + TH-1 2A; C3 fan-2 + TH-2 2A; C4 TH-3 1A; socket 10A if present; one 2A spare. The WS console (no fans) has C1 lamp, C2 TH-1, C3 spare, all 1A.
+- Branches in this order: C1 lamp 1A; C2 fan-1 + TH-1 2A; C3 fan-2 + TH-2 2A; C4 TH-3 1A; socket 10A if present; one 2A spare, unless the panel sets its own spare rating (`ac_spare_rating_a`; unset, the spare is the largest housekeeping branch). The WS console (no fans) has C1 lamp, C2 TH-1, C3 spare, all 1A.
 - AC auxiliary contacts: one on CINC and one on each fan circuit (C2, C3) → 3; WS console 1 (CINC only).
-- AC-powered devices (ADR 0025): each unit of a group B part with `supply_type: VAC` (not `excluded_from_power`) gets its own branch after the socket and before the spare, in group B order, named by its tag without the panel prefix and sized as the DC branches are (group F, ADR 0019) from the AC catalogue at the part's voltage or the AC system voltage. The spare stays the largest housekeeping branch. CINC is raised to the smallest rating above the largest such branch and to at least the panel's AC design current (Σ current factor × W ÷ V over those units). A part with `alarm_on_branch_mcb` adds its branch to the AC auxiliary contacts. The example has no such device.
+- AC-powered devices (ADR 0025): each unit of a group B part with `supply_type: VAC` (not `excluded_from_power`) gets its own branch after the socket and before the spare, in group B order, named by its tag without the panel prefix and sized as the DC branches are (group F, ADR 0019) from the AC catalogue at the part's voltage or the AC system voltage. The spare stays the largest housekeeping branch. CINC is raised to the smallest rating above the largest such branch and to at least the panel's AC design current (Σ current factor × W ÷ V over those units). A part with `alarm_on_branch_mcb` adds its branch to the AC auxiliary contacts; an equipment or panel row may set `alarm_on_branch_mcb` to override the library's value. The example has no such device.
 
 **Breaker part numbers.** Breaker part numbers come from the library's catalogues (ADR 0017, ADR 0023). The default MCB catalogue is Schneider Acti9 iC60N 2-pole, `A9F742` + 2-digit rating (1A = A9F74201, 2A = A9F74202, 6A = A9F74206, 10A = A9F74210, 16A = A9F74216), with aux contact A9A26924; each catalogue gives its codes per rating (`code_pattern` or `codes`), its trip curve and magnetic multiples, and `dc_rating_v`. The library may carry further brand sets (`catalogue_brands`) for MCBs, aux contacts, terminal blocks, busbars and housekeeping parts, and a project or substation picks one per catalogue with `catalogue_choice`; the substation's choice wins over the project's. `catalogue_choice.mcb` sizes the AC branches (group E, including CINC) and, unless `mcb_dc` is set, the DC branches too; `mcb_dc` names a separate DC-rated set for group F and must have `dc_rating_v`. Alternatives of a device are library parts that share its `alt_group` key, optionally ranked `tier: low | mid | high`.
 
 **Terminal block quantities (group G)**
 
-Part numbers come from the chosen catalogue brand (ADR 0017).
+Part numbers come from the chosen catalogue brand (ADR 0017). The quantities below are panel defaults: the engineer may override any strip's quantity or block type per panel, and the spare terminal fraction (`spares.terminals_fraction`) is added to each wiring strip's quantity, rounded up, before any override; strips a device brings stay as its part gives them (ADR 0033).
 
 | Strip | Type / code | Rule seen in the file | 001 | 002 | 003 | WS |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -418,7 +418,7 @@ The library also holds the commodity catalogues: MCBs by rating (1/2/6/10/16 A �
 **2. Substation and its panels – one substation file, one record per cabinet**
 
 - Identity: cabinet number (861-GIS01-PSA-0001), cabinet name, tag prefix (PSA1), LAN letter (A/B or none), sheet name and order.
-- Enclosure: make, model/code, H × D × W, base frame size, cable entry (top/side).
+- Enclosure: make, model/code, H × D × W, base frame size, cable entry (top/side/bottom). A panel the layout generates may set its own enclosure and kind; unset, it takes the ones every generated panel shares.
 - Device list in display order: part\_id, quantity, tag override (optional), purpose text (e.g. "for Dhahran PCC connection"), LAN, cable manager on or off for a network device (optional).
 - Network port plan for each switch: downlinks by speed and media (feeds SFP counts), uplinks to L3 (SM).
 - Options: aux socket (rating), smoke detector, change-over diodes (auto when single-PSU DC loads exist), ventilation mode (auto from heat check, or forced), spare branches per DC feed and on AC, main MCB override, inter-panel terminal count, grounding busbars.

@@ -28,11 +28,12 @@ from bomgen.engine.layout import (
     with_layout,
 )
 from bomgen.engine.network import accessories
+from bomgen.engine.pipeline import build
 from bomgen.engine.units import expand_devices
 from bomgen.io.derived import derive_parts
 from bomgen.io.loader import LoadedSubstation, load_substation
 from bomgen.models.library import Category, PurdueLevel
-from bomgen.models.panel import Panel, PortAllocation
+from bomgen.models.panel import Panel, PanelKind, PortAllocation
 from bomgen.models.project import LayoutDefaults
 from bomgen.models.substation import (
     DeviceMove,
@@ -873,6 +874,45 @@ def test_other_roles_leave_the_row_type_code_to_the_library(example: LoadedSubst
     assert all(d.tag_type is None for p in layout_preview(example).panels for d in p.devices)
 
 
+def test_generated_panel_takes_its_own_enclosure_and_kind(example: LoadedSubstation) -> None:
+    # Plan M50: enclosure_by_panel and kind_by_panel win for their panel only.
+    generated = example.substation.generated_panels
+    assert generated is not None
+    narrow = generated.enclosure.model_copy(update={"w_mm": 600})
+    own = generated.model_copy(
+        update={"enclosure_by_panel": {2: narrow}, "kind_by_panel": {2: PanelKind.CONTROL}}
+    )
+    first, second = layout_substation(with_changes(example, generated_panels=own)).panels
+    assert (first.enclosure, first.kind) == (generated.enclosure, generated.kind)
+    assert (second.enclosure.w_mm, second.kind) == (600, PanelKind.CONTROL)
+
+
+def test_natural_convection_uses_own_enclosure(example: LoadedSubstation) -> None:
+    # Plan M50 acceptance: panel 1 at 600 mm wide and kind control builds its own PANEL
+    # row, X4-DC1 (26, no longer rounded up to 32) and natural-convection area; panel 2 keeps the
+    # shared values.
+    generated = example.substation.generated_panels
+    assert generated is not None
+    narrow = generated.enclosure.model_copy(update={"w_mm": 600})
+    own = generated.model_copy(
+        update={"enclosure_by_panel": {1: narrow}, "kind_by_panel": {1: PanelKind.CONTROL}}
+    )
+    changed = with_changes(example, generated_panels=own)
+    result = build(replace(changed, panels=tuple(layout_substation(changed).panels)))
+    panel = {
+        b.panel_id: next(x.description for x in b.lines if x.tag == "PANEL") for b in result.panels
+    }
+    assert "W600" in panel["psa1"]
+    assert "W800" in panel["psa2"]
+    dc1 = {
+        b.panel_id: next(x.qty for x in b.lines if x.tag == f"{b.panel_id.upper()}-X4-DC1")
+        for b in result.panels
+    }
+    assert dc1 == {"psa1": 26, "psa2": 24}
+    assert result.heat is not None
+    assert {c.panel_id: c.natural.w_m for c in result.heat.cabinets} == {"psa1": 0.6, "psa2": 0.8}
+
+
 def test_max_panels_caps_fill() -> None:
     """M62: with a cap the fill opens no panel past it; a unit that doesn't fit is an
     error naming the unit and the U short."""
@@ -934,3 +974,15 @@ def test_equipment_tag_fields_copied_to_generated_rows(example: LoadedSubstation
 
 def result_library(loaded: LoadedSubstation) -> Any:
     return derive_parts(loaded.library, loaded.substation)[0]
+
+
+def test_equipment_alarm_toggle_reaches_the_generated_rows(example: LoadedSubstation) -> None:
+    # Plan M58: Equipment.alarm_on_branch_mcb is written onto the rows the layout makes.
+    equipment = [
+        e.model_copy(update={"alarm_on_branch_mcb": False}) if e.id == "ext-fw" else e
+        for e in example.substation.equipment
+    ]
+    first = layout_substation(with_changes(example, equipment=equipment)).panels[0]
+    fw = next(d for d in first.devices if d.part_id == "FGR-60F")
+    assert fw.alarm_on_branch_mcb is False
+    assert {d.alarm_on_branch_mcb for d in first.devices if d is not fw} == {None}
