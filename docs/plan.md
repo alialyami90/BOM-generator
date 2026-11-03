@@ -1081,7 +1081,10 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M49 — SFP quantities per switch.** *W4.* Done (#323). `sfp` choices take `spare` and `extra` per BOM
   row and `part_id` became optional; extras warn on the slot check, never fail.
 - **M50 — Enclosure and kind per generated panel, bottom entry.** *W3; spec sentence.* In review.
-- **M51 — New-substation setup instead of ASSUMED seeds.** *W5; Q62.* Planned.
+- **M51 — New-substation setup instead of ASSUMED seeds.** *W5; Q62.* In review. A blank substation's
+  dialog has a *Cabinets and documents* step prefilled from the previous substation (Q62's recommended
+  answer); `document_number_placeholder` warns on a TBD number. Checks reads the model, so it flags
+  TBD only, not an ASSUMED comment; the register already shows assumed dates.
 - **M52 — Design basis model and tab.** *W5; ADR 0031.* Planned.
 - **M53 — Vendor list and part lifecycle states.** *W5; ADRs 0031 and 0037.* Planned.
 - **M54 — Design-basis checks.** *W5.* Planned.
