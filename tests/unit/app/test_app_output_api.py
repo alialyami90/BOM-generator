@@ -1,5 +1,7 @@
 """Checks and Build endpoints of the desktop app (plan M10d)."""
 
+import csv
+import io
 import json
 import os
 import shutil
@@ -344,3 +346,55 @@ def test_a_check_report_that_cannot_be_saved_says_the_workbook_was_written(
 
     assert refused(envelope) == "io"
     assert "was written" in envelope["error"]["message"]  # type: ignore[index]
+
+
+# -- Summary BOM (ADR 0035, plan M63) --
+
+
+def include_summary(project: Path) -> None:
+    edit(
+        project.parent / SUBSTATION,
+        '\n  file_name: "{doc_no}',
+        '\n  include: [summary_bom]\n  file_name: "{doc_no}',
+    )
+
+
+def test_build_target_says_whether_the_summary_is_included(app: api.Api, project: Path) -> None:
+    assert ok(app.build_target(str(project), "gis01"))["include"] == []
+    ok(app.set_substation_field(str(project), "gis01", ["output", "include"], ["summary_bom"]))
+    target = ok(app.build_target(str(project), "gis01"))
+    assert target["include"] == ["summary_bom"]
+    assert target["sheets"][-1] == {"name": "Summary BOM", "cabinet": None}
+
+
+def test_build_writes_the_summary_when_included(
+    app: api.Api, project: Path, tmp_path: Path
+) -> None:
+    include_summary(project)
+    result = ok(app.build_workbook(str(project), "gis01", str(tmp_path / "out")))
+    assert result["sheets"][-1] == "Summary BOM"
+
+
+def test_export_summary_csv_writes_the_sheet_rows(
+    app: api.Api, project: Path, tmp_path: Path
+) -> None:
+    out = tmp_path / "summary.csv"
+    result = ok(app.export_summary_csv(str(project), "gis01", str(out)))
+    assert result["path"] == str(out)
+    assert result["lines"] == 63
+    raw = out.read_bytes()
+    assert raw.startswith(b"\xef\xbb\xbf")  # Excel reads the BOM as UTF-8
+    rows = list(csv.reader(io.StringIO(raw.decode("utf-8-sig"))))
+    assert rows[0] == [
+        "SR.NO",
+        "DESCRIPTION",
+        "QUANTITY",
+        "MAKE",
+        "MODEL",
+        "ORDERING CODE",
+        "WHERE USED",
+    ]
+    mcb = next(r for r in rows if r[5] == "A9F74202")
+    assert mcb[2] == "77"
+    assert mcb[6].startswith("1: PSA1-C2")
+    assert len(rows) == 64

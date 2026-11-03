@@ -10,7 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from bomgen.app.output import problems_of
+from bomgen.app.output import problems_of, summary_rows
 from bomgen.app.substations import resolve
 from bomgen.engine.errors import EngineError
 from bomgen.engine.pipeline import build as build_bom
@@ -207,5 +207,8 @@ def preview_page(project_file: Path, substation_id: str, store: LibraryStore) ->
                 for p in result.nameplates
             ],
         },
+        "summary": None  # ADR 0035
+        if "summary_bom" not in loaded.substation.output.include
+        else {"sheet": sheet_names.summary_bom, "rows": summary_rows(loaded, result)},
         **_sheets(result, names),
     }
