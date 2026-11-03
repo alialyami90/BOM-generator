@@ -16,7 +16,8 @@
     library_version: 'Library version', branch_mcb: 'Branch MCB covers the device', dc_float: 'Rated for the battery float voltage',
     part_number: 'Part number on the BOM', external_ac: 'AC loose loads left out of the totals', l2_link: 'Link to the L2 switch', external_link: 'External link',
     duplicate_tag: 'Unique device tags', untagged_device: 'Devices carry a tag', document_number_placeholder: 'Document number typed',
-    part_source: 'Power and inrush from a source', vendor_list: 'Parts on the vendor list', part_state: 'Parts released, not draft or obsolete'
+    part_source: 'Power and inrush from a source', vendor_list: 'Parts on the vendor list', part_state: 'Parts released, not draft or obsolete',
+    design_basis: 'Design basis'
   };
   const STATUS = { pass: ['ok', 'Pass', 'check'], warn: ['warn', 'Flag', 'warn'], fail: ['bad', 'Fail', 'error'] };
   const status = (s) => badge(...STATUS[s]);
@@ -85,7 +86,7 @@
     return `<div class="table-wrap" style="margin-top:var(--space-3)"><table class="table"><thead><tr><th>Check</th><th style="width:110px">Panel</th><th style="width:110px">Result</th><th>Detail</th><th style="width:110px"><span class="sr-only">Action</span></th></tr></thead><tbody>
       ${groups.map((g) => { const list = items.filter((i) => i.check === g), all = worst(list) === 'pass';  // groups that all pass stay folded into their header
         return `<tr class="band"><td colspan="2">${esc(CHECKS[g] || g)}</td><td>${status(worst(list))}</td><td class="muted small" colspan="2">${plural(list.length, 'item')}${all ? '' : ` · ${list.filter((i) => i.status === 'fail' || open(i)).length} to read`}</td></tr>
-        ${all ? '' : list.map((i) => `<tr><td class="wrap">${esc(i.subject || '')}</td><td class="mono small">${esc(i.panel_id || '—')}</td><td>${i.accepted ? badge('info', 'Accepted', 'check') : status(i.status)}</td><td class="wrap">${esc(i.message)}${i.accepted ? `<span class="cell-sub">Accepted: ${esc(i.accepted)}</span>` : ''}</td>
+        ${all ? '' : list.map((i) => `<tr><td class="wrap">${esc(i.subject || '')}</td><td class="mono small">${esc(i.panel_id || '—')}</td><td>${i.accepted ? badge('info', 'Accepted', 'check') : status(i.status)}</td><td class="wrap">${esc(i.message)}${goto(i)}${i.accepted ? `<span class="cell-sub">Accepted: ${esc(i.accepted)}</span>` : ''}</td>
           <td>${open(i) ? `<button class="btn btn--ghost btn--sm" data-action="checks-accept" data-i="${items.indexOf(i)}">Accept…</button>` : ''}</td></tr>`).join('')}`; }).join('')}</tbody></table></div>`;
   }
   /* ADR 0036: an acceptance no warning matches any more stays listed until removed. */
@@ -110,6 +111,9 @@
   };
   ACTIONS['checks-unaccept'] = (el) => Bridge.call('remove_acceptance', S.project.file, S.sub, +el.dataset.i)
     .then((page) => { rechecked(page); toast('Acceptance removed', 'trash'); }).catch((e) => toast(e.message, 'error'));
+  /* Plan M54: a design basis item leads to its field on Settings › Design basis. */
+  const goto = (i) => (i.values && i.values.field ? ` <button class="btn btn--secondary btn--sm" data-action="checks-field" data-loc="${esc(i.values.field)}">Go to the field</button>` : '');
+  ACTIONS['checks-field'] = (el) => { App.fix({ file: 'substation.yaml', location: el.dataset.loc }); };
   ACTIONS['checks-level'] = (el) => { level = el.dataset.v; App.render(); };
   ACTIONS['checks-rerun'] = () => { running = true; reload('checks'); reload('target'); App.render(); };
   ACTIONS['checks-goto'] = (el) => {

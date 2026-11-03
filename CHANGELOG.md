@@ -75,6 +75,9 @@ project uses [Semantic Versioning](https://semver.org/).
   and a design basis names one. Parts lists its parts first and marks a part off the list; Checks
   warns about it, and about a draft or obsolete part with its successor. Nothing stops a build
   (M53a, ADR 0031).
+- Checks compares the substation with its design basis: a DC part rated outside its DC voltage
+  fails; an AC part at another voltage, a Purdue level out of scope, a GPS clock with no time
+  sync, and EXT devices with no firewall warn. *Go to the field* opens the Design basis tab (M54).
 - The panel editor's Options tab shows the AC and DC spare breaker ratings with the rule behind
   them; click one to set your own. Grounding busbars are checkboxes from the library's catalogue.
   *Alarm on branch MCB trip* can be switched per Parts row and per hand-written panel row, over the
