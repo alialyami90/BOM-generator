@@ -25,6 +25,9 @@ project uses [Semantic Versioning](https://semver.org/).
   a note) and a Health tab: parts by state, assumed figures, parts with no alternative, obsolete
   parts that projects on this PC still use, and brand sets missing an MCB rating or a housekeeping
   role (M68).
+- Parts can propose a saved override to the library: the value goes into the library's pending
+  changes with its source and a note naming the project, and the part waits in Library › Review
+  (M69).
 
 - The panel editor's main MCB shows the engine's rating with the rule it came from ("10 A: next
   standard size above 7.1 A, minimum 6 A"); click it to type your own, *Use automatic* to go back

@@ -121,7 +121,7 @@
       : `<button class="btn btn--secondary btn--sm" data-action="review-send-back" data-id="${esc(r.part_id)}">Send back…</button>`}<button class="btn btn--secondary btn--sm" data-action="review-state" data-id="${esc(r.part_id)}" data-to="released">Release</button></div>`;
     return `<p class="muted" style="margin:var(--space-4) 0 var(--space-3)">Parts in draft or reviewed, with the pending changes applied. Each action is a pending change; nothing reaches projects until you apply the set.</p>
       <div class="table-wrap"><table class="table"><thead><tr><th>Part</th><th>State</th><th>Missing sources</th><th>Last change</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody>
-      ${rows.map((r) => `<tr><td>${partCell(r)}</td><td>${badge(...STATE[r.state])}</td><td>${r.missing.length ? badge('warn', sized(r.missing)) : '<span class="muted">None</span>'}</td><td>${lastChange(r)}</td><td>${actions(r)}</td></tr>`).join('')
+      ${rows.map((r) => `<tr><td class="nowrap">${partCell(r)}</td><td>${badge(...STATE[r.state])}</td><td>${r.missing.length ? badge('warn', sized(r.missing)) : '<span class="muted">None</span>'}</td><td>${lastChange(r)}</td><td>${actions(r)}</td></tr>`).join('')
         || '<tr class="empty-row"><td colspan="5">Nothing to review: every part is released or obsolete.</td></tr>'}</tbody></table></div>`;
   }
   const setState = (id, edits, text) => Bridge.call('add_library_edits', edits).then((p) => { closeDialog(); App.setPending(p); HEALTH.state = 'idle'; App.render(); toast(text, 'check'); }).catch((e) => { closeDialog(); toast(e.message, 'error'); });
