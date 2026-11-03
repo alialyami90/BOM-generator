@@ -109,6 +109,9 @@ class Equipment(InputModel):
     # copied onto every panel row the layout writes for this entry (as on DeviceInstance)
     purpose: str | None = None
     hwio_points: NonNegativeInt | None = None  # a row's HWIO total, overriding the library's
+    tag: str | None = None  # the row's tag instead of the generated one (plan M59)
+    tag_type: str | None = None  # the type code instead of the library's (ADR 0030)
+    first_nn: PositiveInt | None = None  # the first unit's {nn}; later units count on
     port_plan: PortPlan | None = None  # per unit; the layout scales it by the row's qty
     ordering_code: str | None = None  # the BOM's ordering code instead of the library's
     overrides: PartOverrides | None = None

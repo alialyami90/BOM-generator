@@ -406,6 +406,19 @@
           "default": null,
           "title": "Cable Manager"
         },
+        "first_nn": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "First Nn"
+        },
         "hwio_points": {
           "anyOf": [
             {
@@ -521,6 +534,30 @@
         "side": {
           "$ref": "#/$defs/Side",
           "default": "none"
+        },
+        "tag": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tag"
+        },
+        "tag_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tag Type"
         }
       },
       "required": [

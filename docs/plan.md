@@ -247,7 +247,8 @@ equipment:                             # what the layout places (design 3.2)
   # role: l1_switch | l2_switch | ext_switch | firewall | fopp | other
   # redundant (one unit per side) or side: none | a | b; qty (not on l1_switch);
   # l2_ports, l2_speed (default 1G), l2_media (default MM)
-  # purpose, hwio_points: copied onto each row the layout writes (as on a panel row)
+  # purpose, hwio_points, tag, tag_type, first_nn: copied onto each row the layout writes (as on a
+  #   panel row; first_nn numbers the entry's first unit, later units count on) (M59)
   # port_plan: per unit, scaled by the row's qty; not on l1_switch or l2_switch (sized)
   # sfp (l1_switch, l2_switch): [{ speed, media, part_id?, spare?, extra? }]: the SFP part, and the
   #   spare (default spares.sfp_per_l1 on L1, else 0) and extra SFPs on each BOM row (M49)
@@ -1083,10 +1084,12 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M56 — Housekeeping editor.** *W3; ADR 0032.* Planned.
 - **M57 — Terminals tab.** *W3; ADR 0033.* Planned.
 - **M58 — Grounding, spare breaker ratings, alarm on branch trip.** *W3; spec sentence.* Planned.
-- **M59 — BOM text per row on Parts.** *W4.* Planned.
+- **M59 — BOM text per row on Parts.** *W4.* In review. Equipment gains `tag`, `tag_type` and `first_nn`;
+  Parts has a *BOM text* section per row. The hand-written panel editor's tag fields are left to W3,
+  which owns that screen.
 - **M60 — IED schedule.** *W4; ADR 0034.* Planned.
 - **M61 — External links.** *W4; Q64.* Planned.
-- **M62 — Panel count control.** *W4; Q68.* In review. ADR 0013 amendment: `layout.max_panels`
+- **M62 — Panel count control.** *W4; Q68.* Done (#325). ADR 0013 amendment: `layout.max_panels`
   caps the fill (R5, R6): a pair opens only while both its panels are within the cap, a common device
   only into a panel within it, and a unit that fits nowhere is a `panel-limit` layout error naming the
   unit and the U it is short. Moves past the cap are unknown panels. "Exactly n" waits on Q68.

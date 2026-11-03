@@ -11,7 +11,9 @@
   const NET = { ied_count: 'int', topology: 'choice', ring_max_switches: 'int', l1_uplinks_per_switch: 'int', l1_interlink: 'bool', l3_uplinks_per_l2: 'int' };
   const SPARES = { port_fraction: ['Ports kept free on each switch', '%', 'pct'], sfp_per_l1: ['Spare SFPs on each L1', '', 'int'], dc_branches_per_feed: ['Spare DC branches per feed', '', 'int'], ac_branches: ['Spare AC branches', '', 'int'], rack_u_reserved: ['Rack space kept free', 'U', 'int'] };
   const VALUES = [['height_u', 'Height', 'int'], ['unit_power_w', 'Power', 'num'], ['supply_type', 'Supply', 'choice'], ['voltage_v', 'Voltage', 'int'], ['power_supplies', 'Supplies', 'int'], ['inrush_a', 'Inrush', 'num'], ['load_type', 'Load', 'choice']];
-  const EQ = { part_id: 'choice', ordering_code: 'text', qty: 'int', redundant: 'bool', cable_manager: 'bool' };
+  const EQ = { part_id: 'choice', ordering_code: 'text', qty: 'int', redundant: 'bool', cable_manager: 'bool', purpose: 'text', tag: 'text', tag_type: 'text', first_nn: 'int', hwio_points: 'int' };
+  /* M59: the row's BOM text, [field, label, placeholder when unset] */
+  const BOM_TEXT = [['purpose', 'Purpose', () => 'None'], ['tag', 'Tag', (r) => r.tags.join(', ') || 'Generated'], ['tag_type', 'Type code', () => 'From the library'], ['first_nn', 'First number', () => 'Automatic'], ['hwio_points', 'HWIO points', () => 'From the library']];
   const LINK = { l2_ports: 'int', l2_speed: 'choice', l2_media: 'choice' };  // the row's link to the L2 switch
   const BRANDS = [['mcb', 'MCB make and series, AC'], ['mcb_dc', 'MCB make and series, DC'], ['terminal_blocks', 'Terminal blocks']];
   const pct = (v) => Math.round(v * 1000) / 10;
@@ -39,6 +41,7 @@
     if (kind === 'y') return p[a] == null ? '' : p[a];
     const r = rowAt(Number(a)); if (!r) return '';
     if (kind === 'e' && b === 'cable_manager') return r.cable_manager ? String(r.cable_manager.on) : '';
+    if (kind === 'e' && r.bom_text && b in r.bom_text) { const v = r.bom_text[b]; return v == null ? '' : v; }
     if (kind === 'e') { const v = r[b]; return v == null ? '' : typeof v === 'boolean' ? String(v) : v; }
     if (kind === 'l') return r.link ? r.link[b] : '';
     if (kind === 'c') return r.serial_ports == null ? '' : r.serial_ports;
@@ -75,8 +78,8 @@
       if (cleared) { toast(cleared, 'info'); cleared = ''; }
     }
   });
-  const UI = { tuning: null, editing: '', menu: -1, addOpen: false, fresh: null, expanded: new Set() };  // fresh: a new substation's rows before the first save
-  sub().resets.push(() => { PF.reset(); Object.assign(UI, { tuning: null, editing: '', menu: -1, addOpen: false, fresh: null, expanded: new Set() }); });
+  const UI = { tuning: null, editing: '', menu: -1, addOpen: false, fresh: null, expanded: new Set(), bomText: new Set() };  // fresh: a new substation's rows before the first save
+  sub().resets.push(() => { PF.reset(); Object.assign(UI, { tuning: null, editing: '', menu: -1, addOpen: false, fresh: null, expanded: new Set(), bomText: new Set() }); });
   const shown = (key) => { const v = PF.shown(key); return v == null ? '' : String(v); };
   const mark = (key, html) => PF.mark(key, html);
   const err = (key) => (PF.errors[key] ? `<span class="err small" id="p-${key}-err">${icon('error')}<span>${PF.err(key)}</span></span>` : '');
@@ -182,6 +185,17 @@
       : `<div class="prow-sub prow-sub--foot"><label class="sr-only" for="pp-acc-part">Accessory to add</label><select class="select" id="pp-acc-part">${a.parts.map((x) => `<option value="${esc(x)}">${esc(x)}</option>`).join('')}</select><button class="btn btn--ghost btn--sm" data-action="pp-acc-add" ${PF.dirty() ? 'disabled title="Save or discard the changes first"' : ''}>${icon('plus')}Add accessory</button><span class="muted small">Accessories go to loose material.</span></div>`;
     return own + added + foot;
   }
+  /* M59: purpose, tag, type code, first number and HWIO points the layout copies onto the row; the
+     placeholders are what the engine generates. The duplicate-tag check shows on the row. */
+  function bomText(r) {
+    if (!r.part_id) return '';
+    const k = (f) => `e.${r.index}.${f}`, open = UI.bomText.has(r.index) || BOM_TEXT.some(([f]) => PF.errors[k(f)]);
+    const set = BOM_TEXT.filter(([f]) => shown(k(f)) !== '');
+    const summary = set.length ? set.map(([f, label]) => `${label} ${shown(k(f))}`).join(' · ') : r.tags[0] || 'As generated';
+    const dup = r.duplicate ? `<div class="prow-err"><span class="err small">${icon('error')}<span>${esc(r.duplicate)}</span></span></div>` : '';
+    const body = open ? `<div class="form form--3 prow-bomtext" id="pp-bt-${r.index}">${BOM_TEXT.map(([f, label, ph]) => mark(k(f), field(label, input(`p-${k(f)}`, shown(k(f)), { mono: f !== 'purpose', num: EQ[f] === 'int', placeholder: ph(r), invalid: !!PF.errors[k(f)] }), '', PF.err(k(f))))).join('')}</div>` : '';
+    return `<div class="prow-sub prow-sub--foot"><button class="link-btn small" data-action="pp-bomtext" data-i="${r.index}" aria-expanded="${open}" aria-controls="pp-bt-${r.index}">${icon(open ? 'chevd' : 'chevr')}BOM text</button><span class="muted small prow-bt-sum">${esc(summary)}</span></div>${body}${dup}`;
+  }
   function partRow(p, r, last) {
     const changed = Object.keys(PF.draft).some((k) => k.split('.')[1] === String(r.index) && 'eofcl'.includes(k[0]));
     const opts = p.parts.options[r.category] || [], empty = !opts.length && !r.part_id;
@@ -201,7 +215,7 @@
         ${empty ? '' : `<div class="prow-pn">${mark(pn, `<input class="input input--mono" id="p-${pn}" value="${esc(shown(pn))}" placeholder="${r.part_id ? 'Prints the library code' : 'Part number'}" aria-label="Part number on the BOM for ${esc(r.label)}" data-dirty="1" ${!r.part_id ? 'disabled' : ''}>`)}${err(pn)}</div>
         <div class="prow-qty">${r.sized ? '<span class="muted small" title="The sizing sets the quantity">Sized</span>' : `${input('p-' + qty, shown(qty), { num: true, mono: true, invalid: !!PF.errors[qty] }).replace('<input ', `<input aria-label="Quantity of ${esc(r.label)}" `)}`}</div>`}
       </div>
-      ${empty ? '' : strip(r)}${linkRow(r)}${sfpRows(r)}${accessories(p, r)}
+      ${empty ? '' : strip(r)}${linkRow(r)}${sfpRows(r)}${bomText(r)}${accessories(p, r)}
     </div>`;
   }
 
@@ -378,6 +392,7 @@
 
   /* ---------- actions ---------- */
   const keep = (fn) => { const m = document.getElementById('main'), y = m ? m.scrollTop : 0; fn(); App.render(); if (m) m.scrollTop = y; };
+  ACTIONS['pp-bomtext'] = (el) => keep(() => { const i = +el.dataset.i; if (UI.bomText.has(i)) UI.bomText.delete(i); else UI.bomText.add(i); });
   ACTIONS['pp-tuning'] = () => keep(() => { const p = sub().page(); UI.tuning = !(UI.tuning == null ? !p.equipment.length : UI.tuning); });
   ACTIONS['pp-edit'] = (el) => { keep(() => { UI.editing = el.dataset.key; }); const c = document.getElementById('p-' + el.dataset.key); if (c) { c.focus(); if (c.select) c.select(); } };
   const resetTo = (key) => {

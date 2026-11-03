@@ -342,3 +342,20 @@ def test_a_firewall_with_many_sfp_slots_is_seeded_two_sfps() -> None:
     lib = load_project(EXAMPLES / "project.yaml").library
     seeded = parts_edit.link_defaults(lib.get("FGR-60F.CISCO-HIGH"), "firewall")
     assert seeded["port_plan"] == {"downlinks": [{"count": 2, "speed": "1G", "media": "MM"}]}
+
+
+def test_bom_text_fields_round_trip(project: Path) -> None:
+    """M59: purpose, tag, type code, first number and HWIO points are equipment fields."""
+    values = {
+        "purpose": "for the PCC link",
+        "tag": "PSA1-GW-PCC",
+        "tag_type": "PCC",
+        "first_nn": 21,
+        "hwio_points": 12,
+    }
+    for name, value in values.items():
+        path = ("equipment", GW, name)
+        assert fields.set_field(project, path, value, substation="gis01").written
+
+    row = equipment(project)[GW]
+    assert {name: getattr(row, name) for name in values} == values

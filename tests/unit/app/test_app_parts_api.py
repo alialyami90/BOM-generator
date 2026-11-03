@@ -420,3 +420,30 @@ def test_the_panel_cap_is_set_on_parts_and_reported_on_the_board(
     assert page["max_panels"] == 1
     issues = ok(app.substation_layout(str(project), "gis01"))["issues"]
     assert any("does not fit in 1 panel" in i["message"] for i in issues)
+
+
+def test_parts_page_gives_generated_tag_as_placeholder(app: api.Api, project: Path) -> None:
+    """M59: each row carries the tags the layout generates, one per panel row, which the
+    BOM text fields show as placeholders; a typed tag does not replace them."""
+    page = ok(app.parts_page(str(project), "gis01"))["parts"]
+    assert row(page, "l1")["tags"] == ["PSA1-L1-ESW-A11 to A13", "PSA2-L1-ESW-B11 to B13"]
+    gw = row(page, "gw")
+
+    ok(app.set_substation_field(str(project), "gis01", ["equipment", gw["index"], "tag"], "X"))
+
+    page = ok(app.parts_page(str(project), "gis01"))["parts"]
+    assert row(page, "gw")["tags"] == gw["tags"]
+    assert row(page, "gw")["bom_text"]["tag"] == "X"
+
+
+def test_a_typed_tag_another_unit_has_is_marked_on_its_row(app: api.Api, project: Path) -> None:
+    """M59: the duplicate-tag check's sentence shows on the row before Checks runs."""
+    page = ok(app.parts_page(str(project), "gis01"))["parts"]
+    gps = row(page, "gps")
+    assert gps["duplicate"] is None
+    path = ["equipment", gps["index"], "tag"]
+
+    ok(app.set_substation_field(str(project), "gis01", path, "PSA1-L2-ESW-A01"))
+
+    duplicate = row(ok(app.parts_page(str(project), "gis01"))["parts"], "gps")["duplicate"]
+    assert duplicate == "PSA1-L2-ESW-A01: 2 device units share this tag (psa1): each needs its own"
