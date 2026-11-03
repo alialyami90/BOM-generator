@@ -5,7 +5,7 @@
   const makeModel = (d) => (d.model && d.make && d.model.toLowerCase().startsWith(d.make.toLowerCase()) ? esc(d.model) : `${esc(d.make)} <span class="muted">${esc(d.model)}</span>`);
   const ACRONYMS = { io: 'IO', gps: 'GPS', rtac: 'RTAC', sfp: 'SFP' };
   const catName = (c) => c.split('_').map((w) => ACRONYMS[w] || w).join(' ').replace(/^./, (m) => m.toUpperCase());
-  const F = { q: '', cat: '', ver: '', alt: false };
+  const F = { q: '', cat: '', ver: '', alt: false, assumed: false };
 
   /* ---------- data from Python ---------- */
   const LIB = { state: 'idle', overview: null, versions: null, projects: [], errors: {} };
@@ -55,6 +55,7 @@
       supply: d.supply_type ? `${d.voltage_v ? d.voltage_v + ' ' : ''}${d.supply_type}` : '—', w: d.unit_power_w,
       code: d.ordering_code, tagType: d.tag_type, level: d.purdue_level, power: feeds[d.power_supplies] || '',
       mcb: d.min_branch_mcb_a ? `${d.min_branch_mcb_a} A branch` : '',
+      state: d.state || 'released', assumed: Object.values(d.sources || {}).some((x) => x.kind === 'assumed'),  /* ADR 0037 */
       verified: r ? r.verified : null, ds: r ? datasheet(r) : null, alt: r && r.alternatives.length ? alternatives(r) : null, src: r ? r.sources : null
     };
   };
@@ -93,9 +94,12 @@
       <div role="tabpanel" aria-labelledby="tab-libview-${t}">${t === 'catalogues' ? cataloguesView() : devicesView()}</div>`;
   }
 
+  /* ADR 0037: a released part shows nothing; the others say their state. */
+  const STATE = { draft: ['warn', 'Draft'], reviewed: ['info', 'Reviewed'], obsolete: ['bad', 'Obsolete'] };
+  const stateBadge = (st) => (STATE[st] ? ` ${badge(...STATE[st])}` : '');
   function filtered() {
     return devices().filter((d) => (!F.q || (d.id + d.make + d.model).toLowerCase().includes(F.q.toLowerCase()))
-      && (!F.cat || F.cat === d.cat) && (!F.ver || F.ver === d.verified) && (!F.alt || d.alt));
+      && (!F.cat || F.cat === d.cat) && (!F.ver || F.ver === d.verified) && (!F.alt || d.alt) && (!F.assumed || d.assumed));
   }
   function devicesView() {
     const all = devices(), list = filtered(), cats = [...new Set(all.map((d) => d.cat))], quality = hasDeviceDb();
@@ -105,10 +109,11 @@
         <label class="sr-only" for="lib-cat">Category</label>${select('lib-cat', [['', 'All categories'], ...cats.map((c) => [c, catName(c)])], F.cat, { cls: 'ctl' }).replace('data-dirty="1"', 'data-action="lib-cat"').replace('class="select ctl"', 'class="select" style="width:190px"')}
         ${quality ? `<label class="sr-only" for="lib-ver">Data quality</label>${select('lib-ver', [['', 'Any data quality'], ['confirmed', 'Confirmed'], ['partial', 'Partial'], ['unverified', 'Unverified']], F.ver, {}).replace('data-dirty="1"', 'data-action="lib-ver"').replace('class="select "', 'class="select" style="width:190px"')}
         <label class="check"><input type="checkbox" data-action="lib-alt" ${F.alt ? 'checked' : ''}> Has alternatives</label>` : ''}
+        <label class="check"><input type="checkbox" data-action="lib-assumed" ${F.assumed ? 'checked' : ''}> Assumed values</label>
         <span class="sp"></span><span class="muted small">${list.length} of ${all.length} devices</span></div>
       <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,400px);gap:var(--space-5);align-items:start">
         <div><div class="table-wrap"><table class="table"><thead><tr><th>Part ID</th><th>Make and model</th><th>Supply</th>${quality ? '<th>Data</th>' : ''}</tr></thead><tbody>
-          ${list.map((d) => `<tr class="clickable" tabindex="0" data-action="lib-select" data-id="${esc(d.id)}" aria-selected="${sel && sel.id === d.id}"><td><span class="mono">${esc(d.id)}</span><span class="cell-sub">${esc(catName(d.cat))}</span></td><td>${makeModel(d)}</td><td class="nowrap">${esc(d.supply)}${d.w ? `<span class="cell-sub">${d.w} W</span>` : ''}</td>${quality ? `<td style="white-space:nowrap">${d.verified ? verified(d.verified) : ''}</td>` : ''}</tr>`).join('') || `<tr class="empty-row"><td colspan="${quality ? 4 : 3}">No device matches these filters. Clear a filter or search for a different part.</td></tr>`}
+          ${list.map((d) => `<tr class="clickable" tabindex="0" data-action="lib-select" data-id="${esc(d.id)}" aria-selected="${sel && sel.id === d.id}"><td><span class="mono">${esc(d.id)}</span>${stateBadge(d.state)}<span class="cell-sub">${esc(catName(d.cat))}</span></td><td>${makeModel(d)}</td><td class="nowrap">${esc(d.supply)}${d.w ? `<span class="cell-sub">${d.w} W</span>` : ''}</td>${quality ? `<td style="white-space:nowrap">${d.verified ? verified(d.verified) : ''}</td>` : ''}</tr>`).join('') || `<tr class="empty-row"><td colspan="${quality ? 4 : 3}">No device matches these filters. Clear a filter or search for a different part.</td></tr>`}
         </tbody></table><div class="table-foot"><span>Select a row to see its details</span></div></div></div>
         ${sel ? detail(sel) : ''}
       </div>`;
@@ -266,6 +271,7 @@
   document.addEventListener('change', (e) => { if (e.target.id === 'lib-cat') { F.cat = e.target.value; App.render(); } if (e.target.id === 'lib-ver') { F.ver = e.target.value; App.render(); } });
   ACTIONS['lib-cat'] = () => {}; ACTIONS['lib-ver'] = () => {};
   ACTIONS['lib-alt'] = () => { F.alt = !F.alt; App.render(); };
+  ACTIONS['lib-assumed'] = () => { F.assumed = !F.assumed; App.render(); };
   ACTIONS.copy = (el) => {
     const text = el.dataset.v;
     const fallback = () => { const t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); };

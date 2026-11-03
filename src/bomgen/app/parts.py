@@ -305,6 +305,14 @@ def _row(
         "redundant": entry.redundant,
         "network": category in NETWORK_CATEGORIES,
         "library": {k: getattr(part, k) for k in VALUES} if part is not None else None,
+        # ADR 0037: the figures its part assumes, for the chip on the row
+        "assumed": [
+            {"field": name, "ref": source.ref}
+            for name in ("unit_power_w", "inrush_a")
+            if part is not None
+            and (source := part.sources.get(name)) is not None
+            and source.kind == "assumed"
+        ],
         "overrides": entry.overrides.values() if entry.overrides is not None else {},
         "sfp": sfp,
         "bom_text": {k: getattr(entry, k) for k in BOM_TEXT},  # M59

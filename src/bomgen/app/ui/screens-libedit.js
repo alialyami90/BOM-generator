@@ -79,7 +79,8 @@
     identity: ['Identity', [['part_id', 'Part ID', 'fixed', 'Fixed: projects refer to it. To rename, add a copy and retire this one.'], ['category', 'Category', 'choice'], ['make', 'Make', 'text'], ['model', 'Model', 'text'],
       ['ordering_code', 'Ordering code', 'mono', 'Printed in the BOM. Leave empty if the manufacturer gives none.', 2],
       ['description_template', 'Description in the BOM', 'area', 'Placeholders in braces, such as <span class="mono">{side}</span> and <span class="mono">{level}</span>, are filled in by the engine.', 2],
-      ['tag_type', 'Tag type', 'mono', 'First part of the generated tag, e.g. ESW.'], ['purdue_level', 'Purdue level', 'choice']]],
+      ['tag_type', 'Tag type', 'mono', 'First part of the generated tag, e.g. ESW.'], ['purdue_level', 'Purdue level', 'choice'],
+      ['state', 'State', 'choice', 'Released parts are ready for projects; draft and reviewed parts are still being checked.'], ['successor', 'Successor', 'part', 'The part that replaces this one. Only for an obsolete part.']]],
     electrical: ['Electrical', [['supply_type', 'Supply type', 'choice'], ['voltage_v', 'Voltage', 'int', '', 0, 'V'], ['power_supplies', 'Power supplies', 'feeds'],
       ['unit_power_w', 'Rated power', 'num', 'What the power sheet uses.', 0, 'W'], ['inrush_a', 'Inrush current', 'num', 'The branch MCB is sized to clear it.', 0, 'A'], ['load_type', 'Load type', 'choice'],
       ['min_branch_mcb_a', 'Minimum branch MCB (deprecated)', 'fixed', 'Kept from older libraries; it no longer sets a rating. Branch MCBs are sized from the rated power and the inrush current (ADR 0019).', 0, 'A'], ['hwio_points', 'HWIO points', 'int', 'Hardwired points one unit gives.'], ['di_inputs', 'Digital inputs', 'int'],
@@ -98,6 +99,9 @@
       ['rec__sources', 'Sources', 'lines', 'One per line: where each figure was found.', 2]]],
     alternatives: ['Alternatives', [['alt_group', 'Alternative group', 'mono', 'Devices with the same group key are alternatives of each other. The key links them in CSV files too.'], ['tier', 'Tier', 'choice', 'Low, mid or high, among the alternatives.']]]
   };
+  /* ADR 0037: each sized figure says where it comes from; [field, label, unit, tab]. */
+  const SOURCED = [['unit_power_w', 'Rated power', 'W', 'electrical'], ['inrush_a', 'Inrush current', 'A', 'electrical'], ['input_v_max', 'Highest input voltage', 'V', 'electrical'],
+    ['height_u', 'Height', 'U', 'ports'], ['ports', 'Port groups', '', 'ports']];
   const isRec = (key) => key.startsWith('rec__');
   const recPath = (key) => key.slice(5).split('__');
   const recKey = (path) => 'rec__' + path.replace(/\./g, '__');
@@ -112,7 +116,8 @@
   const kindOf = (key) => (FIELDS.find((f) => f[0] === key) || [])[2];
   /* Review entries name a device field, or a record path such as datasheet.weight_kg. */
   const fieldOf = (key) => FIELDS.find((f) => f[0] === key) || FIELDS.find((f) => f[0] === recKey(key));
-  const labelOf = (key) => (LISTS[key] ? LISTS[key][0] : (fieldOf(key) || [key, key])[1]);
+  const sourcedLabel = (f) => (SOURCED.find((x) => x[0] === f) || [f, f])[1];
+  const labelOf = (key) => (key.startsWith('sources.') ? `Source of ${sourcedLabel(key.slice(8)).toLowerCase()}` : LISTS[key] ? LISTS[key][0] : (fieldOf(key) || [key, key])[1]);
   const withUnit = (key, v) => { const u = (fieldOf(key) || [])[5]; return v ? (u ? `${v} ${u}` : v) : 'empty'; };
 
   function loadDevice(id) {
@@ -153,6 +158,7 @@
     if (kind === 'fixed') html = input(id, v, { mono: true, readonly: true });
     else if (kind === 'bool') return ((h) => (changed ? App.changedField(h) : h))(`<div class="field"><label class="switch"><input type="checkbox" id="${id}" ${v ? 'checked' : ''}>${esc(label)}</label>${err ? `<span class="err" id="${id}-err">${icon('error')}<span>${esc(err)}</span></span>` : ''}</div>`);
     else if (kind === 'choice') html = select(id, [['', 'Not set'], ...choices.map((c) => [c, choiceName(key, c)])], v == null ? '' : String(v), o);
+    else if (kind === 'part') html = input(id, v == null ? '' : String(v), { ...o, mono: true }).replace('<input', '<input list="dl-parts"');
     else if (kind === 'feeds') html = select(id, [['0', 'None'], ['1', 'Single feed'], ['2', 'Dual feed (2 supplies)']], String(v || 0), o);
     else if (kind === 'area' || kind === 'lines') html = `<textarea class="input input--mono" id="${id}" rows="3" ${err ? 'aria-invalid="true"' : ''} style="height:auto;padding:8px 10px">${esc(v == null ? '' : v)}</textarea>`;
     else html = input(id, v == null ? '' : String(v), { ...o, mono: kind !== 'text' && kind !== 'csv', num: kind === 'int' || kind === 'num' || kind === 'snum' });
@@ -168,7 +174,8 @@
     const d = ED.reply.device, t = TABS[S.tab.devEdit] ? S.tab.devEdit : 'identity';
     const noRecord = t === 'datasheet' && !ED.reply.record;
     const fields = noRecord ? [] : TABS[t][1], spans = (f) => (f[4] === 2 ? `<div class="span-2">${control(f)}</div>` : control(f));
-    const lists = Object.entries(LISTS).filter(([, l]) => l[1] === t).map(([key]) => listTable(key)).join('') + (t === 'alternatives' ? altTable(d) : '');
+    sourceRule(); successorRule();
+    const lists = Object.entries(LISTS).filter(([, l]) => l[1] === t).map(([key]) => listTable(key)).join('') + (t === 'alternatives' ? altTable(d) : '') + sourcesTable(t);
     const ledeText = { parts: 'Parts that come with each unit of this device. They appear as extra rows in the BOM.',
       datasheet: noRecord ? 'This part has no record in the library\'s device database, so there are no datasheet figures to edit.' : 'What the datasheet confirms. These figures are for reference; the BOM uses the Electrical and Ports values.' }[t];
     const lede = ledeText ? `<p class="muted small" style="max-width:68ch;margin-bottom:var(--space-3)">${ledeText}</p>` : '';
@@ -179,7 +186,7 @@
     const isNew = !ED.reply.saved;
     return `<div class="page">${pageHead(esc(d.part_id), esc([d.make, d.model, isNew ? 'new device, not applied yet' : ''].filter(Boolean).join(' · ')), `<button class="btn btn--danger" data-action="delete-device" data-id="${esc(d.part_id)}" data-new="${isNew ? 1 : ''}">${icon('trash')}Delete…</button>`, crumbs)}${notice}${used}${pend}
       ${tabs('devEdit', Object.entries(TABS).map(([k, [label]]) => [k, label]), t, 'Device sections')}
-      <div role="tabpanel" aria-labelledby="tab-devEdit-${t}">${t === 'parts' ? `<datalist id="dl-parts">${((names) => (ED.reply.part_ids || []).map((p) => `<option value="${esc(p)}" label="${esc(names[p] || '')}">`).join(''))(ED.reply.part_names || {})}</datalist>` : ''}${lede}${fields.length ? `<div class="form ${t === 'identity' ? 'form--2' : 'form--3'}">${fields.map(spans).join('')}</div>` : ''}${lists}</div>${saveBar()}</div>`;
+      <div role="tabpanel" aria-labelledby="tab-devEdit-${t}">${t === 'parts' || t === 'identity' ? `<datalist id="dl-parts">${((names) => (ED.reply.part_ids || []).map((p) => `<option value="${esc(p)}" label="${esc(names[p] || '')}">`).join(''))(ED.reply.part_names || {})}</datalist>` : ''}${lede}${fields.length ? `<div class="form ${t === 'identity' ? 'form--2' : 'form--3'}">${fields.map(spans).join('')}</div>` : ''}${lists}</div>${saveBar()}</div>`;
   }
   /* ---------- Alternatives: the device first, then each part with the same alt_group (ADR 0017) ---------- */
   /* A delta chip: plain text with a sign, warning-tinted when higher, success-tinted when lower. */
@@ -244,6 +251,54 @@
     return [rows.length ? `${esc(u.substation)} uses it in ${plural(rows.length, 'row')}: ${and(parts)}.` : '',
       lib.length ? `In the library it comes with ${and(lib.map((x) => m(x.name)))}.` : ''].filter(Boolean).join(' ');
   }
+  /* ---------- Sources (ADR 0037): one row per sized figure the device sets ---------- */
+  const isSet = (v) => v != null && !(Array.isArray(v) && !v.length);
+  const sourceOf = (sources, f) => (sources || {})[f] || null;
+  function sourcesTable(t) {
+    const rows = SOURCED.filter(([f, , , tab]) => tab === t && (isSet(value(f)) || sourceOf(value('sources'), f)));
+    if (!rows.length) return '';
+    const sources = value('sources') || {}, kinds = (ED.reply.choices || {}).source_kind || [];
+    const err = ED.errors.sources || ED.errors.source_rule, changed = 'sources' in ED.draft;
+    const shown = (f, unit) => { const v = value(f); return Array.isArray(v) ? plural(v.length, 'group') : isSet(v) ? `${v} ${unit}`.trim() : '—'; };
+    const body = rows.map(([f, label, unit]) => {
+      const src = sourceOf(sources, f) || {}, need = (ED.missing || []).includes(f);
+      const kind = select(`src-${f}-kind`, [['', 'Not given'], ...kinds.map((k) => [k, choiceName('source_kind', k)])], src.kind || '', { cls: 'ctl', invalid: need }).replace('<select', `<select aria-label="Source of ${esc(label.toLowerCase())}"`);
+      const ref = input(`src-${f}-ref`, src.ref || '', { placeholder: src.kind === 'assumed' ? 'Why: e.g. no datasheet figure' : 'Document, page or link' }).replace('class="input', 'class="ctl input').replace('<input', `<input aria-label="Reference for ${esc(label.toLowerCase())}"`);
+      const date = input(`src-${f}-date`, src.date || '', { mono: true, placeholder: 'YYYY-MM-DD' }).replace('class="input', 'class="ctl input').replace('<input', `<input aria-label="Date of the source for ${esc(label.toLowerCase())}"`);
+      return `<tr><td>${esc(label)}<span class="cell-sub">${esc(shown(f, unit))}</span></td><td>${kind}</td><td>${ref}</td><td style="width:130px">${date}</td></tr>`;
+    }).join('');
+    return `<section class="section${changed ? ' changed' : ''}" style="padding-top:var(--space-3)"><h3>Sources${changed ? ` ${badge('warn', 'Changed')}` : ''}</h3>
+      <p class="muted small" style="max-width:68ch;margin:4px 0 0">Where each figure comes from. A changed figure needs its source; <i>Assumed</i> is a source, with the reason.</p>
+      <div class="table-wrap" style="max-width:920px;margin-top:6px"><table class="table"><thead><tr><th style="width:190px">Figure</th><th style="width:150px">Source</th><th>Reference</th><th style="width:130px">Date</th></tr></thead><tbody>${body}</tbody></table></div>
+      ${err ? `<span class="err" id="de-sources-err">${icon('error')}<span>${esc(err)}</span></span>` : ''}</section>`;
+  }
+  /* A sized figure changed in the form while its source stayed as saved: Save waits for the source (ADR 0037 item 4). */
+  function sourceRule() {
+    const saved = current('sources'), now = value('sources');
+    ED.missing = SOURCED.map(([f]) => f).filter((f) => f in ED.draft && isSet(ED.draft[f]) && same(sourceOf(now, f), sourceOf(saved, f)));
+    if (ED.missing.length) ED.errors.source_rule = `${ED.missing.map(sourcedLabel).join(', ')} changed: give where the new value comes from under Sources.`;
+    else delete ED.errors.source_rule;
+  }
+  /* State and successor are checked together here, since the model checks one field against the saved other. */
+  function successorRule() {
+    const v = value('successor');
+    const msg = !v ? '' : value('state') !== 'obsolete' ? 'Only an obsolete part names a successor. Set State to Obsolete, or clear this.'
+      : v === ED.key ? 'A part cannot be its own successor.' : !(ED.reply.part_ids || []).includes(v) ? `There is no part ${v} in the library.` : '';
+    if (msg) ED.errors.successor = msg; else delete ED.errors.successor;
+  }
+  function setSource(f, col, raw) {
+    const sources = JSON.parse(JSON.stringify(value('sources') || {})), src = sources[f] || {}, t = String(raw).trim();
+    if (col === 'kind' && !t) delete sources[f];
+    else { if (t) src[col] = t; else delete src[col]; if (col !== 'kind' && !src.kind) src.kind = 'datasheet'; sources[f] = { kind: src.kind, ref: src.ref || '', ...(src.date ? { date: src.date } : {}) }; }
+    if (same(sources, current('sources') || {})) { delete ED.draft.sources; delete ED.errors.sources; queueMicrotask(App.render); return; }
+    ED.draft.sources = sources; delete ED.errors.sources; queueMicrotask(App.render);
+    const id = ED.key;
+    Bridge.call('check_library_field', id, 'sources', sources).then((msg) => {
+      if (ED.key !== id || ED.draft.sources !== sources) return;
+      if (msg) ED.errors.sources = msg; else delete ED.errors.sources;
+      App.render();
+    }).catch(() => {});
+  }
   function listTable(key) {
     const [title, , cols] = LISTS[key], rows = value(key) || [], err = ED.errors[key], changed = key in ED.draft;
     const choices = ED.reply.choices || {};
@@ -286,10 +341,20 @@
       <span class="sp"></span><button class="btn btn--secondary" data-action="de-discard" ${ED.saving ? 'disabled' : ''}>Discard</button>
       <button class="btn btn--primary" data-action="de-save" ${ED.saving || bad ? 'disabled' : ''}>${icon('save')}Save device <kbd class="kbd">Ctrl+S</kbd></button></div>`;
   }
-  ACTIONS['de-first-bad'] = () => { const k = Object.keys(ED.errors)[0]; const el = k && document.getElementById('de-' + k); if (el) el.focus(); else if (k) { S.tab.devEdit = Object.keys(TABS).find((t) => TABS[t][1].some((f) => f[0] === k)); App.render(); } };
+  ACTIONS['de-first-bad'] = () => {
+    const k = Object.keys(ED.errors)[0];
+    if (k === 'source_rule' || k === 'sources') {
+      const f = (ED.missing && ED.missing[0]) || SOURCED[0][0], tab = SOURCED.find((x) => x[0] === f)[3];
+      if (S.tab.devEdit !== tab) { S.tab.devEdit = tab; App.render(); }
+      const el = document.getElementById(`src-${f}-kind`); if (el) el.focus(); return;
+    }
+    const el = k && document.getElementById('de-' + k); if (el) el.focus(); else if (k) { S.tab.devEdit = Object.keys(TABS).find((t) => TABS[t][1].some((f) => f[0] === k)); App.render(); }
+  };
 
   /* A field is checked by the model as it is left; the draft holds only what differs from the saved device. */
   document.addEventListener('change', (e) => {
+    const sc = /^src-(\w+)-(kind|ref|date)$/.exec(e.target.id || '');
+    if (sc && ED.reply) { setSource(sc[1], sc[2], e.target.value); return; }
     const c = /^dl-(\w+?)-(\d+)-(\w+)$/.exec(e.target.id || '');
     if (c && ED.reply && LISTS[c[1]]) {
       const [, key, i, col] = c, rows = listCopy(key), kind = LISTS[key][2].find((x) => x[0] === col)[2];
@@ -306,6 +371,7 @@
     if (same(v, was) || (Array.isArray(v) && !v.length && was == null)) { delete ED.draft[key]; delete ED.errors[key]; queueMicrotask(App.render); return; }
     ED.draft[key] = v;
     if (local) { ED.errors[key] = local; queueMicrotask(App.render); return; }
+    if (key === 'state' || key === 'successor') { queueMicrotask(App.render); return; }  // successorRule checks the pair
     delete ED.errors[key];
     queueMicrotask(App.render);
     const id = ED.key;

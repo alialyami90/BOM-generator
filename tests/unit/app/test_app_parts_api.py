@@ -463,3 +463,21 @@ def test_a_row_with_branch_mcbs_shows_its_alarm_and_the_library_default(
         "utf-8",
     )
     assert row(parts(project, store), "ext-fw")["alarm"] == {"on": False, "default": True}
+
+
+def test_a_row_names_the_figures_its_part_assumes(project: Path, store: LibraryStore) -> None:
+    # ADR 0037 (M67c): Parts shows a chip for an assumed power or inrush.
+    library = project.parent / "library.yaml"
+    edit(
+        library,
+        "  - part_id: SEL-3555-RTAC  # 'Panel 3' row 5: PSA3-RTAC\n",
+        "  - part_id: SEL-3555-RTAC  # 'Panel 3' row 5: PSA3-RTAC\n"
+        '    sources: { unit_power_w: { kind: assumed, ref: "the example workbook" } }\n',
+    )
+
+    found = parts(project, store)
+
+    assert row(found, "rtac")["assumed"] == [
+        {"field": "unit_power_w", "ref": "the example workbook"}
+    ]
+    assert row(found, "gps")["assumed"] == []
