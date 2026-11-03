@@ -473,3 +473,15 @@ def test_manual_panel_cannot_be_generated(tmp_path: Path) -> None:
             "a manual panel is never written by the layout; remove generated: true",
         )
     ]
+
+
+def test_constants_take_voltage_from_design_basis_unless_set(tmp_path: Path) -> None:
+    project = default_project()
+    project["defaults"] = {"constants": {"ac_voltage_v": 240}}
+    substation = default_substation()
+    substation["design_basis"] = {"dc_voltage_v": 110, "ac_voltage_v": 220}
+    substation["constants"] = {"ac_voltage_v": 230}
+    loaded = load_project(write_project(tmp_path, project=project, substation=substation))
+    (s1,) = loaded.substations
+    assert s1.constants.dc_voltage_v == 110  # the design basis over the project default
+    assert s1.constants.ac_voltage_v == 230  # the substation's own constants win

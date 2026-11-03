@@ -30,6 +30,7 @@ from bomgen.models.calc import BranchMcb, DcMains, SpareRatings
 from bomgen.models.library import Category, FanRef, Library
 from bomgen.models.panel import Panel, Ventilation
 from bomgen.models.project import DesignConstants, LooseExtra, LooseMaterial
+from bomgen.models.substation import Tagging
 
 
 @dataclass(frozen=True)
@@ -60,7 +61,9 @@ def build(loaded: LoadedSubstation) -> BuildResult:
         *annunciator_items(loaded.substation.equipment, library, loaded.panels),
     ]
     substation = loaded.substation.substation.name
-    drafts = [_draft(p, library, loaded.constants, loose_items) for p in loaded.panels]
+    drafts = [
+        _draft(p, library, loaded.constants, loose_items, loaded.tagging) for p in loaded.panels
+    ]
     hwio_total = sum(draft.hwio for draft in drafts)
     plates = [nameplates(d.panel, d.rows) for d in drafts]
     panels = tuple(
@@ -93,9 +96,13 @@ def build(loaded: LoadedSubstation) -> BuildResult:
 
 
 def _draft(
-    panel: Panel, library: Library, constants: DesignConstants, loose: Sequence[LooseExtra]
+    panel: Panel,
+    library: Library,
+    constants: DesignConstants,
+    loose: Sequence[LooseExtra],
+    tagging: Tagging,
 ) -> _PanelDraft:
-    rows = expand_devices(panel, library)
+    rows = expand_devices(panel, library, tagging=tagging)
     change_over = needs_change_over(panel, library, loose)
     equipment = [
         enclosure_item(panel),

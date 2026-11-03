@@ -1,6 +1,6 @@
 # 0031. Design basis
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-11-03)
 - Date: 2026-11-03
 - Spec sections: Inputs the tool needs → 2. Substation and its panels, 3. Project settings; Tag
   naming conventions; Validation and warnings

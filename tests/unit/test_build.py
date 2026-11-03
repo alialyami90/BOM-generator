@@ -65,3 +65,22 @@ def test_a_substation_without_panels_does_not_build(
     with pytest.raises(EngineError, match="has no panels yet"):
         build_substation(replace(loaded, panels=()), tmp_path / "bom.xlsx")
     assert not (tmp_path / "bom.xlsx").exists()
+
+
+def test_power_consumption_prints_the_design_basis_dc_voltage(tmp_path: Path) -> None:
+    import shutil
+
+    from bomgen.engine.pipeline import build as build_bom
+    from bomgen.io import fields
+    from bomgen.io.loader import load_project
+
+    shutil.copytree(SUBSTATION_FILE.parents[2], tmp_path / "p")
+    project = tmp_path / "p" / "project.yaml"
+    path = ("design_basis", "dc_voltage_v")
+    assert fields.set_field(project, path, 110, substation="gis01").written
+    (loaded,) = load_project(project).substations
+    power = build_bom(loaded).power
+    assert power is not None
+    dc_lines = [line for c in power.cabinets if c.dc for line in c.dc.lines]
+    assert dc_lines
+    assert {line.supply_label for line in dc_lines} == {"110V"}

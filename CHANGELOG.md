@@ -34,6 +34,9 @@ project uses [Semantic Versioning](https://semver.org/).
   prefix patterns, the enclosure and cable entry, and the BOM, power and heat document numbers,
   filled in from the previous substation. What you type is written without the ASSUMED mark, and
   Checks warns while a document number is still TBD (M51).
+- A substation can state its design basis in `design_basis`: DC and AC voltage feed the design
+  constants unless the substation sets its own, and `tagging` sets the side letters and first
+  numbers that device tags use. Unset, everything builds as before (M52a, ADR 0031).
 - The panel editor's Options tab shows the AC and DC spare breaker ratings with the rule behind
   them; click one to set your own. Grounding busbars are checkboxes from the library's catalogue.
   *Alarm on branch MCB trip* can be switched per Parts row and per hand-written panel row, over the

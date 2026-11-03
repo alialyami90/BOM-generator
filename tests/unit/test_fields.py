@@ -241,3 +241,25 @@ def test_own_enclosure_and_kind_round_trip_and_removal_returns_to_shared(project
     text = substation_yaml(project).read_text("utf-8")
     assert "enclosure_by_panel" not in text
     assert "kind_by_panel" not in text
+
+
+def test_design_basis_round_trips_and_feeds_the_constants(project: Path) -> None:
+    basis = {
+        "dc_voltage_v": 110,
+        "purdue_scope": ["L1", "L2"],
+        "time_sync": "gps_clock",
+        "tagging": {"first_numbers": {"L1": 21}},
+        "notes": "Client spec rev 2",
+    }
+    assert fields.set_field(project, ("design_basis",), basis, substation="gis01").written
+    path = ("design_basis", "ac_voltage_v")
+    assert fields.set_field(project, path, 220, substation="gis01").written
+    (loaded,) = load_project(project).substations
+    design = loaded.substation.design_basis
+    assert design is not None
+    assert design.notes == "Client spec rev 2"
+    assert (loaded.constants.dc_voltage_v, loaded.constants.ac_voltage_v) == (110, 220)
+    redundancy = ("design_basis", "redundancy")
+    message = fields.validate_field(project, redundancy, "prp", substation="gis01")
+    assert message is not None
+    assert "not supported yet" in message

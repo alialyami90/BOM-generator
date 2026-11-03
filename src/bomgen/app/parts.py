@@ -184,10 +184,12 @@ def _tag_info(
     expanded = []
     fills = [f for f in result.fills if f.units]
     for panel, fill in zip(result.panels, fills, strict=True):
-        rows = expand_devices(panel, loaded.library)
+        rows = expand_devices(panel, loaded.library, tagging=loaded.tagging)
         expanded.append((panel, rows))
         devices = [d.model_copy(update={"tag": None}) for d in panel.devices]
-        untagged = expand_devices(panel.model_copy(update={"devices": devices}), loaded.library)
+        untagged = expand_devices(
+            panel.model_copy(update={"devices": devices}), loaded.library, tagging=loaded.tagging
+        )
         for run, row, auto in zip(runs(fill), rows, untagged, strict=True):
             entry = run[0].device
             if auto.tag is not None:

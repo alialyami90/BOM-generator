@@ -10,10 +10,10 @@ from dataclasses import dataclass
 from bomgen.io.mirror import lan_index
 from bomgen.models.library import Category, DeviceType, PurdueLevel
 from bomgen.models.panel import Lan
-from bomgen.models.substation import EquipmentRole
+from bomgen.models.substation import FIRST_NUMBERS, EquipmentRole, Tagging
 
-# First NN per Purdue level.
-FIRST_NUMBER: dict[PurdueLevel, int] = {PurdueLevel.L2: 1, PurdueLevel.L1: 11, PurdueLevel.L3: 1}
+# First NN per Purdue level, unless the design basis's tagging says otherwise (ADR 0031).
+FIRST_NUMBER: dict[PurdueLevel, int] = FIRST_NUMBERS
 # Housekeeping parts whose units are always numbered: FAN-1,2, TH-1,2,3, WS-TH-1.
 NUMBERED_CATEGORIES = frozenset({Category.FAN, Category.THERMOSTAT})
 # The workstation roles share one library part, so the role gives the type code (ADR 0030).
@@ -22,8 +22,8 @@ ROLE_TYPES: dict[EquipmentRole, str] = {
     EquipmentRole.ENGINEERING_WS: "EWS",
     EquipmentRole.DA_SERVER: "SRV",
 }
-# The side of a device in a panel without a LAN (ADR 0030).
-DEFAULT_SIDE = "A"
+# Today's sides and numbers; a panel without a LAN takes the first side (ADR 0030).
+DEFAULT_TAGGING = Tagging()
 
 
 @dataclass(frozen=True)
@@ -34,11 +34,11 @@ class Tags:
     units: tuple[str | None, ...]
 
 
-def first_number(device: DeviceType) -> int:
+def first_number(device: DeviceType, tagging: Tagging = DEFAULT_TAGGING) -> int:
     """Where this device's unit numbering starts in a panel."""
     if device.purdue_level is None:
         return 1
-    return FIRST_NUMBER.get(device.purdue_level, 1)
+    return tagging.first_numbers.get(device.purdue_level, 1)
 
 
 def device_tags(
@@ -50,6 +50,7 @@ def device_tags(
     start: int,
     override: str | None = None,
     tag_type: str | None = None,
+    side_letters: tuple[str, str] = DEFAULT_TAGGING.side_letters,
 ) -> Tags:
     """Tags for ``qty`` units of ``device``, numbered from ``start``; ``tag_type`` replaces
     the library's type code."""
@@ -72,7 +73,8 @@ def device_tags(
     if not type_code:
         return Tags(None, (None,) * qty)
     if device.purdue_level is not None:
-        head = f"{prefix}-{level}-{type_code}-{lan or DEFAULT_SIDE}"
+        side = side_letters[lan_index(lan) - 1] if lan else side_letters[0]
+        head = f"{prefix}-{level}-{type_code}-{side}"
         units = tuple(f"{head}{n:02d}" for n in numbers)
         return Tags(_range(units), units)
     if device.category in NUMBERED_CATEGORIES or qty > 1:
