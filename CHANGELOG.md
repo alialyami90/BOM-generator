@@ -7,6 +7,13 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- The panel editor's main MCB shows the engine's rating with the rule it came from ("10 A: next
+  standard size above 7.1 A, minimum 6 A"); click it to type your own, *Use automatic* to go back
+  (M48). Part overrides on Parts use the same derived-value look, and leaving a value with Tab now
+  closes its input.
+
 ## [0.3.4] - 2026-11-01
 
 ### Added

@@ -204,6 +204,7 @@ class DcMains(OutputModel):
     design_current_a: NonNegativeFloat
     rating_a: NonNegativeInt  # 0 when the panel has no DC loads
     rule_rating_a: NonNegativeInt  # without main_mcb_override_a (plan Q3)
+    rule: str = ""  # how rule_rating_a was reached (plan M48)
 
 
 class HeatResult(OutputModel):

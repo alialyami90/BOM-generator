@@ -9,7 +9,7 @@
   const str = (v) => (v == null ? '' : String(v));
 
   /* ---------- data: one page per (project file, substation id, panel id) ---------- */
-  const PE = { key: '', state: 'idle', page: null, error: null };
+  const PE = { key: '', state: 'idle', page: null, error: null, dv: '' };
   function load(id) {
     const key = `${S.project.file}#${S.sub}#${id}`;
     if (PE.key !== key) Object.assign(PE, { key, state: 'idle', page: null, error: null });
@@ -106,6 +106,31 @@
   const text = (key, o = {}) => input(PFX + key, str(F.shown(key)), { invalid: !!F.errors[key], ...o });
   const num = (key, unit, o = {}) => `<div class="input-affix">${text(key, { num: true, mono: true, ...o })}${unit ? `<span class="affix">${esc(unit)}</span>` : ''}</div>`;
   const choice = (key, opts) => select(PFX + key, opts, str(F.shown(key)), { invalid: !!F.errors[key] });
+  /* The main MCB as a derived value (plan M48): the engine's rating and its rule; a typed rating overrides it.
+     `inherited` is the shared override a panel-only key falls back to. */
+  function mainMcb(p, key, inherited) {
+    const d = p.derived.main_mcb_a;
+    if (PE.dv === key) return App.derived(key, { editing: true, id: PFX + key, label: 'Rating', rule: d.rule, control: num(key, 'A').replace('<input ', `<input data-pdv="${key}" `) });
+    const eff = str(F.shown(key)) || str(inherited);
+    return App.derived(key, { label: 'Rating', shown: `${eff || d.value} A`, auto: `${d.value} A`, overridden: !!eff, bad: !!F.errors[key], rule: d.rule, edit: 'pe-dv-edit', reset: 'pe-dv-reset' });
+  }
+  ACTIONS['pe-dv-edit'] = (el) => { PE.dv = el.dataset.key; App.render(); const c = document.getElementById(PFX + el.dataset.key); if (c) { c.focus(); c.select(); } };
+  ACTIONS['pe-dv-reset'] = (el) => { F.set(el.dataset.key, ''); S.dirty = true; App.render(); };
+  /* Enter keeps the typed rating, Esc puts the shown one back; leaving the field keeps it as a change does. */
+  document.addEventListener('keydown', (e) => {
+    const c = e.target.closest && e.target.closest('[data-pdv]');
+    if (!c || (e.key !== 'Enter' && e.key !== 'Escape')) return;
+    e.preventDefault(); e.stopPropagation();
+    const key = c.dataset.pdv;
+    if (e.key === 'Escape') c.value = str(F.shown(key)); else F.apply(key, c.value);
+    PE.dv = ''; c.blur(); App.render();
+    const b = document.querySelector(`[data-action="pe-dv-edit"][data-key="${key}"]`); if (b) b.focus();
+  }, true);
+  document.addEventListener('change', (e) => { if (e.target.closest && e.target.closest('[data-pdv]')) PE.dv = ''; }, true);  // before the form's render
+  document.addEventListener('focusout', (e) => {
+    const c = e.target.closest && e.target.closest('[data-pdv]');
+    if (c && PE.dv === c.dataset.pdv) setTimeout(() => { if (PE.dv === c.dataset.pdv) { PE.dv = ''; App.render(); } }, 0);
+  });
 
   /* ---------- the page ---------- */
   const TABS = [['enclosure', 'Enclosure'], ['devices', 'Devices'], ['ports', 'Port plans'], ['options', 'Options'], ['document', 'Document'], ['yaml', 'YAML']];
@@ -212,6 +237,7 @@
   function handOptions(p) {
     return `<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">Empty a value to use the default.</p><div class="form form--2">${OPTIONS.map(([k, label, kind, help]) => {
       const o = p.options.find((x) => x.key === k), key = `o.${k}`;
+      if (k === 'main_mcb_override_a' && p.derived.main_mcb_a) return edit(key, 'Main MCB', mainMcb(p, key, ''), 'Click the rating to type your own.');
       const ctl = Array.isArray(kind) ? choice(key, [['', `Default: ${shownValue(o.shared, kind)}`], ...kind]) : num(key, kind, { placeholder: `Default: ${str(o.shared) || 'none'}` });
       const note = o.own ? `${badge('info', `Own value · default ${shownValue(o.shared, kind)}`)} <button class="btn btn--ghost btn--sm" data-action="ph-use-default" data-key="${key}">Use the default</button>` : '';
       return edit(key, esc(label), ctl, [help || '', note].filter(Boolean).join(' '));
@@ -315,6 +341,7 @@
     const owned = p.options.filter((o) => o.own);
     const rows = OPTIONS.map(([k, label, kind, help]) => {
       const o = p.options.find((x) => x.key === k), key = `o.${scope}.${k}`;
+      if (k === 'main_mcb_override_a' && p.derived.main_mcb_a) return edit(key, 'Main MCB', mainMcb(p, key, own ? o.shared : ''), `Click the rating to type your own${own ? ' for this panel' : ' for every generated panel'}.`);
       const opts = Array.isArray(kind) ? (own ? [['', `Shared: ${shownValue(o.shared, kind)}`], ...kind] : kind) : null;
       const ctl = opts ? choice(key, opts) : num(key, kind, own ? { placeholder: `Shared: ${str(o.shared) || 'none'}` } : {});
       const note = own && o.own ? `${badge('info', `Own value · shared ${shownValue(o.shared, kind)}`)} <button class="btn btn--ghost btn--sm" data-action="pe-use-shared" data-key="${key}">Use the shared value</button>`

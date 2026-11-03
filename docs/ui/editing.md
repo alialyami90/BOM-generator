@@ -20,6 +20,15 @@ backup. The YAML tabs stay as an advanced view (see "YAML tabs").
 
 Rule of thumb: a *value* is saved with the form; a *record* appears or disappears at once.
 
+## Overrides
+
+A value the engine derives and the engineer may change follows one contract (plan M48): the engine
+computes it and returns it with a `rule` text (`bomgen.models.output.Derived`: `value`, `rule`,
+`override`, `source`); the file stores an override only when one is set; the screen shows it with the
+"Derived value" component (components.md) and its marker; *Use automatic* removes the override. The UI
+never re-implements a rule. Today: the main MCB (`panel_page` `derived.main_mcb_a`) and the part
+overrides on Parts.
+
 ## Save bar
 
 A strip fixed to the foot of the content area, shown only while the page has unsaved changes.
