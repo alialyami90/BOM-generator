@@ -3,7 +3,7 @@ Columns of a panel BOM, DESCRIPTION)."""
 
 from bomgen.engine.errors import EngineError
 from bomgen.models.bom import BomLine, Group
-from bomgen.models.library import Library, McbCatalogue
+from bomgen.models.library import DeviceType, Library, McbCatalogue, SupplyType
 from bomgen.models.panel import Panel, PanelKind
 
 
@@ -54,6 +54,14 @@ def aux_contact_line(
         ordering_code=aux.ordering_code,
         hwio=hwio,
     )
+
+
+def has_branch_mcb(device: DeviceType) -> bool:
+    """Whether each unit gets its own branch MCB: a DC device with two supplies (group F)
+    or an AC-powered one (group E, ADR 0025)."""
+    if device.power_supplies == 2:
+        return True
+    return device.supply_type is SupplyType.VAC and not device.excluded_from_power
 
 
 def alarms_wired(panel: Panel) -> bool:

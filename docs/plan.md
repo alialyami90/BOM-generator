@@ -394,7 +394,7 @@ devices:                               # group B display order
   - { part_id: RST2228-L1-24MM, qty: 6 }   # first_nn: 15 continues a range (A15 to A16)
   - { part_id: RST2228-EXT, qty: 1 }
   - { part_id: GW-DHPCC, qty: 1, purpose: "for Dhahran PCC connection" }
-  - { part_id: FW-EXT, qty: 1 }
+  - { part_id: FW-EXT, qty: 1 }        # alarm_on_branch_mcb: false overrides the library (M58)
 port_plans:                            # per device, by part_id or tag; allocations are lists
   RST2228-L2:
     uplinks_l3: [{ count: 2, speed: 1G, media: SM }]
@@ -412,6 +412,8 @@ options:
   dc_spare_branches_per_feed: 3        # default 1
   ac_spare_branches: 1
   main_mcb_override_a: null
+  ac_spare_rating_a: null              # M58; null = the largest housekeeping branch
+  dc_spare_rating_a: null              # M58; null = the largest device branch
   inter_panel_terminals: 40
   terminal_overrides: {}               # e.g. { X4-DC1: 32 } where the spec gives no rule
   grounding_busbars: [ac_safety_ground, instrument_ground]
@@ -1086,7 +1088,7 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M55 — Substation templates.** *W5; Q63.* Planned.
 - **M56 — Housekeeping editor.** *W3; ADR 0032.* Planned.
 - **M57 — Terminals tab.** *W3; ADR 0033.* Planned.
-- **M58 — Grounding, spare breaker ratings, alarm on branch trip.** *W3; spec sentence.* Planned.
+- **M58 — Grounding, spare breaker ratings, alarm on branch trip.** *W3; spec sentence.* In review.
 - **M59 — BOM text per row on Parts.** *W4.* Done (#326). Equipment gains `tag`, `tag_type` and `first_nn`;
   Parts has a *BOM text* section per row. The hand-written panel editor's tag fields are left to W3,
   which owns that screen.

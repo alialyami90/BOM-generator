@@ -242,3 +242,27 @@ def test_an_edited_numbering_pattern_drops_its_assumed_mark(app: api.Api, genera
     ok(app.set_substation_field(str(generated), "gis01", path, "861-GIS01-XYZ-{n:04d}"))
     line = next(x for x in file.read_text("utf-8").splitlines() if "cabinet_number" in x)
     assert line.strip() == 'cabinet_number: "861-GIS01-XYZ-{n:04d}"'
+
+
+def test_hand_written_rows_carry_the_alarm_toggle_and_its_library_default(
+    app: api.Api, generated: Path
+) -> None:
+    """Plan M58: a row with a branch MCB may turn the alarm on its trip on or off."""
+    path: list[str | int] = ["devices", 0, "alarm_on_branch_mcb"]
+    ok(app.set_panel_field(str(generated), "gis01", "ws", path, True))
+    devices = ok(app.panel_page(str(generated), "gis01", "ws"))["devices"]
+
+    server, monitor, keyboard = devices
+    assert (server["branch_mcb"], server["alarm_default"], server["alarm_on_branch_mcb"]) == (
+        True,
+        False,
+        True,
+    )
+    assert monitor["branch_mcb"] is False  # single-fed, through a QCOD
+    assert "alarm_on_branch_mcb" not in keyboard
+
+
+def test_the_page_lists_the_busbar_catalogue(app: api.Api, generated: Path) -> None:
+    page = ok(app.panel_page(str(generated), "gis01", "psa1"))
+    keys = [b["key"] for b in page["busbars"]]
+    assert {"ac_safety_ground", "instrument_ground"} <= set(keys)

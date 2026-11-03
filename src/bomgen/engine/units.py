@@ -21,6 +21,13 @@ class DeviceRow:
     tag: str | None
     unit_tags: tuple[str | None, ...]
 
+    @property
+    def alarmed(self) -> bool:
+        """Whether the row's branch MCBs carry an aux contact: the row's choice, else the
+        library's (plan M58)."""
+        own = self.instance.alarm_on_branch_mcb
+        return self.device.alarm_on_branch_mcb if own is None else own
+
 
 def expand_devices(
     panel: Panel, library: Library, instances: Sequence[DeviceInstance] | None = None

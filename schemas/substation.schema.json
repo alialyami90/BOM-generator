@@ -395,6 +395,18 @@
       "additionalProperties": false,
       "description": "A device the substation needs, before any panel exists (ADR 0013).",
       "properties": {
+        "alarm_on_branch_mcb": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alarm On Branch Mcb"
+        },
         "cable_manager": {
           "anyOf": [
             {

@@ -232,8 +232,10 @@ with the save bar; everything on it is saved together.
   model, code, H × D × W, base frame, cable entry top, side or bottom; on a generated panel also
   Kind, with *All generated panels* / *This panel only*, M50), Port plans (a small table per
   switch with an "Engine result" footer), Options (spares, ventilation, diodes,
-  main MCB override, socket, terminals, smoke detector, busbars, terminal
-  overrides, each override with a warning line), Document, `panels/<id>.yaml`.
+  main MCB override and the AC and DC spare ratings as derived values, socket, terminals, smoke
+  detector, grounding busbars as checkboxes from the catalogue, terminal overrides, each override
+  with a warning line; on a hand-written panel the Devices table has *Alarm on breaker trip*,
+  and each Parts row with a branch MCB has the same switch, M58), Document, `panels/<id>.yaml`.
 
 ### Library
 - **Layout:** title with the library name, version and install date; header actions *Add device…* (primary),

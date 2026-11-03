@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+import yaml
 
 from bomgen.app import api
 from bomgen.models.output import Derived
@@ -71,3 +72,44 @@ def test_a_main_mcb_without_override_comes_from_the_engine(app: api.Api, generat
     main = ok(app.panel_page(str(generated), "gis01", "psa1"))["derived"]["main_mcb_a"]
     assert (main["override"], main["source"]) == (None, "engine")
     assert main["rule"].startswith(f"{main['value']} A: ")
+
+
+def test_panel_page_carries_the_spare_ratings_with_their_rules(
+    app: api.Api, generated: Path
+) -> None:
+    """Plan M58: each spare breaker rating is a derived value the panel may override."""
+    ok(app.set_panel_option(str(generated), "gis01", "dc_spare_rating_a", 6, 1))
+    derived = ok(app.panel_page(str(generated), "gis01", "psa1"))["derived"]
+
+    assert derived["ac_spare_a"] == {
+        "value": 2,
+        "rule": "2 A: the largest housekeeping branch",
+        "override": None,
+        "source": "engine",
+        "unit": "A",
+    }
+    dc = derived["dc_spare_a"]
+    assert (dc["value"], dc["override"], dc["source"]) == (2, 6, "override")
+    assert dc["rule"].startswith("2 A: the largest of ")
+
+
+def _dc_aux(app: api.Api, project: Path) -> tuple[int, int]:
+    """psa1's DC aux contact row (quantity, HWIO) and its HWIO total."""
+    sheet = ok(app.preview_substation(str(project), "gis01"))["panels"][0]
+    row = next(r for r in sheet["rows"] if r["description"].startswith("DC Auxiliary Contacts"))
+    return row["qty"], sheet["hwio_total"]
+
+
+def test_turning_the_firewalls_alarm_off_drops_its_dc_aux_contacts(
+    app: api.Api, generated: Path
+) -> None:
+    """Plan M58 acceptance: Q1.n/Q2.n of the firewall leave the DC aux contacts. The DC
+    HWIO counts the mains only (Columns of a panel BOM, HWIO), so the HWIO stays."""
+    file = generated.parent / "substations" / "gis01" / "substation.yaml"
+    ids = [x["id"] for x in yaml.safe_load(file.read_text("utf-8"))["equipment"]]
+    path: list[str | int] = ["equipment", ids.index("ext-fw"), "alarm_on_branch_mcb"]
+
+    before = _dc_aux(app, generated)
+    ok(app.set_substation_field(str(generated), "gis01", path, False))
+    assert before[0] == 4
+    assert _dc_aux(app, generated) == (2, before[1])
