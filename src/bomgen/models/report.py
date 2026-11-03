@@ -24,6 +24,7 @@ class CheckItem(OutputModel):
     subject: str | None = None
     message: str
     values: dict[str, int | float | str] = Field(default_factory=dict)
+    accepted: str | None = None  # a warning's acceptance reason (ADR 0036)
 
 
 class CheckReport(OutputModel):
@@ -33,6 +34,11 @@ class CheckReport(OutputModel):
     def failed(self) -> bool:
         """Any failed check; ``bomgen build`` exits non-zero on it."""
         return any(item.status is CheckStatus.FAIL for item in self.items)
+
+    @property
+    def open_warnings(self) -> int:
+        """Warnings nobody has accepted (ADR 0036)."""
+        return sum(1 for i in self.items if i.status is CheckStatus.WARN and i.accepted is None)
 
     def count(self, status: CheckStatus) -> int:
         return sum(1 for item in self.items if item.status is status)

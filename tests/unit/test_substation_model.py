@@ -387,3 +387,58 @@ def test_ied_row_defaults_to_one_dual_100m_mm_port_landing_on_l1() -> None:
 def test_ied_row_needs_a_port() -> None:
     with pytest.raises(ValidationError, match="at least 1"):
         Network.model_validate({"ied_schedule": [{"bay": "E01", "name": "X", "ports": []}]})
+
+
+# -- Recorded issues and accepted warnings (ADR 0036, plan M66) --
+
+SHA = "a" * 64
+
+
+def issue(rev: str = "00", **extra: Any) -> dict[str, Any]:
+    return {
+        "rev": rev,
+        "date": "2026-11-03",
+        "file": "out/GIS01_Rev00.xlsx",
+        "sha256": SHA,
+        "description": "Issued for review",
+    } | extra
+
+
+def test_a_substation_has_no_issues_until_one_is_recorded() -> None:
+    model = Substation.model_validate(substation_dict())
+    assert model.issues == []
+    assert model.checks is None
+
+
+def test_issue_record_keeps_names_and_accepted_warnings() -> None:
+    accepted = {
+        "check": "dc_float",
+        "subject": "Acti9",
+        "reason": "Vendor letter",
+        "date": "2026-11-03",
+    }
+    data = substation_dict() | {
+        "issues": [
+            issue(prepared="A. Engineer", checked="B. Checker", accepted_warnings=[accepted])
+        ]
+    }
+    record = Substation.model_validate(data).issues[0]
+    assert (record.prepared, record.checked, record.approved) == ("A. Engineer", "B. Checker", None)
+    assert record.accepted_warnings[0].reason == "Vendor letter"
+
+
+def test_recorded_revs_are_unique() -> None:
+    with pytest.raises(ValidationError, match="rev '00' is recorded twice"):
+        Substation.model_validate(substation_dict() | {"issues": [issue(), issue()]})
+
+
+@pytest.mark.parametrize("bad", ["abc", "A" * 64, "a" * 63])
+def test_issue_hash_is_a_sha256_hex_digest(bad: str) -> None:
+    with pytest.raises(ValidationError):
+        Substation.model_validate(substation_dict() | {"issues": [issue(sha256=bad)]})
+
+
+def test_an_accepted_warning_needs_a_reason() -> None:
+    accepted = {"check": "dc_float", "reason": " ", "date": "2026-11-03"}
+    with pytest.raises(ValidationError):
+        Substation.model_validate(substation_dict() | {"checks": {"accepted": [accepted]}})

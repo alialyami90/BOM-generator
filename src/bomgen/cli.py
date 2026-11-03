@@ -9,16 +9,16 @@ from typing import Annotated, NoReturn
 import typer
 
 from bomgen import __version__
-from bomgen.build import build_substation, workbook_name
+from bomgen.build import build_substation, issue_refusal, record_issue, workbook_name
 from bomgen.checks import render_text
 from bomgen.engine.errors import EngineError
 from bomgen.engine.layout import with_layout
 from bomgen.io.errors import InputError
-from bomgen.io.loader import LoadedProject, LoadedSubstation, load_inputs
+from bomgen.io.loader import LoadedProject, LoadedSubstation, load_inputs, project_file_of
 from bomgen.io.schema import write_json_schemas
 from bomgen.library_store.cli import library_app
 from bomgen.project_store.cli import project_app
-from bomgen.revision import read_previous_issue, render_revisions
+from bomgen.revision import previous_from_record, read_previous_issue, render_revisions
 from bomgen.writer import WriterError
 
 app = typer.Typer(no_args_is_help=True, help="Substation SCADA BOM generator.")
@@ -64,6 +64,14 @@ def _load_or_exit(path: Path) -> LoadedProject | LoadedSubstation:
         return load_inputs(path)
     except InputError as error:
         _exit_on_input_error(error)
+
+
+def _project_file(loaded: LoadedProject | LoadedSubstation) -> Path:
+    if isinstance(loaded, LoadedProject):
+        return loaded.file
+    found = project_file_of(loaded.file)
+    assert found is not None  # it loaded through that project
+    return found
 
 
 @app.command()
@@ -141,6 +149,16 @@ def build(
     no_layout: Annotated[
         bool, typer.Option("--no-layout", help="Build the panel files as they are.")
     ] = False,
+    issue: Annotated[
+        str | None,
+        typer.Option(
+            "--issue",
+            help="Build as issued with this description: record the rev, the file's hash and "
+            "the names in substation.yaml (ADR 0036). Refused when the rev is already recorded "
+            "or a check fails.",
+            show_default=False,
+        ),
+    ] = None,
 ) -> None:
     """Build one BOM workbook per substation, print each file's path and its check report.
 
@@ -159,8 +177,20 @@ def build(
             previous = read_previous_issue(compare)
         except InputError as error:
             _exit_on_input_error(error)
+    if issue is not None and no_checks:
+        raise typer.BadParameter("an issue needs the check report", param_hint="--no-checks")
     failed = False
     for target in targets:
+        name = target.substation.substation.id
+        refusal = issue_refusal(target) if issue is not None else None
+        if refusal is not None:
+            typer.echo(f"{name}: {refusal}", err=True)
+            raise typer.Exit(1)
+        recorded = previous
+        if compare is None:
+            recorded, warning = previous_from_record(target)
+            if warning is not None:
+                typer.echo(f"{name}: {warning}", err=True)
         try:
             if not no_layout:
                 target, layout_report = with_layout(target)
@@ -173,7 +203,7 @@ def build(
                     if bad:
                         raise typer.Exit(1)
             outcome = build_substation(
-                target, out / workbook_name(target), previous=previous, checks=not no_checks
+                target, out / workbook_name(target), previous=recorded, checks=not no_checks
             )
         except (EngineError, WriterError) as error:
             typer.echo(f"{target.substation.substation.id}: {error}", err=True)
@@ -184,6 +214,12 @@ def build(
         if outcome.checks is not None:
             typer.echo(render_text(outcome.checks), nl=False)
             failed = failed or outcome.checks.failed
+        if issue is not None:
+            if outcome.failed:
+                typer.echo(f"{name}: not recorded as issued: a check failed", err=True)
+            else:
+                record = record_issue(_project_file(loaded), target, outcome.path, issue)
+                typer.echo(f"Recorded rev {record.rev} as issued ({record.file.as_posix()})")
     if failed:
         raise typer.Exit(1)
 

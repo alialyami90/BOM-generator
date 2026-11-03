@@ -7,6 +7,7 @@ build whose written value differs, as yellow highlighting on top of the panel fi
 them, first by description, then in order.
 """
 
+import hashlib
 import zipfile
 from collections import defaultdict
 from collections.abc import Callable, Iterator, Sequence
@@ -16,6 +17,7 @@ import openpyxl
 from openpyxl.utils.exceptions import InvalidFileException
 
 from bomgen.io.errors import InputError, Issue
+from bomgen.io.loader import LoadedSubstation
 from bomgen.models.bom import BomLine, BomTable, BuildResult, Column, QtySum
 from bomgen.models.project import SheetNames
 from bomgen.models.report import (
@@ -41,6 +43,35 @@ LOOSE_SHEET = SheetNames().loose_material
 
 Cells = dict[Column, str]
 _Key = Callable[[Cells, str], tuple[str, ...] | None]
+
+
+def file_sha256(path: Path) -> str:
+    """The SHA-256 of ``path``'s bytes, as an issue record keeps it (ADR 0036)."""
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1 << 16), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def previous_from_record(loaded: LoadedSubstation) -> tuple[PreviousIssue | None, str | None]:
+    """The latest recorded issue's workbook (ADR 0036), when its file is there and its
+    hash matches; otherwise no previous issue and the warning that says why."""
+    if not loaded.substation.issues:
+        return None, None
+    record = loaded.substation.issues[-1]
+    path = loaded.file.parent / record.file
+    shown = record.file.as_posix()
+    if not path.is_file():
+        reason = "is not there"
+    elif file_sha256(path) != record.sha256:
+        reason = "has changed since it was issued"
+    else:
+        return read_previous_issue(path), None
+    return None, (
+        f"Rev {record.rev}'s recorded file {shown} {reason}; "
+        "choose the previous issue to compare with."
+    )
 
 
 def read_previous_issue(path: Path) -> PreviousIssue:
