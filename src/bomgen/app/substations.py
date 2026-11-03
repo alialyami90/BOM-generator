@@ -187,7 +187,12 @@ def _page(
         },
         "constants": _rows(constants, defaults_c, substation.constants),
         "spares": _rows(spares, defaults_s, substation.spares),
-        "design_basis": _design_basis(substation),
+        "design_basis": _design_basis(substation)
+        | {  # the lists its vendor_list can name (plan M53)
+            "vendor_lists": [
+                {"key": v.key, "name": v.name} for v in (project.vendor_lists if project else [])
+            ]
+        },
         "loose_material": substation.loose_material,
         "equipment": [
             {**e.model_dump(mode="json"), "device": _device(library, e.part_id)}

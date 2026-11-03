@@ -485,3 +485,16 @@ def test_constants_take_voltage_from_design_basis_unless_set(tmp_path: Path) -> 
     (s1,) = loaded.substations
     assert s1.constants.dc_voltage_v == 110  # the design basis over the project default
     assert s1.constants.ac_voltage_v == 230  # the substation's own constants win
+
+
+def test_design_basis_vendor_list_must_name_a_project_list(tmp_path: Path) -> None:
+    project = default_project()
+    project["vendor_lists"] = [{"key": "avl", "name": "Client AVL"}]
+    substation = default_substation()
+    substation["design_basis"] = {"vendor_list": "avl2"}
+    issues = issues_for(write_project(tmp_path, project=project, substation=substation))
+    assert (
+        "substation.yaml",
+        "design_basis.vendor_list",
+        "no vendor list 'avl2' in the project (it has: avl)",
+    ) in where(issues)

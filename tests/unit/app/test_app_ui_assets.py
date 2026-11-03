@@ -988,3 +988,14 @@ def test_build_offers_the_summary_bom_and_its_csv() -> None:
     assert "Export summary as CSV" in build
     preview = (UI_DIR / "screens-preview.js").read_text(encoding="utf-8")
     assert "summaryView(d.summary)" in preview
+
+
+def test_parts_marks_parts_off_the_vendor_list() -> None:
+    """Plan M53: the row chip, the picker badge, the Design basis select, Checks labels."""
+    js = PARTS.read_text(encoding="utf-8")
+    assert "${r.on_list === false ? offList() : ''}" in js
+    assert "o.on_list === false ? App.badge('warn', 'Not on the list', 'warn')" in js
+    sub = (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
+    assert "vendor_list: [['design_basis', 'vendor_list'], 'choice']" in sub
+    verify = (UI_DIR / "screens-verify.js").read_text(encoding="utf-8")
+    assert "vendor_list: 'Parts on the vendor list'" in verify

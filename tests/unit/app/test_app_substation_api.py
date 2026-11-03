@@ -220,3 +220,13 @@ def test_design_basis_page_reports_sources(app: api.Api, project: Path) -> None:
     constants = {c["key"]: c for c in page["constants"]}
     assert (constants["dc_voltage_v"]["value"], constants["dc_voltage_v"]["default"]) == (110, 110)
     assert constants["ac_voltage_v"]["default"] == 220  # Reset goes back to the design basis
+
+
+def test_design_basis_page_lists_the_project_vendor_lists(app: api.Api, project: Path) -> None:
+    edit(
+        project,
+        "substations:",
+        "vendor_lists:\n  - { key: avl, name: Client AVL }\nsubstations:",
+    )
+    page = ok(app.open_substation(str(project), "gis01"))
+    assert page["design_basis"]["vendor_lists"] == [{"key": "avl", "name": "Client AVL"}]

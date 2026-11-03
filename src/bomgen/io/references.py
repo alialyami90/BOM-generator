@@ -254,10 +254,17 @@ def substation_issues(
 def project_issues(
     project: Project, source: YamlSource, substations: Sequence[tuple[Substation, YamlSource]]
 ) -> list[Issue]:
-    """Duplicate substation ids, and register entries naming a substation not listed."""
+    """Duplicate substation ids, register entries naming a substation not listed, and a
+    design basis naming no vendor list of the project."""
     issues: list[Issue] = []
     first: dict[str, str] = {}
+    lists = [v.key for v in project.vendor_lists]
     for substation, sub_source in substations:
+        basis = substation.design_basis
+        if basis is not None and basis.vendor_list is not None and basis.vendor_list not in lists:
+            known = ", ".join(lists) or "none"
+            message = f"no vendor list '{basis.vendor_list}' in the project (it has: {known})"
+            issues.append(_issue(sub_source, ("design_basis", "vendor_list"), message))
         sub_id = substation.substation.id
         if sub_id in first:
             message = f"duplicate substation id '{sub_id}' (first in {first[sub_id]})"

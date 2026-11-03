@@ -101,6 +101,8 @@
   /* ADR 0037: a figure the library assumes; the title says what it rests on. */
   const ASSUMED = { unit_power_w: 'Assumed power', inrush_a: 'Assumed inrush' };
   const assumedChips = (r) => (r.assumed || []).map((a) => `<span title="${esc(`The library assumes this: ${a.ref}. Override it here or confirm it in the library.`)}">${App.badge('warn', ASSUMED[a.field], 'warn')}</span>`).join('');
+  /* Plan M53: a part outside the design basis's vendor list builds, with this chip. */
+  const offList = () => { const n = sub().page().parts.vendor_list; return `<span title="${esc(`${n} does not list this part. It still builds; Checks warns.`)}">${App.badge('warn', 'Not on the vendor list', 'warn')}</span>`; };
   const libValue = (r, f) => (r.library[f] == null ? '' : String(r.library[f]));
   function strip(r) {
     if (!r.part_id) return `<div class="prow-strip"><span class="muted small">${r.sized ? 'Pick the switch to change its data.' : 'Pick a part to see its data.'}</span></div>`;
@@ -111,7 +113,7 @@
     if (sub().page().parts.rows.length >= 20 && !open) {  // 20 or more rows: one line per row; clicking it opens the strip
       const at = (f) => shown(`o.${r.index}.${f}`), n = fields.filter(([f]) => at(f) !== libValue(r, f)).length;
       const line = [FMT.height_u(at('height_u')), ...(r.library.supply_type ? [FMT.unit_power_w(at('unit_power_w')), at('voltage_v') ? `${at('voltage_v')} ${at('supply_type')}` : FMT.supply_type(at('supply_type'))] : [])].join(' · ');
-      return `<div class="prow-strip"><button class="link-btn small prow-summary" data-action="pp-expand" data-i="${r.index}" aria-label="Show the data of ${esc(r.label)}: ${esc(line)}${n ? `, ${plural(n, 'override')}` : ''}">${esc(line)}${n ? ` · <i class="ov-dot" aria-hidden="true"></i>${n} override${n === 1 ? '' : 's'}` : ''}</button></div>`;
+      return `<div class="prow-strip"><button class="link-btn small prow-summary" data-action="pp-expand" data-i="${r.index}" aria-label="Show the data of ${esc(r.label)}: ${esc(line)}${n ? `, ${plural(n, 'override')}` : ''}">${esc(line)}${n ? ` · <i class="ov-dot" aria-hidden="true"></i>${n} override${n === 1 ? '' : 's'}` : ''}</button>${r.on_list === false ? offList() : ''}</div>`;
     }
     let overridden = 0;
     const vals = fields.map(([f, label, kind]) => {
@@ -127,7 +129,7 @@
         resetLabel: `Reset ${label.toLowerCase()} to the library's ${esc(FMT[f](lib))}`, resetTitle: 'Reset to the library value', ...(PF.errors[key] ? { shown: v } : {}) });
     }).join('');
     const errs = fields.map(([f]) => err(`o.${r.index}.${f}`)).join('');
-    return `<div class="prow-strip">${vals}${assumedChips(r)}${overridden ? `<button class="btn btn--ghost btn--sm" data-action="pp-reset-all" data-i="${r.index}">Reset all</button>` : ''}${proposeButton(r)}</div>${errs ? `<div class="prow-err">${errs}</div>` : ''}`;
+    return `<div class="prow-strip">${vals}${assumedChips(r)}${r.on_list === false ? offList() : ''}${overridden ? `<button class="btn btn--ghost btn--sm" data-action="pp-reset-all" data-i="${r.index}">Reset all</button>` : ''}${proposeButton(r)}</div>${errs ? `<div class="prow-err">${errs}</div>` : ''}`;
   }
 
   /* ---------- one device row ---------- */
@@ -262,7 +264,7 @@
       list.innerHTML = items.map((o, i) => o.sizing
         ? `<div role="option" id="pk-${i}" data-v="" aria-selected="false"><span>The sizing picks the switch</span><span class="sub">The engine picks the L1 switch from the IED count.</span></div>`
         : `<div role="option" id="pk-${i}" data-v="${esc(o.part_id)}" aria-selected="false"><span class="mono">${esc(o.part_id)}${o.part_id === btn.value ? ` <span class="muted small">current</span>` : ''}</span>
-          <span class="sub">${esc([[o.make, o.model].filter(Boolean).join(' '), FMT.supply_type(o.supply_type), o.unit_power_w != null ? `${o.unit_power_w} W` : ''].filter((x) => x && x !== '—').join(' · '))}</span><span class="right">${App.verified(o.data_quality) || ''}</span></div>`).join('')
+          <span class="sub">${esc([[o.make, o.model].filter(Boolean).join(' '), FMT.supply_type(o.supply_type), o.unit_power_w != null ? `${o.unit_power_w} W` : ''].filter((x) => x && x !== '—').join(' · '))}</span><span class="right">${o.on_list === false ? App.badge('warn', 'Not on the list', 'warn') : ''}${App.verified(o.data_quality) || ''}</span></div>`).join('')
         || '<div class="pk-none muted small">No device matches. Check the spelling, or install a library that has it.</div>';
       hint.innerHTML = `${all.length > shown.length ? `Showing ${shown.length} of ${all.length}. Type to narrow the list. ` : ''}From ${esc(lib.name)} ${esc(lib.version)}. <kbd class="kbd">↑</kbd> <kbd class="kbd">↓</kbd> to move, <kbd class="kbd">Enter</kbd> to pick, <kbd class="kbd">Esc</kbd> to close.`;
       active = 0; markActive();

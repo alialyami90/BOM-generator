@@ -587,3 +587,63 @@ def test_tbd_document_number_warns() -> None:
         ("document_number_placeholder", CheckStatus.WARN, "s1-bom")
     ]
     assert "TBD" in items[0].message
+
+
+def test_part_outside_vendor_list_warns() -> None:
+    from bomgen.checks import vendor_list_checks
+    from bomgen.models.library import CatalogueChoice
+    from bomgen.models.project import VendorList
+
+    avl = VendorList.model_validate(
+        {"key": "avl", "name": "Client AVL", "makes": ["Siemens"], "brands": {"mcb": ["abb"]}}
+    )
+    lib = library(switch("L2", "L2"))
+    items = vendor_list_checks({"L2"}, CatalogueChoice(mcb="schneider"), lib, avl)
+    assert [(i.check, i.status, i.subject) for i in items] == [
+        ("vendor_list", CheckStatus.WARN, "L2"),
+        ("vendor_list", CheckStatus.WARN, "mcb"),
+    ]
+    assert all("Client AVL" in i.message for i in items)
+
+
+def test_obsolete_part_names_successor() -> None:
+    from bomgen.checks import part_state_checks
+
+    lib = library(
+        switch("L2", "L2"),
+        {**switch("OLD", "L2"), "state": "obsolete", "successor": "L2"},
+        {**switch("NEW", "L2"), "state": "draft"},
+    )
+    items = part_state_checks({"OLD", "NEW", "L2"}, lib)
+    assert [(i.subject, i.status) for i in items] == [
+        ("NEW", CheckStatus.WARN),
+        ("OLD", CheckStatus.WARN),
+    ]
+    assert "draft" in items[0].message
+    assert "replaced by L2" in items[1].message
+
+
+def test_check_report_warns_by_the_design_basis_vendor_list() -> None:
+    from dataclasses import replace
+    from pathlib import Path
+
+    from bomgen.checks import check_report
+    from bomgen.engine.pipeline import build
+    from bomgen.io.loader import load_substation
+    from bomgen.models.project import VendorList
+    from bomgen.models.substation import DesignBasis
+
+    example = Path(__file__).resolve().parents[3] / "examples" / "substations" / "gis01"
+    loaded = load_substation(example / "substation.yaml")
+    avl = VendorList(key="avl", name="Client AVL", makes=["Ruggedcom"], parts_allowed=[])
+    project = loaded.project.model_copy(update={"vendor_lists": [avl]})
+    substation = loaded.substation.model_copy(
+        update={"design_basis": DesignBasis(vendor_list="avl")}
+    )
+    with_list = replace(loaded, project=project, substation=substation)
+    items = check_report(with_list, build(with_list)).items
+    flagged = {i.subject for i in items if i.check == "vendor_list"}
+    assert "SEL-2488" in flagged  # a SEL part on a Ruggedcom-only list
+    assert "RST2228-L2" not in flagged
+    plain = check_report(loaded, build(loaded)).items
+    assert not [i for i in plain if i.check == "vendor_list"]

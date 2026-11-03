@@ -62,6 +62,10 @@ project uses [Semantic Versioning](https://semver.org/).
 - Settings › General has *Save as template…*: the design basis, brands, spares, panel look, parts
   and loose items go to `templates/` in the project folder, and New substation can start from it
   with no panels, documents or quantities (M55).
+- `project.yaml` can hold client vendor lists (allowed brand sets, makes and parts, banned parts),
+  and a design basis names one. Parts lists its parts first and marks a part off the list; Checks
+  warns about it, and about a draft or obsolete part with its successor. Nothing stops a build
+  (M53a, ADR 0031).
 - The panel editor's Options tab shows the AC and DC spare breaker ratings with the rule behind
   them; click one to set your own. Grounding busbars are checkboxes from the library's catalogue.
   *Alarm on branch MCB trip* can be switched per Parts row and per hand-written panel row, over the

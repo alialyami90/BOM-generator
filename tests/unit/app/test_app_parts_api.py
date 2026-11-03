@@ -296,6 +296,7 @@ def test_options_carry_what_the_device_picker_shows(project: Path, store: Librar
         "supply_type": "VDC",
         "unit_power_w": 77,
         "data_quality": None,  # a library file has no device records
+        "on_list": True,  # no vendor list (plan M53)
     }
 
 
@@ -481,3 +482,30 @@ def test_a_row_names_the_figures_its_part_assumes(project: Path, store: LibraryS
         {"field": "unit_power_w", "ref": "the example workbook"}
     ]
     assert row(found, "gps")["assumed"] == []
+
+
+def test_picker_groups_vendor_list_parts_first(
+    project: Path, substation: Path, store: LibraryStore
+) -> None:
+    edit(
+        project,
+        "substations:",
+        "vendor_lists:\n  - { key: avl, name: Client AVL, makes: [Siemens] }\nsubstations:",
+    )
+    with substation.open("a", encoding="utf-8") as f:
+        f.write("design_basis:\n  vendor_list: avl\n")
+    found = parts(project, store)
+
+    switches = found["options"]["network_switch"]
+    on = [o["on_list"] for o in switches]
+    assert on == sorted(on, reverse=True)  # the list's parts first
+    assert {o["make"] for o in switches if o["on_list"]} == {"Siemens"}
+    assert not row(found, "l1")["on_list"]  # Ruggedcom: the warning chip
+    assert found["vendor_list"] == "Client AVL"
+
+
+def test_without_a_vendor_list_every_part_is_on_it(project: Path, store: LibraryStore) -> None:
+    found = parts(project, store)
+    assert found["vendor_list"] is None
+    assert all(o["on_list"] for o in found["options"]["network_switch"])
+    assert row(found, "l1")["on_list"]

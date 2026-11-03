@@ -381,12 +381,20 @@ def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
     ]
     own = _parts(library) if library is not None else []
     records = _records(project, store)  # the data quality the Device picker shows
+    basis = substation.design_basis
+    avl = project.vendor_list(basis.vendor_list) if basis is not None else None
+
+    def on_list(part_id: str | None) -> bool:  # plan M53: off the list gets a warning chip
+        part = library.get(part_id) if library is not None and part_id else None
+        return avl is None or part is None or avl.allows(part.part_id, part.make)
+
     categories = {*ROLE_CATEGORY.values(), *ADD_CATEGORIES, Category.ACCESSORY}
     return page | {
         "parts": {
             "rows": [
                 _row(i, e, library, needs.get(e.id, {}), loose, host)
                 | {"tags": tags.get(e.id, []), "duplicate": duplicates.get(e.id)}
+                | {"on_list": on_list(e.part_id)}
                 for i, e in enumerate(substation.equipment)
             ],
             "options": {
@@ -400,8 +408,9 @@ def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
                         "data_quality": records[d.part_id].verified
                         if d.part_id in records
                         else None,
+                        "on_list": on_list(d.part_id),
                     }
-                    for d in own
+                    for d in sorted(own, key=lambda d: not on_list(d.part_id))  # the list's first
                     if d.category is c
                 ]
                 for c in sorted(categories)
@@ -413,5 +422,6 @@ def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
             "add_categories": [
                 {"category": c.value, "label": CATEGORY_LABEL[c]} for c in ADD_CATEGORIES
             ],
+            "vendor_list": avl.name if avl is not None else None,
         }
     }

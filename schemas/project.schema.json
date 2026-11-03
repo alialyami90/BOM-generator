@@ -389,6 +389,61 @@
       },
       "title": "Spares",
       "type": "object"
+    },
+    "VendorList": {
+      "additionalProperties": false,
+      "description": "A client's approved vendor list (ADR 0031, plan M53): a part, brand set or make\noutside it is a warning, never a build failure.",
+      "properties": {
+        "brands": {
+          "additionalProperties": {
+            "items": {
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Brands",
+          "type": "object"
+        },
+        "key": {
+          "pattern": "^[a-z0-9][a-z0-9_-]*$",
+          "title": "Key",
+          "type": "string"
+        },
+        "makes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Makes",
+          "type": "array"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "parts_allowed": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+            "type": "string"
+          },
+          "title": "Parts Allowed",
+          "type": "array"
+        },
+        "parts_banned": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+            "type": "string"
+          },
+          "title": "Parts Banned",
+          "type": "array"
+        }
+      },
+      "required": [
+        "key",
+        "name"
+      ],
+      "title": "VendorList",
+      "type": "object"
     }
   },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -417,6 +472,13 @@
         "type": "string"
       },
       "title": "Substations",
+      "type": "array"
+    },
+    "vendor_lists": {
+      "items": {
+        "$ref": "#/$defs/VendorList"
+      },
+      "title": "Vendor Lists",
       "type": "array"
     }
   },

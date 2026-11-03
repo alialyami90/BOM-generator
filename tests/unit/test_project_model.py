@@ -274,3 +274,38 @@ def test_summary_bom_is_left_out_unless_included() -> None:
     assert SheetNames().summary_bom == "Summary BOM"
     with pytest.raises(ValidationError):
         OutputSettings(include=["cover"])
+
+
+# --- vendor lists (ADR 0031, plan M53) ---
+
+
+def test_vendor_list_keys_unique() -> None:
+    data = project_dict()
+    data["vendor_lists"] = [{"key": "avl", "name": "Client AVL"}, {"key": "avl", "name": "Other"}]
+    with pytest.raises(ValidationError, match="duplicate vendor list key 'avl'"):
+        Project.model_validate(data)
+
+
+def test_vendor_list_brands_name_a_catalogue() -> None:
+    data = project_dict()
+    data["vendor_lists"] = [{"key": "avl", "name": "AVL", "brands": {"fans": ["abb"]}}]
+    with pytest.raises(ValidationError, match="fans"):
+        Project.model_validate(data)
+
+
+def test_vendor_list_allows_by_make_part_and_ban() -> None:
+    from bomgen.models.project import VendorList
+
+    avl = VendorList.model_validate(
+        {
+            "key": "avl",
+            "name": "AVL",
+            "makes": ["Siemens"],
+            "parts_allowed": ["SEL-2488"],
+            "parts_banned": ["RST2228-L1"],
+        }
+    )
+    assert avl.allows("X", "siemens")  # makes compare without case
+    assert not avl.allows("RST2228-L2", "Ruggedcom")
+    assert avl.allows("SEL-2488", "SEL")  # allowed by part
+    assert not avl.allows("RST2228-L1", "Siemens")  # banned wins
