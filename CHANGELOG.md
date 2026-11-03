@@ -82,6 +82,10 @@ project uses [Semantic Versioning](https://semver.org/).
 - A hand-written panel's Devices rows take a tag, type code and first number, with the generated
   tag as placeholder and a shared tag flagged on the row (M59). Moving, adding or removing a device
   there no longer writes the page's own fields into the panel file.
+- A Summary BOM sheet for procurement (M63, ADR 0035): every part totalled by ordering code across
+  the cabinets and the loose material, with where it is used. Turn it on with the switch on Build;
+  Preview shows it as a tab, and *Export summary as CSV* writes the same lines for a purchasing
+  system. Each quantity is a formula over the BOM sheets, so a hand edit in Excel carries through.
 
 ### Changed
 

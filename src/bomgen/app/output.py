@@ -7,7 +7,9 @@ refusals the Build page explains.
 
 from __future__ import annotations
 
+import csv
 import dataclasses
+import io
 import os
 from pathlib import Path
 from typing import Any
@@ -19,13 +21,16 @@ from bomgen.checks import check_report
 from bomgen.engine.errors import EngineError
 from bomgen.engine.network import unserved_links
 from bomgen.engine.pipeline import build as build_bom
+from bomgen.engine.summary import summarize
 from bomgen.io.errors import InputError
 from bomgen.io.loader import LoadedSubstation
 from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.store import LibraryStore
+from bomgen.models.bom import BuildResult
 from bomgen.models.project import _FILE_NAME_FORBIDDEN
 from bomgen.models.report import CheckStatus
 from bomgen.revision import read_previous_issue
+from bomgen.sheets.summary_sheet import HEADERS as SUMMARY_HEADERS
 from bomgen.sheets.workbook import build_workbook
 from bomgen.writer import WriterError
 
@@ -139,8 +144,49 @@ def build_target(project_file: Path, substation_id: str, store: LibraryStore) ->
         "library": {"name": library.name, "version": library.version},
         "revision": revision,
         "flags": flags,  # the engine checks' warnings, as Checks lists them
+        "include": sorted(loaded.substation.output.include) if loaded else [],  # ADR 0035
         "problems": problems_of(project_file, found, store) + _not_ready(found),
     }
+
+
+def summary_rows(loaded: LoadedSubstation, result: BuildResult) -> list[dict[str, Any]]:
+    """The Summary BOM's lines as the sheet prints them (ADR 0035)."""
+    tables: dict[str | None, str] = {p.panel_id: p.sheet_name for p in result.panels}
+    tables[None] = loaded.substation.output.sheet_names.loose_material
+    return [
+        {
+            "description": line.description,
+            "qty": line.qty,
+            "make": line.make,
+            "model": line.model,
+            "ordering_code": line.ordering_code,
+            "where_used": line.where_used(tables),
+        }
+        for line in summarize(result).lines
+    ]
+
+
+def export_summary_csv(
+    project_file: Path, substation_id: str, store: LibraryStore, path: Path
+) -> dict[str, Any]:
+    """Write the Summary BOM as CSV, UTF-8 with a byte-order mark so Excel reads it."""
+    found = resolve(project_file, substation_id, store)
+    if found.loaded is None:
+        raise OutputRefusedError("has_errors", f"{_errors(found)} block the export.")
+    try:
+        rows = summary_rows(found.loaded, build_bom(found.loaded))
+    except EngineError as exc:
+        raise OutputRefusedError("engine", f"The engine stopped: {exc}") from None
+    buffer = io.StringIO()
+    writer = csv.writer(buffer, lineterminator="\r\n")
+    writer.writerow(SUMMARY_HEADERS)
+    for number, row in enumerate(rows, start=1):
+        writer.writerow([number, *("" if value is None else value for value in row.values())])
+    try:
+        path.write_text(buffer.getvalue(), encoding="utf-8-sig", newline="")
+    except OSError as exc:
+        raise OutputRefusedError("io", f"The CSV was not written: {exc}") from None
+    return {"path": path, "lines": len(rows)}
 
 
 # Windows device names, refused with or without an extension

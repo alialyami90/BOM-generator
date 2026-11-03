@@ -117,6 +117,7 @@
           ${field('Save in', `<div class="row" style="flex-wrap:nowrap">${editable(input('b-dir', B.folder, { mono: true }))}<button class="btn btn--secondary" data-action="build-folder">Browse…</button></div>`)}
           <div class="field"><span class="label">Options</span><div class="stack"><label class="switch"><input type="checkbox" id="b-compare" data-action="build-compare" data-dirty="0" ${B.compare ? 'checked' : ''}>Highlight cells changed since the previous issue</label>
             <div class="row" style="margin-left:44px"><input class="input input--mono" id="b-previous" style="width:320px" placeholder="Choose the previous issue (.xlsx)" value="${esc(B.previous.split(/[\\/]/).pop())}" title="${esc(B.previous)}" readonly ${B.compare ? '' : 'disabled'}><button class="btn btn--secondary btn--sm" data-action="build-previous" ${B.compare ? '' : 'disabled'}>Browse…</button></div>
+            <label class="switch"><input type="checkbox" id="b-summary" data-action="build-summary" data-dirty="0" ${t.include.includes('summary_bom') ? 'checked' : ''}>Add a Summary BOM sheet: every part totalled by ordering code, with where it is used</label>
             <label class="switch"><input type="checkbox" id="b-open" data-action="build-open-toggle" data-dirty="0" ${B.open ? 'checked' : ''}>Open the workbook when it is written</label></div></div>
         </div>
         <div style="margin-top:var(--space-5)" class="row"><button class="btn btn--primary" data-action="build-run" ${blocked || busy ? 'disabled' : ''} ${busy ? 'aria-busy="true"' : ''}>${busy ? '<span class="spinner"></span>Building…' : icon('build') + 'Build workbook'}</button>${blocked ? `<span class="muted small">Unavailable until the ${plural(errors, 'error')} ${errors === 1 ? 'is' : 'are'} fixed.</span>` : ''}</div>
@@ -129,7 +130,7 @@
     const notPass = r.checks.items.filter((i) => i.status !== 'pass');
     const changes = r.revisions ? r.revisions.changes.length : null;
     return `${banner(r.checks.failed ? 'warn' : 'ok', `<b>Workbook written.</b><div class="small muted">${kb(r.size)} · ${plural(r.sheets.length, 'sheet')}${changes !== null ? ` · ${plural(changes, 'change')} marked since the previous issue` : ''}</div>`,
-      '<div class="row" style="flex-wrap:nowrap"><button class="btn btn--primary btn--sm" data-action="build-open">Open workbook</button><button class="btn btn--secondary btn--sm" data-action="build-show">Show in folder</button></div>')}
+      '<div class="row" style="flex-wrap:nowrap"><button class="btn btn--primary btn--sm" data-action="build-open">Open workbook</button><button class="btn btn--secondary btn--sm" data-action="build-show">Show in folder</button><button class="btn btn--ghost btn--sm" data-action="build-summary-csv">Export summary as CSV</button></div>')}
       <p class="mono small path-line">${breakable(r.path)}</p>
       <div class="stack" style="margin-top:var(--space-4)"><h3>Check report</h3>
         <p class="muted small">${plural(r.checks.items.length, 'check')}: ${r.checks.items.length - notPass.length} pass${notPass.length ? `, ${notPass.length} to read` : ''}. Saved next to the workbook as <span class="mono">.checks.json</span>.</p>
@@ -160,6 +161,18 @@
   ACTIONS['build-folder'] = () => { keep(); Bridge.call('choose_folder').then((f) => { if (f) { B.folder = f; App.render(); } }).catch((err) => toast(err.message, 'error')); };
   ACTIONS['build-compare'] = (el) => { keep(); B.compare = el.checked; App.render(); };
   ACTIONS['build-open-toggle'] = (el) => { B.open = el.checked; };
+  /* ADR 0035: the Summary BOM is a saved output setting, so the next build keeps the choice. */
+  ACTIONS['build-summary'] = (el) => {
+    keep();
+    const rest = cache.target.data.include.filter((k) => k !== 'summary_bom');
+    const value = el.checked ? [...rest, 'summary_bom'] : rest.length ? rest : null;
+    Bridge.call('set_substation_field', S.project.file, S.sub, ['output', 'include'], value)
+      .then(() => { reload('target'); App.preview.reload(); App.render(); })
+      .catch((err) => { el.checked = !el.checked; toast(err.message, 'error'); });
+  };
+  ACTIONS['build-summary-csv'] = () => Bridge.call('export_summary_csv', S.project.file, S.sub)
+    .then((r) => { if (r) toast(`Summary exported: ${r.lines} lines`); })
+    .catch((err) => toast(err.message, 'error'));
   ACTIONS['build-previous'] = () => { keep(); Bridge.call('choose_file', 'xlsx').then((f) => { if (f) { B.previous = f; App.render(); } }).catch((err) => toast(err.message, 'error')); };
   ACTIONS['build-open'] = () => Bridge.call('open_file', B.result.path).catch((err) => toast(err.message, 'error'));
   ACTIONS['build-show'] = () => Bridge.call('show_in_folder', B.result.path).catch((err) => toast(err.message, 'error'));

@@ -44,7 +44,13 @@ from bomgen.app.hand_panels import new_panel
 from bomgen.app.library_edit import EditRefusedError, LibraryEditor, PendingEdits
 from bomgen.app.loose import loose_page
 from bomgen.app.network import layout_page
-from bomgen.app.output import OutputRefusedError, build_file, build_target, checks_page
+from bomgen.app.output import (
+    OutputRefusedError,
+    build_file,
+    build_target,
+    checks_page,
+    export_summary_csv,
+)
 from bomgen.app.panel_page import PanelNotFoundError, panel_page, part_list
 from bomgen.app.parts import parts_page
 from bomgen.app.preview import preview_page
@@ -1765,6 +1771,24 @@ class Api:
                 file_name or None,
                 Path(compare) if compare else None,
                 replace,
+            )
+        self._list(result["path"])
+        return result
+
+    @endpoint
+    def export_summary_csv(
+        self, project_file: str, substation_id: str, file: str | None = None
+    ) -> dict[str, Any] | None:
+        """Write the Summary BOM as CSV at ``file``, asked for when not given; None when the
+        person cancels (ADR 0035)."""
+        chosen = file or self._dialog(
+            SAVE_DIALOG, "csv", save_filename=f"{substation_id}-summary-bom.csv"
+        )
+        if chosen is None:
+            return None
+        with self._substation(substation_id):
+            result = export_summary_csv(
+                Path(project_file), substation_id, self._library_store(), Path(chosen)
             )
         self._list(result["path"])
         return result

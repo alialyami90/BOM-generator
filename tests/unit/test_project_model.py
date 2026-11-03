@@ -265,3 +265,12 @@ def test_a_power_footnote_is_not_blank(bad: str) -> None:
 
 def test_layout_defaults_are_1000_and_200_mm() -> None:
     assert Defaults().layout == LayoutDefaults(waist_height_mm=1000, rack_start_mm=200)
+
+
+def test_summary_bom_is_left_out_unless_included() -> None:
+    # ADR 0035: the optional issue sheets are written only when included.
+    assert OutputSettings().include == set()
+    assert OutputSettings(include=["summary_bom"]).include == {"summary_bom"}
+    assert SheetNames().summary_bom == "Summary BOM"
+    with pytest.raises(ValidationError):
+        OutputSettings(include=["cover"])

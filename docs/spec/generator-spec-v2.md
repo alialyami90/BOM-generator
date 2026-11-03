@@ -35,6 +35,7 @@ The workbook holds hidden master BOMs that drive the calculations, visible issue
 | Power Consumption | Visible | DC and AC load per cabinet, 25% margin totals, plus hidden MCB/COR sizing columns | Reads master BOMs; feeds Heat Dissipation |
 | Heat Dissipation | Visible | W and BTU/h per powered device per cabinet | Reads Power Consumption; feeds Heat Calculations |
 | Heat Calculations | Visible | Fan airflow check for the 3 PSA cabinets, natural-convection check for the WS console | Reads Heat Dissipation totals |
+| Summary BOM | Visible, when included (ADR 0035) | Every part totalled by ordering code across the cabinets and loose material, with where it is used | Reads the BOM sheets' quantity cells |
 
 All printable sheets use A4 and page-break preview. Panel BOMs print portrait; the three calculation sheets print landscape.
 
@@ -325,7 +326,7 @@ The tool shall write a single Excel workbook in which every printed sheet has a 
 | --- | --- |
 | OUT-1 | Output is one .xlsx file (Office Open XML, no macros) that opens in Excel 2016 or later without a repair prompt. |
 | OUT-2 | File name is configurable; default `<project doc no.>_PSA_BOM_Rev<rev>.xlsx`. |
-| OUT-3 | Sheet order: one BOM sheet per cabinet in panel order, then Loose Material when the substation has any, then Nameplates when any panel has a nameplate row (ADR 0026), then Power Consumption, Heat Dissipation, Heat Calculations. Sheet names are configurable (`output.sheet_names`, including `loose_material` and `nameplates`). |
+| OUT-3 | Sheet order: one BOM sheet per cabinet in panel order, then Loose Material when the substation has any, then Nameplates when any panel has a nameplate row (ADR 0026), then Power Consumption, Heat Dissipation, Heat Calculations, then Summary BOM when `output.include` names it (ADR 0035). Sheet names are configurable (`output.sheet_names`, including `loose_material`, `nameplates` and `summary_bom`). |
 | OUT-4 | Each BOM sheet carries the HWIO column hidden, so no separate master sheets are needed. |
 | OUT-5 | Calculated cells are live Excel formulas, not pasted values: SR.NO, Power Consumption references to BOM cells, J = F × I, block totals × 1.25, summary sums, Heat Dissipation references and heat formulas, Heat Calculations airflow and ΔT. The workbook is set to recalculate fully on open. |
 | OUT-6 | Formatting follows the Formatting section: fonts, fills, borders, column widths, row heights, merges, number formats. |

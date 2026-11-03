@@ -978,3 +978,13 @@ def test_new_substation_starts_from_a_template_and_settings_saves_one() -> None:
     assert "templates.map((t) => [`template:${t.key}`, `Template: ${t.name}`])" in proj
     sub = (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
     assert 'data-action="save-template">Save as template…</button>' in sub
+
+
+def test_build_offers_the_summary_bom_and_its_csv() -> None:
+    # ADR 0035: the Summary BOM is opt-in on Build, saved to output.include; Preview shows it.
+    build = (UI_DIR / "screens-verify.js").read_text(encoding="utf-8")
+    assert "Add a Summary BOM sheet" in build
+    assert "['output', 'include']" in build
+    assert "Export summary as CSV" in build
+    preview = (UI_DIR / "screens-preview.js").read_text(encoding="utf-8")
+    assert "summaryView(d.summary)" in preview
