@@ -14,6 +14,7 @@ from pydantic import (
     NonNegativeInt,
     PositiveInt,
     StringConstraints,
+    field_validator,
     model_validator,
 )
 
@@ -97,11 +98,27 @@ class PortPlan(InputModel):
     serial_ports: NonNegativeInt = 0
 
 
+HousekeepingLoad = Literal["lamp", "fan", "thermostat", "heater"]
+
+
+class HousekeepingOptions(InputModel):
+    """The housekeeping kit's counts and branch ratings (ADR 0032); unset is the spec's."""
+
+    fans: NonNegativeInt | None = None
+    thermostats_forced: NonNegativeInt | None = None
+    thermostats_natural: NonNegativeInt | None = None
+    filters: NonNegativeInt | None = None
+    lamps: NonNegativeInt | None = None
+    heater: bool = False
+    hygrostat: bool = False
+    branch_ratings: dict[HousekeepingLoad, PositiveInt] = Field(default_factory=dict)
+
+
 class PanelOptions(InputModel):
     """Per-panel switches and overrides (spec: Inputs, 2. Panel definition)."""
 
     aux_socket_a: PositiveInt | None = None
-    smoke_detector: bool = True
+    smoke_detector: Literal["none", "terminals", "supplied"] = "terminals"  # ADR 0032
     change_over_diodes: AutoBool = "auto"
     ventilation: Ventilation = Ventilation.AUTO
     dc_spare_branches_per_feed: NonNegativeInt = 1
@@ -115,6 +132,15 @@ class PanelOptions(InputModel):
     grounding_busbars: list[str] = Field(
         default_factory=lambda: ["ac_safety_ground", "instrument_ground"]
     )
+    housekeeping: HousekeepingOptions = Field(default_factory=HousekeepingOptions)  # ADR 0032
+
+    @field_validator("smoke_detector", mode="before")
+    @classmethod
+    def _smoke_detector_bool(cls, value: object) -> object:
+        """Files written before ADR 0032 say true (the XSD strip) or false (none)."""
+        if isinstance(value, bool):
+            return "terminals" if value else "none"
+        return value
 
 
 class DocumentInfo(InputModel):

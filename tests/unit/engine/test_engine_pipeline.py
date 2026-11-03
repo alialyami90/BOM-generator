@@ -332,3 +332,27 @@ def test_spare_terminals_fraction_reaches_the_bom() -> None:
     (line,) = [x for x in result.panels[0].lines if x.tag == "PSA1-X3-AC"]
     assert line.qty == x3.auto_qty
     assert x3.rule.endswith(f"+10% spare = {x3.auto_qty}")
+
+
+def test_heater_in_ac_block() -> None:
+    """Plan M56 acceptance: a heater gets a group D row, a C branch sized from its watts
+    and its watts in the AC power total."""
+    heater = powered(
+        "HEATER", "component", supply_type="VAC", voltage_v=None, power_supplies=0, unit_power_w=400
+    )
+    cm = device("CM", "cable_manager", tag_pattern="Cable Manager")
+    lib = library(switch("L2", "L2"), cm, heater, heater={"part_id": "HEATER"})
+    plain = panel([{"part_id": "L2"}], id="p1")
+    warm = panel([{"part_id": "L2"}], id="p1", options={"housekeeping": {"heater": True}})
+    before, after = build(loaded(lib=lib, panels=(plain,))), build(loaded(lib=lib, panels=(warm,)))
+
+    lines = after.panels[0].lines
+    assert any(x.group is Group.D and x.part_id == "HEATER" for x in lines)
+    (branch,) = [b for b in after.housekeeping if b.load == "Heater"]
+    assert "from the part's watts" in branch.rule
+    assert before.power is not None
+    assert after.power is not None
+    assert before.power.cabinets[0].ac is None  # the switch is DC only
+    ac = after.power.cabinets[0].ac
+    assert ac is not None
+    assert [(x.qty, x.unit_w) for x in ac.lines] == [(1, 400)]

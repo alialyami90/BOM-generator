@@ -65,20 +65,25 @@ def line_up_check(checks: Sequence[ForcedVentCheck]) -> LineUpCheck:
     )
 
 
-def choose_fan(heat_w: float, library: Library, constants: DesignConstants) -> FanRef:
+def choose_fan(
+    heat_w: float,
+    library: Library,
+    constants: DesignConstants,
+    fan_count: int = FORCED_FANS,
+    thermostat_count: int = FORCED_THERMOSTATS,
+) -> FanRef:
     """The fan a forced cabinet gets: the catalogue fan, or the smallest of
     ``larger_fans`` whose pair moves the required airflow, counting the fans' and
     thermostats' own heat; the largest when none does. ``heat_w`` excludes the
     ventilation parts, as ``ventilation_heat_w`` gives it."""
     kit = library.catalogues.housekeeping
-    thermostats_w = FORCED_THERMOSTATS * (lookup(library, kit.thermostat.part_id).unit_power_w or 0)
+    thermostats_w = thermostat_count * (lookup(library, kit.thermostat.part_id).unit_power_w or 0)
     larger = [fan for fan in kit.larger_fans if fan.airflow_m3h > kit.fan.airflow_m3h]
     fans = [kit.fan, *sorted(larger, key=lambda fan: fan.airflow_m3h)]
     for fan in fans:
-        fans_w = FORCED_FANS * (lookup(library, fan.part_id).unit_power_w or 0)
-        check = forced_check(
-            "", heat_w + fans_w + thermostats_w, FORCED_FANS * fan.airflow_m3h, constants
-        )
+        fans_w = fan_count * (lookup(library, fan.part_id).unit_power_w or 0)
+        airflow = fan_count * fan.airflow_m3h
+        check = forced_check("", heat_w + fans_w + thermostats_w, airflow, constants)
         if check.passes:
             return fan
     return fans[-1]

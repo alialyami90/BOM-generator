@@ -457,6 +457,9 @@ class Housekeeping(InputModel):
     change_over_diodes: ChangeOverDiodes
     socket: SocketRef
     nameplate: HousekeepingRef | None = None  # one row per panel, its tagged units (ADR 0026)
+    heater: HousekeepingRef | None = None  # ADR 0032; a panel option adds it
+    hygrostat: HousekeepingRef | None = None
+    smoke_detector: HousekeepingRef | None = None  # when the panel supplies its detector
 
 
 class Catalogues(InputModel):

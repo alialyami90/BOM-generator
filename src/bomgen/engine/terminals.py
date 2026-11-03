@@ -11,13 +11,14 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 
 from bomgen.engine.errors import EngineError
+from bomgen.engine.housekeeping import KitCounts, kit_counts, kit_role
 from bomgen.engine.items import BomItem
 from bomgen.engine.network import port_plan
-from bomgen.engine.units import DeviceRow, lookup
+from bomgen.engine.units import DeviceRow, expand_devices, lookup
 from bomgen.models._base import template_fields
 from bomgen.models.bom import BomLine, Group, StripRow
 from bomgen.models.library import Library, TerminalRule
-from bomgen.models.panel import Panel, PanelKind, Ventilation
+from bomgen.models.panel import DeviceInstance, Panel, PanelKind, PanelOptions, Ventilation
 
 UT_16 = "UT-16"
 UT_MTD = "UT-2.5-MTD"
@@ -60,6 +61,7 @@ class StripInputs:
     annunciator_feeds: int
     xdin_default: int  # the project's HWIO total (spec: HWIO points)
     spare_fraction: float = 0.0  # spares.terminals_fraction (ADR 0033)
+    kit: KitCounts | None = None  # the housekeeping kit (ADR 0032); None: the spec's
 
 
 @dataclass(frozen=True)
@@ -95,15 +97,9 @@ def strip_table(
             f"2 x {inputs.ac_mcbs} AC MCBs = {2 * inputs.ac_mcbs}",
         ),
         _fixed("TBL", "Lighting Circuits", UT_MTD, LIGHTING, "lighting"),
-        _fixed(
-            "THF",
-            "Fan and Thermostat Circuits",
-            UT_MTD,
-            FAN_THERMOSTAT[inputs.ventilation],
-            THF_RULE[inputs.ventilation],
-        ),
+        _fixed("THF", "Fan and Thermostat Circuits", UT_MTD, *_thf(panel, inputs)),
     ]
-    if options.smoke_detector:
+    if options.smoke_detector != "none":
         strips.append(_fixed("XSD", "Smoke Detector", UT_MTD, SMOKE_DETECTOR, "smoke detector"))
     if options.aux_socket_a is not None:
         strips.append(_fixed("XPS", "Power Socket", UT_MTD, SOCKET, "power socket"))
@@ -142,6 +138,13 @@ def strip_table(
                 f"{ANNUNCIATOR} x {feeds} annunciator feeds = {ANNUNCIATOR * feeds}",
             )
         )
+    kit = inputs.kit
+    extra = [  # a heater or hygrostat brings its part's own strips (ADR 0032 item 5)
+        DeviceInstance(part_id=kit_role(panel, library, role).part_id)
+        for role in ("heater", "hygrostat")
+        if kit is not None and getattr(kit, role)
+    ]
+    rows = [*rows, *expand_devices(panel, library, extra)] if extra else rows
     strips += _device_strips(panel, library, rows, inputs.xdin_default)
     if options.inter_panel_terminals:
         strips.append(
@@ -171,6 +174,26 @@ def strip_table(
         )
         for strip in strips
     ]
+
+
+def _thf(panel: Panel, inputs: StripInputs) -> tuple[int, str]:
+    """The spec's THF for the ventilation, plus 3 per fan and 2 per thermostat more (or
+    fewer) than the spec's kit (ADR 0032 item 5)."""
+    base = FAN_THERMOSTAT[inputs.ventilation]
+    spec = kit_counts(panel.model_copy(update={"options": PanelOptions()}), inputs.ventilation)
+    kit = inputs.kit or spec
+    changes = [
+        (kit.fans - spec.fans, 3, "fan"),
+        (kit.thermostats - spec.thermostats, 2, "thermostat"),
+    ]
+    qty = max(base + sum(n * per for n, per, _ in changes), 0)
+    if not any(n for n, _, _ in changes):
+        return qty, THF_RULE[inputs.ventilation]
+    rule = f"{base} for {THF_RULE[inputs.ventilation]}"
+    for n, per, what in changes:
+        if n:
+            rule += f", {'+' if n > 0 else '-'}{per} x {abs(n)} {what}{'' if abs(n) == 1 else 's'}"
+    return qty, f"{rule} = {qty}"
 
 
 def terminal_strips(

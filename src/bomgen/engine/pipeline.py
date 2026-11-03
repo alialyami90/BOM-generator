@@ -14,7 +14,7 @@ from bomgen.engine.assemble import mark_revisions
 from bomgen.engine.dc_dist import dc_distribution, single_fed_loads
 from bomgen.engine.enclosure import enclosure_item
 from bomgen.engine.grounding import grounding
-from bomgen.engine.housekeeping import FORCED_FANS, housekeeping, needs_change_over
+from bomgen.engine.housekeeping import housekeeping, kit_counts, needs_change_over
 from bomgen.engine.items import BomItem, flatten
 from bomgen.engine.kits import annunciator_items, loose_table, main_equipment
 from bomgen.engine.nameplates import nameplate_item, nameplates
@@ -26,7 +26,7 @@ from bomgen.engine.thermal import choose_fan, choose_ventilation, heat_result, v
 from bomgen.engine.units import DeviceRow, expand_devices, lookup
 from bomgen.io.loader import LoadedSubstation
 from bomgen.models.bom import BuildResult, PanelBom, PanelStrips
-from bomgen.models.calc import BranchMcb, DcMains, SpareRatings
+from bomgen.models.calc import BranchMcb, DcMains, HousekeepingBranch, SpareRatings
 from bomgen.models.library import Category, FanRef, Library
 from bomgen.models.panel import Panel, Ventilation
 from bomgen.models.project import DesignConstants, LooseExtra, LooseMaterial
@@ -45,6 +45,7 @@ class _PanelDraft:
     mains: DcMains
     branch_mcbs: tuple[BranchMcb, ...]
     spares: SpareRatings
+    housekeeping: tuple[HousekeepingBranch, ...]
 
     @property
     def hwio(self) -> int:
@@ -77,7 +78,14 @@ def build(loaded: LoadedSubstation) -> BuildResult:
     loose = loose_table(material, substation, [(d.panel, d.rows) for d in drafts], library)
     power = power_consumption(panels, loose, library, loaded.constants)
     heat = heat_result(
-        [(d.panel, d.ventilation, FORCED_FANS * d.fan.airflow_m3h) for d in drafts],
+        [
+            (
+                d.panel,
+                d.ventilation,
+                kit_counts(d.panel, Ventilation.FORCED).fans * d.fan.airflow_m3h,
+            )
+            for d in drafts
+        ],
         power,
         loaded.constants,
     )
@@ -89,6 +97,7 @@ def build(loaded: LoadedSubstation) -> BuildResult:
         mains=tuple(d.mains for d in drafts),
         branch_mcbs=tuple(b for d in drafts for b in d.branch_mcbs),
         spares=tuple(d.spares for d in drafts),
+        housekeeping=tuple(b for d in drafts for b in d.housekeeping),
         strips=tuple(
             PanelStrips(
                 panel_id=d.panel.id,
@@ -121,8 +130,9 @@ def _draft(
     trial = [*equipment, *housekeeping(panel, library, Ventilation.NATURAL, change_over)]
     heat_w = ventilation_heat_w(flatten(trial), library)
     ventilation = choose_ventilation(panel, heat_w, constants)
-    fan = choose_fan(heat_w, library, constants)
-    ac = ac_distribution(panel, library, ventilation, rows, constants)
+    forced = kit_counts(panel, Ventilation.FORCED)
+    fan = choose_fan(heat_w, library, constants, forced.fans, forced.thermostats)
+    ac = ac_distribution(panel, library, ventilation, rows, constants, fan)
     fed = single_fed_loads(panel, rows, library, loose)
     dc = dc_distribution(panel, library, constants, rows, fed, change_over)
     annunciators = [
@@ -146,6 +156,7 @@ def _draft(
         annunciator_feeds=len(annunciators),
         xdin_default=0,
         spare_fraction=spare_fraction,
+        kit=kit_counts(panel, ventilation),
     )
     mains = DcMains(
         panel_id=panel.id,
@@ -164,7 +175,16 @@ def _draft(
         dc_rule=dc_spare_rule(dc.rule_spare_a, branches=used) if dc.rule_spare_a else "",
     )
     return _PanelDraft(
-        panel, rows, ventilation, fan, items, strip_inputs, mains, branch_mcbs, spares
+        panel,
+        rows,
+        ventilation,
+        fan,
+        items,
+        strip_inputs,
+        mains,
+        branch_mcbs,
+        spares,
+        tuple(ac.housekeeping),
     )
 
 

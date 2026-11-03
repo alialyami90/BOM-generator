@@ -416,7 +416,13 @@ port_plans:                            # per device, by part_id or tag; allocati
   # SEL-3555: { serial_ports: 6 }      # RTAC COM ports used (psa3)
 options:
   aux_socket_a: null                   # e.g. 10 in psa2
-  smoke_detector: true
+  smoke_detector: terminals            # none | terminals | supplied (ADR 0032; true = terminals)
+  housekeeping:                        # M56, ADR 0032; unset counts are the spec's kit
+    fans: null                         # forced; also thermostats_forced, thermostats_natural,
+    lamps: null                        #   filters
+    heater: false                      # adds the library's heater part, its C branch, its strips
+    hygrostat: false
+    branch_ratings: {}                 # lamp | fan | thermostat | heater -> A
   change_over_diodes: auto             # auto | true | false
   ventilation: auto                    # auto | forced | natural
   dc_spare_branches_per_feed: 3        # default 1
@@ -1100,7 +1106,13 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M53 — Vendor list and part lifecycle states.** *W5; ADRs 0031 and 0037.* Planned.
 - **M54 — Design-basis checks.** *W5.* Planned.
 - **M55 — Substation templates.** *W5; Q63.* Planned.
-- **M56 — Housekeeping editor.** *W3; ADR 0032.* Planned.
+- **M56 — Housekeeping editor.** *W3; ADR 0032.* In two PRs. **M56a** (in review): the engine.
+  `PanelOptions.housekeeping` (counts, heater, hygrostat, `branch_ratings`), `smoke_detector` none,
+  terminals or supplied, the library's heater, hygrostat and smoke detector roles; branches sized
+  from the part's AC watts, never below the spec's rating, each with its rule
+  (`BuildResult.housekeeping`); THF adds 3 per fan and 2 per thermostat beyond the spec's kit, and a
+  heater or hygrostat brings its part's own strips. **M56b** (planned): the panel editor's
+  *Cabinet housekeeping* section and the Library roles.
 - **M57 — Terminals tab.** *W3; ADR 0033.* In review. `spares.terminals_fraction` and
   `PanelOptions.terminal_block_overrides`; `BuildResult.strips` carries each strip's rule; the panel
   editor's Terminals tab replaces the read-only terminal overrides of Options.
