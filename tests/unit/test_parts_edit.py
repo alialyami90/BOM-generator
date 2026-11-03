@@ -2,6 +2,7 @@
 
 import shutil
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -359,3 +360,62 @@ def test_bom_text_fields_round_trip(project: Path) -> None:
 
     row = equipment(project)[GW]
     assert {name: getattr(row, name) for name in values} == values
+
+
+# --- The IED schedule (plan M60, ADR 0034) ---------------------------------------------
+
+
+def network(project: Path) -> dict[str, Any]:
+    return dict(read_yaml(substation_yaml(project)).data["network"])
+
+
+def test_first_ied_row_replaces_the_count(project: Path) -> None:
+    assert parts_edit.add_ied_row(
+        project, "gis01", {"bay": "E01", "name": "SEL-411L", "qty": 40}
+    ).written
+    net = network(project)
+    assert "ied_count" not in net
+    assert [dict(r) for r in net["ied_schedule"]] == [{"bay": "E01", "name": "SEL-411L", "qty": 40}]
+
+
+def test_ied_fields_round_trip(project: Path) -> None:
+    parts_edit.add_ied_row(project, "gis01", {"bay": "E01", "name": "P"})
+    assert parts_edit.set_ied_field(project, "gis01", 0, "ports", "2x1G RJ45").written
+    assert parts_edit.set_ied_field(project, "gis01", 0, "attachment", "single_b").written
+    assert parts_edit.set_ied_field(project, "gis01", 0, "notes", "relay room").written
+    assert parts_edit.set_ied_field(project, "gis01", 0, "notes", "").written
+    (row,) = load_project(project).substations[0].substation.network.ied_schedule
+    assert [(p.count, p.speed, p.media) for p in row.ports] == [(2, "1G", "RJ45")]
+    assert (row.attachment, row.notes) == ("single_b", None)
+
+
+def test_unreadable_ports_text_is_refused(project: Path) -> None:
+    parts_edit.add_ied_row(project, "gis01", {"bay": "E01", "name": "P"})
+    with pytest.raises(EditError, match="fast"):
+        parts_edit.set_ied_field(project, "gis01", 0, "ports", "fast")
+
+
+def test_removing_an_ied_row(project: Path) -> None:
+    parts_edit.add_ied_row(project, "gis01", {"bay": "E01", "name": "P"})
+    parts_edit.add_ied_row(project, "gis01", {"bay": "E02", "name": "Q"})
+    assert parts_edit.remove_ied_row(project, "gis01", 0).written
+    assert [r["bay"] for r in network(project)["ied_schedule"]] == ["E02"]
+
+
+def test_importing_a_schedule_replaces_the_rows_and_the_count(project: Path) -> None:
+    rows = [{"bay": "E01", "name": "P", "qty": 30}, {"bay": "E02", "name": "C", "qty": 8}]
+    dry = parts_edit.set_ied_schedule(project, "gis01", rows, dry_run=True)
+    assert dry.written
+    assert network(project)["ied_count"] == 40  # a dry run writes nothing
+    assert parts_edit.set_ied_schedule(project, "gis01", rows).written
+    net = network(project)
+    assert "ied_count" not in net
+    assert [r["bay"] for r in net["ied_schedule"]] == ["E01", "E02"]
+
+
+def test_a_schedule_no_l1_switch_serves_is_still_written(project: Path) -> None:
+    # The Parts Result card then names what does not fit (ADR 0034).
+    copper = {"bay": "E01", "name": "C", "ports": [{"speed": "1G", "media": "RJ45"}]}
+    result = parts_edit.add_ied_row(project, "gis01", copper)
+    assert result.written
+    assert result.preview is None

@@ -481,3 +481,67 @@ def test_a_row_names_the_figures_its_part_assumes(project: Path, store: LibraryS
         {"field": "unit_power_w", "ref": "the example workbook"}
     ]
     assert row(found, "gps")["assumed"] == []
+
+
+# --- The IED schedule (plan M60, ADR 0034) ---------------------------------------------
+
+
+def test_ied_rows_are_added_set_and_removed_from_the_parts_page(
+    app: api.Api, project: Path
+) -> None:
+    page = ok(app.add_ied_row(str(project), "gis01", {"bay": "E01", "name": "SEL-411L", "qty": 40}))
+    assert page["network"]["ied_count"] == 0
+    (first,) = page["parts"]["ieds"]
+    assert first["ports_text"] == "1x100M MM"
+    page = ok(app.set_ied_field(str(project), "gis01", 0, "ports", "2x100M MM"))
+    assert page["parts"]["ieds"][0]["ports_text"] == "2x100M MM"
+    data = ok(app.remove_ied_row(str(project), "gis01", 0))
+    assert data["row"]["bay"] == "E01"
+    assert data["page"]["parts"]["ieds"] == []
+
+
+def test_ied_field_with_unreadable_ports_is_refused(app: api.Api, project: Path) -> None:
+    ok(app.add_ied_row(str(project), "gis01", {"bay": "E01", "name": "P"}))
+    envelope: Any = app.set_ied_field(str(project), "gis01", 0, "ports", "fast")
+    assert envelope["ok"] is False
+    assert "fast" in envelope["error"]["message"]
+
+
+def test_ied_csv_import_is_reviewed_before_it_replaces_the_schedule(
+    app: api.Api, project: Path, tmp_path: Path
+) -> None:
+    csv = tmp_path / "ieds.csv"
+    csv.write_text(
+        "bay,name,qty,ports,attachment,lands_on\n"
+        "E01,SEL-411L,40,1x100M MM,dual,l1\n"
+        "E02,Meter,x,,dual,l1\n",
+        encoding="utf-8",
+    )
+    review = ok(app.import_ied_csv(str(project), "gis01", str(csv), True))
+    assert (len(review["rows"]), review["replaces"], review["can_import"]) == (1, 0, True)
+    assert [(p["row"], p["column"]) for p in review["problems"]] == [(3, "qty")]
+    assert ok(app.parts_page(str(project), "gis01"))["parts"]["ieds"] == []
+    page = ok(app.import_ied_csv(str(project), "gis01", str(csv), False))
+    assert [r["bay"] for r in page["parts"]["ieds"]] == ["E01"]
+
+
+def test_layout_page_gives_the_schedules_ports_per_side(app: api.Api, project: Path) -> None:
+    rows = [
+        {"bay": "E01", "name": "P", "qty": 30},
+        {"bay": "E02", "name": "M", "qty": 4, "attachment": "single_a"},
+    ]
+    for r in rows:
+        ok(app.add_ied_row(str(project), "gis01", r))
+    plan = ok(app.substation_layout(str(project), "gis01"))["plan"]
+    assert plan["ied_count"] == 34
+    assert plan["ied_ports"] == [
+        {"speed": "100M", "media": "MM", "lands_on": "l1", "a": 34, "b": 30}
+    ]
+
+
+def test_undo_puts_a_removed_ied_row_back_in_its_place(app: api.Api, project: Path) -> None:
+    for bay in ("E01", "E02", "E03"):
+        ok(app.add_ied_row(str(project), "gis01", {"bay": bay, "name": "P"}))
+    data = ok(app.remove_ied_row(str(project), "gis01", 1))
+    page = ok(app.add_ied_row(str(project), "gis01", data["row"], 1))
+    assert [r["bay"] for r in page["parts"]["ieds"]] == ["E01", "E02", "E03"]

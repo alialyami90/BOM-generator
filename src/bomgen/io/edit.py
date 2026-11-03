@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, Any
 
 from ruamel.yaml.comments import CommentedMap
 
+from bomgen.engine.errors import EngineError
 from bomgen.engine.layout import LayoutResult, layout_preview
 from bomgen.io.errors import InputError, Issue
 from bomgen.io.loader import LoadedProject, LoadedSubstation, load_project
@@ -143,7 +144,10 @@ def _preview(loaded: LoadedProject | None, substation_id: str | None) -> LayoutR
     target = _substation(loaded, substation_id)
     if target is None or not target.substation.equipment:
         return None
-    return layout_preview(target)
+    try:
+        return layout_preview(target)
+    except EngineError:  # e.g. a schedule no L1 switch serves: Parts says why (ADR 0034)
+        return None
 
 
 def _substation(loaded: LoadedProject, substation_id: str) -> LoadedSubstation | None:

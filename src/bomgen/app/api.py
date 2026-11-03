@@ -71,7 +71,7 @@ from bomgen.app.substations import (
 from bomgen.bundle.errors import LibraryPackageError, RefusalKind
 from bomgen.engine.errors import EngineError
 from bomgen.engine.layout import write_generated_panels
-from bomgen.io import edit, lifecycle, loose_edit, panel_edit, parts_edit
+from bomgen.io import edit, ied_csv, lifecycle, loose_edit, panel_edit, parts_edit
 from bomgen.io.edit import EditError, EditResult
 from bomgen.io.errors import InputError
 from bomgen.io.fields import (
@@ -1260,6 +1260,83 @@ class Api:
                 value=value,
             ),
         )
+
+    @endpoint
+    def add_ied_row(
+        self, project_file: str, substation_id: str, row: dict[str, Any], index: int | None = None
+    ) -> dict[str, Any]:
+        """Insert an IED schedule row (at the end when ``index`` is None, else back where
+        Undo found it); the first one replaces the IED count (ADR 0034)."""
+        return self._parts_write(
+            project_file,
+            substation_id,
+            functools.partial(parts_edit.add_ied_row, row=row, index=index),
+        )
+
+    @endpoint
+    def set_ied_field(
+        self, project_file: str, substation_id: str, index: int, field: str, value: Any
+    ) -> dict[str, Any]:
+        """Write one field of an IED row; ``ports`` takes text such as "2x100M MM"."""
+        return self._parts_write(
+            project_file,
+            substation_id,
+            functools.partial(parts_edit.set_ied_field, index=index, field=field, value=value),
+        )
+
+    @endpoint
+    def remove_ied_row(self, project_file: str, substation_id: str, index: int) -> dict[str, Any]:
+        """Remove an IED row; returns the Parts page and the row as written, for Undo."""
+        store = self._library_store()
+        with self._substation(substation_id):
+            file = resolve(Path(project_file), substation_id, store).file
+        rows = (read_yaml(file).data.get("network") or {}).get("ied_schedule") or []
+        if not 0 <= index < len(rows):
+            raise AppError("edit_refused", f"There is no IED row {index + 1}.")
+        row = json.loads(json.dumps(rows[index], default=str))
+        page = self._parts_write(
+            project_file, substation_id, functools.partial(parts_edit.remove_ied_row, index=index)
+        )
+        return {"page": page, "row": row}
+
+    @endpoint
+    def import_ied_csv(
+        self, project_file: str, substation_id: str, path: str, dry_run: bool
+    ) -> dict[str, Any]:
+        """A CSV of IED rows (``bay,name,qty,ports,attachment,lands_on[,notes]``). The dry run
+        returns its rows, the problem rows (skipped) and how many rows it replaces; else the
+        valid rows replace the schedule and the Parts page is returned (ADR 0034 item 5)."""
+        try:
+            text = Path(path).read_text(encoding="utf-8-sig")
+        except FileNotFoundError as exc:
+            raise AppError("not_found", f"{path} is no longer there.") from exc
+        except UnicodeDecodeError as exc:
+            raise AppError("invalid_edit", f"{Path(path).name} is not a UTF-8 CSV file.") from exc
+        rows, problems = ied_csv.read_schedule(text)
+        if not dry_run:
+            if not rows:
+                raise AppError("invalid_edit", "The file has no IED row that can be imported.")
+            return self._parts_write(
+                project_file,
+                substation_id,
+                functools.partial(parts_edit.set_ied_schedule, rows=rows),
+            )
+        store = self._library_store()
+        with self._substation(substation_id), _edit_refusals():
+            file = resolve(Path(project_file), substation_id, store).file
+            result = parts_edit.set_ied_schedule(
+                Path(project_file), substation_id, rows, store=store, dry_run=True
+            )
+        old = (read_yaml(file).data.get("network") or {}).get("ied_schedule") or []
+        caused = [f"{i.location}: {i.message}" if i.location else i.message for i in result.issues]
+        return {
+            "file": Path(path).name,
+            "rows": [ied_csv.shown(r) for r in rows],
+            "problems": problems,
+            "replaces": len(old),
+            "refused": [] if result.written else caused,
+            "can_import": bool(rows) and result.written,
+        }
 
     @endpoint
     def set_cable_manager(
