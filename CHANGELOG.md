@@ -59,6 +59,9 @@ project uses [Semantic Versioning](https://semver.org/).
 - Settings has a *Design basis* tab first: DC and AC voltage, time sync, Purdue scope, tag side
   letters and first numbers, and notes. Design constants say *From the design basis* on a voltage
   it sets (M52b).
+- Settings › General has *Save as template…*: the design basis, brands, spares, panel look, parts
+  and loose items go to `templates/` in the project folder, and New substation can start from it
+  with no panels, documents or quantities (M55).
 - The panel editor's Options tab shows the AC and DC spare breaker ratings with the rule behind
   them; click one to set your own. Grounding busbars are checkboxes from the library's catalogue.
   *Alarm on branch MCB trip* can be switched per Parts row and per hand-written panel row, over the

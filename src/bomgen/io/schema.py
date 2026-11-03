@@ -12,6 +12,7 @@ from bomgen.models.library import Library
 from bomgen.models.panel import Panel, PanelMirror
 from bomgen.models.project import Project
 from bomgen.models.substation import Substation
+from bomgen.models.template import SubstationTemplate
 
 JSON_SCHEMA_DIALECT = "https://json-schema.org/draft/2020-12/schema"
 
@@ -25,6 +26,7 @@ def json_schemas() -> dict[str, dict[str, Any]]:
         "library.schema.json": Library.model_json_schema(),
         "panel.schema.json": panel,
         "substation.schema.json": Substation.model_json_schema(),
+        "template.schema.json": SubstationTemplate.model_json_schema(),  # plan M55
     }
     return {name: {"$schema": JSON_SCHEMA_DIALECT, **schema} for name, schema in schemas.items()}
 

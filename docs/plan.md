@@ -304,6 +304,21 @@ design_basis:                          # optional (ADR 0031, M52); only sets def
   notes: "Client SCADA spec rev 2"
 ```
 
+**Templates** (plan M55) are `templates/<key>.yaml` in the project folder (Q63), schema
+`schemas/template.schema.json`:
+
+```yaml
+name: "GIS two-LAN standard"
+description: "RuggedCom L1/L2, SEL EXT"     # optional
+design_basis: { dc_voltage_v: 125 }         # as in substation.yaml, each key optional
+catalogue_choice: { mcb: schneider-acti9 }
+spares: { sfp_per_l1: 3 }
+panels: { cabinet_name: "PSA Cabinet - {n:03d}", tag_prefix: "PSA{n}", kind: network,
+          enclosure: { ... }, options: { inter_panel_terminals: 40 } }
+equipment: [ { id: l2, part_id: RST2228-L2, role: l2_switch, redundant: true } ]  # no qty
+loose_items: [ { part_id: ZENON-V12, tag: "SRV/OAS -HMI Software" } ]          # no fed_from
+```
+
 **Loading rules.** Substation `constants`, `spares` and `catalogue_choice` replace only the keys
 they write; the merged constants are checked again (`t_max_c > t_int_c`). The design basis's
 voltages sit between the project's constants and the substation's own (ADR 0031). Every
@@ -1120,16 +1135,20 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
   dialog has a *Cabinets and documents* step prefilled from the previous substation (Q62's recommended
   answer); `document_number_placeholder` warns on a TBD number. Checks reads the model, so it flags
   TBD only, not an ASSUMED comment; the register already shows assumed dates.
-- **M52 — Design basis model and tab.** *W5; ADR 0031.* Split. M52a (model, loader, tags) in review:
+- **M52 — Design basis model and tab.** *W5; ADR 0031.* Done (#338, #341). M52a (model, loader, tags):
   `substation.design_basis`; its voltages feed the constants under the substation's own, and
   `engine/tags.py` reads side letters and first numbers from its `tagging`. A hand-written panel's
-  tags and port-plan keys are written in the file, so they don't follow new side letters. M52b in
-  review: Settings › *Design basis* tab; the substation page carries `design_basis` (written values,
+  tags and port-plan keys are written in the file, so they don't follow new side letters. M52b:
+  Settings › *Design basis* tab; the substation page carries `design_basis` (written values,
   tagging in force, which voltages it feeds) instead of a separate `design_basis_page`. The spares
   policy and vendor list get their fields with M64 and M53.
 - **M53 — Vendor list and part lifecycle states.** *W5; ADRs 0031 and 0037.* Planned.
 - **M54 — Design-basis checks.** *W5.* Planned.
-- **M55 — Substation templates.** *W5; Q63.* Planned.
+- **M55 — Substation templates.** *W5; Q63.* In review. `templates/<key>.yaml` in the project folder
+  (`SubstationTemplate`): design basis, brands, spares, the generated panels' look, equipment parts
+  and roles (no `qty`, `tag`, `first_nn`) and loose items (no `fed_from`). New substation › Start
+  from offers them; Settings › General has *Save as template…*. A loose list's `host_panel` is not
+  checked while the substation has no panels, so a new one can carry its loose items.
 - **M56 — Housekeeping editor.** *W3; ADR 0032.* Done, in two PRs. **M56a** (#340): the engine.
   `PanelOptions.housekeeping` (counts, heater, hygrostat, `branch_ratings`), `smoke_detector` none,
   terminals or supplied, the library's heater, hygrostat and smoke detector roles; branches sized

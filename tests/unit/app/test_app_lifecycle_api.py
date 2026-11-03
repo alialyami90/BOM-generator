@@ -220,3 +220,34 @@ def test_create_substation_writes_the_setup(app: api.Api, project: Path) -> None
     entry = next(d for d in read_yaml(project).data["documents"] if d["key"] == "gis-02-bom")
     assert entry["doc_no"] == "X-001"
     assert str(entry["issue_date"]) == "2026-11-03"
+
+
+# --- substation templates (plan M55) ---
+
+
+def test_save_a_template_and_start_a_substation_from_it(app: api.Api, project: Path) -> None:
+    from bomgen.io.loader import load_project
+
+    saved = ok(app.save_template(str(project), "gis01", "GIS standard", "Two LANs"))
+    assert saved["templates"] == [
+        {"key": "gis-standard", "name": "GIS standard", "description": "Two LANs"}
+    ]
+    assert ok(app.list_templates(str(project))) == saved["templates"]
+    made = ok(app.create_substation(str(project), "GIS 02", None, None, "gis-standard"))
+    ok(app.set_substation_field(str(project), made["id"], ["network", "ied_count"], 40))
+    ok(app.generate_panels(str(project), made["id"]))
+    loaded = {s.substation.substation.id: s for s in load_project(project).substations}
+    new, old = loaded[made["id"]], loaded["gis01"]
+    generated = {"psa1", "psa2", "psa3"}
+
+    def parts(sub: Any) -> set[str]:
+        return {d.part_id for p in sub.panels if p.id in generated for d in p.devices}
+
+    assert parts(new) == parts(old)
+    assert new.substation.catalogue_choice == old.substation.catalogue_choice
+
+
+def test_a_taken_template_name_is_refused(app: api.Api, project: Path) -> None:
+    ok(app.save_template(str(project), "gis01", "GIS standard", None))
+    error = refused(app.save_template(str(project), "gis01", "GIS standard", None))
+    assert error["kind"] == "edit_refused"

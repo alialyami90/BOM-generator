@@ -79,6 +79,7 @@ def test_schema_command_writes_files(tmp_path: Path) -> None:
         "panel.schema.json",
         "project.schema.json",
         "substation.schema.json",
+        "template.schema.json",
     ]
     assert sorted(path.name for path in out_dir.iterdir()) == names
     for name in names:

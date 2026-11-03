@@ -756,6 +756,7 @@ class Api:
         name: str,
         copy_from: str | None,
         setup: Mapping[str, Any] | None = None,
+        from_template: str | None = None,
     ) -> str:
         if not name.strip():
             raise AppError("invalid_edit", "A substation needs a name.")
@@ -767,6 +768,7 @@ class Api:
                 name.strip(),
                 copy_from=copy_from,
                 setup=_dated([], setup or {}),
+                from_template=from_template,
                 store=self._library_store(),
             )
         _written(result)
@@ -797,10 +799,27 @@ class Api:
         name: str,
         copy_from: str | None = None,
         setup: dict[str, Any] | None = None,
+        from_template: str | None = None,
     ) -> dict[str, Any]:
         """Add a substation, blank or a copy of ``copy_from``; its folder comes from the name.
-        ``setup`` holds the values a blank one's setup step changed (plan M51)."""
-        return {"id": self._new_substation(Path(project_file), name, copy_from, setup)}
+        ``setup`` holds the values a blank one's setup step changed (plan M51);
+        ``from_template`` starts a blank one from a project template (plan M55)."""
+        made = self._new_substation(Path(project_file), name, copy_from, setup, from_template)
+        return {"id": made}
+
+    @endpoint
+    def list_templates(self, project_file: str) -> list[dict[str, Any]]:
+        """The project's substation templates (plan M55), by name."""
+        return _templates(Path(project_file))
+
+    @endpoint
+    def save_template(
+        self, project_file: str, substation_id: str, name: str, description: str | None = None
+    ) -> dict[str, Any]:
+        """Save the substation as a template in the project folder; returns the templates."""
+        with _edit_refusals():
+            file = lifecycle.save_template(Path(project_file), substation_id, name, description)
+        return {"file": file, "templates": _templates(Path(project_file))}
 
     @endpoint
     def rename_project(self, project_file: str, name: str) -> dict[str, Any]:
@@ -1845,6 +1864,13 @@ class Api:
             "library_note": result.library_note,
             "manifest": result.manifest,
         }
+
+
+def _templates(project_file: Path) -> list[dict[str, Any]]:
+    return [
+        {"key": t.key, "name": t.name, "description": t.description}
+        for t in lifecycle.list_templates(project_file)
+    ]
 
 
 def _previous_generated_panels(project_file: Path) -> tuple[str, Mapping[str, Any]] | None:

@@ -315,12 +315,14 @@
   };
   ACTIONS['new-substation'] = (el) => {
     const p = curProject(), from = el.dataset.from || '';
-    dialog({ title: from ? 'Create a substation from this one' : 'New substation', body: `<div class="stack">
-      ${field('Start from', select('ns-from', [['', 'A blank substation'], ...p.substations.map((s) => [s.id, `A copy of ${s.name}`])], from), 'A copy keeps the network, equipment, panels and settings, and gets its own documents in the register.')}
+    Bridge.call('list_templates', p.file).catch(() => []).then((templates) => {
+      dialog({ title: from ? 'Create a substation from this one' : 'New substation', body: `<div class="stack">
+      ${field('Start from', select('ns-from', [['', 'A blank substation'], ...templates.map((t) => [`template:${t.key}`, `Template: ${t.name}`]), ...p.substations.map((s) => [s.id, `A copy of ${s.name}`])], from), 'A template brings its design basis, brands, parts and loose items, but no panels or quantities. A copy keeps the network, equipment, panels and settings. Either gets its own documents in the register.')}
       ${field('Name', input('ns-name', '', { placeholder: 'e.g. GIS Substation 02' }), 'The folder is made from the name and stays the same if you rename it later.')}
       <div id="ns-err"></div></div>`,
-      actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="new-substation-do">Create substation</button>' });
-    nsButton();
+        actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="new-substation-do">Create substation</button>' });
+      nsButton();
+    });
   };
   /* A blank substation goes on to "Cabinets and documents" (plan M51); a copy is created at once. */
   const nsButton = () => { const b = $('.dialog [data-action^="new-substation-"]'), f = $('#ns-from'); if (b && f) { b.dataset.action = f.value ? 'new-substation-do' : 'new-substation-setup'; b.textContent = f.value ? 'Create substation' : 'Next'; } };
@@ -375,7 +377,8 @@
     const p = curProject(), name = $('#ns-name').value.trim();
     if (!name) { $('#ns-name').setAttribute('aria-invalid', 'true'); $('#ns-name').focus(); return; }
     el.disabled = true;
-    Bridge.call('create_substation', p.file, name, $('#ns-from').value || null).then((made) => {
+    const f = $('#ns-from').value, template = f.startsWith('template:') ? f.slice(9) : null;  // plan M55
+    Bridge.call('create_substation', p.file, name, template ? null : f || null, null, template).then((made) => {
       closeDialog(); settle(); toast(`${name} created`, 'check');
       return openProject(p.file).then(() => openSub(made.id));
     }).catch((e) => { el.disabled = false; err('ns-err', e); });

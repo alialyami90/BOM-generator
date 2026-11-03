@@ -15,11 +15,12 @@ from datetime import date
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from pydantic import ValidationError
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from ruamel.yaml.scalarstring import DoubleQuotedScalarString
 
 from bomgen.io.edit import EditError, EditResult, commit, project_problems, substation_file
-from bomgen.io.errors import Issue
+from bomgen.io.errors import InputError, Issue
 from bomgen.io.round_trip import (
     dump_text,
     edit_document,
@@ -30,6 +31,7 @@ from bomgen.io.round_trip import (
     write_atomic,
 )
 from bomgen.io.yaml_source import read_yaml
+from bomgen.models.template import SubstationTemplate
 from bomgen.project_store.backup import backup_project
 from bomgen.project_store.export import export_project, project_files
 from bomgen.project_store.manifest import PROJECT_SUFFIX
@@ -40,6 +42,8 @@ if TYPE_CHECKING:
 
 PROJECT_FILE = "project.yaml"
 SUBSTATIONS = "substations"
+TEMPLATES = "templates"  # substation templates, in the project folder (plan M55, Q63)
+_ROW_ONLY = ("qty", "tag", "first_nn")  # an equipment row's own values, not a template's
 _ID = re.compile(r"^[a-z0-9][a-z0-9_-]*$")  # PanelId: a folder and register-key prefix
 
 
@@ -49,6 +53,16 @@ class Created:
 
     project_file: Path
     issues: tuple[Issue, ...]
+
+
+@dataclass(frozen=True)
+class Template:
+    """A saved substation template: its file key, name and content."""
+
+    key: str
+    name: str
+    description: str | None
+    template: SubstationTemplate
 
 
 @dataclass(frozen=True)
@@ -103,13 +117,15 @@ def create_substation(
     copy_from: str | None = None,
     today: date | None = None,
     setup: Mapping[str, Any] | None = None,
+    from_template: str | None = None,
     store: LibraryStore | None = None,
 ) -> EditResult:
     """Add substation ``substation_id``: blank, or a copy of substation ``copy_from`` with
     its panels, settings and register documents. A blank substation gets three register
     documents (BOM, power, heat); ``setup`` gives the values of
     ``new_substation_seeds`` the engineer typed, and those not given keep the seed marked
-    ``ASSUMED``."""
+    ``ASSUMED``. ``from_template`` names a template of the project (plan M55) whose design
+    basis, brands, spares, panel look, equipment and loose items the blank one starts with."""
     if not _ID.fullmatch(substation_id):
         raise EditError(
             f"substation id '{substation_id}' must be lower case letters, digits, - or _"
@@ -121,7 +137,12 @@ def create_substation(
     assumed: set[tuple[int, str]] = set()
     if copy_from is None:
         texts, entries, assumed = _blank(
-            folder, substation_id, name, today or date.today(), setup or {}
+            folder,
+            substation_id,
+            name,
+            today or date.today(),
+            setup or {},
+            _template_data(project_file, from_template) if from_template else {},
         )
     else:
         texts, entries = _copy(project_file, project, copy_from, folder, substation_id, name)
@@ -175,6 +196,7 @@ def _blank(
     name: str,
     today: date,
     setup: Mapping[str, Any],
+    template: Mapping[str, Any],
 ) -> tuple[dict[Path, str | None], list[dict[str, Any]], set[tuple[int, str]]]:
     seeds = new_substation_seeds(substation_id, today=today)
     keys = {kind: f"{substation_id}-{kind}" for kind in ("bom", "power", "heat")}
@@ -201,6 +223,17 @@ def _blank(
             "options": {"inter_panel_terminals": 40},  # network cabinets (spec, XIP)
         },
     }
+    generated: dict[str, Any] = data["generated_panels"]  # type: ignore[assignment]
+    look = dict(template.get("panels") or {})
+    generated.update(look)
+    for key in ("design_basis", "catalogue_choice", "spares"):
+        if template.get(key):
+            data[key] = template[key]
+    if template.get("equipment"):
+        data["equipment"] = list(template["equipment"])
+    if template.get("loose_items"):
+        host = str(generated["id"]).format(n=1)  # the first generated panel
+        data["loose_material"] = {"host_panel": host, "items": list(template["loose_items"])}
     entries = []
     assumed: set[tuple[int, str]] = set()  # (entry, field) left at the seed
     for index, (kind, key) in enumerate(keys.items()):
@@ -211,10 +244,70 @@ def _blank(
         assumed |= {(index, field) for field in ("doc_no", "issue_date") if not given.get(field)}
     root = _map(data)
     for field in ("cabinet_number", "enclosure"):  # no source names them for a new substation
-        if not setup.get(field):
+        if not setup.get(field) and field not in look:
             set_comment(root["generated_panels"], field, "ASSUMED")
     texts: dict[Path, str | None] = {folder / "substation.yaml": dump_text(root)}
     return texts, entries, assumed
+
+
+def save_template(
+    project_file: Path, substation_id: str, name: str, description: str | None = None
+) -> Path:
+    """Write ``templates/<key>.yaml`` from a substation: its design basis, brands, spares, the
+    generated panels' look, the equipment's parts and roles, and the loose items; never its
+    panels, documents or quantities (plan M55)."""
+    if not name.strip():
+        raise EditError("a template needs a name")
+    file = project_file.parent / TEMPLATES / f"{project_id_for(name)}.yaml"
+    if file.exists():
+        raise EditError(f"a template named '{name.strip()}' already exists")
+    data = read_yaml(substation_file(project_file, substation_id)).data
+    template: dict[str, Any] = {"name": name.strip()}
+    if description and description.strip():
+        template["description"] = description.strip()
+    for key in ("design_basis", "catalogue_choice", "spares"):
+        if data.get(key):
+            template[key] = data[key]
+    panels = data.get("generated_panels") or {}
+    look = {
+        k: panels[k] for k in ("cabinet_name", "tag_prefix", "kind", "enclosure") if k in panels
+    }
+    if panels.get("options"):
+        look["options"] = panels["options"]
+    if look:
+        template["panels"] = look
+    template["equipment"] = [
+        {k: v for k, v in entry.items() if k not in _ROW_ONLY}
+        for entry in data.get("equipment") or []
+    ]
+    items = (data.get("loose_material") or {}).get("items") or []
+    template["loose_items"] = [{k: v for k, v in i.items() if k != "fed_from"} for i in items]
+    try:
+        SubstationTemplate.model_validate(template)
+    except ValidationError as error:
+        raise EditError(f"the substation does not make a valid template: {error}") from None
+    write_atomic(file, dump_text(_map(template)))
+    return file
+
+
+def list_templates(project_file: Path) -> list[Template]:
+    """The project's templates by name; a file that does not validate is left out."""
+    found = []
+    for file in sorted((project_file.parent / TEMPLATES).glob("*.yaml")):
+        try:
+            template = SubstationTemplate.model_validate(read_yaml(file).data)
+        except (ValidationError, InputError):
+            continue
+        found.append(Template(file.stem, template.name, template.description, template))
+    return sorted(found, key=lambda t: t.name.lower())
+
+
+def _template_data(project_file: Path, key: str) -> Mapping[str, Any]:
+    file = project_file.parent / TEMPLATES / f"{key}.yaml"
+    if not file.is_file():
+        raise EditError(f"there is no template '{key}' in this project")
+    data: Mapping[str, Any] = read_yaml(file).data
+    return data
 
 
 def _copy(
