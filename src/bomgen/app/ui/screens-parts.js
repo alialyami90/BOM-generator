@@ -102,11 +102,10 @@
         const ctl = f === 'supply_type' ? select(id, [['VDC', 'DC'], ['VAC', 'AC']], v, { cls: 'dv-input' })
           : f === 'load_type' ? select(id, [['CONTINUOUS', 'Continuous'], ['INTERMITTENT', 'Intermittent']], v, { cls: 'dv-input' })
           : input(id, v, { mono: true, num: true }).replace('class="input', 'class="dv-input input');
-        return `<span class="dv is-editing"><label class="dv-label" for="${id}">${label}</label>${ctl.replace('<input ', `<input data-dv="${key}" `).replace('<select ', `<select data-dv="${key}" `)}</span>`;
+        return App.derived(key, { editing: true, id, label, control: ctl.replace('<input ', `<input data-dv="${key}" `).replace('<select ', `<select data-dv="${key}" `) });
       }
-      const bad = !!PF.errors[key];
-      return `<span class="dv${ov ? ' is-ov' : ''}${bad ? ' is-bad' : ''}"><button class="dv-btn" data-action="pp-edit" data-key="${key}" aria-label="${label} ${esc(FMT[f](v))}${ov ? `, overridden; library ${esc(FMT[f](lib))}` : ''}${changed ? ', not saved' : ''}. Change">
-          <span class="dv-label">${changed ? '<span class="chg" aria-hidden="true"></span>' : ''}${label}</span><span class="dv-val">${ov ? '<i class="ov-dot" aria-hidden="true"></i>' : ''}${esc(bad ? v : FMT[f](v))}</span></button>${ov ? `<span class="dv-lib">Library ${esc(FMT[f](lib))}</span><button class="btn btn--ghost btn--icon btn--xs" data-action="pp-reset" data-key="${key}" aria-label="Reset ${label.toLowerCase()} to the library's ${esc(FMT[f](lib))}" title="Reset to the library value">${icon('undo')}</button>` : ''}</span>`;
+      return App.derived(key, { label, shown: FMT[f](v), auto: FMT[f](lib), autoLabel: 'Library', overridden: ov, changed, bad: !!PF.errors[key], edit: 'pp-edit', reset: 'pp-reset',
+        resetLabel: `Reset ${label.toLowerCase()} to the library's ${esc(FMT[f](lib))}`, resetTitle: 'Reset to the library value', ...(PF.errors[key] ? { shown: v } : {}) });
     }).join('');
     const errs = fields.map(([f]) => err(`o.${r.index}.${f}`)).join('');
     return `<div class="prow-strip">${vals}${overridden ? `<button class="btn btn--ghost btn--sm" data-action="pp-reset-all" data-i="${r.index}">Reset all</button>` : ''}</div>${errs ? `<div class="prow-err">${errs}</div>` : ''}`;
@@ -445,6 +444,7 @@
     }
     if (e.key === 'Escape' && (UI.menu >= 0 || UI.addOpen)) { UI.menu = -1; UI.addOpen = false; App.render(); }
   }, true);
+  document.addEventListener('change', (e) => { if (e.target.closest && e.target.closest('[data-dv]')) UI.editing = ''; }, true);  // before the form's render
   document.addEventListener('focusout', (e) => {
     const c = e.target.closest && e.target.closest('[data-dv]');
     if (c && UI.editing === c.dataset.dv) setTimeout(() => { if (UI.editing === c.dataset.dv) { UI.editing = ''; App.render(); } }, 0);

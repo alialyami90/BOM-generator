@@ -55,6 +55,16 @@
   const CHG = '<span class="chg" aria-hidden="true"></span><span class="sr-only">changed</span>';
   const changedField = (html) => html.replace(/^<div class="field">(<label[^>]*>)/, `<div class="field is-changed">$1${CHG}`);
   const changedCell = (on) => (on ? [' class="is-changed"', CHG] : ['', '']);
+  /* Derived value (components.md "Derived value", plan M48): the value shown, the muted rule it came from, a click to
+     change it, the override dot and the automatic value with a reset when overridden. The screen owns the edit state:
+     `editing` swaps in its `control`, `edit` and `reset` name its actions. */
+  const derived = (key, o) => {
+    const rule = o.rule ? `<span class="dv-rule">${esc(o.rule)}</span>` : '';
+    if (o.editing) return `<span class="dv is-editing"><label class="dv-label" for="${o.id}">${o.label}</label>${o.control}${rule}</span>`;
+    const ov = o.overridden, auto = o.autoLabel || 'Automatic';
+    return `<span class="dv${ov ? ' is-ov' : ''}${o.bad ? ' is-bad' : ''}"><button class="dv-btn" data-action="${o.edit}" data-key="${key}" aria-label="${o.label} ${esc(o.shown)}${ov ? `, overridden; ${auto.toLowerCase()} ${esc(o.auto)}` : ''}${o.changed ? ', not saved' : ''}. Change">
+        <span class="dv-label">${o.changed ? '<span class="chg" aria-hidden="true"></span>' : ''}${o.label}</span><span class="dv-val">${ov ? '<i class="ov-dot" aria-hidden="true"></i>' : ''}${esc(o.shown)}</span></button>${ov ? `<span class="dv-lib">${auto} ${esc(o.auto)}</span><button class="btn btn--ghost btn--icon btn--xs" data-action="${o.reset}" data-key="${key}" aria-label="${o.resetLabel || `Use the ${auto.toLowerCase()} ${esc(o.auto)}`}" title="${o.resetTitle || `Use ${auto.toLowerCase()}`}">${icon('undo')}</button>` : ''}${rule}</span>`;
+  };
   /* The save bar's invalid line: one control that moves focus to the first invalid field (components.md "Save bar"). */
   const fixLine = (action, bad) => `<button class="savebar-fix" data-action="${action}">${icon('error')}<span><b>${bad} ${bad === 1 ? 'field needs' : 'fields need'} fixing</b> before you can save.</span></button>`;
   const input = (id, value, o = {}) => `<input class="input ${o.mono ? 'input--mono' : ''} ${o.num ? 'input--num' : ''}" id="${id}" value="${esc(value)}" ${o.readonly ? 'readonly' : ''} ${o.invalid ? 'aria-invalid="true"' : ''} ${o.placeholder ? `placeholder="${esc(o.placeholder)}"` : ''} data-dirty="1">`;
@@ -445,5 +455,5 @@
     return D;
   }
 
-  window.App = { onDiskChange, $, $$, esc, S, ACTIONS, SCREENS, badge, verified, banner, tabs, field, input, select, pageHead, dialog, closeDialog, toast, go, render, setAppInfo, checkList, route, hasProject, hasSub, curProject, curSub, renderStatus, draftForm, changedField, changedCell, fixLine, whereToFix, fix, fixButtons };
+  window.App = { onDiskChange, $, $$, esc, S, ACTIONS, SCREENS, badge, verified, banner, tabs, field, input, select, pageHead, dialog, closeDialog, toast, go, render, setAppInfo, checkList, route, hasProject, hasSub, curProject, curSub, renderStatus, draftForm, derived, changedField, changedCell, fixLine, whereToFix, fix, fixButtons };
 })();

@@ -506,9 +506,11 @@ body.is-dragging-dev { user-select: none; }
 .ov-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-action); display: inline-block; }
 .prow-empty { min-height: var(--size-control-height); display: flex; align-items: center; }
 .dv-lib { font-size: 11.5px; color: var(--color-text-muted); }
+.dv-rule { flex-basis: 100%; font-size: 11.5px; color: var(--color-text-muted); }
 .dv.is-bad .dv-btn { border-color: var(--color-danger); }
 .dv.is-bad .dv-val { color: var(--color-danger-text); }
 .dv.is-editing { padding: 0 2px; }
+.dv:has(.dv-rule) { flex-wrap: wrap; }
 .dv-input { height: 24px; width: 84px; font-size: 12px; padding: 0 6px; }
 .btn--xs { width: 22px; height: 22px; padding: 0; }
 .btn--xs svg.i { width: 13px; height: 13px; }

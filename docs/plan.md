@@ -1065,7 +1065,9 @@ this section, `schemas/`, `docs/ui/editing.md`) take additive changes only: reba
 merge and keep the other workstream's lines. Releases follow the plan's phases (v0.4.0 after A and
 B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 
-- **M48 — Derived-value component and the override contract.** *Lead.* Planned.
+- **M48 — Derived-value component and the override contract.** *Lead.* In review. The main MCB is the
+  first derived value; the SFP, housekeeping and terminal rule texts land with M49, M56 and M57, which put
+  those values on screen.
 - **M49 — SFP quantities per switch.** *W4.* Planned.
 - **M50 — Enclosure and kind per generated panel, bottom entry.** *W3; spec sentence.* Planned.
 - **M51 — New-substation setup instead of ASSUMED seeds.** *W5; Q62.* Planned.
