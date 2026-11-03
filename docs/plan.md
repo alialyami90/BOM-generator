@@ -1498,6 +1498,16 @@ spec, or change the spec to 26.25?
 "Sheet 4" is read as the console panel (`kind: console`): the example's sheet 4 is the WS
 console, and the kind names the same cabinet in any project (A1, 2026-11-01).
 
+**Q62 — A new substation's seeds** (M51). *Open.* A blank substation gets the example's cabinet
+number pattern, cabinet name, tag prefix, enclosure (Rawabi fixed frame 2100 × 1000 × 800, top entry)
+and "TBD" document numbers, the uncertain ones marked ASSUMED. M51 adds a setup step to the New
+substation dialog. Prefill it with these values, or the previous substation's when there is one
+(recommended), or start it blank so every value is typed? Until Ali answers, M51 prefills.
+
+**Q63 — Where substation templates live** (M55). *Open.* In the project folder as
+`templates/*.yaml`, so they travel with the `.bomproj` (recommended), or in the app's home folder,
+shared by every project on the PC? Until Ali answers, M55 stores them in the project folder.
+
 **Q68 — "Exactly n panels"** (M62). *Answered 2026-11-03: offer At most n only.* The plan offers Automatic, Exactly n and At most n. The fill
 already opens the fewest panels, so Exactly n only differs from At most n when the devices fit in
 fewer: spread them evenly, keep the spare panels empty, or offer At most n only (recommended: the
