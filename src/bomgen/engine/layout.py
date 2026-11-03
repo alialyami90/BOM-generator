@@ -877,6 +877,7 @@ def _rows(panel: PanelFill, loaded: LoadedSubstation) -> list[DeviceInstance]:
                 hwio_points=entry.hwio_points,  # a row total, as on DeviceInstance
                 first_nn=start,
                 cable_manager=managed,
+                alarm_on_branch_mcb=entry.alarm_on_branch_mcb,
             )
         )
     return rows

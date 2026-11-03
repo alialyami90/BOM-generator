@@ -207,6 +207,16 @@ class DcMains(OutputModel):
     rule: str = ""  # how rule_rating_a was reached (plan M48)
 
 
+class SpareRatings(OutputModel):
+    """A panel's spare breaker ratings by the rules, before the panel's own (plan M58)."""
+
+    panel_id: str
+    ac_rule_a: PositiveInt
+    ac_rule: str
+    dc_rule_a: NonNegativeInt  # 0 when the panel has no DC loads
+    dc_rule: str = ""
+
+
 class HeatResult(OutputModel):
     dissipation: tuple[CabinetHeat, ...]
     cabinets: tuple[CabinetThermal, ...]

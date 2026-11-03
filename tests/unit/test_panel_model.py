@@ -287,3 +287,11 @@ def test_device_first_nn_defaults_to_none_and_must_be_positive() -> None:
     assert DeviceInstance.model_validate({"part_id": "X", "first_nn": 15}).first_nn == 15
     with pytest.raises(ValidationError, match="first_nn"):
         DeviceInstance.model_validate({"part_id": "X", "first_nn": 0})
+
+
+def test_spare_ratings_and_alarm_toggle_default_to_the_rules() -> None:
+    # Plan M58: unset, the spares follow the rules and the alarm follows the library.
+    options = PanelOptions()
+    assert (options.ac_spare_rating_a, options.dc_spare_rating_a) == (None, None)
+    assert DeviceInstance(part_id="FW").alarm_on_branch_mcb is None
+    assert DeviceInstance(part_id="FW", alarm_on_branch_mcb=False).alarm_on_branch_mcb is False

@@ -373,3 +373,19 @@ def test_a_qcod_names_its_single_fed_unit() -> None:
         ("PSA1-QCOD-1", "PSA1-MONITOR", None),
         ("PSA1-QCOD-2", None, None),  # the loose annunciator has no panel tag
     ]
+
+
+def test_dc_spare_rating_override() -> None:
+    # Plan M58: the panel may set the DC spares' rating; unset, the largest device branch.
+    circuits = build([{"part_id": "L2"}], options={"dc_spare_rating_a": 6})
+    assert table(circuits)[2][:2] == ("PSA1-Q1.2", "6A, 2P MCB For SPARE")
+    assert circuits.rule_spare_a == 2
+
+
+def test_alarm_toggle_adds_aux_contact_and_hwio() -> None:
+    # Plan M58: the row's alarm_on_branch_mcb wins over the library's either way. The DC
+    # HWIO counts the mains only (Columns of a panel BOM, HWIO), so it stays 2.
+    off = build([{"part_id": "L2"}, {"part_id": "FW", "alarm_on_branch_mcb": False}])
+    assert table(off)[-1] == (None, "DC Auxiliary Contacts (For MCB Q1, Q2)", 2, 2)
+    on = build([{"part_id": "L2", "alarm_on_branch_mcb": True}])
+    assert table(on)[-1] == (None, "DC Auxiliary Contacts (For MCB Q1, Q2, Q1.1, Q2.1)", 4, 2)
