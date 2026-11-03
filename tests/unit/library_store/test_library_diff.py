@@ -128,3 +128,10 @@ def test_parse_library_rejects_duplicate_part_ids() -> None:
 def test_parse_library_rejects_malformed_documents(data: bytes, message: str) -> None:
     with pytest.raises(LibraryPackageError, match=message):
         parse_library(data)
+
+
+def test_who_when_and_note_alone_are_not_a_change() -> None:
+    # ADR 0037 item 5: every save writes them on the parts it touched; they are not edits.
+    old = {"devices": [{"part_id": "A", "make": "X"}]}
+    new = {"devices": [{"part_id": "A", "make": "X", "changed_by": "ali", "note": "n"}]}
+    assert diff_libraries(old, new).is_empty

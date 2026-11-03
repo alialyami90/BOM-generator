@@ -212,6 +212,7 @@ for two of them a way to go back.
 | Enclosure and kind, *This panel only* (M50) | `generated_panels.enclosure_by_panel[n]`, `generated_panels.kind_by_panel[n]` | *Give this panel its own enclosure* writes a copy of the shared one (`set_enclosure` with `panel`), then fields edit it; *Use the shared enclosure* removes it. Kind's empty choice removes `kind_by_panel[n]`. `panel_page` returns `shared` (enclosure, kind, `own_enclosure`, `own_kind`). |
 | Options, *All generated panels* | `generated_panels.options` | Writer; validation by `PanelOptions` for each key. |
 | Spare ratings, grounding busbars (M58) | `options.ac_spare_rating_a`, `dc_spare_rating_a`, `grounding_busbars` | The spare ratings are derived values (`panel_page.derived.ac_spare_a`, `dc_spare_a`, with their rule). The busbars are one checkbox per entry of `panel_page.busbars` (the library's catalogue), written at once with `set_panel_option` or `set_panel_field`; *Use the shared busbars* removes a panel's own list. |
+| Terminals tab (M57, ADR 0033) | `options.terminal_overrides[strip]`, `options.terminal_block_overrides[strip]` (generated: `generated_panels.options` or `options_by_panel[n]`); `spares.terminals_fraction` on Project › Overview and Parts › Network fine tuning | `panel_page.terminals` gives each strip its `block`, `block_override` and `qty` as a derived value with its rule; `terminal_blocks` lists the catalogue's types. Draft keys `t.<all\|n>.<strip>` and `tb.<all\|n>.<strip>` (hand-written: `t.<strip>`); empty removes the override. A panel's own map replaces the shared one. |
 | Tag, type code, first number on a hand-written row (M59) | `devices[].tag`, `tag_type`, `first_nn` | Draft fields under each Devices row; `panel_page` gives each row its unit `tags` (the placeholder) and the `duplicate` sentence of the duplicate-tag check. |
 | Alarm on branch MCB trip (M58) | `equipment[].alarm_on_branch_mcb`, hand-written `devices[].alarm_on_branch_mcb` | Unset follows the library. Parts writes it only when it differs from the library (`parts_page` row `alarm: {on, default}`). A hand-written row offers Library / On / Off where the part has a branch MCB (`devices[].branch_mcb`, `alarm_default`). |
 | Options, *This panel only* | `generated_panels.options_by_panel[n]` | Writer that sets one key for panel `n`, and one that **removes** the key again (the "Own value, use the shared one" link). The reader must report, per option, whether panel `n` has its own value, and the shared value it overrides. |
@@ -374,8 +375,10 @@ Tabs and fields, mapped to the model's `DeviceType`:
 
 Lifecycle and sources (ADR 0037): `state`, `successor`, a `source` per sized field (`unit_power_w`,
 `inrush_a`, `height_u`, `input_v_max`, `ports`) and `changed_by`, `changed_on`, `note` are library fields
-(M67a). The editor shows them from M67b: state and successor on Identity, a Sources column on Electrical and
-Ports and mounting.
+(M67a). Applying a pending set, or importing a CSV, that changes a sized field without that field's source is
+refused with a line naming the part and the field; *assumed* is a source. Each applied set writes `changed_by`,
+`changed_on` and the set's note on the parts it touched (M67b). The editor shows them from M67c: state and
+successor on Identity, a Sources column on Electrical and Ports and mounting.
 
 - **In use:** a banner says how many equipment rows in the open substation use the device, and that an edit
   reaches a project only when it records the version you apply. *Delete…* names the rows that use it and

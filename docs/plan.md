@@ -203,6 +203,7 @@ defaults:                              # inherited key by key by every substatio
     dc_branches_per_feed: 3            # for generated panels; panel options keep their own
     ac_branches: 1
     rack_u_reserved: 10                # 42U enclosure → 32U usable
+    terminals_fraction: 0              # M57, ADR 0033; added to each wiring strip, rounded up
 substations:
   - substations/gis01/substation.yaml
 ```
@@ -436,6 +437,7 @@ options:
   dc_spare_rating_a: null              # M58; null = the largest device branch
   inter_panel_terminals: 40
   terminal_overrides: {}               # e.g. { X4-DC1: 32 } where the spec gives no rule
+  terminal_block_overrides: {}         # M57, ADR 0033; e.g. { X3-AC: UT-16 }
   grounding_busbars: [ac_safety_ground, instrument_ground]
 document: gis01-bom                    # register key: this panel's BOM header/footer
 revision:
@@ -1114,7 +1116,9 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M54 — Design-basis checks.** *W5.* Planned.
 - **M55 — Substation templates.** *W5; Q63.* Planned.
 - **M56 — Housekeeping editor.** *W3; ADR 0032.* Planned.
-- **M57 — Terminals tab.** *W3; ADR 0033.* Planned.
+- **M57 — Terminals tab.** *W3; ADR 0033.* In review. `spares.terminals_fraction` and
+  `PanelOptions.terminal_block_overrides`; `BuildResult.strips` carries each strip's rule; the panel
+  editor's Terminals tab replaces the read-only terminal overrides of Options.
 - **M58 — Grounding, spare breaker ratings, alarm on branch trip.** *W3; spec sentence.* Done (#332).
 - **M59 — BOM text per row on Parts.** *W4.* Done (#326). Equipment gains `tag`, `tag_type` and `first_nn`;
   Parts has a *BOM text* section per row. The hand-written panel editor's tag fields came from W3 in a
@@ -1132,8 +1136,10 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M67 — Record sources and lifecycle.** *W1; ADR 0037 (accepted).* In two PRs so that W5's M53
   gets the state field early. **M67a** (in review): `state`, `successor`, `sources` and the change
   fields on `DeviceType`, the successor reference check, `devices.csv` columns, the schema. **M67b**
-  (planned): the source rule on edits, the change fields on save, `min_app_version`, the shipped
-  library's sources, the assumed-power check, the device editor and Library badges.
+  (in review): a sized change needs its source, the save writes who, when and the note, a
+  library that uses these fields needs this app, every shipped part sourced (psa-devices 1.16.0,
+  Q69), the assumed power and inrush check. **M67c** (planned): the device editor's state,
+  successor and Sources column, the Library state badge and *Assumed values* filter, the Parts chip.
 - **M68 — Review queue and health.** *W1.* Planned.
 - **M69 — Propose from project.** *W1.* Planned.
 
@@ -1546,3 +1552,10 @@ already opens the fewest panels, so Exactly n only differs from At most n when t
 fewer: spread them evenly, keep the spare panels empty, or offer At most n only (recommended: the
 Panels board already opens a new pair when a device is dragged onto it). M62 ships At most n
 (`layout.max_panels`); there is no `panel_count`.
+
+**Q69 — Power figures no datasheet states** (M67, ADR 0037 item 6). *Open.* Seven original
+parts carry the spec's example workbook power, which their datasheet does not state (SEL-3355
+91 W against 189 W at most; SEL-2488, SEL-3555-RTAC, SEL-3555-GW, SEL-2240, NAP-F23, IPR-2903685).
+Source them as `assumed` naming the workbook (recommended: Parts and Checks then flag them until
+someone confirms the watts), as `datasheet` citing the workbook, or with a fifth source kind for
+the client's documents (amends ADR 0037)? Until Ali answers, M67b ships them as `assumed`.

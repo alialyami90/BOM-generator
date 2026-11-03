@@ -31,6 +31,7 @@
   const ENC = { make: 'text', model: 'text', ordering_code: 'text', h_mm: 'int', d_mm: 'int', w_mm: 'int', cable_entry: 'choice', 'base_frame.h_mm': 'int', 'base_frame.d_mm': 'int', 'base_frame.w_mm': 'int' };
   const OPT = { dc_spare_branches_per_feed: 'int', ac_spare_branches: 'int', ventilation: 'choice', change_over_diodes: 'choice', main_mcb_override_a: 'int', ac_spare_rating_a: 'int', dc_spare_rating_a: 'int', aux_socket_a: 'int', inter_panel_terminals: 'int', smoke_detector: 'bool' };
   const PORT = { count: 'int', speed: 'choice', media: 'choice', spare: 'int' };
+  const TERM = { t: 'terminal_overrides', tb: 'terminal_block_overrides' };  // t.<all|panel>.<strip>, tb.… (ADR 0033)
   function spec(key) {  // [path in substation.yaml, kind]
     const [k, a, ...r] = key.split('.');
     if (k === 'e') { const f = [a, ...r].join('.'); return ENC[f] ? [['generated_panels', 'enclosure', ...f.split('.')], ENC[f]] : null; }
@@ -39,6 +40,7 @@
     if (k === 'doc') return [['generated_panels', 'document'], 'choice'];
     if (k === 'g') return [['generated_panels', a], 'text'];  // a numbering pattern every generated panel shares
     if (k === 'o') return OPT[r[0]] ? [a === 'all' ? ['generated_panels', 'options', r[0]] : ['generated_panels', 'options_by_panel', Number(a), r[0]], OPT[r[0]]] : null;
+    if (k === 't' || k === 'tb') return [[...(a === 'all' ? ['generated_panels', 'options'] : ['generated_panels', 'options_by_panel', Number(a)]), TERM[k], r.join('.')], k === 't' ? 'int' : 'choice'];  // ADR 0033
     if (k === 'p' && r[0] === 'serial_ports') return [['equipment', Number(a), 'port_plan', 'serial_ports'], 'int'];
     if (k === 'p' && PORT[r[2]]) return [['equipment', Number(a), 'port_plan', r[0], Number(r[1]), r[2]], PORT[r[2]]];
     return null;
@@ -54,6 +56,10 @@
     if (k === 'o') {
       const o = p.options.find((x) => x.key === r[0]); if (!o) return '';
       return a === 'all' ? str(o.shared) : o.own && Number(a) === p.panel.number ? str(o.value) : '';
+    }
+    if (k === 't' || k === 'tb') {
+      const o = p.options.find((x) => x.key === TERM[k]), code = r.join('.');
+      return a === 'all' ? str(o.shared[code]) : o.own && Number(a) === p.panel.number ? str(o.value[code]) : '';
     }
     if (k === 'p') {
       const row = p.ports.find((x) => x.equipment === Number(a)), own = row && row.own;
@@ -83,6 +89,7 @@
     if (k === 'doc') return [['document'], 'choice'];
     if (k === 'o') return OPT[a] ? [['options', a], OPT[a]] : null;
     if (k === 'd') return DEV[r[0]] ? [['devices', Number(a), r[0]], DEV[r[0]]] : null;
+    if (k === 't' || k === 'tb') return [['options', TERM[k], [a, ...r].join('.')], k === 't' ? 'int' : 'choice'];
     return null;
   }
   function hSaved(key) {
@@ -93,6 +100,7 @@
     if (k === 'doc') return p.document;
     if (k === 'o') { const o = p.options.find((x) => x.key === a); return o && o.own ? str(o.value) : ''; }
     if (k === 'd') { const d = p.devices[Number(a)]; return d ? str(d[r[0]]) : ''; }
+    if (k === 't' || k === 'tb') { const o = p.options.find((x) => x.key === TERM[k]); return o && o.own ? str(o.value[[a, ...r].join('.')]) : ''; }
     return '';
   }
   let hPanel = '';  // the hand-written panel the draft belongs to
@@ -138,9 +146,9 @@
   });
 
   /* ---------- the page ---------- */
-  const TABS = [['enclosure', 'Enclosure'], ['devices', 'Devices'], ['ports', 'Port plans'], ['options', 'Options'], ['document', 'Document'], ['yaml', 'YAML']];
+  const TABS = [['enclosure', 'Enclosure'], ['devices', 'Devices'], ['ports', 'Port plans'], ['options', 'Options'], ['terminals', 'Terminals'], ['document', 'Document'], ['yaml', 'YAML']];
   const KIND = { network: 'Network', control: 'Control', console: 'Console' };
-  const TAB_OF = (key) => ({ c: 'enclosure', e: 'enclosure', eo: 'enclosure', kind: 'enclosure', g: 'enclosure', doc: 'document', o: 'options', p: 'ports', d: 'devices' })[key.split('.')[0]];
+  const TAB_OF = (key) => ({ c: 'enclosure', e: 'enclosure', eo: 'enclosure', kind: 'enclosure', g: 'enclosure', doc: 'document', o: 'options', t: 'terminals', tb: 'terminals', p: 'ports', d: 'devices' })[key.split('.')[0]];
   function tabMark(tab) {
     const bad = Object.keys(F.errors).filter((k) => TAB_OF(k) === tab).length, n = Object.keys(F.draft).filter((k) => TAB_OF(k) === tab).length;
     if (bad) return ` <span class="dot dot--bad" aria-hidden="true"></span><span class="sr-only">(${bad} to fix)</span>`;
@@ -165,15 +173,17 @@
       : banner('info', '<b>Hand-written panel.</b> The layout does not touch it. Everything on it is yours to set here.');
     const other = !gen && HD.dirty() && hPanel !== h.id ? `<div style="margin-bottom:var(--space-4)">${banner('warn', `<b>Unsaved changes on ${esc(hPanel)}.</b> Save or discard them before you change this panel.`, `<a class="btn btn--secondary btn--sm" href="#/panels/${esc(hPanel)}">Open ${esc(hPanel)}</a>`)}</div>` : '';
     const engine = p.engine_error ? `<div style="margin-bottom:var(--space-4)">${banner('warn', `<b>The engine stopped on this substation.</b> ${esc(p.engine_error)}`, '<a class="btn btn--secondary btn--sm" href="#/checks">Open checks</a>')}</div>` : '';
-    const body = gen ? { enclosure, devices, ports, options, document: docTab, yaml }[t](p)
+    const body = gen ? { enclosure, devices, ports, options, terminals, document: docTab, yaml }[t](p)
       : t === 'yaml' ? yaml(p) : mirror || other || t === 'ports' ? readOnly(p, t)
-        : { enclosure: handEnclosure, devices: handDevices, options: handOptions, document: docTab }[t](p);
+        : { enclosure: handEnclosure, devices: handDevices, options: handOptions, terminals, document: docTab }[t](p);
     const del = gen ? '' : `<button class="btn btn--danger" data-action="pe-delete">${icon('trash')}Delete panel…</button>`;
     return `<div class="page">${pageHead(esc(h.cabinet_name), meta, `<a class="btn btn--secondary" href="#/preview/${esc(h.id)}">${icon('preview')}Preview BOM</a>${del}`, crumbs(h.cabinet_name))}
       <div style="margin-bottom:var(--space-4)">${intro}</div>${other}${engine}
       ${tabs('panel', TABS.map(([k, x]) => [k, x, mirror ? '' : tabMark(k)]), t, 'Panel sections')}
       <div role="tabpanel" aria-labelledby="tab-panel-${t}" style="margin-top:var(--space-4)">${body}</div>${F.bar()}</div>`;
   };
+
+  App.panelEditor.reload = reload;  // Parts and Project › Overview write the spare terminals (M57)
 
   /* ---------- Enclosure: shared by every generated panel, or this panel's own (plan M50) ---------- */
   const KINDS = [['network', 'Network cabinet'], ['control', 'Control'], ['console', 'Console']];
@@ -303,6 +313,7 @@
     <tbody>${p.devices.map((d) => `<tr><td><span class="mono">${esc(d.part_id)}</span><span class="cell-sub">${esc(d.label)}</span></td><td class="num">${d.qty}</td><td>${esc(d.purpose || '')}</td></tr>`).join('')}</tbody></table></div>`
     : t === 'document' ? `<dl class="kv"><dt>Register document</dt><dd class="mono">${esc(p.document)}</dd></dl>`
     : t === 'enclosure' ? `<dl class="kv">${Object.entries(p.enclosure).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(typeof v === 'object' ? JSON.stringify(v) : v)}</dd>`).join('')}</dl>`
+    : t === 'terminals' ? stripTable(p, (s) => `${esc(s.block_override || s.block)}`, (s) => `<span class="mono">${s.qty.override ?? s.qty.value}</span><span class="cell-sub">${esc(s.qty.rule)}</span>`)
     : t === 'options' ? `<dl class="kv">${p.options.map((o) => `<dt>${esc(o.key)}</dt><dd>${esc(JSON.stringify(o.value))}</dd>`).join('')}</dl>`
     : '<p class="muted">Port plans of a hand-written panel are in its file.</p>');
 
@@ -383,14 +394,12 @@
         : !own && o.own ? `<span class="muted small">This panel has its own value, ${esc(shownValue(o.value, kind))}.</span>` : '';
       return edit(key, esc(label), ctl, [help || '', note].filter(Boolean).join(' '));
     }).join('');
-    const extra = p.options.filter((o) => o.key === 'terminal_overrides');
-    return `<div class="field" style="margin-bottom:var(--space-4)"><span class="label" id="pe-scope-l">Apply to</span><div class="segmented" role="radiogroup" aria-labelledby="pe-scope-l">
-        <label><input type="radio" name="pe-scope" value="all" data-action="pe-scope" ${own ? '' : 'checked'}><span>All generated panels</span></label><label><input type="radio" name="pe-scope" value="own" data-action="pe-scope" ${own ? 'checked' : ''}><span>This panel only</span></label></div>
-      <span class="help">${own ? `Values you set are kept for ${esc(p.panel.cabinet_name)} only and marked Own value.` : 'Values you set apply to every generated panel that has no value of its own.'}${owned.length ? ` This panel has ${plural(owned.length, 'own value')}.` : ''}</span></div>
-      <div class="form form--2">${rows}</div>${busbars(p, own)}
-      <div class="section" style="margin-top:var(--space-5)"><h3>Terminal overrides</h3><p class="lede">Shown as written. Change them in substation.yaml for now.</p>
-      <dl class="kv">${extra.map((o) => `<dt>Terminal overrides</dt><dd class="mono">${esc(Object.entries(o.value).map(([a, b]) => `${a}: ${b}`).join(', ') || 'None')}</dd>`).join('')}</dl></div>`;
+    return `${scopeField(own, `${own ? `Values you set are kept for ${esc(p.panel.cabinet_name)} only and marked Own value.` : 'Values you set apply to every generated panel that has no value of its own.'}${owned.length ? ` This panel has ${plural(owned.length, 'own value')}.` : ''}`)}
+      <div class="form form--2">${rows}</div>${busbars(p, own)}`;
   }
+  const scopeField = (own, help) => `<div class="field" style="margin-bottom:var(--space-4)"><span class="label" id="pe-scope-l">Apply to</span><div class="segmented" role="radiogroup" aria-labelledby="pe-scope-l">
+        <label><input type="radio" name="pe-scope" value="all" data-action="pe-scope" ${own ? '' : 'checked'}><span>All generated panels</span></label><label><input type="radio" name="pe-scope" value="own" data-action="pe-scope" ${own ? 'checked' : ''}><span>This panel only</span></label></div>
+      <span class="help">${help}</span></div>`;
   /* Grounding busbars (M58): one checkbox per busbar in the library's catalogue; a tick writes at once. */
   function busbars(p, own) {
     const o = p.options.find((x) => x.key === 'grounding_busbars'), on = own || !p.panel.generated ? o.value : o.shared;
@@ -418,6 +427,29 @@
   ACTIONS['pe-bus-shared'] = () => writeBusbars(null);
   ACTIONS['pe-scope'] = (el) => { S.optScope = el.value; App.render(); };
   ACTIONS['pe-use-shared'] = (el) => { PD.set(el.dataset.key, ''); S.dirty = true; App.render(); };
+
+  /* ---------- Terminals (ADR 0033): each strip's quantity from its rule, which the panel may override, and its block type ---------- */
+  const stripTable = (p, block, qty, changed = () => false) => `<div class="table-wrap"><table class="table"><thead><tr><th>Strip</th><th style="width:220px">Block type</th><th>Quantity</th></tr></thead>
+    <tbody>${p.terminals.map((s) => `<tr${changed(s) ? ' class="is-changed"' : ''}><td><span class="mono">${esc(s.code)}</span><span class="cell-sub">${esc(s.description)}</span></td><td>${block(s)}</td><td>${qty(s)}</td></tr>`).join('')}</tbody></table>
+    <div class="table-foot"><span>${plural(p.terminals.length, 'strip')}</span><span>The spare terminals of Project settings are added to the wiring strips. Strips a device brings stay as its part gives them.</span></div></div>`;
+  function stripQty(key, d, inherited) {
+    if (PE.dv === key) return App.derived(key, { editing: true, id: PFX + key, label: 'Quantity', rule: d.rule, control: num(key, '').replace('<input ', `<input data-pdv="${key}" `) });
+    const eff = str(F.shown(key)) || str(inherited);
+    return App.derived(key, { label: 'Quantity', shown: eff || String(d.value), auto: String(d.value), overridden: !!eff, changed: key in F.draft, bad: !!F.errors[key], rule: d.rule, edit: 'pe-dv-edit', reset: 'pe-dv-reset' });
+  }
+  function terminals(p) {
+    if (!p.terminals.length) return `<p class="muted">${p.engine_error ? 'The strips show once the engine runs on this substation.' : 'This panel has no terminal strips.'}</p>`;
+    const gen = p.panel.generated, own = gen && S.optScope === 'own', pre = gen ? `${own ? p.panel.number : 'all'}.` : '';
+    const ov = p.options.find((x) => x.key === 'terminal_overrides'), bo = p.options.find((x) => x.key === 'terminal_block_overrides');
+    const inherited = (o, code) => (own && !o.own ? str(o.shared[code]) : '');  // this panel's own list replaces the shared one
+    const head = gen ? scopeField(own, own ? `Overrides you set are kept for ${esc(p.panel.cabinet_name)} only; once it has its own, the shared ones no longer reach it.` : `Overrides you set apply to every generated panel that has none of its own.${ov.own || bo.own ? ' This panel has its own.' : ''}`)
+      : '<p class="muted" style="max-width:68ch;margin-bottom:var(--space-4)">Click a quantity to type your own. Empty it to use the rule.</p>';
+    return head + stripTable(p, (s) => { const key = `tb.${pre}${s.code}`, inh = inherited(bo, s.code);
+      return `<label class="sr-only" for="${PFX}${key}">Block type of ${esc(s.code)}</label>${choice(key, [['', inh ? `Shared: ${inh}` : `Rule: ${s.block}`], ...p.terminal_blocks]).replace('class="select', 'class="ctl select')}`;
+    }, (s) => { const key = `t.${pre}${s.code}`, bad = err(key) || err(`tb.${pre}${s.code}`);
+      return stripQty(key, s.qty, inherited(ov, s.code)) + (bad ? `<span class="err small">${icon('error')}<span>${esc(bad)}</span></span>` : '');
+    }, (s) => `t.${pre}${s.code}` in F.draft || `tb.${pre}${s.code}` in F.draft);
+  }
 
   /* ---------- Document ---------- */
   function docTab(p) {

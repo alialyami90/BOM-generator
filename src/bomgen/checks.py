@@ -50,6 +50,7 @@ def check_report(loaded: LoadedSubstation, result: BuildResult) -> CheckReport:
     if di is not None:
         items.append(di)
     items += part_number_checks(loaded.substation.equipment, loaded.library)
+    items += part_source_checks(loaded.substation.equipment, loaded.library)
     items += l2_link_checks(loaded.substation.equipment, loaded.library)
     items += external_ac_checks(result.loose, loaded.library)
     items += document_number_checks(loaded.documents)
@@ -437,6 +438,36 @@ def part_number_checks(equipment: Iterable[Equipment], library: Library) -> list
                 status=CheckStatus.WARN,
                 subject=entry.id,
                 message="no part number; the BOM prints the library model",
+            )
+        )
+    return items
+
+
+def part_source_checks(equipment: Iterable[Equipment], library: Library) -> list[CheckItem]:
+    """A warning per equipment entry whose part's power or inrush is assumed (ADR 0037)."""
+    items = []
+    for entry in equipment:
+        part = library.get(entry.part_id) if entry.part_id is not None else None
+        if part is None:
+            continue
+        assumed = [
+            (name, source.ref)
+            for name in ("unit_power_w", "inrush_a")
+            if (source := part.sources.get(name)) is not None and source.kind == "assumed"
+        ]
+        if not assumed:
+            continue
+        names = [name for name, _ref in assumed]
+        refs = "; ".join(dict.fromkeys(ref for _name, ref in assumed))
+        verb, them = ("is", "it") if len(names) == 1 else ("are", "them")
+        items.append(
+            CheckItem(
+                check="part_source",
+                status=CheckStatus.WARN,
+                subject=entry.id,
+                message=f"{part.part_id}: {' and '.join(names)} {verb} assumed ({refs}); "
+                f"confirm {them} against a datasheet or a measurement",
+                values={"part_id": part.part_id, "fields": ", ".join(names)},
             )
         )
     return items

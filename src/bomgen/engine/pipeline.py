@@ -21,11 +21,12 @@ from bomgen.engine.nameplates import nameplate_item, nameplates
 from bomgen.engine.network import accessories
 from bomgen.engine.power import power_consumption
 from bomgen.engine.rules_text import ac_spare_rule, dc_spare_rule, main_mcb_rule
-from bomgen.engine.terminals import StripInputs, terminal_strips
+from bomgen.engine.tags import DEFAULT_TAGGING
+from bomgen.engine.terminals import StripInputs, strip_table, terminal_strips
 from bomgen.engine.thermal import choose_fan, choose_ventilation, heat_result, ventilation_heat_w
 from bomgen.engine.units import DeviceRow, expand_devices, lookup
 from bomgen.io.loader import LoadedSubstation
-from bomgen.models.bom import BuildResult, PanelBom
+from bomgen.models.bom import BuildResult, PanelBom, PanelStrips
 from bomgen.models.calc import BranchMcb, DcMains, SpareRatings
 from bomgen.models.library import Category, FanRef, Library
 from bomgen.models.panel import Panel, Ventilation
@@ -61,8 +62,10 @@ def build(loaded: LoadedSubstation) -> BuildResult:
         *annunciator_items(loaded.substation.equipment, library, loaded.panels),
     ]
     substation = loaded.substation.substation.name
+    fraction = loaded.spares.terminals_fraction
     drafts = [
-        _draft(p, library, loaded.constants, loose_items, loaded.tagging) for p in loaded.panels
+        _draft(p, library, loaded.constants, loose_items, fraction, loaded.tagging)
+        for p in loaded.panels
     ]
     hwio_total = sum(draft.hwio for draft in drafts)
     plates = [nameplates(d.panel, d.rows) for d in drafts]
@@ -91,6 +94,17 @@ def build(loaded: LoadedSubstation) -> BuildResult:
         mains=tuple(d.mains for d in drafts),
         branch_mcbs=tuple(b for d in drafts for b in d.branch_mcbs),
         spares=tuple(d.spares for d in drafts),
+        strips=tuple(
+            PanelStrips(
+                panel_id=d.panel.id,
+                strips=tuple(
+                    strip_table(
+                        d.panel, library, d.rows, replace(d.strip_inputs, xdin_default=hwio_total)
+                    )
+                ),
+            )
+            for d in drafts
+        ),
         nameplates=tuple(p for p in plates if p.plates),
     )
 
@@ -100,7 +114,8 @@ def _draft(
     library: Library,
     constants: DesignConstants,
     loose: Sequence[LooseExtra],
-    tagging: Tagging,
+    spare_fraction: float = 0.0,
+    tagging: Tagging = DEFAULT_TAGGING,
 ) -> _PanelDraft:
     rows = expand_devices(panel, library, tagging=tagging)
     change_over = needs_change_over(panel, library, loose)
@@ -136,6 +151,7 @@ def _draft(
         change_over=change_over,
         annunciator_feeds=len(annunciators),
         xdin_default=0,
+        spare_fraction=spare_fraction,
     )
     mains = DcMains(
         panel_id=panel.id,

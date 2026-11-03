@@ -25,7 +25,7 @@ from bomgen.io.edit import panel_options
 from bomgen.io.loader import LoadedSubstation
 from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.store import LibraryStore
-from bomgen.models.bom import BomLine, Group, QtySum
+from bomgen.models.bom import BomLine, Group, QtySum, StripRow
 from bomgen.models.calc import DcMains, SpareRatings
 from bomgen.models.output import Derived
 from bomgen.models.panel import Panel, PanelOptions
@@ -162,11 +162,13 @@ def panel_page(
     lines: Sequence[BomLine] = []
     main: DcMains | None = None
     spares: SpareRatings | None = None
+    strips: Sequence[StripRow] = ()
     try:
         result = build(loaded)
         lines = next(b.lines for b in result.panels if b.panel_id == panel.id)
         main = next((m for m in result.mains if m.panel_id == panel.id), None)
         spares = next((s for s in result.spares if s.panel_id == panel.id), None)
+        strips = next((s.strips for s in result.strips if s.panel_id == panel.id), ())
     except EngineError as exc:
         page["engine_error"] = str(exc)
     tagging = _tagging(loaded, panel)
@@ -261,6 +263,18 @@ def panel_page(
             {"key": k, "tag": b.tag, "description": b.description}
             for k, b in loaded.library.catalogues.busbars.items()
         ],
+        # group G's strips, each quantity with its rule (ADR 0033)
+        "terminals": [
+            {
+                **s.model_dump(mode="json", include={"code", "description", "block", "spared"}),
+                "block_override": s.block_override,
+                "qty": Derived[int](value=s.auto_qty, rule=s.rule, override=s.override).model_dump(
+                    mode="json"
+                ),
+            }
+            for s in strips
+        ],
+        "terminal_blocks": list(loaded.library.catalogues.terminal_blocks),
         "ports": _ports(loaded, panel, units, lines) if board else [],
         "parts": [] if board else part_list(loaded),
         "yaml": file.read_text(encoding="utf-8"),

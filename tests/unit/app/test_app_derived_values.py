@@ -113,3 +113,50 @@ def test_turning_the_firewalls_alarm_off_drops_its_dc_aux_contacts(
     ok(app.set_substation_field(str(generated), "gis01", path, False))
     assert before[0] == 4
     assert _dc_aux(app, generated) == (2, before[1])
+
+
+def _strip(page: dict[str, Any], code: str) -> dict[str, Any]:
+    return next(s for s in page["terminals"] if s["code"] == code)
+
+
+def test_terminals_tab_carries_each_strip_with_its_rule(app: api.Api, project: Path) -> None:
+    """ADR 0033: each strip's quantity is a derived value with the rule that gave it."""
+    page = ok(app.panel_page(str(project), "gis01", "psa1"))
+
+    x3 = _strip(page, "X3-AC")
+    assert x3["qty"] == {
+        "value": 12,
+        "rule": "2 x 6 AC MCBs = 12",
+        "override": None,
+        "source": "engine",
+        "unit": None,
+    }
+    assert (x3["block"], x3["block_override"], x3["spared"]) == ("UT-2.5-MTD", None, True)
+    assert _strip(page, "X4-DC1")["qty"]["value"] == 32
+    assert "UT-16" in page["terminal_blocks"]
+
+
+def test_spare_terminals_and_overrides_keep_the_rule(app: api.Api, project: Path) -> None:
+    """Plan M57 acceptance on Cabinet 001: 10% spare makes X3-AC 14 and X4-DC1 36; an XIP
+    override of 60 keeps the rule shown; a block type override changes the strip's type."""
+    ok(app.set_project_field(str(project), ["defaults", "spares", "terminals_fraction"], 0.1))
+    options: list[str | int] = ["options", "terminal_overrides", "XIP"]
+    ok(app.set_panel_field(str(project), "gis01", "psa1", options, 60))
+    blocks: list[str | int] = ["options", "terminal_block_overrides", "X3-AC"]
+    page = ok(app.set_panel_field(str(project), "gis01", "psa1", blocks, "UT-16"))
+    page = ok(app.panel_page(str(project), "gis01", "psa1"))
+
+    assert _strip(page, "X3-AC")["qty"]["value"] == 14
+    assert _strip(page, "X3-AC")["block_override"] == "UT-16"
+    assert _strip(page, "X4-DC1")["qty"]["value"] == 36
+    xip = _strip(page, "XIP")["qty"]
+    assert (xip["override"], xip["source"]) == (60, "override")
+    assert xip["rule"].endswith("% spare = " + str(xip["value"]))
+
+
+def test_generated_panels_share_terminal_overrides(app: api.Api, generated: Path) -> None:
+    path: list[str | int] = ["generated_panels", "options", "terminal_overrides", "X3-AC"]
+    ok(app.set_substation_field(str(generated), "gis01", path, 20))
+
+    qty = _strip(ok(app.panel_page(str(generated), "gis01", "psa1")), "X3-AC")["qty"]
+    assert (qty["value"], qty["override"]) == (12, 20)
