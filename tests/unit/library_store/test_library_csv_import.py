@@ -433,6 +433,7 @@ def test_a_column_the_file_lacks_keeps_the_values_the_library_has(
 ) -> None:
     data = base.model_dump(mode="json")
     data["devices"][0]["inrush_a"] = 9.5
+    data["devices"][0]["sources"] = {"inrush_a": {"kind": "datasheet", "ref": "p. 4"}}
     save_local_version(store, "psa", Library.model_validate(data))
     columns = [c for c in TABLES["devices.csv"] if c != "inrush_a"]
     buffer = io.StringIO(newline="")

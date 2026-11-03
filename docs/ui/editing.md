@@ -374,8 +374,10 @@ Tabs and fields, mapped to the model's `DeviceType`:
 
 Lifecycle and sources (ADR 0037): `state`, `successor`, a `source` per sized field (`unit_power_w`,
 `inrush_a`, `height_u`, `input_v_max`, `ports`) and `changed_by`, `changed_on`, `note` are library fields
-(M67a). The editor shows them from M67b: state and successor on Identity, a Sources column on Electrical and
-Ports and mounting.
+(M67a). Applying a pending set, or importing a CSV, that changes a sized field without that field's source is
+refused with a line naming the part and the field; *assumed* is a source. Each applied set writes `changed_by`,
+`changed_on` and the set's note on the parts it touched (M67b). The editor shows them from M67c: state and
+successor on Identity, a Sources column on Electrical and Ports and mounting.
 
 - **In use:** a banner says how many equipment rows in the open substation use the device, and that an edit
   reaches a project only when it records the version you apply. *Delete…* names the rows that use it and

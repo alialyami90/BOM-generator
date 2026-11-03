@@ -14,19 +14,24 @@ is out of date.
 
 from __future__ import annotations
 
+import csv
+import datetime as dt
 import re
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 import yaml
+from ruamel.yaml.comments import CommentedMap
+from ruamel.yaml.scalarstring import DoubleQuotedScalarString
 
-from bomgen.io.round_trip import dump_text, load_text
+from bomgen.io.round_trip import dump_text, load_text, set_entry
 
 ROOT = Path(__file__).resolve().parents[2]
 EXAMPLE = ROOT / "examples" / "library.yaml"
 ADDITIONS = ROOT / "data" / "library" / "additions.yaml"
 DEVICE_DB = ROOT / "data" / "device-db"
+CONTRACTOR = DEVICE_DB / "contractor-2026-10-31"
 SHIPPED = ROOT / "data" / "library" / "psa-devices.yaml"
 
 DATASHEET_KEYS = ("inrush_a", "inrush_ms", "input_v_min", "input_v_max")
@@ -43,6 +48,11 @@ HEADER = """\
 """
 OVERRIDE = "override (data/library/additions.yaml)"
 
+# ADR 0037 item 6: the sized fields, and what each source cites when no document gives the value
+SOURCED = ("unit_power_w", "inrush_a", "height_u", "input_v_max", "ports")
+WORKBOOK = "the spec's example workbook"  # plan Q69
+CONTRACTOR_DELIVERY = "contractor delivery 2026-10-31"
+
 
 def datasheets(device_db: Path = DEVICE_DB) -> dict[str, dict[str, Any]]:
     """Each original part's datasheet figures and make that the library carries, by part id."""
@@ -58,9 +68,29 @@ def datasheets(device_db: Path = DEVICE_DB) -> dict[str, dict[str, Any]]:
     return found
 
 
-def build(example: str, figures: dict[str, dict[str, Any]], additions: str) -> str:
+class Evidence(NamedTuple):
+    """What the sources of the shipped parts' sized figures are read from (ADR 0037)."""
+
+    records: dict[str, dict[str, Any]]  # device-database records by part id
+    contractor: dict[tuple[str, str], dict[str, str]]  # sources.csv rows by (part id, column)
+
+
+def evidence(device_db: Path = DEVICE_DB, contractor: Path = CONTRACTOR) -> Evidence:
+    """The device database's records and the contractor's per-value sources."""
+    records = {
+        record["part_id"]: record
+        for path in sorted(device_db.glob("*.yaml"))
+        for record in yaml.safe_load(path.read_text(encoding="utf-8"))["records"]
+    }
+    with (contractor / "sources.csv").open(encoding="utf-8-sig", newline="") as file:
+        rows = {(row["part_id"], row["column"]): row for row in csv.DictReader(file)}
+    return Evidence(records, rows)
+
+
+def build(example: str, figures: dict[str, dict[str, Any]], additions: str, found: Evidence) -> str:
     """The shipped library's text: ``example`` with ``figures`` added to its originals and
-    the ``additions`` file's devices and MCB brand sets appended."""
+    the ``additions`` file's devices and MCB brand sets appended, each part with a source
+    for each sized figure it sets (from ``found``)."""
     data = load_text(example)
     for device in data["devices"]:
         if device.get("tier") is not None or device["part_id"] not in figures:
@@ -86,12 +116,120 @@ def build(example: str, figures: dict[str, dict[str, Any]], additions: str) -> s
     _override(data["catalogues"], overrides.get("catalogues") or {})
     data["devices"].extend(extra["devices"])
     data["catalogue_brands"]["mcb"].extend(extra["catalogue_brands"]["mcb"])
+    delivered = {device["part_id"] for device in extra["devices"]}
+    for device in data["devices"]:
+        sources = {
+            name: _source(device, name, device["part_id"] in delivered, found)
+            for name in SOURCED
+            if device.get(name) not in (None, [])
+        }
+        if sources:
+            set_entry(device, "sources", CommentedMap((k, _flow(v)) for k, v in sources.items()))
     text = re.sub(r"(\S) +# " + re.escape(OVERRIDE), r"\1  # " + OVERRIDE, dump_text(data))
     body = text.split("\n", 1)[1] if text.startswith("# yaml-language-server") else text
     lines = body.splitlines(keepends=True)
     while lines and lines[0].startswith("#"):
         lines.pop(0)  # the example's own header describes the example workbook
     return HEADER + "".join(lines)
+
+
+def _flow(source: dict[str, Any]) -> CommentedMap:
+    node = CommentedMap({**source, "ref": DoubleQuotedScalarString(source["ref"])})
+    node.fa.set_flow_style()
+    return node
+
+
+def _source(device: Any, name: str, delivered: bool, found: Evidence) -> dict[str, Any]:
+    """Where one sized figure of a shipped part comes from (ADR 0037 item 6): the
+    contractor's cited document, the device database's datasheet or alternative tier when it
+    gives the same value, else assumed with the reason."""
+    part_id: str = device["part_id"]
+    if delivered:
+        row = found.contractor.get((part_id, name))
+        if row is not None and _same(row["value"], device[name]):
+            return _contractor(row)
+        table = "device_ports.csv" if name == "ports" else "devices.csv"
+        return {"kind": "contractor", "ref": f"{CONTRACTOR_DELIVERY}, {table}"}
+    base, _, alternative = part_id.partition(".")
+    record = found.records.get(base)
+    if record is None:
+        return {"kind": "assumed", "ref": WORKBOOK}
+    if alternative:
+        return _tier_source(record, part_id, name)
+    return _datasheet_source(record, name, device[name])
+
+
+def _same(cell: str, value: Any) -> bool:
+    try:
+        return float(cell) == float(value)
+    except (TypeError, ValueError):
+        return False
+
+
+def _contractor(row: dict[str, str]) -> dict[str, Any]:
+    cited = " ".join(filter(None, (row["doc_title"], row["doc_number"])))
+    ref = f"{cited}, p. {row['page']}" if row["page"] else cited
+    source: dict[str, Any] = {
+        "kind": "contractor" if row["basis"] in ("datasheet", "computed") else "assumed",
+        "ref": ref if row["basis"] != "computed" else f"computed from {ref}",
+    }
+    if source["kind"] == "assumed":
+        source["ref"] = f"contractor: {row['note'] or row['basis']} ({ref})"
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", row["doc_date"]):
+        source["date"] = dt.date.fromisoformat(row["doc_date"])
+    return source
+
+
+def _tier_source(record: dict[str, Any], part_id: str, name: str) -> dict[str, Any]:
+    base = record["part_id"]
+    for alternative in record["alternatives"]:
+        for tier_name, tier in alternative["tiers"].items():
+            slug = re.sub(r"[^A-Z0-9]+", "-", alternative["make"].upper()).strip("-")
+            if f"{base}.{slug}-{tier_name.upper()}" != part_id:
+                continue
+            ref = tier.get("url") or (tier.get("sources") or record["sources"])[0]
+            if name == "unit_power_w":
+                basis = tier.get("power_basis")
+                if basis in ("datasheet_max", "datasheet_typical"):
+                    return {"kind": "datasheet", "ref": ref}
+                if basis == "computed":
+                    return {"kind": "datasheet", "ref": f"computed: {tier['power_note']}"}
+                return {"kind": "assumed", "ref": tier.get("power_note") or "no datasheet figure"}
+            if tier["verified"]:
+                return {"kind": "datasheet", "ref": ref}
+            return {"kind": "assumed", "ref": "alternative not checked against its datasheet"}
+    return {"kind": "assumed", "ref": WORKBOOK}
+
+
+def _datasheet_source(record: dict[str, Any], name: str, value: Any) -> dict[str, Any]:
+    datasheet = record["datasheet"]
+    if record["verified"] == "unverified":
+        return {"kind": "assumed", "ref": f"{WORKBOOK}; the device database could not verify it"}
+    if name == "unit_power_w":
+        power = datasheet.get("power") or {}
+        given = {power.get("typical_w"), power.get("max_w")} - {None}
+        if value in given:
+            return {"kind": "datasheet", "ref": _datasheet_ref(record)}
+        most = f"; the datasheet gives {power['max_w']} W at most" if power.get("max_w") else ""
+        return {"kind": "assumed", "ref": f"{WORKBOOK}{most}"}
+    if name == "ports":
+        mine = sorted((p["count"], p["speed"], p["kind"]) for p in value)
+        theirs = sorted(
+            (p["count"], p["speed"], p["kind"]) for p in datasheet.get("port_groups") or []
+        )
+        matches = mine == theirs
+    else:
+        matches = datasheet.get(name) == value
+    if matches:
+        return {"kind": "datasheet", "ref": _datasheet_ref(record)}
+    return {"kind": "assumed", "ref": WORKBOOK}
+
+
+def _datasheet_ref(record: dict[str, Any]) -> str:
+    datasheet = record["datasheet"]
+    return str(
+        datasheet.get("datasheet_url") or datasheet.get("product_url") or record["sources"][0]
+    )
 
 
 def _override(target: Any, changes: Any, owner: tuple[Any, str] | None = None) -> None:
@@ -122,6 +260,7 @@ def main() -> None:
         EXAMPLE.read_text(encoding="utf-8"),
         datasheets(),
         ADDITIONS.read_text(encoding="utf-8"),
+        evidence(),
     )
     SHIPPED.write_text(text, encoding="utf-8")
     print(f"wrote {SHIPPED.relative_to(ROOT)}")

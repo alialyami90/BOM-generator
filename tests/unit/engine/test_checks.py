@@ -17,6 +17,7 @@ from bomgen.checks import (
     l2_link_checks,
     library_check,
     part_number_checks,
+    part_source_checks,
     render_json,
     render_text,
     sfp_slot_checks,
@@ -410,6 +411,35 @@ def test_a_device_without_a_part_number_warns() -> None:
             status=CheckStatus.WARN,
             subject="a",
             message="no part number; the BOM prints the library model",
+        )
+    ]
+
+
+def test_assumed_power_warns() -> None:
+    # ADR 0037: a picked part whose power or inrush is assumed is named, with what it rests on.
+    assumed = {"kind": "assumed", "ref": "no datasheet figure"}
+    sourced = {"kind": "datasheet", "ref": "p. 12"}
+    lib = library(
+        powered(
+            "GUESS", "rtac", inrush_a=20, sources={"unit_power_w": assumed, "inrush_a": assumed}
+        ),
+        powered("READ", "rtac", sources={"unit_power_w": sourced}),
+        powered("BARE", "rtac"),
+    )
+    equipment = [
+        Equipment(id="a", part_id="GUESS", role="other"),
+        Equipment(id="b", part_id="READ", role="other"),
+        Equipment(id="c", part_id="BARE", role="other"),
+        Equipment(id="l1", role="l1_switch", redundant=True),
+    ]
+    assert part_source_checks(equipment, lib) == [
+        CheckItem(
+            check="part_source",
+            status=CheckStatus.WARN,
+            subject="a",
+            message="GUESS: unit_power_w and inrush_a are assumed (no datasheet figure); "
+            "confirm them against a datasheet or a measurement",
+            values={"part_id": "GUESS", "fields": "unit_power_w, inrush_a"},
         )
     ]
 

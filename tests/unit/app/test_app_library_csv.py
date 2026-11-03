@@ -114,6 +114,7 @@ def test_a_row_with_a_problem_is_listed_and_skipped(app: api.Api, tmp_path: Path
 def test_accepted_rows_go_to_the_pending_set(app: api.Api, tmp_path: Path) -> None:
     folder = Path(ok(app.export_library_csv(["devices", "catalogues"], str(tmp_path)))["folder"])
     edit_devices(folder, PART, "unit_power_w", "80")
+    edit_devices(folder, PART, "source_unit_power_w", "measured|bench test|")
     page = ok(app.add_library_csv(str(folder / "devices.csv")))
     assert page["count"] >= 1
     assert ok(app.library_device(PART))["device"]["unit_power_w"] == 80
