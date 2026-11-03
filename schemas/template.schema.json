@@ -1,0 +1,1167 @@
+{
+  "$defs": {
+    "BaseFrame": {
+      "additionalProperties": false,
+      "description": "The plinth under the enclosure (spec: Inputs, 2. Panel definition).",
+      "properties": {
+        "d_mm": {
+          "exclusiveMinimum": 0,
+          "title": "D Mm",
+          "type": "integer"
+        },
+        "h_mm": {
+          "exclusiveMinimum": 0,
+          "title": "H Mm",
+          "type": "integer"
+        },
+        "w_mm": {
+          "exclusiveMinimum": 0,
+          "title": "W Mm",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "h_mm",
+        "d_mm",
+        "w_mm"
+      ],
+      "title": "BaseFrame",
+      "type": "object"
+    },
+    "CableEntry": {
+      "enum": [
+        "top",
+        "side",
+        "bottom"
+      ],
+      "title": "CableEntry",
+      "type": "string"
+    },
+    "CatalogueChoice": {
+      "additionalProperties": false,
+      "description": "The brand set picked per catalogue; unset means ``default``.",
+      "properties": {
+        "aux_contact": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Aux Contact"
+        },
+        "busbars": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Busbars"
+        },
+        "housekeeping": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Housekeeping"
+        },
+        "mcb": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mcb"
+        },
+        "mcb_dc": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mcb Dc"
+        },
+        "terminal_blocks": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Terminal Blocks"
+        }
+      },
+      "title": "CatalogueChoice",
+      "type": "object"
+    },
+    "Category": {
+      "enum": [
+        "network_switch",
+        "firewall",
+        "gateway",
+        "patch_panel",
+        "gps_clock",
+        "rtac",
+        "io_chassis",
+        "workstation",
+        "monitor",
+        "peripheral",
+        "sfp",
+        "cable_manager",
+        "serial_cable",
+        "component",
+        "lamp",
+        "door_switch",
+        "fan",
+        "vent_filter",
+        "thermostat",
+        "relay",
+        "socket",
+        "change_over_diode",
+        "annunciator",
+        "software",
+        "cable",
+        "accessory",
+        "kvm",
+        "console"
+      ],
+      "title": "Category",
+      "type": "string"
+    },
+    "DesignBasis": {
+      "additionalProperties": false,
+      "description": "What the engineer states first (ADR 0031). It only sets defaults: a value the\nsubstation writes itself wins. Unset keys mean today's behaviour.",
+      "properties": {
+        "ac_voltage_v": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ac Voltage V"
+        },
+        "dc_voltage_v": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dc Voltage V"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Notes"
+        },
+        "purdue_scope": {
+          "anyOf": [
+            {
+              "items": {
+                "enum": [
+                  "L1",
+                  "L2",
+                  "EXT"
+                ],
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Purdue Scope"
+        },
+        "redundancy": {
+          "default": "duplicated_lan",
+          "title": "Redundancy",
+          "type": "string"
+        },
+        "spares_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SparesPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "tagging": {
+          "$ref": "#/$defs/Tagging"
+        },
+        "time_sync": {
+          "anyOf": [
+            {
+              "enum": [
+                "gps_clock",
+                "ptp_from_clock",
+                "none"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Time Sync"
+        },
+        "vendor_list": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Vendor List"
+        }
+      },
+      "title": "DesignBasis",
+      "type": "object"
+    },
+    "Enclosure": {
+      "additionalProperties": false,
+      "description": "The cabinet enclosure (spec: Inputs, 2. Panel definition).",
+      "properties": {
+        "base_frame": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BaseFrame"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "cable_entry": {
+          "$ref": "#/$defs/CableEntry"
+        },
+        "d_mm": {
+          "exclusiveMinimum": 0,
+          "title": "D Mm",
+          "type": "integer"
+        },
+        "h_mm": {
+          "exclusiveMinimum": 0,
+          "title": "H Mm",
+          "type": "integer"
+        },
+        "make": {
+          "title": "Make",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "ordering_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ordering Code"
+        },
+        "w_mm": {
+          "exclusiveMinimum": 0,
+          "title": "W Mm",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "make",
+        "model",
+        "h_mm",
+        "d_mm",
+        "w_mm",
+        "cable_entry"
+      ],
+      "title": "Enclosure",
+      "type": "object"
+    },
+    "Equipment": {
+      "additionalProperties": false,
+      "description": "A device the substation needs, before any panel exists (ADR 0013).",
+      "properties": {
+        "alarm_on_branch_mcb": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alarm On Branch Mcb"
+        },
+        "cable_manager": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cable Manager"
+        },
+        "first_nn": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "First Nn"
+        },
+        "hwio_points": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Hwio Points"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "l2_media": {
+          "$ref": "#/$defs/Media",
+          "default": "MM"
+        },
+        "l2_ports": {
+          "default": 0,
+          "minimum": 0,
+          "title": "L2 Ports",
+          "type": "integer"
+        },
+        "l2_speed": {
+          "$ref": "#/$defs/PortSpeed",
+          "default": "1G"
+        },
+        "ordering_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ordering Code"
+        },
+        "overrides": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PartOverrides"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "part_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Part Id"
+        },
+        "port_plan": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PortPlan"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "purpose": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Purpose"
+        },
+        "qty": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Qty",
+          "type": "integer"
+        },
+        "redundant": {
+          "default": false,
+          "title": "Redundant",
+          "type": "boolean"
+        },
+        "role": {
+          "$ref": "#/$defs/EquipmentRole"
+        },
+        "sfp": {
+          "items": {
+            "$ref": "#/$defs/SfpChoice"
+          },
+          "title": "Sfp",
+          "type": "array"
+        },
+        "side": {
+          "$ref": "#/$defs/Side",
+          "default": "none"
+        },
+        "tag": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tag"
+        },
+        "tag_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tag Type"
+        }
+      },
+      "required": [
+        "id",
+        "role"
+      ],
+      "title": "Equipment",
+      "type": "object"
+    },
+    "EquipmentRole": {
+      "enum": [
+        "l1_switch",
+        "l2_switch",
+        "ext_switch",
+        "firewall",
+        "fopp",
+        "other",
+        "time_server",
+        "operator_ws",
+        "engineering_ws",
+        "da_server",
+        "kvm",
+        "console",
+        "annunciator",
+        "time_accessory"
+      ],
+      "title": "EquipmentRole",
+      "type": "string"
+    },
+    "LoadType": {
+      "enum": [
+        "CONTINUOUS",
+        "INTERMITTENT"
+      ],
+      "title": "LoadType",
+      "type": "string"
+    },
+    "LooseExtra": {
+      "additionalProperties": false,
+      "description": "A loose-material row: a library part, optionally with kit children and a feeding\npanel, or a free-text item with only a description (ADR 0022).",
+      "properties": {
+        "children": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+            "type": "string"
+          },
+          "title": "Children",
+          "type": "array"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "fed_from": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fed From"
+        },
+        "part_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Part Id"
+        },
+        "qty": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "const": "1 Lot"
+            }
+          ],
+          "default": 1,
+          "title": "Qty"
+        },
+        "tag": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tag"
+        }
+      },
+      "title": "LooseExtra",
+      "type": "object"
+    },
+    "Media": {
+      "enum": [
+        "MM",
+        "SM",
+        "RJ45"
+      ],
+      "title": "Media",
+      "type": "string"
+    },
+    "PanelKind": {
+      "enum": [
+        "network",
+        "control",
+        "console"
+      ],
+      "title": "PanelKind",
+      "type": "string"
+    },
+    "PartOverrides": {
+      "additionalProperties": false,
+      "description": "Library values replaced for one equipment entry (ADR 0024).",
+      "properties": {
+        "height_u": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Height U"
+        },
+        "inrush_a": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Inrush A"
+        },
+        "load_type": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LoadType"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "power_supplies": {
+          "anyOf": [
+            {
+              "enum": [
+                0,
+                1,
+                2
+              ],
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Power Supplies"
+        },
+        "supply_type": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SupplyType"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "unit_power_w": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit Power W"
+        },
+        "voltage_v": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Voltage V"
+        }
+      },
+      "title": "PartOverrides",
+      "type": "object"
+    },
+    "PortAllocation": {
+      "additionalProperties": false,
+      "description": "A count of ports of one speed and media used for one purpose, plus spares.",
+      "properties": {
+        "count": {
+          "exclusiveMinimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "media": {
+          "$ref": "#/$defs/Media"
+        },
+        "spare": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Spare",
+          "type": "integer"
+        },
+        "speed": {
+          "$ref": "#/$defs/PortSpeed"
+        }
+      },
+      "required": [
+        "count",
+        "speed",
+        "media"
+      ],
+      "title": "PortAllocation",
+      "type": "object"
+    },
+    "PortPlan": {
+      "additionalProperties": false,
+      "description": "How one device's ports are allocated (keyed by part id or tag in the panel).",
+      "properties": {
+        "downlinks": {
+          "items": {
+            "$ref": "#/$defs/PortAllocation"
+          },
+          "title": "Downlinks",
+          "type": "array"
+        },
+        "serial_ports": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Serial Ports",
+          "type": "integer"
+        },
+        "uplinks": {
+          "items": {
+            "$ref": "#/$defs/PortAllocation"
+          },
+          "title": "Uplinks",
+          "type": "array"
+        },
+        "uplinks_l3": {
+          "items": {
+            "$ref": "#/$defs/PortAllocation"
+          },
+          "title": "Uplinks L3",
+          "type": "array"
+        }
+      },
+      "title": "PortPlan",
+      "type": "object"
+    },
+    "PortSpeed": {
+      "enum": [
+        "10M",
+        "100M",
+        "1G",
+        "2.5G",
+        "5G",
+        "10G",
+        "25G"
+      ],
+      "title": "PortSpeed",
+      "type": "string"
+    },
+    "PurdueLevel": {
+      "enum": [
+        "L1",
+        "L2",
+        "EXT",
+        "L3"
+      ],
+      "title": "PurdueLevel",
+      "type": "string"
+    },
+    "SfpChoice": {
+      "additionalProperties": false,
+      "description": "The SFP model picked for one port speed and media of a switch (ADR 0024), and the\nspare and extra SFPs on each of its BOM rows (plan M49). No ``part_id`` keeps the\nautomatic pick; no ``spare`` keeps the project's.",
+      "properties": {
+        "extra": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Extra",
+          "type": "integer"
+        },
+        "media": {
+          "$ref": "#/$defs/Media"
+        },
+        "part_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Part Id"
+        },
+        "spare": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Spare"
+        },
+        "speed": {
+          "$ref": "#/$defs/PortSpeed"
+        }
+      },
+      "required": [
+        "speed",
+        "media"
+      ],
+      "title": "SfpChoice",
+      "type": "object"
+    },
+    "Side": {
+      "enum": [
+        "none",
+        "a",
+        "b"
+      ],
+      "title": "Side",
+      "type": "string"
+    },
+    "Spares": {
+      "additionalProperties": false,
+      "description": "Every spare as a user input, defaults as today (ADR 0013).",
+      "properties": {
+        "ac_branches": {
+          "default": 1,
+          "minimum": 0,
+          "title": "Ac Branches",
+          "type": "integer"
+        },
+        "dc_branches_per_feed": {
+          "default": 3,
+          "minimum": 0,
+          "title": "Dc Branches Per Feed",
+          "type": "integer"
+        },
+        "port_fraction": {
+          "default": 0.2,
+          "exclusiveMaximum": 1,
+          "minimum": 0,
+          "title": "Port Fraction",
+          "type": "number"
+        },
+        "rack_u_reserved": {
+          "default": 10,
+          "minimum": 0,
+          "title": "Rack U Reserved",
+          "type": "integer"
+        },
+        "sfp_per_l1": {
+          "default": 3,
+          "minimum": 0,
+          "title": "Sfp Per L1",
+          "type": "integer"
+        },
+        "terminals_fraction": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Terminals Fraction",
+          "type": "number"
+        }
+      },
+      "title": "Spares",
+      "type": "object"
+    },
+    "SparesPolicy": {
+      "additionalProperties": false,
+      "description": "The spares list's policy (ADR 0031); read by the spares list (plan M64) only.",
+      "properties": {
+        "categories": {
+          "items": {
+            "$ref": "#/$defs/Category"
+          },
+          "title": "Categories",
+          "type": "array"
+        },
+        "minimum_per_part": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Minimum Per Part",
+          "type": "integer"
+        },
+        "percent": {
+          "additionalProperties": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/Category"
+          },
+          "title": "Percent",
+          "type": "object"
+        }
+      },
+      "title": "SparesPolicy",
+      "type": "object"
+    },
+    "SupplyType": {
+      "enum": [
+        "VDC",
+        "VAC"
+      ],
+      "title": "SupplyType",
+      "type": "string"
+    },
+    "Tagging": {
+      "additionalProperties": false,
+      "description": "How device tags print their side and number (ADR 0030, 0031); defaults are today's.",
+      "properties": {
+        "first_numbers": {
+          "additionalProperties": {
+            "exclusiveMinimum": 0,
+            "type": "integer"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/PurdueLevel"
+          },
+          "title": "First Numbers",
+          "type": "object"
+        },
+        "side_letters": {
+          "default": [
+            "A",
+            "B"
+          ],
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "pattern": "^[A-Z]$",
+              "type": "string"
+            },
+            {
+              "pattern": "^[A-Z]$",
+              "type": "string"
+            }
+          ],
+          "title": "Side Letters",
+          "type": "array"
+        }
+      },
+      "title": "Tagging",
+      "type": "object"
+    },
+    "TemplatePanels": {
+      "additionalProperties": false,
+      "description": "The generated panels' look; their numbers and documents are the new substation's.",
+      "properties": {
+        "cabinet_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cabinet Name"
+        },
+        "enclosure": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Enclosure"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PanelKind"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "options": {
+          "additionalProperties": true,
+          "title": "Options",
+          "type": "object"
+        },
+        "tag_prefix": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tag Prefix"
+        }
+      },
+      "title": "TemplatePanels",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "catalogue_choice": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CatalogueChoice"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Description"
+    },
+    "design_basis": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DesignBasis"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "equipment": {
+      "items": {
+        "$ref": "#/$defs/Equipment"
+      },
+      "title": "Equipment",
+      "type": "array"
+    },
+    "loose_items": {
+      "items": {
+        "$ref": "#/$defs/LooseExtra"
+      },
+      "title": "Loose Items",
+      "type": "array"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "panels": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TemplatePanels"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "spares": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Spares"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "title": "SubstationTemplate",
+  "type": "object"
+}

@@ -286,3 +286,55 @@ def test_new_substation_seeds_follow_the_id() -> None:
     assert seeds["cabinet_number"] == "GIS02-PSA-{n:04d}"
     assert seeds["enclosure"]["make"] == "Rawabi"
     assert seeds["documents"]["bom"] == {"doc_no": "TBD", "rev": "00", "issue_date": TODAY}
+
+
+# --- substation templates (plan M55, Q63: in the project folder) ---
+
+
+def test_template_round_trips_a_substation(project: Path) -> None:
+    file = lifecycle.save_template(project, "gis01", "GIS standard", "Two-LAN GIS")
+    assert file == project.parent / "templates" / "gis-standard.yaml"
+    (listed,) = lifecycle.list_templates(project)
+    assert (listed.key, listed.name, listed.description) == (
+        "gis-standard",
+        "GIS standard",
+        "Two-LAN GIS",
+    )
+    template = listed.template
+    (source,) = load_project(project).substations
+    assert [e.id for e in template.equipment] == [e.id for e in source.substation.equipment]
+    assert template.catalogue_choice == source.substation.catalogue_choice
+    assert template.panels is not None
+    assert template.panels.enclosure == source.substation.generated_panels.enclosure  # type: ignore[union-attr]
+    assert [i.part_id for i in template.loose_items][:2] == ["NAP-K55", "ZENON-V12"]
+    assert all(i.fed_from is None for i in template.loose_items)  # panels are not in a template
+
+
+def test_a_template_name_is_taken_once(project: Path) -> None:
+    lifecycle.save_template(project, "gis01", "GIS standard")
+    with pytest.raises(EditError, match="already"):
+        lifecycle.save_template(project, "gis01", "GIS Standard")
+
+
+def test_substation_from_template_has_no_panels_or_documents_of_its_own(project: Path) -> None:
+    lifecycle.save_template(project, "gis01", "GIS standard")
+    result = create_substation(project, "gis02", "GIS 2", from_template="gis-standard", today=TODAY)
+    assert result.written, result.issues
+    loaded = load_project(project)
+    made = next(s for s in loaded.substations if s.substation.substation.id == "gis02")
+    source = next(s for s in loaded.substations if s.substation.substation.id == "gis01")
+    assert sorted(made.documents) == ["gis02-bom", "gis02-heat", "gis02-power"]
+    assert made.substation.manual_panels == []
+    assert [e.part_id for e in made.substation.equipment] == [
+        e.part_id for e in source.substation.equipment
+    ]
+    assert made.substation.network.ied_count == 0  # quantities are not in a template
+    assert made.substation.catalogue_choice == source.substation.catalogue_choice
+    loose = made.substation.loose_material
+    assert loose is not None
+    assert loose.host_panel == "psa1"
+
+
+def test_an_unknown_template_is_refused(project: Path) -> None:
+    with pytest.raises(EditError, match="no template"):
+        create_substation(project, "gis02", "GIS 2", from_template="nope")

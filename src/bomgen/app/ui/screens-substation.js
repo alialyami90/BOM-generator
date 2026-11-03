@@ -1,7 +1,7 @@
 /* Screen: substation Settings on bomgen.app.api (plan M10c), edited here (M17c). The page it
    loads is the Parts page's (parts_page, plan M23), which screens-parts.js shares through App.sub. */
 (function () {
-  const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, field, input, select, pageHead, toast } = App;
+  const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, field, input, select, pageHead, toast, $ } = App;
   const ro = (html) => html.replace('data-dirty="1"', 'readonly').replace('class="input', 'class="ctl input');
   const fixed = (v, unit) => `<div class="input-affix">${ro(input('x', v, { num: true, mono: true }))}${unit ? `<span class="affix">${esc(unit)}</span>` : ''}</div>`;
   const plural = (n, one) => `${n} ${one}${n === 1 ? '' : 's'}`;
@@ -149,7 +149,28 @@
       <p class="lede">These come from the project and are the same for every substation in it.</p>
       <dl class="kv"><dt>Project</dt><dd>${esc(p.project.name)}</dd><dt>Client</dt><dd>${esc(p.project.client || '—')}</dd><dt>Device library</dt><dd>${esc(p.project.library.name)}, built with ${esc(p.project.library.version)}</dd></dl>
       <div class="row" style="margin-top:var(--space-3)"><button class="btn btn--secondary" data-action="goto" data-to="#/project/info">Open project overview</button></div>
+    </div>
+    <div class="span-2 section" style="margin:0">
+      <h3>Template</h3>
+      <p class="lede">Save this substation's design basis, brands, spares, parts and loose items as a template. New substations in this project can start from it.</p>
+      <div class="row" style="margin-top:var(--space-3)"><button class="btn btn--secondary" data-action="save-template">Save as template…</button></div>
     </div></div>`;
+  /* ---------- Save as template (plan M55): stored in the project folder (Q63) ---------- */
+  ACTIONS['save-template'] = () => {
+    App.dialog({ title: 'Save as template', body: `<div class="stack">
+      ${field('Template name', input('tp-name', '', { placeholder: 'e.g. GIS two-LAN standard' }), 'Saved in the project folder, so it travels with the project.')}
+      ${field('Description', input('tp-desc', '', { placeholder: 'Optional' }))}
+      <p class="muted small">Panels, documents and quantities stay with this substation.</p><div id="tp-err"></div></div>`,
+      actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="save-template-do">Save template</button>' });
+  };
+  ACTIONS['save-template-do'] = (el) => {
+    const name = $('#tp-name').value.trim();
+    if (!name) { $('#tp-name').setAttribute('aria-invalid', 'true'); $('#tp-name').focus(); return; }
+    el.disabled = true;
+    Bridge.call('save_template', S.project.file, S.sub, name, $('#tp-desc').value.trim() || null)
+      .then(() => { App.closeDialog(); toast(`Saved the template ${name}`, 'check'); })
+      .catch((e) => { el.disabled = false; $('#tp-err').innerHTML = banner('bad', esc(e.message)); });
+  };
   const docOpts = (p) => p.documents.map((d) => [d.key, d.key]);
   const entryOf = (p, key) => p.documents.find((d) => d.key === key);
   const docCells = (e) => (e ? `<td class="mono">${esc(e.doc_no)}</td><td class="mono">${esc(e.rev)}</td><td class="mono">${esc(e.issue_date)}</td>` : `<td colspan="3"><span class="err small">${icon('error')}<span>Not in the register</span></span></td>`);

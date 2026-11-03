@@ -13,10 +13,11 @@ NAMES = [
     "panel.schema.json",
     "project.schema.json",
     "substation.schema.json",
+    "template.schema.json",
 ]
 
 
-def test_json_schemas_cover_the_four_input_files() -> None:
+def test_json_schemas_cover_the_input_files() -> None:
     schemas = json_schemas()
     assert sorted(schemas) == NAMES
     assert schemas["project.schema.json"]["title"] == "Project"

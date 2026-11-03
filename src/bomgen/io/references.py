@@ -233,7 +233,7 @@ def substation_issues(
     loose = substation.loose_material
     if loose is not None:
         known_parts = set(library.part_ids())
-        if loose.host_panel not in ids:
+        if ids and loose.host_panel not in ids:  # none yet: a new substation (plan M55)
             message = f"host_panel '{loose.host_panel}' is not a panel id in this substation"
             issues.append(_issue(source, ("loose_material", "host_panel"), message))
         for index, item in enumerate(loose.items):
