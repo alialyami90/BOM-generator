@@ -22,6 +22,14 @@ project uses [Semantic Versioning](https://semver.org/).
 - psa-devices 1.16.0: every part says where its power, inrush, height, input voltage and ports
   come from: the device database's datasheet, the contractor's cited document, or assumed with
   the reason. Checks warns when a picked part's power or inrush is assumed (M67b, ADR 0037).
+- The device editor shows a part's state, its successor when obsolete, and a Sources table beside
+  the sized figures; changing a figure asks for its source before you save. Library marks draft,
+  reviewed and obsolete parts and filters to *Assumed values*; Parts badges an assumed power or
+  inrush (M67c, ADR 0037).
+- Library has a Review tab for draft and reviewed parts (mark reviewed, release, or send back with
+  a note) and a Health tab: parts by state, assumed figures, parts with no alternative, obsolete
+  parts that projects on this PC still use, and brand sets missing an MCB rating or a housekeeping
+  role (M68).
 
 - The panel editor's main MCB shows the engine's rating with the rule it came from ("10 A: next
   standard size above 7.1 A, minimum 6 A"); click it to type your own, *Use automatic* to go back
@@ -53,6 +61,11 @@ project uses [Semantic Versioning](https://semver.org/).
   shown with the rule behind it ("2 x 6 AC MCBs = 12"); click a quantity to set your own, or pick
   another block type. *Spare terminals* (Project › Overview, Parts › Network fine tuning) adds a
   share to each wiring strip, rounded up: 10% makes X3-AC 14 and X4-DC1 36 in Cabinet 001 (M57).
+- A panel's housekeeping kit is now an input: the number of lamps, fans, thermostats and filters,
+  a heater or hygrostat (from the library's new heater and hygrostat roles), and whether the smoke
+  detector is supplied, only wired to terminals, or left out. Housekeeping breakers are sized from
+  the part's AC watts when it gives them, never below the spec's rating, and a panel can set its
+  own. With nothing set every BOM is as before (M56a, ADR 0032).
 - A hand-written panel's Devices rows take a tag, type code and first number, with the generated
   tag as placeholder and a shared tag flagged on the row (M59). Moving, adding or removing a device
   there no longer writes the page's own fields into the panel file.

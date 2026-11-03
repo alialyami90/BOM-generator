@@ -7,6 +7,7 @@ import pytest
 from engine_factories import device, library, panel, powered
 
 from bomgen.engine.errors import EngineError
+from bomgen.engine.housekeeping import KitCounts
 from bomgen.engine.items import flatten
 from bomgen.engine.terminals import StripInputs, strip_table, terminal_strips
 from bomgen.engine.units import expand_devices
@@ -282,3 +283,28 @@ def test_block_type_override_changes_part_number() -> None:
 def test_block_type_override_of_a_missing_strip_is_an_error() -> None:
     with pytest.raises(EngineError, match="XYZ"):
         strips(inputs(), options={"terminal_block_overrides": {"XYZ": "UT-16"}})
+
+
+def test_thf_follows_fan_and_thermostat_count() -> None:
+    """ADR 0032 item 5: the spec's 12 or 5, plus 3 per fan and 2 per thermostat more than
+    the spec's kit."""
+    kit = KitCounts(lamps=1, fans=3, thermostats=2, filters=0, heater=False, hygrostat=False)
+    p = panel([{"part_id": "SW"}])
+    (thf,) = [s for s in strip_table(p, lib(), [], inputs(kit=kit)) if s.code == "THF"]
+    assert (thf.qty, thf.rule) == (
+        13,
+        "12 for two fans and three thermostats, +3 x 1 fan, -2 x 1 thermostat = 13",
+    )
+    assert strips(inputs())["THF"] == 12
+    assert strips(inputs(ventilation=Ventilation.NATURAL))["THF"] == 5
+
+
+def test_heater_brings_its_parts_own_strip_and_leaves_thf() -> None:
+    """ADR 0032 item 5: a heater adds the strip rows its library part gives."""
+    heater = device("HEATER", terminals=[{"strip": "XHT", "block": "UT-2.5-MTD", "count": 3}])
+    lib_ = library(SWITCH, heater, heater={"part_id": "HEATER"})
+    kit = KitCounts(lamps=1, fans=2, thermostats=3, filters=0, heater=True, hygrostat=False)
+    table = {
+        s.code: s.qty for s in strip_table(panel([{"part_id": "SW"}]), lib_, [], inputs(kit=kit))
+    }
+    assert (table["THF"], table["XHT"]) == (12, 3)

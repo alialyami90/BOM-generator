@@ -92,7 +92,7 @@ def test_a_field_of_a_hand_written_panel_is_set_checked_and_removed(
     options = {o["key"]: o for o in page["options"]}
     assert (options["ac_spare_branches"]["value"], options["ac_spare_branches"]["own"]) == (3, True)
     assert options["smoke_detector"]["own"] is False
-    assert options["smoke_detector"]["shared"] is True  # the default
+    assert options["smoke_detector"]["shared"] == "terminals"  # the default
 
     message = ok(app.check_panel_field(str(project), "gis01", "ws", ["enclosure", "h_mm"], -1))
     assert message

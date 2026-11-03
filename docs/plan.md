@@ -432,7 +432,13 @@ port_plans:                            # per device, by part_id or tag; allocati
   # SEL-3555: { serial_ports: 6 }      # RTAC COM ports used (psa3)
 options:
   aux_socket_a: null                   # e.g. 10 in psa2
-  smoke_detector: true
+  smoke_detector: terminals            # none | terminals | supplied (ADR 0032; true = terminals)
+  housekeeping:                        # M56, ADR 0032; unset counts are the spec's kit
+    fans: null                         # forced; also thermostats_forced, thermostats_natural,
+    lamps: null                        #   filters
+    heater: false                      # adds the library's heater part, its C branch, its strips
+    hygrostat: false
+    branch_ratings: {}                 # lamp | fan | thermostat | heater -> A
   change_over_diodes: auto             # auto | true | false
   ventilation: auto                    # auto | forced | natural
   dc_spare_branches_per_feed: 3        # default 1
@@ -1120,7 +1126,13 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M53 — Vendor list and part lifecycle states.** *W5; ADRs 0031 and 0037.* Planned.
 - **M54 — Design-basis checks.** *W5.* Planned.
 - **M55 — Substation templates.** *W5; Q63.* Planned.
-- **M56 — Housekeeping editor.** *W3; ADR 0032.* Planned.
+- **M56 — Housekeeping editor.** *W3; ADR 0032.* In two PRs. **M56a** (in review): the engine.
+  `PanelOptions.housekeeping` (counts, heater, hygrostat, `branch_ratings`), `smoke_detector` none,
+  terminals or supplied, the library's heater, hygrostat and smoke detector roles; branches sized
+  from the part's AC watts, never below the spec's rating, each with its rule
+  (`BuildResult.housekeeping`); THF adds 3 per fan and 2 per thermostat beyond the spec's kit, and a
+  heater or hygrostat brings its part's own strips. **M56b** (planned): the panel editor's
+  *Cabinet housekeeping* section and the Library roles.
 - **M57 — Terminals tab.** *W3; ADR 0033.* In review. `spares.terminals_fraction` and
   `PanelOptions.terminal_block_overrides`; `BuildResult.strips` carries each strip's rule; the panel
   editor's Terminals tab replaces the read-only terminal overrides of Options.
@@ -1139,13 +1151,19 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M65 — Cable schedule.** *W2; ADR 0035, Q66.* Planned.
 - **M66 — Revision history and recorded issues.** *W2; ADR 0036, Q67.* Planned.
 - **M67 — Record sources and lifecycle.** *W1; ADR 0037 (accepted).* In two PRs so that W5's M53
-  gets the state field early. **M67a** (in review): `state`, `successor`, `sources` and the change
+  gets the state field early. **M67a** (merged, #331): `state`, `successor`, `sources` and the change
   fields on `DeviceType`, the successor reference check, `devices.csv` columns, the schema. **M67b**
-  (in review): a sized change needs its source, the save writes who, when and the note, a
+  (merged, #335): a sized change needs its source, the save writes who, when and the note, a
   library that uses these fields needs this app, every shipped part sourced (psa-devices 1.16.0,
-  Q69), the assumed power and inrush check. **M67c** (planned): the device editor's state,
+  Q69), the assumed power and inrush check. **M67c** (merged, #337): the device editor's state,
   successor and Sources column, the Library state badge and *Assumed values* filter, the Parts chip.
-- **M68 — Review queue and health.** *W1.* Planned.
+- **M68 — Review queue and health.** *W1.* In review. `library_store/health.py` measures parts by
+  state, assumed figures, parts without an alternative, obsolete parts the projects on this PC pick,
+  MCB brand sets missing a rating of the default set, and housekeeping roles the default fills that a
+  brand leaves empty. Library gains *Review* (draft and reviewed parts with their missing sources:
+  *Mark reviewed*, *Release*, *Send back…* with a note kept on the part) and *Health* (a card per
+  measure). Every action is a pending edit; anyone using the app may release, as the app has no
+  owner role.
 - **M69 — Propose from project.** *W1.* Planned.
 
 ## 5. Testing strategy
@@ -1551,6 +1569,11 @@ substation dialog. Prefill it with these values, or the previous substation's wh
 **Q63 — Where substation templates live** (M55). In the project folder as
 `templates/*.yaml`, so they travel with the `.bomproj` (recommended), or in the app's home folder,
 shared by every project on the PC? *Answered 2026-11-03: the project folder.*
+
+**Q67 — Where prepared, checked and approved names print** (M66; ADR 0036). *Answered 2026-11-03: the history sheet only, footer as it is.* The register
+gains the three names per document. They print on the Revision History sheet (ADR 0035) for each
+recorded issue. To ask Ali: the history sheet only, with the footer as it is (recommended); also in
+every sheet's page header; or on a cover sheet.
 
 **Q68 — "Exactly n panels"** (M62). *Answered 2026-11-03: offer At most n only.* The plan offers Automatic, Exactly n and At most n. The fill
 already opens the fewest panels, so Exactly n only differs from At most n when the devices fit in

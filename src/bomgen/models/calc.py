@@ -217,6 +217,18 @@ class SpareRatings(OutputModel):
     dc_rule: str = ""
 
 
+class HousekeepingBranch(OutputModel):
+    """A housekeeping C branch with its rating and the rule behind it (ADR 0032)."""
+
+    panel_id: str
+    tag: str
+    load: str
+    key: Literal["lamp", "fan", "thermostat", "heater"]  # the branch_ratings entry
+    rating_a: PositiveInt  # the panel's own rating when it sets one
+    rule_rating_a: PositiveInt
+    rule: str
+
+
 class HeatResult(OutputModel):
     dissipation: tuple[CabinetHeat, ...]
     cabinets: tuple[CabinetThermal, ...]

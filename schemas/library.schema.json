@@ -760,6 +760,28 @@
         "fan": {
           "$ref": "#/$defs/FanRef"
         },
+        "heater": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HousekeepingRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "hygrostat": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HousekeepingRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "ipr_kit": {
           "$ref": "#/$defs/HousekeepingRef"
         },
@@ -774,6 +796,17 @@
           "type": "array"
         },
         "nameplate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HousekeepingRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "smoke_detector": {
           "anyOf": [
             {
               "$ref": "#/$defs/HousekeepingRef"
@@ -826,6 +859,28 @@
         "fan": {
           "$ref": "#/$defs/FanRef"
         },
+        "heater": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HousekeepingRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "hygrostat": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HousekeepingRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "id": {
           "pattern": "^[a-z0-9][a-z0-9-]*$",
           "title": "Id",
@@ -857,6 +912,17 @@
           "title": "Name"
         },
         "nameplate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HousekeepingRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "smoke_detector": {
           "anyOf": [
             {
               "$ref": "#/$defs/HousekeepingRef"

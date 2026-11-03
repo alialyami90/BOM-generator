@@ -25,6 +25,7 @@ from bomgen.library_store.alternatives import compare_alternatives
 from bomgen.library_store.device_db import DeviceRecord, MountingKind, load_device_records
 from bomgen.library_store.edit import apply_edits, check_field, parse_edits
 from bomgen.library_store.errors import LibraryPackageError, RefusalKind
+from bomgen.library_store.health import library_health, missing_sources
 from bomgen.library_store.local import next_local_version, save_edits
 from bomgen.library_store.records import apply_record_edits, check_record_field
 from bomgen.library_store.store import LibraryStore
@@ -34,10 +35,12 @@ from bomgen.models.library import (
     Library,
     LoadType,
     Media,
+    PartState,
     PortKind,
     PortSpeed,
     PortUse,
     PurdueLevel,
+    Source,
     SupplyType,
     Tier,
 )
@@ -55,6 +58,8 @@ CHOICES = {
     "usable_for": [c.value for c in PortUse],
     "per": ["unit", "serial_port"],
     "tier": list(get_args(Tier)),
+    "state": list(get_args(PartState)),  # ADR 0037
+    "source_kind": list(get_args(Source.model_fields["kind"].annotation)),
     # the datasheet record's
     "verified": list(get_args(DeviceRecord.model_fields["verified"].annotation)),
     "mounting_kind": list(get_args(MountingKind)),
@@ -375,6 +380,37 @@ class LibraryEditor:
             raise EditRefusedError(f"devices: {part_id} is already in the library")
         return self.add([{"op": "insert", "path": ["devices"], "value": body}])
 
+    def health(self, used: Mapping[str, Sequence[str]]) -> dict[str, Any]:
+        """The Review and Health tabs (M68), pending edits applied; ``used`` maps a part id to
+        where the projects on this PC pick it."""
+        library = self._edited(self._ready())
+        found = library_health(library, used)
+        names = {d.part_id: " ".join(filter(None, (d.make, d.model))) for d in library.devices}
+
+        def part(pid: str, **more: object) -> dict[str, Any]:
+            return {"part_id": pid, "name": names[pid], **more}
+
+        return {
+            "states": found.states,
+            "review": [
+                part(
+                    d.part_id,
+                    state=d.state,
+                    missing=missing_sources(d),
+                    note=d.note,
+                    changed_by=d.changed_by,
+                    changed_on=d.changed_on.isoformat() if d.changed_on else None,
+                )
+                for d in library.devices
+                if d.state in ("draft", "reviewed")
+            ],
+            "assumed": [part(pid, fields=fields) for pid, fields in found.assumed],
+            "alone": [part(pid) for pid in found.alone],
+            "obsolete_in_use": [part(pid, where=where) for pid, where in found.obsolete_in_use],
+            "mcb_gaps": [{"brand": b, "missing": m} for b, m in found.mcb_gaps],
+            "housekeeping_gaps": [{"brand": b, "roles": r} for b, r in found.housekeeping_gaps],
+        }
+
     def catalogues(self) -> dict[str, Any]:
         """The Catalogues tab: every brand set as rows, with the pending edits applied."""
         pending = self._ready()
@@ -497,7 +533,20 @@ def describe(before: Library, after: Library) -> list[dict[str, str]]:
             continue
         for key, value in device.items():
             was = old[part_id].get(key)
-            if value != was:
+            if key == "sources":  # one entry per sized field whose source changed (ADR 0037)
+                had = was or {}
+                for name in sorted(value.keys() | had.keys()):
+                    if value.get(name) != had.get(name):
+                        old_text, new_text = (
+                            _source_text(had.get(name)),
+                            _source_text(value.get(name)),
+                        )
+                        entries.append(
+                            _entry(
+                                "Device", part_id, "changed", f"sources.{name}", old_text, new_text
+                            )
+                        )
+            elif value != was:
                 entries.append(_entry("Device", part_id, "changed", key, _text(was), _text(value)))
     for part_id in old.keys() - new.keys():
         entries.append(_entry("Device", part_id, "removed", "", part_id, ""))
@@ -586,6 +635,13 @@ def _text(value: object) -> str:
     if isinstance(value, list) and all(isinstance(item, dict) for item in value):
         return "; ".join(_item_text(item) for item in value)
     return json.dumps(value, ensure_ascii=False)
+
+
+def _source_text(source: Mapping[str, Any] | None) -> str:
+    """A source as words: "datasheet: p. 12, 2026-10-31"."""
+    if source is None:
+        return ""
+    return f"{source['kind']}: " + ", ".join(filter(None, (source["ref"], source.get("date"))))
 
 
 def _item_text(item: dict[str, Any]) -> str:
