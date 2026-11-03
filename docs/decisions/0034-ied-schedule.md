@@ -1,6 +1,6 @@
 # 0034. IED schedule
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-11-03)
 - Date: 2026-11-03
 - Spec sections: Automatic panel layout; Inputs, 2. Substation and its panels; Derivation rules →
   Network accessories (group C)

@@ -1,6 +1,6 @@
 # 0032. Housekeeping as panel inputs
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-11-03)
 - Date: 2026-11-03
 - Spec sections: Derivation rules → Housekeeping kit (group D); Derivation rules → AC distribution
   (group E); Derivation rules → Terminal block quantities (group G), THF and XSD rows; Inputs,
