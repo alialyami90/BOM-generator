@@ -15,15 +15,19 @@ from pydantic import ValidationError
 
 from bomgen.app.loose import _records
 from bomgen.app.substations import _library, resolve, substation_page
+from bomgen.checks import duplicate_tag_checks
 from bomgen.engine.errors import EngineError
-from bomgen.engine.layout import CABLE_MANAGED, layout_preview
+from bomgen.engine.layout import CABLE_MANAGED, LayoutResult, layout_preview, runs
 from bomgen.engine.network import unserved_links
+from bomgen.engine.rules_text import sfp_rule, sfp_spare_rule
+from bomgen.engine.units import expand_devices
 from bomgen.io.derived import effective_part_id
 from bomgen.io.errors import InputError
 from bomgen.io.loader import LoadedSubstation
 from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.store import LibraryStore
 from bomgen.models.library import Category, DeviceType, Library, Media
+from bomgen.models.output import Derived
 from bomgen.models.project import Project
 from bomgen.models.substation import Equipment, EquipmentRole, Substation
 
@@ -139,6 +143,9 @@ def _category(entry: Equipment, part: DeviceType | None) -> Category | None:
     return ROLE_CATEGORY.get(entry.role)
 
 
+BOM_TEXT = ("purpose", "tag", "tag_type", "first_nn", "hwio_points")  # Parts BOM text (M59)
+
+
 def _label(entry: Equipment, category: Category | None) -> str:
     if entry.role in ROLE_LABEL:
         return ROLE_LABEL[entry.role]
@@ -151,13 +158,53 @@ def row_label(entry: Equipment, library: Library) -> str:
     return _label(entry, _category(entry, part))
 
 
-def _sfp_needs(loaded: LoadedSubstation) -> dict[str, set[tuple[str, str]]]:
-    """The (speed, media) pairs each sized switch entry's ports use, from the layout."""
+SfpCounts = dict[tuple[str, str], tuple[int, int]]  # (speed, media) -> (links, spare)
+
+
+def _preview(loaded: LoadedSubstation | None) -> LayoutResult | None:
+    """The layout the page describes; none for a blank substation, which has no switches
+    to size yet (the model takes both or none, ADR 0013), or when the sizing fails."""
+    if loaded is None or not loaded.substation.equipment:
+        return None
     try:
-        result = layout_preview(loaded)
+        return layout_preview(loaded)
     except EngineError:
-        return {}
-    needs: dict[str, set[tuple[str, str]]] = {}
+        return None
+
+
+def _tag_info(
+    loaded: LoadedSubstation, result: LayoutResult
+) -> tuple[dict[str, list[str]], dict[str, str]]:
+    """For each entry, the tags the layout generates, one per panel row, ignoring a tag the
+    entry writes (the BOM text placeholders), and the duplicate-tag sentence of the first
+    tag of its units another unit shares (plan M59)."""
+    generated: dict[str, list[str]] = {}
+    owners: dict[str, list[str]] = {}  # unit tag -> entry ids
+    expanded = []
+    fills = [f for f in result.fills if f.units]
+    for panel, fill in zip(result.panels, fills, strict=True):
+        rows = expand_devices(panel, loaded.library)
+        expanded.append((panel, rows))
+        devices = [d.model_copy(update={"tag": None}) for d in panel.devices]
+        untagged = expand_devices(panel.model_copy(update={"devices": devices}), loaded.library)
+        for run, row, auto in zip(runs(fill), rows, untagged, strict=True):
+            entry = run[0].device
+            if auto.tag is not None:
+                generated.setdefault(entry, []).append(auto.tag)
+            for tag in row.unit_tags:
+                if tag is not None:
+                    owners.setdefault(tag, []).append(entry)
+    duplicates: dict[str, str] = {}
+    for item in duplicate_tag_checks(expanded):
+        for entry in owners.get(item.subject or "", []):
+            duplicates.setdefault(entry, f"{item.subject}: {item.message}")
+    return generated, duplicates
+
+
+def _sfp_needs(loaded: LoadedSubstation, result: LayoutResult) -> dict[str, SfpCounts]:
+    """The (speed, media) pairs each sized switch entry's ports use, from the layout, with
+    the links and automatic spare of the first panel row that hosts it (plan M49)."""
+    needs: dict[str, SfpCounts] = {}
     for entry in loaded.substation.equipment:
         if entry.role not in SIZED or entry.part_id is None:
             continue
@@ -170,10 +217,38 @@ def _sfp_needs(loaded: LoadedSubstation) -> dict[str, set[tuple[str, str]]]:
             plan = panel.port_plans.get(str(key))
             if plan is None:
                 continue
+            counts: SfpCounts = {}
             for a in (*plan.uplinks_l3, *plan.uplinks, *plan.downlinks):
                 if a.media is not Media.RJ45:
-                    needs.setdefault(entry.id, set()).add((a.speed.value, a.media.value))
+                    links, spare = counts.get((a.speed.value, a.media.value), (0, 0))
+                    counts[(a.speed.value, a.media.value)] = (links + a.count, spare + a.spare)
+            needs.setdefault(entry.id, {})
+            for pair, value in counts.items():
+                needs[entry.id].setdefault(pair, value)
     return needs
+
+
+def _sfp(
+    entry: Equipment, speed: str, media: str, counts: tuple[int, int], candidates: list[str]
+) -> dict[str, Any]:
+    """One SFP sub-row of a switch: its part choice and its quantity per BOM row."""
+    choice = next((c for c in entry.sfp if (c.speed.value, c.media.value) == (speed, media)), None)
+    used, auto = counts
+    override = choice.spare if choice is not None else None
+    extra = choice.extra if choice is not None else 0
+    spare = auto if override is None else override
+    rule = sfp_spare_rule(auto, l1=entry.role is EquipmentRole.L1_SWITCH)
+    return {
+        "speed": speed,
+        "media": media,
+        "choice": choice.part_id if choice is not None else None,
+        "candidates": candidates,
+        "used": used,
+        "spare": Derived[int](value=auto, rule=rule, override=override).model_dump(mode="json"),
+        "extra": extra,
+        "total": used + spare + extra,
+        "rule": sfp_rule(used, spare, extra),
+    }
 
 
 def _serves(device: DeviceType, speed: str, media: str) -> bool:
@@ -187,23 +262,21 @@ def _row(
     index: int,
     entry: Equipment,
     library: Library | None,
-    needs: set[tuple[str, str]],
+    needs: SfpCounts,
     loose: list[dict[str, Any]],
     host_panel: str | None,
 ) -> dict[str, Any]:
     part = library.get(entry.part_id) if library and entry.part_id else None
     category = _category(entry, part)
     default = category in CABLE_MANAGED  # the layout's rule (ADR 0013, amended)
-    chosen = {(c.speed.value, c.media.value): c.part_id for c in entry.sfp}
     sfp = [
-        {
-            "speed": speed,
-            "media": media,
-            "choice": chosen.get((speed, media)),
-            "candidates": [d.part_id for d in _parts(library) if _serves(d, speed, media)]
-            if library
-            else [],
-        }
+        _sfp(
+            entry,
+            speed,
+            media,
+            needs[(speed, media)],
+            [d.part_id for d in _parts(library) if _serves(d, speed, media)] if library else [],
+        )
         for speed, media in sorted(needs)
     ]
     accessories = None
@@ -231,6 +304,7 @@ def _row(
         "library": {k: getattr(part, k) for k in VALUES} if part is not None else None,
         "overrides": entry.overrides.values() if entry.overrides is not None else {},
         "sfp": sfp,
+        "bom_text": {k: getattr(entry, k) for k in BOM_TEXT},  # M59
         # M31: the link to the L2 switch (none for the sized switches and the patch panel)
         "link": None
         if entry.role in (*SIZED, EquipmentRole.FOPP)
@@ -274,8 +348,9 @@ def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
     substation, library, loaded, project = _source(project_file, substation_id, store)
     if substation is None:
         return page | {"parts": None}
-    # a blank substation has no switches to size yet (the model takes both or none, ADR 0013)
-    needs = _sfp_needs(loaded) if loaded is not None and loaded.substation.equipment else {}
+    result = _preview(loaded)
+    needs = _sfp_needs(loaded, result) if loaded is not None and result is not None else {}
+    tags, duplicates = _tag_info(loaded, result) if loaded and result else ({}, {})
     items = substation.loose_material.items if substation.loose_material else []
     # loose material starts with its host panel, so accessories can be added only then
     host = substation.loose_material.host_panel if substation.loose_material else None
@@ -290,7 +365,8 @@ def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
     return page | {
         "parts": {
             "rows": [
-                _row(i, e, library, needs.get(e.id, set()), loose, host)
+                _row(i, e, library, needs.get(e.id, {}), loose, host)
+                | {"tags": tags.get(e.id, []), "duplicate": duplicates.get(e.id)}
                 for i, e in enumerate(substation.equipment)
             ],
             "options": {

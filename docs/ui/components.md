@@ -427,6 +427,15 @@ supply and load type) with Enter to keep and Esc to cancel.
 | Invalid | Input with the danger border and the error under the strip ("Enter watts as a number, for example 25."). |
 | Equal to the library | Not an override: entering the library value shows it as a library value, and saving writes nothing for it. |
 
+### Derived value
+A detail value whose automatic value comes from an engine rule rather than the library (plan M48): the
+same 24 px button, then the rule in muted 11.5 px on its own line ("10 A: next standard size above 7.1 A,
+minimum 6 A"), returned by the engine with the value, never worked out in the UI. Overridden, it shows
+the dot, "Automatic 10 A" and a reset icon button ("Use the automatic 10 A"); resetting removes the
+override on save. `App.derived()` in `ui.js` renders both this and the detail value (`autoLabel:
+"Library"`, no rule). Used for the panel editor's main MCB; later milestones put SFP quantities,
+housekeeping, terminals and spare ratings on it.
+
 ### SFP sub-row
 Under an L1 or L2 row, one per media and speed the sizing needs: "1G · Multi-mode · 6 needed" in muted
 text (the count is the engine's), then a select of the library's SFPs for that media and speed. The first

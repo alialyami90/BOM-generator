@@ -23,6 +23,8 @@ from bomgen.io.loader import LoadedSubstation
 from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.store import LibraryStore
 from bomgen.models.bom import BomLine, Group, QtySum
+from bomgen.models.calc import DcMains
+from bomgen.models.output import Derived
 from bomgen.models.panel import Panel, PanelOptions
 from bomgen.models.substation import EquipmentRole
 
@@ -122,8 +124,11 @@ def panel_page(
     defaults = PanelOptions().model_dump(mode="json")
     written = panel.options.model_fields_set
     lines: Sequence[BomLine] = []
+    main: DcMains | None = None
     try:
-        lines = next(b.lines for b in build(loaded).panels if b.panel_id == panel.id)
+        result = build(loaded)
+        lines = next(b.lines for b in result.panels if b.panel_id == panel.id)
+        main = next((m for m in result.mains if m.panel_id == panel.id), None)
     except EngineError as exc:
         page["engine_error"] = str(exc)
     page |= {
@@ -180,6 +185,17 @@ def panel_page(
                 for d in panel.devices
             ]
         ),
+        # values the engine derives, each with its rule (plan M48)
+        "derived": {
+            "main_mcb_a": Derived[int](
+                value=main.rule_rating_a,
+                rule=main.rule,
+                override=panel.options.main_mcb_override_a,
+                unit="A",
+            ).model_dump(mode="json")
+            if main is not None and main.rule_rating_a
+            else None
+        },
         "ports": _ports(loaded, panel, units, lines) if board else [],
         "parts": [] if board else part_list(loaded),
         "yaml": file.read_text(encoding="utf-8"),

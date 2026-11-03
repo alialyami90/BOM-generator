@@ -7,6 +7,22 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- The panel editor's main MCB shows the engine's rating with the rule it came from ("10 A: next
+  standard size above 7.1 A, minimum 6 A"); click it to type your own, *Use automatic* to go back
+  (M48). Part overrides on Parts use the same derived-value look, and leaving a value with Tab now
+  closes its input.
+- Parts shows the SFPs on each switch's BOM rows as links, spare and extra, with the total and the
+  rule behind it. Set the spare to replace the project's spare SFPs for that speed and media, or add
+  extra SFPs; the BOM quantity stays a formula such as `=6+3+2`, and Checks warns when the extras
+  need more slots than are free (M49).
+- Parts › Network fine tuning has *Most panels*: the layout opens no panel past it, and Panels lists
+  each device that doesn't fit with the rack units it is short (M62).
+- Each Parts row has *BOM text*: purpose, tag, type code, first number and HWIO points, with the
+  generated tags as placeholders. A first number of 21 on the L1 row prints PSA1-L1-ESW-A21 onward,
+  and a tag another unit already has is flagged on the row (M59).
+
 ## [0.3.4] - 2026-11-01
 
 ### Added
