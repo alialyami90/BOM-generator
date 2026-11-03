@@ -1155,7 +1155,7 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
   chips a row off the list, Design basis tab selects the list. The state field, CSV columns and
   Library state badges came with M67. **M53b** planned: Project › *Vendor lists* editor.
 - **M54 — Design-basis checks.** *W5.* Planned.
-- **M55 — Substation templates.** *W5; Q63.* In review. `templates/<key>.yaml` in the project folder
+- **M55 — Substation templates.** *W5; Q63.* Done (#344). `templates/<key>.yaml` in the project folder
   (`SubstationTemplate`): design basis, brands, spares, the generated panels' look, equipment parts
   and roles (no `qty`, `tag`, `first_nn`) and loose items (no `fed_from`). New substation › Start
   from offers them; Settings › General has *Save as template…*. A loose list's `host_panel` is not
