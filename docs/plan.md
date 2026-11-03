@@ -225,7 +225,9 @@ manual_panels: [panels/ws.yaml]        # never touched by the layout; after `pan
 output:
   file_name: "{doc_no}_PSA_BOM_Rev{rev}.xlsx"   # OUT-2
   sheet_names: { loose_material: "Loose Material", power_consumption: "Power Consumption",
-                 heat_dissipation: "Heat Dissipation", heat_calculations: "Heat Calculations" }
+                 heat_dissipation: "Heat Dissipation", heat_calculations: "Heat Calculations",
+                 summary_bom: "Summary BOM" }
+  include: [summary_bom]                # optional sheets to write (ADR 0035); default none
   power_footnotes: ["*Printer Power Consumption: 622 watts (Printing), …"]  # rows after NOTES; optional
 constants: { t_max_c: 40 }             # optional overrides of the project defaults
 spares: { port_fraction: 0.25 }        # optional overrides of the project defaults
@@ -1145,7 +1147,7 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
   caps the fill (R5, R6): a pair opens only while both its panels are within the cap, a common device
   only into a panel within it, and a unit that fits nowhere is a `panel-limit` layout error naming the
   unit and the U it is short. Moves past the cap are unknown panels. No "Exactly n" (Q68).
-- **M63 — Summary BOM.** *W2; ADR 0035.* Planned.
+- **M63 — Summary BOM.** *W2; ADR 0035.* In review. `engine/summary.py` groups every panel's and the loose material's lines by (make, model, ordering code), free text by (make, description), a text quantity on its own; `sheets/summary_sheet.py` writes it after Heat Calculations when `output.include` has `summary_bom`, quantities as `SUM` formulas over the BOM sheets' quantity cells. Build has the switch and *Export summary as CSV*; Preview a *Summary BOM* tab.
 - **M64 — Spares list.** *W2; ADR 0035, Q65.* Planned.
 - **M65 — Cable schedule.** *W2; ADR 0035, Q66.* Planned.
 - **M66 — Revision history and recorded issues.** *W2; ADR 0036, Q67.* Planned.

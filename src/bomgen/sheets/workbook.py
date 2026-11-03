@@ -2,11 +2,12 @@
 
 Sheet order: one BOM sheet per panel in panel order, the Loose Material sheet when the
 substation has loose material, then Power Consumption, Heat Dissipation and Heat
-Calculations.
+Calculations, then the Summary BOM when included (ADR 0035).
 """
 
 from pathlib import Path
 
+from bomgen.engine.summary import summarize
 from bomgen.io.loader import LoadedSubstation
 from bomgen.models.bom import BomTable, BuildResult
 from bomgen.models.calc import LineRef
@@ -17,6 +18,7 @@ from bomgen.sheets.bom_sheet import BomSheet, bom_sheet, loose_sheet
 from bomgen.sheets.header_footer import bom_header_footer, calc_header_footer, fitting_size
 from bomgen.sheets.nameplate_sheet import nameplate_sheet
 from bomgen.sheets.power_sheet import BomSource
+from bomgen.sheets.summary_sheet import summary_sheet
 
 
 def build_workbook(
@@ -114,4 +116,21 @@ def build_workbook(
             fitting_size(styles.CALC_MARGINS, heat_calc_sheet.SCALE),
         ),
     )
-    return WorkbookModel(sheets=(*sheets, power.model, dissipation.model, calculations))
+    sheets.extend((power.model, dissipation.model, calculations))
+    if "summary_bom" in loaded.substation.output.include:
+        # Issued under the substation's main document (ADR 0035).
+        document = loaded.documents[loaded.substation.document]
+        cells = {ref: (source.sheet, source.row) for ref, source in sources.items()}
+        tables: dict[str | None, str] = {p.panel_id: p.sheet_name for p in result.panels}
+        tables[None] = names.loose_material
+        sheets.append(
+            summary_sheet(
+                names.summary_bom,
+                loaded.substation.substation.name,
+                summarize(result),
+                cells,
+                tables,
+                bom_header_footer(project_name, loaded.substation.substation.name, document, logo),
+            )
+        )
+    return WorkbookModel(sheets=tuple(sheets))

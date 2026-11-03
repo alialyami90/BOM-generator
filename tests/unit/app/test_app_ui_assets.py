@@ -970,3 +970,13 @@ def test_a_link_with_no_library_sfp_is_flagged_on_its_parts_row() -> None:
         in js
     )
     assert "focus: id(`p-l.${m[1]}.${m[2]}`) };  // M46" in ui
+
+
+def test_build_offers_the_summary_bom_and_its_csv() -> None:
+    # ADR 0035: the Summary BOM is opt-in on Build, saved to output.include; Preview shows it.
+    build = (UI_DIR / "screens-verify.js").read_text(encoding="utf-8")
+    assert "Add a Summary BOM sheet" in build
+    assert "['output', 'include']" in build
+    assert "Export summary as CSV" in build
+    preview = (UI_DIR / "screens-preview.js").read_text(encoding="utf-8")
+    assert "summaryView(d.summary)" in preview

@@ -1043,6 +1043,15 @@
           "title": "File Name",
           "type": "string"
         },
+        "include": {
+          "items": {
+            "const": "summary_bom",
+            "type": "string"
+          },
+          "title": "Include",
+          "type": "array",
+          "uniqueItems": true
+        },
         "power_footnotes": {
           "items": {
             "type": "string"
@@ -1428,6 +1437,17 @@
           "minLength": 1,
           "pattern": "^(?!')(?:[^\\[\\]:*?/\\\\']|'(?!$))*$",
           "title": "Power Consumption",
+          "type": [
+            "string",
+            "integer"
+          ]
+        },
+        "summary_bom": {
+          "default": "Summary BOM",
+          "maxLength": 31,
+          "minLength": 1,
+          "pattern": "^(?!')(?:[^\\[\\]:*?/\\\\']|'(?!$))*$",
+          "title": "Summary Bom",
           "type": [
             "string",
             "integer"

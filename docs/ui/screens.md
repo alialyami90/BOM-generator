@@ -328,7 +328,7 @@ too and their "Go to field" opens the project page.
 
 ### Preview
 - **Layout:** title, a banner when the last load had errors, sheet tabs (one
-  Sheet per panel, then **Loose Material (n)** when the substation has loose material, then **Nameplates (n)** when some panel has plates, then Power Consumption, Heat Dissipation, Heat Calculations),
+  Sheet per panel, then **Loose Material (n)** when the substation has loose material, then **Nameplates (n)** when some panel has plates, then Power Consumption, Heat Dissipation, Heat Calculations, then **Summary BOM (n)** when included, ADR 0035),
   then the sheet.
 - **BOM sheet:** group chips A to H with counts, a row filter, a switch for the
   hidden HWIO column (the revised-cells switch was dropped, see *Departures in
@@ -383,12 +383,12 @@ front view. The workbook's sheet preview (above) is unchanged.
 
 ### Build
 - **Layout:** two columns. Left: file name (from the pattern), save folder,
-  options (highlight changes since the previous issue with a file picker, open
-  when written), the Build button and the result area. Right: what the
+  options (highlight changes since the previous issue with a file picker, add a
+  Summary BOM sheet, saved to `output.include` at once (ADR 0035), open when written), the Build button and the result area. Right: what the
   workbook contains (the Loose Material sheet only when it will be written), library, project revision and warning count.
 - **States:** blocked (errors: red banner, disabled button with a reason);
   ready; building (button busy, four named steps with a progress bar);
-  success (path, size, sheet count, Open workbook primary, Show in folder, and
+  success (path, size, sheet count, Open workbook primary, Show in folder, Export summary as CSV, and
   a short check report); failed because the file is open in Excel (red banner,
   "Try again", "Save as new name"). An existing file with the same name asks
   for confirmation in a dialog before it is replaced.

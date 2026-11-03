@@ -126,3 +126,14 @@ def test_the_page_lists_each_panels_nameplates(page: Any) -> None:
     assert plates["panel_id"] == "psa1"
     assert plates["plates"][0]["text"] == "FOPP_CCR_A01"
     assert len(plates["plates"]) == 11
+
+
+def test_summary_tab_only_when_included(app: api.Api, project: Path, page: Any) -> None:
+    # ADR 0035: the Preview mirrors the workbook, so the summary shows once it is included.
+    assert page["summary"] is None
+    ok(app.set_substation_field(str(project), "gis01", ["output", "include"], ["summary_bom"]))
+    summary = ok(app.preview_substation(str(project), "gis01"))["summary"]
+    assert summary["sheet"] == "Summary BOM"
+    mcb = next(r for r in summary["rows"] if r["ordering_code"] == "A9F74202")
+    assert mcb["qty"] == 77
+    assert mcb["where_used"].startswith("1: PSA1-C2")

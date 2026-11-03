@@ -5,6 +5,7 @@ order" (entity BomLine). Lines hold values only; SR.NO formulas, separator rows 
 cell addresses are laid out by the sheet layer.
 """
 
+from collections.abc import Mapping
 from enum import StrEnum
 from typing import Annotated, Literal
 
@@ -15,6 +16,7 @@ from bomgen.models.calc import (
     DcMains,
     HeatResult,
     HousekeepingBranch,
+    LineRef,
     PowerConsumption,
     SpareRatings,
 )
@@ -160,3 +162,40 @@ class BuildResult(OutputModel):
     strips: tuple[PanelStrips, ...] = ()  # group G before the BOM rows (ADR 0033)
     housekeeping: tuple[HousekeepingBranch, ...] = ()  # the kit's C branches (ADR 0032)
     nameplates: tuple[PanelNameplates, ...] = ()  # empty when the library has no nameplate
+
+
+class SummarySource(OutputModel):
+    """One BOM row counted in a summary line."""
+
+    ref: LineRef
+    tag: str | None = None
+    qty: int | str
+
+
+class SummaryLine(OutputModel):
+    """One Summary BOM line: a part, or a free-text item, across every sheet (ADR 0035)."""
+
+    description: str  # the first seen
+    qty: int | str  # the sum; a text quantity ("1 Lot") is never summed
+    make: str | None = None
+    model: str | None = None
+    ordering_code: str | None = None
+    sources: tuple[SummarySource, ...]
+
+    def where_used(self, sheets: Mapping[str | None, str]) -> str:
+        """``sheet: tag, tag (qty)`` per sheet, in order; ``sheets`` names each table."""
+        parts: list[str] = []
+        by_table: dict[str | None, list[SummarySource]] = {}
+        for source in self.sources:
+            by_table.setdefault(source.ref.panel_id, []).append(source)
+        for table, sources in by_table.items():
+            tags = ", ".join(s.tag for s in sources if s.tag)
+            numbers = [s.qty for s in sources if isinstance(s.qty, int)]
+            qty = sum(numbers) if len(numbers) == len(sources) else sources[0].qty
+            label = f"{sheets[table]}: {tags}" if tags else sheets[table]
+            parts.append(f"{label} ({qty})")
+        return "; ".join(parts)
+
+
+class SummaryTable(OutputModel):
+    lines: tuple[SummaryLine, ...]

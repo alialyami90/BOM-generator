@@ -7,7 +7,7 @@ holds them); the loader resolves them.
 
 from pathlib import Path
 from string import Formatter
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import (
     Field,
@@ -41,6 +41,10 @@ class SheetNames(InputModel):
     power_consumption: ExcelSheetName = "Power Consumption"
     heat_dissipation: ExcelSheetName = "Heat Dissipation"
     heat_calculations: ExcelSheetName = "Heat Calculations"
+    summary_bom: ExcelSheetName = "Summary BOM"  # ADR 0035
+
+
+OptionalSheet = Literal["summary_bom"]  # ADR 0035: written only when included
 
 
 class OutputSettings(InputModel):
@@ -49,6 +53,7 @@ class OutputSettings(InputModel):
 
     file_name: str = "{doc_no}_PSA_BOM_Rev{rev}.xlsx"
     sheet_names: SheetNames = Field(default_factory=SheetNames)
+    include: set[OptionalSheet] = Field(default_factory=set)  # ADR 0035
     power_footnotes: list[str] = Field(default_factory=list)  # one row each; "\n" breaks the line
 
     @field_validator("power_footnotes")
