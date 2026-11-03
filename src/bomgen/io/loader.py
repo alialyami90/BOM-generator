@@ -278,7 +278,7 @@ def _load_substation(
             found.append(Issue(panel_source.path, "generated", message, line))
 
     constants = _merged(
-        _with_design_basis(project.defaults.constants, substation),
+        with_design_basis(project.defaults.constants, substation),
         substation.constants,
         source,
         ("constants",),
@@ -313,7 +313,7 @@ def _load_substation(
     )
 
 
-def _with_design_basis(base: DesignConstants, substation: Substation) -> DesignConstants:
+def with_design_basis(base: DesignConstants, substation: Substation) -> DesignConstants:
     """The project's constants with the design basis's voltages over them (ADR 0031)."""
     basis = substation.design_basis
     if basis is None:
