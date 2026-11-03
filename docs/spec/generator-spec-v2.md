@@ -358,6 +358,8 @@ The tool shall write a single Excel workbook in which every printed sheet has a 
 
 The tool can fill the substation's panels itself from its equipment list (ADR 0013, rules R5â€“R9 and their amendments). The example keeps its hand-written panels; `bomgen build --no-layout` builds from hand-written panels only.
 
+The L1 switches are sized from `network.ied_count`, or from the IED schedule when there is one: the ports each side needs per speed and media, which the switches' port groups must serve, and the IED count is then derived from it (ADR 0034).
+
 **Panel capacity**
 
 - Every panel is the enclosure's 42U (`enclosure_u`) less `spares.rack_u_reserved` (10U), so 32U are usable. Blank space has no BOM row (Q25).
@@ -424,6 +426,7 @@ The library also holds the commodity catalogues: MCBs by rating (1/2/6/10/16 A â
 - Options: aux socket (rating), smoke detector, change-over diodes (auto when single-PSU DC loads exist), ventilation mode (auto from heat check, or forced), spare branches per DC feed and on AC, main MCB override, inter-panel terminal count, grounding busbars.
 - Catalogue choice: `catalogue_choice` with a brand id or `default` per catalogue (`mcb`, `mcb_dc`, `aux_contact`, `terminal_blocks`, `busbars`, `housekeeping`); unset keys follow the project's choice, and `mcb_dc` must be a DC-rated set (ADR 0023).
 - Equipment: per device, a library `part_id` and optionally `ordering_code` (the part number printed in BOM col G instead of the library's), `overrides` of the library's `height_u`, `unit_power_w`, `supply_type`, `voltage_v`, `power_supplies`, `inrush_a` and `load_type` for this design, and, on the L1 and L2 switches, `sfp`: one SFP part per port speed and media (ADR 0024). On a switch, patch panel, firewall or gateway, `cable_manager` true or false gives or removes its 1U cable manager in the panel and on the BOM; unset keeps the category's rule (ADR 0013).
+- Network: `network.ied_count`, or `network.ied_schedule`, one row per bay and IED type with its quantity, ports per side (count, speed, media), attachment (dual, side A or side B only) and whether it lands on L1 or L2; a substation gives one or the other (ADR 0034).
 - Layout: `layout.blank_plate_u`, `layout.overrides` (device and pair moves with an optional `position` or `top_u`) and `layout.removed`, for the automatic panel layout.
 - Loose material: `loose_material.host_panel`, the panel whose document the Loose Material sheet is issued under, and `items[]`, each a library `part_id` with quantity, tag, children and `fed_from`, or a free-text `description` with quantity and tag (ADR 0022).
 - BOM document data for its page header/footer: supplier document number, revision, issue date.

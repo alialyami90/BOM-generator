@@ -825,6 +825,71 @@
       "title": "GeneratedPanels",
       "type": "object"
     },
+    "IedRow": {
+      "additionalProperties": false,
+      "description": "One row of the IED schedule: ``qty`` IEDs of one type in one bay (ADR 0034).",
+      "properties": {
+        "attachment": {
+          "default": "dual",
+          "enum": [
+            "dual",
+            "single_a",
+            "single_b"
+          ],
+          "title": "Attachment",
+          "type": "string"
+        },
+        "bay": {
+          "title": "Bay",
+          "type": "string"
+        },
+        "lands_on": {
+          "default": "l1",
+          "enum": [
+            "l1",
+            "l2"
+          ],
+          "title": "Lands On",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Notes"
+        },
+        "ports": {
+          "items": {
+            "$ref": "#/$defs/PortNeed"
+          },
+          "minItems": 1,
+          "title": "Ports",
+          "type": "array"
+        },
+        "qty": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Qty",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "bay",
+        "name"
+      ],
+      "title": "IedRow",
+      "type": "object"
+    },
     "Layout": {
       "additionalProperties": false,
       "description": "Layout inputs; the usable U per panel is computed, not written (ADR 0013).",
@@ -1002,6 +1067,13 @@
           "minimum": 0,
           "title": "Ied Count",
           "type": "integer"
+        },
+        "ied_schedule": {
+          "items": {
+            "$ref": "#/$defs/IedRow"
+          },
+          "title": "Ied Schedule",
+          "type": "array"
         },
         "l1_interlink": {
           "default": true,
@@ -1265,6 +1337,28 @@
         "media"
       ],
       "title": "PortAllocation",
+      "type": "object"
+    },
+    "PortNeed": {
+      "additionalProperties": false,
+      "description": "Ports one IED needs on each side it attaches to (ADR 0034).",
+      "properties": {
+        "count": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "media": {
+          "$ref": "#/$defs/Media",
+          "default": "MM"
+        },
+        "speed": {
+          "$ref": "#/$defs/PortSpeed",
+          "default": "100M"
+        }
+      },
+      "title": "PortNeed",
       "type": "object"
     },
     "PortPlan": {

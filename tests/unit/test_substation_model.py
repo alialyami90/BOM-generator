@@ -369,3 +369,21 @@ def test_tagging_side_letters_are_two_different_capitals() -> None:
     with pytest.raises(ValidationError):
         Tagging.model_validate({"side_letters": ["a", "b"]})
     assert Tagging.model_validate({"side_letters": ["X", "Y"]}).side_letters == ("X", "Y")
+
+
+def test_ied_count_refused_with_schedule() -> None:
+    row = {"bay": "E01", "name": "SEL-411L", "qty": 2}
+    with pytest.raises(ValidationError, match="ied_count or ied_schedule"):
+        Network.model_validate({"ied_count": 40, "ied_schedule": [row]})
+
+
+def test_ied_row_defaults_to_one_dual_100m_mm_port_landing_on_l1() -> None:
+    network = Network.model_validate({"ied_schedule": [{"bay": "E01", "name": "SEL-411L"}]})
+    (row,) = network.ied_schedule
+    assert (row.qty, row.attachment, row.lands_on) == (1, "dual", "l1")
+    assert [(p.count, p.speed, p.media) for p in row.ports] == [(1, "100M", "MM")]
+
+
+def test_ied_row_needs_a_port() -> None:
+    with pytest.raises(ValidationError, match="at least 1"):
+        Network.model_validate({"ied_schedule": [{"bay": "E01", "name": "X", "ports": []}]})

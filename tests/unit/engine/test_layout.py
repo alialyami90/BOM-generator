@@ -29,17 +29,20 @@ from bomgen.engine.layout import (
 )
 from bomgen.engine.network import accessories
 from bomgen.engine.pipeline import build
+from bomgen.engine.sizing import SizingError
 from bomgen.engine.units import expand_devices
 from bomgen.io.derived import derive_parts
 from bomgen.io.loader import LoadedSubstation, load_substation
-from bomgen.models.library import Category, PurdueLevel
+from bomgen.models.library import Category, Media, PortSpeed, PurdueLevel
 from bomgen.models.panel import Panel, PanelKind, PortAllocation
 from bomgen.models.project import LayoutDefaults
 from bomgen.models.substation import (
     DeviceMove,
     Equipment,
     EquipmentRole,
+    IedRow,
     PairMove,
+    PortNeed,
     Side,
     UnitRef,
 )
@@ -986,3 +989,78 @@ def test_equipment_alarm_toggle_reaches_the_generated_rows(example: LoadedSubsta
     fw = next(d for d in first.devices if d.part_id == "FGR-60F")
     assert fw.alarm_on_branch_mcb is False
     assert {d.alarm_on_branch_mcb for d in first.devices if d is not fw} == {None}
+
+
+# --- The IED schedule (ADR 0034) ------------------------------------------------------
+
+
+CISCO_L1 = "RST2228-L1-24MM.CISCO-LOW"  # 24 100M SFP slots for IEDs
+
+
+def with_schedule(loaded: LoadedSubstation, *rows: IedRow) -> LoadedSubstation:
+    network = loaded.substation.network.model_copy(
+        update={"ied_count": 0, "ied_schedule": list(rows)}
+    )
+    return with_changes(loaded, network=network)
+
+
+def with_l1(loaded: LoadedSubstation, part_id: str) -> LoadedSubstation:
+    return with_entry(loaded, "l1", part_id=part_id)
+
+
+def test_schedule_of_dual_100m_mm_lays_out_as_the_count(example: LoadedSubstation) -> None:
+    scheduled = layout_preview(with_schedule(example, IedRow(bay="E01", name="P", qty=40)))
+    quick = layout_preview(example)
+    assert scheduled.plan == quick.plan
+    assert scheduled.panels == quick.panels
+    assert scheduled.report.lines() == quick.report.lines()
+
+
+def test_schedule_row_landing_on_l2_adds_l2_downlinks(example: LoadedSubstation) -> None:
+    sm = PortNeed(speed=PortSpeed.G1, media=Media.SM)
+    loaded = with_schedule(
+        example,
+        IedRow(bay="E01", name="P", qty=40),
+        IedRow(bay="H01", name="Merging unit", qty=2, lands_on="l2", ports=[sm]),
+    )
+    result = layout_preview(loaded)
+    assert result.plan.l2_demand_per_side == layout_preview(example).plan.l2_demand_per_side + 2
+    l2 = result.panels[0].port_plans["RST2228-L2"]
+    assert PortAllocation(count=2, speed=PortSpeed.G1, media=Media.SM) in l2.downlinks
+
+
+def test_scheduled_ports_on_l1_sfp_slots_are_l1_downlinks(example: LoadedSubstation) -> None:
+    loaded = with_l1(with_schedule(example, IedRow(bay="E01", name="P", qty=30)), CISCO_L1)
+    first, second = layout_preview(loaded).panels
+    for panel in (first, second):
+        l1 = panel.port_plans[CISCO_L1]
+        assert l1.downlinks == [PortAllocation(count=30, speed=PortSpeed.M100, media=Media.MM)]
+
+
+def test_single_attached_ieds_land_on_side_a_switches_only(example: LoadedSubstation) -> None:
+    rows = (
+        IedRow(bay="E01", name="P", qty=30),
+        IedRow(bay="E02", name="M", qty=10, attachment="single_a"),
+    )
+    loaded = with_l1(with_schedule(example, *rows), CISCO_L1)
+    first, second = layout_preview(loaded).panels
+    assert first.port_plans[CISCO_L1].downlinks[0].count == 40
+    assert second.port_plans[CISCO_L1].downlinks[0].count == 30
+
+
+def test_schedule_with_a_removed_l1_switch_reports_port_capacity(
+    example: LoadedSubstation,
+) -> None:
+    loaded = with_schedule(example, IedRow(bay="E01", name="P", qty=40))
+    removed = [UnitRef(device="l1", unit=3, side="a")]
+    result = layout_preview(loaded, LayoutInputs(removed=removed))
+    assert [i.subject for i in result.report.issues if i.kind == "port-capacity"] == ["side A L1"]
+
+
+def test_schedule_no_l1_switch_serves_names_the_speed_and_media(
+    example: LoadedSubstation,
+) -> None:
+    copper = PortNeed(speed=PortSpeed.G1, media=Media.RJ45)
+    loaded = with_schedule(example, IedRow(bay="E01", name="C", qty=8, ports=[copper]))
+    with pytest.raises(SizingError, match="1G RJ45"):
+        layout_preview(loaded)

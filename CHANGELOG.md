@@ -9,6 +9,11 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- An IED schedule (`network.ied_schedule`) as an alternative to the IED count: rows by bay and
+  IED type with ports per side by count, speed and media, dual or single attachment, landing on
+  L1 or L2. The L1 switches are sized against their port groups per speed and media, ports on SFP
+  slots become L1 downlinks (and SFPs), L2 rows add to the L2 demand, and a sizing error names the
+  speed and media no switch serves ("1G RJ45"). The example keeps `ied_count` (M60a, ADR 0034).
 - Library parts carry a lifecycle state (draft, reviewed, released, obsolete; released by
   default), an obsolete part's successor, and a source for each sized figure: power, inrush,
   height, maximum input voltage and ports, each from a datasheet, the contractor, a measurement or

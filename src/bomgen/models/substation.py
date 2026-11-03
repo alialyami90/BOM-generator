@@ -151,13 +151,42 @@ class Topology(StrEnum):
     RING = "ring"
 
 
+class PortNeed(InputModel):
+    """Ports one IED needs on each side it attaches to (ADR 0034)."""
+
+    count: PositiveInt = 1
+    speed: PortSpeed = PortSpeed.M100
+    media: Media = Media.MM
+
+
+class IedRow(InputModel):
+    """One row of the IED schedule: ``qty`` IEDs of one type in one bay (ADR 0034)."""
+
+    bay: str
+    name: str  # the IED type or tag
+    qty: PositiveInt = 1
+    ports: Annotated[list[PortNeed], Field(min_length=1)] = Field(
+        default_factory=lambda: [PortNeed()]
+    )
+    attachment: Literal["dual", "single_a", "single_b"] = "dual"
+    lands_on: Literal["l1", "l2"] = "l1"
+    notes: str | None = None
+
+
 class Network(InputModel):
     ied_count: NonNegativeInt = 0  # field IEDs: sizes the L1 switches, never a BOM row
+    ied_schedule: list[IedRow] = Field(default_factory=list)  # replaces ied_count (ADR 0034)
     topology: Topology = Topology.STAR
     ring_max_switches: PositiveInt = 6
     l1_uplinks_per_switch: PositiveInt = 1
     l1_interlink: bool = True
     l3_uplinks_per_l2: NonNegativeInt = 2
+
+    @model_validator(mode="after")
+    def _consistent(self) -> Self:
+        if self.ied_count and self.ied_schedule:
+            raise ValueError("give ied_count or ied_schedule, not both")
+        return self
 
 
 UnitSide = Literal["a", "b"]
