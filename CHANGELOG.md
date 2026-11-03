@@ -14,6 +14,9 @@ project uses [Semantic Versioning](https://semver.org/).
   height, maximum input voltage and ports, each from a datasheet, the contractor, a measurement or
   assumed. `devices.csv` exports and imports them as `state`, `successor` and `source_<field>`
   (`kind|ref|date`). Nothing in a BOM changes (M67a, ADR 0037).
+- psa-devices 1.16.0: every part says where its power, inrush, height, input voltage and ports
+  come from: the device database's datasheet, the contractor's cited document, or assumed with
+  the reason. Checks warns when a picked part's power or inrush is assumed (M67b, ADR 0037).
 
 - The panel editor's main MCB shows the engine's rating with the rule it came from ("10 A: next
   standard size above 7.1 A, minimum 6 A"); click it to type your own, *Use automatic* to go back
@@ -45,6 +48,13 @@ project uses [Semantic Versioning](https://semver.org/).
 - A hand-written panel's Devices rows take a tag, type code and first number, with the generated
   tag as placeholder and a shared tag flagged on the row (M59). Moving, adding or removing a device
   there no longer writes the page's own fields into the panel file.
+
+### Changed
+
+- Changing a library part's power, inrush, height, input voltage or ports now needs that
+  figure's source in the same change, in the device editor or a CSV import; *assumed* counts.
+  Each save writes who changed the part, when and the note. A library saved this way opens only in
+  this release or later (M67b, ADR 0037).
 
 ## [0.3.4] - 2026-11-01
 

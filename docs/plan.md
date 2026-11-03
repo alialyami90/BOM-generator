@@ -1121,8 +1121,10 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M67 — Record sources and lifecycle.** *W1; ADR 0037 (accepted).* In two PRs so that W5's M53
   gets the state field early. **M67a** (in review): `state`, `successor`, `sources` and the change
   fields on `DeviceType`, the successor reference check, `devices.csv` columns, the schema. **M67b**
-  (planned): the source rule on edits, the change fields on save, `min_app_version`, the shipped
-  library's sources, the assumed-power check, the device editor and Library badges.
+  (in review): a sized change needs its source, the save writes who, when and the note, a
+  library that uses these fields needs this app, every shipped part sourced (psa-devices 1.16.0,
+  Q69), the assumed power and inrush check. **M67c** (planned): the device editor's state,
+  successor and Sources column, the Library state badge and *Assumed values* filter, the Parts chip.
 - **M68 — Review queue and health.** *W1.* Planned.
 - **M69 — Propose from project.** *W1.* Planned.
 
@@ -1535,3 +1537,10 @@ already opens the fewest panels, so Exactly n only differs from At most n when t
 fewer: spread them evenly, keep the spare panels empty, or offer At most n only (recommended: the
 Panels board already opens a new pair when a device is dragged onto it). M62 ships At most n
 (`layout.max_panels`); there is no `panel_count`.
+
+**Q69 — Power figures no datasheet states** (M67, ADR 0037 item 6). *Open.* Seven original
+parts carry the spec's example workbook power, which their datasheet does not state (SEL-3355
+91 W against 189 W at most; SEL-2488, SEL-3555-RTAC, SEL-3555-GW, SEL-2240, NAP-F23, IPR-2903685).
+Source them as `assumed` naming the workbook (recommended: Parts and Checks then flag them until
+someone confirms the watts), as `datasheet` citing the workbook, or with a fifth source kind for
+the client's documents (amends ADR 0037)? Until Ali answers, M67b ships them as `assumed`.

@@ -27,6 +27,10 @@ devices:
       - { part_id: FOPP-SPLICE-HOLDER, qty: 1 }
       - { part_id: FOPP-PIGTAIL-LC-SM, qty: cores }
 
+    sources:
+      height_u:
+        kind: assumed
+        ref: "the spec's example workbook; the device database could not verify it"
   - part_id: FOPP-SPOOL  # 'Panel 1' row 5
     category: component
     alt_group: FOPP-SPOOL  # M14 (ADR 0017)
@@ -69,6 +73,19 @@ devices:
     ports:  # device database (PR #18); the workbook gives no port inventory. Slot 6 is blank (G00).
       - { count: 20, speed: 1G, kind: sfp_slot, usable_for: any }  # slots 1-5, 100M/1G
       - { count: 4, speed: 1G, kind: sfp_slot, usable_for: uplink }  # slot 0, SFP+
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://assets.new.siemens.com/siemens/assets/api/uuid:7c5d5b6f-4c7a-4917-b9d4-4781694f0bb6/di-pa-ci-rst2228-brochure-en.pdf"
+      height_u:
+        kind: datasheet
+        ref: "https://assets.new.siemens.com/siemens/assets/api/uuid:7c5d5b6f-4c7a-4917-b9d4-4781694f0bb6/di-pa-ci-rst2228-brochure-en.pdf"
+      input_v_max:
+        kind: datasheet
+        ref: "https://assets.new.siemens.com/siemens/assets/api/uuid:7c5d5b6f-4c7a-4917-b9d4-4781694f0bb6/di-pa-ci-rst2228-brochure-en.pdf"
+      ports:
+        kind: assumed
+        ref: "the spec's example workbook"
       # Slot 0 takes 1/10G SFP+ (the device database records 10G); written 1G because 1G SFPs are fitted
       # in the example, and M1c matches port groups by speed.
 
@@ -98,6 +115,19 @@ devices:
       - { count: 4, speed: 1G, kind: sfp_slot, usable_for: uplink }  # SFP+ (1/10G), 1G fitted
       # Written 1G, not the device database's 10G: 1G SFPs are fitted, and M1c matches groups by speed.
     excluded_from_power: false
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://assets.new.siemens.com/siemens/assets/api/uuid:7c5d5b6f-4c7a-4917-b9d4-4781694f0bb6/di-pa-ci-rst2228-brochure-en.pdf"
+      height_u:
+        kind: datasheet
+        ref: "https://assets.new.siemens.com/siemens/assets/api/uuid:7c5d5b6f-4c7a-4917-b9d4-4781694f0bb6/di-pa-ci-rst2228-brochure-en.pdf"
+      input_v_max:
+        kind: datasheet
+        ref: "https://assets.new.siemens.com/siemens/assets/api/uuid:7c5d5b6f-4c7a-4917-b9d4-4781694f0bb6/di-pa-ci-rst2228-brochure-en.pdf"
+      ports:
+        kind: assumed
+        ref: "the spec's example workbook"
 
   - part_id: SEL-2730M-EXT  # 'Panel 1' row 10: PSA1-EXT-ESW-A
     category: network_switch
@@ -123,6 +153,22 @@ devices:
       - { count: 4, speed: 1G, kind: sfp_slot, usable_for: uplink }  # ports 1-4
       - { count: 4, speed: 1G, media: RJ45, kind: fixed, usable_for: any }  # ports 5-8
       - { count: 16, speed: 100M, media: MM, kind: fixed, usable_for: ied }  # ports 9-24
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://selinc.com/products/2730M/specs"
+      inrush_a:
+        kind: datasheet
+        ref: "https://selinc.com/products/2730M/specs"
+      height_u:
+        kind: datasheet
+        ref: "https://selinc.com/products/2730M/specs"
+      input_v_max:
+        kind: datasheet
+        ref: "https://selinc.com/products/2730M/specs"
+      ports:
+        kind: datasheet
+        ref: "https://selinc.com/products/2730M/specs"
     # NOTE: the issued sheets '1'!F10:G10 and '2'!F10:G10 list a Ruggedcom RST-2228
     # (...E01+F00+G00) here; this follows the master 'Panel 1', which Power Consumption reads.
 
@@ -145,6 +191,19 @@ devices:
     load_type: CONTINUOUS
     power_supplies: 2
     min_branch_mcb_a: 2
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "the spec's example workbook"
+      inrush_a:
+        kind: datasheet
+        ref: "https://selinc.com/api/download/107948"
+      height_u:
+        kind: datasheet
+        ref: "https://selinc.com/api/download/107948"
+      input_v_max:
+        kind: datasheet
+        ref: "https://selinc.com/api/download/107948"
 
   - part_id: FGR-60F  # 'Panel 1' row 12: PSA1-EXT-FW-A
     category: firewall
@@ -170,6 +229,19 @@ devices:
 
   # --- Group B: control cabinet (example workbook, 'Panel 3'!B4:G10) ------------------
 
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://www.fortinet.com/products/next-generation-firewall/rugged"
+      height_u:
+        kind: datasheet
+        ref: "https://www.fortinet.com/products/next-generation-firewall/rugged"
+      input_v_max:
+        kind: datasheet
+        ref: "https://www.fortinet.com/products/next-generation-firewall/rugged"
+      ports:
+        kind: assumed
+        ref: "the spec's example workbook"
   - part_id: SEL-2488  # 'Panel 3' row 4: PSA3-GPS
     category: gps_clock
     alt_group: SEL-2488  # M14 (ADR 0017)
@@ -199,6 +271,19 @@ devices:
       - { part_id: SEL-C961-025, qty: 1 }
       - { part_id: SEL-915900043, qty: 1 }
 
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "the spec's example workbook; the datasheet gives 45 W at most"
+      inrush_a:
+        kind: datasheet
+        ref: "https://selinc.com/api/download/105748"
+      height_u:
+        kind: datasheet
+        ref: "https://selinc.com/api/download/105748"
+      input_v_max:
+        kind: datasheet
+        ref: "https://selinc.com/api/download/105748"
   - part_id: SEL-3555-RTAC  # 'Panel 3' row 5: PSA3-RTAC
     category: rtac
     alt_group: SEL-3555-RTAC  # M14 (ADR 0017)
@@ -224,6 +309,19 @@ devices:
         count: 5
         per: serial_port
         description: "Terminal Blocks for RTAC COM Port"  # 'Panel 3'!C60
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "the spec's example workbook"
+      inrush_a:
+        kind: datasheet
+        ref: "https://selinc.com/api/download/107948"
+      height_u:
+        kind: datasheet
+        ref: "https://selinc.com/api/download/107948"
+      input_v_max:
+        kind: datasheet
+        ref: "https://selinc.com/api/download/107948"
 
   - part_id: SEL-2240  # 'Panel 3' row 6: PSA3-HWIO
     category: io_chassis
@@ -249,6 +347,19 @@ devices:
       - { part_id: SEL-2243, qty: 2 }
       - { part_id: SEL-2244-2, qty: 4 }
 
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "the spec's example workbook"
+      inrush_a:
+        kind: datasheet
+        ref: "https://selinc.com/api/download/97809"
+      height_u:
+        kind: datasheet
+        ref: "https://selinc.com/api/download/97809"
+      input_v_max:
+        kind: datasheet
+        ref: "https://selinc.com/api/download/97809"
   - part_id: SEL-2242  # 'Panel 3' row 7
     category: component
     alt_group: SEL-2242  # M14 (ADR 0017)
@@ -257,6 +368,10 @@ devices:
     model: SEL-2242
     ordering_code: "2242#5DPM"
     description_template: "Chassis/Backpane"
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://selinc.com/api/download/97809"
 
   - part_id: SEL-2241  # 'Panel 3' row 8
     category: component
@@ -266,6 +381,10 @@ devices:
     model: SEL-2241
     ordering_code: "2241#4D2J"
     description_template: "RTAC"
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://selinc.com/api/download/97809"
 
   - part_id: SEL-2243  # 'Panel 3' row 9
     category: component
@@ -275,6 +394,10 @@ devices:
     model: SEL-2243
     ordering_code: "224311X0"
     description_template: "Power Coupler (125V DC)"
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://selinc.com/api/download/97809"
 
   - part_id: SEL-2244-2  # 'Panel 3' row 10
     category: component
@@ -292,6 +415,10 @@ devices:
         first_slot: D
         # 'Panel 3'!C55:C58 (trailing space trimmed)
         description: 'Knife Disconnect Terminal Blocks For Axion "{slot} Slot" (DI)'
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://selinc.com/api/download/97809"
 
   # --- Group B: WS console (example workbook, 'Aux'!B4:G6) -----------------------------
 
@@ -314,6 +441,19 @@ devices:
     load_type: CONTINUOUS
     power_supplies: 2
     min_branch_mcb_a: 2
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "the spec's example workbook; the datasheet gives 189 W at most"
+      inrush_a:
+        kind: datasheet
+        ref: "https://selinc.com/products/3355/"
+      height_u:
+        kind: datasheet
+        ref: "https://selinc.com/products/3355/"
+      input_v_max:
+        kind: datasheet
+        ref: "https://selinc.com/products/3355/"
 
   - part_id: NAP-F23  # 'Aux' row 5: WS-MONITOR
     category: monitor
@@ -333,6 +473,16 @@ devices:
     load_type: CONTINUOUS
     power_supplies: 1  # single-fed through the change-over diodes (WS-QCOD-1)
     min_branch_mcb_a: 2
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "the spec's example workbook"
+      height_u:
+        kind: datasheet
+        ref: "https://www.austin-hughes.com/wp-content/uploads/2020/07/CA-UV-FHD-L.pdf"
+      input_v_max:
+        kind: datasheet
+        ref: "https://www.austin-hughes.com/wp-content/uploads/2020/07/CA-UV-FHD-L.pdf"
 
   - part_id: KEYTEK-KBM  # 'Aux' row 6: Keyboard & Mouse
     category: peripheral
@@ -343,6 +493,10 @@ devices:
     ordering_code: K-TEK-A420TP-KP-FN-MDT
     description_template: "Industrial Keyboard & Mouse"
     tag_pattern: "Keyboard & Mouse"
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://innova.se/product/k-tek-a420tp-kp-fn-mdt/"
 
   # --- Group C: network and IO accessories (derived from port plans and rules) ---------
   # Each SFP declares the one port it provides, so port-plan allocations can be matched
@@ -360,6 +514,10 @@ devices:
     ports:
       - { count: 1, speed: 1G, media: SM, kind: fixed }
 
+    sources:
+      ports:
+        kind: assumed
+        ref: "the spec's example workbook"
   - part_id: SFP-1G-SX-MM  # 'Panel 1' rows 14 and 16: L2-ESW-A01 / L1-ESW-A11 to A16 SFP (MM)
     category: sfp
     alt_group: SFP-1G-SX-MM  # M14 (ADR 0017)
@@ -372,6 +530,10 @@ devices:
     ports:
       - { count: 1, speed: 1G, media: MM, kind: fixed }
 
+    sources:
+      ports:
+        kind: assumed
+        ref: "the spec's example workbook"
   - part_id: SFP-100M-FX-MM  # 'Panel 1' row 15: L2-ESW-A01 SFP (MM)
     category: sfp
     alt_group: SFP-100M-FX-MM  # M14 (ADR 0017)
@@ -382,6 +544,10 @@ devices:
     ports:
       - { count: 1, speed: 100M, media: MM, kind: fixed }
 
+    sources:
+      ports:
+        kind: assumed
+        ref: "the spec's example workbook"
   - part_id: FR-TRAN-SX  # 'Panel 1' row 17: EXT-FW-A SFP (MM)
     category: sfp
     alt_group: FR-TRAN-SX  # M14 (ADR 0017)
@@ -392,6 +558,10 @@ devices:
     ports:
       - { count: 1, speed: 1G, media: MM, kind: fixed }
 
+    sources:
+      ports:
+        kind: assumed
+        ref: "the spec's example workbook"
   - part_id: PL1U12NEBK  # 'Panel 1' row 18: Cable Manager (9 per network cabinet)
     category: cable_manager
     alt_group: PL1U12NEBK  # M14 (ADR 0017)
@@ -401,6 +571,10 @@ devices:
     ordering_code: PL1U12NEBK
     description_template: "Brush Type Cable Manager"
     tag_pattern: "Cable Manager"
+    sources:
+      height_u:
+        kind: assumed
+        ref: "the spec's example workbook; the device database could not verify it"
 
   - part_id: SEL-C607  # 'Panel 3' row 11: COM-CABLE (one per RTAC serial port used)
     category: serial_cable
@@ -431,6 +605,10 @@ devices:
     voltage_v: 230
     unit_power_w: 11  # 'Power Consumption'!I17
     load_type: INTERMITTENT
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://www.rittal.com/pdf-creator/variant/de-de/2500210"
 
   - part_id: SK3243-FAN  # 'Panel 1' row 20: PSA1-FAN-1,2
     category: fan
@@ -444,6 +622,10 @@ devices:
     voltage_v: 230
     unit_power_w: 87  # 'Power Consumption'!I18, per fan
     load_type: INTERMITTENT
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://rittal.com/pdf-creator/variant/uk-en/3243100"
 
   - part_id: SK3238-FILTER  # 'Aux' row 8: WS-FILTER
     category: vent_filter
@@ -467,6 +649,10 @@ devices:
     voltage_v: 230
     unit_power_w: 0  # override (data/library/additions.yaml)
     load_type: INTERMITTENT
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://www.rittal.com/pdf-creator/variant/ca-en/3110000"
 
   - part_id: IPR-2903685  # 'Panel 1' row 22: PSA1-IPR
     category: relay
@@ -488,6 +674,13 @@ devices:
       - { part_id: IPR-SUPP-2900944, qty: 1 }
       - { part_id: IPR-BRACKET-2900954, qty: 1 }
 
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "the spec's example workbook; the datasheet gives 1.5 W at most"
+      input_v_max:
+        kind: datasheet
+        ref: "https://www.phoenixcontact.com/fr/produits/2903685/pdf"
   - part_id: IPR-BASE-2900934  # 'Panel 1' row 23
     category: component
     alt_group: IPR-BASE-2900934  # M14 (ADR 0017)
@@ -562,6 +755,16 @@ devices:
     load_type: CONTINUOUS  # 'Power Consumption'!K84
     power_supplies: 1  # single-fed through PSA3's change-over diodes (PSA3-QCOD-1)
     min_branch_mcb_a: 2
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://www.austin-hughes.com/wp-content/uploads/2020/07/CA-UV-4K-L.pdf"
+      height_u:
+        kind: datasheet
+        ref: "https://www.austin-hughes.com/wp-content/uploads/2020/07/CA-UV-4K-L.pdf"
+      input_v_max:
+        kind: datasheet
+        ref: "https://www.austin-hughes.com/wp-content/uploads/2020/07/CA-UV-4K-L.pdf"
 
   - part_id: NAMEPLATE-0828805  # not in the workbook: one per tagged unit (ADR 0026)
     category: accessory
@@ -686,6 +889,10 @@ devices:
         qty: cores
     alt_group: FOPP-96SM
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://ecatalog.corning.com/optical-communications/US/en/p/CCH-02U"
 
   - part_id: FOPP-96SM.CORNING-MID
     category: patch_panel
@@ -706,6 +913,10 @@ devices:
         qty: cores
     alt_group: FOPP-96SM
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://ecatalog.corning.com/optical-communications/US/en/p/CCH-03U"
 
   - part_id: FOPP-96SM.CORNING-HIGH
     category: patch_panel
@@ -726,6 +937,10 @@ devices:
         qty: cores
     alt_group: FOPP-96SM
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://ecatalog.corning.com/optical-communications/US/en/p/CCH-04U"
 
   - part_id: FOPP-96SM.PANDUIT-LOW
     category: patch_panel
@@ -746,6 +961,10 @@ devices:
         qty: cores
     alt_group: FOPP-96SM
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.heilind.com/panfce1u.html"
 
   - part_id: FOPP-96SM.PANDUIT-MID
     category: patch_panel
@@ -766,6 +985,10 @@ devices:
         qty: cores
     alt_group: FOPP-96SM
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.panduit.com/en/products/fiber-optic-systems/fiber-optic-panels-cassettes-enclosures/fiber-optic-enclosures/fce2u.html"
 
   - part_id: FOPP-96SM.PANDUIT-HIGH
     category: patch_panel
@@ -786,6 +1009,10 @@ devices:
         qty: cores
     alt_group: FOPP-96SM
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://panduit.com/en/products/fiber-optic-systems/fiber-optic-panels-cassettes-enclosures/fiber-optic-enclosures/fce4u.html"
 
   - part_id: FOPP-SPOOL.PANDUIT-LOW
     category: component
@@ -796,6 +1023,10 @@ devices:
     description_template: Fiber Management Spool
     alt_group: FOPP-SPOOL
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.gexpro.com/p/515864/panduit/spool-fiber-management-2-4-ru-/074983029693/fms2"
 
   - part_id: FOPP-SPOOL.CORNING-LOW
     category: component
@@ -806,6 +1037,10 @@ devices:
     description_template: Fiber Management Spool
     alt_group: FOPP-SPOOL
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://ecatalog.corning.com/optical-communications/US/en/p/CCH-02U"
 
   - part_id: FOPP-SPOOL.CORNING-MID
     category: component
@@ -816,6 +1051,10 @@ devices:
     description_template: Fiber Management Spool
     alt_group: FOPP-SPOOL
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://ecatalog.corning.com/optical-communications/US/en/p/CCH-03U"
 
   - part_id: FOPP-SPOOL.CORNING-HIGH
     category: component
@@ -826,6 +1065,10 @@ devices:
     description_template: Fiber Management Spool
     alt_group: FOPP-SPOOL
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://ecatalog.corning.com/optical-communications/US/en/p/CCH-04U"
 
   - part_id: FOPP-SPLICE-HOLDER.CORNING-LOW
     category: component
@@ -836,6 +1079,10 @@ devices:
     description_template: Splice Holder
     alt_group: FOPP-SPLICE-HOLDER
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://ecatalog.corning.com/optical-communications/US/en/p/M67-048"
 
   - part_id: FOPP-SPLICE-HOLDER.CORNING-MID
     category: component
@@ -846,6 +1093,10 @@ devices:
     description_template: Splice Holder
     alt_group: FOPP-SPLICE-HOLDER
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://ecatalog.corning.com/optical-communications/US/en/Fiber-Optic-Hardware/Panels-Modules-and-Cassettes/CCH-Pigtailed-Splice-Cassette/p/CCH-CS12-A9-P00RE"
 
   - part_id: FOPP-SPLICE-HOLDER.CORNING-HIGH
     category: component
@@ -856,6 +1107,10 @@ devices:
     description_template: Splice Holder
     alt_group: FOPP-SPLICE-HOLDER
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://ubbcentral.com/store/item/Corning-CCH-CS24-A9-P00RE-Pigtailed-Splice-Cassette-24F-LC-Duplex-SM-OS2-UPC-NEW_145857249978.html"
 
   - part_id: FOPP-SPLICE-HOLDER.PANDUIT-LOW
     category: component
@@ -866,6 +1121,10 @@ devices:
     description_template: Splice Holder
     alt_group: FOPP-SPLICE-HOLDER
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.gexpro.com/p/58016/panduit/splice-tray-kit/074983648931/fst6"
 
   - part_id: FOPP-SPLICE-HOLDER.PANDUIT-MID
     category: component
@@ -876,6 +1135,10 @@ devices:
     description_template: Splice Holder
     alt_group: FOPP-SPLICE-HOLDER
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.digikey.com/en/products/detail/panduit-corp/FSC24/7920008"
 
   - part_id: FOPP-SPLICE-HOLDER.PANDUIT-HIGH
     category: component
@@ -886,6 +1149,10 @@ devices:
     description_template: Splice Holder
     alt_group: FOPP-SPLICE-HOLDER
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.gexpro.com/p/400347/panduit/fiber-splice-tray-24-mechanical-or-fus/074983868193/fst24"
 
   - part_id: FOPP-PIGTAIL-LC-SM.CORNING-LOW
     category: component
@@ -896,6 +1163,10 @@ devices:
     description_template: LC Single Mode pigtails
     alt_group: FOPP-PIGTAIL-LC-SM
     tier: low
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: FOPP-PIGTAIL-LC-SM.CORNING-MID
     category: component
@@ -906,6 +1177,10 @@ devices:
     description_template: LC Single Mode pigtails
     alt_group: FOPP-PIGTAIL-LC-SM
     tier: mid
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: FOPP-PIGTAIL-LC-SM.CORNING-HIGH
     category: component
@@ -916,6 +1191,10 @@ devices:
     description_template: LC Single Mode pigtails
     alt_group: FOPP-PIGTAIL-LC-SM
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://ecatalog.corning.com/optical-communications/US/en/Fiber-Optic-Hardware/Panels-Modules-and-Cassettes/CCH-Pigtailed-Splice-Cassette/p/CCH-CS12-A9-P00RE"
 
   - part_id: FOPP-PIGTAIL-LC-SM.PANDUIT-LOW
     category: component
@@ -926,6 +1205,10 @@ devices:
     description_template: LC Single Mode pigtails
     alt_group: FOPP-PIGTAIL-LC-SM
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.guillevin.com/products/pigtail-os2-simplex-lc-upc-to-pigtail-1-m-nkfp91bn1nkm001-pan-nkfp91bn1nkm001"
 
   - part_id: FOPP-PIGTAIL-LC-SM.PANDUIT-MID
     category: component
@@ -936,6 +1219,10 @@ devices:
     description_template: LC Single Mode pigtails
     alt_group: FOPP-PIGTAIL-LC-SM
     tier: mid
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: FOPP-PIGTAIL-LC-SM.PANDUIT-HIGH
     category: component
@@ -946,6 +1233,10 @@ devices:
     description_template: LC Single Mode pigtails
     alt_group: FOPP-PIGTAIL-LC-SM
     tier: high
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: RST2228-L2.MOXA-LOW
     category: network_switch
@@ -981,6 +1272,19 @@ devices:
         usable_for: uplink
     alt_group: RST2228-L2
     tier: low
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "computed: Datasheet input current for models with 8 or more fibre ports: 0.313 A at 110 VDC. 0.313 A x 110 V = 34.4 W. (At 220 VDC: 0.167 A; at 110 VAC: 0.586 A.)"
+      height_u:
+        kind: datasheet
+        ref: "https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/"
+      input_v_max:
+        kind: datasheet
+        ref: "https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/"
+      ports:
+        kind: datasheet
+        ref: "https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/"
 
   - part_id: RST2228-L2.MOXA-MID
     category: network_switch
@@ -1015,6 +1319,19 @@ devices:
         usable_for: uplink
     alt_group: RST2228-L2
     tier: mid
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "computed: Chassis with PWR-HV-NP: max 0.11 A at 110 VDC = 12.1 W (Moxa product page). LM-7000H-4GSFP: 4.8 W max each (LM-7000H datasheet v1.1). 12.1 + 6 x 4.8 = 40.9 W. SFP transceivers not included."
+      height_u:
+        kind: datasheet
+        ref: "https://www.moxa.com/product/PT-G7728_Series.htm"
+      input_v_max:
+        kind: datasheet
+        ref: "https://www.moxa.com/product/PT-G7728_Series.htm"
+      ports:
+        kind: datasheet
+        ref: "https://www.moxa.com/product/PT-G7728_Series.htm"
 
   - part_id: RST2228-L2.MOXA-HIGH
     category: network_switch
@@ -1049,6 +1366,19 @@ devices:
         usable_for: uplink
     alt_group: RST2228-L2
     tier: high
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "computed: PT-G7828 page: max 0.11 A at 110 VDC with PWR-HV-NP = 12.1 W. Add 6 x 4.8 W max LM-7000H-4GSFP (LM-7000H datasheet v1.1): 12.1 + 28.8 = 40.9 W. SFPs not included."
+      height_u:
+        kind: datasheet
+        ref: "https://www.moxa.com/product/pt-g7828_series.htm"
+      input_v_max:
+        kind: datasheet
+        ref: "https://www.moxa.com/product/pt-g7828_series.htm"
+      ports:
+        kind: datasheet
+        ref: "https://www.moxa.com/product/pt-g7828_series.htm"
 
   - part_id: RST2228-L2.CISCO-LOW
     category: network_switch
@@ -1083,6 +1413,22 @@ devices:
         usable_for: uplink
     alt_group: RST2228-L2
     tier: low
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html"
+      inrush_a:
+        kind: datasheet
+        ref: "https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html"
+      height_u:
+        kind: datasheet
+        ref: "https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html"
+      input_v_max:
+        kind: datasheet
+        ref: "https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html"
+      ports:
+        kind: datasheet
+        ref: "https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html"
 
   - part_id: RST2228-L2.CISCO-MID
     category: network_switch
@@ -1117,6 +1463,22 @@ devices:
         usable_for: uplink
     alt_group: RST2228-L2
     tier: mid
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html"
+      inrush_a:
+        kind: datasheet
+        ref: "https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html"
+      height_u:
+        kind: datasheet
+        ref: "https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html"
+      input_v_max:
+        kind: datasheet
+        ref: "https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html"
+      ports:
+        kind: datasheet
+        ref: "https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html"
 
   - part_id: RST2228-L2.CISCO-HIGH
     category: network_switch
@@ -1151,6 +1513,22 @@ devices:
         usable_for: uplink
     alt_group: RST2228-L2
     tier: high
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://www.barcodesinc.com/cisco/part-ie-9320-22s2c4x-a.htm"
+      inrush_a:
+        kind: datasheet
+        ref: "https://www.barcodesinc.com/cisco/part-ie-9320-22s2c4x-a.htm"
+      height_u:
+        kind: datasheet
+        ref: "https://www.barcodesinc.com/cisco/part-ie-9320-22s2c4x-a.htm"
+      input_v_max:
+        kind: datasheet
+        ref: "https://www.barcodesinc.com/cisco/part-ie-9320-22s2c4x-a.htm"
+      ports:
+        kind: datasheet
+        ref: "https://www.barcodesinc.com/cisco/part-ie-9320-22s2c4x-a.htm"
 
   - part_id: RST2228-L1-24MM.MOXA-LOW
     category: network_switch
@@ -1187,6 +1565,19 @@ devices:
         usable_for: uplink
     alt_group: RST2228-L1-24MM
     tier: low
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "computed: Datasheet: 0.313 A at 110 VDC for models with 8 or more fibre ports. 0.313 x 110 = 34.4 W."
+      height_u:
+        kind: datasheet
+        ref: "https://ipc2u.com/catalog/pt-7528-12msc-12tx-4gsfp-hv-hv/"
+      input_v_max:
+        kind: datasheet
+        ref: "https://ipc2u.com/catalog/pt-7528-12msc-12tx-4gsfp-hv-hv/"
+      ports:
+        kind: datasheet
+        ref: "https://ipc2u.com/catalog/pt-7528-12msc-12tx-4gsfp-hv-hv/"
 
   - part_id: RST2228-L1-24MM.MOXA-MID
     category: network_switch
@@ -1223,6 +1614,19 @@ devices:
         usable_for: uplink
     alt_group: RST2228-L1-24MM
     tier: mid
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "computed: 0.313 A at 110 VDC (datasheet, models with 8 or more fibre ports) = 34.4 W."
+      height_u:
+        kind: datasheet
+        ref: "https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/"
+      input_v_max:
+        kind: datasheet
+        ref: "https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/"
+      ports:
+        kind: datasheet
+        ref: "https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/"
 
   - part_id: RST2228-L1-24MM.MOXA-HIGH
     category: network_switch
@@ -1258,6 +1662,19 @@ devices:
         usable_for: uplink
     alt_group: RST2228-L1-24MM
     tier: high
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "computed: 12.1 W chassis (max 0.11 A at 110 VDC, Moxa page) + 6 x 4.8 W LM-7000H-4GSFP (datasheet max) = 40.9 W; SFP transceivers excluded."
+      height_u:
+        kind: datasheet
+        ref: "https://www.moxa.com/product/PT-G7728_Series.htm"
+      input_v_max:
+        kind: datasheet
+        ref: "https://www.moxa.com/product/PT-G7728_Series.htm"
+      ports:
+        kind: datasheet
+        ref: "https://www.moxa.com/product/PT-G7728_Series.htm"
 
   - part_id: RST2228-L1-24MM.CISCO-LOW
     category: network_switch
@@ -1293,6 +1710,22 @@ devices:
         usable_for: uplink
     alt_group: RST2228-L1-24MM
     tier: low
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html"
+      inrush_a:
+        kind: datasheet
+        ref: "https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html"
+      height_u:
+        kind: datasheet
+        ref: "https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html"
+      input_v_max:
+        kind: datasheet
+        ref: "https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html"
+      ports:
+        kind: datasheet
+        ref: "https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html"
 
   - part_id: RST2228-L1-24MM.CISCO-MID
     category: network_switch
@@ -1328,6 +1761,22 @@ devices:
         usable_for: uplink
     alt_group: RST2228-L1-24MM
     tier: mid
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html"
+      inrush_a:
+        kind: datasheet
+        ref: "https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html"
+      height_u:
+        kind: datasheet
+        ref: "https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html"
+      input_v_max:
+        kind: datasheet
+        ref: "https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html"
+      ports:
+        kind: datasheet
+        ref: "https://cisco.com/c/en/us/products/collateral/switches/catalyst-ie9300-rugged-series/catalyst-ie9300-rugged-series-ds.html"
 
   - part_id: RST2228-L1-24MM.CISCO-HIGH
     category: network_switch
@@ -1363,6 +1812,22 @@ devices:
         usable_for: uplink
     alt_group: RST2228-L1-24MM
     tier: high
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://www.barcodesinc.com/cisco/part-ie-9320-22s2c4x-a.htm"
+      inrush_a:
+        kind: datasheet
+        ref: "https://www.barcodesinc.com/cisco/part-ie-9320-22s2c4x-a.htm"
+      height_u:
+        kind: datasheet
+        ref: "https://www.barcodesinc.com/cisco/part-ie-9320-22s2c4x-a.htm"
+      input_v_max:
+        kind: datasheet
+        ref: "https://www.barcodesinc.com/cisco/part-ie-9320-22s2c4x-a.htm"
+      ports:
+        kind: datasheet
+        ref: "https://www.barcodesinc.com/cisco/part-ie-9320-22s2c4x-a.htm"
 
   - part_id: SEL-2730M-EXT.MOXA-LOW
     category: network_switch
@@ -1398,6 +1863,19 @@ devices:
         usable_for: ied
     alt_group: SEL-2730M-EXT
     tier: low
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "computed: 0.313 A at 110 VDC (datasheet, models with 8 or more fibre ports) = 34.4 W."
+      height_u:
+        kind: datasheet
+        ref: "https://ipc2u.com/catalog/pt-7528-12msc-12tx-4gsfp-hv-hv/"
+      input_v_max:
+        kind: datasheet
+        ref: "https://ipc2u.com/catalog/pt-7528-12msc-12tx-4gsfp-hv-hv/"
+      ports:
+        kind: datasheet
+        ref: "https://ipc2u.com/catalog/pt-7528-12msc-12tx-4gsfp-hv-hv/"
 
   - part_id: SEL-2730M-EXT.MOXA-MID
     category: network_switch
@@ -1433,6 +1911,19 @@ devices:
         usable_for: ied
     alt_group: SEL-2730M-EXT
     tier: mid
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "computed: 0.313 A at 110 VDC (datasheet) = 34.4 W."
+      height_u:
+        kind: datasheet
+        ref: "https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/"
+      input_v_max:
+        kind: datasheet
+        ref: "https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/"
+      ports:
+        kind: datasheet
+        ref: "https://ipc2u.com/catalog/pt-7528-20msc-4tx-4gsfp-hv-hv/"
 
   - part_id: SEL-2730M-EXT.MOXA-HIGH
     category: network_switch
@@ -1467,6 +1958,19 @@ devices:
         usable_for: ied
     alt_group: SEL-2730M-EXT
     tier: high
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "computed: 12.1 W chassis (max 0.11 A at 110 VDC) + 4 x 4.8 W LM-7000H-4GSFP + 3.63 W LM-7000H-4GTX (LM-7000H datasheet max values) = 34.9 W; SFPs excluded."
+      height_u:
+        kind: datasheet
+        ref: "https://www.moxa.com/product/PT-G7728_Series.htm"
+      input_v_max:
+        kind: datasheet
+        ref: "https://www.moxa.com/product/PT-G7728_Series.htm"
+      ports:
+        kind: datasheet
+        ref: "https://www.moxa.com/product/PT-G7728_Series.htm"
 
   - part_id: SEL-2730M-EXT.SIEMENS-MID
     category: network_switch
@@ -1502,6 +2006,19 @@ devices:
         usable_for: uplink
     alt_group: SEL-2730M-EXT
     tier: mid
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://mall.industry.siemens.com/mall/en/WW/Catalog/Product/6GK6023-0AS24-4DC0-Z"
+      height_u:
+        kind: datasheet
+        ref: "https://mall.industry.siemens.com/mall/en/WW/Catalog/Product/6GK6023-0AS24-4DC0-Z"
+      input_v_max:
+        kind: datasheet
+        ref: "https://mall.industry.siemens.com/mall/en/WW/Catalog/Product/6GK6023-0AS24-4DC0-Z"
+      ports:
+        kind: datasheet
+        ref: "https://mall.industry.siemens.com/mall/en/WW/Catalog/Product/6GK6023-0AS24-4DC0-Z"
 
   - part_id: SEL-2730M-EXT.SIEMENS-HIGH
     category: network_switch
@@ -1537,6 +2054,19 @@ devices:
         usable_for: ied
     alt_group: SEL-2730M-EXT
     tier: high
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://assets.new.siemens.com/siemens/assets/api/uuid:7c5d5b6f-4c7a-4917-b9d4-4781694f0bb6/di-pa-ci-rst2228-brochure-en.pdf"
+      height_u:
+        kind: datasheet
+        ref: "https://assets.new.siemens.com/siemens/assets/api/uuid:7c5d5b6f-4c7a-4917-b9d4-4781694f0bb6/di-pa-ci-rst2228-brochure-en.pdf"
+      input_v_max:
+        kind: datasheet
+        ref: "https://assets.new.siemens.com/siemens/assets/api/uuid:7c5d5b6f-4c7a-4917-b9d4-4781694f0bb6/di-pa-ci-rst2228-brochure-en.pdf"
+      ports:
+        kind: datasheet
+        ref: "https://assets.new.siemens.com/siemens/assets/api/uuid:7c5d5b6f-4c7a-4917-b9d4-4781694f0bb6/di-pa-ci-rst2228-brochure-en.pdf"
 
   - part_id: SEL-3555-GW.SIEMENS-LOW
     category: gateway
@@ -1556,6 +2086,16 @@ devices:
     input_v_max: 286
     alt_group: SEL-3555-GW
     tier: low
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "Assumed: the PS-8622 can deliver at most 12 W to the CPU and I/O bus; 12 W / ~0.8 efficiency = 15 W input. No input-power figure is published for the PS-8622."
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
+      input_v_max:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-3555-GW.SIEMENS-MID
     category: gateway
@@ -1575,6 +2115,16 @@ devices:
     input_v_max: 220
     alt_group: SEL-3555-GW
     tier: mid
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "Assumed upper bound: PS-8642 rated output 45 W / ~0.8 efficiency = 56 W input. No input-power figure is published for the PS-8642 or the CP-8050."
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
+      input_v_max:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-3555-GW.SIEMENS-HIGH
     category: gateway
@@ -1594,6 +2144,16 @@ devices:
     input_v_max: 220
     alt_group: SEL-3555-GW
     tier: high
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "Assumed upper bound: two PS-8642 at 45 W output / ~0.8 efficiency = 56 W each, 112 W total. No input-power figure is published."
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
+      input_v_max:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-3555-GW.HITACHI-ENERGY-MID
     category: gateway
@@ -1619,6 +2179,19 @@ devices:
         usable_for: any
     alt_group: SEL-3555-GW
     tier: mid
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "Assumed: 44.3 W from Proax's invoice text for the 110-220 VDC RTU560 rack PSU (unlabelled, taken as the PSU rating and so an upper bound for the CMU plus rack); no input-power figure published"
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
+      input_v_max:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
+      ports:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: FGR-60F.CISCO-LOW
     category: firewall
@@ -1645,6 +2218,19 @@ devices:
         usable_for: any
     alt_group: FGR-60F
     tier: low
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://www.xsnet.com.au/product/cisco/48319/isa-3000-4c-k9"
+      height_u:
+        kind: datasheet
+        ref: "https://www.xsnet.com.au/product/cisco/48319/isa-3000-4c-k9"
+      input_v_max:
+        kind: datasheet
+        ref: "https://www.xsnet.com.au/product/cisco/48319/isa-3000-4c-k9"
+      ports:
+        kind: datasheet
+        ref: "https://www.xsnet.com.au/product/cisco/48319/isa-3000-4c-k9"
 
   - part_id: FGR-60F.CISCO-MID
     category: firewall
@@ -1675,6 +2261,19 @@ devices:
         usable_for: any
     alt_group: FGR-60F
     tier: mid
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://www.xsnet.com.au/product/cisco/48318/isa-3000-2c2f-k9"
+      height_u:
+        kind: datasheet
+        ref: "https://www.xsnet.com.au/product/cisco/48318/isa-3000-2c2f-k9"
+      input_v_max:
+        kind: datasheet
+        ref: "https://www.xsnet.com.au/product/cisco/48318/isa-3000-2c2f-k9"
+      ports:
+        kind: datasheet
+        ref: "https://www.xsnet.com.au/product/cisco/48318/isa-3000-2c2f-k9"
 
   - part_id: FGR-60F.CISCO-HIGH
     category: firewall
@@ -1710,6 +2309,22 @@ devices:
         usable_for: any
     alt_group: FGR-60F
     tier: high
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://www.connection.com/product/cisco-cisco-catalyst-ir8340-rugged-r/ir8340-k9/41420808"
+      inrush_a:
+        kind: datasheet
+        ref: "https://www.connection.com/product/cisco-cisco-catalyst-ir8340-rugged-r/ir8340-k9/41420808"
+      height_u:
+        kind: datasheet
+        ref: "https://www.connection.com/product/cisco-cisco-catalyst-ir8340-rugged-r/ir8340-k9/41420808"
+      input_v_max:
+        kind: datasheet
+        ref: "https://www.connection.com/product/cisco-cisco-catalyst-ir8340-rugged-r/ir8340-k9/41420808"
+      ports:
+        kind: datasheet
+        ref: "https://www.connection.com/product/cisco-cisco-catalyst-ir8340-rugged-r/ir8340-k9/41420808"
 
   - part_id: FGR-60F.MOXA-LOW
     category: firewall
@@ -1740,6 +2355,19 @@ devices:
         usable_for: any
     alt_group: FGR-60F
     tier: low
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "computed: Datasheet input current 0.70 A at 24 VDC: 0.70 x 24 = 16.8 W (1.51 A at 12 V = 18.1 W; 0.35 A at 48 V = 16.8 W)."
+      height_u:
+        kind: datasheet
+        ref: "https://uk.rs-online.com/web/p/routers/0288918"
+      input_v_max:
+        kind: datasheet
+        ref: "https://uk.rs-online.com/web/p/routers/0288918"
+      ports:
+        kind: datasheet
+        ref: "https://uk.rs-online.com/web/p/routers/0288918"
 
   - part_id: FGR-60F.MOXA-MID
     category: firewall
@@ -1770,6 +2398,19 @@ devices:
         usable_for: any
     alt_group: FGR-60F
     tier: mid
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "computed: Datasheet input current 0.15 A at 120 VDC: 0.15 x 120 = 18 W (0.28 A at 120 VAC; 0.08 A at 240 VDC)."
+      height_u:
+        kind: datasheet
+        ref: "https://uk.rs-online.com/web/p/routers/0288917"
+      input_v_max:
+        kind: datasheet
+        ref: "https://uk.rs-online.com/web/p/routers/0288917"
+      ports:
+        kind: datasheet
+        ref: "https://uk.rs-online.com/web/p/routers/0288917"
 
   - part_id: FGR-60F.MOXA-HIGH
     category: firewall
@@ -1800,6 +2441,19 @@ devices:
         usable_for: any
     alt_group: FGR-60F
     tier: high
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "computed: Same hardware as mid: 0.15 A at 120 VDC = 18 W."
+      height_u:
+        kind: datasheet
+        ref: "https://uk.rs-online.com/web/p/routers/0288917"
+      input_v_max:
+        kind: datasheet
+        ref: "https://uk.rs-online.com/web/p/routers/0288917"
+      ports:
+        kind: datasheet
+        ref: "https://uk.rs-online.com/web/p/routers/0288917"
 
   - part_id: SEL-2488.MEINBERG-LOW
     category: gps_clock
@@ -1832,6 +2486,16 @@ devices:
         qty: 1
     alt_group: SEL-2488
     tier: low
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "computed: Nominal current 0.63 A at 48 VDC nominal = 30.2 W"
+      height_u:
+        kind: datasheet
+        ref: "https://www.meinbergglobal.com/english/productinfo/microsync.htm"
+      input_v_max:
+        kind: datasheet
+        ref: "https://www.meinbergglobal.com/english/productinfo/microsync.htm"
 
   - part_id: SEL-2488.MEINBERG-MID
     category: gps_clock
@@ -1861,6 +2525,13 @@ devices:
         qty: 1
     alt_group: SEL-2488
     tier: mid
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://www.meinbergglobal.com/english/products/lantime-m600-gps-ptpv2.htm"
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-2488.MEINBERG-HIGH
     category: gps_clock
@@ -1893,6 +2564,16 @@ devices:
         qty: 1
     alt_group: SEL-2488
     tier: high
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://www.meinbergglobal.com/download/docs/shortinfo/german/info_ims-lantime-m1000-s.pdf"
+      height_u:
+        kind: datasheet
+        ref: "https://www.meinbergglobal.com/download/docs/shortinfo/german/info_ims-lantime-m1000-s.pdf"
+      input_v_max:
+        kind: datasheet
+        ref: "https://www.meinbergglobal.com/download/docs/shortinfo/german/info_ims-lantime-m1000-s.pdf"
 
   - part_id: SEL-2488.ARBITER-SYSTEMS-LOW
     category: gps_clock
@@ -1925,6 +2606,16 @@ devices:
         qty: 1
     alt_group: SEL-2488
     tier: low
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://arbiter.com/catalog/product/model-1201b-c-gnss-satellite-precision-time-synchronized-clock-100ns.php"
+      height_u:
+        kind: datasheet
+        ref: "https://arbiter.com/catalog/product/model-1201b-c-gnss-satellite-precision-time-synchronized-clock-100ns.php"
+      input_v_max:
+        kind: datasheet
+        ref: "https://arbiter.com/catalog/product/model-1201b-c-gnss-satellite-precision-time-synchronized-clock-100ns.php"
 
   - part_id: SEL-2488.ARBITER-SYSTEMS-HIGH
     category: gps_clock
@@ -1957,6 +2648,16 @@ devices:
         qty: 1
     alt_group: SEL-2488
     tier: high
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://arbiter.com/catalog/product/model-1206b-c-gnss-satellite-precision-time-synchronized-clock-40ns.php"
+      height_u:
+        kind: datasheet
+        ref: "https://arbiter.com/catalog/product/model-1206b-c-gnss-satellite-precision-time-synchronized-clock-40ns.php"
+      input_v_max:
+        kind: datasheet
+        ref: "https://arbiter.com/catalog/product/model-1206b-c-gnss-satellite-precision-time-synchronized-clock-40ns.php"
 
   - part_id: SEL-3555-RTAC.SIEMENS-LOW
     category: rtac
@@ -1982,6 +2683,16 @@ devices:
         description: Terminal Blocks for RTAC COM Port
     alt_group: SEL-3555-RTAC
     tier: low
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "Assumed: the PS-8622 can deliver at most 12 W to the CPU and I/O bus; 12 W / ~0.8 efficiency = 15 W input. No input-power figure is published for the PS-8622."
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
+      input_v_max:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-3555-RTAC.SIEMENS-MID
     category: rtac
@@ -2007,6 +2718,16 @@ devices:
         description: Terminal Blocks for RTAC COM Port
     alt_group: SEL-3555-RTAC
     tier: mid
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "Assumed upper bound: PS-8642 rated output 45 W / ~0.8 efficiency = 56 W input. No input-power figure is published for the PS-8642 or the CP-8050."
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
+      input_v_max:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-3555-RTAC.SIEMENS-HIGH
     category: rtac
@@ -2032,6 +2753,16 @@ devices:
         description: Terminal Blocks for RTAC COM Port
     alt_group: SEL-3555-RTAC
     tier: high
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "Assumed upper bound: two PS-8642 at 45 W output / ~0.8 efficiency = 56 W each, 112 W total. No input-power figure is published."
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
+      input_v_max:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-3555-RTAC.HITACHI-ENERGY-MID
     category: rtac
@@ -2063,6 +2794,19 @@ devices:
         usable_for: any
     alt_group: SEL-3555-RTAC
     tier: mid
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "Assumed: 44.3 W from Proax's invoice text for the 110-220 VDC RTU560 rack PSU (unlabelled, taken as the PSU rating and so an upper bound for the CMU plus rack); no input-power figure published"
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
+      input_v_max:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
+      ports:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-2240.SIEMENS-LOW
     category: io_chassis
@@ -2091,6 +2835,16 @@ devices:
         qty: 4
     alt_group: SEL-2240
     tier: low
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "Assumed: the PS-8622 can deliver at most 12 W to the CPU and I/O bus; 12 W / ~0.8 efficiency = 15 W input. No input-power figure is published for the PS-8622."
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
+      input_v_max:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-2240.SIEMENS-MID
     category: io_chassis
@@ -2119,6 +2873,16 @@ devices:
         qty: 4
     alt_group: SEL-2240
     tier: mid
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "Assumed upper bound: PS-8642 rated output 45 W / ~0.8 efficiency = 56 W input. No input-power figure is published for the PS-8642 or the CP-8050."
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
+      input_v_max:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-2240.SIEMENS-HIGH
     category: io_chassis
@@ -2147,6 +2911,16 @@ devices:
         qty: 4
     alt_group: SEL-2240
     tier: high
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "Assumed upper bound: PS-8642 rated output 45 W / ~0.8 efficiency = 56 W. With redundant supplies sharing one CPU the total draw does not double; 56 W is the per-feed worst case."
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
+      input_v_max:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-2240.HITACHI-ENERGY-MID
     category: io_chassis
@@ -2174,6 +2948,13 @@ devices:
         qty: 4
     alt_group: SEL-2240
     tier: mid
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "Assumed: 44.3 W from Proax's invoice text for the 110-220 VDC RTU560 rack PSU (unlabelled, taken as the PSU rating and so an upper bound for the CMU plus rack); no input-power figure published"
+      input_v_max:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-2242.SIEMENS-LOW
     category: component
@@ -2183,6 +2964,10 @@ devices:
     description_template: Chassis/Backpane
     alt_group: SEL-2242
     tier: low
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-2242.HITACHI-ENERGY-LOW
     category: component
@@ -2192,6 +2977,10 @@ devices:
     description_template: Chassis/Backpane
     alt_group: SEL-2242
     tier: low
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-2242.HITACHI-ENERGY-MID
     category: component
@@ -2201,6 +2990,10 @@ devices:
     description_template: Chassis/Backpane
     alt_group: SEL-2242
     tier: mid
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-2242.HITACHI-ENERGY-HIGH
     category: component
@@ -2210,6 +3003,10 @@ devices:
     description_template: Chassis/Backpane
     alt_group: SEL-2242
     tier: high
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-2241.SIEMENS-LOW
     category: component
@@ -2220,6 +3017,10 @@ devices:
     description_template: RTAC
     alt_group: SEL-2241
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://mall.industry.siemens.com/mall/tr/tr/Catalog/Product/6MF2803-1AA00"
 
   - part_id: SEL-2241.SIEMENS-MID
     category: component
@@ -2230,6 +3031,10 @@ devices:
     description_template: RTAC
     alt_group: SEL-2241
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://mall.industry.siemens.com/mall/en/oeii/Catalog/Product/6MF28050AA00"
 
   - part_id: SEL-2241.SIEMENS-HIGH
     category: component
@@ -2240,6 +3045,10 @@ devices:
     description_template: RTAC
     alt_group: SEL-2241
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.siemens.com/ja-jp/products/sicam/a8000-cp8050/"
 
   - part_id: SEL-2241.HITACHI-ENERGY-LOW
     category: component
@@ -2250,6 +3059,10 @@ devices:
     description_template: RTAC
     alt_group: SEL-2241
     tier: low
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-2241.HITACHI-ENERGY-MID
     category: component
@@ -2260,6 +3073,10 @@ devices:
     description_template: RTAC
     alt_group: SEL-2241
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://proax.ca/en/product/1108941/abb1kgt036300r0001"
 
   - part_id: SEL-2241.HITACHI-ENERGY-HIGH
     category: component
@@ -2269,6 +3086,10 @@ devices:
     description_template: RTAC
     alt_group: SEL-2241
     tier: high
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-2243.SIEMENS-LOW
     category: component
@@ -2279,6 +3100,10 @@ devices:
     description_template: Power Coupler (125V DC)
     alt_group: SEL-2243
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.rowse-automation.co.uk/siemens-6mf2862-0aa00"
 
   - part_id: SEL-2243.SIEMENS-MID
     category: component
@@ -2289,6 +3114,10 @@ devices:
     description_template: Power Coupler (125V DC)
     alt_group: SEL-2243
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://mall.industry.siemens.com/mall/en/kr/Catalog/Product/6MF2862-2AA00"
 
   - part_id: SEL-2243.SIEMENS-HIGH
     category: component
@@ -2299,6 +3128,10 @@ devices:
     description_template: Power Coupler (125V DC)
     alt_group: SEL-2243
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.rowse-automation.co.uk/siemens-6mf2864-2aa00"
 
   - part_id: SEL-2243.HITACHI-ENERGY-LOW
     category: component
@@ -2308,6 +3141,10 @@ devices:
     description_template: Power Coupler (125V DC)
     alt_group: SEL-2243
     tier: low
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-2243.HITACHI-ENERGY-MID
     category: component
@@ -2317,6 +3154,10 @@ devices:
     description_template: Power Coupler (125V DC)
     alt_group: SEL-2243
     tier: mid
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-2243.HITACHI-ENERGY-HIGH
     category: component
@@ -2326,6 +3167,10 @@ devices:
     description_template: Power Coupler (125V DC)
     alt_group: SEL-2243
     tier: high
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-2244-2.SIEMENS-LOW
     category: component
@@ -2343,6 +3188,10 @@ devices:
         description: Knife Disconnect Terminal Blocks For Axion "{slot} Slot" (DI)
     alt_group: SEL-2244-2
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://uk.rs-online.com/web/p/plc-io-modules/2751773"
 
   - part_id: SEL-2244-2.SIEMENS-MID
     category: component
@@ -2360,6 +3209,10 @@ devices:
         description: Knife Disconnect Terminal Blocks For Axion "{slot} Slot" (DI)
     alt_group: SEL-2244-2
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://uk.rs-online.com/web/p/plc-io-modules/2751773"
 
   - part_id: SEL-2244-2.SIEMENS-HIGH
     category: component
@@ -2377,6 +3230,10 @@ devices:
         description: Knife Disconnect Terminal Blocks For Axion "{slot} Slot" (DI)
     alt_group: SEL-2244-2
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.rowse-automation.co.uk/siemens-6mf2811-3aa00"
 
   - part_id: SEL-2244-2.HITACHI-ENERGY-LOW
     category: component
@@ -2392,6 +3249,10 @@ devices:
         description: Knife Disconnect Terminal Blocks For Axion "{slot} Slot" (DI)
     alt_group: SEL-2244-2
     tier: low
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-2244-2.HITACHI-ENERGY-MID
     category: component
@@ -2407,6 +3268,10 @@ devices:
         description: Knife Disconnect Terminal Blocks For Axion "{slot} Slot" (DI)
     alt_group: SEL-2244-2
     tier: mid
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-2244-2.HITACHI-ENERGY-HIGH
     category: component
@@ -2422,6 +3287,10 @@ devices:
         description: Knife Disconnect Terminal Blocks For Axion "{slot} Slot" (DI)
     alt_group: SEL-2244-2
     tier: high
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-3355.ADVANTECH-LOW
     category: workstation
@@ -2441,6 +3310,16 @@ devices:
     input_v_max: 240
     alt_group: SEL-3355
     tier: low
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://ipc2u.com/catalog/ecu-4553-r12sae"
+      height_u:
+        kind: datasheet
+        ref: "https://ipc2u.com/catalog/ecu-4553-r12sae"
+      input_v_max:
+        kind: datasheet
+        ref: "https://ipc2u.com/catalog/ecu-4553-r12sae"
 
   - part_id: SEL-3355.ADVANTECH-MID
     category: workstation
@@ -2460,6 +3339,16 @@ devices:
     input_v_max: 240
     alt_group: SEL-3355
     tier: mid
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://www.walkerindustrial.com/ECU-4784-D55SBE-Advantech-p/ecu-4784-d55sbe.htm"
+      height_u:
+        kind: datasheet
+        ref: "https://www.walkerindustrial.com/ECU-4784-D55SBE-Advantech-p/ecu-4784-d55sbe.htm"
+      input_v_max:
+        kind: datasheet
+        ref: "https://www.walkerindustrial.com/ECU-4784-D55SBE-Advantech-p/ecu-4784-d55sbe.htm"
 
   - part_id: SEL-3355.ADVANTECH-HIGH
     category: workstation
@@ -2479,6 +3368,16 @@ devices:
     input_v_max: 240
     alt_group: SEL-3355
     tier: high
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://walkerindustrial.com/ECU-4784-E56SAE-Advantech-p/ecu-4784-e56sae.htm"
+      height_u:
+        kind: datasheet
+        ref: "https://walkerindustrial.com/ECU-4784-E56SAE-Advantech-p/ecu-4784-e56sae.htm"
+      input_v_max:
+        kind: datasheet
+        ref: "https://walkerindustrial.com/ECU-4784-E56SAE-Advantech-p/ecu-4784-e56sae.htm"
 
   - part_id: NAP-F23.ADVANTECH-LOW
     category: monitor
@@ -2495,6 +3394,13 @@ devices:
     load_type: CONTINUOUS
     alt_group: NAP-F23
     tier: low
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "Datasheet gives no consumption figure. 60 W is the included adapter's rating (12 V x 5 A), used as an upper bound."
+      height_u:
+        kind: datasheet
+        ref: "https://www.advantech.com/en/products/1-2mlc1h/fpm-221w/mod_0243f1c1-4b75-41e7-a45b-db6bafb04500"
 
   - part_id: NAP-F23.ADVANTECH-MID
     category: monitor
@@ -2512,6 +3418,13 @@ devices:
     power_supplies: 1
     alt_group: NAP-F23
     tier: mid
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "computed: Datasheet states '25 W + 20%' = 30 W max"
+      height_u:
+        kind: datasheet
+        ref: "https://digikey.cn/en/products/detail/advantech-corporation/FPM-7211W-P3AE/9857627"
 
   - part_id: NAP-F23.ADVANTECH-HIGH
     category: monitor
@@ -2529,6 +3442,13 @@ devices:
     power_supplies: 1
     alt_group: NAP-F23
     tier: high
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://www.advantech.com/en/products/1-2mlc1h/fpm-724w/mod_50895519-12b6-42d7-ac9e-3f54e4582765"
+      height_u:
+        kind: datasheet
+        ref: "https://www.advantech.com/en/products/1-2mlc1h/fpm-724w/mod_50895519-12b6-42d7-ac9e-3f54e4582765"
 
   - part_id: NAP-F23.SIEMENS-LOW
     category: monitor
@@ -2548,6 +3468,16 @@ devices:
     input_v_max: 28.8
     alt_group: NAP-F23
     tier: low
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "computed: Current consumption max 1.9 A x 24 V = 45.6 W (rated 1.5 A = 36 W; power loss typ 36 W / max 41 W)"
+      height_u:
+        kind: datasheet
+        ref: "https://buerklin.com/en/p/siemens/hmi/6av7863-7ma00-2aa0/70P4279"
+      input_v_max:
+        kind: datasheet
+        ref: "https://buerklin.com/en/p/siemens/hmi/6av7863-7ma00-2aa0/70P4279"
 
   - part_id: NAP-F23.SIEMENS-MID
     category: monitor
@@ -2567,6 +3497,16 @@ devices:
     input_v_max: 28.8
     alt_group: NAP-F23
     tier: mid
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "No figure published for this code. Assumed equal to the sister IFP2400 V2 units, whose Siemens data sheets both give rated 1.5 A, max 1.9 A at 24 V (1.9 x 24 = 45.6 W), I2t 0.5 A2s, power loss 36/41 W: standard 6AV7863-7MA00-2AA0 and PRO 6AV7863-7MA16-2AA0 (which also has HDBaseT)."
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
+      input_v_max:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: NAP-F23.SIEMENS-HIGH
     category: monitor
@@ -2586,6 +3526,16 @@ devices:
     input_v_max: 28.8
     alt_group: NAP-F23
     tier: high
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "Assumed equal to the sister PRO unit 6AV7863-7MA16-2AA0 (IFP2400 V2 PRO, support-arm version). Its Siemens data sheet gives rated 1.5 A, max 1.9 A at 24 V (45.6 W), I2t 0.5 A2s, power loss 36/41 W."
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
+      input_v_max:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: KEYTEK-KBM.IKEY-LOW
     category: peripheral
@@ -2597,6 +3547,10 @@ devices:
     tag_pattern: Keyboard & Mouse
     alt_group: KEYTEK-KBM
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://ikey.com/products/sealed-keyboard-integrated-touchpad-sk-97-tp"
 
   - part_id: KEYTEK-KBM.IKEY-MID
     category: peripheral
@@ -2608,6 +3562,10 @@ devices:
     tag_pattern: Keyboard & Mouse
     alt_group: KEYTEK-KBM
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://ikey.com/products/sealed-keyboard-integrated-touchpad-backlighting-black"
 
   - part_id: KEYTEK-KBM.IKEY-HIGH
     category: peripheral
@@ -2619,6 +3577,10 @@ devices:
     tag_pattern: Keyboard & Mouse
     alt_group: KEYTEK-KBM
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://ikey.com/products/panel-mount-stainless-steel-keyboard-with-touchpad-pm-65-tp-ss"
 
   - part_id: KEYTEK-KBM.GETT-FORMERLY-INDUKEY-LOW
     category: peripheral
@@ -2630,6 +3592,10 @@ devices:
     tag_pattern: Keyboard & Mouse
     alt_group: KEYTEK-KBM
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://gett-group.com/images/Products/Keyboards/TKS_Folie/105c-TOUCH/Desktop/Documentations/GETT_TKS-105c-TOUCH-KGEH_Datasheet_Rev-10-2025.pdf"
 
   - part_id: KEYTEK-KBM.GETT-FORMERLY-INDUKEY-MID
     category: peripheral
@@ -2641,6 +3607,10 @@ devices:
     tag_pattern: Keyboard & Mouse
     alt_group: KEYTEK-KBM
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://gett-group.com/en/keyboards/stainless-steel-keyboards/tkv-084-fit-touch-ip65-mgeh-usb-de"
 
   - part_id: KEYTEK-KBM.GETT-FORMERLY-INDUKEY-HIGH
     category: peripheral
@@ -2652,6 +3622,10 @@ devices:
     tag_pattern: Keyboard & Mouse
     alt_group: KEYTEK-KBM
     tier: high
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SFP-1G-LX-SM.CISCO-LOW
     category: sfp
@@ -2662,6 +3636,10 @@ devices:
     description_template: 1000BASE-LX SM SFP (1310nm, 10 Km)
     alt_group: SFP-1G-LX-SM
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://au.stockinthechannel.com/Product/Cisco-GLC-LH-SMD-network-transceiver-module-1000-Mbit-s-SFP-1300-nm/8600444"
 
   - part_id: SFP-1G-LX-SM.CISCO-MID
     category: sfp
@@ -2672,6 +3650,10 @@ devices:
     description_template: 1000BASE-LX SM SFP (1310nm, 10 Km)
     alt_group: SFP-1G-LX-SM
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.pbtech.com/product/NETCIS1002789/Cisco-GLC-LX-SM-RGD-GLC-LX-SM-RGD--1000Mbps-SNGL-M"
 
   - part_id: SFP-1G-LX-SM.CISCO-HIGH
     category: sfp
@@ -2682,6 +3664,10 @@ devices:
     description_template: 1000BASE-LX SM SFP (1310nm, 10 Km)
     alt_group: SFP-1G-LX-SM
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.pbtech.com/product/NETCIS1141644/Cisco-GLC-ZX-SM-RGD-1000BASE-ZX-Single-Mode-Rugged"
 
   - part_id: SFP-1G-LX-SM.MOXA-LOW
     category: sfp
@@ -2692,6 +3678,10 @@ devices:
     description_template: 1000BASE-LX SM SFP (1310nm, 10 Km)
     alt_group: SFP-1G-LX-SM
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.moxa.com/en/products/accessories/sfp-modules/gigabit-ethernet-sfp-modules/sfp-1g-series/sfp-1glxlc"
 
   - part_id: SFP-1G-LX-SM.MOXA-MID
     category: sfp
@@ -2702,6 +3692,10 @@ devices:
     description_template: 1000BASE-LX SM SFP (1310nm, 10 Km)
     alt_group: SFP-1G-LX-SM
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://esaitech.com/products/moxa-media-sfp-1glxlc-t-ieee-802-3z-1g-port-gigabit-ethernet-sfp-transceiver-module"
 
   - part_id: SFP-1G-LX-SM.MOXA-HIGH
     category: sfp
@@ -2712,6 +3706,10 @@ devices:
     description_template: 1000BASE-LX SM SFP (1310nm, 10 Km)
     alt_group: SFP-1G-LX-SM
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.distrelec.ch/en/moxa-lc-single-mode-transceiver-module-full-duplex-half-duplex-1000-mbps-moxa-sfp-1glhlc/p/30519473"
 
   - part_id: SFP-1G-SX-MM.CISCO-LOW
     category: sfp
@@ -2722,6 +3720,10 @@ devices:
     description_template: 1000BASE-SX MM SFP (850nm, <500m)
     alt_group: SFP-1G-SX-MM
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://eshop.spacecom.cz/detail/Cisco-GLCSXMMD-1000BASESX-SFP/638081"
 
   - part_id: SFP-1G-SX-MM.CISCO-MID
     category: sfp
@@ -2732,6 +3734,10 @@ devices:
     description_template: 1000BASE-SX MM SFP (850nm, <500m)
     alt_group: SFP-1G-SX-MM
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.neweggbusiness.com/cisco-sfp-ge-s/p/9B-2AS-0093-00029"
 
   - part_id: SFP-1G-SX-MM.CISCO-HIGH
     category: sfp
@@ -2742,6 +3748,10 @@ devices:
     description_template: 1000BASE-SX MM SFP (850nm, <500m)
     alt_group: SFP-1G-SX-MM
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.xsnet.com.au/products/cisco-glc-sx-mm-rgd-1g-sfp-1000base-sx-850nm-550m-mmf-lc-rugged-ext-temp"
 
   - part_id: SFP-1G-SX-MM.MOXA-LOW
     category: sfp
@@ -2752,6 +3762,10 @@ devices:
     description_template: 1000BASE-SX MM SFP (850nm, <500m)
     alt_group: SFP-1G-SX-MM
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://adjditec.com/en/products/sfp-1gsxlc-moxa"
 
   - part_id: SFP-1G-SX-MM.MOXA-MID
     category: sfp
@@ -2762,6 +3776,10 @@ devices:
     description_template: 1000BASE-SX MM SFP (850nm, <500m)
     alt_group: SFP-1G-SX-MM
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://industry-electronics.com/moxa/sfp-1gsxlc-t-1000basesx-0.5-km-printview-678700.htm"
 
   - part_id: SFP-1G-SX-MM.MOXA-HIGH
     category: sfp
@@ -2772,6 +3790,10 @@ devices:
     description_template: 1000BASE-SX MM SFP (850nm, <500m)
     alt_group: SFP-1G-SX-MM
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://rspsupply.com/p-9563-moxa-sfp-1glsxlc-t-plug-in-sfp-module-lc-multi-5-km.aspx"
 
   - part_id: SFP-100M-FX-MM.CISCO-LOW
     category: sfp
@@ -2782,6 +3804,10 @@ devices:
     description_template: 100BASE-FX MM SFP (1310nm, <2km)
     alt_group: SFP-100M-FX-MM
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://multitronic.fi/en/products/54396/cisco-100base-fx-sfp-module-for-gigabit-ethernet-ports--1310-nm-wavelength--2-km-over-mmf"
 
   - part_id: SFP-100M-FX-MM.CISCO-MID
     category: sfp
@@ -2792,6 +3818,10 @@ devices:
     description_template: 100BASE-FX MM SFP (1310nm, <2km)
     alt_group: SFP-100M-FX-MM
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.distrelec.ch/en/fibre-optic-transceiver-multi-mode-100mbps-lc-sfp-2km-1300nm-cisco-glc-fe-100fx-rgd/p/30295866"
 
   - part_id: SFP-100M-FX-MM.CISCO-HIGH
     category: sfp
@@ -2802,6 +3832,10 @@ devices:
     description_template: 100BASE-FX MM SFP (1310nm, <2km)
     alt_group: SFP-100M-FX-MM
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://us.stockinthechannel.com/Product/Cisco-GLC-FE-100LX-RGD-network-transceiver-module-100-Mbit-s-SFP-1310-nm/46057492"
 
   - part_id: SFP-100M-FX-MM.MOXA-LOW
     category: sfp
@@ -2812,6 +3846,10 @@ devices:
     description_template: 100BASE-FX MM SFP (1310nm, <2km)
     alt_group: SFP-100M-FX-MM
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://moxa.com/en/products/accessories/sfp-modules/fast-ethernet-sfp-modules/sfp-1fe-series/sfp-1femlc-t"
 
   - part_id: SFP-100M-FX-MM.MOXA-HIGH
     category: sfp
@@ -2822,6 +3860,10 @@ devices:
     description_template: 100BASE-FX MM SFP (1310nm, <2km)
     alt_group: SFP-100M-FX-MM
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.moxa.com/en/products/accessories/sfp-modules/fast-ethernet-sfp-modules/sfp-1fe-series/sfp-1feslc-t"
 
   - part_id: FR-TRAN-SX.CISCO-LOW
     category: sfp
@@ -2832,6 +3874,10 @@ devices:
     description_template: Industrial SFP (1Gig, MM)
     alt_group: FR-TRAN-SX
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://eshop.spacecom.cz/detail/Cisco-GLCSXMMD-1000BASESX-SFP/638081"
 
   - part_id: FR-TRAN-SX.CISCO-MID
     category: sfp
@@ -2842,6 +3888,10 @@ devices:
     description_template: Industrial SFP (1Gig, MM)
     alt_group: FR-TRAN-SX
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.neweggbusiness.com/cisco-sfp-ge-s/p/9B-2AS-0093-00029"
 
   - part_id: FR-TRAN-SX.CISCO-HIGH
     category: sfp
@@ -2852,6 +3902,10 @@ devices:
     description_template: Industrial SFP (1Gig, MM)
     alt_group: FR-TRAN-SX
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.xsnet.com.au/products/cisco-glc-sx-mm-rgd-1g-sfp-1000base-sx-850nm-550m-mmf-lc-rugged-ext-temp"
 
   - part_id: FR-TRAN-SX.MOXA-LOW
     category: sfp
@@ -2862,6 +3916,10 @@ devices:
     description_template: Industrial SFP (1Gig, MM)
     alt_group: FR-TRAN-SX
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://adjditec.com/en/products/sfp-1gsxlc-moxa"
 
   - part_id: FR-TRAN-SX.MOXA-MID
     category: sfp
@@ -2872,6 +3930,10 @@ devices:
     description_template: Industrial SFP (1Gig, MM)
     alt_group: FR-TRAN-SX
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://industry-electronics.com/moxa/sfp-1gsxlc-t-1000basesx-0.5-km-printview-678700.htm"
 
   - part_id: FR-TRAN-SX.MOXA-HIGH
     category: sfp
@@ -2882,6 +3944,10 @@ devices:
     description_template: Industrial SFP (1Gig, MM)
     alt_group: FR-TRAN-SX
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://rspsupply.com/p-9563-moxa-sfp-1glsxlc-t-plug-in-sfp-module-lc-multi-5-km.aspx"
 
   - part_id: PL1U12NEBK.STARTECH-COM-LOW
     category: cable_manager
@@ -2893,6 +3959,10 @@ devices:
     tag_pattern: Cable Manager
     alt_group: PL1U12NEBK
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.cdw.com/shop/products/StarTech.com/3185627.aspx"
 
   - part_id: PL1U12NEBK.STARTECH-COM-HIGH
     category: cable_manager
@@ -2904,6 +3974,10 @@ devices:
     tag_pattern: Cable Manager
     alt_group: PL1U12NEBK
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://deploydepot.ca/products/startech-com-2u-horizontal-finger-duct-rack-cable-management-panel-with-cover-cmduct2u"
 
   - part_id: PL1U12NEBK.PANDUIT-LOW
     category: cable_manager
@@ -2915,6 +3989,10 @@ devices:
     tag_pattern: Cable Manager
     alt_group: PL1U12NEBK
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.heilind.com/pannmf1.html"
 
   - part_id: PL1U12NEBK.PANDUIT-MID
     category: cable_manager
@@ -2926,6 +4004,10 @@ devices:
     tag_pattern: Cable Manager
     alt_group: PL1U12NEBK
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.heilind.com/panbr1b.html"
 
   - part_id: PL1U12NEBK.PANDUIT-HIGH
     category: cable_manager
@@ -2937,6 +4019,10 @@ devices:
     tag_pattern: Cable Manager
     alt_group: PL1U12NEBK
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.mc-mc.com/Product/panduit-nm1"
 
   - part_id: SEL-C607.MOXA-LOW
     category: serial_cable
@@ -2948,6 +4034,10 @@ devices:
     tag_pattern: COM-CABLE
     alt_group: SEL-C607
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://shop.manuauto.com/products/moxa-cbl-rj45m9-150-serial-cable"
 
   - part_id: SEL-C607.MOXA-MID
     category: serial_cable
@@ -2959,6 +4049,10 @@ devices:
     tag_pattern: COM-CABLE
     alt_group: SEL-C607
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://azcus.digikey.com/en/products/detail/moxa/CBL-RJ45F9-150/14671470"
 
   - part_id: SEL-C607.MOXA-HIGH
     category: serial_cable
@@ -2970,6 +4064,10 @@ devices:
     tag_pattern: COM-CABLE
     alt_group: SEL-C607
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://shop.manuauto.com/products/moxa-cbl-rj45sf9-150-serial-cable"
 
   - part_id: SEL-C607.DIGI-LOW
     category: serial_cable
@@ -2981,6 +4079,10 @@ devices:
     tag_pattern: COM-CABLE
     alt_group: SEL-C607
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.connection.com/product/digi-rj-45-m-to-db9-m-cable-4ft/76000240/185116"
 
   - part_id: SEL-C607.DIGI-MID
     category: serial_cable
@@ -2992,6 +4094,10 @@ devices:
     tag_pattern: COM-CABLE
     alt_group: SEL-C607
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.connection.com/product/digi-rj-45-m-to-db9-f-cable-4ft/76000201/347572"
 
   - part_id: SEL-C607.DIGI-HIGH
     category: serial_cable
@@ -3003,6 +4109,10 @@ devices:
     tag_pattern: COM-CABLE
     alt_group: SEL-C607
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://westwardsales.com/digi-76000645-cable"
 
   - part_id: SZ2500-LAMP.STEGO-LOW
     category: lamp
@@ -3019,6 +4129,13 @@ devices:
     load_type: INTERMITTENT
     alt_group: SZ2500-LAMP
     tier: low
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://ph.rs-online.com/web/p/cabinet-lighting/8103176"
+      height_u:
+        kind: datasheet
+        ref: "https://ph.rs-online.com/web/p/cabinet-lighting/8103176"
 
   - part_id: SZ2500-LAMP.STEGO-MID
     category: lamp
@@ -3035,6 +4152,13 @@ devices:
     load_type: INTERMITTENT
     alt_group: SZ2500-LAMP
     tier: mid
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://www.distrelec.be/en/stego-varioline-led-025-series-led-enclosure-light-110-240-ac-351-mm-length-6500k-stego-02540-01/p/30489816"
+      height_u:
+        kind: datasheet
+        ref: "https://www.distrelec.be/en/stego-varioline-led-025-series-led-enclosure-light-110-240-ac-351-mm-length-6500k-stego-02540-01/p/30489816"
 
   - part_id: SZ2500-LAMP.STEGO-HIGH
     category: lamp
@@ -3051,6 +4175,13 @@ devices:
     load_type: INTERMITTENT
     alt_group: SZ2500-LAMP
     tier: high
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://uk.rs-online.com/web/p/cabinet-lighting/0655411"
+      height_u:
+        kind: datasheet
+        ref: "https://uk.rs-online.com/web/p/cabinet-lighting/0655411"
 
   - part_id: SZ2500-LAMP.NVENT-HOFFMAN-LOW
     category: lamp
@@ -3067,6 +4198,13 @@ devices:
     load_type: INTERMITTENT
     alt_group: SZ2500-LAMP
     tier: low
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://steinerelectric.com/Product/nVent-HOFFMAN-EL900D-EL-Enclosure-Light-With-Door-Operated-Switch-Connection100-to-240-VACPlastic-1189476"
+      height_u:
+        kind: datasheet
+        ref: "https://steinerelectric.com/Product/nVent-HOFFMAN-EL900D-EL-Enclosure-Light-With-Door-Operated-Switch-Connection100-to-240-VACPlastic-1189476"
 
   - part_id: SZ2500-LAMP.NVENT-HOFFMAN-MID
     category: lamp
@@ -3083,6 +4221,13 @@ devices:
     load_type: INTERMITTENT
     alt_group: SZ2500-LAMP
     tier: mid
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://www.lemu.dk/en/product/led-cabin-light-el1200ds-bf-id-7857990968"
+      height_u:
+        kind: datasheet
+        ref: "https://www.lemu.dk/en/product/led-cabin-light-el1200ds-bf-id-7857990968"
 
   - part_id: SZ2500-LAMP.NVENT-HOFFMAN-HIGH
     category: lamp
@@ -3099,6 +4244,13 @@ devices:
     load_type: INTERMITTENT
     alt_group: SZ2500-LAMP
     tier: high
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://mc-mc.com/Product/nvent-hoffman-el1200m"
+      height_u:
+        kind: datasheet
+        ref: "https://mc-mc.com/Product/nvent-hoffman-el1200m"
 
   - part_id: SK3243-FAN.PFANNENBERG-LOW
     category: fan
@@ -3114,6 +4266,13 @@ devices:
     load_type: INTERMITTENT
     alt_group: SK3243-FAN
     tier: low
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://www.motorsandcontrol.com/11665104055-pfannenberg.html"
+      height_u:
+        kind: datasheet
+        ref: "https://www.motorsandcontrol.com/11665104055-pfannenberg.html"
 
   - part_id: SK3243-FAN.PFANNENBERG-MID
     category: fan
@@ -3129,6 +4288,13 @@ devices:
     load_type: INTERMITTENT
     alt_group: SK3243-FAN
     tier: mid
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://uk.rs-online.com/web/p/filter-fans/0497567"
+      height_u:
+        kind: datasheet
+        ref: "https://uk.rs-online.com/web/p/filter-fans/0497567"
 
   - part_id: SK3243-FAN.PFANNENBERG-HIGH
     category: fan
@@ -3144,6 +4310,13 @@ devices:
     load_type: INTERMITTENT
     alt_group: SK3243-FAN
     tier: high
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://uk.rs-online.com/web/p/filter-fans/0497589"
+      height_u:
+        kind: datasheet
+        ref: "https://uk.rs-online.com/web/p/filter-fans/0497589"
 
   - part_id: SK3243-FAN.STEGO-LOW
     category: fan
@@ -3159,6 +4332,13 @@ devices:
     load_type: INTERMITTENT
     alt_group: SK3243-FAN
     tier: low
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://solutionsdirectonline.com/stego-enclosure-exhaust-filter-fan-179-5-cfm-230-vac-01873-0-30"
+      height_u:
+        kind: datasheet
+        ref: "https://solutionsdirectonline.com/stego-enclosure-exhaust-filter-fan-179-5-cfm-230-vac-01873-0-30"
 
   - part_id: SK3243-FAN.STEGO-MID
     category: fan
@@ -3174,6 +4354,13 @@ devices:
     load_type: INTERMITTENT
     alt_group: SK3243-FAN
     tier: mid
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://buerklin.com/en/p/stego/panel-mount-fans/01874-0-30/80H7921"
+      height_u:
+        kind: datasheet
+        ref: "https://buerklin.com/en/p/stego/panel-mount-fans/01874-0-30/80H7921"
 
   - part_id: SK3243-FAN.STEGO-HIGH
     category: fan
@@ -3189,6 +4376,13 @@ devices:
     load_type: INTERMITTENT
     alt_group: SK3243-FAN
     tier: high
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://ph.rs-online.com/web/p/filter-fans/1947672"
+      height_u:
+        kind: datasheet
+        ref: "https://ph.rs-online.com/web/p/filter-fans/1947672"
 
   - part_id: SK3238-FILTER.PFANNENBERG-LOW
     category: vent_filter
@@ -3201,6 +4395,10 @@ devices:
     tag_pattern: '{prefix}-FILTER'
     alt_group: SK3238-FILTER
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://uk.rs-online.com/web/p/fan-filters/0497595"
 
   - part_id: SK3238-FILTER.PFANNENBERG-MID
     category: vent_filter
@@ -3213,6 +4411,10 @@ devices:
     tag_pattern: '{prefix}-FILTER'
     alt_group: SK3238-FILTER
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://uk.rs-online.com/web/p/fan-filters/0497600"
 
   - part_id: SK3238-FILTER.PFANNENBERG-HIGH
     category: vent_filter
@@ -3225,6 +4427,10 @@ devices:
     tag_pattern: '{prefix}-FILTER'
     alt_group: SK3238-FILTER
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.distrelec.ch/en/exhaust-filter-ip54-exhaust-145-145mm-pfannenberg-11920001055/p/30367832"
 
   - part_id: SK3238-FILTER.STEGO-LOW
     category: vent_filter
@@ -3237,6 +4443,10 @@ devices:
     tag_pattern: '{prefix}-FILTER'
     alt_group: SK3238-FILTER
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://solutionsdirectonline.com/stego_exhaust_filter_3-6_x_3-6_11870-0-00"
 
   - part_id: SK3238-FILTER.STEGO-MID
     category: vent_filter
@@ -3249,6 +4459,10 @@ devices:
     tag_pattern: '{prefix}-FILTER'
     alt_group: SK3238-FILTER
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://at.rs-online.com/web/p/lufterfilter/9160013"
 
   - part_id: SK3238-FILTER.STEGO-HIGH
     category: vent_filter
@@ -3261,6 +4475,10 @@ devices:
     tag_pattern: '{prefix}-FILTER'
     alt_group: SK3238-FILTER
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://solutionsdirectonline.com/stego_exhaust_filter_6-9_x_6-9_11872-0-00"
 
   - part_id: SK3110-TH.PFANNENBERG-LOW
     category: thermostat
@@ -3272,6 +4490,10 @@ devices:
     tag_type: TH
     alt_group: SK3110-TH
     tier: low
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SK3110-TH.PFANNENBERG-MID
     category: thermostat
@@ -3283,6 +4505,10 @@ devices:
     tag_type: TH
     alt_group: SK3110-TH
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://motorsandcontrol.com/pfannenberg-17103000010-change-over-contact-single-thermostat-flz-510"
 
   - part_id: SK3110-TH.PFANNENBERG-HIGH
     category: thermostat
@@ -3294,6 +4520,10 @@ devices:
     tag_type: TH
     alt_group: SK3110-TH
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://solutionsdirectonline.com/pfannenberg-dual-enclosure-thermostat-no-no-17143000010"
 
   - part_id: SK3110-TH.STEGO-LOW
     category: thermostat
@@ -3305,6 +4535,10 @@ devices:
     tag_type: TH
     alt_group: SK3110-TH
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://industrial.rubicon.tech/products/stego-thermostat-2-state-regulator-no-0-60-c-250vac-10a"
 
   - part_id: SK3110-TH.STEGO-MID
     category: thermostat
@@ -3316,6 +4550,10 @@ devices:
     tag_type: TH
     alt_group: SK3110-TH
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://solutionsdirectonline.com/enclosure-dual-thermostat-ncno-0-60-c--011720-00-p5996.aspx"
 
   - part_id: SK3110-TH.STEGO-HIGH
     category: thermostat
@@ -3331,6 +4569,13 @@ devices:
     load_type: INTERMITTENT
     alt_group: SK3110-TH
     tier: high
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://dacpol.eu/en/10966-series-etr011"
+      height_u:
+        kind: datasheet
+        ref: "https://dacpol.eu/en/10966-series-etr011"
 
   - part_id: IPR-2903685.FINDER-LOW
     category: relay
@@ -3354,6 +4599,13 @@ devices:
         qty: 1
     alt_group: IPR-2903685
     tier: low
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://www.elektramat.nl/finder-40-52-8-230-0000-find-relais-2w-8a-230vac"
+      height_u:
+        kind: datasheet
+        ref: "https://www.elektramat.nl/finder-40-52-8-230-0000-find-relais-2w-8a-230vac"
 
   - part_id: IPR-2903685.FINDER-MID
     category: relay
@@ -3377,6 +4629,13 @@ devices:
         qty: 1
     alt_group: IPR-2903685
     tier: mid
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://powermatic.net/part/finder/55.34.8.230.5040/826418"
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: IPR-2903685.FINDER-HIGH
     category: relay
@@ -3400,6 +4659,13 @@ devices:
         qty: 1
     alt_group: IPR-2903685
     tier: high
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://powermatic.net/part/finder/55.34.8.230.0050/826410"
+      height_u:
+        kind: datasheet
+        ref: "https://powermatic.net/part/finder/55.34.8.230.0050/826410"
 
   - part_id: IPR-2903685.WEIDMULLER-LOW
     category: relay
@@ -3423,6 +4689,13 @@ devices:
         qty: 1
     alt_group: IPR-2903685
     tier: low
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "computed: DRM570730 230 VAC coil: 6.1 mA at 50 Hz x 230 V = 1.40 VA (datasheet power rating 1.0-1.2 VA at 60 Hz); W <= VA"
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: IPR-2903685.WEIDMULLER-MID
     category: relay
@@ -3446,6 +4719,13 @@ devices:
         qty: 1
     alt_group: IPR-2903685
     tier: mid
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "computed: 6.1 mA (50 Hz) x 230 V = 1.40 VA; datasheet 1.0-1.2 VA at 60 Hz"
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: IPR-2903685.WEIDMULLER-HIGH
     category: relay
@@ -3469,6 +4749,13 @@ devices:
         qty: 1
     alt_group: IPR-2903685
     tier: high
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "computed: Datasheet: rated current 6.1 mA (50 Hz) / 5.2 mA (60 Hz), power 1.0-1.2 VA (60 Hz); 6.1 mA x 230 V = 1.40 VA"
+      height_u:
+        kind: datasheet
+        ref: "https://uk.misumi-ec.com/pdf/ds/WML1/7760056190_DRM570730LT_AU_eng.pdf"
 
   - part_id: IPR-BASE-2900934.FINDER-LOW
     category: component
@@ -3479,6 +4766,10 @@ devices:
     description_template: IPR Relay Base
     alt_group: IPR-BASE-2900934
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://nz.element14.com/finder/94-04sma/socket-85-series/dp/4269081"
 
   - part_id: IPR-BASE-2900934.FINDER-MID
     category: component
@@ -3489,6 +4780,10 @@ devices:
     description_template: IPR Relay Base
     alt_group: IPR-BASE-2900934
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.conrad.com/p/finder-94p4-relay-socket-compatible-with-series-finder-55-series-finder-86-series-finder-094-series-finder-5532-f-1419657"
 
   - part_id: IPR-BASE-2900934.FINDER-HIGH
     category: component
@@ -3499,6 +4794,10 @@ devices:
     description_template: IPR Relay Base
     alt_group: IPR-BASE-2900934
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.rapidonline.com/catalogue/product/51-0647"
 
   - part_id: IPR-BASE-2900934.WEIDMULLER-LOW
     category: component
@@ -3509,6 +4808,10 @@ devices:
     description_template: IPR Relay Base
     alt_group: IPR-BASE-2900934
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.mouser.com/datasheet/2/575/7760056264_SCM_4CO_ECO_en-2471945.pdf"
 
   - part_id: IPR-BASE-2900934.WEIDMULLER-MID
     category: component
@@ -3519,6 +4822,10 @@ devices:
     description_template: IPR Relay Base
     alt_group: IPR-BASE-2900934
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://cdn.erply.com/files/396198/7760056363-SCM-4CO-P-en-2.pdf"
 
   - part_id: IPR-BASE-2900934.WEIDMULLER-HIGH
     category: component
@@ -3529,6 +4836,10 @@ devices:
     description_template: IPR Relay Base
     alt_group: IPR-BASE-2900934
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://pacificautomation.com.au/electrical-components/relays-and-opto-couplers/general-purpose-relays/block-style-relays/weidmuller-7760056107-fs-4co-1018476"
 
   - part_id: IPR-SUPP-2900944.FINDER-LOW
     category: component
@@ -3539,6 +4850,10 @@ devices:
     description_template: Suppression Module
     alt_group: IPR-SUPP-2900944
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.standardelectricsupply.com/347328-Finder-9902023059"
 
   - part_id: IPR-SUPP-2900944.FINDER-MID
     category: component
@@ -3549,6 +4864,10 @@ devices:
     description_template: Suppression Module
     alt_group: IPR-SUPP-2900944
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.rapidonline.com/finder-99-02-0-230-98-coil-indication-and-emc-suppression-module-110-240vac-dc-51-0442"
 
   - part_id: IPR-SUPP-2900944.FINDER-HIGH
     category: component
@@ -3559,6 +4878,10 @@ devices:
     description_template: Suppression Module
     alt_group: IPR-SUPP-2900944
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://jp.rs-online.com/web/p/pluggable-function-modules/6239721"
 
   - part_id: IPR-SUPP-2900944.WEIDMULLER-LOW
     category: component
@@ -3569,6 +4892,10 @@ devices:
     description_template: Suppression Module
     alt_group: IPR-SUPP-2900944
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.mouser.lt/datasheet/3/864/1/7760056014_RIM_3_110_230VAC_en.pdf"
 
   - part_id: IPR-SUPP-2900944.WEIDMULLER-MID
     category: component
@@ -3579,6 +4906,10 @@ devices:
     description_template: Suppression Module
     alt_group: IPR-SUPP-2900944
     tier: mid
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: IPR-SUPP-2900944.WEIDMULLER-HIGH
     category: component
@@ -3589,6 +4920,10 @@ devices:
     description_template: Suppression Module
     alt_group: IPR-SUPP-2900944
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.mouser.lt/datasheet/3/864/1/1174670000_RIM_5_6_230VAC_en.pdf"
 
   - part_id: IPR-BRACKET-2900954.FINDER-LOW
     category: component
@@ -3599,6 +4934,10 @@ devices:
     description_template: Retaining Bracket - RIF-RH-2
     alt_group: IPR-BRACKET-2900954
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.standardelectricsupply.com/FINDER-09471-Retaining-Clip"
 
   - part_id: IPR-BRACKET-2900954.FINDER-MID
     category: component
@@ -3609,6 +4948,10 @@ devices:
     description_template: Retaining Bracket - RIF-RH-2
     alt_group: IPR-BRACKET-2900954
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.rapidonline.com/finder-094-91-3-plastic-retaining-and-release-clip-blue-for-94-series-sockets-51-0649"
 
   - part_id: IPR-BRACKET-2900954.FINDER-HIGH
     category: component
@@ -3619,6 +4962,10 @@ devices:
     description_template: Retaining Bracket - RIF-RH-2
     alt_group: IPR-BRACKET-2900954
     tier: high
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: IPR-BRACKET-2900954.WEIDMULLER-LOW
     category: component
@@ -3629,6 +4976,10 @@ devices:
     description_template: Retaining Bracket - RIF-RH-2
     alt_group: IPR-BRACKET-2900954
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://rspsupply.com/p-212710-weidmuller-7760056108-retaining-clip.aspx"
 
   - part_id: IPR-BRACKET-2900954.WEIDMULLER-MID
     category: component
@@ -3639,6 +4990,10 @@ devices:
     description_template: Retaining Bracket - RIF-RH-2
     alt_group: IPR-BRACKET-2900954
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://eshop.weidmueller.com/es/scm-clip-p/p/7760056367"
 
   - part_id: IPR-BRACKET-2900954.WEIDMULLER-HIGH
     category: component
@@ -3649,6 +5004,10 @@ devices:
     description_template: Retaining Bracket - RIF-RH-2
     alt_group: IPR-BRACKET-2900954
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://mouser.com/datasheet/2/575/7760056235_SLD_CLIP_4CO_M_en-2471929.pdf"
 
   - part_id: COD-NEG-IRND150F12.SEMIKRON-DANFOSS-LOW
     category: change_over_diode
@@ -3661,6 +5020,10 @@ devices:
     tag_pattern: '{prefix}-COD-1'
     alt_group: COD-NEG-IRND150F12
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://shop.richardsonrfpd.com/Products/Product/SKND105F12"
 
   - part_id: COD-NEG-IRND150F12.SEMIKRON-DANFOSS-MID
     category: change_over_diode
@@ -3673,6 +5036,10 @@ devices:
     tag_pattern: '{prefix}-COD-1'
     alt_group: COD-NEG-IRND150F12
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.semikron-danfoss.com/products/p/sknd-150f12-230b1844"
 
   - part_id: COD-NEG-IRND150F12.SEMIKRON-DANFOSS-HIGH
     category: change_over_diode
@@ -3685,6 +5052,10 @@ devices:
     tag_pattern: '{prefix}-COD-1'
     alt_group: COD-NEG-IRND150F12
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.semikron-danfoss.com/products/p/skkd-150f12-230b1837"
 
   - part_id: COD-NEG-IRND150F12.IXYS-LITTELFUSE-LOW
     category: change_over_diode
@@ -3697,6 +5068,10 @@ devices:
     tag_pattern: '{prefix}-COD-1'
     alt_group: COD-NEG-IRND150F12
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://uk.rs-online.com/web/p/schottky-diodes-rectifiers/1258054"
 
   - part_id: COD-NEG-IRND150F12.IXYS-LITTELFUSE-MID
     category: change_over_diode
@@ -3709,6 +5084,10 @@ devices:
     tag_pattern: '{prefix}-COD-1'
     alt_group: COD-NEG-IRND150F12
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://uk.rs-online.com/web/p/schottky-diodes-rectifiers/0192433"
 
   - part_id: COD-NEG-IRND150F12.IXYS-LITTELFUSE-HIGH
     category: change_over_diode
@@ -3721,6 +5100,10 @@ devices:
     tag_pattern: '{prefix}-COD-1'
     alt_group: COD-NEG-IRND150F12
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.ozdisan.com/en/p/module-diodes-388/ixys-mea250-12da-361957"
 
   - part_id: COD-POS-IRMD150F12.SEMIKRON-DANFOSS-LOW
     category: change_over_diode
@@ -3733,6 +5116,10 @@ devices:
     tag_pattern: '{prefix}-COD-2'
     alt_group: COD-POS-IRMD150F12
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://semikron-danfoss.com/products/p/skkd-105f12-07918480"
 
   - part_id: COD-POS-IRMD150F12.SEMIKRON-DANFOSS-MID
     category: change_over_diode
@@ -3745,6 +5132,10 @@ devices:
     tag_pattern: '{prefix}-COD-2'
     alt_group: COD-POS-IRMD150F12
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.semikron-danfoss.com/products/p/skmd-150f12-230b1843"
 
   - part_id: COD-POS-IRMD150F12.SEMIKRON-DANFOSS-HIGH
     category: change_over_diode
@@ -3757,6 +5148,10 @@ devices:
     tag_pattern: '{prefix}-COD-2'
     alt_group: COD-POS-IRMD150F12
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.tme.eu/en/katalog/diode-modules_113441/params/b35_case/p1441047_semipack2/"
 
   - part_id: COD-POS-IRMD150F12.IXYS-LITTELFUSE-LOW
     category: change_over_diode
@@ -3769,6 +5164,10 @@ devices:
     tag_pattern: '{prefix}-COD-2'
     alt_group: COD-POS-IRMD150F12
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://uk.rs-online.com/web/p/schottky-diodes-rectifiers/7115320P"
 
   - part_id: COD-POS-IRMD150F12.IXYS-LITTELFUSE-MID
     category: change_over_diode
@@ -3781,6 +5180,10 @@ devices:
     tag_pattern: '{prefix}-COD-2'
     alt_group: COD-POS-IRMD150F12
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.tme.eu/en/katalog/diode-modules_113441/params/b227_load-current/p1440742_150a/"
 
   - part_id: COD-POS-IRMD150F12.IXYS-LITTELFUSE-HIGH
     category: change_over_diode
@@ -3793,6 +5196,10 @@ devices:
     tag_pattern: '{prefix}-COD-2'
     alt_group: COD-POS-IRMD150F12
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.tme.com/th/en/details/mek250-12da/diode-modules/ixys/"
 
   - part_id: SOCKET-730076.SCHNEIDER-ELECTRIC-LOW
     category: socket
@@ -3805,6 +5212,10 @@ devices:
     tag_pattern: '{prefix}-AUX PS'
     alt_group: SOCKET-730076
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://eshop.se.com/qa/lisse-switched-socket-without-instructions-13-a-230-v-2-gangs-white-ggbl3020nis.html"
 
   - part_id: SOCKET-730076.SCHNEIDER-ELECTRIC-MID
     category: socket
@@ -3817,6 +5228,10 @@ devices:
     tag_pattern: '{prefix}-AUX PS'
     alt_group: SOCKET-730076
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://cdn.yesss.co.uk/documents/1177896_03_GGBL3020S_Datasheet_2f24dc89370a0be3bdcae061f76203a7.pdf"
 
   - part_id: SOCKET-730076.SCHNEIDER-ELECTRIC-HIGH
     category: socket
@@ -3829,6 +5244,10 @@ devices:
     tag_pattern: '{prefix}-AUX PS'
     alt_group: SOCKET-730076
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://rapidonline.com/catalogue/product/65-2728"
 
   - part_id: SOCKET-730076.MK-ELECTRIC-HONEYWELL-LOW
     category: socket
@@ -3841,6 +5260,10 @@ devices:
     tag_pattern: '{prefix}-AUX PS'
     alt_group: SOCKET-730076
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://cpcireland.farnell.com/mk/k2747whi/mk-2-gang-switched-socket/dp/PL00563"
 
   - part_id: SOCKET-730076.MK-ELECTRIC-HONEYWELL-MID
     category: socket
@@ -3853,6 +5276,10 @@ devices:
     tag_pattern: '{prefix}-AUX PS'
     alt_group: SOCKET-730076
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://sparksdirect.co.uk/2-gang-13a-dp-switched-socket-with-screwless-terminal-connectors-white-plastic-mk-logic-plus-k2747stwhi-rapid-fix"
 
   - part_id: SOCKET-730076.MK-ELECTRIC-HONEYWELL-HIGH
     category: socket
@@ -3865,6 +5292,10 @@ devices:
     tag_pattern: '{prefix}-AUX PS'
     alt_group: SOCKET-730076
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.sparksdirect.co.uk/product/mk-metal-clad-2-gang-13a-switched-socket-double-pole-with-surface-mounting-box-mk-metalclad-plus-k2946alm"
 
   - part_id: NAP-K55.ADVANTECH-LOW
     category: annunciator
@@ -3879,6 +5310,13 @@ devices:
     load_type: CONTINUOUS
     alt_group: NAP-K55
     tier: low
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://buy.advantech.com/Displays/Digital-Signage-Displays/model-DSD-3055N-40FHA1E.htm"
+      height_u:
+        kind: datasheet
+        ref: "https://buy.advantech.com/Displays/Digital-Signage-Displays/model-DSD-3055N-40FHA1E.htm"
 
   - part_id: NAP-K55.ADVANTECH-MID
     category: annunciator
@@ -3893,6 +5331,13 @@ devices:
     load_type: CONTINUOUS
     alt_group: NAP-K55
     tier: mid
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://buy.advantech.com/full+HD+digital+signage+touch+sc/DSD+3055T+40FHA1E/model-DSD-3055T-40FHA1E.htm"
+      height_u:
+        kind: datasheet
+        ref: "https://buy.advantech.com/full+HD+digital+signage+touch+sc/DSD+3055T+40FHA1E/model-DSD-3055T-40FHA1E.htm"
 
   - part_id: NAP-K55.ADVANTECH-HIGH
     category: annunciator
@@ -3907,6 +5352,13 @@ devices:
     load_type: CONTINUOUS
     alt_group: NAP-K55
     tier: high
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://advdownload.advantech.com/productfile/PIS/DSD-3055/file/DSD-3055_DS(102122)20231127002352.pdf"
+      height_u:
+        kind: datasheet
+        ref: "https://advdownload.advantech.com/productfile/PIS/DSD-3055/file/DSD-3055_DS(102122)20231127002352.pdf"
 
   - part_id: NAP-K55.SAMSUNG-LOW
     category: annunciator
@@ -3921,6 +5373,13 @@ devices:
     load_type: CONTINUOUS
     alt_group: NAP-K55
     tier: low
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://screenmoove.com/products/samsung-qb55c-lh55qbcebgcxen-55-professional-smart-signage-display"
+      height_u:
+        kind: datasheet
+        ref: "https://screenmoove.com/products/samsung-qb55c-lh55qbcebgcxen-55-professional-smart-signage-display"
 
   - part_id: NAP-K55.SAMSUNG-MID
     category: annunciator
@@ -3935,6 +5394,13 @@ devices:
     load_type: CONTINUOUS
     alt_group: NAP-K55
     tier: mid
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://screenmoove.com/products/samsung-qm55c-lh55qmcebgcxen-55-4k-ultra-hd-smart-digital-signage-display"
+      height_u:
+        kind: datasheet
+        ref: "https://screenmoove.com/products/samsung-qm55c-lh55qmcebgcxen-55-4k-ultra-hd-smart-digital-signage-display"
 
   - part_id: NAP-K55.SAMSUNG-HIGH
     category: annunciator
@@ -3949,6 +5415,13 @@ devices:
     load_type: CONTINUOUS
     alt_group: NAP-K55
     tier: high
+    sources:
+      unit_power_w:
+        kind: datasheet
+        ref: "https://www.scan.co.uk/products/55-samsung-qm55b-t-4k-uhd-interactive-touch-display-hdmi-dp-rs232c-rj45-500nit-24-7"
+      height_u:
+        kind: datasheet
+        ref: "https://www.scan.co.uk/products/55-samsung-qm55b-t-4k-uhd-interactive-touch-display-hdmi-dp-rs232c-rj45-500nit-24-7"
 
   - part_id: LPA37-696.CHIEF-LEGRAND-AV-LOW
     category: accessory
@@ -3959,6 +5432,10 @@ devices:
     description_template: Wall Mount Kit
     alt_group: LPA37-696
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.markertek.com/product/chf-lsa1u/chief-fusion-large-fixed-tv-wall-mount-black"
 
   - part_id: LPA37-696.CHIEF-LEGRAND-AV-MID
     category: accessory
@@ -3969,6 +5446,10 @@ devices:
     description_template: Wall Mount Kit
     alt_group: LPA37-696
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.markertek.com/product/chf-lta1u/chief-lta1u-large-fusion-tilt-wall-mount-vesa-100x100-878x500-mm-black"
 
   - part_id: LPA37-696.CHIEF-LEGRAND-AV-HIGH
     category: accessory
@@ -3979,6 +5460,10 @@ devices:
     description_template: Wall Mount Kit
     alt_group: LPA37-696
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.bhphotovideo.com/c/product/840964-REG/Chief_TS325TU_TS325TU_THINSTALL_Dual_Swing.html"
 
   - part_id: LPA37-696.PEERLESS-AV-LOW
     category: accessory
@@ -3989,6 +5474,10 @@ devices:
     description_template: Wall Mount Kit
     alt_group: LPA37-696
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://peerless-av.com/products/SF660P"
 
   - part_id: LPA37-696.PEERLESS-AV-MID
     category: accessory
@@ -3999,6 +5488,10 @@ devices:
     description_template: Wall Mount Kit
     alt_group: LPA37-696
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.adiglobaldistribution.pr/product/qp-st660p"
 
   - part_id: LPA37-696.PEERLESS-AV-HIGH
     category: accessory
@@ -4009,6 +5502,10 @@ devices:
     description_template: Wall Mount Kit
     alt_group: LPA37-696
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://peerless-av.com/products/SA771PU"
 
   - part_id: ZENON-V12.SIEMENS-LOW
     category: software
@@ -4018,6 +5515,10 @@ devices:
     description_template: Zenon Energy Edition Sever/Client with Editor Studio
     alt_group: ZENON-V12
     tier: low
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: ZENON-V12.SIEMENS-MID
     category: software
@@ -4027,6 +5528,10 @@ devices:
     description_template: Zenon Energy Edition Sever/Client with Editor Studio
     alt_group: ZENON-V12
     tier: mid
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: ZENON-V12.SIEMENS-HIGH
     category: software
@@ -4036,6 +5541,10 @@ devices:
     description_template: Zenon Energy Edition Sever/Client with Editor Studio
     alt_group: ZENON-V12
     tier: high
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: ZENON-V12.HITACHI-ENERGY-LOW
     category: software
@@ -4045,6 +5554,10 @@ devices:
     description_template: Zenon Energy Edition Sever/Client with Editor Studio
     alt_group: ZENON-V12
     tier: low
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: ZENON-V12.HITACHI-ENERGY-MID
     category: software
@@ -4054,6 +5567,10 @@ devices:
     description_template: Zenon Energy Edition Sever/Client with Editor Studio
     alt_group: ZENON-V12
     tier: mid
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: ZENON-V12.HITACHI-ENERGY-HIGH
     category: software
@@ -4063,6 +5580,10 @@ devices:
     description_template: Zenon Energy Edition Sever/Client with Editor Studio
     alt_group: ZENON-V12
     tier: high
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: MS-OFFICE-2021.SOFTMAKER-LOW
     category: software
@@ -4073,6 +5594,10 @@ devices:
     description_template: "SoftMaker FreeOffice"  # override (data/library/additions.yaml)
     alt_group: MS-OFFICE-2021
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://freeoffice.com/en/features/freeoffice-comparison"
 
   - part_id: MS-OFFICE-2021.SOFTMAKER-MID
     category: software
@@ -4083,6 +5608,10 @@ devices:
     description_template: "SoftMaker Office Standard 2024"  # override (data/library/additions.yaml)
     alt_group: MS-OFFICE-2021
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.bhphotovideo.com/c/product/1791561-REG/softmaker_bn_0015_e_office_standard_2024_for.html"
 
   - part_id: MS-OFFICE-2021.SOFTMAKER-HIGH
     category: software
@@ -4093,6 +5622,10 @@ devices:
     description_template: "SoftMaker Office Professional 2024"  # override (data/library/additions.yaml)
     alt_group: MS-OFFICE-2021
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.staples.com/softmaker-office-professional-2024-for-5-devices-windows-macos-linux-download-bn-0016-e/product_24585778"
 
   - part_id: MS-OFFICE-2021.COREL-WORDPERFECT-OFFICE-LOW
     category: software
@@ -4103,6 +5636,10 @@ devices:
     description_template: "Corel WordPerfect Office 2021 Standard"  # override (data/library/additions.yaml)
     alt_group: MS-OFFICE-2021
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.staples.com/corel-wordperfect-office-standard-2021-for-1-user-windows-download-esdwp2021stdef/product_24577266"
 
   - part_id: MS-OFFICE-2021.COREL-WORDPERFECT-OFFICE-MID
     category: software
@@ -4113,6 +5650,10 @@ devices:
     description_template: "Corel WordPerfect Office 2021 Standard"  # override (data/library/additions.yaml)
     alt_group: MS-OFFICE-2021
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://store.datek.co.uk/corel-wordperfect-office-2021-standard-office-suite-volume-licence-1-license-s-multilingual-lcwp2021ml1"
 
   - part_id: MS-OFFICE-2021.COREL-WORDPERFECT-OFFICE-HIGH
     category: software
@@ -4123,6 +5664,10 @@ devices:
     description_template: "Corel WordPerfect Office 2021 Professional"  # override (data/library/additions.yaml)
     alt_group: MS-OFFICE-2021
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.connection.com/product/corel-corp.-wordperfect-office-2021-pro-license-multi-lingual-1-user/lcwp2021prml1/41417075"
 
   - part_id: SEL-9524B.MEINBERG-LOW
     category: accessory
@@ -4132,6 +5677,10 @@ devices:
     description_template: GPS/GLONASS Antenna
     alt_group: SEL-9524B
     tier: low
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-9524B.MEINBERG-MID
     category: accessory
@@ -4141,6 +5690,10 @@ devices:
     description_template: GPS/GLONASS Antenna
     alt_group: SEL-9524B
     tier: mid
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-9524B.MEINBERG-HIGH
     category: accessory
@@ -4150,6 +5703,10 @@ devices:
     description_template: GPS/GLONASS Antenna
     alt_group: SEL-9524B
     tier: high
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-9524B.ARBITER-SYSTEMS-LOW
     category: accessory
@@ -4160,6 +5717,10 @@ devices:
     description_template: GPS/GLONASS Antenna
     alt_group: SEL-9524B
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://arbiter.com/catalog/accessories/details.php?acc=214"
 
   - part_id: SEL-9524B.ARBITER-SYSTEMS-MID
     category: accessory
@@ -4169,6 +5730,10 @@ devices:
     description_template: GPS/GLONASS Antenna
     alt_group: SEL-9524B
     tier: mid
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-9524B.ARBITER-SYSTEMS-HIGH
     category: accessory
@@ -4178,6 +5743,10 @@ devices:
     description_template: GPS/GLONASS Antenna
     alt_group: SEL-9524B
     tier: high
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-C961-050.TIMES-MICROWAVE-SYSTEMS-LOW
     category: cable
@@ -4187,6 +5756,10 @@ devices:
     description_template: "50 ft (15 Meters) LMR-240 cable"  # override (data/library/additions.yaml)
     alt_group: SEL-C961-050
     tier: low
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-C961-050.TIMES-MICROWAVE-SYSTEMS-MID
     category: cable
@@ -4197,6 +5770,10 @@ devices:
     description_template: 50 ft (15 Meters) LMR-400 cable
     alt_group: SEL-C961-050
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://timesmicrowave.com/connectors/tc-400-tm-x-coax-connectors"
 
   - part_id: SEL-C961-050.TIMES-MICROWAVE-SYSTEMS-HIGH
     category: cable
@@ -4207,6 +5784,10 @@ devices:
     description_template: 50 ft (15 Meters) LMR-400 cable
     alt_group: SEL-C961-050
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.l-com.com/TNC-Male-Connector-Crimp-Solder-Attachment-for-LMR-400-LMR-400-DB-LMR-400-FR-400-Series-Cable-TC-400-TM-X"
 
   - part_id: SEL-C961-050.MEINBERG-LOW
     category: cable
@@ -4216,6 +5797,10 @@ devices:
     description_template: "50 ft (15 Meters) antenna cable"  # override (data/library/additions.yaml)
     alt_group: SEL-C961-050
     tier: low
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-C961-050.MEINBERG-MID
     category: cable
@@ -4225,6 +5810,10 @@ devices:
     description_template: "50 ft (15 Meters) low-loss antenna cable"  # override (data/library/additions.yaml)
     alt_group: SEL-C961-050
     tier: mid
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-C961-050.MEINBERG-HIGH
     category: cable
@@ -4234,6 +5823,10 @@ devices:
     description_template: "Fiber-optic antenna link"  # override (data/library/additions.yaml)
     alt_group: SEL-C961-050
     tier: high
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-915900139.POLYPHASER-LOW
     category: accessory
@@ -4243,6 +5836,10 @@ devices:
     description_template: Gas Tube Coaxial Surge Protector and Mounting Kit
     alt_group: SEL-915900139
     tier: low
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-915900139.POLYPHASER-MID
     category: accessory
@@ -4253,6 +5850,10 @@ devices:
     description_template: Gas Tube Coaxial Surge Protector and Mounting Kit
     alt_group: SEL-915900139
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://rspsupply.com/p-713276-polyphaser-dgxz06tftf-a-coaxial-rf-surge-protector.aspx"
 
   - part_id: SEL-915900139.POLYPHASER-HIGH
     category: accessory
@@ -4263,6 +5864,10 @@ devices:
     description_template: Gas Tube Coaxial Surge Protector and Mounting Kit
     alt_group: SEL-915900139
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://shop.richardsonrfpd.com/Products/Product/DGXZ-plus-15TFTF-A"
 
   - part_id: SEL-915900139.MEINBERG-LOW
     category: accessory
@@ -4272,6 +5877,10 @@ devices:
     description_template: Gas Tube Coaxial Surge Protector and Mounting Kit
     alt_group: SEL-915900139
     tier: low
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-915900139.MEINBERG-HIGH
     category: accessory
@@ -4281,6 +5890,10 @@ devices:
     description_template: Gas Tube Coaxial Surge Protector and Mounting Kit
     alt_group: SEL-915900139
     tier: high
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-C961-025.TIMES-MICROWAVE-SYSTEMS-LOW
     category: cable
@@ -4290,6 +5903,10 @@ devices:
     description_template: "25 ft (7 Meters) LMR-240 cable"  # override (data/library/additions.yaml)
     alt_group: SEL-C961-025
     tier: low
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-C961-025.TIMES-MICROWAVE-SYSTEMS-MID
     category: cable
@@ -4300,6 +5917,10 @@ devices:
     description_template: 25 ft (7 Meters) LMR-400 cable
     alt_group: SEL-C961-025
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://timesmicrowave.com/connectors/tc-400-tm-x-coax-connectors"
 
   - part_id: SEL-C961-025.TIMES-MICROWAVE-SYSTEMS-HIGH
     category: cable
@@ -4310,6 +5931,10 @@ devices:
     description_template: 25 ft (7 Meters) LMR-400 cable
     alt_group: SEL-C961-025
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.l-com.com/TNC-Male-Connector-Crimp-Solder-Attachment-for-LMR-400-LMR-400-DB-LMR-400-FR-400-Series-Cable-TC-400-TM-X"
 
   - part_id: SEL-C961-025.MEINBERG-LOW
     category: cable
@@ -4319,6 +5944,10 @@ devices:
     description_template: "25 ft (7 Meters) antenna cable"  # override (data/library/additions.yaml)
     alt_group: SEL-C961-025
     tier: low
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-C961-025.MEINBERG-MID
     category: cable
@@ -4328,6 +5957,10 @@ devices:
     description_template: "25 ft (7 Meters) low-loss antenna cable"  # override (data/library/additions.yaml)
     alt_group: SEL-C961-025
     tier: mid
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-C961-025.MEINBERG-HIGH
     category: cable
@@ -4337,6 +5970,10 @@ devices:
     description_template: "Fiber-optic antenna link"  # override (data/library/additions.yaml)
     alt_group: SEL-C961-025
     tier: high
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-915900043.MEINBERG-LOW
     category: accessory
@@ -4346,6 +5983,10 @@ devices:
     description_template: Antenna Pipe-Mounting Kit
     alt_group: SEL-915900043
     tier: low
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-915900043.MEINBERG-MID
     category: accessory
@@ -4355,6 +5996,10 @@ devices:
     description_template: Antenna Pipe-Mounting Kit
     alt_group: SEL-915900043
     tier: mid
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: SEL-915900043.ARBITER-SYSTEMS-LOW
     category: accessory
@@ -4364,6 +6009,10 @@ devices:
     description_template: Antenna Pipe-Mounting Kit
     alt_group: SEL-915900043
     tier: low
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: ANN-DISPLAY-CABLE-10M.LINDY-LOW
     category: cable
@@ -4374,6 +6023,10 @@ devices:
     description_template: Display Cable for Annunciator
     alt_group: ANN-DISPLAY-CABLE-10M
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://store.midwich.com/products/details/LINDY41071"
 
   - part_id: ANN-DISPLAY-CABLE-10M.LINDY-MID
     category: cable
@@ -4384,6 +6037,10 @@ devices:
     description_template: Display Cable for Annunciator
     alt_group: ANN-DISPLAY-CABLE-10M
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://shop.wearesync.co.uk/lindy-10m-active-displayport-1-2-cable-41078.html"
 
   - part_id: ANN-DISPLAY-CABLE-10M.LINDY-HIGH
     category: cable
@@ -4394,6 +6051,10 @@ devices:
     description_template: Display Cable for Annunciator
     alt_group: ANN-DISPLAY-CABLE-10M
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.comms-express.com/products/lindy-38510-10m-fibre-optic-hybrid-hdmi-8k60-cable/"
 
   - part_id: ANN-DISPLAY-CABLE-10M.KRAMER-LOW
     category: cable
@@ -4404,6 +6065,10 @@ devices:
     description_template: Display Cable for Annunciator
     alt_group: ANN-DISPLAY-CABLE-10M
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.thomann.co.uk/kramer_c_hm_hm_pro_35_cable_10.7m.htm"
 
   - part_id: ANN-DISPLAY-CABLE-10M.KRAMER-MID
     category: cable
@@ -4414,6 +6079,10 @@ devices:
     description_template: Display Cable for Annunciator
     alt_group: ANN-DISPLAY-CABLE-10M
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.hdtvsupply.com/kramer-cls-aoch-60-33-4k60-active-optical-hdmi-cable.html"
 
   - part_id: ANN-DISPLAY-CABLE-10M.KRAMER-HIGH
     category: cable
@@ -4424,6 +6093,10 @@ devices:
     description_template: Display Cable for Annunciator
     alt_group: ANN-DISPLAY-CABLE-10M
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.shi.com/product/34070345/Kramer-CP-AOCH60-Series-CP-AOCH60-33"
 
   - part_id: ANN-USB-CABLE-10M.LINDY-LOW
     category: cable
@@ -4434,6 +6107,10 @@ devices:
     description_template: USB cable for Annunciator
     alt_group: ANN-USB-CABLE-10M
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://shop.avoira.com/lindy-10m-usb-2-0-active-extension-hub-42635.html"
 
   - part_id: ANN-USB-CABLE-10M.LINDY-MID
     category: cable
@@ -4444,6 +6121,10 @@ devices:
     description_template: USB cable for Annunciator
     alt_group: ANN-USB-CABLE-10M
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.comms-express.com/products/lindy-42761-10m-usb-2-0-active-cable-type-a-to-b/"
 
   - part_id: ANN-USB-CABLE-10M.LINDY-HIGH
     category: cable
@@ -4454,6 +6135,10 @@ devices:
     description_template: USB cable for Annunciator
     alt_group: ANN-USB-CABLE-10M
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://store.digital-origin.co.uk/lindy-100m-usb-2-0-cat-6-extender-42674.html"
 
   - part_id: ANN-USB-CABLE-10M.ICRON-LOW
     category: cable
@@ -4464,6 +6149,10 @@ devices:
     description_template: USB cable for Annunciator
     alt_group: ANN-USB-CABLE-10M
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://screenmoove.com/products/icron-single-port-usb-2-0-extender-up-to-100-meters-over-catx-cabling-00-00403"
 
   - part_id: ANN-USB-CABLE-10M.ICRON-MID
     category: cable
@@ -4474,6 +6163,10 @@ devices:
     description_template: USB cable for Annunciator
     alt_group: ANN-USB-CABLE-10M
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://screenmoove.com/collections/kvm-extender/products/icron-2-port-usb-2-0-extender-up-to-100-meters-over-catx-cabling-00-00408"
 
   - part_id: ANN-USB-CABLE-10M.ICRON-HIGH
     category: cable
@@ -4484,6 +6177,10 @@ devices:
     description_template: USB cable for Annunciator
     alt_group: ANN-USB-CABLE-10M
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.icron.com/?p=325"
 
   - part_id: MON-DVI-CABLE-3M.STARTECH-COM-LOW
     category: cable
@@ -4494,6 +6191,10 @@ devices:
     description_template: DVI Cable for Monitor
     alt_group: MON-DVI-CABLE-3M
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://rapidonline.com/startech-hddvimm3m-3m-hdmi-to-dvi-d-cable-m-m-19-9401"
 
   - part_id: MON-DVI-CABLE-3M.STARTECH-COM-MID
     category: cable
@@ -4504,6 +6205,10 @@ devices:
     description_template: DVI Cable for Monitor
     alt_group: MON-DVI-CABLE-3M
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://boxxe.com/shop/boxxe-shop-by-brand/startech-com/dvidsmm3m-startech-com-3m-dvi-d-single-link-cable-m-m"
 
   - part_id: MON-DVI-CABLE-3M.STARTECH-COM-HIGH
     category: cable
@@ -4514,6 +6219,10 @@ devices:
     description_template: DVI Cable for Monitor
     alt_group: MON-DVI-CABLE-3M
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.lambda-tek.com/StarTech-com-DVIDDMM3M-sh/B732097"
 
   - part_id: MON-DVI-CABLE-3M.LINDY-LOW
     category: cable
@@ -4524,6 +6233,10 @@ devices:
     description_template: DVI Cable for Monitor
     alt_group: MON-DVI-CABLE-3M
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://store.digital-origin.co.uk/lindy-3m-dvi-d-single-link-cable-black-line-36257.html"
 
   - part_id: MON-DVI-CABLE-3M.LINDY-MID
     category: cable
@@ -4534,6 +6247,10 @@ devices:
     description_template: DVI Cable for Monitor
     alt_group: MON-DVI-CABLE-3M
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.huss-licht-ton.de/product_info.php/Lindy-36273-Video-Adapterkabel-30m-Black-Line-HDMI-DVI-D/info/34720.html"
 
   - part_id: MON-DVI-CABLE-3M.LINDY-HIGH
     category: cable
@@ -4544,6 +6261,10 @@ devices:
     description_template: DVI Cable for Monitor
     alt_group: MON-DVI-CABLE-3M
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://store.digital-origin.co.uk/lindy-3m-dvi-d-dual-link-cable-black-line-36253.html"
 
   - part_id: MON-USB-CABLE-3M.LINDY-LOW
     category: cable
@@ -4554,6 +6275,10 @@ devices:
     description_template: USB Cable for Monitor
     alt_group: MON-USB-CABLE-3M
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://store.bsl-it.com/lindy-3m-usb-2-0-cable-type-a-to-b-transparent-41754.html"
 
   - part_id: MON-USB-CABLE-3M.LINDY-MID
     category: cable
@@ -4564,6 +6289,10 @@ devices:
     description_template: USB Cable for Monitor
     alt_group: MON-USB-CABLE-3M
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://shop.wearesync.co.uk/lindy-3m-usb-2-0-type-a-to-b-cable-anthra-line-36674.html"
 
   - part_id: MON-USB-CABLE-3M.LINDY-HIGH
     category: cable
@@ -4574,6 +6303,10 @@ devices:
     description_template: USB Cable for Monitor
     alt_group: MON-USB-CABLE-3M
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://shop.teqex.co.uk/lindy-3m-usb-2-0-type-a-to-b-cable-cromo-line-36643.html"
 
   - part_id: MON-USB-CABLE-3M.BELKIN-LOW
     category: cable
@@ -4584,6 +6317,10 @@ devices:
     description_template: USB Cable for Monitor
     alt_group: MON-USB-CABLE-3M
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://store.digital-origin.co.uk/belkin-usb-2-0-a-usb-2-0-b-3m-usb-cable-usb-a-usb-b-grey-f3u154bt3m.html"
 
   - part_id: MON-USB-CABLE-3M.BELKIN-MID
     category: cable
@@ -4594,6 +6331,10 @@ devices:
     description_template: USB Cable for Monitor
     alt_group: MON-USB-CABLE-3M
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://ibselectronics.com/products/belkin/f3u133b10"
 
   - part_id: MON-USB-CABLE-3M.BELKIN-HIGH
     category: cable
@@ -4604,6 +6345,10 @@ devices:
     description_template: USB Cable for Monitor
     alt_group: MON-USB-CABLE-3M
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.aztekc.com/cableusbdstpusba-usbb16device-belkin/p"
 
   - part_id: FO-PATCH-CORDS.PANDUIT-LOW
     category: cable
@@ -4614,6 +6359,10 @@ devices:
     description_template: Fiber Optic Patch Cords
     alt_group: FO-PATCH-CORDS
     tier: low
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://elektrobode.nl/products/panduit-om3-2f-1-6mm-pc-lszh-lc-dup-lc-dup-std-polarity-std-il-3m-07498392215"
 
   - part_id: FO-PATCH-CORDS.PANDUIT-MID
     category: cable
@@ -4624,6 +6373,10 @@ devices:
     description_template: Fiber Optic Patch Cords
     alt_group: FO-PATCH-CORDS
     tier: mid
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://elektrobode.nl/products/panduit-om4-patch-cord-50-125-duplex-lc-lc-lszh-3m-07498379333"
 
   - part_id: FO-PATCH-CORDS.PANDUIT-HIGH
     category: cable
@@ -4634,6 +6387,10 @@ devices:
     description_template: Fiber Optic Patch Cords
     alt_group: FO-PATCH-CORDS
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://www.regard.ru/product/205255/patc-kord-panduit-f92ellnlnsnm003-3m"
 
   - part_id: FO-PATCH-CORDS.CORNING-LOW
     category: cable
@@ -4644,6 +6401,10 @@ devices:
     description_template: Fiber Optic Patch Cords
     alt_group: FO-PATCH-CORDS
     tier: low
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: FO-PATCH-CORDS.CORNING-MID
     category: cable
@@ -4654,6 +6415,10 @@ devices:
     description_template: Fiber Optic Patch Cords
     alt_group: FO-PATCH-CORDS
     tier: mid
+    sources:
+      height_u:
+        kind: assumed
+        ref: "alternative not checked against its datasheet"
 
   - part_id: FO-PATCH-CORDS.CORNING-HIGH
     category: cable
@@ -4664,6 +6429,10 @@ devices:
     description_template: Fiber Optic Patch Cords
     alt_group: FO-PATCH-CORDS
     tier: high
+    sources:
+      height_u:
+        kind: datasheet
+        ref: "https://specialized.net/corning-040402g5120005m-lc-u-lc-u-duplex-sm-patch-cord-2mm-5m.html"
 
   - part_id: C9300-24T-A  # Cisco Catalyst 9300 Series Switches Data Sheet C78-738977 C78-738977-46 09/26, p. 65
     category: "network_switch"
@@ -4687,6 +6456,19 @@ devices:
       - { count: 24, speed: 1G, media: RJ45, kind: fixed }
       - { count: 8, speed: 10G, kind: sfp_slot }
       - { count: 1, speed: 1G, media: RJ45, kind: fixed }
+    sources:
+      unit_power_w:
+        kind: assumed
+        ref: "contractor: Conservative one-PSU published total INPUT rating, not 350 W output rating and not measured switch consumption. Page 7 footnote states rating based on 100 VAC. Used as planning envelope for one fitted PWR-C1-350WAC-P at proposed 230 VAC; actual measured C9300-24T + NM-8X full-port 100% traffic consumption is 99 W at 230 VAC in data-sheet page 60, IOS XE 16.8.1. (Cisco Catalyst 9300 Series Switches Hardware Installation Guide: Technical Specifications, p. 6)"
+      height_u:
+        kind: contractor
+        ref: "computed from Cisco Catalyst 9300 Series Switches Hardware Installation Guide: Technical Specifications, p. 3"
+      input_v_max:
+        kind: contractor
+        ref: "Cisco Catalyst 9300 Series Switches Hardware Installation Guide: Technical Specifications, p. 6"
+      ports:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, device_ports.csv"
   - part_id: IE-4010-16S12P  # Cisco Industrial Ethernet 4010 Series Switches Data Sheet C78-737279 C78-737279-13 10/24, p. 15
     category: "network_switch"
     alt_group: "IE-4010-16S12P"
@@ -4710,6 +6492,22 @@ devices:
       - { count: 12, speed: 1G, kind: sfp_slot }
       - { count: 4, speed: 1G, kind: sfp_slot }
       - { count: 12, speed: 1G, media: RJ45, kind: fixed }
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "Cisco Industrial Ethernet 4010 Series Switches Data Sheet C78-737279, p. 6"
+      inrush_a:
+        kind: contractor
+        ref: "Cisco Catalyst IR8300 Rugged Series Router Data Sheet C78-2451473, p. 10"
+      height_u:
+        kind: contractor
+        ref: "Cisco Industrial Ethernet 4010 Series Switches Data Sheet C78-737279, p. 3"
+      input_v_max:
+        kind: contractor
+        ref: "Cisco Industrial Ethernet 4010 Series Switches Data Sheet C78-737279, p. 5"
+      ports:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, device_ports.csv"
   - part_id: RST2228-28SFP-HV  # RUGGEDCOM RST2228 Equipment Manual C79000-G8976-1359-20 03/2024, p. 1
     category: "network_switch"
     alt_group: "RST2228-28SFP-HV"  # delivered in RST2228-L2 with no tier: its own group until tiered
@@ -4731,6 +6529,19 @@ devices:
     ports:
       - { count: 24, speed: 1G, kind: sfp_slot }
       - { count: 4, speed: 10G, kind: sfp_slot }
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "RUGGEDCOM RST2228 Equipment Manual C79000-G8976-1359-20, p. 58"
+      height_u:
+        kind: contractor
+        ref: "RUGGEDCOM RST2228 Equipment Manual C79000-G8976-1359-20, p. 10"
+      input_v_max:
+        kind: contractor
+        ref: "RUGGEDCOM RST2228 Equipment Manual C79000-G8976-1359-20, p. 58"
+      ports:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, device_ports.csv"
   - part_id: SEL-2743  # SEL-2743 Ethernet Switch Manual Date Code 20260624, p. 1
     category: "network_switch"
     alt_group: "SEL-2743"
@@ -4751,6 +6562,22 @@ devices:
     ports:
       - { count: 8, speed: 1G, kind: sfp_slot }
       - { count: 1, speed: 1G, media: RJ45, kind: fixed }
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "computed from SEL-2743 Ethernet Switch Manual, p. 15"
+        date: 2026-06-24
+      height_u:
+        kind: contractor
+        ref: "SEL-2743 Ethernet Switch Manual, p. 17"
+        date: 2026-06-24
+      input_v_max:
+        kind: contractor
+        ref: "SEL-2743 Ethernet Switch Manual, p. 15"
+        date: 2026-06-24
+      ports:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, device_ports.csv"
   - part_id: SEL-2744  # SEL-2744 Ethernet Switch Manual Date Code 20260601, p. 1
     category: "network_switch"
     alt_group: "SEL-2744"
@@ -4772,6 +6599,22 @@ devices:
       - { count: 8, speed: 1G, kind: sfp_slot }
       - { count: 2, speed: 10G, kind: sfp_slot }
       - { count: 1, speed: 1G, media: RJ45, kind: fixed }
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "computed from SEL-2744 Ethernet Switch Manual, p. 15"
+        date: 2026-06-01
+      height_u:
+        kind: contractor
+        ref: "SEL-2744 Ethernet Switch Manual, p. 17"
+        date: 2026-06-01
+      input_v_max:
+        kind: contractor
+        ref: "SEL-2744 Ethernet Switch Manual, p. 15"
+        date: 2026-06-01
+      ports:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, device_ports.csv"
   - part_id: FG-121G  # FortiGate 120G Series Data Sheet FG-120G-DAT FG-120G-DAT-R19-20260929, p. 10
     category: "firewall"
     alt_group: "FG-121G"
@@ -4796,6 +6639,22 @@ devices:
       - { count: 1, speed: 1G, media: RJ45, kind: fixed }
       - { count: 8, speed: 1G, kind: sfp_slot }
       - { count: 4, speed: 10G, kind: sfp_slot }
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "FortiGate 120G Series Data Sheet FG-120G-DAT, p. 8"
+        date: 2026-09-29
+      height_u:
+        kind: contractor
+        ref: "FortiGate 120G Series Data Sheet FG-120G-DAT, p. 8"
+        date: 2026-09-29
+      input_v_max:
+        kind: contractor
+        ref: "FortiGate 120G Series Data Sheet FG-120G-DAT, p. 8"
+        date: 2026-09-29
+      ports:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, device_ports.csv"
   - part_id: FG-60F  # FortiGate 60F Series Data Sheet FG-60F-DAT R51, p. 11
     category: "firewall"
     alt_group: "FG-60F"
@@ -4816,6 +6675,22 @@ devices:
     input_v_max: 240
     ports:
       - { count: 10, speed: 1G, media: RJ45, kind: fixed }
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "FortiGate 60F Series Data Sheet FG-60F-DAT, p. 9"
+        date: 2026-10-01
+      height_u:
+        kind: assumed
+        ref: "contractor: Desktop appliance; no rack tray selected. Dimensions H x W x L: 38.5 x 216 x 160 mm. (FortiGate 60F Series Data Sheet FG-60F-DAT, p. 8)"
+        date: 2026-10-01
+      input_v_max:
+        kind: contractor
+        ref: "FortiGate 60F Series Data Sheet FG-60F-DAT, p. 9"
+        date: 2026-10-01
+      ports:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, device_ports.csv"
   - part_id: FG-70F  # FortiGate 70F Series Data Sheet FG-70F-DAT R14, p. 10
     category: "firewall"
     alt_group: "FG-70F"
@@ -4836,6 +6711,22 @@ devices:
     input_v_max: 240
     ports:
       - { count: 10, speed: 1G, media: RJ45, kind: fixed }
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "FortiGate 70F Series Data Sheet FG-70F-DAT, p. 8"
+        date: 2025-04-07
+      height_u:
+        kind: assumed
+        ref: "contractor: Desktop appliance; no rack tray selected. Dimensions H x W x L: 38.5 x 216 x 160 mm. (FortiGate 70F Series Data Sheet FG-70F-DAT, p. 8)"
+        date: 2025-04-07
+      input_v_max:
+        kind: contractor
+        ref: "FortiGate 70F Series Data Sheet FG-70F-DAT, p. 8"
+        date: 2025-04-07
+      ports:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, device_ports.csv"
   - part_id: FGR-70F  # FortiGate Rugged Series Data Sheet FGR-DAT R59, p. 26
     category: "firewall"
     alt_group: "FGR-70F"
@@ -4857,6 +6748,20 @@ devices:
     ports:
       - { count: 6, speed: 1G, media: RJ45, kind: fixed }
       - { count: 2, speed: 1G, kind: sfp_slot }
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "FortiGate Rugged Firewalls, p. 10"
+      height_u:
+        kind: assumed
+        ref: "contractor: DIN-rail/surface mounting selected. Dimensions H x W x L: 111 x 80.5 x 122 mm. (FortiGate Rugged Series Data Sheet FGR-DAT, p. 13)"
+        date: 2026-09-24
+      input_v_max:
+        kind: contractor
+        ref: "FortiGate Rugged Firewalls, p. 10"
+      ports:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, device_ports.csv"
   - part_id: SEL-3530-4  # SEL-3530-4 RTAC Data Sheet PDS3530-02 Date Code 20260925, p. 1
     category: "rtac"
     alt_group: "SEL-3530-4"
@@ -4875,6 +6780,23 @@ devices:
     inrush_a: 40
     input_v_min: 85
     input_v_max: 300
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "SEL-3530-4 RTAC Data Sheet PDS3530-02, p. 12"
+        date: 2026-09-25
+      inrush_a:
+        kind: contractor
+        ref: "SEL-3530-4 RTAC Data Sheet PDS3530-02, p. 12"
+        date: 2026-09-25
+      height_u:
+        kind: contractor
+        ref: "computed from SEL-3530-4 RTAC Data Sheet PDS3530-02, p. 8"
+        date: 2026-09-25
+      input_v_max:
+        kind: contractor
+        ref: "SEL-3530-4 RTAC Data Sheet PDS3530-02, p. 12"
+        date: 2026-09-25
   - part_id: SEL-3350-1  # SEL-3350-1 Data Sheet PDS3350-01 Date Code 20260928, p. 1
     category: "rtac"
     alt_group: "SEL-3350-1"
@@ -4894,6 +6816,23 @@ devices:
     inrush_ms: 36
     input_v_min: 85
     input_v_max: 300
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "SEL-3350-1 Data Sheet PDS3350-01, p. 17"
+        date: 2026-09-28
+      inrush_a:
+        kind: contractor
+        ref: "SEL-3350-1 Data Sheet PDS3350-01, p. 17"
+        date: 2026-09-28
+      height_u:
+        kind: assumed
+        ref: "contractor: Select documented horizontal 3U 19-inch rack chassis. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only. (SEL-3350-1 Data Sheet PDS3350-01, p. 4)"
+        date: 2026-09-28
+      input_v_max:
+        kind: contractor
+        ref: "SEL-3350-1 Data Sheet PDS3350-01, p. 17"
+        date: 2026-09-28
   - part_id: SEL-3555-2  # SEL-3555-2 Data Sheet PDS3555-02 Date Code 20250730, p. 13
     category: "rtac"
     alt_group: "SEL-3555-2"
@@ -4913,6 +6852,22 @@ devices:
     inrush_ms: 9
     input_v_min: 100
     input_v_max: 300
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, devices.csv"
+      inrush_a:
+        kind: contractor
+        ref: "SEL-3555-2 Data Sheet PDS3555-02, p. 11"
+        date: 2025-07-30
+      height_u:
+        kind: contractor
+        ref: "computed from SEL-3555-2 Data Sheet PDS3555-02, p. 8"
+        date: 2025-07-30
+      input_v_max:
+        kind: contractor
+        ref: "SEL-3555-2 Data Sheet PDS3555-02, p. 11"
+        date: 2025-07-30
   - part_id: SEL-3355-2  # SEL-3355-2 Data Sheet PDS3355-04 Date Code 20260521, p. 11
     category: "workstation"
     alt_group: "SEL-3355-2"
@@ -4932,6 +6887,22 @@ devices:
     inrush_ms: 9
     input_v_min: 100
     input_v_max: 300
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, devices.csv"
+      inrush_a:
+        kind: contractor
+        ref: "SEL-3355-2 Data Sheet PDS3355-04, p. 8"
+        date: 2026-05-21
+      height_u:
+        kind: contractor
+        ref: "computed from SEL-3355-2 Data Sheet PDS3355-04, p. 6"
+        date: 2026-05-21
+      input_v_max:
+        kind: contractor
+        ref: "SEL-3355-2 Data Sheet PDS3355-04, p. 8"
+        date: 2026-05-21
   - part_id: SEL-3560E  # SEL-3560 Data Sheet PDS3560-01 Date Code 20241218, p. 14
     category: "rtac"
     alt_group: "SEL-3560E"
@@ -4950,6 +6921,22 @@ devices:
     inrush_a: 20
     input_v_min: 100
     input_v_max: 300
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, devices.csv"
+      inrush_a:
+        kind: contractor
+        ref: "SEL-3560 RTAC Data Sheet PDS3560-01, p. 11"
+        date: 2024-12-18
+      height_u:
+        kind: contractor
+        ref: "SEL-3560 RTAC Data Sheet PDS3560-01, p. 9"
+        date: 2024-12-18
+      input_v_max:
+        kind: contractor
+        ref: "SEL-3560 RTAC Data Sheet PDS3560-01, p. 11"
+        date: 2024-12-18
   - part_id: SEL-3560S  # SEL-3560 Data Sheet PDS3560-01 Date Code 20241218, p. 14
     category: "rtac"
     alt_group: "SEL-3560S"
@@ -4968,6 +6955,22 @@ devices:
     inrush_a: 20
     input_v_min: 100
     input_v_max: 300
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, devices.csv"
+      inrush_a:
+        kind: contractor
+        ref: "SEL-3560 RTAC Data Sheet PDS3560-01, p. 11"
+        date: 2024-12-18
+      height_u:
+        kind: contractor
+        ref: "SEL-3560 RTAC Data Sheet PDS3560-01, p. 9"
+        date: 2024-12-18
+      input_v_max:
+        kind: contractor
+        ref: "SEL-3560 RTAC Data Sheet PDS3560-01, p. 11"
+        date: 2024-12-18
   - part_id: SEL-2407  # SEL-2407 Satellite-Synchronized Clock Instruction Manual PM2407-01 Date Code 20250918, p. 1
     category: "gps_clock"
     alt_group: "SEL-2407"
@@ -4985,6 +6988,19 @@ devices:
     height_u: 1
     input_v_min: 18
     input_v_max: 300
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "SEL-2407 Satellite-Synchronized Clock Instruction Manual PM2407-01, p. 31"
+        date: 2025-09-18
+      height_u:
+        kind: assumed
+        ref: "contractor: Rack-mount half-rack version provisionally selected: height43.7mm (1.72in), occupying1U. Surface version would be0U. Full configured ordering code remains unconfirmed; values apply to the documented/proposed variant only. (SEL-2407 Satellite-Synchronized Clock Instruction Manual PM2407-01, p. 32)"
+        date: 2025-09-18
+      input_v_max:
+        kind: contractor
+        ref: "SEL-2407 Satellite-Synchronized Clock Instruction Manual PM2407-01, p. 31"
+        date: 2025-09-18
   - part_id: FG-401G  # FortiGate 400G Series Data Sheet FG-400G-DAT FG-400G-DAT-R06-20261013, p. 10
     category: "firewall"
     alt_group: "FG-401G"
@@ -5010,6 +7026,22 @@ devices:
       - { count: 16, speed: 1G, kind: sfp_slot }
       - { count: 4, speed: 10G, kind: sfp_slot }
       - { count: 4, speed: 25G, kind: sfp_slot }
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "FortiGate 400G Series Data Sheet FG-400G-DAT, p. 8"
+        date: 2026-10-13
+      height_u:
+        kind: contractor
+        ref: "FortiGate 400G Series Data Sheet FG-400G-DAT, p. 8"
+        date: 2026-10-13
+      input_v_max:
+        kind: contractor
+        ref: "FortiGate 400G Series Data Sheet FG-400G-DAT, p. 8"
+        date: 2026-10-13
+      ports:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, device_ports.csv"
   - part_id: FG-701G  # FortiGate 700G Series Data Sheet FG-700G-DAT FG-700G-DAT-R15-20260929, p. 10
     category: "firewall"
     alt_group: "FG-701G"
@@ -5035,6 +7067,22 @@ devices:
       - { count: 16, speed: 1G, kind: sfp_slot }
       - { count: 4, speed: 10G, kind: sfp_slot }
       - { count: 4, speed: 25G, kind: sfp_slot }
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "FortiGate 700G Series Data Sheet FG-700G-DAT, p. 8"
+        date: 2026-09-29
+      height_u:
+        kind: contractor
+        ref: "FortiGate 700G Series Data Sheet FG-700G-DAT, p. 8"
+        date: 2026-09-29
+      input_v_max:
+        kind: contractor
+        ref: "FortiGate 700G Series Data Sheet FG-700G-DAT, p. 8"
+        date: 2026-09-29
+      ports:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, device_ports.csv"
   - part_id: HUBBELL-FEUR12LCDM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
     alt_group: "HUBBELL-FEUR12LCDM"
@@ -5045,6 +7093,10 @@ devices:
     tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
     tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
+    sources:
+      height_u:
+        kind: contractor
+        ref: "FEUR fiber enclosures, p. 1"
   - part_id: HUBBELL-FEUR12LCDOM3  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
     alt_group: "HUBBELL-FEUR12LCDOM3"
@@ -5055,6 +7107,10 @@ devices:
     tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
     tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
+    sources:
+      height_u:
+        kind: contractor
+        ref: "FEUR fiber enclosures, p. 1"
   - part_id: HUBBELL-FEUR12LCDSM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
     alt_group: "HUBBELL-FEUR12LCDSM"
@@ -5065,6 +7121,10 @@ devices:
     tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
     tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
+    sources:
+      height_u:
+        kind: contractor
+        ref: "FEUR fiber enclosures, p. 1"
   - part_id: HUBBELL-FEUR12SCM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
     alt_group: "HUBBELL-FEUR12SCM"
@@ -5075,6 +7135,10 @@ devices:
     tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
     tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
+    sources:
+      height_u:
+        kind: contractor
+        ref: "FEUR fiber enclosures, p. 1"
   - part_id: HUBBELL-FEUR12SCOM3  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
     alt_group: "HUBBELL-FEUR12SCOM3"
@@ -5085,6 +7149,10 @@ devices:
     tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
     tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
+    sources:
+      height_u:
+        kind: contractor
+        ref: "FEUR fiber enclosures, p. 1"
   - part_id: HUBBELL-FEUR12SCSM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
     alt_group: "HUBBELL-FEUR12SCSM"
@@ -5095,6 +7163,10 @@ devices:
     tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
     tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
+    sources:
+      height_u:
+        kind: contractor
+        ref: "FEUR fiber enclosures, p. 1"
   - part_id: HUBBELL-FEUR12STM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
     alt_group: "HUBBELL-FEUR12STM"
@@ -5105,6 +7177,10 @@ devices:
     tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
     tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
+    sources:
+      height_u:
+        kind: contractor
+        ref: "FEUR fiber enclosures, p. 1"
   - part_id: HUBBELL-FEUR24LCDM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
     alt_group: "HUBBELL-FEUR24LCDM"
@@ -5115,6 +7191,10 @@ devices:
     tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
     tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
+    sources:
+      height_u:
+        kind: contractor
+        ref: "FEUR fiber enclosures, p. 1"
   - part_id: HUBBELL-FEUR24LCDOM3  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
     alt_group: "HUBBELL-FEUR24LCDOM3"
@@ -5125,6 +7205,10 @@ devices:
     tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
     tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
+    sources:
+      height_u:
+        kind: contractor
+        ref: "FEUR fiber enclosures, p. 1"
   - part_id: HUBBELL-FEUR24LCDSM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
     alt_group: "HUBBELL-FEUR24LCDSM"
@@ -5135,6 +7219,10 @@ devices:
     tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
     tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
+    sources:
+      height_u:
+        kind: contractor
+        ref: "FEUR fiber enclosures, p. 1"
   - part_id: HUBBELL-FEUR24SCM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
     alt_group: "HUBBELL-FEUR24SCM"
@@ -5145,6 +7233,10 @@ devices:
     tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
     tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
+    sources:
+      height_u:
+        kind: contractor
+        ref: "FEUR fiber enclosures, p. 1"
   - part_id: HUBBELL-FEUR24SCOM3  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
     alt_group: "HUBBELL-FEUR24SCOM3"
@@ -5155,6 +7247,10 @@ devices:
     tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
     tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
+    sources:
+      height_u:
+        kind: contractor
+        ref: "FEUR fiber enclosures, p. 1"
   - part_id: HUBBELL-FEUR24SCSM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
     alt_group: "HUBBELL-FEUR24SCSM"
@@ -5165,6 +7261,10 @@ devices:
     tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
     tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
+    sources:
+      height_u:
+        kind: contractor
+        ref: "FEUR fiber enclosures, p. 1"
   - part_id: HUBBELL-FEUR24STM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
     alt_group: "HUBBELL-FEUR24STM"
@@ -5175,6 +7275,10 @@ devices:
     tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
     tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
+    sources:
+      height_u:
+        kind: contractor
+        ref: "FEUR fiber enclosures, p. 1"
   - part_id: HUBBELL-FEUR48LCDM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
     alt_group: "HUBBELL-FEUR48LCDM"
@@ -5185,6 +7289,10 @@ devices:
     tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
     tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
+    sources:
+      height_u:
+        kind: contractor
+        ref: "FEUR fiber enclosures, p. 1"
   - part_id: HUBBELL-FEUR48LCDOM3  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
     alt_group: "HUBBELL-FEUR48LCDOM3"
@@ -5195,6 +7303,10 @@ devices:
     tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
     tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
+    sources:
+      height_u:
+        kind: contractor
+        ref: "FEUR fiber enclosures, p. 1"
   - part_id: HUBBELL-FEUR48LCDSM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
     alt_group: "HUBBELL-FEUR48LCDSM"
@@ -5205,6 +7317,10 @@ devices:
     tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
     tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
+    sources:
+      height_u:
+        kind: contractor
+        ref: "FEUR fiber enclosures, p. 1"
   - part_id: HUBBELL-FEUR48SCM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
     alt_group: "HUBBELL-FEUR48SCM"
@@ -5215,6 +7331,10 @@ devices:
     tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
     tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
+    sources:
+      height_u:
+        kind: contractor
+        ref: "FEUR fiber enclosures, p. 1"
   - part_id: HUBBELL-FEUR48SCOM3  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
     alt_group: "HUBBELL-FEUR48SCOM3"
@@ -5225,6 +7345,10 @@ devices:
     tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
     tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
+    sources:
+      height_u:
+        kind: contractor
+        ref: "FEUR fiber enclosures, p. 1"
   - part_id: HUBBELL-FEUR48SCSM  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
     alt_group: "HUBBELL-FEUR48SCSM"
@@ -5235,6 +7359,10 @@ devices:
     tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
     tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
+    sources:
+      height_u:
+        kind: contractor
+        ref: "FEUR fiber enclosures, p. 1"
   - part_id: HUBBELL-FEURFSPD  # FEUR fiber enclosures, p. 1
     category: "patch_panel"
     alt_group: "HUBBELL-FEURFSPD"
@@ -5245,6 +7373,10 @@ devices:
     tag_type: "FOPP"  # M44: as FOPP-96SM (ADR 0030, Q58)
     tag_pattern: "{prefix}-FOPP-CCR-{lan}01"
     height_u: 1
+    sources:
+      height_u:
+        kind: contractor
+        ref: "FEUR fiber enclosures, p. 1"
   - part_id: FG-600F  # FortiGate 600F Series, p. 7
     category: "firewall"
     alt_group: "FG-600F"
@@ -5268,6 +7400,19 @@ devices:
       - { count: 8, speed: 1G, kind: sfp_slot }
       - { count: 4, speed: 10G, kind: sfp_slot }
       - { count: 4, speed: 25G, kind: sfp_slot }
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "FortiGate 600F Series, p. 7"
+      height_u:
+        kind: contractor
+        ref: "FortiGate 600F Series, p. 7"
+      input_v_max:
+        kind: contractor
+        ref: "FortiGate 600F Series, p. 7"
+      ports:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, device_ports.csv"
   - part_id: FG-601F  # FortiGate 600F Series, p. 7
     category: "firewall"
     alt_group: "FG-601F"
@@ -5291,6 +7436,19 @@ devices:
       - { count: 8, speed: 1G, kind: sfp_slot }
       - { count: 4, speed: 10G, kind: sfp_slot }
       - { count: 4, speed: 25G, kind: sfp_slot }
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "FortiGate 600F Series, p. 7"
+      height_u:
+        kind: contractor
+        ref: "FortiGate 600F Series, p. 7"
+      input_v_max:
+        kind: contractor
+        ref: "FortiGate 600F Series, p. 7"
+      ports:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, device_ports.csv"
   - part_id: SK3244-FAN-EC  # Rittal SK 3244.500 variant datasheet (rittal.com pdf-creator, us-en 3244500)
     category: "fan"
     alt_group: "SK3244-FAN-EC"
@@ -5304,6 +7462,13 @@ devices:
     unit_power_w: 80  # rated power Pel, 50 and 60 Hz
     load_type: "INTERMITTENT"
     height_u: 0
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, devices.csv"
+      height_u:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, devices.csv"
   - part_id: SK3244-FAN  # Rittal SK 3244.100 variant datasheet (rittal.com pdf-creator, uk-en 3244100)
     category: "fan"
     alt_group: "SK3244-FAN"
@@ -5317,6 +7482,13 @@ devices:
     unit_power_w: 138  # 60 Hz: the tender text's 138 W; the technical data says 135 W
     load_type: "INTERMITTENT"
     height_u: 0
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, devices.csv"
+      height_u:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, devices.csv"
   # Alternative tiers from data/device-db (M14 rules), appended by
   # data/device-db/tools/library_entries.py (M41c): the two that got a power figure in M41b
   # (finding 30) and the six nameplate tiers.
@@ -5350,6 +7522,19 @@ devices:
         usable_for: ied
     alt_group: SEL-2730M-EXT
     tier: low
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, devices.csv"
+      height_u:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, devices.csv"
+      input_v_max:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, devices.csv"
+      ports:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, device_ports.csv"
   - part_id: SEL-2488.ARBITER-SYSTEMS-MID
     category: gps_clock
     height_u: 1
@@ -5381,6 +7566,16 @@ devices:
         qty: 1
     alt_group: SEL-2488
     tier: mid
+    sources:
+      unit_power_w:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, devices.csv"
+      height_u:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, devices.csv"
+      input_v_max:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, devices.csv"
   - part_id: NAMEPLATE-0828805.WEIDMULLER-LOW
     category: accessory
     height_u: 0
@@ -5390,6 +7585,10 @@ devices:
     description_template: Device nameplate, white PVC plate 60 x 30 mm, self-adhesive
     alt_group: NAMEPLATE-0828805
     tier: low
+    sources:
+      height_u:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, devices.csv"
   - part_id: NAMEPLATE-0828805.WEIDMULLER-MID
     category: accessory
     height_u: 0
@@ -5399,6 +7598,10 @@ devices:
     description_template: Device nameplate, white PVC plate 60 x 30 mm, self-adhesive
     alt_group: NAMEPLATE-0828805
     tier: mid
+    sources:
+      height_u:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, devices.csv"
   - part_id: NAMEPLATE-0828805.WEIDMULLER-HIGH
     category: accessory
     height_u: 0
@@ -5408,6 +7611,10 @@ devices:
     description_template: Device nameplate, white PVC plate 60 x 30 mm, self-adhesive
     alt_group: NAMEPLATE-0828805
     tier: high
+    sources:
+      height_u:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, devices.csv"
   - part_id: NAMEPLATE-0828805.BRADY-LOW
     category: accessory
     height_u: 0
@@ -5417,6 +7624,10 @@ devices:
     description_template: Device nameplate, white PVC plate 60 x 30 mm, self-adhesive
     alt_group: NAMEPLATE-0828805
     tier: low
+    sources:
+      height_u:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, devices.csv"
   - part_id: NAMEPLATE-0828805.BRADY-MID
     category: accessory
     height_u: 0
@@ -5426,6 +7637,10 @@ devices:
     description_template: Device nameplate, white PVC plate 60 x 30 mm, self-adhesive
     alt_group: NAMEPLATE-0828805
     tier: mid
+    sources:
+      height_u:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, devices.csv"
   - part_id: NAMEPLATE-0828805.BRADY-HIGH
     category: accessory
     height_u: 0
@@ -5435,6 +7650,10 @@ devices:
     description_template: Device nameplate, white PVC plate 60 x 30 mm, self-adhesive
     alt_group: NAMEPLATE-0828805
     tier: high
+    sources:
+      height_u:
+        kind: contractor
+        ref: "contractor delivery 2026-10-31, devices.csv"
 catalogues:
   enclosure_u: 42  # rack units of the standard enclosure (ADR 0013)
   mcb:  # spec: Derivation rules -> Breaker part numbers
