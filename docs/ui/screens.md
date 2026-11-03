@@ -167,7 +167,8 @@ with the save bar; everything on it is saved together.
 - **Behaviour:** picking a part fills the row's details strip from the library. A value clicked in the
   strip becomes an input; a value that differs from the library is an **override**, marked, with a reset.
   The Result card recalculates after each change, as before. Rows with no part number get a warning on
-  Checks ("printed with the library model").
+  Checks ("printed with the library model"). A part whose power or inrush is assumed gets an *Assumed
+  power* or *Assumed inrush* warning badge under its strip, its title naming what the figure rests on.
 - **Sized switches:** the L1 and L2 rows show "Sized" for quantity. With no part picked, the sizing picks
   one and the row says so ("The sizing picks the switch"); the strip then reads "Pick the switch to
   change its data." and offers no overrides.
@@ -243,11 +244,21 @@ with the save bar; everything on it is saved together.
 
 ### Library
 - **Layout:** title with the library name, version and install date; header actions *Add device…* (primary),
-  *Export…* and *Import…* (a menu: update package or CSV). Two tabs, *Devices* and *Catalogues*. A
+  *Export…* and *Import…* (a menu: update package or CSV). Tabs *Devices*, *Catalogues*, *Review* and *Health*. A
   **pending bar** at the foot while there are unapplied edits (see [`editing.md`](editing.md), "Library
   editing").
-- **Devices tab:** a toolbar (search, category, data quality, "Has alternatives", count); a table (part id,
-  make and model, supply and rated power, data-quality badge) beside a 400 px detail pane.
+- **Devices tab:** a toolbar (search, category, data quality, "Has alternatives", "Assumed values", count); a
+  table (part id, make and model, supply and rated power, data-quality badge) beside a 400 px detail pane. A
+  part that is not released carries a state badge beside its id: *Draft* (warning), *Reviewed* (info),
+  *Obsolete* (bad). "Assumed values" keeps the parts whose power or inrush is assumed (ADR 0037).
+- **Review tab (M68):** the draft and reviewed parts, pending edits applied: part, state badge, missing
+  sources, last change (date, who, note) and actions *Mark reviewed* (draft), *Send back…* (reviewed; a
+  dialog asks what needs doing, saved as the part's note) and *Release*. Each action is a pending edit.
+  Empty: "Nothing to review: every part is released or obsolete."
+- **Health tab (M68):** a card per measure with its count and a disclosure listing the parts, each a link
+  to the device editor: parts by state (with *Open Review*), obsolete and still used (where, from the
+  projects on this PC), assumed values, no alternative, MCB brands missing a rating of the default set,
+  housekeeping roles a brand leaves empty that the default fills.
 - **Detail pane:** tabs *Overview*, *Datasheet*, *Alternatives* (the compact comparison list with *Use…* and
   *Compare in full*), and *Edit device* in the pane header.
 - **Catalogues tab:** a segmented switch (MCBs, Aux contacts, Terminal blocks, Busbars, Housekeeping); brand

@@ -8,7 +8,7 @@ substation file); the loader resolves them and applies the project defaults.
 from enum import StrEnum
 from pathlib import Path
 from string import Formatter
-from typing import Any, Literal, Self
+from typing import Annotated, Any, Literal, Self
 
 from pydantic import (
     Field,
@@ -16,6 +16,7 @@ from pydantic import (
     NonNegativeInt,
     PositiveFloat,
     PositiveInt,
+    StringConstraints,
     TypeAdapter,
     ValidationError,
     field_validator,
@@ -25,9 +26,11 @@ from pydantic import (
 from bomgen.models._base import DocumentKey, ExcelSheetName, InputModel, PartId
 from bomgen.models.library import (
     CatalogueChoice,
+    Category,
     LoadType,
     Media,
     PortSpeed,
+    PurdueLevel,
     SfpChoice,
     SizedSpeed,
     SupplyType,
@@ -273,6 +276,65 @@ _RENDERED: dict[str, TypeAdapter[str]] = {
 }
 
 
+SideLetter = Annotated[str, StringConstraints(pattern=r"^[A-Z]$")]
+FIRST_NUMBERS: dict[PurdueLevel, int] = {PurdueLevel.L2: 1, PurdueLevel.L1: 11, PurdueLevel.L3: 1}
+
+
+def _first_numbers() -> dict[PurdueLevel, PositiveInt]:
+    return dict(FIRST_NUMBERS)
+
+
+class Tagging(InputModel):
+    """How device tags print their side and number (ADR 0030, 0031); defaults are today's."""
+
+    side_letters: tuple[SideLetter, SideLetter] = ("A", "B")  # LAN A, LAN B
+    first_numbers: dict[PurdueLevel, PositiveInt] = Field(default_factory=_first_numbers)
+
+    @field_validator("side_letters")
+    @classmethod
+    def _different(cls, value: tuple[str, str]) -> tuple[str, str]:
+        if value[0] == value[1]:
+            raise ValueError("the two side letters must differ")
+        return value
+
+    @field_validator("first_numbers")
+    @classmethod
+    def _filled(cls, value: dict[PurdueLevel, int]) -> dict[PurdueLevel, int]:
+        return FIRST_NUMBERS | value  # a level left out keeps today's number
+
+
+class SparesPolicy(InputModel):
+    """The spares list's policy (ADR 0031); read by the spares list (plan M64) only."""
+
+    percent: dict[Category, NonNegativeFloat] = Field(default_factory=dict)
+    minimum_per_part: NonNegativeInt = 0
+    categories: list[Category] = Field(default_factory=list)
+
+
+class DesignBasis(InputModel):
+    """What the engineer states first (ADR 0031). It only sets defaults: a value the
+    substation writes itself wins. Unset keys mean today's behaviour."""
+
+    dc_voltage_v: PositiveFloat | None = None
+    ac_voltage_v: PositiveFloat | None = None
+    redundancy: str = "duplicated_lan"
+    purdue_scope: set[Literal["L1", "L2", "EXT"]] | None = None
+    time_sync: Literal["gps_clock", "ptp_from_clock", "none"] | None = None
+    tagging: Tagging = Field(default_factory=Tagging)
+    spares_policy: SparesPolicy | None = None
+    vendor_list: str | None = None  # a key of the project's vendor lists (plan M53)
+    notes: str | None = None
+
+    @field_validator("redundancy")
+    @classmethod
+    def _duplicated_lan_only(cls, value: str) -> str:
+        if value.lower() in ("prp", "hsr"):
+            raise ValueError(f"{value.upper()} is not supported yet; use duplicated_lan")
+        if value != "duplicated_lan":
+            raise ValueError("redundancy must be duplicated_lan")
+        return value
+
+
 class Substation(InputModel):
     """The substation file (``substation.yaml``)."""
 
@@ -290,6 +352,7 @@ class Substation(InputModel):
     network: Network = Field(default_factory=Network)
     layout: Layout = Field(default_factory=Layout)
     generated_panels: GeneratedPanels | None = None
+    design_basis: DesignBasis | None = None  # ADR 0031
 
     @model_validator(mode="after")
     def _consistent(self) -> "Substation":

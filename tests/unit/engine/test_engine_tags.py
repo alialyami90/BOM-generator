@@ -199,3 +199,17 @@ def test_short_tag_drops_the_panel_prefix_and_uses_underscores() -> None:
     lib = library(switch("L2", "L2"))
     assert short_tag("PSA1-L2-ESW-A01", lookup(lib, "L2"), "PSA1") == "L2_ESW_A01"
     assert short_tag(None, lookup(lib, "L2"), "PSA1") == "L2"  # untagged: the model
+
+
+def test_tagging_first_numbers_from_design_basis() -> None:
+    from bomgen.models.library import PurdueLevel
+    from bomgen.models.substation import Tagging
+
+    tagging = Tagging.model_validate({"first_numbers": {"L1": 21}, "side_letters": ["X", "Y"]})
+    lib = library(*SWITCHES)
+    l1, l2 = expand_devices(
+        panel([{"part_id": "L1", "qty": 2}, {"part_id": "L2"}], lan="B"), lib, tagging=tagging
+    )
+    assert l1.tag == "PSA1-L1-ESW-Y21 to Y22"
+    assert l2.tag == "PSA1-L2-ESW-Y01"  # L2 keeps the default first number
+    assert tagging.first_numbers[PurdueLevel.L2] == 1

@@ -184,10 +184,12 @@ def _tag_info(
     expanded = []
     fills = [f for f in result.fills if f.units]
     for panel, fill in zip(result.panels, fills, strict=True):
-        rows = expand_devices(panel, loaded.library)
+        rows = expand_devices(panel, loaded.library, tagging=loaded.tagging)
         expanded.append((panel, rows))
         devices = [d.model_copy(update={"tag": None}) for d in panel.devices]
-        untagged = expand_devices(panel.model_copy(update={"devices": devices}), loaded.library)
+        untagged = expand_devices(
+            panel.model_copy(update={"devices": devices}), loaded.library, tagging=loaded.tagging
+        )
         for run, row, auto in zip(runs(fill), rows, untagged, strict=True):
             entry = run[0].device
             if auto.tag is not None:
@@ -303,6 +305,14 @@ def _row(
         "redundant": entry.redundant,
         "network": category in NETWORK_CATEGORIES,
         "library": {k: getattr(part, k) for k in VALUES} if part is not None else None,
+        # ADR 0037: the figures its part assumes, for the chip on the row
+        "assumed": [
+            {"field": name, "ref": source.ref}
+            for name in ("unit_power_w", "inrush_a")
+            if part is not None
+            and (source := part.sources.get(name)) is not None
+            and source.kind == "assumed"
+        ],
         "overrides": entry.overrides.values() if entry.overrides is not None else {},
         "sfp": sfp,
         "bom_text": {k: getattr(entry, k) for k in BOM_TEXT},  # M59

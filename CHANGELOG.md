@@ -17,6 +17,14 @@ project uses [Semantic Versioning](https://semver.org/).
 - psa-devices 1.16.0: every part says where its power, inrush, height, input voltage and ports
   come from: the device database's datasheet, the contractor's cited document, or assumed with
   the reason. Checks warns when a picked part's power or inrush is assumed (M67b, ADR 0037).
+- The device editor shows a part's state, its successor when obsolete, and a Sources table beside
+  the sized figures; changing a figure asks for its source before you save. Library marks draft,
+  reviewed and obsolete parts and filters to *Assumed values*; Parts badges an assumed power or
+  inrush (M67c, ADR 0037).
+- Library has a Review tab for draft and reviewed parts (mark reviewed, release, or send back with
+  a note) and a Health tab: parts by state, assumed figures, parts with no alternative, obsolete
+  parts that projects on this PC still use, and brand sets missing an MCB rating or a housekeeping
+  role (M68).
 
 - The panel editor's main MCB shows the engine's rating with the rule it came from ("10 A: next
   standard size above 7.1 A, minimum 6 A"); click it to type your own, *Use automatic* to go back
@@ -37,6 +45,9 @@ project uses [Semantic Versioning](https://semver.org/).
   prefix patterns, the enclosure and cable entry, and the BOM, power and heat document numbers,
   filled in from the previous substation. What you type is written without the ASSUMED mark, and
   Checks warns while a document number is still TBD (M51).
+- A substation can state its design basis in `design_basis`: DC and AC voltage feed the design
+  constants unless the substation sets its own, and `tagging` sets the side letters and first
+  numbers that device tags use. Unset, everything builds as before (M52a, ADR 0031).
 - The panel editor's Options tab shows the AC and DC spare breaker ratings with the rule behind
   them; click one to set your own. Grounding busbars are checkboxes from the library's catalogue.
   *Alarm on branch MCB trip* can be switched per Parts row and per hand-written panel row, over the

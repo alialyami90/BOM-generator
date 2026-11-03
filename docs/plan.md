@@ -285,10 +285,21 @@ generated_panels:                      # needed when equipment is given; {n} = p
   enclosure_by_panel: { 3: { make: Rawabi, model: "Fixed Frame", h_mm: 2100, d_mm: 1000,
                              w_mm: 600, cable_entry: bottom } }   # optional, whole enclosure (M50)
   kind_by_panel: { 3: control }        # optional; unset panels take `kind` (M50)
+design_basis:                          # optional (ADR 0031, M52); only sets defaults
+  dc_voltage_v: 110                    # over the project's constants, under this file's own
+  ac_voltage_v: 230
+  redundancy: duplicated_lan           # PRP and HSR refused until a rule exists
+  purdue_scope: [L1, L2, EXT]          # checked by M54, changes no quantity
+  time_sync: gps_clock                 # gps_clock | ptp_from_clock | none
+  tagging: { side_letters: [A, B], first_numbers: { L2: 1, L1: 11, L3: 1 } }
+  spares_policy: { percent: { sfp: 10 }, minimum_per_part: 1, categories: [sfp] }  # M64
+  vendor_list: client-avl              # a project vendor list's key (M53)
+  notes: "Client SCADA spec rev 2"
 ```
 
 **Loading rules.** Substation `constants`, `spares` and `catalogue_choice` replace only the keys
-they write; the merged constants are checked again (`t_max_c > t_int_c`). Every
+they write; the merged constants are checked again (`t_max_c > t_int_c`). The design basis's
+voltages sit between the project's constants and the substation's own (ADR 0031). Every
 document key a substation, its calculation sheets, `generated_panels` and its
 panels name must be one of that substation's register entries. Equipment parts
 must exist and carry `height_u`, and the two switch roles must be
@@ -1098,11 +1109,15 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M49 — SFP quantities per switch.** *W4.* Done (#323). `sfp` choices take `spare` and `extra` per BOM
   row and `part_id` became optional; extras warn on the slot check, never fail.
 - **M50 — Enclosure and kind per generated panel, bottom entry.** *W3; spec sentence.* In review.
-- **M51 — New-substation setup instead of ASSUMED seeds.** *W5; Q62.* In review. A blank substation's
+- **M51 — New-substation setup instead of ASSUMED seeds.** *W5; Q62.* Done (#333). A blank substation's
   dialog has a *Cabinets and documents* step prefilled from the previous substation (Q62's recommended
   answer); `document_number_placeholder` warns on a TBD number. Checks reads the model, so it flags
   TBD only, not an ASSUMED comment; the register already shows assumed dates.
-- **M52 — Design basis model and tab.** *W5; ADR 0031.* Planned.
+- **M52 — Design basis model and tab.** *W5; ADR 0031.* Split. M52a (model, loader, tags) in review:
+  `substation.design_basis`; its voltages feed the constants under the substation's own, and
+  `engine/tags.py` reads side letters and first numbers from its `tagging`. A hand-written panel's
+  tags and port-plan keys are written in the file, so they don't follow new side letters. M52b (the
+  tab and `design_basis_page`) planned.
 - **M53 — Vendor list and part lifecycle states.** *W5; ADRs 0031 and 0037.* Planned.
 - **M54 — Design-basis checks.** *W5.* Planned.
 - **M55 — Substation templates.** *W5; Q63.* Planned.
@@ -1131,13 +1146,19 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M65 — Cable schedule.** *W2; ADR 0035, Q66.* Planned.
 - **M66 — Revision history and recorded issues.** *W2; ADR 0036, Q67.* Planned.
 - **M67 — Record sources and lifecycle.** *W1; ADR 0037 (accepted).* In two PRs so that W5's M53
-  gets the state field early. **M67a** (in review): `state`, `successor`, `sources` and the change
+  gets the state field early. **M67a** (merged, #331): `state`, `successor`, `sources` and the change
   fields on `DeviceType`, the successor reference check, `devices.csv` columns, the schema. **M67b**
-  (in review): a sized change needs its source, the save writes who, when and the note, a
+  (merged, #335): a sized change needs its source, the save writes who, when and the note, a
   library that uses these fields needs this app, every shipped part sourced (psa-devices 1.16.0,
-  Q69), the assumed power and inrush check. **M67c** (planned): the device editor's state,
+  Q69), the assumed power and inrush check. **M67c** (merged, #337): the device editor's state,
   successor and Sources column, the Library state badge and *Assumed values* filter, the Parts chip.
-- **M68 — Review queue and health.** *W1.* Planned.
+- **M68 — Review queue and health.** *W1.* In review. `library_store/health.py` measures parts by
+  state, assumed figures, parts without an alternative, obsolete parts the projects on this PC pick,
+  MCB brand sets missing a rating of the default set, and housekeeping roles the default fills that a
+  brand leaves empty. Library gains *Review* (draft and reviewed parts with their missing sources:
+  *Mark reviewed*, *Release*, *Send back…* with a note kept on the part) and *Health* (a card per
+  measure). Every action is a pending edit; anyone using the app may release, as the app has no
+  owner role.
 - **M69 — Propose from project.** *W1.* Planned.
 
 ## 5. Testing strategy
@@ -1534,15 +1555,20 @@ spec, or change the spec to 26.25?
 "Sheet 4" is read as the console panel (`kind: console`): the example's sheet 4 is the WS
 console, and the kind names the same cabinet in any project (A1, 2026-11-01).
 
-**Q62 — A new substation's seeds** (M51). *Open.* A blank substation gets the example's cabinet
+**Q62 — A new substation's seeds** (M51). *Answered 2026-11-03: prefill, previous substation first.* A blank substation gets the example's cabinet
 number pattern, cabinet name, tag prefix, enclosure (Rawabi fixed frame 2100 × 1000 × 800, top entry)
 and "TBD" document numbers, the uncertain ones marked ASSUMED. M51 adds a setup step to the New
 substation dialog. Prefill it with these values, or the previous substation's when there is one
-(recommended), or start it blank so every value is typed? Until Ali answers, M51 prefills.
+(recommended), or start it blank so every value is typed? M51 prefills.
 
-**Q63 — Where substation templates live** (M55). *Open.* In the project folder as
+**Q63 — Where substation templates live** (M55). In the project folder as
 `templates/*.yaml`, so they travel with the `.bomproj` (recommended), or in the app's home folder,
-shared by every project on the PC? Until Ali answers, M55 stores them in the project folder.
+shared by every project on the PC? *Answered 2026-11-03: the project folder.*
+
+**Q67 — Where prepared, checked and approved names print** (M66; ADR 0036). *Answered 2026-11-03: the history sheet only, footer as it is.* The register
+gains the three names per document. They print on the Revision History sheet (ADR 0035) for each
+recorded issue. To ask Ali: the history sheet only, with the footer as it is (recommended); also in
+every sheet's page header; or on a cover sheet.
 
 **Q68 — "Exactly n panels"** (M62). *Answered 2026-11-03: offer At most n only.* The plan offers Automatic, Exactly n and At most n. The fill
 already opens the fewest panels, so Exactly n only differs from At most n when the devices fit in

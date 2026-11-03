@@ -181,7 +181,8 @@ def _unsourced(base: Library, library: Library) -> list[str]:
 
 
 def _stamped(base: Library, library: Library, note: str) -> Library:
-    """`library` with who, when and the note written on each part the edits touched."""
+    """`library` with who, when and the note written on each part the edits touched. A note
+    the edits gave the part itself (a review sent back) is kept over the save's note."""
     stamp = {
         "changed_by": _user(),
         "changed_on": date.today().isoformat(),
@@ -191,7 +192,10 @@ def _stamped(base: Library, library: Library, note: str) -> Library:
     for device in data["devices"]:
         old = base.get(device["part_id"])
         if old is None or _content(old.model_dump(mode="json")) != _content(device):
+            own = device["note"] if old is None or device["note"] != old.note else None
             device.update(stamp)
+            if own:
+                device["note"] = own
     return Library.model_validate(data)
 
 
