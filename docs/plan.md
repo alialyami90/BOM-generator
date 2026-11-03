@@ -260,6 +260,8 @@ network:
   l3_uplinks_per_l2: 2
 layout:                                # panel capacity = enclosure_u − rack_u_reserved
   blank_plate_u: 1                     # space only, no BOM row (Q25)
+  max_panels: 4                        # optional cap (M62): no panel past it; a unit that does not
+                                       #   fit is a panel-limit error naming it and the U short
   overrides:                           # written by the UI's Panels board; equipment ids
     - { device: l1, unit: 3, side: a, panel: 3 }   # unit 1-based; side for redundant
     - { pair: l1, unit: 2, panel: [3, 4] }         # both sides; no unit = every pair
@@ -1070,7 +1072,7 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M48 — Derived-value component and the override contract.** *Lead.* In review. The main MCB is the
   first derived value; the SFP, housekeeping and terminal rule texts land with M49, M56 and M57, which put
   those values on screen.
-- **M49 — SFP quantities per switch.** *W4.* In review. `sfp` choices take `spare` and `extra` per BOM
+- **M49 — SFP quantities per switch.** *W4.* Done (#323). `sfp` choices take `spare` and `extra` per BOM
   row and `part_id` became optional; extras warn on the slot check, never fail.
 - **M50 — Enclosure and kind per generated panel, bottom entry.** *W3; spec sentence.* Planned.
 - **M51 — New-substation setup instead of ASSUMED seeds.** *W5; Q62.* Planned.
@@ -1084,7 +1086,10 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M59 — BOM text per row on Parts.** *W4.* Planned.
 - **M60 — IED schedule.** *W4; ADR 0034.* Planned.
 - **M61 — External links.** *W4; Q64.* Planned.
-- **M62 — Panel count control.** *W4.* Planned.
+- **M62 — Panel count control.** *W4; Q68.* In review. ADR 0013 amendment: `layout.max_panels`
+  caps the fill (R5, R6): a pair opens only while both its panels are within the cap, a common device
+  only into a panel within it, and a unit that fits nowhere is a `panel-limit` layout error naming the
+  unit and the U it is short. Moves past the cap are unknown panels. "Exactly n" waits on Q68.
 - **M63 — Summary BOM.** *W2; ADR 0035.* Planned.
 - **M64 — Spares list.** *W2; ADR 0035, Q65.* Planned.
 - **M65 — Cable schedule.** *W2; ADR 0035, Q66.* Planned.
@@ -1486,3 +1491,9 @@ the device tag rule.
 spec, or change the spec to 26.25?
 "Sheet 4" is read as the console panel (`kind: console`): the example's sheet 4 is the WS
 console, and the kind names the same cabinet in any project (A1, 2026-11-01).
+
+**Q68 — "Exactly n panels"** (M62). The plan offers Automatic, Exactly n and At most n. The fill
+already opens the fewest panels, so Exactly n only differs from At most n when the devices fit in
+fewer: spread them evenly, keep the spare panels empty, or offer At most n only (recommended: the
+Panels board already opens a new pair when a device is dragged onto it). M62 ships At most n
+(`layout.max_panels`) while Ali answers.

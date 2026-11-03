@@ -622,6 +622,19 @@
           "title": "Blank Plate U",
           "type": "integer"
         },
+        "max_panels": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Panels"
+        },
         "overrides": {
           "items": {
             "anyOf": [
