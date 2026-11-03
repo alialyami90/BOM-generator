@@ -540,3 +540,50 @@ def test_describe_lists_one_entry_per_changed_source() -> None:
             "to": "measured: bench test",
         }
     ]
+
+
+# -- review and health (M68) ------------------------------------------------------------------
+
+
+def state(part: str, value: str) -> dict[str, object]:
+    return {"op": "set", "path": ["devices", part, "state"], "value": value}
+
+
+def test_health_counts_states_with_the_pending_edits(app: api.Api) -> None:
+    ok(app.add_library_edits([state(PART, "draft")]))
+
+    health = ok(app.library_health())
+
+    assert health["states"]["draft"] == 1
+    assert health["states"]["obsolete"] == 0
+
+
+def test_review_lists_draft_and_reviewed_parts_with_their_missing_sources(app: api.Api) -> None:
+    ok(app.add_library_edits([state(PART, "reviewed")]))
+
+    review = ok(app.library_health())["review"]
+
+    assert [r["part_id"] for r in review] == [PART]
+    assert review[0]["state"] == "reviewed"
+    assert "unit_power_w" in review[0]["missing"]
+
+
+def test_health_says_where_projects_on_this_pc_use_an_obsolete_part(
+    app: api.Api, tmp_path: Path
+) -> None:
+    shutil.copytree(EXAMPLES, tmp_path / "workspace" / "jfgp2")
+    ok(app.add_library_edits([state(PART, "obsolete")]))
+
+    obsolete = ok(app.library_health())["obsolete_in_use"]
+
+    assert [o["part_id"] for o in obsolete] == [PART]
+    assert obsolete[0]["where"] == [
+        "JAFURAH JFGP2 PKG.3 UTILITIES, SULFUR and INTERCONNECTING SYSTEMS · gis01"
+    ]
+
+
+def test_health_lists_the_weak_spots_as_rows(app: api.Api) -> None:
+    health = ok(app.library_health())
+
+    assert set(health) >= {"assumed", "alone", "mcb_gaps", "housekeeping_gaps"}
+    assert all({"part_id", "name"} <= set(row) for row in health["alone"])

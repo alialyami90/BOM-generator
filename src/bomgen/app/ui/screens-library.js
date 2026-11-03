@@ -89,9 +89,69 @@
   /* Devices, and the commodity catalogues the engine picks MCBs, terminal blocks and busbars from. */
   function contents() {
     if (!(LIB.overview && LIB.overview.catalogues)) return devicesView();
-    const t = S.tab.libview === 'catalogues' ? 'catalogues' : 'devices';
-    return `${tabs('libview', [['devices', 'Devices', badge('plain', devices().length)], ['catalogues', 'Catalogues']], t, 'Library contents')}
-      <div role="tabpanel" aria-labelledby="tab-libview-${t}">${t === 'catalogues' ? cataloguesView() : devicesView()}</div>`;
+    const t = ['catalogues', 'review', 'health'].includes(S.tab.libview) ? S.tab.libview : 'devices';
+    const view = { devices: devicesView, catalogues: cataloguesView, review: reviewView, health: healthView }[t];
+    return `${tabs('libview', [['devices', 'Devices', badge('plain', devices().length)], ['catalogues', 'Catalogues'], ['review', 'Review'], ['health', 'Health']], t, 'Library contents')}
+      <div role="tabpanel" aria-labelledby="tab-libview-${t}">${view()}</div>`;
+  }
+
+  /* ---------- Review and Health (M68): read with the pending changes applied ---------- */
+  const HEALTH = { state: 'idle', data: null, failed: '' };
+  App.healthStale = () => { HEALTH.state = 'idle'; };
+  window.addEventListener('hashchange', App.healthStale);  // the editor may have changed a part
+  function health() {
+    if (HEALTH.state === 'idle') {
+      HEALTH.state = 'loading';
+      Bridge.call('library_health').then((d) => { HEALTH.data = d; HEALTH.state = 'loaded'; App.render(); })
+        .catch((e) => { HEALTH.state = 'failed'; HEALTH.failed = e.message; App.render(); });
+    }
+    if (HEALTH.state === 'failed') return { html: `<div style="margin-top:var(--space-4)">${banner('bad', `<b>The library could not be checked.</b> ${esc(HEALTH.failed)}`)}</div>` };
+    if (!HEALTH.data) return { html: '<p class="muted" style="margin-top:var(--space-4)">Checking the library…</p>' };
+    return { data: HEALTH.data };
+  }
+  const SIZED = { unit_power_w: 'Power', inrush_a: 'Inrush', height_u: 'Height', input_v_max: 'Maximum input voltage', ports: 'Ports' };
+  const sized = (fields) => fields.map((f) => SIZED[f] || f).join(', ');
+  const partCell = (r) => `<a class="mono" href="#/library/device/${encodeURIComponent(r.part_id)}">${esc(r.part_id)}</a><span class="cell-sub">${esc(r.name)}</span>`;
+  function reviewView() {
+    const h = health(); if (!h.data) return h.html;
+    const rows = h.data.review;
+    const lastChange = (r) => (r.changed_on || r.note ? `${r.changed_on ? `${esc(day(r.changed_on))}${r.changed_by ? ` · ${esc(r.changed_by)}` : ''}` : ''}${r.note ? `<span class="cell-sub">${esc(r.note)}</span>` : ''}` : '<span class="muted">—</span>');
+    const actions = (r) => `<div class="row" style="gap:var(--space-2);flex-wrap:nowrap;justify-content:flex-end">${r.state === 'draft'
+      ? `<button class="btn btn--secondary btn--sm" data-action="review-state" data-id="${esc(r.part_id)}" data-to="reviewed">Mark reviewed</button>`
+      : `<button class="btn btn--secondary btn--sm" data-action="review-send-back" data-id="${esc(r.part_id)}">Send back…</button>`}<button class="btn btn--secondary btn--sm" data-action="review-state" data-id="${esc(r.part_id)}" data-to="released">Release</button></div>`;
+    return `<p class="muted" style="margin:var(--space-4) 0 var(--space-3)">Parts in draft or reviewed, with the pending changes applied. Each action is a pending change; nothing reaches projects until you apply the set.</p>
+      <div class="table-wrap"><table class="table"><thead><tr><th>Part</th><th>State</th><th>Missing sources</th><th>Last change</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody>
+      ${rows.map((r) => `<tr><td>${partCell(r)}</td><td>${badge(...STATE[r.state])}</td><td>${r.missing.length ? badge('warn', sized(r.missing)) : '<span class="muted">None</span>'}</td><td>${lastChange(r)}</td><td>${actions(r)}</td></tr>`).join('')
+        || '<tr class="empty-row"><td colspan="5">Nothing to review: every part is released or obsolete.</td></tr>'}</tbody></table></div>`;
+  }
+  const setState = (id, edits, text) => Bridge.call('add_library_edits', edits).then((p) => { closeDialog(); App.setPending(p); HEALTH.state = 'idle'; App.render(); toast(text, 'check'); }).catch((e) => { closeDialog(); toast(e.message, 'error'); });
+  const stateEdit = (id, value) => ({ op: 'set', path: ['devices', id, 'state'], value });
+  ACTIONS['review-state'] = (el) => setState(el.dataset.id, [stateEdit(el.dataset.id, el.dataset.to)], `${el.dataset.id} ${el.dataset.to === 'released' ? 'released' : 'marked reviewed'}, pending`);
+  ACTIONS['review-send-back'] = (el) => {
+    const id = el.dataset.id;
+    dialog({ title: `Send ${esc(id)} back to draft?`, body: `<div class="form">${field('What needs doing', `<textarea class="input" id="review-note" rows="3" style="height:auto;padding:8px 10px" data-id="${esc(id)}"></textarea>`, 'Saved on the part, so whoever picks it up sees why.')}<p class="err small" id="review-note-err" hidden></p></div>`,
+      actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="review-send-back-do">Send back</button>' });
+  };
+  ACTIONS['review-send-back-do'] = () => {
+    const box = $('#review-note'), id = box.dataset.id, note = box.value.trim(), bad = $('#review-note-err');
+    if (!note) { bad.textContent = 'Say what needs doing before it can be reviewed again.'; bad.hidden = false; box.setAttribute('aria-invalid', 'true'); box.focus(); return; }
+    setState(id, [stateEdit(id, 'draft'), { op: 'set', path: ['devices', id, 'note'], value: note }], `${id} sent back to draft, pending`);
+  };
+  function healthView() {
+    const h = health(); if (!h.data) return h.html;
+    const d = h.data, s = d.states;
+    const card = (title, count, lede, items, level = 'warn') => `<section class="card health-card" style="padding:var(--space-4)"><div class="row" style="justify-content:space-between;align-items:baseline"><h3>${title}</h3>${badge(count ? level : 'ok', String(count))}</div><p class="muted small" style="margin:var(--space-1) 0 var(--space-2)">${lede}</p>
+      ${count ? `<details><summary>Show ${count === 1 ? 'it' : `all ${count}`}</summary><ul class="health-list">${items}</ul></details>` : '<p class="small">None.</p>'}</section>`;
+    const go = (r, extra) => `<li><a class="mono" href="#/library/device/${encodeURIComponent(r.part_id)}">${esc(r.part_id)}</a> <span class="muted">${esc(r.name)}</span>${extra ? `<span class="cell-sub">${extra}</span>` : ''}</li>`;
+    return `<p class="muted" style="margin:var(--space-4) 0 var(--space-3)">Where the library is weak, with the pending changes applied. Open a part to fix it; the fix waits as a pending change like any other edit.</p>
+      <div class="health-grid">
+        <section class="card health-card" style="padding:var(--space-4)"><h3>Parts by state</h3><dl class="kv" style="margin-top:var(--space-2)"><dt>Draft</dt><dd>${s.draft}</dd><dt>Reviewed</dt><dd>${s.reviewed}</dd><dt>Released</dt><dd>${s.released}</dd><dt>Obsolete</dt><dd>${s.obsolete}</dd></dl>${s.draft + s.reviewed ? '<button class="btn btn--secondary btn--sm" style="margin-top:var(--space-3)" data-action="tab" data-group="libview" data-value="review">Open Review</button>' : ''}</section>
+        ${card('Obsolete and still used', d.obsolete_in_use.length, 'Obsolete parts that projects on this PC still pick. Point them at the successor.', d.obsolete_in_use.map((r) => go(r, esc(r.where.join('; ')))).join(''), 'bad')}
+        ${card('Assumed values', d.assumed.length, 'Parts with a figure that no datasheet, contractor or measurement backs.', d.assumed.map((r) => go(r, esc(sized(r.fields)))).join(''))}
+        ${card('No alternative', d.alone.length, 'Parts with nothing to swap to if they cannot be bought.', d.alone.map((r) => go(r)).join(''), 'info')}
+        ${card('MCB brands missing a rating', d.mcb_gaps.length, 'Brand sets without a rating the default set has, so the sizing may not find it.', d.mcb_gaps.map((g) => `<li><span class="mono">${esc(g.brand)}</span><span class="cell-sub">${g.missing.map((a) => `${a} A`).join(', ')}</span></li>`).join(''))}
+        ${card('Housekeeping roles left empty', d.housekeeping_gaps.length, 'Brand sets that leave out a role the default set fills.', d.housekeeping_gaps.map((g) => `<li><span class="mono">${esc(g.brand)}</span><span class="cell-sub">${g.roles.map((r) => ROLES[r] || r).join(', ')}</span></li>`).join(''))}
+      </div>`;
   }
 
   /* ADR 0037: a released part shows nothing; the others say their state. */
@@ -290,7 +350,7 @@
   }
   ACTIONS.tab2 = null;
   const origTab = ACTIONS.tab;
-  ACTIONS.tab = (el) => { if (el.dataset.group === 'libtab2') { S.libTab = el.dataset.value; App.render(); const n = document.getElementById(el.id); n && n.focus(); } else origTab(el); };
+  ACTIONS.tab = (el) => { if (el.dataset.group === 'libtab2') { S.libTab = el.dataset.value; App.render(); const n = document.getElementById(el.id); n && n.focus(); } else { if (el.dataset.group === 'libview') HEALTH.state = 'idle'; origTab(el); } };
 
   /* Refusals: what the first failed check means for the person importing (docs/ui/screens.md, Refusals). */
   const REFUSALS = {

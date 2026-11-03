@@ -25,6 +25,7 @@ from bomgen.library_store.alternatives import compare_alternatives
 from bomgen.library_store.device_db import DeviceRecord, MountingKind, load_device_records
 from bomgen.library_store.edit import apply_edits, check_field, parse_edits
 from bomgen.library_store.errors import LibraryPackageError, RefusalKind
+from bomgen.library_store.health import library_health, missing_sources
 from bomgen.library_store.local import next_local_version, save_edits
 from bomgen.library_store.records import apply_record_edits, check_record_field
 from bomgen.library_store.store import LibraryStore
@@ -378,6 +379,37 @@ class LibraryEditor:
         if any(d.part_id == part_id for d in edited.devices):
             raise EditRefusedError(f"devices: {part_id} is already in the library")
         return self.add([{"op": "insert", "path": ["devices"], "value": body}])
+
+    def health(self, used: Mapping[str, Sequence[str]]) -> dict[str, Any]:
+        """The Review and Health tabs (M68), pending edits applied; ``used`` maps a part id to
+        where the projects on this PC pick it."""
+        library = self._edited(self._ready())
+        found = library_health(library, used)
+        names = {d.part_id: " ".join(filter(None, (d.make, d.model))) for d in library.devices}
+
+        def part(pid: str, **more: object) -> dict[str, Any]:
+            return {"part_id": pid, "name": names[pid], **more}
+
+        return {
+            "states": found.states,
+            "review": [
+                part(
+                    d.part_id,
+                    state=d.state,
+                    missing=missing_sources(d),
+                    note=d.note,
+                    changed_by=d.changed_by,
+                    changed_on=d.changed_on.isoformat() if d.changed_on else None,
+                )
+                for d in library.devices
+                if d.state in ("draft", "reviewed")
+            ],
+            "assumed": [part(pid, fields=fields) for pid, fields in found.assumed],
+            "alone": [part(pid) for pid in found.alone],
+            "obsolete_in_use": [part(pid, where=where) for pid, where in found.obsolete_in_use],
+            "mcb_gaps": [{"brand": b, "missing": m} for b, m in found.mcb_gaps],
+            "housekeeping_gaps": [{"brand": b, "roles": r} for b, r in found.housekeeping_gaps],
+        }
 
     def catalogues(self) -> dict[str, Any]:
         """The Catalogues tab: every brand set as rows, with the pending edits applied."""

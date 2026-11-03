@@ -21,6 +21,10 @@ project uses [Semantic Versioning](https://semver.org/).
   the sized figures; changing a figure asks for its source before you save. Library marks draft,
   reviewed and obsolete parts and filters to *Assumed values*; Parts badges an assumed power or
   inrush (M67c, ADR 0037).
+- Library has a Review tab for draft and reviewed parts (mark reviewed, release, or send back with
+  a note) and a Health tab: parts by state, assumed figures, parts with no alternative, obsolete
+  parts that projects on this PC still use, and brand sets missing an MCB rating or a housekeeping
+  role (M68).
 
 - The panel editor's main MCB shows the engine's rating with the rule it came from ("10 A: next
   standard size above 7.1 A, minimum 6 A"); click it to type your own, *Use automatic* to go back

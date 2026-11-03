@@ -377,7 +377,8 @@ Lifecycle and sources (ADR 0037): `state`, `successor`, a `source` per sized fie
 `inrush_a`, `height_u`, `input_v_max`, `ports`) and `changed_by`, `changed_on`, `note` are library fields
 (M67a). Applying a pending set, or importing a CSV, that changes a sized field without that field's source is
 refused with a line naming the part and the field; *assumed* is a source. Each applied set writes `changed_by`,
-`changed_on` and the set's note on the parts it touched (M67b). The editor shows them (M67c): State and
+`changed_on` and the set's note on the parts it touched (M67b); a note the set gives a part itself, as
+Library › Review's *Send back…* does, is kept over the set's note (M68). The editor shows them (M67c): State and
 Successor on Identity (the successor field only for an obsolete part, checked against the library as you type),
 and a Sources table on Electrical (power, inrush, maximum input voltage) and Ports and mounting (height, ports)
 with a kind, a reference and a date per figure. Changing a sized figure marks its source row until the source
