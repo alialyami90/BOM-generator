@@ -160,3 +160,41 @@ def test_generated_panels_share_terminal_overrides(app: api.Api, generated: Path
 
     qty = _strip(ok(app.panel_page(str(generated), "gis01", "psa1")), "X3-AC")["qty"]
     assert (qty["value"], qty["override"]) == (12, 20)
+
+
+def test_panel_page_carries_the_housekeeping_kit_with_its_rules(
+    app: api.Api, project: Path
+) -> None:
+    """ADR 0032: each housekeeping load's breaker is a derived value; the counts default
+    to the spec's kit."""
+    kit = ok(app.panel_page(str(project), "gis01", "psa1"))["housekeeping"]
+
+    assert kit["defaults"]["fans"] == 2
+    fan = kit["ratings"]["fan"]
+    assert (fan["value"], fan["override"], fan["source"]) == (2, None, "engine")
+    assert fan["rule"].startswith("2 A: the spec's fan rating")
+    assert [b["load"] for b in kit["branches"]][:2] == ["Illumination Lamp", "Fan-1 and TH-1"]
+
+
+def test_housekeeping_counts_and_ratings_round_trip(app: api.Api, project: Path) -> None:
+    fans: list[str | int] = ["options", "housekeeping", "fans"]
+    rating: list[str | int] = ["options", "housekeeping", "branch_ratings", "fan"]
+    ok(app.set_panel_field(str(project), "gis01", "psa1", fans, 3))
+    kit = ok(app.set_panel_field(str(project), "gis01", "psa1", rating, 6))["housekeeping"]
+
+    assert [b["key"] for b in kit["branches"]].count("fan") == 3
+    fan = kit["ratings"]["fan"]
+    assert (fan["value"], fan["override"]) == (2, 6)
+
+    ok(app.set_panel_field(str(project), "gis01", "psa1", rating, None))
+    page = ok(app.panel_page(str(project), "gis01", "psa1"))
+    assert page["housekeeping"]["ratings"]["fan"]["override"] is None
+
+
+def test_generated_panels_share_a_housekeeping_count(app: api.Api, generated: Path) -> None:
+    path: list[str | int] = ["generated_panels", "options", "housekeeping", "lamps"]
+    ok(app.set_substation_field(str(generated), "gis01", path, 2))
+
+    sheet = ok(app.preview_substation(str(generated), "gis01"))["panels"][0]
+    lamp = next(r for r in sheet["rows"] if r["description"].startswith("Illumination Lamp"))
+    assert lamp["qty"] == 2

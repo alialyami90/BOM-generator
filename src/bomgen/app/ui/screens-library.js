@@ -213,9 +213,10 @@
      as it leaves the cell; a change the library refuses stays in the table with the reason. */
   const ROLES = {
     lamp: 'Cabinet lamp', door_switch: 'Door switch', fan: 'Fan', vent_filter: 'Vent filter', thermostat: 'Thermostat', ipr_kit: 'IPR kit',
-    change_over_diode_negative: 'Change-over diode, negative', change_over_diode_positive: 'Change-over diode, positive', socket: 'Socket', nameplate: 'Device nameplate'
+    change_over_diode_negative: 'Change-over diode, negative', change_over_diode_positive: 'Change-over diode, positive', socket: 'Socket', nameplate: 'Device nameplate',
+    heater: 'Heater', hygrostat: 'Hygrostat', smoke_detector: 'Smoke detector'  // ADR 0032
   };
-  const OPTIONAL = ['door_switch', 'nameplate'];
+  const OPTIONAL = ['door_switch', 'nameplate', 'heater', 'hygrostat', 'smoke_detector'];
   const KINDS = [['mcb', 'MCBs'], ['aux_contact', 'Aux contacts'], ['terminal_blocks', 'Terminal blocks'], ['busbars', 'Busbars'], ['housekeeping', 'Housekeeping']];
   const COLS = {  // [field, heading, mono, wide]
     mcb: [['rating_a', 'Rating (A)', true], ['code', 'Ordering code', true]],

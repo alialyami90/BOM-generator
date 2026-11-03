@@ -28,6 +28,9 @@ ROLES = (
     ("change_over_diode_positive", ("change_over_diodes", "positive")),
     ("socket", ("socket", "part_id")),
     ("nameplate", ("nameplate", "part_id")),
+    ("heater", ("heater", "part_id")),  # ADR 0032
+    ("hygrostat", ("hygrostat", "part_id")),
+    ("smoke_detector", ("smoke_detector", "part_id")),
 )
 
 
