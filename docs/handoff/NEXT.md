@@ -45,7 +45,8 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
   either. Don't move golden values without an ADR. Only Ali marks ADRs Accepted. Don't commit `.xlsx`.
   Don't force-push (LESSONS "Branch restart"). Don't bump the version outside a release PR (on main it
   publishes at once). Don't push tags.
-- Next free numbers: ADR 0031, Q62, milestone M48.
+- Next free numbers: ADR 0038, Q68, milestone M70 (0031 to 0037, Q62 to Q67 and M48 to M69 are
+  reserved by the workflow plan).
 
 ## 3. Questions for Ali (one card each, recommendation marked)
 
@@ -67,13 +68,12 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
 
 ## 4. When Ali's feedback arrives
 
-**Workflow review (2026-11-03).** Ali asked for a top-to-bottom review of the engineering workflow from a
-SCADA engineer's view and a plan for agents. Both are in the repo and waiting for his comments before any
-milestone is planned in `docs/plan.md`:
-[`docs/superpowers/specs/2026-11-03-engineering-workflow-review.md`](../superpowers/specs/2026-11-03-engineering-workflow-review.md)
-(review, features F1–F16, phases A–F) and
-[`docs/superpowers/plans/2026-11-03-agent-implementation-plan.md`](../superpowers/plans/2026-11-03-agent-implementation-plan.md)
-(milestones M48–M69, ADRs 0031–0037, Q62–Q67). Ali chose to review the docs first.
+**Workflow review (2026-11-03).** Ali asked for delivery of the agent plan
+([`docs/superpowers/plans/2026-11-03-agent-implementation-plan.md`](../superpowers/plans/2026-11-03-agent-implementation-plan.md),
+milestones M48–M69). It is planned in [`docs/plan.md`](../plan.md) "M48–M69" as six workstreams
+(lead, W1 library, W2 issue outputs, W3 panel detailing, W4 parts and network, W5 setup and design
+basis), one thread each, in the plan's phase order. ADRs 0032 to 0034 (phases C and D) are drafted by
+the lead and need Ali's acceptance before M56, M57 and M60 start.
 
 Write it into `docs/backlog.md` as numbered points (as for v0.2), propose milestones in `docs/plan.md`
 (from M27), give decisions an ADR (0028 on) or a plan question (Q56 on), and deliver one PR per
