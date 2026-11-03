@@ -65,6 +65,9 @@ def library_issues(library: Library, source: YamlSource) -> list[Issue]:
             if item.part_id not in first_at:
                 loc = ("devices", index, "loose_items", k, "part_id")
                 issues.append(_unknown_part(source, loc, item.part_id, name))
+        if device.successor is not None and device.successor not in first_at:
+            at: Loc = ("devices", index, "successor")
+            issues.append(_unknown_part(source, at, device.successor, name))
         for k, rule in enumerate(device.terminals):
             if rule.block not in library.catalogues.terminal_blocks:
                 loc = ("devices", index, "terminals", k, "block")

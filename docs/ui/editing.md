@@ -371,6 +371,11 @@ Tabs and fields, mapped to the model's `DeviceType`:
 | Datasheet | Supply range, Operating temperature, Typical and Maximum power, Ports, Dimensions, Weight, Certifications, Datasheet link, Data quality, Sources. A datasheet height is labelled **Height in the datasheet** with the help "The layout uses Ports and mounting › Height.", so the two heights never read as one field |
 | Alternatives | Alternative group key and the comparison list below, *Add alternative…* |
 
+Lifecycle and sources (ADR 0037): `state`, `successor`, a `source` per sized field (`unit_power_w`,
+`inrush_a`, `height_u`, `input_v_max`, `ports`) and `changed_by`, `changed_on`, `note` are library fields
+(M67a). The editor shows them from M67b: state and successor on Identity, a Sources column on Electrical and
+Ports and mounting.
+
 - **In use:** a banner says how many equipment rows in the open substation use the device, and that an edit
   reaches a project only when it records the version you apply. *Delete…* names the rows that use it and
   warns that the substation will report an error until another part is picked.
@@ -409,6 +414,8 @@ part's alternatives first under "Alternatives to X".
 - **Export…** (dialog): *Spreadsheet (CSV)* or *Backup package (.bomlib)*. CSV: choose tables (devices,
   alternatives, catalogues) and a folder; one file per table, written as UTF-8 with a byte-order mark so Excel
   shows accents and symbols. A note says to keep `part_id` and `alt_group` as they are: they link rows.
+  `devices.csv` has `state`, `successor` and a `source_<field>` column per sized field, written
+  `kind|ref|date` (`datasheet|RST2228 p. 12|2026-10-31`); a blank cell is no source (ADR 0037).
   Backup writes a complete package of the active version that can be kept or handed on as an update.
 - **Import…** is a menu: *Update package (.bomlib)…* (the existing flow) and *Spreadsheet (CSV)…*.
 - **CSV import** (`#/library/csv`) has a review step before anything is added: (1) choose or drop a file;

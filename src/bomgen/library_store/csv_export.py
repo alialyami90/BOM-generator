@@ -25,6 +25,7 @@ from bomgen.library_store.manifest import LIBRARY_SCHEMA_VERSION
 from bomgen.library_store.store import LibraryStore
 from bomgen.models.library import (
     DEFAULT_BRAND,
+    SOURCED_FIELDS,
     ChildRule,
     DeviceType,
     Housekeeping,
@@ -32,6 +33,7 @@ from bomgen.models.library import (
     LooseItem,
     McbCatalogue,
     PortGroup,
+    Source,
     TerminalRule,
 )
 
@@ -59,6 +61,8 @@ _CHILD_MODELS: dict[str, type[BaseModel]] = {
 }
 LOADER_ONLY = ("derived_from", "sfp_choice")  # set on derived parts, never in a library (ADR 0024)
 _REFERENCE_COLUMN = {"children": "child_part_id", "loose_items": "item_part_id"}
+# A sized field's source is one cell, `kind|ref|date` (ADR 0037)
+SOURCE_COLUMNS: dict[str, str] = {name: f"source_{name}" for name in SOURCED_FIELDS}
 
 HOUSEKEEPING_ROLES = tuple(
     role
@@ -84,8 +88,13 @@ def _child_columns(field: str) -> tuple[str, ...]:
 
 TABLES: dict[str, tuple[str, ...]] = {
     "library.csv": ("key", "value"),
-    "devices.csv": tuple(
-        name for name in DeviceType.model_fields if name not in {*CHILD_TABLES, *LOADER_ONLY}
+    "devices.csv": (
+        *(
+            name
+            for name in DeviceType.model_fields
+            if name not in {*CHILD_TABLES, *LOADER_ONLY, "sources"}
+        ),
+        *SOURCE_COLUMNS.values(),
     ),
     **{file: _child_columns(field) for field, file in CHILD_TABLES.items()},
     "mcb.csv": (
@@ -126,6 +135,13 @@ def cell(value: object) -> str:
     return str(value)
 
 
+def source_cell(source: Source | None) -> str:
+    """A source as one cell, `kind|ref|date`; blank for none (ADR 0037)."""
+    if source is None:
+        return ""
+    return LIST_SEPARATOR.join((source.kind, source.ref, cell(source.date)))
+
+
 def _row(model: BaseModel, columns: Sequence[str], **extra: object) -> Row:
     return {c: cell(extra[c] if c in extra else getattr(model, c, None)) for c in columns}
 
@@ -149,7 +165,8 @@ def library_tables(library: Library, *, name: str = "", based_on: str = "") -> d
 
 def _device_rows(library: Library, tables: dict[str, list[Row]]) -> None:
     for device in library.devices:
-        tables["devices.csv"].append(_row(device, TABLES["devices.csv"]))
+        sources = {SOURCE_COLUMNS[f]: source_cell(device.sources.get(f)) for f in SOURCED_FIELDS}
+        tables["devices.csv"].append(_row(device, TABLES["devices.csv"], **sources))
         for field, file in CHILD_TABLES.items():
             rename = _REFERENCE_COLUMN.get(field)
             for seq, item in enumerate(getattr(device, field), start=1):

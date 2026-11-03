@@ -5,9 +5,10 @@ alternatives and catalogue brands, ADR 0017. Cross-record checks (duplicate part
 dangling references) live in the loader.
 """
 
+import datetime as dt
 from enum import StrEnum
 from itertools import pairwise
-from typing import Annotated, Literal
+from typing import Annotated, Literal, get_args
 
 from pydantic import (
     AfterValidator,
@@ -197,6 +198,19 @@ class SfpChoice(InputModel):
 AltGroup = Annotated[str, StringConstraints(pattern=r"^[A-Z0-9][A-Z0-9-]*$")]
 Tier = Literal["low", "mid", "high"]
 
+# ADR 0037: a part's lifecycle state and where each sized figure comes from
+PartState = Literal["draft", "reviewed", "released", "obsolete"]
+SourcedField = Literal["unit_power_w", "inrush_a", "height_u", "input_v_max", "ports"]
+SOURCED_FIELDS: tuple[SourcedField, ...] = get_args(SourcedField)
+
+
+class Source(InputModel):
+    """Where one sized figure of a part comes from (ADR 0037)."""
+
+    kind: Literal["datasheet", "contractor", "assumed", "measured"]
+    ref: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
+    date: dt.date | None = None
+
 
 class DeviceType(InputModel):
     """One orderable part (spec: Inputs, 1. Device library)."""
@@ -235,6 +249,12 @@ class DeviceType(InputModel):
     inrush_ms: PositiveFloat | None = None  # inrush duration
     input_v_min: PositiveFloat | None = None  # rated input voltage range, V
     input_v_max: PositiveFloat | None = None
+    state: PartState = "released"
+    successor: PartId | None = None  # an obsolete part's replacement
+    sources: dict[SourcedField, Source] = Field(default_factory=dict)
+    changed_by: str | None = None  # the last local save that touched the part
+    changed_on: dt.date | None = None
+    note: str | None = None
     # set by the loader on a part derived from an equipment entry, never in a file (ADR 0024)
     derived_from: SkipJsonSchema[PartId | None] = None
     sfp_choice: SkipJsonSchema[list[SfpChoice]] = Field(default_factory=list)
@@ -276,6 +296,18 @@ class DeviceType(InputModel):
         low, high = self.input_v_min, self.input_v_max
         if low is not None and high is not None and low > high:
             raise ValueError("input_v_min must not be above input_v_max")
+        return self
+
+    @model_validator(mode="after")
+    def _lifecycle_rules(self) -> "DeviceType":
+        if self.successor is not None:
+            if self.state != "obsolete":
+                raise ValueError("successor is only for an obsolete part")
+            if self.successor == self.part_id:
+                raise ValueError("a part cannot be its own successor")
+        unset = [name for name in self.sources if getattr(self, name) in (None, [])]
+        if unset:
+            raise ValueError(f"a source for {', '.join(unset)}, which the part leaves unset")
         return self
 
     @property

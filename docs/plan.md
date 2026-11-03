@@ -335,6 +335,15 @@ devices:
     inrush_ms: 5                       # optional inrush duration (M15)
     input_v_min: 88                    # optional rated input range, V (check report)
     input_v_max: 150
+    state: released                    # draft | reviewed | released | obsolete (ADR 0037)
+    successor: null                    # an obsolete part's replacement part_id
+    sources:                           # per sized field: unit_power_w, inrush_a, height_u,
+      unit_power_w: { kind: datasheet, ref: "RST2228 datasheet p. 12", date: 2026-10-31 }
+                                       # input_v_max, ports; kind datasheet | contractor |
+                                       # assumed | measured; date optional
+    changed_by: null                   # written by the local save (ADR 0037)
+    changed_on: null
+    note: null
 
 catalogues:                            # the brand set named default
   enclosure_u: 42                      # rack units of the enclosure (ADR 0013)
@@ -1102,7 +1111,11 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M64 — Spares list.** *W2; ADR 0035, Q65.* Planned.
 - **M65 — Cable schedule.** *W2; ADR 0035, Q66.* Planned.
 - **M66 — Revision history and recorded issues.** *W2; ADR 0036, Q67.* Planned.
-- **M67 — Record sources and lifecycle.** *W1; ADR 0037.* Planned.
+- **M67 — Record sources and lifecycle.** *W1; ADR 0037 (accepted).* In two PRs so that W5's M53
+  gets the state field early. **M67a** (in review): `state`, `successor`, `sources` and the change
+  fields on `DeviceType`, the successor reference check, `devices.csv` columns, the schema. **M67b**
+  (planned): the source rule on edits, the change fields on save, `min_app_version`, the shipped
+  library's sources, the assumed-power check, the device editor and Library badges.
 - **M68 — Review queue and health.** *W1.* Planned.
 - **M69 — Propose from project.** *W1.* Planned.
 
