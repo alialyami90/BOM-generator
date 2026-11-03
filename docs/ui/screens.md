@@ -229,7 +229,8 @@ with the save bar; everything on it is saved together.
   editor, as in the first design. Devices: reorder handle, device, quantity,
   purpose, HWIO override, generated tag, remove; "Add device" opens the picker.
 - **Tabs:** Enclosure (make,
-  model, code, H × D × W, base frame, cable entry), Port plans (a small table per
+  model, code, H × D × W, base frame, cable entry top, side or bottom; on a generated panel also
+  Kind, with *All generated panels* / *This panel only*, M50), Port plans (a small table per
   switch with an "Engine result" footer), Options (spares, ventilation, diodes,
   main MCB override, socket, terminals, smoke detector, busbars, terminal
   overrides, each override with a warning line), Document, `panels/<id>.yaml`.

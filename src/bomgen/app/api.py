@@ -1481,10 +1481,14 @@ class Api:
 
     @endpoint
     def set_enclosure(
-        self, project_file: str, substation_id: str, enclosure: dict[str, Any]
+        self,
+        project_file: str,
+        substation_id: str,
+        enclosure: dict[str, Any],
+        panel: int | None = None,
     ) -> dict[str, Any]:
-        """Write the enclosure every generated panel uses."""
-        return self._edit(project_file, substation_id, edit.set_enclosure, enclosure)
+        """Write the enclosure every generated panel uses, or panel ``panel``'s own."""
+        return self._edit(project_file, substation_id, edit.set_enclosure, enclosure, panel=panel)
 
     @endpoint
     def set_generated_document(

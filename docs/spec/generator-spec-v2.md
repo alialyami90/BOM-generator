@@ -418,7 +418,7 @@ The library also holds the commodity catalogues: MCBs by rating (1/2/6/10/16 A �
 **2. Substation and its panels – one substation file, one record per cabinet**
 
 - Identity: cabinet number (861-GIS01-PSA-0001), cabinet name, tag prefix (PSA1), LAN letter (A/B or none), sheet name and order.
-- Enclosure: make, model/code, H × D × W, base frame size, cable entry (top/side).
+- Enclosure: make, model/code, H × D × W, base frame size, cable entry (top/side/bottom). A panel the layout generates may set its own enclosure and kind; unset, it takes the ones every generated panel shares.
 - Device list in display order: part\_id, quantity, tag override (optional), purpose text (e.g. "for Dhahran PCC connection"), LAN, cable manager on or off for a network device (optional).
 - Network port plan for each switch: downlinks by speed and media (feeds SFP counts), uplinks to L3 (SM).
 - Options: aux socket (rating), smoke detector, change-over diodes (auto when single-PSU DC loads exist), ventilation mode (auto from heat check, or forced), spare branches per DC feed and on AC, main MCB override, inter-panel terminal count, grounding busbars.

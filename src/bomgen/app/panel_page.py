@@ -26,7 +26,7 @@ from bomgen.models.bom import BomLine, Group, QtySum
 from bomgen.models.calc import DcMains
 from bomgen.models.output import Derived
 from bomgen.models.panel import Panel, PanelOptions
-from bomgen.models.substation import EquipmentRole
+from bomgen.models.substation import EquipmentRole, GeneratedPanels
 
 SIZED = (EquipmentRole.L1_SWITCH, EquipmentRole.L2_SWITCH)  # their port plans are computed
 TEMPLATE = ("cabinet_name", "cabinet_number", "tag_prefix", "sheet_name")
@@ -153,6 +153,8 @@ def panel_page(
         if panel.generated and loaded.substation.generated_panels
         else None,
         "enclosure": panel.enclosure.model_dump(mode="json", exclude_none=True),
+        # what every generated panel shares, and whether this one has its own (plan M50)
+        "shared": _shared(loaded.substation.generated_panels, board["number"]) if board else None,
         "document": panel.document,
         "documents": [
             e.model_dump(mode="json")
@@ -201,3 +203,14 @@ def panel_page(
         "yaml": file.read_text(encoding="utf-8"),
     }
     return page
+
+
+def _shared(generated: GeneratedPanels | None, number: int) -> dict[str, Any] | None:
+    if generated is None:
+        return None
+    return {
+        "enclosure": generated.enclosure.model_dump(mode="json", exclude_none=True),
+        "kind": generated.kind.value,
+        "own_enclosure": number in generated.enclosure_by_panel,
+        "own_kind": number in generated.kind_by_panel,
+    }

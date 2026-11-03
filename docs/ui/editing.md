@@ -208,7 +208,8 @@ for two of them a way to go back.
 
 | Editor control | Model field | What is needed |
 | --- | --- | --- |
-| Enclosure (shared by all generated panels) | `generated_panels.enclosure` | Writer; per-field validation of the `Enclosure` fields. One value for all panels, so no per-panel enclosure is designed. |
+| Enclosure and kind, *All generated panels* | `generated_panels.enclosure`, `generated_panels.kind` | Writer; per-field validation of the `Enclosure` fields. |
+| Enclosure and kind, *This panel only* (M50) | `generated_panels.enclosure_by_panel[n]`, `generated_panels.kind_by_panel[n]` | *Give this panel its own enclosure* writes a copy of the shared one (`set_enclosure` with `panel`), then fields edit it; *Use the shared enclosure* removes it. Kind's empty choice removes `kind_by_panel[n]`. `panel_page` returns `shared` (enclosure, kind, `own_enclosure`, `own_kind`). |
 | Options, *All generated panels* | `generated_panels.options` | Writer; validation by `PanelOptions` for each key. |
 | Options, *This panel only* | `generated_panels.options_by_panel[n]` | Writer that sets one key for panel `n`, and one that **removes** the key again (the "Own value, use the shared one" link). The reader must report, per option, whether panel `n` has its own value, and the shared value it overrides. |
 | Port plans | `equipment[].port_plan` (`uplinks_l3`, `uplinks`, `downlinks`, `serial_ports`) | Writer per equipment row. The plan is per unit and scaled by the row's `qty`, so a change reaches every panel that holds that device and both sides of a redundant pair; the tab says so. |
