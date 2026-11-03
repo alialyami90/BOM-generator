@@ -1088,10 +1088,10 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M55 — Substation templates.** *W5; Q63.* Planned.
 - **M56 — Housekeeping editor.** *W3; ADR 0032.* Planned.
 - **M57 — Terminals tab.** *W3; ADR 0033.* Planned.
-- **M58 — Grounding, spare breaker ratings, alarm on branch trip.** *W3; spec sentence.* In review.
+- **M58 — Grounding, spare breaker ratings, alarm on branch trip.** *W3; spec sentence.* Done (#332).
 - **M59 — BOM text per row on Parts.** *W4.* Done (#326). Equipment gains `tag`, `tag_type` and `first_nn`;
-  Parts has a *BOM text* section per row. The hand-written panel editor's tag fields are left to W3,
-  which owns that screen.
+  Parts has a *BOM text* section per row. The hand-written panel editor's tag fields came from W3 in a
+  follow-up PR: tag, type code and first number under each Devices row, with the duplicate-tag check.
 - **M60 — IED schedule.** *W4; ADR 0034.* Planned.
 - **M61 — External links.** *W4; Q64.* Planned.
 - **M62 — Panel count control.** *W4; Q68.* Done (#325). ADR 0013 amendment: `layout.max_panels`

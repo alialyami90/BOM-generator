@@ -266,3 +266,19 @@ def test_the_page_lists_the_busbar_catalogue(app: api.Api, generated: Path) -> N
     page = ok(app.panel_page(str(generated), "gis01", "psa1"))
     keys = [b["key"] for b in page["busbars"]]
     assert {"ac_safety_ground", "instrument_ground"} <= set(keys)
+
+
+def test_hand_written_rows_carry_their_tags_and_a_duplicate_tag(
+    app: api.Api, generated: Path
+) -> None:
+    """Plan M59 on the panel editor: tag, type code and first number on hand-written rows,
+    with the generated tags as placeholders and the duplicate-tag check inline."""
+    server = ok(app.panel_page(str(generated), "gis01", "ws"))["devices"][0]
+    assert server["duplicate"] is None
+    [tag] = server["tags"]
+
+    path: list[str | int] = ["devices", 1, "tag"]
+    ok(app.set_panel_field(str(generated), "gis01", "ws", path, tag))
+    devices = ok(app.panel_page(str(generated), "gis01", "ws"))["devices"]
+    assert devices[1]["tag"] == tag
+    assert devices[0]["duplicate"].startswith(f"{tag}: 2 device units share this tag")
