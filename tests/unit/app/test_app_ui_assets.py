@@ -972,6 +972,14 @@ def test_a_link_with_no_library_sfp_is_flagged_on_its_parts_row() -> None:
     assert "focus: id(`p-l.${m[1]}.${m[2]}`) };  // M46" in ui
 
 
+def test_new_substation_starts_from_a_template_and_settings_saves_one() -> None:
+    """Plan M55: templates in the Start from select; Save as template on General."""
+    proj = (UI_DIR / "screens-projects.js").read_text(encoding="utf-8")
+    assert "templates.map((t) => [`template:${t.key}`, `Template: ${t.name}`])" in proj
+    sub = (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
+    assert 'data-action="save-template">Save as template…</button>' in sub
+
+
 def test_build_offers_the_summary_bom_and_its_csv() -> None:
     # ADR 0035: the Summary BOM is opt-in on Build, saved to output.include; Preview shows it.
     build = (UI_DIR / "screens-verify.js").read_text(encoding="utf-8")
