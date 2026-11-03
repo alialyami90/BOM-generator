@@ -1321,6 +1321,13 @@
           "minimum": 0,
           "title": "Sfp Per L1",
           "type": "integer"
+        },
+        "terminals_fraction": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Terminals Fraction",
+          "type": "number"
         }
       },
       "title": "Spares",

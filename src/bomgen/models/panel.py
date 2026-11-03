@@ -111,6 +111,7 @@ class PanelOptions(InputModel):
     dc_spare_rating_a: PositiveInt | None = None  # None: the largest device branch
     inter_panel_terminals: NonNegativeInt | None = None
     terminal_overrides: dict[str, NonNegativeInt] = Field(default_factory=dict)
+    terminal_block_overrides: dict[str, str] = Field(default_factory=dict)  # ADR 0033
     grounding_busbars: list[str] = Field(
         default_factory=lambda: ["ac_safety_ground", "instrument_ground"]
     )

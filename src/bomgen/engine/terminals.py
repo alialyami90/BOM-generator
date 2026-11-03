@@ -15,7 +15,7 @@ from bomgen.engine.items import BomItem
 from bomgen.engine.network import port_plan
 from bomgen.engine.units import DeviceRow, lookup
 from bomgen.models._base import template_fields
-from bomgen.models.bom import BomLine, Group
+from bomgen.models.bom import BomLine, Group, StripRow
 from bomgen.models.library import Library, TerminalRule
 from bomgen.models.panel import Panel, PanelKind, Ventilation
 
@@ -59,6 +59,7 @@ class StripInputs:
     change_over: bool
     annunciator_feeds: int
     xdin_default: int  # the project's HWIO total (spec: HWIO points)
+    spare_fraction: float = 0.0  # spares.terminals_fraction (ADR 0033)
 
 
 @dataclass(frozen=True)
@@ -67,39 +68,79 @@ class _Strip:
     description: str
     block: str
     qty: int
+    rule: str
+    spared: bool = True  # the spare fraction applies (ADR 0033: not to the devices' strips)
 
 
-def terminal_strips(
+THF_RULE = {
+    Ventilation.FORCED: "two fans and three thermostats",
+    Ventilation.NATURAL: "three thermostats",
+}
+
+
+def strip_table(
     panel: Panel, library: Library, rows: Sequence[DeviceRow], inputs: StripInputs
-) -> list[BomItem]:
-    """One row per strip, in the order of the example's group G rows ('Panel 1' and
-    'Panel 3'; plan Q34)."""
+) -> list[StripRow]:
+    """Every strip of the panel in group G order, before the BOM rows are written."""
     defaults = KIND_DEFAULTS[panel.kind]
     options = panel.options
+    kind = panel.kind.value
     strips = [
-        _fixed("X-AC", "AC Input Circuits", UT_16, defaults.incoming),
-        _fixed("X3-AC", "AC Distribution Circuits", UT_MTD, 2 * inputs.ac_mcbs),
-        _fixed("TBL", "Lighting Circuits", UT_MTD, LIGHTING),
-        _fixed("THF", "Fan and Thermostat Circuits", UT_MTD, FAN_THERMOSTAT[inputs.ventilation]),
+        _fixed("X-AC", "AC Input Circuits", UT_16, defaults.incoming, f"incoming, {kind} panel"),
+        _fixed(
+            "X3-AC",
+            "AC Distribution Circuits",
+            UT_MTD,
+            2 * inputs.ac_mcbs,
+            f"2 x {inputs.ac_mcbs} AC MCBs = {2 * inputs.ac_mcbs}",
+        ),
+        _fixed("TBL", "Lighting Circuits", UT_MTD, LIGHTING, "lighting"),
+        _fixed(
+            "THF",
+            "Fan and Thermostat Circuits",
+            UT_MTD,
+            FAN_THERMOSTAT[inputs.ventilation],
+            THF_RULE[inputs.ventilation],
+        ),
     ]
     if options.smoke_detector:
-        strips.append(_fixed("XSD", "Smoke Detector", UT_MTD, SMOKE_DETECTOR))
+        strips.append(_fixed("XSD", "Smoke Detector", UT_MTD, SMOKE_DETECTOR, "smoke detector"))
     if options.aux_socket_a is not None:
-        strips.append(_fixed("XPS", "Power Socket", UT_MTD, SOCKET))
+        strips.append(_fixed("XPS", "Power Socket", UT_MTD, SOCKET, "power socket"))
     if inputs.dc_branches_per_feed:
         step = defaults.distribution_step
-        distribution = step * math.ceil(2 * (inputs.dc_branches_per_feed + 1) / step)
+        raw = 2 * (inputs.dc_branches_per_feed + 1)
+        distribution = step * math.ceil(raw / step)
+        rule = f"2 x ({inputs.dc_branches_per_feed} branches + 1) = {raw}"
+        if distribution != raw or step > 1:
+            rule += f", up to a multiple of {step} = {distribution}"
+        incoming = f"incoming, {kind} panel"
         strips += [
-            _fixed("X-DC1", "DC1 Circuits", UT_16, defaults.incoming),
-            _fixed("X-DC2", "DC2 Circuits", UT_16, defaults.incoming),
-            _fixed("X4-DC1", "DC1 Distribution Circuits", UT_MTD, distribution),
-            _fixed("X4-DC2", "DC2 Distribution Circuits", UT_MTD, distribution),
+            _fixed("X-DC1", "DC1 Circuits", UT_16, defaults.incoming, incoming),
+            _fixed("X-DC2", "DC2 Circuits", UT_16, defaults.incoming, incoming),
+            _fixed("X4-DC1", "DC1 Distribution Circuits", UT_MTD, distribution, rule),
+            _fixed("X4-DC2", "DC2 Distribution Circuits", UT_MTD, distribution, rule),
         ]
     if inputs.change_over:
-        strips.append(_fixed("X4-COD", "Change-over Circuits", UT_MTD, defaults.change_over))
-    if inputs.annunciator_feeds:
         strips.append(
-            _fixed("X-ANN", "Annunciator Circuits", UT_MTD, ANNUNCIATOR * inputs.annunciator_feeds)
+            _fixed(
+                "X4-COD",
+                "Change-over Circuits",
+                UT_MTD,
+                defaults.change_over,
+                f"change-over, {kind} panel",
+            )
+        )
+    if inputs.annunciator_feeds:
+        feeds = inputs.annunciator_feeds
+        strips.append(
+            _fixed(
+                "X-ANN",
+                "Annunciator Circuits",
+                UT_MTD,
+                ANNUNCIATOR * feeds,
+                f"{ANNUNCIATOR} x {feeds} annunciator feeds = {ANNUNCIATOR * feeds}",
+            )
         )
     strips += _device_strips(panel, library, rows, inputs.xdin_default)
     if options.inter_panel_terminals:
@@ -109,21 +150,57 @@ def terminal_strips(
                 "Interpanel Wiring",
                 defaults.inter_panel_block,
                 options.inter_panel_terminals,
+                "the panel's inter-panel terminals",
             )
         )
 
-    overrides = dict(options.terminal_overrides)
-    unknown = sorted(set(overrides) - {strip.code for strip in strips})
-    if unknown:
-        raise EngineError(f"{panel.id}: terminal_overrides name no strip of this panel: {unknown}")
+    codes = {strip.code for strip in strips}
+    for name, given in (
+        ("terminal_overrides", options.terminal_overrides),
+        ("terminal_block_overrides", options.terminal_block_overrides),
+    ):
+        unknown = sorted(set(given) - codes)
+        if unknown:
+            raise EngineError(f"{panel.id}: {name} name no strip of this panel: {unknown}")
     return [
-        BomItem(_line(panel, library, strip, overrides.get(strip.code, strip.qty)))
+        _row(
+            strip,
+            inputs.spare_fraction,
+            options.terminal_overrides.get(strip.code),
+            options.terminal_block_overrides.get(strip.code),
+        )
         for strip in strips
     ]
 
 
-def _fixed(code: str, circuits: str, block: str, qty: int) -> _Strip:
-    return _Strip(code, f"Terminal Blocks For {circuits}", block, qty)
+def terminal_strips(
+    panel: Panel, library: Library, rows: Sequence[DeviceRow], inputs: StripInputs
+) -> list[BomItem]:
+    """One row per strip, in the order of the example's group G rows ('Panel 1' and
+    'Panel 3'; plan Q34)."""
+    return [BomItem(_line(panel, library, r)) for r in strip_table(panel, library, rows, inputs)]
+
+
+def _row(strip: _Strip, fraction: float, override: int | None, block: str | None) -> StripRow:
+    auto, rule = strip.qty, strip.rule
+    if strip.spared and fraction:
+        auto = math.ceil(round(strip.qty * (1 + fraction), 9))
+        rule += f", +{fraction * 100:g}% spare = {auto}"
+    return StripRow(
+        code=strip.code,
+        description=strip.description,
+        block=strip.block,
+        block_override=block,
+        rule=rule,
+        auto_qty=auto,
+        override=override,
+        spared=strip.spared,
+    )
+
+
+def _fixed(code: str, circuits: str, block: str, qty: int, why: str) -> _Strip:
+    rule = why if why[:1].isdigit() else f"{qty}: {why}"
+    return _Strip(code, f"Terminal Blocks For {circuits}", block, qty, rule)
 
 
 def _device_strips(
@@ -144,7 +221,16 @@ def _device_strips(
             if rule.first_slot is not None:
                 xdin_block = xdin_block or rule.block
     xdin = (
-        [_Strip(XDIN, XDIN_DESCRIPTION, xdin_block, xdin_default)]
+        [
+            _Strip(
+                XDIN,
+                XDIN_DESCRIPTION,
+                xdin_block,
+                xdin_default,
+                f"{xdin_default}: the project's HWIO total",
+                spared=False,
+            )
+        ]
         if xdin_block is not None and (xdin_default or XDIN in panel.options.terminal_overrides)
         else []
     )
@@ -183,14 +269,19 @@ def _expand(rule: TerminalRule, units: int) -> list[_Strip]:
     """One strip per unit when the code is numbered ({n}) or slotted ({slot}), else one
     strip holding every unit's terminals."""
     if not template_fields(rule.strip) & {"n", "slot"}:
-        return [_Strip(rule.strip, _describe(rule, rule.strip, {}), rule.block, rule.count * units)]
+        qty = rule.count * units
+        why = f"{rule.count} x {units} units = {qty}: the device's terminals"
+        return [_Strip(rule.strip, _describe(rule, rule.strip, {}), rule.block, qty, why, False)]
     strips = []
     for index in range(units):
         values: dict[str, object] = {"n": index + 1}
         if rule.first_slot is not None:
             values["slot"] = chr(ord(rule.first_slot) + index)
         code = rule.strip.format(**values)
-        strips.append(_Strip(code, _describe(rule, code, values), rule.block, rule.count))
+        why = f"{rule.count}: the device's terminals per unit"
+        strips.append(
+            _Strip(code, _describe(rule, code, values), rule.block, rule.count, why, False)
+        )
     return strips
 
 
@@ -200,16 +291,16 @@ def _describe(rule: TerminalRule, code: str, values: dict[str, object]) -> str:
     return rule.description.format(**values)
 
 
-def _line(panel: Panel, library: Library, strip: _Strip, qty: int) -> BomLine:
-    block = library.catalogues.terminal_blocks.get(strip.block)
+def _line(panel: Panel, library: Library, strip: StripRow) -> BomLine:
+    block = library.catalogues.terminal_blocks.get(strip.model)
     if block is None:
-        raise EngineError(f"terminal block {strip.block} is not in the library catalogue")
+        raise EngineError(f"terminal block {strip.model} is not in the library catalogue")
     return BomLine(
         group=Group.G,
         tag=f"{panel.tag_prefix}-{strip.code}",
         description=strip.description,
-        qty=qty,
+        qty=strip.qty,
         make=block.make,
-        model=strip.block,
+        model=strip.model,
         ordering_code=block.ordering_code,
     )

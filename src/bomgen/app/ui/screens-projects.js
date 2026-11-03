@@ -141,6 +141,7 @@
     ['client', 'Client', ['project', 'client'], 'text', '', 'Optional. Printed under the project name.'],
     ['power_margin', 'Power margin', ['defaults', 'constants', 'power_margin'], 'pct', '%', 'Added to the power total.'],
     ['port_fraction', 'Spare ports on each switch', ['defaults', 'spares', 'port_fraction'], 'pct', '%'],
+    ['terminals_fraction', 'Spare terminals', ['defaults', 'spares', 'terminals_fraction'], 'pct', '%', 'Added to each wiring strip, rounded up (ADR 0033).'],
     ['sfp_per_l1', 'Spare SFPs per L1 switch', ['defaults', 'spares', 'sfp_per_l1'], 'int'],
     ['rack_u_reserved', 'Rack space kept free', ['defaults', 'spares', 'rack_u_reserved'], 'int', 'U'],
     ['dc_branches_per_feed', 'Spare DC branches', ['defaults', 'spares', 'dc_branches_per_feed'], 'int', 'per feed'],
@@ -163,7 +164,7 @@
     saved: (key) => saved(curProject(), key),
     check: (path, value) => Bridge.call('check_project_field', curProject().file, path, value),
     write: (path, value) => Bridge.call('set_project_field', curProject().file, path, value),
-    done: (page) => { const tab = S.tab.project; S.project = view(page); S.tab.project = tab; }
+    done: (page) => { const tab = S.tab.project; S.project = view(page); S.tab.project = tab; App.panelEditor.reload(); }
   });
   const shown = (p, key) => PO.shown(key);
   /* A height not in the file is the model's assumed default: Confirm writes it; a marked one loses the mark. */

@@ -145,7 +145,7 @@ Only groups A–C are chosen by the engineer; groups D–H and the HWIO column a
 
 **Terminal block quantities (group G)**
 
-Part numbers come from the chosen catalogue brand (ADR 0017).
+Part numbers come from the chosen catalogue brand (ADR 0017). The quantities below are panel defaults: the engineer may override any strip's quantity or block type per panel, and the spare terminal fraction (`spares.terminals_fraction`) is added to each wiring strip's quantity, rounded up, before any override; strips a device brings stay as its part gives them (ADR 0033).
 
 | Strip | Type / code | Rule seen in the file | 001 | 002 | 003 | WS |
 | --- | --- | --- | --- | --- | --- | --- |

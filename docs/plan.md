@@ -203,6 +203,7 @@ defaults:                              # inherited key by key by every substatio
     dc_branches_per_feed: 3            # for generated panels; panel options keep their own
     ac_branches: 1
     rack_u_reserved: 10                # 42U enclosure → 32U usable
+    terminals_fraction: 0              # M57, ADR 0033; added to each wiring strip, rounded up
 substations:
   - substations/gis01/substation.yaml
 ```
@@ -416,6 +417,7 @@ options:
   dc_spare_rating_a: null              # M58; null = the largest device branch
   inter_panel_terminals: 40
   terminal_overrides: {}               # e.g. { X4-DC1: 32 } where the spec gives no rule
+  terminal_block_overrides: {}         # M57, ADR 0033; e.g. { X3-AC: UT-16 }
   grounding_busbars: [ac_safety_ground, instrument_ground]
 document: gis01-bom                    # register key: this panel's BOM header/footer
 revision:
@@ -1087,7 +1089,9 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M54 — Design-basis checks.** *W5.* Planned.
 - **M55 — Substation templates.** *W5; Q63.* Planned.
 - **M56 — Housekeeping editor.** *W3; ADR 0032.* Planned.
-- **M57 — Terminals tab.** *W3; ADR 0033.* Planned.
+- **M57 — Terminals tab.** *W3; ADR 0033.* In review. `spares.terminals_fraction` and
+  `PanelOptions.terminal_block_overrides`; `BuildResult.strips` carries each strip's rule; the panel
+  editor's Terminals tab replaces the read-only terminal overrides of Options.
 - **M58 — Grounding, spare breaker ratings, alarm on branch trip.** *W3; spec sentence.* Done (#332).
 - **M59 — BOM text per row on Parts.** *W4.* Done (#326). Equipment gains `tag`, `tag_type` and `first_nn`;
   Parts has a *BOM text* section per row. The hand-written panel editor's tag fields came from W3 in a
