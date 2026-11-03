@@ -1547,6 +1547,11 @@ substation dialog. Prefill it with these values, or the previous substation's wh
 `templates/*.yaml`, so they travel with the `.bomproj` (recommended), or in the app's home folder,
 shared by every project on the PC? *Answered 2026-11-03: the project folder.*
 
+**Q67 — Where prepared, checked and approved names print** (M66; ADR 0036). *Answered 2026-11-03: the history sheet only, footer as it is.* The register
+gains the three names per document. They print on the Revision History sheet (ADR 0035) for each
+recorded issue. To ask Ali: the history sheet only, with the footer as it is (recommended); also in
+every sheet's page header; or on a cover sheet.
+
 **Q68 — "Exactly n panels"** (M62). *Answered 2026-11-03: offer At most n only.* The plan offers Automatic, Exactly n and At most n. The fill
 already opens the fewest panels, so Exactly n only differs from At most n when the devices fit in
 fewer: spread them evenly, keep the spare panels empty, or offer At most n only (recommended: the
