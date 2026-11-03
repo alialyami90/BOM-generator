@@ -238,6 +238,7 @@ publishing. Release runs never cancel each other; PR runs do.
 | Database checks | `tests/unit/test_device_db.py` (18 tests) | README "Record format", "Field rules", "Checks" | CI |
 | Example library | `examples/library.yaml` | The spec's example workbook plus M14 alternatives | Goldens |
 | Shipped library | `data/library/psa-devices.yaml` | **Generated** by `data/library/build.py` | `release.yml` packs it as psa-devices 1.1.0 |
+| Part sources (ADR 0037) | `sources:` on every shipped part | `build.py` `_source`: the contractor's `sources.csv` row when the delivered value matches, the device-db datasheet when it gives the same value, a tier's basis, else `assumed` naming the example workbook (Q69) | `test_shipped_library.py`; the `part_source` check |
 | Shipped library checks | `tests/unit/test_shipped_library.py` (5 tests), `tests/unit/engine/test_engine_shipped_library.py` (6 tests, #171) | — | CI |
 
 The engine never reads `data/device-db/` directly. The M14 generator is
@@ -378,6 +379,12 @@ ADR 0008, ADR 0018.
   for the Datasheet tab; #170 ADR 0018 amendment "device-record edits"; #179 `catalogues.mcb_dc` in the
   CSV as the `default_dc` row, `plain_message` row messages, "Compared with … Saving makes …" wording;
   #165 `ac_rated` CSV column and brand sets counted in `diff_libraries`.
+- M67–M69 (ADR 0037, #331, #335, #337, #339, #342): a part's `state`, `successor`, `sources` per
+  sized field and `changed_by`/`changed_on`/`note`. `save_local_version` refuses a sized change
+  without its source and stamps the parts it touched (a note the set gives a part is kept); a library
+  using these fields raises `min_app_version`. `health.py` measures states, assumed figures, parts
+  without an alternative, obsolete parts in use on this PC, MCB and housekeeping brand gaps (Library ›
+  Review and Health). Parts' *Propose for the library…* calls `propose_library_edit`.
 
 | Module (API re-exported in `__init__.py`) | What it holds |
 | --- | --- |

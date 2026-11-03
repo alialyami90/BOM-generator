@@ -1161,7 +1161,7 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
   *Mark reviewed*, *Release*, *Send back…* with a note kept on the part) and *Health* (a card per
   measure). Every action is a pending edit; anyone using the app may release, as the app has no
   owner role.
-- **M69 — Propose from project.** *W1.* In review. Parts: a row with saved overrides has *Propose
+- **M69 — Propose from project.** *W1.* Merged (#342). Parts: a row with saved overrides has *Propose
   for the library…*; the dialog picks the value, the source (measured or datasheet) and a reference,
   and whether a released part stays released. `propose_library_edit` adds the value, its source, a
   note naming the project and substation, and state draft (unless kept released) to the installed
