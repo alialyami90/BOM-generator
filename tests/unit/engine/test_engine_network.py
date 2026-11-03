@@ -163,7 +163,7 @@ def test_one_sfp_part_serving_two_media_gets_one_row_per_media() -> None:
     ]
 
 
-def build_with_choice(choice: list[dict[str, str]], plans: dict[str, Any]) -> list[BomItem]:
+def build_with_choice(choice: list[dict[str, Any]], plans: dict[str, Any]) -> list[BomItem]:
     """As ``build`` with the L2 switch carrying an SFP choice, as a derived part does."""
     lib = library(*PARTS)
     devices = [
@@ -218,3 +218,39 @@ def test_a_switch_without_a_cable_manager_adds_no_manager_row() -> None:
 def test_a_firewall_with_a_cable_manager_adds_a_manager_row() -> None:
     (item,) = build([{"part_id": "FW", "cable_manager": True}], {})
     assert (item.line.tag, item.line.qty) == ("Cable Manager", 1)
+
+
+def build_l1_with_choice(choice: dict[str, Any]) -> BomItem:
+    """The L1 row's SFP item, its derived part carrying ``choice`` (plan M49)."""
+    lib = library(*PARTS)
+    devices = [
+        d.model_copy(update={"sfp_choice": [SfpChoice.model_validate(choice)]})
+        if d.part_id == "L1"
+        else d
+        for d in lib.devices
+    ]
+    lib = lib.model_copy(update={"devices": devices})
+    plans = {"L1": {"uplinks": [{"count": 24, "speed": "1G", "media": "MM", "spare": 3}]}}
+    p = panel([{"part_id": "L1", "qty": 6}], port_plans=plans)
+    return accessories(p, expand_devices(p, lib), lib)[0]
+
+
+def test_sfp_qty_is_used_plus_spare_plus_extra() -> None:
+    item = build_l1_with_choice({"speed": "1G", "media": "MM", "extra": 2})
+    assert item.line.qty == QtySum(parts=(24, 3, 2))
+    assert item.line.part_id == "SFP-SX"
+
+
+def test_sfp_spare_per_choice_overrides_project_spare() -> None:
+    item = build_l1_with_choice({"speed": "1G", "media": "MM", "spare": 5})
+    assert item.line.qty == QtySum(parts=(24, 5))
+
+
+def test_sfp_spare_zero_leaves_the_links_alone() -> None:
+    item = build_l1_with_choice({"speed": "1G", "media": "MM", "spare": 0})
+    assert item.line.qty == 24
+
+
+def test_sfp_extra_on_a_row_without_spares() -> None:
+    items = build_with_choice([{"speed": "1G", "media": "MM", "extra": 2}], MM_DOWNLINKS)
+    assert summary(items)[0] == ("L2-ESW-A01 SFP (MM)", QtySum(parts=(4, 2)), "SFP-SX")

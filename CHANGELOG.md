@@ -13,6 +13,10 @@ project uses [Semantic Versioning](https://semver.org/).
   standard size above 7.1 A, minimum 6 A"); click it to type your own, *Use automatic* to go back
   (M48). Part overrides on Parts use the same derived-value look, and leaving a value with Tab now
   closes its input.
+- Parts shows the SFPs on each switch's BOM rows as links, spare and extra, with the total and the
+  rule behind it. Set the spare to replace the project's spare SFPs for that speed and media, or add
+  extra SFPs; the BOM quantity stays a formula such as `=6+3+2`, and Checks warns when the extras
+  need more slots than are free (M49).
 
 ## [0.3.4] - 2026-11-01
 

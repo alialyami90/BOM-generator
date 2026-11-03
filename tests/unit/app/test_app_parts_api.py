@@ -380,3 +380,29 @@ def test_a_monitor_row_is_named_by_its_category(
     row_in = {"id": "mon", "part_id": "NAP-F23", "role": "other"}
     ok(app.add_equipment(str(project), "gis01", row_in, None, True))
     assert row(parts(project, store), "mon")["label"] == "Monitor"
+
+
+def test_parts_page_sfp_counts_carry_rule(project: Path, store: LibraryStore) -> None:
+    """M49: each SFP sub-row gives the links, spare, extra and total of each BOM row."""
+    (sfp,) = row(parts(project, store), "l1")["sfp"]
+
+    assert (sfp["used"], sfp["extra"], sfp["total"]) == (6, 0, 9)
+    assert sfp["spare"] == {
+        "value": 3,
+        "rule": "3: the project's spare SFPs per L1 row",
+        "override": None,
+        "unit": None,
+        "source": "engine",
+    }
+    assert sfp["rule"] == "6 links + 3 spare"
+
+
+def test_sfp_spare_and_extra_are_set_from_the_parts_page(app: api.Api, project: Path) -> None:
+    l1 = row(ok(app.parts_page(str(project), "gis01"))["parts"], "l1")["index"]
+
+    ok(app.set_sfp_count(str(project), "gis01", l1, "1G", "MM", "spare", 1))
+    page = ok(app.set_sfp_count(str(project), "gis01", l1, "1G", "MM", "extra", 2))
+
+    (sfp,) = row(page["parts"], "l1")["sfp"]
+    assert (sfp["spare"]["override"], sfp["extra"], sfp["total"]) == (1, 2, 9)
+    assert sfp["rule"] == "6 links + 1 spare + 2 extra"
