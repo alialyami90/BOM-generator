@@ -1126,8 +1126,10 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
   terminals or supplied, the library's heater, hygrostat and smoke detector roles; branches sized
   from the part's AC watts, never below the spec's rating, each with its rule
   (`BuildResult.housekeeping`); THF adds 3 per fan and 2 per thermostat beyond the spec's kit, and a
-  heater or hygrostat brings its part's own strips. **M56b** (planned): the panel editor's
-  *Cabinet housekeeping* section and the Library roles.
+  heater or hygrostat brings its part's own strips. **M56b** (in review): the panel editor's
+  *Cabinet housekeeping* section under Options (counts, heater, hygrostat, each load's breaker as a
+  derived value) and the heater, hygrostat and smoke detector roles in Library › Catalogues. The
+  socket stays a rating; a pick list from the library's sockets is left for later.
 - **M57 — Terminals tab.** *W3; ADR 0033.* In review. `spares.terminals_fraction` and
   `PanelOptions.terminal_block_overrides`; `BuildResult.strips` carries each strip's rule; the panel
   editor's Terminals tab replaces the read-only terminal overrides of Options.

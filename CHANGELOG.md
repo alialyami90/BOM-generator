@@ -61,6 +61,10 @@ project uses [Semantic Versioning](https://semver.org/).
   detector is supplied, only wired to terminals, or left out. Housekeeping breakers are sized from
   the part's AC watts when it gives them, never below the spec's rating, and a panel can set its
   own. With nothing set every BOM is as before (M56a, ADR 0032).
+- The panel editor's Options tab has *Cabinet housekeeping*: the lamp, fan, thermostat and filter
+  counts with the spec's kit as placeholders, heater and hygrostat, and each housekeeping breaker
+  with the rule behind it; click one to set your own. Library › Catalogues › Housekeeping lists the
+  heater, hygrostat and smoke detector roles (M56b).
 - A hand-written panel's Devices rows take a tag, type code and first number, with the generated
   tag as placeholder and a shared tag flagged on the row (M59). Moving, adding or removing a device
   there no longer writes the page's own fields into the panel file.

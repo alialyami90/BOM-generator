@@ -17,7 +17,7 @@ import yaml
 from bomgen.models.library import SOURCED_FIELDS, DeviceType, Library, PartState, SourcedField
 
 # roles a housekeeping set may leave empty; a gap only when the default set fills it
-_OPTIONAL_ROLES = ("door_switch", "nameplate")
+_OPTIONAL_ROLES = ("door_switch", "nameplate", "heater", "hygrostat", "smoke_detector")
 
 
 @dataclass(frozen=True)

@@ -17,6 +17,13 @@ from bomgen.app.output import problems_of
 from bomgen.app.substations import resolve
 from bomgen.checks import duplicate_tag_checks
 from bomgen.engine.errors import EngineError
+from bomgen.engine.housekeeping import (
+    FORCED_FANS,
+    FORCED_THERMOSTATS,
+    LAMPS,
+    NATURAL_FILTERS,
+    NATURAL_THERMOSTATS,
+)
 from bomgen.engine.layout import layout_preview
 from bomgen.engine.mcb import has_branch_mcb
 from bomgen.engine.pipeline import build
@@ -26,13 +33,20 @@ from bomgen.io.loader import LoadedSubstation
 from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.store import LibraryStore
 from bomgen.models.bom import BomLine, Group, QtySum, StripRow
-from bomgen.models.calc import DcMains, SpareRatings
+from bomgen.models.calc import DcMains, HousekeepingBranch, SpareRatings
 from bomgen.models.output import Derived
 from bomgen.models.panel import Panel, PanelOptions
 from bomgen.models.substation import EquipmentRole, GeneratedPanels
 
 SIZED = (EquipmentRole.L1_SWITCH, EquipmentRole.L2_SWITCH)  # their port plans are computed
 TEMPLATE = ("cabinet_name", "cabinet_number", "tag_prefix", "sheet_name")
+KIT_DEFAULTS = {  # the spec's kit (Housekeeping kit (group D)); unset counts take these
+    "lamps": LAMPS,
+    "fans": FORCED_FANS,
+    "thermostats_forced": FORCED_THERMOSTATS,
+    "thermostats_natural": NATURAL_THERMOSTATS,
+    "filters": NATURAL_FILTERS,
+}
 
 
 class PanelNotFoundError(LookupError):
@@ -163,12 +177,14 @@ def panel_page(
     main: DcMains | None = None
     spares: SpareRatings | None = None
     strips: Sequence[StripRow] = ()
+    kit: list[HousekeepingBranch] = []
     try:
         result = build(loaded)
         lines = next(b.lines for b in result.panels if b.panel_id == panel.id)
         main = next((m for m in result.mains if m.panel_id == panel.id), None)
         spares = next((s for s in result.spares if s.panel_id == panel.id), None)
         strips = next((s.strips for s in result.strips if s.panel_id == panel.id), ())
+        kit = [b for b in result.housekeeping if b.panel_id == panel.id]
     except EngineError as exc:
         page["engine_error"] = str(exc)
     tagging = _tagging(loaded, panel)
@@ -275,6 +291,24 @@ def panel_page(
             for s in strips
         ],
         "terminal_blocks": list(loaded.library.catalogues.terminal_blocks),
+        # the housekeeping kit (ADR 0032): the spec's counts and each branch load's rating
+        "housekeeping": {
+            "defaults": KIT_DEFAULTS,
+            "roles": {
+                role: getattr(loaded.library.catalogues.housekeeping, role) is not None
+                for role in ("heater", "hygrostat", "smoke_detector")
+            },
+            "ratings": {
+                b.key: Derived[int](
+                    value=b.rule_rating_a,
+                    rule=b.rule,
+                    override=panel.options.housekeeping.branch_ratings.get(b.key),
+                    unit="A",
+                ).model_dump(mode="json")
+                for b in reversed(kit)  # the first branch of each load wins
+            },
+            "branches": [{"tag": b.tag, "load": b.load, "key": b.key} for b in kit],
+        },
         "ports": _ports(loaded, panel, units, lines) if board else [],
         "parts": [] if board else part_list(loaded),
         "yaml": file.read_text(encoding="utf-8"),
