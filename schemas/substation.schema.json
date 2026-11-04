@@ -1564,7 +1564,8 @@
           "items": {
             "enum": [
               "summary_bom",
-              "notes"
+              "notes",
+              "ied_schedule"
             ],
             "type": "string"
           },
@@ -2006,6 +2007,17 @@
           "minLength": 1,
           "pattern": "^(?!')(?:[^\\[\\]:*?/\\\\']|'(?!$))*$",
           "title": "Heat Dissipation",
+          "type": [
+            "string",
+            "integer"
+          ]
+        },
+        "ied_schedule": {
+          "default": "IED Schedule",
+          "maxLength": 31,
+          "minLength": 1,
+          "pattern": "^(?!')(?:[^\\[\\]:*?/\\\\']|'(?!$))*$",
+          "title": "Ied Schedule",
           "type": [
             "string",
             "integer"

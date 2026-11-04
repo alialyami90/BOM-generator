@@ -20,6 +20,7 @@ from bomgen.models.bom import BomLine, BomTable, BuildResult, LooseTable, Qty, Q
 from bomgen.models.calc import CabinetHeat, LineRef, PowerBlock, PowerLine
 from bomgen.sheets.cable_sheet import cable_type, has_cables
 from bomgen.sheets.history_sheet import history_rows
+from bomgen.sheets.ied_sheet import schedule_lines
 from bomgen.sheets.notes_sheet import noted_rows
 
 
@@ -230,6 +231,13 @@ def preview_page(project_file: Path, substation_id: str, store: LibraryStore) ->
         else {
             "sheet": sheet_names.notes,
             "rows": [{"sheet": s, "tag": t, "description": d, "note": n} for s, t, d, n in noted],
+        },
+        "ied_schedule": None  # plan M80: written when chosen and the network has a schedule
+        if "ied_schedule" not in loaded.substation.output.include
+        or not loaded.substation.network.ied_schedule
+        else {
+            "sheet": sheet_names.ied_schedule,
+            "rows": schedule_lines(loaded.substation.network.ied_schedule),
         },
         "history": None  # ADR 0036: the sheet is written once there is a row
         if not (history := history_rows(loaded))

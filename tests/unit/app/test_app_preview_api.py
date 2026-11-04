@@ -213,3 +213,31 @@ def test_a_loose_note_shows_in_the_notes_column_and_the_notes_tab_when_chosen(
     notes = ok(app.preview_substation(str(project), "gis01"))["notes"]
     assert notes["sheet"] == "Notes"
     assert [(r["sheet"], r["note"]) for r in notes["rows"]] == [("Loose Material", "Hi")]
+
+
+def test_ied_schedule_tab_when_chosen_and_a_schedule_exists(
+    app: api.Api, project: Path, page: Any
+) -> None:
+    # plan M80: the Preview mirrors the workbook.
+    assert page["ied_schedule"] is None
+    file = str(project)
+    rows = [{"bay": "E01", "name": "P546", "qty": 4}]
+    ok(app.set_substation_field(file, "gis01", ["network", "ied_count"], None))
+    ok(app.set_substation_field(file, "gis01", ["network", "ied_schedule"], rows))
+    ok(app.set_substation_field(file, "gis01", ["output", "include"], ["ied_schedule"]))
+    ieds = ok(app.preview_substation(file, "gis01"))["ied_schedule"]
+    assert ieds["sheet"] == "IED Schedule"
+    assert ieds["rows"] == [
+        {
+            "bay": "E01",
+            "ied": "P546",
+            "qty": 4,
+            "ports": 1,
+            "speed": "100M",
+            "media": "MM",
+            "attachment": "Dual (A and B)",
+            "lands_on": "L1",
+            "side_a": 4,
+            "side_b": 4,
+        }
+    ]

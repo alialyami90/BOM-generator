@@ -20,6 +20,7 @@ from bomgen.sheets.bom_sheet import BomSheet, bom_sheet, loose_sheet
 from bomgen.sheets.cable_sheet import cable_sheet, has_cables
 from bomgen.sheets.header_footer import bom_header_footer, calc_header_footer, fitting_size
 from bomgen.sheets.history_sheet import history_rows, history_sheet
+from bomgen.sheets.ied_sheet import ied_sheet
 from bomgen.sheets.nameplate_sheet import nameplate_sheet
 from bomgen.sheets.notes_sheet import noted_rows, notes_sheet
 from bomgen.sheets.power_sheet import BomSource
@@ -175,6 +176,19 @@ def build_workbook(
                 names.notes,
                 substation,
                 noted,
+                bom_header_footer(
+                    project_name, substation, loaded.documents[loaded.substation.document], logo
+                ),
+            )
+        )
+    schedule = loaded.substation.network.ied_schedule
+    if "ied_schedule" in loaded.substation.output.include and schedule:
+        substation = loaded.substation.substation.name
+        sheets.append(
+            ied_sheet(
+                names.ied_schedule,
+                substation,
+                schedule,
                 bom_header_footer(
                     project_name, substation, loaded.documents[loaded.substation.document], logo
                 ),

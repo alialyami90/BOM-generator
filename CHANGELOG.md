@@ -27,6 +27,9 @@ project uses [Semantic Versioning](https://semver.org/).
 - Row notes (M71, ADR 0035 amendment): `note` on equipment rows (Parts › BOM text), hand-written
   panel rows (the panel editor) and loose items. A note is never printed on a BOM sheet; Preview
   shows a Notes column, and Build can add a Notes sheet listing every noted row.
+- IED Schedule sheet (M80, ADR 0035 amendment): Build can add a reference sheet of the IED
+  schedule, one row per IED row and port need with each side's ports, then totals per speed, media
+  and landing as formulas, so the L1 switch count can be audited. Preview has the tab.
 
 ## [0.4.0] - 2026-11-04
 

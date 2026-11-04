@@ -9,6 +9,7 @@
   const SPARES = 'spares';
   const CABLES = 'cables';
   const NOTES = 'notes';
+  const IEDS = 'ied-schedule';
   const real = () => S.backend === 'yes' && S.project && S.project.real && S.sub;
   const GROUPS = { A: 'Enclosure', B: 'Main equipment', C: 'Network and IO accessories', D: 'Cabinet housekeeping', E: 'AC distribution', F: 'DC distribution', G: 'Terminal blocks', H: 'Grounding' };  // the spec's group names, labels only
   const fmt = (n, d = 1) => Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -54,13 +55,14 @@
       ...(d.spares ? [[SPARES, `${d.spares.sheet} (${d.spares.rows.length})`, '', 'Spares from the policy and your edits']] : []),
       ...(d.cables ? [[CABLES, `${d.cables.sheet} (${d.cables.rows.length})`, '', 'The loose rows that are cables']] : []),
       ...(d.notes ? [[NOTES, `${d.notes.sheet} (${d.notes.rows.length})`, '', 'Every row with a note']] : []),
+      ...(d.ied_schedule ? [[IEDS, `${d.ied_schedule.sheet} (${d.ied_schedule.rows.length})`, '', 'The schedule behind the L1 switch count']] : []),
       ...(d.history ? [[HISTORY, d.history.sheet, '', 'Each issue with its names']] : [])];
     const { b } = App.route();
     let t = b || S.tab.preview;
     if (!sheets.some(([k]) => k === t)) t = sheets[0][0];
     S.tab.preview = t;
     const panel = t === LOOSE ? d.loose : d.panels.find((x) => x.panel_id === t);
-    const body = panel ? bomView(panel, t === LOOSE) : t === PLATES ? nameplatesView(d.nameplates) : t === SUMMARY ? summaryView(d.summary) : t === SPARES ? sparesView(d.spares) : t === CABLES ? cablesView(d.cables) : t === NOTES ? notesView(d.notes) : t === HISTORY ? historyView(d.history) : t === 'power' ? powerView(d) : t === 'heatdiss' ? heatDissView(d) : heatCalcView(d);
+    const body = panel ? bomView(panel, t === LOOSE) : t === PLATES ? nameplatesView(d.nameplates) : t === SUMMARY ? summaryView(d.summary) : t === SPARES ? sparesView(d.spares) : t === CABLES ? cablesView(d.cables) : t === NOTES ? notesView(d.notes) : t === IEDS ? iedView(d.ied_schedule) : t === HISTORY ? historyView(d.history) : t === 'power' ? powerView(d) : t === 'heatdiss' ? heatDissView(d) : heatCalcView(d);
     return `<div class="page">${pageHead('Preview', 'What the workbook will contain. Values are calculated by the engine; nothing here is editable.',
       `<a class="btn btn--primary" href="#/build">${icon('build')}Continue to Build</a>`)}
       ${tabs('preview', sheets, t, 'Workbook sheets')}
@@ -139,6 +141,13 @@
     const rows = m.rows.map((r, i) => `<tr><td class="num">${i + 1}</td><td>${esc(r.sheet)}</td><td class="mono">${esc(r.tag || '')}</td><td class="wrap">${esc(r.description)}</td><td class="wrap">${esc(r.note)}</td></tr>`).join('');
     return `<div class="table-wrap" style="max-height:calc(100vh - 320px)"><table class="table"><thead><tr><th class="num">S.No</th><th>Sheet</th><th>Tag</th><th>Description</th><th>Note</th></tr></thead><tbody>${rows}</tbody></table></div>
       <p class="muted small" style="margin-top:var(--space-2)">${plural(m.rows.length, 'note')}. Notes print only on this sheet.</p>`;
+  }
+
+  /* ---------- IED Schedule (plan M80): the schedule rows and their ports per side ---------- */
+  function iedView(m) {
+    const rows = m.rows.map((r, i) => `<tr><td class="num">${i + 1}</td><td>${esc(r.bay)}</td><td>${esc(r.ied)}</td><td class="num">${r.qty}</td><td class="num">${r.ports}</td><td>${esc(r.speed)} ${esc(r.media)}</td><td>${esc(r.attachment)}</td><td>${esc(r.lands_on)}</td><td class="num">${r.side_a}</td><td class="num">${r.side_b}</td></tr>`).join('');
+    return `<div class="table-wrap" style="max-height:calc(100vh - 320px)"><table class="table"><thead><tr><th class="num">S.No</th><th>Bay</th><th>IED</th><th class="num">Qty</th><th class="num">Ports per IED</th><th>Port</th><th>Attachment</th><th>Lands on</th><th class="num">Side A ports</th><th class="num">Side B ports</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="muted small" style="margin-top:var(--space-2)">${plural(m.rows.length, 'line')}. The sheet adds the totals per speed, media and landing as formulas. <a href="#/parts">Edit the schedule on Parts.</a></p>`;
   }
 
   /* ---------- Revision History (ADR 0036): recorded issues, then the current revision ---------- */

@@ -46,9 +46,12 @@ class SheetNames(InputModel):
     spare_parts: ExcelSheetName = "Spare Parts"  # ADR 0035, plan M64
     cable_schedule: ExcelSheetName = "Cable Schedule"  # ADR 0035, plan M65
     notes: ExcelSheetName = "Notes"  # ADR 0035, plan M71
+    ied_schedule: ExcelSheetName = "IED Schedule"  # ADR 0035, plan M80
 
 
-OptionalSheet = Literal["summary_bom", "notes"]  # ADR 0035: written only when included
+OptionalSheet = Literal[
+    "summary_bom", "notes", "ied_schedule"
+]  # ADR 0035: written only when included
 
 
 class OutputSettings(InputModel):

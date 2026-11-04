@@ -164,6 +164,7 @@
             <div class="row" style="margin-left:44px"><input class="input input--mono" id="b-previous" style="width:320px" placeholder="Choose the previous issue (.xlsx)" value="${esc(B.previous.split(/[\\/]/).pop())}" title="${esc(B.previous)}" readonly ${B.compare ? '' : 'disabled'}><button class="btn btn--secondary btn--sm" data-action="build-previous" ${B.compare ? '' : 'disabled'}>Browse…</button></div>
             <label class="switch"><input type="checkbox" id="b-summary" data-action="build-summary" data-dirty="0" ${t.include.includes('summary_bom') ? 'checked' : ''}>Add a Summary BOM sheet: every part totalled by ordering code, with where it is used</label>
             <label class="switch"><input type="checkbox" id="b-notes" data-action="build-notes" data-dirty="0" ${t.include.includes('notes') ? 'checked' : ''}>Add a Notes sheet: every row's note, which the BOM sheets never print</label>
+            <label class="switch"><input type="checkbox" id="b-ieds" data-action="build-ieds" data-dirty="0" ${t.include.includes('ied_schedule') ? 'checked' : ''}>Add an IED Schedule sheet: the schedule's rows and ports per side, when Parts has a schedule</label>
             <label class="switch"><input type="checkbox" id="b-open" data-action="build-open-toggle" data-dirty="0" ${B.open ? 'checked' : ''}>Open the workbook when it is written</label></div></div>
         </div>
         <div style="margin-top:var(--space-5)" class="row"><button class="btn btn--primary" data-action="build-run" ${blocked || busy ? 'disabled' : ''} ${busy ? 'aria-busy="true"' : ''}>${busy ? '<span class="spinner"></span>Building…' : icon('build') + 'Build workbook'}</button><button class="btn btn--secondary" data-action="build-issue" ${blocked || busy || t.issue.refusal ? 'disabled' : ''} title="${esc(t.issue.refusal || 'Build, then record this revision as issued')}">Build as issued…</button>${blocked ? `<span class="muted small">Unavailable until the ${plural(errors, 'error')} ${errors === 1 ? 'is' : 'are'} fixed.</span>` : ''}</div>
@@ -243,6 +244,7 @@
   };
   ACTIONS['build-summary'] = includeSheet('summary_bom');
   ACTIONS['build-notes'] = includeSheet('notes');
+  ACTIONS['build-ieds'] = includeSheet('ied_schedule');  // plan M80
   ACTIONS['build-summary-csv'] = () => Bridge.call('export_summary_csv', S.project.file, S.sub)
     .then((r) => { if (r) toast(`Summary exported: ${r.lines} lines`); })
     .catch((err) => toast(err.message, 'error'));
