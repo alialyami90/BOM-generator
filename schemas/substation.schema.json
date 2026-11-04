@@ -1856,6 +1856,17 @@
             "integer"
           ]
         },
+        "spare_parts": {
+          "default": "Spare Parts",
+          "maxLength": 31,
+          "minLength": 1,
+          "pattern": "^(?!')(?:[^\\[\\]:*?/\\\\']|'(?!$))*$",
+          "title": "Spare Parts",
+          "type": [
+            "string",
+            "integer"
+          ]
+        },
         "summary_bom": {
           "default": "Summary BOM",
           "maxLength": 31,
@@ -1879,6 +1890,47 @@
       ],
       "title": "Side",
       "type": "string"
+    },
+    "SpareExtra": {
+      "additionalProperties": false,
+      "description": "A spare the policy does not give: a library part or a free-text item (plan M64).",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "part_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Part Id"
+        },
+        "qty": {
+          "exclusiveMinimum": 0,
+          "title": "Qty",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "qty"
+      ],
+      "title": "SpareExtra",
+      "type": "object"
     },
     "Spares": {
       "additionalProperties": false,
@@ -1924,6 +1976,36 @@
         }
       },
       "title": "Spares",
+      "type": "object"
+    },
+    "SparesList": {
+      "additionalProperties": false,
+      "description": "The substation's edits to the spares list (plan M64): a spare quantity per ordering\ncode (the model when a part has none), codes left out, and extra items.",
+      "properties": {
+        "excluded": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Excluded",
+          "type": "array"
+        },
+        "extra": {
+          "items": {
+            "$ref": "#/$defs/SpareExtra"
+          },
+          "title": "Extra",
+          "type": "array"
+        },
+        "items": {
+          "additionalProperties": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Items",
+          "type": "object"
+        }
+      },
+      "title": "SparesList",
       "type": "object"
     },
     "SparesPolicy": {
@@ -2200,6 +2282,17 @@
       "anyOf": [
         {
           "$ref": "#/$defs/Spares"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "spares_list": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SparesList"
         },
         {
           "type": "null"
