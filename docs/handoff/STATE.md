@@ -9,8 +9,18 @@ rather than copy it.
 
 ## 1. Overview (2026-11-04)
 
-- Repo `alialyami90/BOM-generator`, default branch `main`, at `65837a3` (#370, the v0.4.0
-  release). Check open PRs with `list_pull_requests` before starting.
+- Repo `alialyami90/BOM-generator`, default branch `main`, at `9b25f6b` (#389, the last phase G
+  checkpoint). Check open PRs with `list_pull_requests` before starting.
+- **M70–M81 are merged on main, unreleased** (2026-11-04, #373–#389; `plan.md` "M70–M81" has
+  each PR number and the coverage table of the workflow review): panel and row notes with a
+  Notes sheet (M70, M71), switch counts and the port budget (M72, Q72), RedBox and media
+  converter roles (M73, ADR 0038), steering and rack priority per row (M74, M76), PANEL row
+  details and nameplate text (M75), overrides in Checks with reasons and the Revision History
+  OVERRIDES column (M77, ADR 0040), PDF export (M78, ADR 0039, Q73), mark as revised with a
+  change list (M79), the IED Schedule sheet (M80) and function tags (M81, psa-devices 1.17.0).
+  The golden values are unchanged except five more `override` passes in the check counts. The
+  changelog's `[Unreleased]` lists them; the next release is v0.5.0 (new inputs and a new
+  runtime dependency, reportlab).
 - **v0.4.0 is released** (#370, 2026-11-04) with `bomgen-setup-0.4.0.exe` and psa-devices 1.16.0.
   It is the engineer-controlled workflow, M48–M69 of the
   [agent implementation plan](../superpowers/plans/2026-11-03-agent-implementation-plan.md)
@@ -19,7 +29,7 @@ rather than copy it.
   detailing M50 and M56–M58, W4 Parts and network M49 and M59–M62, W5 Setup and design basis
   M51–M55, plus the lead's M48 (#321). Every new input is unset in `examples/`, so the golden
   values are unchanged. The review points M48–M69 left out are planned as M70–M81 in `plan.md`
-  (#364, with a coverage table of the review); they start after this release.
+  (#364, with a coverage table of the review); they are merged, see above.
 - **v0.3.4 is released** (#314, 2026-11-01) with `bomgen-setup-0.3.4.exe` and psa-devices 1.15.0.
   It finishes the v0.3 roadmap, M35–M47 (#297–#313): the spec's "Automatic panel layout" section
   (M35, ALI-14), Library › Catalogues brand editing (M36), Settings YAML apply and defaults
@@ -100,16 +110,18 @@ rather than copy it.
   round-trip writers (ADR 0021), and the loose material sheet and page (ADR 0020, ADR 0022). v0.2.1 is
   the UI polish pass from [`docs/ui/polish-v02.md`](../ui/polish-v02.md) (items 1–16, #205–#208) plus
   #194, #198–#201.
-- **Numbers (2026-11-04, after v0.4.0).** ADRs 0001–0027, 0029–0038 and 0040 are Accepted and 0028
-  is Rejected; 0039 is with W2. The next free ADR is **0041**, the next free
-  question **Q74** and the next milestone **M82** (M70–M81 are planned; M70, M72–M77 are done;
-  Q72 answered "only above"). Q51 (annunciator) and Q55
-  (categories for the contractor's other part types) are open.
-- **Changelog** has a `[0.4.0]` section, and `[Unreleased]` is empty.
-- **Next work:** M70–M81 (`plan.md` "M70–M81"), one PR each, handed out by the lead to the
-  workstreams that own the files; then Ali's answers on the v0.3.4 review list (keyboard nameplate,
-  a DC supply-voltage check, Q51, Q55, reviewer mode, Q11/Q23) and his hand test of drag and drop
-  on Windows (ALI-8).
+- **Numbers (2026-11-04, after M70–M81).** ADRs 0001–0027 and 0029–0040 are Accepted and 0028
+  is Rejected. The next free ADR is **0041**, the next free question **Q74** and the next
+  milestone **M82** (M70–M81 are done; Q72 "only above", Q73 "both, built-in by default").
+  Q51 (annunciator) and Q55 (categories for the contractor's other part types) are open.
+- **Changelog** has a `[0.4.0]` section and `[Unreleased]` holds M70–M81.
+- **Next work:** release v0.5.0 (changelog PR, then the bump PR; "How a release happens"), then
+  Ali's field feedback: try *Use Excel* in PDF export on Windows (NEXT §3), his hand test of drag
+  and drop on Windows (ALI-8), and his answers on the v0.3.4 review list (keyboard nameplate, a
+  DC supply-voltage check, Q51, Q55, reviewer mode, Q11/Q23). Open ends the workstreams left:
+  psa-devices has no RedBox or media converter part and no nameplate pattern for them, the
+  Library detail pane does not show tags, the socket pick list (M56), and the built-in PDF
+  renderer leaves out the header logo.
 
 ### Verification (`f2234f7`, after #227)
 

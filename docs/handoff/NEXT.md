@@ -76,8 +76,9 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
 11. **Q51** (annunciator mounted in a panel), **Q54** (power of the -2 SEL computers) and **Q55**
    (categories for the contractor's other part types) are open in plan §6.
 
-**Next work:** v0.4.0 shipped M48–M69 (STATE.md §1). M70–M81 are next, one PR each, in the order of
-`plan.md` "M70–M81"; M72, M73, M77 and M78 start with a card or an ADR.
+**Next work:** M70–M81 are merged on main, unreleased (STATE.md §1). Release v0.5.0 next: the
+changelog PR (`[Unreleased]` → `[0.5.0]`), then the bump PR, with no other merge until the
+release is published. Then the open ends in STATE.md §1 "Next work", as Ali orders them.
 
 ## 4. When Ali's feedback arrives
 

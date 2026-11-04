@@ -104,6 +104,10 @@ A milestone with several modules may group them in a subfolder,
 | `engine/test_engine_spares.py`, `sheets/test_spares_sheet.py`, `app/test_app_spares_api.py` | M64 | the spares list: quantities from the policy (Q65), then overrides, exclusions and extras; its sheet and the Spares page |
 | `engine/test_engine_cables.py`, `sheets/test_cable_sheet.py` | M65 | cable suggestions from the port plans, one cord per link at its upper end (Q66, Q71), and the Cable Schedule sheet |
 | `test_recorded_issue.py`, `test_cli_issue.py`, `sheets/test_history_sheet.py` | M66 | recorded issues (ADR 0036): the previous issue from the record, `bomgen build --issue`, and the Revision History sheet |
+| `test_ied_csv.py` | M60 | the IED schedule CSV's port text (ADR 0034 item 5): count, speed and media read, defaulted, refused and round-tripped |
+| `library_store/test_health.py` | M68 | library health: parts by state, assumed sources, parts without an alternative, obsolete parts projects use |
+| `engine/test_redbox_and_converter.py` | M73 | RedBox and media converter roles (ADR 0038): names, tags, MCBs, power and L2 ports of a mixed network |
+| `engine/test_overrides.py`, `engine/test_rules_text.py`, `app/test_app_derived_values.py` | M77 | every override a build applied, the Overrides check group and its reasons, the recorded risky overrides (ADR 0040); the rule texts; the app's derived values and their rules |
 | `sheets/test_notes_sheet.py` | M71 | row notes reach their BOM lines, print nowhere on a BOM sheet, and the optional Notes sheet |
 | `sheets/test_ied_sheet.py` | M80 | the optional IED Schedule sheet: one row per schedule row and port need, side ports as formulas, totals per speed, media and landing |
 | `test_pdf.py` | M78 | PDF export (ADR 0039): the built-in renderer's pages, paper, headers, repeated title rows and hidden columns, chosen sheets, and the Excel script and its refusals |

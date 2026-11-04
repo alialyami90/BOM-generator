@@ -3,6 +3,17 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-11-04: Phase G done, M70–M81 merged (Lead)
+
+- **Base:** main `9b25f6b` (#389). Docs-only PR.
+- **Done:** all twelve review-point milestones are on main (#373–#389): W1 M81; W2 M71, M78,
+  M79, M80; W3 M70, M75; W4 M72, M73, M74, M76; the lead's M77. ADRs 0038–0040 Accepted, Q72
+  and Q73 answered, Ali keeps panel notes off the workbook. STATE.md §1 lists the set and the
+  open ends; `CHANGELOG.md` `[Unreleased]` has one entry each; `tests/unit/README.md` lists the
+  six modules the workstreams left out.
+- **Next:** release v0.5.0 (NEXT.md), then Ali's field tests (PDF export with Excel, drag and
+  drop) and his review list.
+
 ## 2026-11-04: W2 phase G, M78 PDF export merged (W2)
 
 - **Done:** M78 (#388, ADR 0039 Accepted, Q73 answered "both, built-in by default"). `bomgen.pdf`
