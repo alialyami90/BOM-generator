@@ -1319,7 +1319,7 @@ design basis says) are not milestones.
   puts every unit of a common row in that panel without pinning; the fill reports when it doesn't fit.
   ADR 0013 amendment paragraph. In review. The Parts row gets a Panel select (Automatic or a
   panel number) on common rows.
-- **M75 — PANEL row details and label rules.** *W3; spec sentence.* Review step 6. `Enclosure.ip_rating`
+- **M75 — PANEL row details and label rules.** *W3; spec sentence.* Done. Review step 6. `Enclosure.ip_rating`
   and `colour` printed in the PANEL row's description; nameplate text patterns per category in the
   design basis tagging (`nameplate_pattern`), defaulting to today's tag text.
 - **M76 — Rack priority per row.** *W4.* Review step 4. `Equipment.priority: 1–4` overrides the

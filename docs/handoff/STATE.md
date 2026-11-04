@@ -575,7 +575,7 @@ consume `BuildResult`.
 | --- | --- |
 | `engine/units.py` | step 1: expands a panel's device instances into tagged `DeviceRow`s |
 | `engine/tags.py` | tag naming (`<PANEL>-<LEVEL>-<TYPE>-<LAN><NN>`, `tag_pattern`, panel overrides) |
-| `engine/enclosure.py` | group A: the enclosure row |
+| `engine/enclosure.py` | group A: the enclosure row, with the IP rating and colour when given (M75) |
 | `engine/kits.py` | step 2: device rows with kit children (group B), and `loose_table` (None with no rows) |
 | `engine/network.py` | group C: SFPs, cable managers, serial cables |
 | `engine/housekeeping.py` | group D: lamp, fans, filters, thermostats, heater, hygrostat, smoke detector, IPR kit, change-over diodes, socket; `kit_counts` reads `options.housekeeping` over the spec's kit (ADR 0032) |
@@ -583,8 +583,8 @@ consume `BuildResult`.
 | `engine/dc_dist.py` | group F: Q1/Q2 mains, Q1.n/Q2.n branches, spares, QCODs, `branch_sizing` (ADR 0019), all from `catalogues.dc_mcb` (ADR 0023) |
 | `engine/mcb.py` | `rating_at_least`, `rating_above`, `mcb_line` take an `McbCatalogue`; aux contact rows; `alarms_wired` |
 | `engine/terminals.py` | group G: terminal strips (X1, X3-AC, X4-DC1/DC2, XDIN, …); `strip_table` gives each strip its rule, the spare fraction and the panel's quantity and block overrides (ADR 0033, `BuildResult.strips`); THF follows the kit (ADR 0032); `unit_strips` for the preview |
-| `engine/grounding.py` | group H: grounding busbars |
-| `engine/nameplates.py` | group H: the nameplate row (last) and each plate's text, the MCB short tag (M26, ADR 0026) |
+| `engine/grounding.py` | group H: grounding busbars, and `misc_items`: the panel's "1 Lot" rows, printed last (M70) |
+| `engine/nameplates.py` | group H: the nameplate row (last before any misc rows) and each plate's text, the MCB short tag or the design basis tagging's `nameplate_pattern` for its category (M26, ADR 0026, M75) |
 | `engine/preview.py` | `device_preview(loaded, overrides)`: every unit with its U, MCBs (`BranchMcb.unit_tag`, `feed`) and strips (M24) |
 | `engine/assemble.py` | step 11: separators and SR.NO in group order |
 | `engine/power.py` | step 4: Power Consumption rows and totals (2,177.5 W DC, 1,090.3 W AC on the example) |

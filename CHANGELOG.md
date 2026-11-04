@@ -16,6 +16,10 @@ project uses [Semantic Versioning](https://semver.org/).
 - Steer a common device to a panel (M74): `panel_hint` on a common equipment row puts its units
   in that panel when they fit, without pinning them; otherwise they go where there is room and the
   layout warns. Parts has a Panel select on each common row (ADR 0013, amended).
+- PANEL row details and nameplate text (M75). An enclosure's `ip_rating` and `colour` end the
+  PANEL row's description; the design basis tagging's `nameplate_pattern` sets each category's
+  plate text from `{tag}`, `{full_tag}` and `{purpose}` (unset prints today's tag text). The
+  panel editor's Enclosure tab and the Design basis tab edit them.
 - Panel notes and miscellaneous rows (M70). A panel's `notes` (`generated_panels.notes_by_panel`
   on a generated panel) are the engineer's own and never printed; `options.misc_items` print
   last in group H, one "1 Lot" row each. The panel editor has Notes on the Document tab and the

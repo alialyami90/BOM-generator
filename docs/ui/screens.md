@@ -119,7 +119,7 @@ line. "Apply to form" is available only when the YAML is valid.
 
 ### Substation settings
 Only what belongs to this substation: *Design basis* (voltages, time sync, Purdue scope, tag side
-letters and first numbers, notes: defaults only, ADR 0031), *General* (name, which is also the BOM title line, and a
+letters and first numbers, nameplate text per category (M75), notes: defaults only, ADR 0031), *General* (name, which is also the BOM title line, and a
 read-only "From the project" block with a link to the project page), *Documents*
 (which register entry each calculation sheet prints; cabinet BOMs choose theirs on
 each panel), *Output* (main document, file-name pattern with the resulting name,
@@ -250,7 +250,7 @@ with the save bar; everything on it is saved together.
   editor, as in the first design. Devices: reorder handle, device, quantity,
   purpose, HWIO override, generated tag, remove; "Add device" opens the picker.
 - **Tabs:** Enclosure (make,
-  model, code, H × D × W, base frame, cable entry top, side or bottom; on a generated panel also
+  model, code, H × D × W, base frame, cable entry top, side or bottom, IP rating and colour (M75); on a generated panel also
   Kind, with *All generated panels* / *This panel only*, M50), Port plans (a small table per
   switch with an "Engine result" footer), Options (spares, ventilation, diodes,
   main MCB override and the AC and DC spare ratings as derived values, socket, terminals, smoke

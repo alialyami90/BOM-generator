@@ -64,6 +64,8 @@ class Enclosure(InputModel):
     w_mm: PositiveInt
     base_frame: BaseFrame | None = None
     cable_entry: CableEntry
+    ip_rating: Annotated[str, StringConstraints(pattern=r"^IP[0-9X]{2}[A-Z]?$")] | None = None
+    colour: NonBlank | None = None  # e.g. RAL 7035 (plan M75)
 
 
 class DeviceInstance(InputModel):
