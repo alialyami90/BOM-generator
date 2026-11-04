@@ -115,6 +115,12 @@ project uses [Semantic Versioning](https://semver.org/).
   (`cable: { from_tag, to_tag, length_m, media, speed }`); the workbook then gets a Cable
   Schedule sheet after the Summary BOM listing each such row with its quantity as a formula on
   the Loose Material sheet.
+- Cable suggestions (M65b, Q66, Q71): `suggest_cables` lists the patch cords the port plans call
+  for, one per link counted once at its upper end (L2 downlinks, L3 uplinks, external links; the
+  L1 A-B interlinks once from side A), 2 m in a cabinet and 5 m between cabinets unless the design
+  basis `cables` says otherwise, and an external link at its own `cable_length_m`. A library cable
+  part (`media`, `length_m`) of the media and length is picked, else the cord is free text with a
+  warning. Accepting appends them as loose rows with cable data; nothing is written before.
 - The app records issues too (M66b, ADR 0036). Build has *Build as issued…*: it asks for a
   description, builds, then records the rev unless a check failed. Without a chosen previous issue
   every build compares with the last recorded one, or says why it can't. Checks has *Accept…* on

@@ -378,6 +378,15 @@ class SparesList(InputModel):
     extra: list[SpareExtra] = Field(default_factory=list)
 
 
+class CableDefaults(InputModel):
+    """Cord lengths per link class for the cable suggestions (plan M65, Q66): within one
+    cabinet, between cabinets, and leaving the substation when the link row gives none."""
+
+    in_cabinet_m: PositiveFloat = 2
+    inter_cabinet_m: PositiveFloat = 5
+    external_m: PositiveFloat | None = None
+
+
 class DesignBasis(InputModel):
     """What the engineer states first (ADR 0031). It only sets defaults: a value the
     substation writes itself wins. Unset keys mean today's behaviour."""
@@ -390,6 +399,7 @@ class DesignBasis(InputModel):
     tagging: Tagging = Field(default_factory=Tagging)
     spares_policy: SparesPolicy | None = None
     vendor_list: str | None = None  # a key of the project's vendor lists (plan M53)
+    cables: CableDefaults | None = None  # plan M65, Q66
     notes: str | None = None
 
     @field_validator("redundancy")

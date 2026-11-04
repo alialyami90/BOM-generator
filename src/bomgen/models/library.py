@@ -236,6 +236,8 @@ class DeviceType(InputModel):
     ports: list[PortGroup] = Field(default_factory=list)
     cores: PositiveInt | None = None
     height_u: NonNegativeInt | None = None  # rack units; 0 = DIN rail, None = not given yet
+    media: Media | None = None  # a cable part's media, for the cable suggestions (plan M65)
+    length_m: PositiveFloat | None = None  # a cable part's length
     children: list[ChildRule] = Field(default_factory=list)
     terminals: list[TerminalRule] = Field(default_factory=list)
     loose_items: list[LooseItem] = Field(default_factory=list)

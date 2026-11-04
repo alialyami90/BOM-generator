@@ -7,7 +7,7 @@ column. Every writer is checked against the whole project before it writes.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -50,22 +50,47 @@ def add_loose_item(
     substation's ``loose_material``, which needs ``host_panel``."""
 
     def change(data: CommentedMap) -> None:
-        material = data.get("loose_material")
-        if not isinstance(material, CommentedMap):
-            if host_panel is None:
-                raise EditError("the first loose item needs host_panel")
-            set_entry(data, "loose_material", {"host_panel": host_panel, "items": []})
-            material = data["loose_material"]
-        items = material.get("items")
-        if not isinstance(items, CommentedSeq):
-            set_entry(material, "items", [])
-            items = material["items"]
+        items = _items_or_start(data, host_panel)
         position = len(items) if index is None else index
         if not 0 <= position <= len(items):
             raise EditError(f"no loose item {position}")
         insert_entry(items, position, dict(item))
 
     return edit_substation(project_file, substation_id, change, store=store)
+
+
+def add_loose_items(
+    project_file: Path,
+    substation_id: str,
+    items: Sequence[Mapping[str, Any]],
+    *,
+    host_panel: str | None = None,
+    store: LibraryStore | None = None,
+) -> EditResult:
+    """Append ``items`` in one write, e.g. accepted cable suggestions (plan M65)."""
+
+    def change(data: CommentedMap) -> None:
+        rows = _items_or_start(data, host_panel)
+        for item in items:
+            insert_entry(rows, len(rows), dict(item))
+
+    return edit_substation(project_file, substation_id, change, store=store)
+
+
+def _items_or_start(data: CommentedMap, host_panel: str | None) -> CommentedSeq:
+    """The loose items; the first item starts ``loose_material``, which needs ``host_panel``."""
+    material = data.get("loose_material")
+    if not isinstance(material, CommentedMap):
+        if host_panel is None:
+            raise EditError("the first loose item needs host_panel")
+        set_entry(data, "loose_material", {"host_panel": host_panel, "items": []})
+        material = data["loose_material"]
+    items = material.get("items")
+    if not isinstance(items, CommentedSeq):
+        set_entry(material, "items", [])
+        items = material["items"]
+    assert isinstance(items, CommentedSeq)
+    return items
 
 
 def set_loose_item(

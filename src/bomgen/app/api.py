@@ -30,6 +30,7 @@ from pydantic import BaseModel, ValidationError
 
 from bomgen import __version__
 from bomgen.app import library_csv
+from bomgen.app.cables import cables_page
 from bomgen.app.catalogue_edit import CatalogueEditError
 from bomgen.app.catalogues import catalogues_page
 from bomgen.app.device_preview import device_preview_page
@@ -1861,6 +1862,31 @@ class Api:
             loose_edit.add_loose_item,
             item,
             index=index,
+            host_panel=host_panel,
+            page=loose_page,
+        )
+
+    @endpoint
+    def suggest_cables(self, project_file: str, substation_id: str) -> dict[str, Any]:
+        """The patch cords the port plans call for, each with the loose item it becomes;
+        nothing is written (plan M65)."""
+        with self._substation(substation_id):
+            return cables_page(Path(project_file), substation_id, self._library_store())
+
+    @endpoint
+    def accept_cables(
+        self,
+        project_file: str,
+        substation_id: str,
+        items: list[dict[str, Any]],
+        host_panel: str | None,
+    ) -> dict[str, Any]:
+        """Append accepted cable suggestions as loose items in one write."""
+        return self._edit(
+            project_file,
+            substation_id,
+            loose_edit.add_loose_items,
+            items,
             host_panel=host_panel,
             page=loose_page,
         )
