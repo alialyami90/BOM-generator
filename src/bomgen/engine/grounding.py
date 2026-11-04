@@ -20,3 +20,11 @@ def grounding(panel: Panel, library: Library) -> list[BomItem]:
             BomItem(BomLine(group=Group.H, tag=busbar.tag, description=busbar.description, qty=1))
         )
     return items
+
+
+def misc_items(panel: Panel) -> list[BomItem]:
+    """The panel's free-text rows, one lot each (plan M70)."""
+    return [
+        BomItem(BomLine(group=Group.H, description=text, qty="1 Lot"))
+        for text in panel.options.misc_items
+    ]

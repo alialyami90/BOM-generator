@@ -356,3 +356,31 @@ def test_heater_in_ac_block() -> None:
     ac = after.power.cabinets[0].ac
     assert ac is not None
     assert [(x.qty, x.unit_w) for x in ac.lines] == [(1, 400)]
+
+
+def test_misc_item_prints_last_in_group_h_as_one_lot_on_its_panel_only() -> None:
+    # Plan M70: a panel's misc_items print last in group H, quantity 1 Lot, description only.
+    base = loaded()
+    p1, p2 = base.panels
+    misc = "Miscellaneous: cable ties, labels"
+    own = p1.model_copy(update={"options": p1.options.model_copy(update={"misc_items": [misc]})})
+    first, second = build(replace(base, panels=(own, p2))).panels
+    last = first.lines[-1]
+    assert (last.group, last.description, last.qty) == (Group.H, misc, "1 Lot")
+    assert (last.tag, last.make, last.model, last.ordering_code, last.hwio) == (
+        None,
+        None,
+        None,
+        None,
+        0,
+    )
+    assert all(line.description != misc for line in second.lines)
+
+
+def test_panel_notes_are_never_printed() -> None:
+    # Plan M70: notes are the engineer's own; no line of any table carries them.
+    base = loaded()
+    p1, p2 = base.panels
+    note = "Customer asked for a glass door"
+    result = build(replace(base, panels=(p1.model_copy(update={"notes": note}), p2)))
+    assert note not in result.model_dump_json()
