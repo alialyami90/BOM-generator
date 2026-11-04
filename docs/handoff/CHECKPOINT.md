@@ -54,7 +54,7 @@ keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detai
   and Parts screens (#337). M68 Library › Review and Health (#339). M69 Propose for the library from
   Parts (#342). Screenshots in `/mnt/project-files/a11-screens/m67c-lifecycle/`,
   `m68-review-health/`, `m69-propose/`.
-- **Waiting:** Ali's card on Q69 (seven original parts carry the example workbook's power, which
+- **Answered 2026-11-04:** Q69, `assumed` naming the workbook, as shipped. Was: Ali's card on Q69 (seven original parts carry the example workbook's power, which
   their datasheet does not state; they ship as `assumed` until he answers).
 
 ## 2026-11-03: W4 Parts and network, M49, M62, M59 merged (W4)
