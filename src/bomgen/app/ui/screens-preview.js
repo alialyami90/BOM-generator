@@ -8,6 +8,7 @@
   const HISTORY = 'history';
   const SPARES = 'spares';
   const CABLES = 'cables';
+  const NOTES = 'notes';
   const real = () => S.backend === 'yes' && S.project && S.project.real && S.sub;
   const GROUPS = { A: 'Enclosure', B: 'Main equipment', C: 'Network and IO accessories', D: 'Cabinet housekeeping', E: 'AC distribution', F: 'DC distribution', G: 'Terminal blocks', H: 'Grounding' };  // the spec's group names, labels only
   const fmt = (n, d = 1) => Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -52,13 +53,14 @@
       ...(d.summary ? [[SUMMARY, `${d.summary.sheet} (${d.summary.rows.length})`, '', 'Every part totalled by ordering code']] : []),
       ...(d.spares ? [[SPARES, `${d.spares.sheet} (${d.spares.rows.length})`, '', 'Spares from the policy and your edits']] : []),
       ...(d.cables ? [[CABLES, `${d.cables.sheet} (${d.cables.rows.length})`, '', 'The loose rows that are cables']] : []),
+      ...(d.notes ? [[NOTES, `${d.notes.sheet} (${d.notes.rows.length})`, '', 'Every row with a note']] : []),
       ...(d.history ? [[HISTORY, d.history.sheet, '', 'Each issue with its names']] : [])];
     const { b } = App.route();
     let t = b || S.tab.preview;
     if (!sheets.some(([k]) => k === t)) t = sheets[0][0];
     S.tab.preview = t;
     const panel = t === LOOSE ? d.loose : d.panels.find((x) => x.panel_id === t);
-    const body = panel ? bomView(panel, t === LOOSE) : t === PLATES ? nameplatesView(d.nameplates) : t === SUMMARY ? summaryView(d.summary) : t === SPARES ? sparesView(d.spares) : t === CABLES ? cablesView(d.cables) : t === HISTORY ? historyView(d.history) : t === 'power' ? powerView(d) : t === 'heatdiss' ? heatDissView(d) : heatCalcView(d);
+    const body = panel ? bomView(panel, t === LOOSE) : t === PLATES ? nameplatesView(d.nameplates) : t === SUMMARY ? summaryView(d.summary) : t === SPARES ? sparesView(d.spares) : t === CABLES ? cablesView(d.cables) : t === NOTES ? notesView(d.notes) : t === HISTORY ? historyView(d.history) : t === 'power' ? powerView(d) : t === 'heatdiss' ? heatDissView(d) : heatCalcView(d);
     return `<div class="page">${pageHead('Preview', 'What the workbook will contain. Values are calculated by the engine; nothing here is editable.',
       `<a class="btn btn--primary" href="#/build">${icon('build')}Continue to Build</a>`)}
       ${tabs('preview', sheets, t, 'Workbook sheets')}
@@ -67,8 +69,8 @@
 
   /* ---------- BOM sheet ---------- */
   const matches = (r) => (grp === 'all' || r.group === grp) && (!q || [r.tag, r.description, r.make, r.model, r.ordering_code].join(' ').toLowerCase().includes(q.toLowerCase()));
-  function bomRows(rows, filtering) {
-    const cols = showHwio ? 9 : 8;
+  function bomRows(rows, filtering, notes) {
+    const cols = (showHwio ? 9 : 8) + (notes ? 1 : 0);
     let out = '', skip = 0;
     rows.forEach((r) => {
       if (filtering && !matches(r)) return;
@@ -78,15 +80,16 @@
       else if (!filtering && r.tag_rows > 1) { skip = r.tag_rows - 1; tag = `<td class="merged mono" rowspan="${r.tag_rows}">${esc(r.tag || '')}</td>`; }
       else tag = `<td class="mono">${esc(r.tag || '')}</td>`;
       const rev = (c) => (r.revised.includes(c) ? 'changed' : '');
-      out += `<tr><td class="muted" style="width:34px">${r.group}</td><td class="num" style="width:56px">${r.sr}</td>${tag}<td class="wrap pv-desc ${rev('D')}">${esc(r.description).replace(/\n/g, '<br>')}</td><td class="num ${rev('E')}" style="width:70px">${esc(r.qty)}</td><td class="${rev('F')}">${esc(r.make || '')}</td><td class="mono pv-code ${rev('G')}">${seg(r.model)}</td><td class="mono pv-code ${rev('H')}">${r.ordering_code && r.ordering_code === r.model ? '<span class="muted small pv-same" title="The workbook repeats the model here">Same as model</span>' : seg(r.ordering_code)}</td>${showHwio ? `<td class="num">${r.hwio || ''}</td>` : ''}</tr>`;
+      out += `<tr><td class="muted" style="width:34px">${r.group}</td><td class="num" style="width:56px">${r.sr}</td>${tag}<td class="wrap pv-desc ${rev('D')}">${esc(r.description).replace(/\n/g, '<br>')}</td><td class="num ${rev('E')}" style="width:70px">${esc(r.qty)}</td><td class="${rev('F')}">${esc(r.make || '')}</td><td class="mono pv-code ${rev('G')}">${seg(r.model)}</td><td class="mono pv-code ${rev('H')}">${r.ordering_code && r.ordering_code === r.model ? '<span class="muted small pv-same" title="The workbook repeats the model here">Same as model</span>' : seg(r.ordering_code)}</td>${showHwio ? `<td class="num">${r.hwio || ''}</td>` : ''}${notes ? `<td class="wrap small pv-note">${esc(r.note || '')}</td>` : ''}</tr>`;
     });
     return out;
   }
-  const head = () => `<thead><tr><th title="Group (preview only)">Grp</th><th class="num">SR.NO</th><th>Item designation</th><th>Description</th><th class="num">Quantity</th><th>Make</th><th>Model</th><th>Ordering code</th>${showHwio ? '<th class="num">HWIO</th>' : ''}</tr></thead>`;
+  const head = (notes) => `<thead><tr><th title="Group (preview only)">Grp</th><th class="num">SR.NO</th><th>Item designation</th><th>Description</th><th class="num">Quantity</th><th>Make</th><th>Model</th><th>Ordering code</th>${showHwio ? '<th class="num">HWIO</th>' : ''}${notes ? '<th title="Preview only: never printed on the BOM">Notes</th>' : ''}</tr></thead>`;
   function bomView(p, loose) {
     const counts = {}; p.rows.forEach((r) => { counts[r.group] = (counts[r.group] || 0) + 1; });
     const filtering = grp !== 'all' || !!q;
-    const out = bomRows(p.rows, filtering);
+    const notes = p.rows.some((r) => r.note);  // plan M71: a Notes column, preview only
+    const out = bomRows(p.rows, filtering, notes);
     return `<div class="toolbar">
       <label class="sr-only" for="bom-grp">Show group</label>
       <select class="select" id="bom-grp" data-action="pv-grp" style="width:260px"><option value="all">All groups</option>${Object.keys(GROUPS).filter((g) => counts[g]).map((g) => `<option value="${g}" ${grp === g ? 'selected' : ''}>${g}  ${esc(GROUPS[g])} (${counts[g]})</option>`).join('')}</select>
@@ -95,7 +98,7 @@
       ${loose ? `<a class="btn btn--secondary btn--sm" href="#/loose" style="margin-right:var(--space-3)">${icon('edit')}Edit the list</a>` : ''}
       <label class="switch"><input type="checkbox" data-action="pv-hwio" ${showHwio ? 'checked' : ''}>HWIO column</label></div>
       <div class="sheet-title">${esc(p.title[0])}<small>${esc(p.title[1])}</small></div>
-      <div class="table-wrap" style="max-height:calc(100vh - 380px)"><table class="table">${head()}<tbody>${out || `<tr class="empty-row"><td colspan="9">No rows match. Clear the filter to see all ${p.rows.length} rows.</td></tr>`}</tbody></table></div>
+      <div class="table-wrap" style="max-height:calc(100vh - 380px)"><table class="table">${head(notes)}<tbody>${out || `<tr class="empty-row"><td colspan="9">No rows match. Clear the filter to see all ${p.rows.length} rows.</td></tr>`}</tbody></table></div>
       <div class="row" style="justify-content:space-between;margin-top:var(--space-2)"><span class="muted small">${plural(p.rows.length, 'row')} · Groups (A to H) and the HWIO column are for review. The issued sheet shows neither, and the HWIO column is hidden in the workbook.</span><span class="muted small">${loose ? 'HWIO total' : 'Panel HWIO total'}: <b>${p.hwio_total}</b></span></div>`;
   }
   ACTIONS['pv-grp'] = (el) => { grp = el.value; App.render(); };
@@ -129,6 +132,13 @@
     const rows = m.rows.map((r, i) => `<tr><td class="num">${i + 1}</td><td class="mono">${esc(r.from_tag)}</td><td class="mono">${esc(r.to_tag)}</td><td class="wrap">${esc(r.type)}</td><td class="num">${r.length_m == null ? '' : r.length_m}</td><td class="num">${esc(String(r.qty))}</td><td>${esc(r.make || '')}</td><td class="mono">${esc(r.model || '')}</td><td class="mono">${seg(r.ordering_code)}</td></tr>`).join('');
     return `<div class="table-wrap" style="max-height:calc(100vh - 320px)"><table class="table"><thead><tr><th class="num">S.No</th><th>From</th><th>To</th><th>Type</th><th class="num">Length (m)</th><th class="num">Qty</th><th>Make</th><th>Model</th><th>Ordering code</th></tr></thead><tbody>${rows}</tbody></table></div>
       <p class="muted small" style="margin-top:var(--space-2)">${plural(m.rows.length, 'cable row')}. In the workbook each quantity is a formula on the Loose Material sheet. <a href="#/loose">Edit them on Loose material.</a></p>`;
+  }
+
+  /* ---------- Notes (plan M71): every row with a note, when Build adds the sheet ---------- */
+  function notesView(m) {
+    const rows = m.rows.map((r, i) => `<tr><td class="num">${i + 1}</td><td>${esc(r.sheet)}</td><td class="mono">${esc(r.tag || '')}</td><td class="wrap">${esc(r.description)}</td><td class="wrap">${esc(r.note)}</td></tr>`).join('');
+    return `<div class="table-wrap" style="max-height:calc(100vh - 320px)"><table class="table"><thead><tr><th class="num">S.No</th><th>Sheet</th><th>Tag</th><th>Description</th><th>Note</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="muted small" style="margin-top:var(--space-2)">${plural(m.rows.length, 'note')}. Notes print only on this sheet.</p>`;
   }
 
   /* ---------- Revision History (ADR 0036): recorded issues, then the current revision ---------- */

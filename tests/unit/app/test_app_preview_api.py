@@ -192,3 +192,23 @@ def test_cable_schedule_tab_once_a_loose_row_has_cable_data(
             "ordering_code": None,
         }
     ]
+
+
+def test_a_loose_note_shows_in_the_notes_column_and_the_notes_tab_when_chosen(
+    app: api.Api, project: Path, page: Any
+) -> None:
+    # plan M71: a note shows in Preview, and on the Notes sheet only when Build adds it.
+    assert page["notes"] is None
+    assert all(r["note"] is None for r in page["loose"]["rows"])
+    ok(
+        app.set_substation_field(
+            str(project), "gis01", ["loose_material", "items", 0, "note"], "Hi"
+        )
+    )
+    shown = ok(app.preview_substation(str(project), "gis01"))
+    assert shown["loose"]["rows"][0]["note"] == "Hi"
+    assert shown["notes"] is None
+    ok(app.set_substation_field(str(project), "gis01", ["output", "include"], ["notes"]))
+    notes = ok(app.preview_substation(str(project), "gis01"))["notes"]
+    assert notes["sheet"] == "Notes"
+    assert [(r["sheet"], r["note"]) for r in notes["rows"]] == [("Loose Material", "Hi")]

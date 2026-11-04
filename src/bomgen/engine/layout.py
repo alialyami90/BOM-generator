@@ -898,6 +898,7 @@ def _rows(panel: PanelFill, loaded: LoadedSubstation) -> list[DeviceInstance]:
                 first_nn=start,
                 cable_manager=managed,
                 alarm_on_branch_mcb=entry.alarm_on_branch_mcb,
+                note=entry.note,
             )
         )
     return rows

@@ -6,7 +6,7 @@
   const { esc, S, ACTIONS, SCREENS, badge, banner, field, input, select, pageHead, dialog, closeDialog, toast, go, $, $$ } = App;
   const real = () => S.backend === 'yes' && S.project && S.project.real && S.sub;
   const plural = (n, one) => `${n} ${one}${n === 1 ? '' : 's'}`;
-  const KEYS = ['part_id', 'description', 'qty', 'tag', 'children', 'fed_from', 'cable'];
+  const KEYS = ['part_id', 'description', 'qty', 'tag', 'children', 'fed_from', 'cable', 'note'];
 
   /* ---------- data: the file's list (data) and the draft the page edits ---------- */
   const LM = { key: '', state: 'idle', data: null, error: null };
@@ -88,21 +88,21 @@
       /* Changed marker: a new row's first cell, or each edited cell of a saved row. */
       const isNew = r.orig == null, [ncls, ndot] = App.changedCell(isNew);
       const ch = (k) => App.changedCell(!isNew && !same({ [k]: it[k] }, { [k]: r.base[k] }));
-      const [c1, d1] = ch(free ? 'description' : 'part_id'), [c2, d2] = ch('tag'), [c3, d3] = ch('qty'), [c4, d4] = free ? ['', ''] : ch('fed_from');
+      const [c1, d1] = ch(free ? 'description' : 'part_id'), [c2, d2] = ch('tag'), [c5, d5] = ch('note'), [c3, d3] = ch('qty'), [c4, d4] = free ? ['', ''] : ch('fed_from');
       const cableCells = !anyCable ? '' : !it.cable ? '<td colspan="3" class="muted small"><span aria-hidden="true">—</span><span class="sr-only">Not a cable</span></td>'
         : ['from_tag', 'to_tag', 'length_m'].map((k) => {
           const id = `lm-c${k.split('_')[0]}-${i}`, v = it.cable[k], [cc, cd] = ch('cable');
           const opts = k === 'length_m' ? { num: true, mono: true, invalid: !!bad[k], placeholder: 'm' } : { mono: true, invalid: !!bad[k] };
           return `<td${cc}>${cd}${described(ctl(input(id, v == null ? '' : String(v), opts)), id, bad[k])}${cellErr(id, bad[k])}${k === 'to_tag' && (it.cable.speed || it.cable.media) ? `<span class="cell-sub">${esc([it.cable.speed, it.cable.media].filter(Boolean).join(' '))}</span>` : ''}</td>`;
         }).join('');
-      return `<tr><td class="num muted${ncls ? ' is-changed' : ''}" style="width:44px">${ndot}${i + 1}</td><td${c1}>${d1}${first}</td><td${c2}>${d2}${ctl(input('lm-tag-' + i, it.tag || '', { placeholder: 'Designation on the sheet' }))}</td>
+      return `<tr><td class="num muted${ncls ? ' is-changed' : ''}" style="width:44px">${ndot}${i + 1}</td><td${c1}>${d1}${first}</td><td${c2}>${d2}${ctl(input('lm-tag-' + i, it.tag || '', { placeholder: 'Designation on the sheet' }))}</td><td${c5}>${d5}${ctl(input('lm-note-' + i, it.note || '', { placeholder: 'Not printed' }))}</td>
         <td${c3}>${d3}${described(ctl(input('lm-qty-' + i, it.qty == null ? '' : String(it.qty), { num: true, mono: true, invalid: !!bad.qty })), 'lm-qty-' + i, bad.qty)}${cellErr('lm-qty-' + i, bad.qty)}</td><td${c4}>${d4}${fed}</td>${cableCells}
         <td><button class="btn btn--ghost btn--icon btn--sm btn--del" data-action="lm-remove" data-i="${i}" aria-label="Remove ${esc(free ? (it.description || 'item ' + (i + 1)) : it.part_id)}" ${saving ? 'disabled' : ''}>${icon('trash')}</button></td></tr>`;
     }).join('');
     const host = d.host_options.map((p) => [p.id, `${p.name} (${p.sheet})`]);
     return `<div class="page">${head}${notice}
       <div class="stack" style="gap:var(--space-5)">
-        <div style="min-width:0"><div class="table-wrap"><table class="table"${anyCable ? ' style="min-width:1240px"' : ''}><caption class="sr-only">Loose material, in the sheet's order</caption><thead><tr><th class="num">No.</th><th style="min-width:190px">Part or description</th><th style="min-width:230px">Designation</th><th style="width:110px">Qty</th><th style="width:200px">Fed from</th>${anyCable ? '<th style="min-width:150px">From</th><th style="min-width:150px">To</th><th style="width:96px">Length (m)</th>' : ''}<th style="width:40px"><span class="sr-only">Actions</span></th></tr></thead><tbody>${rows}</tbody></table>
+        <div style="min-width:0"><div class="table-wrap"><table class="table"${anyCable ? ' style="min-width:1420px"' : ''}><caption class="sr-only">Loose material, in the sheet's order</caption><thead><tr><th class="num">No.</th><th style="min-width:190px">Part or description</th><th style="min-width:230px">Designation</th><th style="min-width:180px">Note <span class="muted small">(not printed)</span></th><th style="width:110px">Qty</th><th style="width:200px">Fed from</th>${anyCable ? '<th style="min-width:150px">From</th><th style="min-width:150px">To</th><th style="width:96px">Length (m)</th>' : ''}<th style="width:40px"><span class="sr-only">Actions</span></th></tr></thead><tbody>${rows}</tbody></table>
           <div class="table-foot"><span>${plural(draft.rows.length, 'item')}</span><span>Quantity is a whole number, or 1 Lot.</span></div></div>
           <p class="muted small" style="margin-top:var(--space-3);max-width:68ch">An item that needs power names the cabinet that feeds it, and the engine adds its load to that cabinet. Parts that come with an item are added by the library and listed under it.</p></div>
         <aside class="lm-cards" aria-label="Where it goes in the workbook">
@@ -128,11 +128,11 @@
   const qtyOf = (v) => (/^\d+$/.test(v.trim()) ? Number(v.trim()) : v.trim());
   document.addEventListener('change', (e) => {
     if (!draft || !real() || App.route().a !== 'loose') return;
-    const t = e.target, m = /^lm-(tag|qty|fed|desc|cfrom|cto|clength)-(\d+)$/.exec(t.id || ''), r = m && draft.rows[+m[2]];
+    const t = e.target, m = /^lm-(tag|qty|fed|desc|note|cfrom|cto|clength)-(\d+)$/.exec(t.id || ''), r = m && draft.rows[+m[2]];
     if (r && m[1].startsWith('c')) {  /* a cable end or length: a new object, so the saved one stays the base */
       const k = { cfrom: 'from_tag', cto: 'to_tag', clength: 'length_m' }[m[1]], v = t.value.trim();
       r.item.cable = { ...r.item.cable, [k]: k === 'length_m' ? (v === '' ? null : Number(v)) : v };
-    } else if (r) r.item[{ tag: 'tag', qty: 'qty', fed: 'fed_from', desc: 'description' }[m[1]]] = m[1] === 'qty' ? qtyOf(t.value) : t.value.trim() || null;
+    } else if (r) r.item[{ tag: 'tag', qty: 'qty', fed: 'fed_from', desc: 'description', note: 'note' }[m[1]]] = m[1] === 'qty' ? qtyOf(t.value) : t.value.trim() || null;
     if (t.id === 'lm-host') draft.host = t.value;
     if (r || t.id === 'lm-host') queueMicrotask(App.render);  /* change can fire on a blur inside a render */
   });

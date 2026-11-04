@@ -77,6 +77,7 @@ class BomLine(OutputModel):
     merge_fg: bool = False
     revised: frozenset[Column] = frozenset()
     cable: CableRef | None = None  # a loose row's cable data (plan M65)
+    note: str | None = None  # the input row's note, for Preview and the Notes sheet (M71)
 
 
 class BomTable(OutputModel):

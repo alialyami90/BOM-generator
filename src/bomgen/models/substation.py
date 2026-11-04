@@ -122,6 +122,7 @@ class Equipment(InputModel):
     sfp: list[SfpChoice] = Field(default_factory=list)
     cable_manager: bool | None = None  # None: the category's rule (ADR 0013, amended)
     alarm_on_branch_mcb: bool | None = None  # None: the library's value (plan M58)
+    note: str | None = None  # plan M71: never printed on a BOM sheet
 
     @model_validator(mode="after")
     def _consistent(self) -> "Equipment":

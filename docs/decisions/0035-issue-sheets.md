@@ -58,6 +58,14 @@ workbook would move `tests/golden/test_workbook.py` (sheet list, formula count) 
    it (ADR 0035)". The spares percentage (Q65) and cable lengths (Q66) are asked when M64 and M65
    start.
 
+## Amendment (2026-11-04, plan M71): the Notes sheet
+
+`note` on equipment rows, hand-written panel rows and loose items is never printed on a BOM sheet.
+Preview shows it in a Notes column. An optional Notes sheet, written when `output.include` names
+`notes` and a row has a note, lists each noted row's sheet, tag, description and note; it goes
+after the Cable Schedule and before the Revision History, and is issued under the substation's
+main document like the other ADR 0035 sheets.
+
 ## Consequences
 
 - The workbook stays the one issued file; procurement, spares and cables read from the same build

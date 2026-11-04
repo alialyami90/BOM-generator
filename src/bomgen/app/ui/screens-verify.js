@@ -148,6 +148,7 @@
             ${record(t.issue.record)}
             <div class="row" style="margin-left:44px"><input class="input input--mono" id="b-previous" style="width:320px" placeholder="Choose the previous issue (.xlsx)" value="${esc(B.previous.split(/[\\/]/).pop())}" title="${esc(B.previous)}" readonly ${B.compare ? '' : 'disabled'}><button class="btn btn--secondary btn--sm" data-action="build-previous" ${B.compare ? '' : 'disabled'}>Browse…</button></div>
             <label class="switch"><input type="checkbox" id="b-summary" data-action="build-summary" data-dirty="0" ${t.include.includes('summary_bom') ? 'checked' : ''}>Add a Summary BOM sheet: every part totalled by ordering code, with where it is used</label>
+            <label class="switch"><input type="checkbox" id="b-notes" data-action="build-notes" data-dirty="0" ${t.include.includes('notes') ? 'checked' : ''}>Add a Notes sheet: every row's note, which the BOM sheets never print</label>
             <label class="switch"><input type="checkbox" id="b-open" data-action="build-open-toggle" data-dirty="0" ${B.open ? 'checked' : ''}>Open the workbook when it is written</label></div></div>
         </div>
         <div style="margin-top:var(--space-5)" class="row"><button class="btn btn--primary" data-action="build-run" ${blocked || busy ? 'disabled' : ''} ${busy ? 'aria-busy="true"' : ''}>${busy ? '<span class="spinner"></span>Building…' : icon('build') + 'Build workbook'}</button><button class="btn btn--secondary" data-action="build-issue" ${blocked || busy || t.issue.refusal ? 'disabled' : ''} title="${esc(t.issue.refusal || 'Build, then record this revision as issued')}">Build as issued…</button>${blocked ? `<span class="muted small">Unavailable until the ${plural(errors, 'error')} ${errors === 1 ? 'is' : 'are'} fixed.</span>` : ''}</div>
@@ -216,15 +217,17 @@
   ACTIONS['build-folder'] = () => { keep(); Bridge.call('choose_folder').then((f) => { if (f) { B.folder = f; App.render(); } }).catch((err) => toast(err.message, 'error')); };
   ACTIONS['build-compare'] = (el) => { keep(); B.compare = el.checked; App.render(); };
   ACTIONS['build-open-toggle'] = (el) => { B.open = el.checked; };
-  /* ADR 0035: the Summary BOM is a saved output setting, so the next build keeps the choice. */
-  ACTIONS['build-summary'] = (el) => {
+  /* ADR 0035: the Summary BOM and the Notes sheet (M71) are saved output settings, so the next build keeps the choice. */
+  const includeSheet = (key) => (el) => {
     keep();
-    const rest = cache.target.data.include.filter((k) => k !== 'summary_bom');
-    const value = el.checked ? [...rest, 'summary_bom'] : rest.length ? rest : null;
+    const rest = cache.target.data.include.filter((k) => k !== key);
+    const value = el.checked ? [...rest, key] : rest.length ? rest : null;
     Bridge.call('set_substation_field', S.project.file, S.sub, ['output', 'include'], value)
       .then(() => { reload('target'); App.preview.reload(); App.render(); })
       .catch((err) => { el.checked = !el.checked; toast(err.message, 'error'); });
   };
+  ACTIONS['build-summary'] = includeSheet('summary_bom');
+  ACTIONS['build-notes'] = includeSheet('notes');
   ACTIONS['build-summary-csv'] = () => Bridge.call('export_summary_csv', S.project.file, S.sub)
     .then((r) => { if (r) toast(`Summary exported: ${r.lines} lines`); })
     .catch((err) => toast(err.message, 'error'));

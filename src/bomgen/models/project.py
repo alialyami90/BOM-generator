@@ -45,9 +45,10 @@ class SheetNames(InputModel):
     revision_history: ExcelSheetName = "Revision History"  # ADR 0035, ADR 0036
     spare_parts: ExcelSheetName = "Spare Parts"  # ADR 0035, plan M64
     cable_schedule: ExcelSheetName = "Cable Schedule"  # ADR 0035, plan M65
+    notes: ExcelSheetName = "Notes"  # ADR 0035, plan M71
 
 
-OptionalSheet = Literal["summary_bom"]  # ADR 0035: written only when included
+OptionalSheet = Literal["summary_bom", "notes"]  # ADR 0035: written only when included
 
 
 class OutputSettings(InputModel):
@@ -141,6 +142,7 @@ class LooseExtra(InputModel):
     children: list[PartId] = Field(default_factory=list)
     fed_from: str | None = None
     cable: CableRef | None = None  # plan M65: the row is listed on the Cable Schedule
+    note: str | None = None  # plan M71: never printed on a BOM sheet
 
     @model_validator(mode="after")
     def _part_or_description(self) -> "LooseExtra":

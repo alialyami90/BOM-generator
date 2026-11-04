@@ -133,6 +133,9 @@ as in v0.3.4.
   basis `cables` says otherwise, and an external link at its own `cable_length_m`. A library cable
   part (`media`, `length_m`) of the media and length is picked, else the cord is free text with a
   warning. Accepting appends them as loose rows with cable data; nothing is written before.
+- Row notes (M71, ADR 0035 amendment): `note` on equipment rows (Parts › BOM text), hand-written
+  panel rows (the panel editor) and loose items. A note is never printed on a BOM sheet; Preview
+  shows a Notes column, and Build can add a Notes sheet listing every noted row.
 - Loose material has *Suggest cables…* (M65c): a review of the suggested cords with their ends,
   length class and warnings, each row ticked, added in one write. Rows that are cables get From,
   To and Length columns to edit, and Preview has a Cable Schedule tab.

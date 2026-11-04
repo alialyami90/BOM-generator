@@ -511,6 +511,18 @@
           "$ref": "#/$defs/PortSpeed",
           "default": "1G"
         },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        },
         "ordering_code": {
           "anyOf": [
             {
@@ -701,6 +713,18 @@
           ],
           "default": null,
           "title": "Fed From"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
         },
         "part_id": {
           "anyOf": [
