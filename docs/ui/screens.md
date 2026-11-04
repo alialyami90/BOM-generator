@@ -468,6 +468,8 @@ reviewed by the design owner and is the intended behaviour; the prototype in
   - A category the library has no parts for (KVM, console) shows "The library has no
     KVM parts yet." on its row instead of a select, and is disabled in the *Add a
     device* menu with the same sentence.
+  - *Add a device* also offers RedBox and Media converter (M73, ADR 0038); a new row of
+    either starts with one L2 port, like a gateway.
   - SFP sub-rows show the media and speed, and the first option reads "Automatic: same
     make first". Under each, the links, spare, extra and total of each BOM row with the
     rule (M49); spare and extra are derived values set through the save bar.

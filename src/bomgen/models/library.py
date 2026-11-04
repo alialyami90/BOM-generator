@@ -62,6 +62,8 @@ class Category(StrEnum):
     ACCESSORY = "accessory"
     KVM = "kvm"
     CONSOLE = "console"
+    REDBOX = "redbox"  # ADR 0038
+    MEDIA_CONVERTER = "media_converter"
 
 
 class PurdueLevel(StrEnum):

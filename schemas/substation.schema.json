@@ -347,7 +347,9 @@
         "cable",
         "accessory",
         "kvm",
-        "console"
+        "console",
+        "redbox",
+        "media_converter"
       ],
       "title": "Category",
       "type": "string"
@@ -987,7 +989,9 @@
         "kvm",
         "console",
         "annunciator",
-        "time_accessory"
+        "time_accessory",
+        "redbox",
+        "media_converter"
       ],
       "title": "EquipmentRole",
       "type": "string"

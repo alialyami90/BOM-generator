@@ -264,6 +264,7 @@ equipment:                             # what the layout places (design 3.2)
   - { id: gps, part_id: SEL-2488, role: other, l2_ports: 1, l2_speed: 100M } # side: none
     # a common row may add panel_hint: 2, its units' panel when they fit, not a pin (M74)
     # any row may add priority: 1-4, its rack stack order instead of its category's (M76)
+    # role: redbox or media_converter draws a mixed network, sized as other (ADR 0038, M73)
   # id: unique; overrides and the UI name ids, never tags
   # role: l1_switch | l2_switch | ext_switch | firewall | fopp | other
   # redundant (one unit per side) or side: none | a | b; qty (not on l1_switch);
@@ -1312,20 +1313,22 @@ design basis says) are not milestones.
   card lists per switch used, reserved, spare and free ports with their rule (M48); `network.l1_per_side`
   and `l2_per_side` override the sizing (a lower count than the demand fails sizing naming the
   shortfall). Q72: may an override go below the computed count with a warning, or only above it?
-  In review.
+  Done (#375); Q72 answered "only above".
 - **M73 — RedBox and media converter roles.** *W4; ADR.* Review step 3. Equipment roles `redbox` and
   `media_converter` (library categories, tag types, DC feeds, L2 link) so a mixed network can be drawn;
-  PRP and HSR stay refused. Acceptance: a media converter row builds with its MCBs, power and tag.
+  PRP and HSR stay refused. Acceptance: a media converter row builds with its MCBs, power and tag. Done (#384).
+  ADR 0038 (accepted). Parts' Add a device offers both; a new row starts with 1 L2 port (RedBox
+  100M, media converter 1G).
 - **M74 — Steer common devices to a panel.** *W4.* Review step 5. `Equipment.panel_hint: PositiveInt`
   puts every unit of a common row in that panel without pinning; the fill reports when it doesn't fit.
-  ADR 0013 amendment paragraph. In review. The Parts row gets a Panel select (Automatic or a
+  ADR 0013 amendment paragraph. Done (#377). The Parts row gets a Panel select (Automatic or a
   panel number) on common rows.
 - **M75 — PANEL row details and label rules.** *W3; spec sentence.* Done. Review step 6. `Enclosure.ip_rating`
   and `colour` printed in the PANEL row's description; nameplate text patterns per category in the
   design basis tagging (`nameplate_pattern`), defaulting to today's tag text.
 - **M76 — Rack priority per row.** *W4.* Review step 4. `Equipment.priority: 1–4` overrides the
   category's stack priority (spec "Where in the panel"); Parts row menu "Rack priority". Golden
-  unchanged when unset. In review. The priority is a select on the row's Panel line, beside the
+  unchanged when unset. Done (#380). The priority is a select on the row's Panel line, beside the
   panel hint, rather than in the row menu (the menu is closed while the page has unsaved edits).
 - **M77 — Overrides in Checks, reasons for risky ones, the remaining rule texts.** *Lead; ADR 0040.* **Done**
   (2026-11-04). Review
@@ -1797,8 +1800,8 @@ equipment rows for the devices in the cabinets and add the links that leave the 
 their own list, `network.external_links` (recommended: existing files and the example keep
 working), or fold both into one list of links?
 
-**Q72 — A switch-count override below the sizing** (M72). *Open, card sent 2026-11-04.* May
+**Q72 — A switch-count override below the sizing** (M72). *Answered (Ali, 2026-11-04): only above*, as shipped in M72 (#375). May
 `network.l1_per_side` or `l2_per_side` go below the count the sizing computes, building with a
 Checks warning that lists the ports left without a switch, or only above it, a lower count
 stopping the sizing and naming the shortfall (recommended: a BOM with too few switches is wrong on
-site)? Until Ali answers, M72 ships "only above".
+site)?

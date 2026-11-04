@@ -100,10 +100,10 @@ rather than copy it.
   round-trip writers (ADR 0021), and the loose material sheet and page (ADR 0020, ADR 0022). v0.2.1 is
   the UI polish pass from [`docs/ui/polish-v02.md`](../ui/polish-v02.md) (items 1–16, #205–#208) plus
   #194, #198–#201.
-- **Numbers (2026-11-04, after v0.4.0).** ADRs 0001–0027, 0029–0037 and 0040 are Accepted and 0028
-  is Rejected; 0038 and 0039 are with W4 and W2. The next free ADR is **0041**, the next free
-  question **Q74** and the next milestone **M82** (M70–M81 are planned; M70, M72, M74, M75 and M77
-  are done). Q51 (annunciator) and Q55
+- **Numbers (2026-11-04, after v0.4.0).** ADRs 0001–0027, 0029–0038 and 0040 are Accepted and 0028
+  is Rejected; 0039 is with W2. The next free ADR is **0041**, the next free
+  question **Q74** and the next milestone **M82** (M70–M81 are planned; M70, M72–M77 are done;
+  Q72 answered "only above"). Q51 (annunciator) and Q55
   (categories for the contractor's other part types) are open.
 - **Changelog** has a `[0.4.0]` section, and `[Unreleased]` is empty.
 - **Next work:** M70–M81 (`plan.md` "M70–M81"), one PR each, handed out by the lead to the

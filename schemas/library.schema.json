@@ -259,7 +259,9 @@
         "cable",
         "accessory",
         "kvm",
-        "console"
+        "console",
+        "redbox",
+        "media_converter"
       ],
       "title": "Category",
       "type": "string"

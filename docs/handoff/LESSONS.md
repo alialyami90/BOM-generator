@@ -554,3 +554,10 @@ The rules are in ADR 0013 and the design spec (R1–R10).
   child `min-width:0` so the table scrolls inside its `.table-wrap` (M65c).
 - Playwright `evaluate` on the Proxy bridge stub hung for `choose_file`; the screenshot server reads
   the chosen path from a `choose.txt` beside it instead.
+- **W4 phase G (2026-11-04).** With one remote branch, build the next milestone on a local
+  `git worktree` branch while the current PR waits on CI, then cherry-pick it onto main after the
+  squash merge; run its tests with `PYTHONPATH=src` or they import the main checkout's package.
+- Main moves under a waiting PR often in a multi-workstream round: fetch main just before merging
+  and expect `merge_pull_request` to refuse with "merge conflicts" even after green CI.
+- The DC power total carries `constants.power_margin`; a test of one added device's power expects
+  `w * (1 + margin)`, not `w`.
