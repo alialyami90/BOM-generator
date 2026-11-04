@@ -47,6 +47,12 @@ project uses [Semantic Versioning](https://semver.org/).
   when the compare can't see the change. The row is highlighted yellow, *Build as issued…* lists the
   compare's changes and the marked rows before writing, and the issue records the marks and clears
   them (`revision_marks`, `issues[].marked`).
+- Overrides in Checks (M77, ADR 0040): Checks lists every override a build applied, with its
+  automatic value, in an *Overrides* group. One below the automatic value warns until it carries a
+  one-line reason, given on the Checks row or the panel editor and stored with the override
+  (`options.override_reasons`, `spares_list.reasons`). Recording an issue keeps the risky
+  overrides, and the Revision History sheet prints them in an OVERRIDES column. The fan choice,
+  the grounding busbars and the cable managers' count show their rule.
 
 ## [0.4.0] - 2026-11-04
 
