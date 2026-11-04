@@ -442,3 +442,15 @@ def test_an_accepted_warning_needs_a_reason() -> None:
     accepted = {"check": "dc_float", "reason": " ", "date": "2026-11-03"}
     with pytest.raises(ValidationError):
         Substation.model_validate(substation_dict() | {"checks": {"accepted": [accepted]}})
+
+
+def test_external_link_defaults_to_a_redundant_1g_sm_link_on_l2() -> None:
+    network = Network.model_validate({"external_links": [{"name": "CCR"}]})
+    (link,) = network.external_links
+    assert (link.count, link.speed, link.media, link.lands_on) == (1, "1G", "SM", "l2")
+    assert (link.redundant, link.through_firewall, link.cable_length_m) == (True, False, None)
+
+
+def test_external_link_speed_must_be_sized() -> None:
+    with pytest.raises(ValidationError):
+        Network.model_validate({"external_links": [{"name": "CCR", "speed": "25G"}]})

@@ -826,6 +826,67 @@
       "title": "EquipmentRole",
       "type": "string"
     },
+    "ExternalLink": {
+      "additionalProperties": false,
+      "description": "A link leaving the substation, e.g. to the control centre or PCC (plan M61, Q64).",
+      "properties": {
+        "cable_length_m": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cable Length M"
+        },
+        "count": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "lands_on": {
+          "default": "l2",
+          "enum": [
+            "l2",
+            "ext"
+          ],
+          "title": "Lands On",
+          "type": "string"
+        },
+        "media": {
+          "$ref": "#/$defs/Media",
+          "default": "SM"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "redundant": {
+          "default": true,
+          "title": "Redundant",
+          "type": "boolean"
+        },
+        "speed": {
+          "$ref": "#/$defs/PortSpeed",
+          "default": "1G"
+        },
+        "through_firewall": {
+          "default": false,
+          "title": "Through Firewall",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "ExternalLink",
+      "type": "object"
+    },
     "GeneratedPanels": {
       "additionalProperties": false,
       "description": "Identity of the panels the layout writes; ``{n}`` is the panel number (ADR 0013).",
@@ -1224,6 +1285,13 @@
     "Network": {
       "additionalProperties": false,
       "properties": {
+        "external_links": {
+          "items": {
+            "$ref": "#/$defs/ExternalLink"
+          },
+          "title": "External Links",
+          "type": "array"
+        },
         "ied_count": {
           "default": 0,
           "minimum": 0,

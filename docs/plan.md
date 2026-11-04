@@ -268,6 +268,11 @@ network:
         ports: [{ count: 1, speed: 100M, media: MM }],
         attachment: dual,                #   dual | single_a | single_b
         lands_on: l1, notes: "" }        #   l1 | l2 (an L2 row adds to the L2 demand)
+  external_links:                      # links leaving the substation (M61, Q64)
+    - { name: CCR, count: 2, speed: 1G, media: SM,  # count per side; defaults 1, 1G, SM
+        lands_on: l2,                    #   l2 | ext: a port and SFP on that switch per side
+        through_firewall: false, redundant: true,  # redundant: A and B; else side A only
+        cable_length_m: 120 }            #   optional, for the cable schedule (M65)
   topology: star                       # star | ring
   ring_max_switches: 6
   l1_uplinks_per_switch: 1
@@ -1171,8 +1176,8 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M59 — BOM text per row on Parts.** *W4.* Done (#326). Equipment gains `tag`, `tag_type` and `first_nn`;
   Parts has a *BOM text* section per row. The hand-written panel editor's tag fields came from W3 in a
   follow-up PR: tag, type code and first number under each Devices row, with the duplicate-tag check.
-- **M60 — IED schedule.** *W4; ADR 0034.* M60a (model and sizing) done (#343); M60b (Parts screen, CSV import) in review.
-- **M61 — External links.** *W4; Q64.* Planned.
+- **M60 — IED schedule.** *W4; ADR 0034.* M60a (model and sizing) done (#343); M60b (Parts screen, CSV import) done (#348).
+- **M61 — External links.** *W4; Q64.* In review.
 - **M62 — Panel count control.** *W4; Q68.* Done (#325). ADR 0013 amendment: `layout.max_panels`
   caps the fill (R5, R6): a pair opens only while both its panels are within the cap, a common device
   only into a panel within it, and a unit that fits nowhere is a `panel-limit` layout error naming the
@@ -1629,3 +1634,8 @@ SFP slots any media of their speed). Should `ied_count` keep today's rule, every
 whatever its speed and media (recommended: no project's switch count moves), or act strictly as
 n dual 100M MM IEDs, so copper and 1G IED ports stop counting? The two differ only on L1 switches
 with IED ports of more than one speed or media. Until Ali answers, M60a keeps today's rule.
+
+**Q64 — External links beside the device rows' L2 ports** (M61). *Open.* Keep `l2_ports` on
+equipment rows for the devices in the cabinets and add the links that leave the substation as
+their own list, `network.external_links` (recommended: existing files and the example keep
+working), or fold both into one list of links? Until Ali answers, M61 ships its own list.

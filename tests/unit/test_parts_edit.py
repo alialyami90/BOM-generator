@@ -419,3 +419,17 @@ def test_a_schedule_no_l1_switch_serves_is_still_written(project: Path) -> None:
     result = parts_edit.add_ied_row(project, "gis01", copper)
     assert result.written
     assert result.preview is None
+
+
+# --- External links (plan M61) --------------------------------------------------------
+
+
+def test_external_links_round_trip(project: Path) -> None:
+    assert parts_edit.add_external_link(project, "gis01", {"name": "CCR", "count": 2}).written
+    assert parts_edit.set_external_link_field(project, "gis01", 0, "media", "MM").written
+    assert parts_edit.set_external_link_field(project, "gis01", 0, "through_firewall", True).written
+    assert parts_edit.set_external_link_field(project, "gis01", 0, "cable_length_m", "").written
+    (link,) = load_project(project).substations[0].substation.network.external_links
+    assert (link.name, link.count, link.media, link.through_firewall) == ("CCR", 2, "MM", True)
+    assert parts_edit.remove_external_link(project, "gis01", 0).written
+    assert "external_links" not in network(project) or not network(project)["external_links"]

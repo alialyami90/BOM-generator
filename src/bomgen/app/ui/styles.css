@@ -623,3 +623,8 @@ body.is-dragging-dev { user-select: none; }
 .ied-table td:nth-child(5) .select { min-width: 84px; }
 .ied-table td:nth-child(6) .select { min-width: 56px; }
 .ied-table td:nth-child(7) .input { min-width: 72px; }
+.xl-table td:nth-child(1) .input { min-width: 110px; }
+.xl-table td:nth-child(2) .input { min-width: 44px; }
+.xl-table td:nth-child(3) .select, .xl-table td:nth-child(4) .select, .xl-table td:nth-child(5) .select, .xl-table td:nth-child(6) .select { min-width: 64px; }
+.xl-table td:nth-child(7) .select { min-width: 84px; }
+.xl-table td:nth-child(8) .input { min-width: 64px; }

@@ -9,6 +9,11 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- External links (`network.external_links`): links to the control centre, a PCC or a third party,
+  each with its count, speed, media, landing (L2 or the external switch), firewall, sides and cable
+  length. A link on L2 adds to the L2 demand and puts its SFPs on the L2 switches; a link on EXT goes
+  on the external switch's port plan. Parts edits them, the Result card lists them, and Checks fails
+  a firewall link without a firewall row or an EXT link without an external switch (M61, Q64).
 - An IED schedule (`network.ied_schedule`) as an alternative to the IED count: rows by bay and
   IED type with ports per side by count, speed and media, dual or single attachment, landing on
   L1 or L2. The L1 switches are sized against their port groups per speed and media, ports on SFP
