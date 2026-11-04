@@ -1155,7 +1155,7 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
   those values on screen.
 - **M49 — SFP quantities per switch.** *W4.* Done (#323). `sfp` choices take `spare` and `extra` per BOM
   row and `part_id` became optional; extras warn on the slot check, never fail.
-- **M50 — Enclosure and kind per generated panel, bottom entry.** *W3; spec sentence.* In review.
+- **M50 — Enclosure and kind per generated panel, bottom entry.** *W3; spec sentence.* Done.
 - **M51 — New-substation setup instead of ASSUMED seeds.** *W5; Q62.* Done (#333). A blank substation's
   dialog has a *Cabinets and documents* step prefilled from the previous substation (Q62's recommended
   answer); `document_number_placeholder` warns on a TBD number. Checks reads the model, so it flags
@@ -1167,12 +1167,15 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
   Settings › *Design basis* tab; the substation page carries `design_basis` (written values,
   tagging in force, which voltages it feeds) instead of a separate `design_basis_page`. The spares
   policy and vendor list get their fields with M64 and M53.
-- **M53 — Vendor list and part lifecycle states.** *W5; ADRs 0031 and 0037.* In two PRs. **M53a**
-  in review: `Project.vendor_lists` (`VendorList`), a design basis's `vendor_list` must name one,
+- **M53 — Vendor list and part lifecycle states.** *W5; ADRs 0031 and 0037.* In two PRs. **M53a** (#350, done):
+  `Project.vendor_lists` (`VendorList`), a design basis's `vendor_list` must name one,
   Checks `vendor_list` and `part_state` warn, Parts lists the list's parts first in the picker and
   chips a row off the list, Design basis tab selects the list. The state field, CSV columns and
   Library state badges came with M67. **M53b** planned: Project › *Vendor lists* editor.
-- **M54 — Design-basis checks.** *W5.* Planned.
+- **M54 — Design-basis checks.** *W5.* In review. `design_basis_checks`, one Checks group
+  *Design basis*: a DC part rated outside the DC voltage fails; an AC part at another voltage, a
+  level out of the Purdue scope, a GPS clock with `time_sync: none`, and EXT parts with no firewall
+  picked warn. Each item has *Go to the field* on Settings › Design basis.
 - **M55 — Substation templates.** *W5; Q63.* Done (#344). `templates/<key>.yaml` in the project folder
   (`SubstationTemplate`): design basis, brands, spares, the generated panels' look, equipment parts
   and roles (no `qty`, `tag`, `first_nn`) and loose items (no `fed_from`). New substation › Start

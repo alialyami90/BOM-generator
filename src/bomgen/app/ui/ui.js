@@ -256,6 +256,10 @@
       if (['cabinet_name', 'cabinet_number', 'tag_prefix', 'sheet_name'].includes(key)) return { label: 'Open the panel', hash: `${base}/enclosure`, focus: id(`pe-g.${key}`) };
       return line;
     }
+    if (head === 'design_basis') {  // ADR 0031: the Design basis tab's st-db_* fields
+      const f = key === 'tagging' ? rest.split('.').slice(1).join('_').replace('first_numbers_', 'first_') : key;
+      return { label: 'Go to the field', hash: '#/settings/basis', focus: id(`st-db_${f}`) };
+    }
     if (loc === 'equipment') return { label: 'Open Parts', hash: '#/parts', focus: null };
     if (loc === 'panels') return { label: 'Open Panels', hash: '#/panels', focus: null };
     if (head === 'layout') return { label: 'Open the board', hash: '#/panels', focus: null, changes: true };

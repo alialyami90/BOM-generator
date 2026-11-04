@@ -116,3 +116,19 @@ def test_float_check_warns_for_the_ic60n_and_the_125v_firewall(shipped: Built) -
     }
     assert {"SEL-3555-GW", "SEL-3555-RTAC", "SEL-3355"} <= passed
     assert not report.failed
+
+
+@pytest.mark.parametrize(("dc", "failed"), [(125, set()), (220, {"FGR-60F", "NAP-F23", "NAP-K55"})])
+def test_the_example_against_a_design_basis(tmp_path: Path, dc: int, failed: set[str]) -> None:
+    """Plan M54: the example is clean at its own 125 V; at 220 V the parts rated below fail."""
+    project = tmp_path / "examples"
+    shutil.copytree(REPO / "examples", project)
+    shutil.copyfile(SHIPPED, project / "library.yaml")
+    substation = project / "substations" / "gis01" / "substation.yaml"
+    with substation.open("a", encoding="utf-8") as f:
+        f.write(f"design_basis: {{ dc_voltage_v: {dc}, purdue_scope: [L1, L2, EXT] }}\n")
+    loaded = load_substation(substation)
+    items = [i for i in check_report(loaded, build(loaded)).items if i.check == "design_basis"]
+    assert {i.subject for i in items if i.status is CheckStatus.FAIL} == failed
+    assert not [i for i in items if i.status is CheckStatus.WARN]
+    assert all((i.subject or "") in i.message for i in items if i.status is CheckStatus.FAIL)

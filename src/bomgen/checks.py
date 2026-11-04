@@ -28,12 +28,19 @@ from bomgen.models.library import (
     Media,
     PortKind,
     PortSpeed,
+    PurdueLevel,
     SupplyType,
 )
 from bomgen.models.panel import Panel, Ventilation
 from bomgen.models.project import DesignConstants, RegisterEntry, VendorList, merge_defaults
 from bomgen.models.report import CheckItem, CheckReport, CheckStatus
-from bomgen.models.substation import AcceptedWarning, Equipment, EquipmentRole, ExternalLink
+from bomgen.models.substation import (
+    AcceptedWarning,
+    DesignBasis,
+    Equipment,
+    EquipmentRole,
+    ExternalLink,
+)
 
 SPEED_ORDER = (PortSpeed.M10, PortSpeed.M100, PortSpeed.G1, PortSpeed.G10)
 
@@ -69,6 +76,8 @@ def check_report(loaded: LoadedSubstation, result: BuildResult) -> CheckReport:
     parts = picked_parts(loaded)
     items += part_state_checks(parts, loaded.library)
     basis = loaded.substation.design_basis
+    if basis is not None:
+        items += design_basis_checks(parts, loaded.library, basis)
     avl = loaded.project.vendor_list(basis.vendor_list) if basis is not None else None
     if avl is not None:
         choice = merge_defaults(
@@ -648,6 +657,63 @@ def part_state_checks(part_ids: Iterable[str], library: Library) -> list[CheckIt
         items.append(
             CheckItem(check="part_state", status=CheckStatus.WARN, subject=part_id, message=message)
         )
+    return items
+
+
+def _basis_item(status: CheckStatus, subject: str, message: str, field: str) -> CheckItem:
+    return CheckItem(
+        check="design_basis",
+        status=status,
+        subject=subject,
+        message=message,
+        values={"field": f"design_basis.{field}"},  # where Checks' "Go to the field" leads
+    )
+
+
+def design_basis_checks(
+    part_ids: Iterable[str], library: Library, basis: DesignBasis
+) -> list[CheckItem]:
+    """The picked parts against the design basis (ADR 0031, plan M54): a DC part rated
+    outside its voltage fails; an AC part at another voltage, a level out of the Purdue
+    scope, a GPS clock without time sync, and EXT devices without a firewall warn."""
+    parts = [p for i in sorted(set(part_ids)) if (p := library.get(i)) is not None]
+    items = []
+    dc = basis.dc_voltage_v
+    for part in parts:
+        low, high = part.input_v_min, part.input_v_max
+        if dc is None or part.supply_type is not SupplyType.VDC or (low is None and high is None):
+            continue
+        if (low is not None and dc < low) or (high is not None and dc > high):
+            rated = f"{low or 0:g}-{high:g} V" if high is not None else f"from {low:g} V"
+            message = f"{part.part_id} is rated {rated} DC, outside the {dc:g} V design basis"
+            items.append(_basis_item(CheckStatus.FAIL, part.part_id, message, "dc_voltage_v"))
+    ac = basis.ac_voltage_v
+    for part in parts:
+        if ac is None or part.supply_type is not SupplyType.VAC or part.voltage_v is None:
+            continue
+        if part.voltage_v != ac:
+            message = f"{part.part_id} takes {part.voltage_v} V AC; the design basis says {ac:g} V"
+            items.append(_basis_item(CheckStatus.WARN, part.part_id, message, "ac_voltage_v"))
+    scope = basis.purdue_scope
+    if scope is not None:
+        named = ", ".join(level for level in ("L1", "L2", "EXT") if level in scope)
+        for level in PurdueLevel:
+            at = [p.part_id for p in parts if p.purdue_level is level]
+            if at and level.value not in scope:
+                message = f"{', '.join(at)} at {level.value}, outside the Purdue scope {named}"
+                items.append(_basis_item(CheckStatus.WARN, level.value, message, "purdue_scope"))
+        ext = [p.part_id for p in parts if p.purdue_level is PurdueLevel.EXT]
+        if "EXT" in scope and ext and not any(p.category is Category.FIREWALL for p in parts):
+            message = f"{', '.join(ext)} at EXT with no firewall picked"
+            items.append(_basis_item(CheckStatus.WARN, "EXT", message, "purdue_scope"))
+    if basis.time_sync == "none":
+        for part in parts:
+            if part.category is Category.GPS_CLOCK:
+                message = f"{part.part_id} is a GPS clock, but the design basis has no time sync"
+                items.append(_basis_item(CheckStatus.WARN, part.part_id, message, "time_sync"))
+    if not items:
+        message = "the parts match the design basis"
+        items.append(_basis_item(CheckStatus.PASS, "Design basis", message, "dc_voltage_v"))
     return items
 
 

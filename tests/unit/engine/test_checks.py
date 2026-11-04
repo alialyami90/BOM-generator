@@ -720,3 +720,85 @@ def test_ext_landing_needs_ext_switch_row() -> None:
     assert item.message == "the link lands on the external switch, but no equipment row is one"
     ext = Equipment(id="ext", part_id="EXT", role="ext_switch")
     assert external_link_checks(links, [ext]) == []
+
+
+def _basis(**fields: Any) -> Any:
+    from bomgen.models.substation import DesignBasis
+
+    return DesignBasis.model_validate(fields)
+
+
+def _basis_lib() -> Any:
+    return library(
+        switch("L2", "L2", input_v_min=88, input_v_max=150),
+        switch("L1", "L1"),  # no input range: not checked
+        switch("EXT", "EXT"),
+        powered("FW", "firewall", purdue_level="EXT"),
+        powered("GPS", "gps_clock", purdue_level="L2"),
+        powered(
+            "WS",
+            "workstation",
+            supply_type="VAC",
+            voltage_v=230,
+            power_supplies=0,
+            purdue_level="L2",
+        ),
+    )
+
+
+def test_dc_part_whose_input_range_excludes_the_design_basis_voltage_fails() -> None:
+    from bomgen.checks import design_basis_checks
+
+    items = design_basis_checks({"L2", "L1"}, _basis_lib(), _basis(dc_voltage_v=220))
+    assert [(i.check, i.status, i.subject) for i in items] == [
+        ("design_basis", CheckStatus.FAIL, "L2")
+    ]
+    assert "88-150 V" in items[0].message
+    assert items[0].values["field"] == "design_basis.dc_voltage_v"
+
+
+def test_ac_part_at_another_voltage_than_the_design_basis_warns() -> None:
+    from bomgen.checks import design_basis_checks
+
+    items = design_basis_checks({"WS"}, _basis_lib(), _basis(ac_voltage_v=120))
+    assert [(i.status, i.subject) for i in items] == [(CheckStatus.WARN, "WS")]
+    assert items[0].values["field"] == "design_basis.ac_voltage_v"
+
+
+def test_purdue_level_out_of_the_scope_warns() -> None:
+    from bomgen.checks import design_basis_checks
+
+    items = design_basis_checks({"L2", "L1"}, _basis_lib(), _basis(purdue_scope=["L2"]))
+    assert [(i.status, i.subject) for i in items] == [(CheckStatus.WARN, "L1")]
+    assert "L1" in items[0].message
+    assert items[0].values["field"] == "design_basis.purdue_scope"
+
+
+def test_gps_clock_with_no_time_sync_warns() -> None:
+    from bomgen.checks import design_basis_checks
+
+    items = design_basis_checks({"GPS"}, _basis_lib(), _basis(time_sync="none"))
+    assert [(i.status, i.subject) for i in items] == [(CheckStatus.WARN, "GPS")]
+    assert items[0].values["field"] == "design_basis.time_sync"
+
+
+def test_ext_devices_without_a_firewall_warn() -> None:
+    from bomgen.checks import design_basis_checks
+
+    scope = ["L1", "L2", "EXT"]
+    items = design_basis_checks({"EXT"}, _basis_lib(), _basis(purdue_scope=scope))
+    assert [(i.status, i.subject) for i in items] == [(CheckStatus.WARN, "EXT")]
+    assert "firewall" in items[0].message
+    assert not [
+        i
+        for i in design_basis_checks({"EXT", "FW"}, _basis_lib(), _basis(purdue_scope=scope))
+        if i.status is not CheckStatus.PASS
+    ]
+
+
+def test_a_substation_matching_its_design_basis_passes_once() -> None:
+    from bomgen.checks import design_basis_checks
+
+    basis = _basis(dc_voltage_v=125, ac_voltage_v=230, purdue_scope=["L1", "L2", "EXT"])
+    items = design_basis_checks({"L2", "L1", "EXT", "FW", "WS"}, _basis_lib(), basis)
+    assert [(i.check, i.status) for i in items] == [("design_basis", CheckStatus.PASS)]

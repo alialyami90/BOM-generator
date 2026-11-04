@@ -1015,6 +1015,15 @@ def test_issue_actions_on_build_checks_register_and_preview() -> None:
     assert "revision_history: 'Revision history'" in sub
 
 
+def test_checks_leads_a_design_basis_item_to_its_field() -> None:
+    """Plan M54: the Design basis group and its Go to the field button."""
+    verify = (UI_DIR / "screens-verify.js").read_text(encoding="utf-8")
+    assert "design_basis: 'Design basis'" in verify
+    assert 'data-action="checks-field" data-loc="${esc(i.values.field)}">Go to the field' in verify
+    ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    assert "hash: '#/settings/basis', focus: id(`st-db_${f}`)" in ui
+
+
 def test_spares_page_and_preview_tab() -> None:
     # plan M64: a Spares page under Loose material and a Spare Parts Preview tab.
     ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
