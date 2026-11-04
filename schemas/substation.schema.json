@@ -1030,6 +1030,13 @@
           "title": "Kind By Panel",
           "type": "object"
         },
+        "notes_by_panel": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Notes By Panel",
+          "type": "object"
+        },
         "options": {
           "additionalProperties": true,
           "title": "Options",

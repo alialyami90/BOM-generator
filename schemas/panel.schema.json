@@ -391,6 +391,18 @@
           "default": null,
           "title": "Lan"
         },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Notes"
+        },
         "options": {
           "$ref": "#/$defs/PanelOptions"
         },
@@ -490,6 +502,18 @@
           "pattern": "^[a-z0-9][a-z0-9_-]*$",
           "title": "Mirror Of",
           "type": "string"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Notes"
         },
         "options": {
           "additionalProperties": true,
@@ -629,6 +653,14 @@
           ],
           "default": null,
           "title": "Main Mcb Override A"
+        },
+        "misc_items": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Misc Items",
+          "type": "array"
         },
         "smoke_detector": {
           "default": "terminals",

@@ -128,3 +128,12 @@ def test_mirror_bad_option_raises_validation_error() -> None:
     bad = PanelMirror.model_validate({**mirror_dict(), "options": {"ac_spare_branches": -1}})
     with pytest.raises(ValidationError, match="ac_spare_branches"):
         mirror_panel(base_panel(), bad)
+
+
+def test_mirror_keeps_its_own_notes() -> None:
+    # Plan M70: notes belong to the panel they are written on, never inherited.
+    base = Panel.model_validate(base_dict() | {"notes": "Original's note"})
+    mirror = PanelMirror.model_validate(mirror_dict())
+    assert mirror_panel(base, mirror).notes is None
+    mirror = PanelMirror.model_validate(mirror_dict() | {"notes": "Mirror's note"})
+    assert mirror_panel(base, mirror).notes == "Mirror's note"

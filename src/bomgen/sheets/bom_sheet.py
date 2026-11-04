@@ -177,8 +177,9 @@ def _qty(line: BomLine) -> CellValue:
 
 
 def _is_grounding(line: BomLine) -> bool:
-    """A grounding busbar row; the nameplate row is group H too, but a library part."""
-    return line.group is Group.H and line.part_id is None
+    """A grounding busbar row; the nameplate row is group H too, but a library part, and a
+    miscellaneous row (plan M70) is one lot."""
+    return line.group is Group.H and line.part_id is None and line.qty != "1 Lot"
 
 
 def _height(line: BomLine) -> float:

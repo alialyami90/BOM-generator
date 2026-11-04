@@ -231,3 +231,12 @@ def test_nameplate_row_is_a_body_row_not_a_grounding_row() -> None:
     assert m.rows[4].height == 131.25  # the busbar row
     assert m.rows[5].height == 30
     assert style(m, 5, 3).fill is None
+
+
+def test_misc_row_is_a_body_row_not_a_grounding_row() -> None:
+    # Plan M70: the "1 Lot" miscellaneous row is group H with no part, but not a busbar.
+    misc = line(Group.H, None, description="Miscellaneous: cable ties", qty="1 Lot", make=None)
+    m = bom_sheet(panel(LINES[-1], misc)).model
+    assert m.rows[5].height == 30
+    assert style(m, 5, 3).fill is None
+    assert value(m, 5, 4) == "1 Lot"

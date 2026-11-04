@@ -7,6 +7,13 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Panel notes and miscellaneous rows (M70). A panel's `notes` (`generated_panels.notes_by_panel`
+  on a generated panel) are the engineer's own and never printed; `options.misc_items` print
+  last in group H, one "1 Lot" row each. The panel editor has Notes on the Document tab and the
+  rows on Options.
+
 ## [0.4.0] - 2026-11-04
 
 The engineer-controlled workflow: milestones M48 to M69 of the

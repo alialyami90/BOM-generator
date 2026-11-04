@@ -1063,6 +1063,7 @@ def _panel(
         options=PanelOptions.model_validate(options),
         document=spec.document,
         generated=True,
+        notes=spec.notes_by_panel.get(n),
     )
 
 
