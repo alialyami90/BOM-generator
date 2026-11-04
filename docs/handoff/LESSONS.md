@@ -33,6 +33,11 @@ replaced entry "superseded by …".
   `git merge-tree --write-tree HEAD origin/<other-branch>` before pushing.
 - `docs/decisions/README.md` and `docs/plan.md` conflict when two milestones are open; keep every row in
   number order and both notes.
+- One designated branch, several milestones: build the next milestone on a local branch while the
+  PR is open; after the squash merge restart the branch from `origin/main`, `merge -s ours` the old
+  remote branch (no force-push), then cherry-pick. Main moves fast with five workstreams, so merge
+  main in right before merging; appended tests in `test_app_ui_assets.py` and `test_checks.py`
+  conflict every time and keep both sides.
 - The clone may be shallow: `git fetch --unshallow` before using old shas; `git fetch --tags` if
   `v0.2.x` tags are missing locally.
 
