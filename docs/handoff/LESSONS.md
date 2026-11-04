@@ -538,3 +538,9 @@ The rules are in ADR 0013 and the design spec (R1–R10).
   the page shows `'Api' object has no attribute …` (M69).
 - `ui.js`'s `input()` and `select()` add `data-dirty="1"`; strip it for controls in a dialog on a form
   page, so they never count as the page's unsaved edits (M69).
+- **W4 (2026-11-04).** `set_entry` stores a copy of the value: after creating a list or mapping
+  with it, fetch the node again from its parent before appending, or the edit is lost (M60b).
+- An engine error raised while `io/edit.py` previews the edited file came after the write and
+  crashed the endpoint; `_preview` now returns None on `EngineError`, so the check report shows it.
+- Playwright `evaluate` on the Proxy bridge stub hung for `choose_file`; the screenshot server reads
+  the chosen path from a `choose.txt` beside it instead.
