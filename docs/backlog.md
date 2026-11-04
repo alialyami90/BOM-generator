@@ -13,6 +13,7 @@ team.
 | # | Point (Ali) | Milestone | Status |
 | --- | --- | --- | --- |
 | 1 | Engineer-controlled workflow: every derived value shown with its rule and overridable, a design basis, panel detailing and network inputs, issue outputs and a reviewed library (2026-11-03). | M48–M69 | Planned in six workstreams ([`plan.md`](plan.md) "M48–M69"). |
+| 2 | Plan the review points M48–M69 left out: notes, port budget and switch-count override, RedBox and media converter, steering common devices, PANEL row details, rack priority, overrides in Checks with reasons, PDF export, mark as revised, IED schedule sheet, library tags (2026-11-04). | M70–M81 | Planned ([`plan.md`](plan.md) "M70–M81"). |
 
 ## v0.3: Ali's feedback on v0.2.1
 
