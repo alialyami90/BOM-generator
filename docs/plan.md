@@ -1150,7 +1150,7 @@ this section, `schemas/`, `docs/ui/editing.md`) take additive changes only: reba
 merge and keep the other workstream's lines. Releases follow the plan's phases (v0.4.0 after A and
 B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 
-- **M48 — Derived-value component and the override contract.** *Lead.* In review. The main MCB is the
+- **M48 — Derived-value component and the override contract.** *Lead.* Done (#321). The main MCB is the
   first derived value; the SFP, housekeeping and terminal rule texts land with M49, M56 and M57, which put
   those values on screen.
 - **M49 — SFP quantities per switch.** *W4.* Done (#323). `sfp` choices take `spare` and `extra` per BOM
@@ -1223,6 +1223,117 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
   and whether a released part stays released. `propose_library_edit` adds the value, its source, a
   note naming the project and substation, and state draft (unless kept released) to the installed
   library's pending set; Library › Review lists it. A project on its own library file cannot propose.
+
+### M70–M81 — Review points the M48–M69 plan left out (phase G)
+
+Ali's answer (2026-11-04): plan the workflow review's points that M48–M69 did not cover, after v0.4.0.
+The review is
+[`superpowers/specs/2026-11-03-engineering-workflow-review.md`](superpowers/specs/2026-11-03-engineering-workflow-review.md);
+each entry names its section. The agent plan's fixed rules apply (one PR each, decision first, TDD,
+golden unchanged with every new input unset, the M48 contract for derived values). Workstreams keep
+the files they own in "M48–M69". ADR 0038 on and Q72 on are given out by the lead, one at a time.
+
+**Coverage of the review.** Every "Missing" item of the review's step-by-step section, its library
+section, its F1–F16 table and its automation contract, with the milestone that covers it. Items the
+review left out on purpose (pricing, multi-user editing) and PRP/HSR (refused with a message, as the
+design basis says) are not milestones.
+
+| Review section | Point | Milestone |
+| --- | --- | --- |
+| 1 Design basis | Tab shown first, voltages, redundancy, Purdue scope, time sync, tagging, spares policy, "From the design basis" sources | M52 |
+| 1 Design basis | Vendor list | M53 |
+| 1 Design basis | Enclosure, cable entry and document numbering for a new substation | M51 |
+| 2 IED schedule | Rows with ports, attachment and landing; quick count; CSV import | M60 |
+| 2 IED schedule | The schedule as a reference sheet | M80 |
+| 3 Network sizing | External links as rows | M61 |
+| 3 Network sizing | Port budget per switch; switch-count override | M72 |
+| 3 Network sizing | RedBox or media converter role | M73 |
+| 4 Parts | SFP quantities with the rule | M49 |
+| 4 Parts | BOM text per row (purpose, tag, type, first number, HWIO) | M59 |
+| 4 Parts | Alarm on branch trip per row | M58 |
+| 4 Parts | Part filter by the vendor list | M53 |
+| 4 Parts | Rack priority per row | M76 |
+| 4 Parts | "Why this quantity" on sized rows | M48 (the rule text), M72 (switch counts) |
+| 5 Layout preview | Fixed or maximum panel count | M62 |
+| 5 Layout preview | Common devices steered to a panel without pinning | M74 |
+| 5 Layout preview | Per-panel note on the BOM header | M70 (notes are never printed; a header note is not planned, Q to Ali if wanted) |
+| 6 Panel detailing | Enclosure and kind per panel, bottom entry | M50 |
+| 6 Panel detailing | IP rating and colour on the PANEL row; nameplate and label text rules | M75 |
+| 6 Panel detailing | Housekeeping section (counts, breakers, heater, hygrostat, smoke detector, socket pick list) | M56 |
+| 6 Panel detailing | Terminals tab (rule, override, spare percent, block types) | M57 |
+| 6 Panel detailing | Grounding busbars as checkboxes; spare breaker ratings; DC aux alarm per device | M58 |
+| 6 Panel detailing | Per-panel free-text "miscellaneous, 1 lot" row | M70 |
+| 7 Loose material and cables | Suggested cables from the port plans; cable schedule sheet | M65 |
+| 7 Loose material and cables | Per-item notes | M71 |
+| 8 Spares list | Policy, computed list, edits, Spare Parts sheet | M64 |
+| 9 Checks | Design-basis checks (vendor list, brand set, TBD document number, panel count) | M54 (vendor list and brand set in M53, TBD in M51, panel count in M62) |
+| 9 Checks | Data-quality check on an unverified or assumed record | M67 |
+| 9 Checks | Accepted warnings with a reason, printed in the history | M66 |
+| 10 Preview | The new sheets | M63, M64, M65, M66 |
+| 10 Preview | "Mark as revised" on a row | M79 |
+| 10 Preview | A note column in preview only | M71 |
+| 11 Issue | Summary BOM sheet and CSV | M63 |
+| 11 Issue | Spare Parts and Cable Schedule sheets | M64, M65 |
+| 11 Issue | Revision History sheet; prepared, checked, approved names | M66 |
+| 11 Issue | Choice of sheets per issue | M63 |
+| 11 Issue | PDF export | M78 |
+| 12 Handover | Recorded issue (rev, date, hash, compare result), automatic compare, history fills itself | M66 |
+| 12 Handover | Change log to read before issuing | M79 |
+| 12 Handover | Procurement extract (summary BOM as CSV) | M63 |
+| Library | Source for every number; lifecycle state with successor; ownership and change notes | M67 |
+| Library | Classification for search (function tags) | M81 |
+| Library | Intake through CSV into draft; review queue; health tab | M68 |
+| Library | Field feedback ("Propose for the library") | M69 |
+| Library | Release of an official version from reviewed records | Existing release flow (STATE.md "How a release happens"); the state field makes "reviewed parts only" checkable (M67) |
+| F14 Templates | New substation from a template | M55 |
+| Automation contract | Computed, explained, overridable, marked and resettable (points 1 to 4) | M48 and every milestone with a derived value |
+| Automation contract | Checks lists every override in one place (point 4); sourced defaults (point 5); reason for a risky override (point 6) | M77 (point 5 is in M52 for the design basis) |
+| Automation contract | Rule texts where the app "stops at step 1": SFP counts, housekeeping, terminals, spare ratings | M49, M56, M57, M58 |
+| Automation contract | Rule texts for grounding, switch counts, cable managers' count, the fan choice | M77 |
+
+- **M70 — Panel notes and a miscellaneous row.** *W3.* Review F16 and step 6. `Panel.notes` (free
+  text, never printed) and `PanelOptions.misc_items`: free-text rows printed in group H as "1 Lot"
+  (e.g. "Miscellaneous: cable ties, labels"). Panel editor: a Notes field on the Document tab and the
+  rows on Options. *Spec sentence* for the group H row. Acceptance: a misc row prints last in group H
+  on its panel only; notes appear nowhere in the workbook.
+- **M71 — Row notes and a notes column in Preview.** *W2.* Review F16, steps 7 and 10. `note` on
+  equipment rows, hand-written panel rows and loose items; Preview shows a Notes column (preview
+  only); Build offers an optional Notes sheet (ADR 0035 amendment, one paragraph). Acceptance: a note
+  typed on Parts shows in Preview and on the Notes sheet when chosen, nowhere else.
+- **M72 — Port budget per switch and switch-count override.** *W4; Q.* Review step 3. Parts' Result
+  card lists per switch used, reserved, spare and free ports with their rule (M48); `network.l1_per_side`
+  and `l2_per_side` override the sizing (a lower count than the demand fails sizing naming the
+  shortfall). Q: may an override go below the computed count with a warning, or only above it?
+- **M73 — RedBox and media converter roles.** *W4; ADR.* Review step 3. Equipment roles `redbox` and
+  `media_converter` (library categories, tag types, DC feeds, L2 link) so a mixed network can be drawn;
+  PRP and HSR stay refused. Acceptance: a media converter row builds with its MCBs, power and tag.
+- **M74 — Steer common devices to a panel.** *W4.* Review step 5. `Equipment.panel_hint: PositiveInt`
+  puts every unit of a common row in that panel without pinning; the fill reports when it doesn't fit.
+  ADR 0013 amendment paragraph.
+- **M75 — PANEL row details and label rules.** *W3; spec sentence.* Review step 6. `Enclosure.ip_rating`
+  and `colour` printed in the PANEL row's description; nameplate text patterns per category in the
+  design basis tagging (`nameplate_pattern`), defaulting to today's tag text.
+- **M76 — Rack priority per row.** *W4.* Review step 4. `Equipment.priority: 1–4` overrides the
+  category's stack priority (spec "Where in the panel"); Parts row menu "Rack priority". Golden
+  unchanged when unset.
+- **M77 — Overrides in Checks, reasons for risky ones, the remaining rule texts.** *Lead; ADR.* Review
+  "The automation contract" points 4 to 6. Checks gets an *Overrides* group listing every override with
+  its automatic value and reason; an override that weakens a check (a smaller breaker, fewer spares or
+  terminals than the policy, a fan below the required airflow) needs a one-line reason, stored with it
+  and printed on the Revision History sheet. Rule texts for grounding busbars, switch counts, cable
+  manager count and the fan choice.
+- **M78 — PDF export of the issued sheets.** *W2; ADR and Q.* Review step 11. After a build, *Export
+  PDF* writes the chosen sheets with their print settings. Q: Excel on the engineer's PC (exact page
+  setup, Windows only) or a built-in renderer (no Excel needed, approximate).
+- **M79 — Mark as revised and a change log before issuing.** *W2.* Review steps 10 and 12. Preview:
+  *Mark as revised* on a row the compare can't see (stored per issue, highlighted yellow as the spec's
+  revision rule); Build as issued shows the change list (compare result plus marked rows) before writing.
+- **M80 — IED schedule reference sheet.** *W2.* Review step 2. An optional sheet listing the schedule
+  rows and the ports per speed, media and side, written when a schedule exists and the sheet is chosen
+  (ADR 0035 amendment).
+- **M81 — Function tags for library search.** *W1.* Review "What each part record needs".
+  `DeviceType.tags: list[str]` (CSV column, device editor, library search and the part picker filter);
+  the shipped library gets tags from its category and port counts in `build.py`.
 
 ## 5. Testing strategy
 
