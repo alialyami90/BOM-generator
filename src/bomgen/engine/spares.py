@@ -33,7 +33,8 @@ def spares(loaded: LoadedSubstation, result: BuildResult) -> SparesTable:
         if key in overrides:
             spare = overrides[key]
             text = f"set to {spare}" + (f" (rule gives {rule.spare})" if rule else "")
-            lines.append(_line(line, index, spare, text, overridden=True))
+            given = rule.spare if rule else None
+            lines.append(_line(line, index, spare, text, overridden=True, rule_spare=given))
         elif rule is not None and rule.spare:
             lines.append(rule.model_copy(update={"summary_line": index}))
     lines.extend(_extra(loaded, extra) for extra in (edits.extra if edits else []))

@@ -2,7 +2,10 @@
 
 from bomgen.engine.rules_text import (
     ac_spare_rule,
+    cable_manager_rule,
     dc_spare_rule,
+    fan_rule,
+    grounding_rule,
     main_mcb_rule,
     reserved_rule,
     sfp_rule,
@@ -63,3 +66,30 @@ def test_reserved_rule_names_what_each_switch_keeps() -> None:
 
 def test_spare_ports_rule_names_the_fraction_kept_free() -> None:
     assert spare_ports_rule(0.2) == "20% of the device ports kept free"
+
+
+def test_grounding_rule_names_the_busbars_the_options_chose() -> None:
+    assert grounding_rule(["AC safety ground", "Instrument ground"]) == (
+        "2 busbars from the panel options: AC safety ground, Instrument ground"
+    )
+    assert grounding_rule(["Power ground"]) == "1 busbar from the panel options: Power ground"
+    assert grounding_rule([]) == "No busbars: none chosen in the panel options"
+
+
+def test_cable_manager_rule_says_one_under_each_managed_device() -> None:
+    assert cable_manager_rule(9) == (
+        "9: one under each rack-mounted switch, firewall and patch panel"
+    )
+    assert cable_manager_rule(0) == "0: no rack-mounted switch, firewall or patch panel takes one"
+
+
+def test_fan_rule_says_which_fan_and_why() -> None:
+    assert fan_rule(2, 420, 310.4, larger=False) == (
+        "the catalogue fan; 2 fans move 420 m³/h for the 310 m³/h required"
+    )
+    assert fan_rule(2, 970, 650, larger=True) == (
+        "the smallest larger fan whose 2 fans move 970 m³/h for the 650 m³/h required"
+    )
+    assert fan_rule(2, 970, 1200, larger=True) == (
+        "the largest fan; 2 fans move 970 m³/h for the 1200 m³/h required"
+    )

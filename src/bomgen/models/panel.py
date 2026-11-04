@@ -136,6 +136,8 @@ class PanelOptions(InputModel):
         default_factory=lambda: ["ac_safety_ground", "instrument_ground"]
     )
     housekeeping: HousekeepingOptions = Field(default_factory=HousekeepingOptions)  # ADR 0032
+    # why an override weakens a check, keyed by the Overrides check's subject (ADR 0040)
+    override_reasons: dict[str, NonBlank] = Field(default_factory=dict)
     misc_items: list[NonBlank] = Field(default_factory=list)  # group H "1 Lot" rows (plan M70)
 
     @field_validator("smoke_detector", mode="before")

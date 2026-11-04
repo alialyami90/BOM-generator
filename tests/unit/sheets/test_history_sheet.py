@@ -7,8 +7,8 @@ from pathlib import Path
 from bomgen.engine.pipeline import build
 from bomgen.io.loader import LoadedSubstation, load_substation
 from bomgen.models.sheet import SheetModel
-from bomgen.models.substation import IssueRecord
-from bomgen.sheets.history_sheet import HistoryRow, history_rows, history_sheet
+from bomgen.models.substation import IssueRecord, OverrideNote
+from bomgen.sheets.history_sheet import HistoryRow, history_rows, history_sheet, override_lines
 from bomgen.sheets.workbook import build_workbook
 
 EXAMPLE = Path(__file__).parents[3] / "examples" / "substations" / "gis01" / "substation.yaml"
@@ -75,17 +75,47 @@ def test_layout() -> None:
     rows = [HistoryRow("00", date(2026, 11, 1), "For review", "A", "B", "C")]
     m = history_sheet("Revision History", "GIS Substation", rows)
     assert cell(m, "A1") == "GIS Substation\nRevision History"
-    assert [cell(m, f"{c}2") for c in "ABCDEF"] == [
+    assert [cell(m, f"{c}2") for c in "ABCDEFG"] == [
         "REV",
         "DATE",
         "DESCRIPTION",
         "PREPARED",
         "CHECKED",
         "APPROVED",
+        "OVERRIDES",
     ]
-    assert [cell(m, f"{c}3") for c in "ABCDEF"] == ["00", "2026-11-01", "For review", "A", "B", "C"]
+    assert [cell(m, f"{c}3") for c in "ABCDEFG"] == [
+        "00",
+        "2026-11-01",
+        "For review",
+        "A",
+        "B",
+        "C",
+        "",
+    ]
     setup = m.print_setup
     assert setup.orientation == "portrait"
     assert setup.repeat_rows == (1, 2)
     assert setup.print_area is not None
-    assert setup.print_area.name == "A1:F3"
+    assert setup.print_area.name == "A1:G3"
+
+
+def test_the_overrides_column_lists_the_risky_overrides_recorded_with_the_issue() -> None:
+    """ADR 0040: where, what instead of what, and the reason; none given is said so."""
+    notes = [
+        OverrideNote(
+            panel_id="psa1", subject="main_mcb", automatic="10 A", override="6 A", reason="Feeder"
+        ),
+        OverrideNote(subject="spares.SX", automatic="9", override="2"),
+    ]
+    assert override_lines(notes) == (
+        "psa1 main_mcb: 6 A instead of 10 A: Feeder\nspares.SX: 2 instead of 9 (no reason given)"
+    )
+    loaded = with_issues(
+        load_substation(EXAMPLE), record("00", 1).model_copy(update={"overrides": notes})
+    )
+    rows = history_rows(loaded)
+    assert rows[0].overrides == override_lines(notes)
+    assert rows[1].overrides == ""  # the current, unrecorded revision
+    m = history_sheet("Revision History", "GIS Substation", rows)
+    assert cell(m, "G3") == override_lines(notes)

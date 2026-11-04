@@ -20,14 +20,14 @@ from bomgen.engine.kits import annunciator_items, loose_table, main_equipment
 from bomgen.engine.nameplates import nameplate_item, nameplates
 from bomgen.engine.network import accessories
 from bomgen.engine.power import power_consumption
-from bomgen.engine.rules_text import ac_spare_rule, dc_spare_rule, main_mcb_rule
+from bomgen.engine.rules_text import ac_spare_rule, dc_spare_rule, fan_rule, main_mcb_rule
 from bomgen.engine.tags import DEFAULT_TAGGING
 from bomgen.engine.terminals import StripInputs, strip_table, terminal_strips
 from bomgen.engine.thermal import choose_fan, choose_ventilation, heat_result, ventilation_heat_w
 from bomgen.engine.units import DeviceRow, expand_devices, lookup
 from bomgen.io.loader import LoadedSubstation
 from bomgen.models.bom import BuildResult, PanelBom, PanelStrips
-from bomgen.models.calc import BranchMcb, DcMains, HousekeepingBranch, SpareRatings
+from bomgen.models.calc import BranchMcb, DcMains, FanChoice, HousekeepingBranch, SpareRatings
 from bomgen.models.library import Category, FanRef, Library
 from bomgen.models.panel import Panel, Ventilation
 from bomgen.models.project import DesignConstants, LooseExtra, LooseMaterial
@@ -94,11 +94,30 @@ def build(loaded: LoadedSubstation) -> BuildResult:
         power,
         loaded.constants,
     )
+    catalogue_fan = library.catalogues.housekeeping.fan.part_id
+    fans = []
+    for draft, cabinet in zip(drafts, heat.cabinets, strict=True):
+        if draft.ventilation is not Ventilation.FORCED:
+            continue
+        count = kit_counts(draft.panel, Ventilation.FORCED).fans
+        airflow = count * draft.fan.airflow_m3h
+        required = cabinet.forced.required_m3h
+        fans.append(
+            FanChoice(
+                panel_id=draft.panel.id,
+                part_id=draft.fan.part_id,
+                fans=count,
+                airflow_m3h=airflow,
+                required_m3h=required,
+                rule=fan_rule(count, airflow, required, larger=draft.fan.part_id != catalogue_fan),
+            )
+        )
     return BuildResult(
         panels=panels,
         loose=loose,
         power=power,
         heat=heat,
+        fans=tuple(fans),
         mains=tuple(d.mains for d in drafts),
         branch_mcbs=tuple(b for d in drafts for b in d.branch_mcbs),
         spares=tuple(d.spares for d in drafts),

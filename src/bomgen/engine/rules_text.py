@@ -62,3 +62,29 @@ def reserved_rule(*, uplinks: int, interlink: bool, ring: bool) -> str:
 def spare_ports_rule(fraction: float) -> str:
     """The share of a switch's device ports the spare keeps free (R1; plan M72)."""
     return f"{fraction:.0%} of the device ports kept free"
+
+
+def grounding_rule(busbars: list[str]) -> str:
+    """The busbars a panel gets: the ones its options name (spec: grounding; plan M77)."""
+    if not busbars:
+        return "No busbars: none chosen in the panel options"
+    n = len(busbars)
+    return f"{n} busbar{'' if n == 1 else 's'} from the panel options: {', '.join(busbars)}"
+
+
+def cable_manager_rule(count: int) -> str:
+    """Group C's cable managers (spec: Where in the panel, Q32; plan M77)."""
+    if not count:
+        return "0: no rack-mounted switch, firewall or patch panel takes one"
+    return f"{count}: one under each rack-mounted switch, firewall and patch panel"
+
+
+def fan_rule(fans: int, airflow_m3h: float, required_m3h: float, *, larger: bool) -> str:
+    """The fan a forced cabinet gets (spec: Heat Dissipation; ADR 0029, plan M77)."""
+    moved = f"{fans} fan{'' if fans == 1 else 's'} move {airflow_m3h:.0f} m³/h"
+    need = f"for the {required_m3h:.0f} m³/h required"
+    if airflow_m3h < required_m3h:
+        return f"the largest fan; {moved} {need}"
+    if larger:
+        return f"the smallest larger fan whose {moved} {need}"
+    return f"the catalogue fan; {moved} {need}"

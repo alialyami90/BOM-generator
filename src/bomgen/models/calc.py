@@ -229,6 +229,18 @@ class HousekeepingBranch(OutputModel):
     rule: str
 
 
+class FanChoice(OutputModel):
+    """The fan a cabinet gets when it is fan-ventilated, with the rule behind the choice
+    (ADR 0040): the fans fitted, the airflow they move and the airflow the heat needs."""
+
+    panel_id: str
+    part_id: str
+    fans: PositiveInt
+    airflow_m3h: NonNegativeFloat  # all the fans together
+    required_m3h: NonNegativeFloat
+    rule: str
+
+
 class HeatResult(OutputModel):
     dissipation: tuple[CabinetHeat, ...]
     cabinets: tuple[CabinetThermal, ...]

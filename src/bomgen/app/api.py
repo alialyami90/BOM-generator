@@ -65,6 +65,7 @@ from bomgen.app.projects import (
 from bomgen.app.spares import spares_page
 from bomgen.app.substations import (
     ProjectInvalidError,
+    Resolved,
     SubstationNotFoundError,
     check_settings_yaml,
     resolve,
@@ -261,6 +262,40 @@ def _dated(path: Sequence[str | int], value: Any) -> Any:
         with contextlib.suppress(ValueError):
             return date.fromisoformat(value)
     return value
+
+
+def _reason_path(found: Resolved, panel_id: str | None, subject: str) -> tuple[str | int, ...]:
+    """Where an override's reason lives: ``spares_list.reasons`` for a spares subject, a
+    generated panel's own or shared ``override_reasons`` in substation.yaml, or a
+    hand-written panel's ``options`` in its own file."""
+    if subject.startswith("spares."):
+        return ("spares_list", "reasons", subject.removeprefix("spares."))
+    if panel_id is None:
+        raise EditError(f"an override reason for '{subject}' names its panel")
+    loaded = found.loaded
+    panel = next((p for p in loaded.panels if p.id == panel_id), None) if loaded else None
+    if panel is None:
+        raise PanelNotFoundError(panel_id)
+    generated = loaded.substation.generated_panels if loaded else None
+    if not panel.generated or generated is None:
+        return ("options", "override_reasons", subject)
+    number = next((n for n in range(1, 1000) if generated.id.format(n=n) == panel.id), None)
+    own = generated.options_by_panel.get(number, {}) if number is not None else {}
+    key = _OPTION_OF.get(subject.split(".")[0], subject)
+    if number is not None and key in own:
+        return ("generated_panels", "options_by_panel", number, "override_reasons", subject)
+    return ("generated_panels", "options", "override_reasons", subject)
+
+
+# the panel option an Overrides subject is stored in, to find the reason's own or shared place
+_OPTION_OF = {
+    "main_mcb": "main_mcb_override_a",
+    "ac_spare": "ac_spare_rating_a",
+    "dc_spare": "dc_spare_rating_a",
+    "housekeeping": "housekeeping",
+    "terminals": "terminal_overrides",
+    "ventilation": "ventilation",
+}
 
 
 def _written(result: EditResult) -> None:
@@ -1537,6 +1572,38 @@ class Api:
         _written(result)
         with self._substation(substation_id):
             return checks_page(Path(project_file), substation_id, store)
+
+    @endpoint
+    def set_override_reason(
+        self,
+        project_file: str,
+        substation_id: str,
+        panel_id: str | None,
+        subject: str,
+        reason: str,
+    ) -> dict[str, Any]:
+        """Store why an override weakens a check (ADR 0040), by the Overrides check's panel
+        and subject; an empty reason removes it. Returns the Checks page."""
+        store = self._library_store()
+        project = Path(project_file)
+        with self._substation(substation_id), _edit_refusals():
+            path = _reason_path(resolve(project, substation_id, store), panel_id, subject)
+            panel = panel_id if path[0] == "options" else None
+            if reason.strip():
+                result = set_field(
+                    project,
+                    path,
+                    reason.strip(),
+                    substation=substation_id,
+                    panel=panel,
+                    store=store,
+                )
+            else:
+                result = remove_field(
+                    project, path, substation=substation_id, panel=panel, store=store
+                )
+            _written(result)
+            return checks_page(project, substation_id, store)
 
     @endpoint
     def remove_acceptance(
