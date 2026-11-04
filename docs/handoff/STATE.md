@@ -7,10 +7,19 @@ Stable knowledge stays where it lives ([`CLAUDE.md`](../../CLAUDE.md), [`docs/pl
 [`docs/spec/`](../spec/), the ADRs in [`docs/decisions/`](../decisions/)); these files link to it
 rather than copy it.
 
-## 1. Overview (2026-11-01)
+## 1. Overview (2026-11-04)
 
-- Repo `alialyami90/BOM-generator`, default branch `main`, at `b930913` (#314, the v0.3.4
+- Repo `alialyami90/BOM-generator`, default branch `main`, at `65837a3` (#370, the v0.4.0
   release). Check open PRs with `list_pull_requests` before starting.
+- **v0.4.0 is released** (#370, 2026-11-04) with `bomgen-setup-0.4.0.exe` and psa-devices 1.16.0.
+  It is the engineer-controlled workflow, M48–M69 of the
+  [agent implementation plan](../superpowers/plans/2026-11-03-agent-implementation-plan.md)
+  (#318–#367; ADRs 0031–0037 Accepted; Q62–Q71 answered), delivered by five parallel workstreams
+  whose checkpoints are in CHECKPOINT.md: W1 Library M67–M69, W2 Issue outputs M63–M66, W3 Panel
+  detailing M50 and M56–M58, W4 Parts and network M49 and M59–M62, W5 Setup and design basis
+  M51–M55, plus the lead's M48 (#321). Every new input is unset in `examples/`, so the golden
+  values are unchanged. The review points M48–M69 left out are planned as M70–M81 in `plan.md`
+  (#364, with a coverage table of the review); they start after this release.
 - **v0.3.4 is released** (#314, 2026-11-01) with `bomgen-setup-0.3.4.exe` and psa-devices 1.15.0.
   It finishes the v0.3 roadmap, M35–M47 (#297–#313): the spec's "Automatic panel layout" section
   (M35, ALI-14), Library › Catalogues brand editing (M36), Settings YAML apply and defaults
@@ -91,14 +100,15 @@ rather than copy it.
   round-trip writers (ADR 0021), and the loose material sheet and page (ADR 0020, ADR 0022). v0.2.1 is
   the UI polish pass from [`docs/ui/polish-v02.md`](../ui/polish-v02.md) (items 1–16, #205–#208) plus
   #194, #198–#201.
-- **Numbers (2026-11-01, after v0.3.4).** ADRs 0001–0027, 0029 and 0030 are Accepted and 0028 is
-  Rejected; the next free ADR is **0031**. Q54 and Q56–Q61 are answered; the next free question is
-  **Q62** and the next milestone **M48**. Q51 (annunciator) and Q55 (categories for the
-  contractor's other part types) are open.
-- **Changelog** has a `[0.3.4]` section, and `[Unreleased]` is empty.
-- **Next work:** Ali's answers on the v0.3.4 review list (keyboard nameplate, a DC supply-voltage
-  check, Q51, Q55, reviewer mode, Q11/Q23/ASSUMED seeds) and his hand test of drag and drop on
-  Windows (ALI-8).
+- **Numbers (2026-11-04, after v0.4.0).** ADRs 0001–0027 and 0029–0037 are Accepted and 0028 is
+  Rejected; the next free ADR is **0038**. Q62–Q71 are answered; the next free question is
+  **Q72** and the next milestone **M82** (M70–M81 are planned). Q51 (annunciator) and Q55
+  (categories for the contractor's other part types) are open.
+- **Changelog** has a `[0.4.0]` section, and `[Unreleased]` is empty.
+- **Next work:** M70–M81 (`plan.md` "M70–M81"), one PR each, handed out by the lead to the
+  workstreams that own the files; then Ali's answers on the v0.3.4 review list (keyboard nameplate,
+  a DC supply-voltage check, Q51, Q55, reviewer mode, Q11/Q23) and his hand test of drag and drop
+  on Windows (ALI-8).
 
 ### Verification (`f2234f7`, after #227)
 
