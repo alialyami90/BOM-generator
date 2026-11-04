@@ -3,6 +3,19 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-11-04: W2 phase G, M78 PDF export merged (W2)
+
+- **Done:** M78 (#388, ADR 0039 Accepted, Q73 answered "both, built-in by default"). `bomgen.pdf`
+  renders the written workbook. `render_pdf` (ReportLab, new runtime dependency) follows each sheet's
+  paper, orientation, fit or scale, margins, print area, title rows, merges, fills, borders and
+  scaled header/footer. `excel_pdf` drives Excel through PowerShell COM on Windows. Build has
+  *Export PDF…* (sheets, renderer, `<workbook>.pdf`). `pypdf` joins the dev extras. Golden
+  unchanged. Screenshots and two rendered pages in `/mnt/project-files/a11-screens/m78/`.
+  W2's M71, M78, M79 and M80 are all done.
+- **Left for later:** the Excel path is untested on a real PC (CI is Linux), so try it once on
+  Windows with Excel. The built-in renderer leaves out the header logo picture, and uses
+  Helvetica for Calibri, so wrapping can differ slightly from Excel's.
+
 ## 2026-11-04: W2 phase G, M71, M80 and M79 merged; M78 waits on Q73 (W2)
 
 - **Done:** M71 row notes (#373): `note` on equipment, hand-written panel and loose rows, never
