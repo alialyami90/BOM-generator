@@ -603,7 +603,8 @@ def test_external_links_are_edited_on_parts_and_counted_on_the_result_card(
 def test_a_common_row_offers_a_panel_hint(project: Path, store: LibraryStore) -> None:
     """M74: a common row may be steered to a panel; a redundant row may not."""
     found = parts(project, store)
-    assert row(found, "gps")["placement"] == {"panel_hint": None, "steerable": True}
+    gps = row(found, "gps")["placement"]
+    assert (gps["panel_hint"], gps["steerable"]) == (None, True)
     assert row(found, "l2")["placement"]["steerable"] is False
 
 
@@ -613,3 +614,13 @@ def test_a_panel_hint_on_a_redundant_row_is_refused(app: api.Api, project: Path)
         app.check_substation_field(str(project), "gis01", ["equipment", l2, "panel_hint"], 2)
     )
     assert "panel_hint steers a common device" in problem
+
+
+def test_a_row_shows_its_rack_priority_and_its_categorys(
+    project: Path, store: LibraryStore
+) -> None:
+    """M76: the category's stack priority, and the row's own when set."""
+    found = parts(project, store)
+    rtac = row(found, "rtac")["placement"]
+    assert (rtac["priority"], rtac["default_priority"]) == (None, 4)
+    assert row(found, "gps")["placement"]["default_priority"] == 1
