@@ -223,7 +223,7 @@
     if (!r.part_id || r.sized || !r.placement.steerable) return '';
     const key = `e.${r.index}.panel_hint`, v = shown(key), n = Math.max(App.panelCount() || p.panels || 0, +v || 0);
     const opts = [['', 'Automatic: most free space'], ...Array.from({ length: n }, (_, i) => [String(i + 1), `Panel ${i + 1}`])];
-    return `<div class="prow-sub"><span class="prow-sub-what">Panel</span>${mark(key, select(`p-${key}`, opts, v).replace('<select ', `<select aria-label="Panel for ${esc(r.label)}" `))}<span class="muted small">Not a pin: a unit that does not fit there goes where there is room, and Panels says so.</span></div>${err(key)}`;
+    return `<div class="prow-sub prow-link prow-place"><span class="prow-sub-what">Panel</span>${mark(key, select(`p-${key}`, opts, v).replace('<select ', `<select aria-label="Panel for ${esc(r.label)}" aria-describedby="pp-pin-${r.index}" `))}<span class="muted small" id="pp-pin-${r.index}">Not a pin: if it does not fit there, it goes where there is room.</span></div>${err(key)}`;
   }
   function partRow(p, r, last) {
     const changed = Object.keys(PF.draft).some((k) => k.split('.')[1] === String(r.index) && 'eofcl'.includes(k[0]));
