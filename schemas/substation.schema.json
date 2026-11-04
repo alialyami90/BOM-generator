@@ -100,6 +100,63 @@
       "title": "CableEntry",
       "type": "string"
     },
+    "CableRef": {
+      "additionalProperties": false,
+      "description": "What a loose row that is a cable connects, for the Cable Schedule (ADR 0035, M65).",
+      "properties": {
+        "from_tag": {
+          "minLength": 1,
+          "title": "From Tag",
+          "type": "string"
+        },
+        "length_m": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Length M"
+        },
+        "media": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Media"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "speed": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PortSpeed"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "to_tag": {
+          "minLength": 1,
+          "title": "To Tag",
+          "type": "string"
+        }
+      },
+      "required": [
+        "from_tag",
+        "to_tag"
+      ],
+      "title": "CableRef",
+      "type": "object"
+    },
     "CalcSheet": {
       "additionalProperties": false,
       "description": "A calculation sheet's register document and its scope line.",
@@ -1173,6 +1230,17 @@
       "additionalProperties": false,
       "description": "A loose-material row: a library part, optionally with kit children and a feeding\npanel, or a free-text item with only a description (ADR 0022).",
       "properties": {
+        "cable": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CableRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "children": {
           "items": {
             "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$",
@@ -1711,6 +1779,17 @@
     "SheetNames": {
       "additionalProperties": false,
       "properties": {
+        "cable_schedule": {
+          "default": "Cable Schedule",
+          "maxLength": 31,
+          "minLength": 1,
+          "pattern": "^(?!')(?:[^\\[\\]:*?/\\\\']|'(?!$))*$",
+          "title": "Cable Schedule",
+          "type": [
+            "string",
+            "integer"
+          ]
+        },
         "heat_calculations": {
           "default": "Heat Calculations",
           "maxLength": 31,
