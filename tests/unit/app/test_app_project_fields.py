@@ -154,3 +154,37 @@ def test_recording_the_active_library_version_clears_the_note(
     page = ok(app.set_project_field(str(project), ["library", "version"], "9.9.9"))
     assert page["library"]["version"] == "9.9.9"
     assert page["library"]["note"] is None
+
+
+AVL = {"key": "avl", "name": "Client AVL", "makes": ["Siemens"], "brands": {"mcb": ["default"]}}
+
+
+def test_a_vendor_list_is_added_edited_and_listed(app: api.Api, project: Path) -> None:
+    """Plan M53b: Project > Vendor lists."""
+    page = ok(app.save_vendor_list(str(project), None, AVL))
+    assert [v["key"] for v in page["vendor_lists"]] == ["avl"]
+    assert page["vendor_lists"][0]["used_by"] == []
+    assert "Ruggedcom" in page["makes"]
+    page = ok(app.save_vendor_list(str(project), 0, AVL | {"name": "Client AVL rev 2"}))
+    assert read_yaml(project).data["vendor_lists"][0]["name"] == "Client AVL rev 2"
+    assert len(page["vendor_lists"]) == 1
+
+
+def test_a_vendor_list_key_is_taken_once(app: api.Api, project: Path) -> None:
+    ok(app.save_vendor_list(str(project), None, AVL))
+    error = refused(app.save_vendor_list(str(project), None, AVL))
+    assert "duplicate vendor list key 'avl'" in error["message"]
+
+
+def test_a_vendor_list_a_substation_names_is_not_removed(app: api.Api, project: Path) -> None:
+    ok(app.save_vendor_list(str(project), None, AVL))
+    substation = project.parent / "substations" / "gis01" / "substation.yaml"
+    with substation.open("a", encoding="utf-8") as f:
+        f.write("design_basis:\n  vendor_list: avl\n")
+    page = ok(app.open_project(str(project)))
+    assert page["vendor_lists"][0]["used_by"] == ["gis01"]
+    error = refused(app.remove_vendor_list(str(project), 0))
+    assert "gis01" in error["message"]
+    substation.write_text(substation.read_text().replace("  vendor_list: avl\n", "  notes: x\n"))
+    page = ok(app.remove_vendor_list(str(project), 0))
+    assert page["vendor_lists"] == []

@@ -1171,8 +1171,9 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
   `Project.vendor_lists` (`VendorList`), a design basis's `vendor_list` must name one,
   Checks `vendor_list` and `part_state` warn, Parts lists the list's parts first in the picker and
   chips a row off the list, Design basis tab selects the list. The state field, CSV columns and
-  Library state badges came with M67. **M53b** planned: Project › *Vendor lists* editor.
-- **M54 — Design-basis checks.** *W5.* In review. `design_basis_checks`, one Checks group
+  Library state badges came with M67. **M53b** in review: Project › *Vendor lists* tab and dialog
+  (`save_vendor_list`, `remove_vendor_list`, refused while a substation names the list).
+- **M54 — Design-basis checks.** *W5.* Done (#358). `design_basis_checks`, one Checks group
   *Design basis*: a DC part rated outside the DC voltage fails; an AC part at another voltage, a
   level out of the Purdue scope, a GPS clock with `time_sync: none`, and EXT parts with no firewall
   picked warn. Each item has *Go to the field* on Settings › Design basis.

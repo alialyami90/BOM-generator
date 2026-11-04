@@ -262,6 +262,19 @@ shows what a new record starts with. Labels are the user-facing words; model nam
 | Used by | Read-only | Sheet or panel that picks the document |
 | Add / remove | **Add** per substation band; trash per row | Remove is disabled while *Used by* is set |
 
+### Project › Vendor lists (ADR 0031, plan M53b)
+
+A table of the project's lists (name and key, makes, brand sets, parts allowed and banned, the
+substations whose design basis names it). **New vendor list…** and **Edit…** open one dialog:
+
+| Field | Control | Notes |
+| --- | --- | --- |
+| Name, key | Text; key mono | The key is what a design basis's *Vendor list* names; taken once |
+| Allowed makes | Text, comma separated | Empty allows any make; the help lists the library's makes |
+| Parts allowed, parts banned | Text, mono, comma separated | Allowed wins over the makes; banned wins over everything |
+| Brand sets | Per catalogue: *Any brand set*, or checkboxes of the library's sets | |
+| Remove | Trash per row | Refused while a substation names the list |
+
 ### Substation › Settings
 
 | Tab | Fields |
