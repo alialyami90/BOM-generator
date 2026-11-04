@@ -16,6 +16,7 @@ from bomgen.checks import (
     document_number_checks,
     duplicate_tag_checks,
     external_ac_checks,
+    external_link_checks,
     l2_link_checks,
     library_check,
     part_number_checks,
@@ -49,7 +50,7 @@ from bomgen.models.library import (
 from bomgen.models.panel import Ventilation
 from bomgen.models.project import DesignConstants
 from bomgen.models.report import CheckItem, CheckReport, CheckStatus
-from bomgen.models.substation import AcceptedWarning, Equipment
+from bomgen.models.substation import AcceptedWarning, Equipment, ExternalLink
 
 SLOTTED = switch(
     "SW",
@@ -698,3 +699,24 @@ def test_text_report_marks_an_accepted_warning() -> None:
     text = render_text(apply_acceptances(CheckReport(items=(_warn(),)), [_accepted()]))
     assert "accepted: Vendor letter VL-12" in text
     assert "0 failed, 0 open warnings (1 accepted), 0 passed" in text
+
+
+# External links (plan M61): where a link goes needs its device row.
+
+
+def test_firewall_link_needs_firewall_row() -> None:
+    links = [ExternalLink(name="CCR", through_firewall=True)]
+    l2 = Equipment(id="l2", part_id="L2", role="l2_switch", redundant=True)
+    (item,) = external_link_checks(links, [l2])
+    assert (item.check, item.status, item.subject) == ("external_link", CheckStatus.FAIL, "CCR")
+    assert item.message == "the link goes through the firewall, but no equipment row is a firewall"
+    fw = Equipment(id="fw", part_id="FW", role="firewall", redundant=True)
+    assert external_link_checks(links, [l2, fw]) == []
+
+
+def test_ext_landing_needs_ext_switch_row() -> None:
+    links = [ExternalLink(name="Telecom", lands_on="ext")]
+    (item,) = external_link_checks(links, [])
+    assert item.message == "the link lands on the external switch, but no equipment row is one"
+    ext = Equipment(id="ext", part_id="EXT", role="ext_switch")
+    assert external_link_checks(links, [ext]) == []

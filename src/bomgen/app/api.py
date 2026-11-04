@@ -71,7 +71,7 @@ from bomgen.app.substations import (
 from bomgen.bundle.errors import LibraryPackageError, RefusalKind
 from bomgen.engine.errors import EngineError
 from bomgen.engine.layout import write_generated_panels
-from bomgen.io import edit, lifecycle, loose_edit, panel_edit, parts_edit
+from bomgen.io import edit, ied_csv, lifecycle, loose_edit, panel_edit, parts_edit
 from bomgen.io.edit import EditError, EditResult
 from bomgen.io.errors import InputError
 from bomgen.io.fields import (
@@ -1281,6 +1281,126 @@ class Api:
         )
 
     @endpoint
+    def add_ied_row(
+        self, project_file: str, substation_id: str, row: dict[str, Any], index: int | None = None
+    ) -> dict[str, Any]:
+        """Insert an IED schedule row (at the end when ``index`` is None, else back where
+        Undo found it); the first one replaces the IED count (ADR 0034)."""
+        return self._parts_write(
+            project_file,
+            substation_id,
+            functools.partial(parts_edit.add_ied_row, row=row, index=index),
+        )
+
+    @endpoint
+    def set_ied_field(
+        self, project_file: str, substation_id: str, index: int, field: str, value: Any
+    ) -> dict[str, Any]:
+        """Write one field of an IED row; ``ports`` takes text such as "2x100M MM"."""
+        return self._parts_write(
+            project_file,
+            substation_id,
+            functools.partial(parts_edit.set_ied_field, index=index, field=field, value=value),
+        )
+
+    @endpoint
+    def remove_ied_row(self, project_file: str, substation_id: str, index: int) -> dict[str, Any]:
+        """Remove an IED row; returns the Parts page and the row as written, for Undo."""
+        store = self._library_store()
+        with self._substation(substation_id):
+            file = resolve(Path(project_file), substation_id, store).file
+        rows = (read_yaml(file).data.get("network") or {}).get("ied_schedule") or []
+        if not 0 <= index < len(rows):
+            raise AppError("edit_refused", f"There is no IED row {index + 1}.")
+        row = json.loads(json.dumps(rows[index], default=str))
+        page = self._parts_write(
+            project_file, substation_id, functools.partial(parts_edit.remove_ied_row, index=index)
+        )
+        return {"page": page, "row": row}
+
+    @endpoint
+    def add_external_link(
+        self, project_file: str, substation_id: str, row: dict[str, Any], index: int | None = None
+    ) -> dict[str, Any]:
+        """Insert an external link (at the end when ``index`` is None) (plan M61)."""
+        return self._parts_write(
+            project_file,
+            substation_id,
+            functools.partial(parts_edit.add_external_link, row=row, index=index),
+        )
+
+    @endpoint
+    def set_external_link_field(
+        self, project_file: str, substation_id: str, index: int, field: str, value: Any
+    ) -> dict[str, Any]:
+        """Write one field of an external link; returns the Parts page."""
+        return self._parts_write(
+            project_file,
+            substation_id,
+            functools.partial(
+                parts_edit.set_external_link_field, index=index, field=field, value=value
+            ),
+        )
+
+    @endpoint
+    def remove_external_link(
+        self, project_file: str, substation_id: str, index: int
+    ) -> dict[str, Any]:
+        """Remove an external link; returns the Parts page and the row as written, for Undo."""
+        store = self._library_store()
+        with self._substation(substation_id):
+            file = resolve(Path(project_file), substation_id, store).file
+        rows = (read_yaml(file).data.get("network") or {}).get("external_links") or []
+        if not 0 <= index < len(rows):
+            raise AppError("edit_refused", f"There is no external link {index + 1}.")
+        row = json.loads(json.dumps(rows[index], default=str))
+        page = self._parts_write(
+            project_file,
+            substation_id,
+            functools.partial(parts_edit.remove_external_link, index=index),
+        )
+        return {"page": page, "row": row}
+
+    @endpoint
+    def import_ied_csv(
+        self, project_file: str, substation_id: str, path: str, dry_run: bool
+    ) -> dict[str, Any]:
+        """A CSV of IED rows (``bay,name,qty,ports,attachment,lands_on[,notes]``). The dry run
+        returns its rows, the problem rows (skipped) and how many rows it replaces; else the
+        valid rows replace the schedule and the Parts page is returned (ADR 0034 item 5)."""
+        try:
+            text = Path(path).read_text(encoding="utf-8-sig")
+        except FileNotFoundError as exc:
+            raise AppError("not_found", f"{path} is no longer there.") from exc
+        except UnicodeDecodeError as exc:
+            raise AppError("invalid_edit", f"{Path(path).name} is not a UTF-8 CSV file.") from exc
+        rows, problems = ied_csv.read_schedule(text)
+        if not dry_run:
+            if not rows:
+                raise AppError("invalid_edit", "The file has no IED row that can be imported.")
+            return self._parts_write(
+                project_file,
+                substation_id,
+                functools.partial(parts_edit.set_ied_schedule, rows=rows),
+            )
+        store = self._library_store()
+        with self._substation(substation_id), _edit_refusals():
+            file = resolve(Path(project_file), substation_id, store).file
+            result = parts_edit.set_ied_schedule(
+                Path(project_file), substation_id, rows, store=store, dry_run=True
+            )
+        old = (read_yaml(file).data.get("network") or {}).get("ied_schedule") or []
+        caused = [f"{i.location}: {i.message}" if i.location else i.message for i in result.issues]
+        return {
+            "file": Path(path).name,
+            "rows": [ied_csv.shown(r) for r in rows],
+            "problems": problems,
+            "replaces": len(old),
+            "refused": [] if result.written else caused,
+            "can_import": bool(rows) and result.written,
+        }
+
+    @endpoint
     def set_cable_manager(
         self, project_file: str, substation_id: str, index: int, on: bool
     ) -> dict[str, Any]:
@@ -1349,6 +1469,58 @@ class Api:
         """The substation's located problems, then the engine checks when the files load."""
         with self._substation(substation_id):
             return checks_page(Path(project_file), substation_id, self._library_store())
+
+    @endpoint
+    def accept_warning(
+        self,
+        project_file: str,
+        substation_id: str,
+        check: str,
+        panel_id: str | None,
+        subject: str | None,
+        reason: str,
+        by: str | None = None,
+    ) -> dict[str, Any]:
+        """Accept a check warning with a reason, dated today (ADR 0036); returns the Checks
+        page."""
+        store = self._library_store()
+        value = {"check": check, "panel_id": panel_id, "subject": subject, "reason": reason}
+        value = {k: v for k, v in value.items() if v is not None}
+        value |= {"by": by.strip()} if by and by.strip() else {}
+        value["date"] = date.today().isoformat()
+        with self._substation(substation_id), _edit_refusals():
+            result = insert_item(
+                Path(project_file),
+                ("checks", "accepted"),
+                None,
+                value,
+                substation=substation_id,
+                store=store,
+            )
+        _written(result)
+        with self._substation(substation_id):
+            return checks_page(Path(project_file), substation_id, store)
+
+    @endpoint
+    def remove_acceptance(
+        self, project_file: str, substation_id: str, index: int
+    ) -> dict[str, Any]:
+        """Remove an accepted warning; the list, then ``checks``, go when left empty."""
+        store = self._library_store()
+        project = Path(project_file)
+        with self._substation(substation_id), _edit_refusals():
+            result = remove_item(
+                project, ("checks", "accepted"), index, substation=substation_id, store=store
+            )
+            _written(result)
+            file = resolve(project, substation_id, store).file
+            if not (read_yaml(file).data.get("checks") or {}).get("accepted"):
+                _written(
+                    remove_field(
+                        project, ("checks", "accepted"), substation=substation_id, store=store
+                    )
+                )
+            return checks_page(project, substation_id, store)
 
     @endpoint
     def build_target(self, project_file: str, substation_id: str) -> dict[str, Any]:
@@ -1760,8 +1932,10 @@ class Api:
         file_name: str | None = None,
         compare: str | None = None,
         replace: bool = False,
+        issue: str | None = None,
     ) -> dict[str, Any]:
-        """Write the substation's workbook; ``compare`` marks changes since that issue."""
+        """Write the substation's workbook; ``compare`` marks changes since that issue, else
+        the latest recorded issue; ``issue`` records this build as issued (ADR 0036)."""
         with self._substation(substation_id):
             result = build_file(
                 Path(project_file),
@@ -1771,6 +1945,7 @@ class Api:
                 file_name or None,
                 Path(compare) if compare else None,
                 replace,
+                issue,
             )
         self._list(result["path"])
         return result

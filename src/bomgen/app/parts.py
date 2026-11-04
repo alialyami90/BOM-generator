@@ -22,6 +22,7 @@ from bomgen.engine.mcb import has_branch_mcb
 from bomgen.engine.network import unserved_links
 from bomgen.engine.rules_text import sfp_rule, sfp_spare_rule
 from bomgen.engine.units import expand_devices
+from bomgen.io import ied_csv
 from bomgen.io.derived import effective_part_id
 from bomgen.io.errors import InputError
 from bomgen.io.loader import LoadedSubstation
@@ -415,6 +416,8 @@ def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
                 ]
                 for c in sorted(categories)
             },
+            "ieds": [ied_csv.shown(r) for r in substation.network.ied_schedule],  # M60
+            "links": [x.model_dump(mode="json") for x in substation.network.external_links],
             "default_rows": [
                 {"role": r.value, "label": ROLE_LABEL[r], "category": ROLE_CATEGORY[r].value}
                 for r in DEFAULT_ROWS

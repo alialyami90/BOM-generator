@@ -69,7 +69,13 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
    option, the spec's 12 or 5 plus 3 per fan and 2 per thermostat beyond the spec's kit. If Ali picks
    "keep 12 or 5, override by hand", make `_thf` in `engine/terminals.py` return the spec's value
    and update `test_thf_follows_fan_and_thermostat_count`.
-7. **Q51** (annunciator mounted in a panel), **Q54** (power of the -2 SEL computers) and **Q55**
+7. **Q70** (W4, card sent 2026-11-03): the quick `ied_count` keeps today's media-agnostic rule on
+   L1 switches with mixed ports (recommended). If Ali picks "strict 100M MM", make the quick count
+   build one `PortNeed()` row per IED in `engine/layout.py` `network_inputs` and record it in plan §6.
+8. **Q64** (W4, card sent 2026-11-03): external links are their own list, `network.external_links`
+   beside the device rows' `l2_ports` (recommended). If Ali picks "one list", fold `l2_ports` into
+   it with a migration and record it in plan §6.
+9. **Q51** (annunciator mounted in a panel), **Q54** (power of the -2 SEL computers) and **Q55**
    (categories for the contractor's other part types) are open in plan §6.
 
 **Next work:** M19–M26 shipped in v0.3.0, and v0.3.1 fixed the blank-substation crash (STATE.md §1). Engine model changes (step 4) come from A4's plan.

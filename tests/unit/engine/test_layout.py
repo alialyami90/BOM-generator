@@ -34,12 +34,13 @@ from bomgen.engine.units import expand_devices
 from bomgen.io.derived import derive_parts
 from bomgen.io.loader import LoadedSubstation, load_substation
 from bomgen.models.library import Category, Media, PortSpeed, PurdueLevel
-from bomgen.models.panel import Panel, PanelKind, PortAllocation
+from bomgen.models.panel import Panel, PanelKind, PortAllocation, PortPlan
 from bomgen.models.project import LayoutDefaults
 from bomgen.models.substation import (
     DeviceMove,
     Equipment,
     EquipmentRole,
+    ExternalLink,
     IedRow,
     PairMove,
     PortNeed,
@@ -1064,3 +1065,28 @@ def test_schedule_no_l1_switch_serves_names_the_speed_and_media(
     loaded = with_schedule(example, IedRow(bay="E01", name="C", qty=8, ports=[copper]))
     with pytest.raises(SizingError, match="1G RJ45"):
         layout_preview(loaded)
+
+
+# --- External links (plan M61) --------------------------------------------------------
+
+
+def with_links(loaded: LoadedSubstation, *links: ExternalLink) -> LoadedSubstation:
+    network = loaded.substation.network.model_copy(update={"external_links": list(links)})
+    return with_changes(loaded, network=network)
+
+
+def test_two_sm_links_to_the_ccr_add_two_sm_ports_on_each_l2(example: LoadedSubstation) -> None:
+    result = layout_preview(with_links(example, ExternalLink(name="CCR", count=2)))
+    before = layout_preview(example)
+    assert result.plan.l2_demand_per_side == before.plan.l2_demand_per_side + 2
+    for panel in result.panels[:2]:
+        l2 = panel.port_plans["RST2228-L2"]
+        assert l2.uplinks == [PortAllocation(count=2, speed=PortSpeed.G1, media=Media.SM)]
+
+
+def test_a_link_landing_on_ext_is_on_the_ext_switch_port_plan(example: LoadedSubstation) -> None:
+    link = ExternalLink(name="Telecom", lands_on="ext", media=Media.MM, redundant=False)
+    first, second = layout_preview(with_links(example, link)).panels[:2]
+    ext = first.port_plans["SEL-2730M-EXT"]
+    assert PortAllocation(count=1, speed=PortSpeed.G1, media=Media.MM) in ext.uplinks
+    assert not second.port_plans.get("SEL-2730M-EXT", PortPlan()).uplinks

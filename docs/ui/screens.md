@@ -150,6 +150,16 @@ with the save bar; everything on it is saved together.
 
 - **Layout:** the two columns of the old Network page. Left, top to bottom:
   1. **Field network:** Field IEDs (required on a new substation) and Topology (Star or Ring), as before.
+     Once the substation has rows, a **Quick count / IED schedule** switch sits above them (M60, ADR
+     0034). The schedule shows the IED table (bay, IED, qty, ports per side as text such as
+     `2x100M MM + 1x1G RJ45`, attached to Both, A only or B only, lands on L1 or L2, notes, remove with
+     Undo), **Add a row** and **Import CSV…**, whose dialog lists the rows, the skipped rows with their
+     problems and how many rows it replaces. Field IEDs then reads the count from the schedule, and the
+     Result card adds the IED ports per speed and media on each side. Quick count is disabled while the
+     schedule has rows.
+     Under them, **External links** (M61): one row per link leaving the substation (name, links per side,
+     speed, media, lands on L2 or EXT, through the firewall, Both sides or A only, cable length), with
+     **Add a link** and remove with Undo; the Result card lists them with their count on each side.
   2. **Network fine tuning**, a disclosure under them, closed once the substation is set up. Closed, it
      is one muted summary line ("Star · 1 uplink per L1 · A–B interlink · 20% ports kept free · 4 U kept
      free"); open, it holds switches per ring (Ring only), L1 uplinks per switch, A–B interlink, L3
@@ -325,10 +335,15 @@ too and their "Go to field" opens the project page.
   points) with Pass / Flag / Not run.
 - **Behaviour:** "Run checks again" shows a busy button then a toast. Engine
   checks are "Not run" while errors exist and say why.
+- **Accepted warnings (ADR 0036):** an engine warning has **Accept…**, a dialog
+  with a reason and an optional name, saved to `checks.accepted:`. The row then
+  shows **Accepted** with its reason and no longer counts as open. Failures
+  can't be accepted. *Unused acceptances* lists those no warning matches any
+  more, each with **Remove**.
 
 ### Preview
 - **Layout:** title, a banner when the last load had errors, sheet tabs (one
-  Sheet per panel, then **Loose Material (n)** when the substation has loose material, then **Nameplates (n)** when some panel has plates, then Power Consumption, Heat Dissipation, Heat Calculations, then **Summary BOM (n)** when included, ADR 0035),
+  Sheet per panel, then **Loose Material (n)** when the substation has loose material, then **Nameplates (n)** when some panel has plates, then Power Consumption, Heat Dissipation, Heat Calculations, then **Summary BOM (n)** when included, ADR 0035, then **Revision History** when it has rows, ADR 0036),
   then the sheet.
 - **BOM sheet:** group chips A to H with counts, a row filter, a switch for the
   hidden HWIO column (the revised-cells switch was dropped, see *Departures in
@@ -392,6 +407,11 @@ front view. The workbook's sheet preview (above) is unchanged.
   a short check report); failed because the file is open in Excel (red banner,
   "Try again", "Save as new name"). An existing file with the same name asks
   for confirmation in a dialog before it is replaced.
+- **Recorded issues (ADR 0036):** **Build as issued…** beside Build asks for a
+  description, builds, then records the register's rev, unless a check failed.
+  It is disabled with the reason when that rev is already recorded. With no
+  previous issue chosen, the build compares with the last recorded issue; the
+  options say which, or warn when its file is missing or changed.
 
 ## Departures in the built app
 

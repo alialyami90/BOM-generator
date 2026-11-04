@@ -613,3 +613,18 @@ body.is-dragging-dev { user-select: none; }
 .health-list { margin: var(--space-2) 0 0; padding-left: 18px; max-height: 320px; overflow-y: auto; }
 .health-list li { margin-bottom: var(--space-1); overflow-wrap: anywhere; }
 .health-list .cell-sub { display: block; font-size: 12px; color: var(--color-text-muted); line-height: 1.25; }
+/* M60: the IED schedule table on Parts, one input per cell */
+.ied-table th, .ied-table td { padding: 4px; vertical-align: top; }
+.ied-table .input, .ied-table .select { width: 100%; }
+.ied-table td:nth-child(1) .input { min-width: 56px; }
+.ied-table td:nth-child(2) .input { min-width: 100px; }
+.ied-table td:nth-child(3) .input { min-width: 44px; }
+.ied-table td:nth-child(4) .input { min-width: 112px; }
+.ied-table td:nth-child(5) .select { min-width: 84px; }
+.ied-table td:nth-child(6) .select { min-width: 56px; }
+.ied-table td:nth-child(7) .input { min-width: 72px; }
+.xl-table td:nth-child(1) .input { min-width: 110px; }
+.xl-table td:nth-child(2) .input { min-width: 44px; }
+.xl-table td:nth-child(3) .select, .xl-table td:nth-child(4) .select, .xl-table td:nth-child(5) .select, .xl-table td:nth-child(6) .select { min-width: 64px; }
+.xl-table td:nth-child(7) .select { min-width: 84px; }
+.xl-table td:nth-child(8) .input { min-width: 64px; }

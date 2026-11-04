@@ -234,7 +234,8 @@ output:
   file_name: "{doc_no}_PSA_BOM_Rev{rev}.xlsx"   # OUT-2
   sheet_names: { loose_material: "Loose Material", power_consumption: "Power Consumption",
                  heat_dissipation: "Heat Dissipation", heat_calculations: "Heat Calculations",
-                 summary_bom: "Summary BOM", revision_history: "Revision History" }
+                 summary_bom: "Summary BOM", cable_schedule: "Cable Schedule",
+                 revision_history: "Revision History" }
   include: [summary_bom]                # optional sheets to write (ADR 0035); default none
   power_footnotes: ["*Printer Power Consumption: 622 watts (Printing), …"]  # rows after NOTES; optional
 issues:                                # recorded issues, in order (ADR 0036); `bomgen build --issue`
@@ -252,6 +253,8 @@ loose_material:                        # extras not tied to a device
     - { part_id: NAP-K55, children: [LPA37-696], fed_from: psa3 }   # Q13
     - { part_id: FO-PATCH-CORDS, qty: "1 Lot" }
     - { description: "Cable tray, 300 mm", qty: "1 Lot", tag: Tray }   # free text (ADR 0022)
+    - { description: "LC-LC duplex patch cord", qty: 4,   # cable data: listed on the Cable Schedule (M65)
+        cable: { from_tag: L2-ESW-A01, to_tag: L1-ESW-A11, length_m: 2, media: MM, speed: 1G } }
 equipment:                             # what the layout places (design 3.2)
   - { id: l2, part_id: RST2228-L2, role: l2_switch, redundant: true }       # exactly one
   - { id: l1, part_id: RST2228-L1-24MM, role: l1_switch, redundant: true }  # exactly one; no qty
@@ -275,6 +278,11 @@ network:
         ports: [{ count: 1, speed: 100M, media: MM }],
         attachment: dual,                #   dual | single_a | single_b
         lands_on: l1, notes: "" }        #   l1 | l2 (an L2 row adds to the L2 demand)
+  external_links:                      # links leaving the substation (M61, Q64)
+    - { name: CCR, count: 2, speed: 1G, media: SM,  # count per side; defaults 1, 1G, SM
+        lands_on: l2,                    #   l2 | ext: a port and SFP on that switch per side
+        through_firewall: false, redundant: true,  # redundant: A and B; else side A only
+        cable_length_m: 120 }            #   optional, for the cable schedule (M65)
   topology: star                       # star | ring
   ring_max_switches: 6
   l1_uplinks_per_switch: 1
@@ -1182,16 +1190,16 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 - **M59 — BOM text per row on Parts.** *W4.* Done (#326). Equipment gains `tag`, `tag_type` and `first_nn`;
   Parts has a *BOM text* section per row. The hand-written panel editor's tag fields came from W3 in a
   follow-up PR: tag, type code and first number under each Devices row, with the duplicate-tag check.
-- **M60 — IED schedule.** *W4; ADR 0034.* M60a (model and sizing) in review; M60b (Parts screen, CSV import) planned.
-- **M61 — External links.** *W4; Q64.* Planned.
+- **M60 — IED schedule.** *W4; ADR 0034.* M60a (model and sizing) done (#343); M60b (Parts screen, CSV import) done (#348).
+- **M61 — External links.** *W4; Q64.* Done (#353).
 - **M62 — Panel count control.** *W4; Q68.* Done (#325). ADR 0013 amendment: `layout.max_panels`
   caps the fill (R5, R6): a pair opens only while both its panels are within the cap, a common device
   only into a panel within it, and a unit that fits nowhere is a `panel-limit` layout error naming the
   unit and the U it is short. Moves past the cap are unknown panels. No "Exactly n" (Q68).
-- **M63 — Summary BOM.** *W2; ADR 0035.* In review. `engine/summary.py` groups every panel's and the loose material's lines by (make, model, ordering code), free text by (make, description), a text quantity on its own; `sheets/summary_sheet.py` writes it after Heat Calculations when `output.include` has `summary_bom`, quantities as `SUM` formulas over the BOM sheets' quantity cells. Build has the switch and *Export summary as CSV*; Preview a *Summary BOM* tab.
+- **M63 — Summary BOM.** *W2; ADR 0035.* Done (#324). `engine/summary.py` groups every panel's and the loose material's lines by (make, model, ordering code), free text by (make, description), a text quantity on its own; `sheets/summary_sheet.py` writes it after Heat Calculations when `output.include` has `summary_bom`, quantities as `SUM` formulas over the BOM sheets' quantity cells. Build has the switch and *Export summary as CSV*; Preview a *Summary BOM* tab.
 - **M64 — Spares list.** *W2; ADR 0035, Q65.* Planned.
-- **M65 — Cable schedule.** *W2; ADR 0035, Q66.* Planned.
-- **M66 — Revision history and recorded issues.** *W2; ADR 0036, Q67.* Split. **M66a** (engine, CLI) in review: `issues:` records, `checks.accepted:`, register names, the Revision History sheet, the automatic compare with the last recorded issue when its hash matches (else a warning and the picker), `bomgen build --issue`. **M66b** (app) planned: Build as issued, Accept with reason on Checks, names in Settings › Documents, Preview tab. The history sheet is written whenever it has rows; it has no `output.include` switch.
+- **M65 — Cable schedule.** *W2; ADR 0035, Q66, Q71.* Split. **M65a** (model, sheet) in review: `loose_material.items[].cable` (`from_tag`, `to_tag`, `length_m`, `media`, `speed`) and the Cable Schedule sheet after the Summary BOM, written when any loose row has cable data, quantities as formulas on the Loose Material cells; no `output.include` switch, like the history sheet. **M65b** planned: the suggestions from the port plans (Q71) with design-basis lengths (Q66), Suggest cables on Loose material, the cable columns and a Preview tab.
+- **M66 — Revision history and recorded issues.** *W2; ADR 0036, Q67.* Done, split. **M66a** (engine, CLI) done (#349): `issues:` records, `checks.accepted:`, register names, the Revision History sheet, the automatic compare with the last recorded issue when its hash matches (else a warning and the picker), `bomgen build --issue`. **M66b** (app) done (#351): Build as issued, Accept with reason on Checks, names in Project › Documents (the register), Preview tab. The history sheet is written whenever it has rows; it has no `output.include` switch.
 - **M67 — Record sources and lifecycle.** *W1; ADR 0037 (accepted).* In two PRs so that W5's M53
   gets the state field early. **M67a** (merged, #331): `state`, `successor`, `sources` and the change
   fields on `DeviceType`, the successor reference check, `devices.csv` columns, the schema. **M67b**
@@ -1640,3 +1648,8 @@ SFP slots any media of their speed). Should `ied_count` keep today's rule, every
 whatever its speed and media (recommended: no project's switch count moves), or act strictly as
 n dual 100M MM IEDs, so copper and 1G IED ports stop counting? The two differ only on L1 switches
 with IED ports of more than one speed or media. Until Ali answers, M60a keeps today's rule.
+
+**Q64 — External links beside the device rows' L2 ports** (M61). *Open.* Keep `l2_ports` on
+equipment rows for the devices in the cabinets and add the links that leave the substation as
+their own list, `network.external_links` (recommended: existing files and the example keep
+working), or fold both into one list of links? Until Ali answers, M61 ships its own list.

@@ -28,7 +28,7 @@ from bomgen.models._base import (
     Quantity,
     check_template,
 )
-from bomgen.models.library import BrandId, CatalogueChoice
+from bomgen.models.library import BrandId, CatalogueChoice, Media, PortSpeed
 from bomgen.models.panel import DocumentInfo, PanelId
 
 FILE_NAME_PLACEHOLDERS = {"doc_no", "rev"}
@@ -43,6 +43,7 @@ class SheetNames(InputModel):
     heat_calculations: ExcelSheetName = "Heat Calculations"
     summary_bom: ExcelSheetName = "Summary BOM"  # ADR 0035
     revision_history: ExcelSheetName = "Revision History"  # ADR 0035, ADR 0036
+    cable_schedule: ExcelSheetName = "Cable Schedule"  # ADR 0035, plan M65
 
 
 OptionalSheet = Literal["summary_bom"]  # ADR 0035: written only when included
@@ -115,6 +116,19 @@ class DesignConstants(ConstantOverrides):
         return self
 
 
+CableEnd = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
+
+
+class CableRef(InputModel):
+    """What a loose row that is a cable connects, for the Cable Schedule (ADR 0035, M65)."""
+
+    from_tag: CableEnd
+    to_tag: CableEnd
+    length_m: PositiveFloat | None = None
+    media: Media | None = None
+    speed: PortSpeed | None = None
+
+
 class LooseExtra(InputModel):
     """A loose-material row: a library part, optionally with kit children and a feeding
     panel, or a free-text item with only a description (ADR 0022)."""
@@ -125,6 +139,7 @@ class LooseExtra(InputModel):
     tag: str | None = None
     children: list[PartId] = Field(default_factory=list)
     fed_from: str | None = None
+    cable: CableRef | None = None  # plan M65: the row is listed on the Cable Schedule
 
     @model_validator(mode="after")
     def _part_or_description(self) -> "LooseExtra":

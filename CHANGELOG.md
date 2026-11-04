@@ -9,11 +9,20 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- External links (`network.external_links`): links to the control centre, a PCC or a third party,
+  each with its count, speed, media, landing (L2 or the external switch), firewall, sides and cable
+  length. A link on L2 adds to the L2 demand and puts its SFPs on the L2 switches; a link on EXT goes
+  on the external switch's port plan. Parts edits them, the Result card lists them, and Checks fails
+  a firewall link without a firewall row or an EXT link without an external switch (M61, Q64).
 - An IED schedule (`network.ied_schedule`) as an alternative to the IED count: rows by bay and
   IED type with ports per side by count, speed and media, dual or single attachment, landing on
   L1 or L2. The L1 switches are sized against their port groups per speed and media, ports on SFP
   slots become L1 downlinks (and SFPs), L2 rows add to the L2 demand, and a sizing error names the
   speed and media no switch serves ("1G RJ45"). The example keeps `ied_count` (M60a, ADR 0034).
+- Parts: a Quick count / IED schedule switch with the schedule's table (bay, IED, qty, ports per
+  side, attachment, landing, notes), Add a row, remove with Undo and Import CSV… with a review of
+  the rows and the skipped ones; the Result card shows the IED ports per speed and media on each
+  side, and a schedule no L1 switch serves names what does not fit (M60b, ADR 0034).
 - Library parts carry a lifecycle state (draft, reviewed, released, obsolete; released by
   default), an obsolete part's successor, and a source for each sized figure: power, inrush,
   height, maximum input voltage and ports, each from a datasheet, the contractor, a measurement or
@@ -95,6 +104,16 @@ project uses [Semantic Versioning](https://semver.org/).
   compares with that issue on its own, or warns and builds without it when the file has changed.
   A Revision History sheet lists every recorded issue and the current revision. Warnings accepted
   in `checks.accepted` show their reason in the check report and stop counting as open.
+- Cable Schedule (M65a, ADR 0035): a loose material row can carry cable data
+  (`cable: { from_tag, to_tag, length_m, media, speed }`); the workbook then gets a Cable
+  Schedule sheet after the Summary BOM listing each such row with its quantity as a formula on
+  the Loose Material sheet.
+- The app records issues too (M66b, ADR 0036). Build has *Build as issued…*: it asks for a
+  description, builds, then records the rev unless a check failed. Without a chosen previous issue
+  every build compares with the last recorded one, or says why it can't. Checks has *Accept…* on
+  a warning (a reason and an optional name) and lists acceptances no warning matches any more,
+  each with *Remove*. The register has Prepared, Checked and Approved per document. Preview shows
+  the Revision History tab.
 
 ### Changed
 

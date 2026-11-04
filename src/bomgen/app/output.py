@@ -16,8 +16,8 @@ from typing import Any
 
 from bomgen.app.projects import library_note
 from bomgen.app.substations import Resolved, resolve
-from bomgen.build import build_substation, workbook_name
-from bomgen.checks import check_report
+from bomgen.build import build_substation, issue_refusal, record_issue, workbook_name
+from bomgen.checks import check_report, unused_acceptances
 from bomgen.engine.errors import EngineError
 from bomgen.engine.network import unserved_links
 from bomgen.engine.pipeline import build as build_bom
@@ -28,8 +28,8 @@ from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.store import LibraryStore
 from bomgen.models.bom import BuildResult
 from bomgen.models.project import _FILE_NAME_FORBIDDEN
-from bomgen.models.report import CheckStatus
-from bomgen.revision import read_previous_issue
+from bomgen.models.report import CheckReport
+from bomgen.revision import previous_from_record, read_previous_issue, record_warning
 from bomgen.sheets.summary_sheet import HEADERS as SUMMARY_HEADERS
 from bomgen.sheets.workbook import build_workbook
 from bomgen.writer import WriterError
@@ -100,6 +100,7 @@ def checks_page(project_file: Path, substation_id: str, store: LibraryStore) -> 
     """The located problems, then the engine checks; these run only when the files load."""
     found = resolve(project_file, substation_id, store)
     engine: dict[str, Any] = {"run": False, "reason": None, "failed": False, "items": []}
+    unused: list[dict[str, Any]] = []
     missing = _not_ready(found)
     if found.loaded is None:
         engine["reason"] = f"{_errors(found)} must be fixed before the engine checks run."
@@ -112,7 +113,23 @@ def checks_page(project_file: Path, substation_id: str, store: LibraryStore) -> 
             engine["reason"] = f"The engine stopped: {exc}"
         else:
             engine = {"run": True, "reason": None, "failed": report.failed, "items": report.items}
-    return {"problems": problems_of(project_file, found, store) + missing, "engine": engine}
+            unused = _unused(found.loaded, report)
+    return {
+        "problems": problems_of(project_file, found, store) + missing,
+        "engine": engine,
+        "unused": unused,  # acceptances no warning matches any more (ADR 0036)
+    }
+
+
+def _unused(loaded: LoadedSubstation, report: CheckReport) -> list[dict[str, Any]]:
+    accepted = loaded.substation.checks.accepted if loaded.substation.checks else []
+    unused = unused_acceptances(report, accepted)
+    shown = {"check", "panel_id", "subject", "reason"}
+    return [
+        {"index": index, **a.model_dump(mode="json", include=shown)}
+        for index, a in enumerate(accepted)
+        if a in unused
+    ]
 
 
 def build_target(project_file: Path, substation_id: str, store: LibraryStore) -> dict[str, Any]:
@@ -122,7 +139,9 @@ def build_target(project_file: Path, substation_id: str, store: LibraryStore) ->
     loaded = found.loaded
     name = sheets = revision = None
     flags = 0
+    issue: dict[str, Any] = {"refusal": None, "record": None}  # ADR 0036
     if loaded is not None:
+        issue = _issue(loaded)
         name = workbook_name(loaded)
         revision = loaded.documents[loaded.substation.document].rev
         try:
@@ -132,7 +151,7 @@ def build_target(project_file: Path, substation_id: str, store: LibraryStore) ->
         except EngineError:
             pass  # Checks names the engine's problem; Build refuses with it
         else:
-            flags = sum(1 for item in report.items if item.status is CheckStatus.WARN)
+            flags = report.open_warnings
             cabinets = {panel.sheet_name: panel.cabinet_name for panel in loaded.panels}
             sheets = [{"name": s.name, "cabinet": cabinets.get(s.name)} for s in workbook.sheets]
     library = found.project.library
@@ -143,10 +162,25 @@ def build_target(project_file: Path, substation_id: str, store: LibraryStore) ->
         "sheets": sheets,
         "library": {"name": library.name, "version": library.version},
         "revision": revision,
-        "flags": flags,  # the engine checks' warnings, as Checks lists them
+        "flags": flags,  # the engine checks' open warnings, as Checks counts them
         "include": sorted(loaded.substation.output.include) if loaded else [],  # ADR 0035
+        "issue": issue,
         "problems": problems_of(project_file, found, store) + _not_ready(found),
     }
+
+
+def _issue(loaded: LoadedSubstation) -> dict[str, Any]:
+    """Why Build as issued is refused, and the latest record the next build compares with."""
+    records = loaded.substation.issues
+    record = None
+    if records:
+        latest = records[-1]
+        record = {
+            "rev": latest.rev,
+            "file": latest.file.as_posix(),
+            "warning": record_warning(loaded),
+        }
+    return {"refusal": issue_refusal(loaded), "record": record}
 
 
 def summary_rows(loaded: LoadedSubstation, result: BuildResult) -> list[dict[str, Any]]:
@@ -238,8 +272,10 @@ def build_file(
     file_name: str | None = None,
     compare: Path | None = None,
     replace: bool = False,
+    issue: str | None = None,
 ) -> dict[str, Any]:
-    """Write one substation's workbook and its check report next to it."""
+    """Write one substation's workbook and its check report next to it; with ``issue`` (its
+    description) also record it as issued unless a check failed (ADR 0036)."""
     found = resolve(project_file, substation_id, store)
     loaded = found.loaded
     if loaded is None:
@@ -247,14 +283,22 @@ def build_file(
     path = _checked_folder(folder) / _checked_name(
         file_name if file_name is not None else workbook_name(loaded)
     )
+    if issue is not None:
+        if not issue.strip():
+            raise OutputRefusedError("bad_description", "Describe the issue, e.g. For review.")
+        refusal = issue_refusal(loaded)
+        if refusal is not None:
+            raise OutputRefusedError("already_issued", refusal)
     if path.exists() and not replace:
         raise OutputRefusedError("file_exists", f"{path.name} is already in {folder}.")
-    previous = None
+    previous = warning = None
     if compare is not None:
         try:
             previous = read_previous_issue(compare)
         except InputError as exc:
             raise OutputRefusedError("bad_previous", str(exc)) from None
+    else:
+        previous, warning = previous_from_record(loaded)
     try:
         outcome = build_substation(loaded, path, previous=previous)
     except EngineError as exc:
@@ -276,10 +320,19 @@ def build_file(
         ) from None
     report = outcome.checks
     assert report is not None
+    issued = not_issued = None
+    if issue is not None and report.failed:
+        not_issued = "Not recorded as issued: a check failed."
+    elif issue is not None:
+        recorded = record_issue(project_file, loaded, path, issue.strip())
+        issued = {"rev": recorded.rev, "file": recorded.file.as_posix()}
     return {
         "path": path,
         "size": path.stat().st_size,
         "sheets": list(outcome.sheets),
         "checks": {"failed": report.failed, "items": report.items},
         "revisions": outcome.revisions,
+        "record_warning": warning,
+        "issued": issued,
+        "not_issued": not_issued,
     }

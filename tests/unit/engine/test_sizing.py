@@ -8,6 +8,7 @@ from bomgen.engine.sizing import (
     SizingError,
     SwitchPorts,
     Topology,
+    external_l2_links,
     ied_l2_links,
     ied_ports_per_side,
     l1_links,
@@ -23,7 +24,7 @@ from bomgen.engine.sizing import (
 )
 from bomgen.models.library import DeviceType, Media, PortSpeed
 from bomgen.models.panel import PortAllocation
-from bomgen.models.substation import IedRow, PortNeed
+from bomgen.models.substation import ExternalLink, IedRow, PortNeed
 
 # 24 fixed IED ports and 4 SFP slots that may take anything (the design's reading).
 L1_ANY = SwitchPorts("L1-ANY", ied=24, uplink=0, any=4)
@@ -319,3 +320,23 @@ def test_single_attached_side_sets_the_l1_count_per_side() -> None:
 def test_schedule_ports_on_sfp_slots_become_l1_downlinks() -> None:
     assert l1_slot_downlinks(L1_SLOTS, 2, {MM100: 30, RJ100: 4}) == {MM100: 30, RJ100: 4}
     assert l1_slot_downlinks(L1_MM, 2, {MM100: 30}) == {}
+
+
+# External links (plan M61)
+
+
+def test_external_link_adds_l2_demand() -> None:
+    ccr = ExternalLink(name="CCR", count=2)
+    (link,) = external_l2_links([ccr], "a")
+    plan = size_network(NetworkInputs(ied_count=40), L1_RST, L2_RST, [link])
+    assert plan.l2_demand_per_side == 3 + 2  # three L1 links and the two CCR links
+
+
+def test_a_single_external_link_lands_on_side_a_only() -> None:
+    pcc = ExternalLink(name="PCC", redundant=False)
+    assert len(external_l2_links([pcc], "a")) == 1
+    assert external_l2_links([pcc], "b") == []
+
+
+def test_ext_landing_links_take_no_l2_port() -> None:
+    assert external_l2_links([ExternalLink(name="3rd party", lands_on="ext")], "a") == []

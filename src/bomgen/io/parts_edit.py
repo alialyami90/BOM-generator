@@ -19,6 +19,7 @@ from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from bomgen.engine.layout import CABLE_MANAGED
 from bomgen.io.edit import EditError, EditResult, edit_substation, substation_file
 from bomgen.io.errors import InputError
+from bomgen.io.ied_csv import parse_ports
 from bomgen.io.loader import load_library, load_project
 from bomgen.io.round_trip import insert_entry, load_text, remove_entry, set_entry
 from bomgen.io.yaml_source import read_yaml
@@ -372,5 +373,186 @@ def start_parts(
             "equipment",
             [{k: v for k, v in _ordered(r).items() if v not in (None, "")} for r in picked],
         )
+
+    return edit_substation(project_file, substation_id, change, store=store)
+
+
+# --- The IED schedule (plan M60, ADR 0034) ---------------------------------------------
+
+IED_FIELDS = ("bay", "name", "qty", "ports", "attachment", "lands_on", "notes")
+
+
+def _network(data: CommentedMap) -> CommentedMap:
+    network = data.get("network")
+    if not isinstance(network, CommentedMap):
+        set_entry(data, "network", {})
+        network = data["network"]
+    assert isinstance(network, CommentedMap)
+    return network
+
+
+def _schedule(data: CommentedMap, key: str = "ied_schedule") -> CommentedSeq:
+    network = _network(data)
+    rows = network.get(key)
+    if not isinstance(rows, CommentedSeq):
+        set_entry(network, key, [])
+        rows = network[key]
+    assert isinstance(rows, CommentedSeq)
+    return rows
+
+
+def _ied_row(data: CommentedMap, index: int, key: str = "ied_schedule") -> CommentedMap:
+    rows = _schedule(data, key)
+    if not 0 <= index < len(rows) or not isinstance(rows[index], CommentedMap):
+        what = "IED schedule row" if key == "ied_schedule" else "external link"
+        raise EditError(f"no {what} {index + 1}")
+    row: CommentedMap = rows[index]
+    return row
+
+
+def _drop_count(data: CommentedMap) -> None:
+    """A schedule replaces ``ied_count`` (ADR 0034 item 1)."""
+    network = _network(data)
+    if "ied_count" in network:
+        remove_entry(network, "ied_count")
+
+
+def add_ied_row(
+    project_file: Path,
+    substation_id: str,
+    row: Mapping[str, Any],
+    index: int | None = None,
+    *,
+    store: LibraryStore | None = None,
+) -> EditResult:
+    """Insert an IED schedule row (at the end when ``index`` is None); the first one
+    replaces the quick count."""
+
+    def change(data: CommentedMap) -> None:
+        _drop_count(data)
+        rows = _schedule(data)
+        insert_entry(rows, len(rows) if index is None else index, _plain(dict(row)))
+
+    return edit_substation(project_file, substation_id, change, store=store)
+
+
+def set_ied_field(
+    project_file: Path,
+    substation_id: str,
+    index: int,
+    field: str,
+    value: object,
+    *,
+    store: LibraryStore | None = None,
+) -> EditResult:
+    """Write one field of IED row ``index``; ``ports`` is the text the CSV takes
+    ("2x100M MM + 1G RJ45"), and an empty value removes the field."""
+    if field not in IED_FIELDS:
+        raise EditError(f"an IED row has no field '{field}'")
+    if field == "ports" and isinstance(value, str) and value.strip():
+        try:
+            value = parse_ports(value)
+        except ValueError as exc:
+            raise EditError(str(exc)) from None
+
+    def change(data: CommentedMap) -> None:
+        target = _ied_row(data, index)
+        if value is None or value == "":
+            if field in target:
+                remove_entry(target, field)
+        else:
+            set_entry(target, field, _plain(value))
+
+    return edit_substation(project_file, substation_id, change, store=store)
+
+
+def remove_ied_row(
+    project_file: Path, substation_id: str, index: int, *, store: LibraryStore | None = None
+) -> EditResult:
+    def change(data: CommentedMap) -> None:
+        _ied_row(data, index)
+        remove_entry(_schedule(data), index)
+
+    return edit_substation(project_file, substation_id, change, store=store)
+
+
+def set_ied_schedule(
+    project_file: Path,
+    substation_id: str,
+    rows: Sequence[Mapping[str, Any]],
+    *,
+    store: LibraryStore | None = None,
+    dry_run: bool = False,
+) -> EditResult:
+    """Replace the whole schedule, as a CSV import does; ``dry_run`` only checks."""
+
+    def change(data: CommentedMap) -> None:
+        _drop_count(data)
+        set_entry(_network(data), "ied_schedule", _plain([dict(r) for r in rows]))
+
+    return edit_substation(project_file, substation_id, change, store=store, dry_run=dry_run)
+
+
+# --- External links (plan M61) --------------------------------------------------------
+
+LINK_FIELDS = (
+    "name",
+    "count",
+    "speed",
+    "media",
+    "lands_on",
+    "through_firewall",
+    "redundant",
+    "cable_length_m",
+)
+
+
+def add_external_link(
+    project_file: Path,
+    substation_id: str,
+    row: Mapping[str, Any],
+    index: int | None = None,
+    *,
+    store: LibraryStore | None = None,
+) -> EditResult:
+    """Insert an external link (at the end when ``index`` is None)."""
+
+    def change(data: CommentedMap) -> None:
+        rows = _schedule(data, "external_links")
+        insert_entry(rows, len(rows) if index is None else index, _plain(dict(row)))
+
+    return edit_substation(project_file, substation_id, change, store=store)
+
+
+def set_external_link_field(
+    project_file: Path,
+    substation_id: str,
+    index: int,
+    field: str,
+    value: object,
+    *,
+    store: LibraryStore | None = None,
+) -> EditResult:
+    """Write one field of external link ``index``; an empty value removes the field."""
+    if field not in LINK_FIELDS:
+        raise EditError(f"an external link has no field '{field}'")
+
+    def change(data: CommentedMap) -> None:
+        target = _ied_row(data, index, "external_links")
+        if value is None or value == "":
+            if field in target:
+                remove_entry(target, field)
+        else:
+            set_entry(target, field, _plain(value))
+
+    return edit_substation(project_file, substation_id, change, store=store)
+
+
+def remove_external_link(
+    project_file: Path, substation_id: str, index: int, *, store: LibraryStore | None = None
+) -> EditResult:
+    def change(data: CommentedMap) -> None:
+        _ied_row(data, index, "external_links")
+        remove_entry(_schedule(data, "external_links"), index)
 
     return edit_substation(project_file, substation_id, change, store=store)

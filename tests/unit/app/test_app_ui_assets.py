@@ -999,3 +999,17 @@ def test_parts_marks_parts_off_the_vendor_list() -> None:
     assert "vendor_list: [['design_basis', 'vendor_list'], 'choice']" in sub
     verify = (UI_DIR / "screens-verify.js").read_text(encoding="utf-8")
     assert "vendor_list: 'Parts on the vendor list'" in verify
+
+
+def test_issue_actions_on_build_checks_register_and_preview() -> None:
+    # ADR 0036, plan M66b: Build as issued, Accept with reason, names per document, history tab.
+    verify = (UI_DIR / "screens-verify.js").read_text(encoding="utf-8")
+    assert 'data-action="build-issue"' in verify
+    assert "Bridge.call('accept_warning'" in verify
+    assert "Bridge.call('remove_acceptance'" in verify
+    proj = (UI_DIR / "screens-projects.js").read_text(encoding="utf-8")
+    assert "'prepared', 'checked', 'approved']" in proj
+    preview = (UI_DIR / "screens-preview.js").read_text(encoding="utf-8")
+    assert "historyView(d.history)" in preview
+    sub = (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
+    assert "revision_history: 'Revision history'" in sub

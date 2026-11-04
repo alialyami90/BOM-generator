@@ -500,6 +500,8 @@ Last code change: `ef65800` (#100).
 | `size_network` → `NetworkPlan` | L1 and L2 counts per side (R1, R2); `ied_count` kept for the check report (R4) |
 | `L2Link`, `l2_port_plan`, `l1_port_plan` | Generated port plans (R3) |
 | `SizingError` | Inputs no library switch can meet |
+| `PortPool`, `ied_ports_per_side`, `ied_l2_links`, `l1_slot_downlinks` | IED schedule (ADR 0034, M60): per-side pools, fixed ports by speed and media, SFP slots by speed; `NetworkPlan.l1_by_side` |
+| `external_sides`, `external_l2_links` | External links on L2 (M61, Q64) |
 
 `src/bomgen/engine/layout.py` (R5–R10), bottom up:
 1. **Fill (pure):** `Unit`, `LayoutRules` (capacity, blank plate U), `blank_plates`, `used_u`,

@@ -33,7 +33,7 @@ from bomgen.models.library import (
 from bomgen.models.panel import Panel, Ventilation
 from bomgen.models.project import DesignConstants, RegisterEntry, VendorList, merge_defaults
 from bomgen.models.report import CheckItem, CheckReport, CheckStatus
-from bomgen.models.substation import AcceptedWarning, Equipment
+from bomgen.models.substation import AcceptedWarning, Equipment, EquipmentRole, ExternalLink
 
 SPEED_ORDER = (PortSpeed.M10, PortSpeed.M100, PortSpeed.G1, PortSpeed.G10)
 
@@ -61,6 +61,9 @@ def check_report(loaded: LoadedSubstation, result: BuildResult) -> CheckReport:
     items += part_number_checks(loaded.substation.equipment, loaded.library)
     items += part_source_checks(loaded.substation.equipment, loaded.library)
     items += l2_link_checks(loaded.substation.equipment, loaded.library)
+    items += external_link_checks(
+        loaded.substation.network.external_links, loaded.substation.equipment
+    )
     items += external_ac_checks(result.loose, loaded.library)
     items += document_number_checks(loaded.documents)
     parts = picked_parts(loaded)
@@ -533,6 +536,27 @@ def l2_link_checks(equipment: Iterable[Equipment], library: Library) -> list[Che
                 status=CheckStatus.WARN,
                 subject=entry.id,
                 message="no L2 link (l2_ports is 0), so the L2 switch gets no SFP for it",
+            )
+        )
+    return items
+
+
+def external_link_checks(
+    links: Iterable[ExternalLink], equipment: Iterable[Equipment]
+) -> list[CheckItem]:
+    """A failure per external link whose firewall or external switch has no row (M61)."""
+    roles = {entry.role for entry in equipment}
+    items = []
+    for link in links:
+        if link.through_firewall and EquipmentRole.FIREWALL not in roles:
+            message = "the link goes through the firewall, but no equipment row is a firewall"
+        elif link.lands_on == "ext" and EquipmentRole.EXT_SWITCH not in roles:
+            message = "the link lands on the external switch, but no equipment row is one"
+        else:
+            continue
+        items.append(
+            CheckItem(
+                check="external_link", status=CheckStatus.FAIL, subject=link.name, message=message
             )
         )
     return items

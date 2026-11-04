@@ -112,12 +112,19 @@ def _loose_extra(extra: LooseExtra, library: Library) -> BomItem:
     if extra.part_id is None:  # free text: no make, model or ordering code (ADR 0022)
         assert extra.description is not None  # the model requires one or the other
         return BomItem(
-            BomLine(group=Group.B, tag=extra.tag, description=extra.description, qty=extra.qty)
+            BomLine(
+                group=Group.B,
+                tag=extra.tag,
+                description=extra.description,
+                qty=extra.qty,
+                cable=extra.cable,
+            )
         )
     per_parent = extra.qty if isinstance(extra.qty, int) else 1
     line = _loose_line(extra.part_id, extra.tag, extra.qty, library)
     children = tuple(_loose_line(c, None, per_parent, library) for c in extra.children)
-    return BomItem(line.model_copy(update={"merge_fg": bool(children)}), children)
+    update = {"merge_fg": bool(children), "cable": extra.cable}
+    return BomItem(line.model_copy(update=update), children)
 
 
 def _device_loose(row: DeviceRow, library: Library) -> BomItem:

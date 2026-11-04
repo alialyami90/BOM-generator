@@ -59,17 +59,27 @@ def previous_from_record(loaded: LoadedSubstation) -> tuple[PreviousIssue | None
     hash matches; otherwise no previous issue and the warning that says why."""
     if not loaded.substation.issues:
         return None, None
+    warning = record_warning(loaded)
+    if warning is not None:
+        return None, warning
+    return read_previous_issue(loaded.file.parent / loaded.substation.issues[-1].file), None
+
+
+def record_warning(loaded: LoadedSubstation) -> str | None:
+    """Why the latest recorded issue's workbook can't be compared with: missing or changed
+    since it was issued; None when it can, or nothing is recorded."""
+    if not loaded.substation.issues:
+        return None
     record = loaded.substation.issues[-1]
     path = loaded.file.parent / record.file
-    shown = record.file.as_posix()
     if not path.is_file():
         reason = "is not there"
     elif file_sha256(path) != record.sha256:
         reason = "has changed since it was issued"
     else:
-        return read_previous_issue(path), None
-    return None, (
-        f"Rev {record.rev}'s recorded file {shown} {reason}; "
+        return None
+    return (
+        f"Rev {record.rev}'s recorded file {record.file.as_posix()} {reason}; "
         "choose the previous issue to compare with."
     )
 
