@@ -7,6 +7,8 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-04
+
 ### Added
 
 - Switch counts and port budget (M72): the Parts Result card lists each switch level's ports on
@@ -937,7 +939,8 @@ as in v0.3.4.
   airflow; future library defaults use 0 W for the SK 3110 thermostat and
   460 m³/h for the SK 3243.100 fan with its outlet filter (#12).
 
-[Unreleased]: https://github.com/alialyami90/BOM-generator/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/alialyami90/BOM-generator/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/alialyami90/BOM-generator/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/alialyami90/BOM-generator/compare/v0.3.4...v0.4.0
 [0.3.4]: https://github.com/alialyami90/BOM-generator/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/alialyami90/BOM-generator/compare/v0.3.2...v0.3.3
