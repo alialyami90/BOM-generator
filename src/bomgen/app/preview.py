@@ -14,6 +14,7 @@ from bomgen.app.output import problems_of, summary_rows
 from bomgen.app.substations import resolve
 from bomgen.engine.errors import EngineError
 from bomgen.engine.pipeline import build as build_bom
+from bomgen.engine.spares import spares
 from bomgen.library_store.store import LibraryStore
 from bomgen.models.bom import BomLine, BomTable, BuildResult, Qty, QtySum
 from bomgen.models.calc import CabinetHeat, LineRef, PowerBlock, PowerLine
@@ -211,6 +212,12 @@ def preview_page(project_file: Path, substation_id: str, store: LibraryStore) ->
         "summary": None  # ADR 0035
         if "summary_bom" not in loaded.substation.output.include
         else {"sheet": sheet_names.summary_bom, "rows": summary_rows(loaded, result)},
+        "spares": None  # plan M64: the sheet is written once there is a line
+        if not (spare_lines := spares(loaded, result).lines)
+        else {
+            "sheet": sheet_names.spare_parts,
+            "rows": [line.model_dump(mode="json") for line in spare_lines],
+        },
         "history": None  # ADR 0036: the sheet is written once there is a row
         if not (history := history_rows(loaded))
         else {"sheet": sheet_names.revision_history, "rows": [r._asdict() for r in history]},
