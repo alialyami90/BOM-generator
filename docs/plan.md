@@ -1766,12 +1766,12 @@ someone confirms the watts), as `datasheet` citing the workbook, or with a fifth
 the client's documents (amends ADR 0037)? Parts and Checks flag them until a datasheet or a
 measurement confirms the watts.
 
-**Q70 — The quick IED count on mixed-media L1 switches** (M60, ADR 0034 item 4). *Open.* A
+**Q70 — The quick IED count on mixed-media L1 switches** (M60, ADR 0034 item 4). *Answered (Ali, 2026-11-04): keep today's rule*, as shipped in M60a. A
 schedule matches each IED port to a switch port of its speed and media (fixed ports their own,
 SFP slots any media of their speed). Should `ied_count` keep today's rule, every IED port counts
 whatever its speed and media (recommended: no project's switch count moves), or act strictly as
 n dual 100M MM IEDs, so copper and 1G IED ports stop counting? The two differ only on L1 switches
-with IED ports of more than one speed or media. Until Ali answers, M60a keeps today's rule.
+with IED ports of more than one speed or media.
 
 **Q71 — Where a suggested cord is counted** (M65; ADR 0035). *Answered 2026-11-04: once, at the
 link's upper end.* A link has two port plan ends (an L1 uplink and an L2 downlink). Count each
