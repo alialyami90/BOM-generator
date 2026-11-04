@@ -1177,3 +1177,27 @@ def test_panel_hint_reaches_the_units_of_a_common_row(example: LoadedSubstation)
 def test_panel_hint_is_for_a_common_row() -> None:
     with pytest.raises(ValidationError, match="panel_hint steers a common device"):
         Equipment(id="l2", part_id="X", role=EquipmentRole.OTHER, redundant=True, panel_hint=1)
+
+
+# --- Rack priority per row (plan M76) --------------------------------------------------
+
+
+def with_field(loaded: LoadedSubstation, device: str, **fields: Any) -> LoadedSubstation:
+    rows = [
+        e.model_validate({**e.model_dump(exclude_unset=True), **fields}) if e.id == device else e
+        for e in loaded.substation.equipment
+    ]
+    return with_changes(loaded, equipment=rows)
+
+
+def test_a_rows_rack_priority_replaces_its_categorys(example: LoadedSubstation) -> None:
+    before = {x.device: x.priority for f in layout_preview(example).fills for x in f.units}
+    assert before["rtac"] == 4  # the rest
+    result = layout_preview(with_field(example, "rtac", priority=1))
+    (fill,) = [f for f in result.fills if any(x.device == "rtac" for x in f.units)]
+    assert fill.stack()[0].device == "rtac"  # above the network devices (2)
+
+
+def test_rack_priority_is_one_to_four() -> None:
+    with pytest.raises(ValidationError):
+        Equipment(id="x", part_id="X", role=EquipmentRole.OTHER, priority=5)

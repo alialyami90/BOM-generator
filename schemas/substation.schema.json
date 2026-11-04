@@ -877,6 +877,20 @@
           ],
           "default": null
         },
+        "priority": {
+          "anyOf": [
+            {
+              "maximum": 4,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Priority"
+        },
         "purpose": {
           "anyOf": [
             {

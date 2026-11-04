@@ -11,7 +11,7 @@
   const NET = { ied_count: 'int', topology: 'choice', ring_max_switches: 'int', l1_uplinks_per_switch: 'int', l1_interlink: 'bool', l3_uplinks_per_l2: 'int', l1_per_side: 'int', l2_per_side: 'int' };
   const SPARES = { port_fraction: ['Ports kept free on each switch', '%', 'pct'], sfp_per_l1: ['Spare SFPs on each L1', '', 'int'], dc_branches_per_feed: ['Spare DC branches per feed', '', 'int'], ac_branches: ['Spare AC branches', '', 'int'], rack_u_reserved: ['Rack space kept free', 'U', 'int'], terminals_fraction: ['Spare terminals on each wiring strip', '%', 'pct'] };
   const VALUES = [['height_u', 'Height', 'int'], ['unit_power_w', 'Power', 'num'], ['supply_type', 'Supply', 'choice'], ['voltage_v', 'Voltage', 'int'], ['power_supplies', 'Supplies', 'int'], ['inrush_a', 'Inrush', 'num'], ['load_type', 'Load', 'choice']];
-  const EQ = { part_id: 'choice', ordering_code: 'text', qty: 'int', redundant: 'bool', cable_manager: 'bool', alarm_on_branch_mcb: 'bool', purpose: 'text', tag: 'text', tag_type: 'text', first_nn: 'int', hwio_points: 'int', panel_hint: 'int' };
+  const EQ = { part_id: 'choice', ordering_code: 'text', qty: 'int', redundant: 'bool', cable_manager: 'bool', alarm_on_branch_mcb: 'bool', purpose: 'text', tag: 'text', tag_type: 'text', first_nn: 'int', hwio_points: 'int', panel_hint: 'int', priority: 'int' };
   /* M59: the row's BOM text, [field, label, placeholder when unset] */
   const BOM_TEXT = [['purpose', 'Purpose', () => 'None'], ['tag', 'Tag', (r) => r.tags.join(', ') || 'Generated'], ['tag_type', 'Type code', () => 'From the library'], ['first_nn', 'First number', () => 'Automatic'], ['hwio_points', 'HWIO points', () => 'From the library']];
   /* M60: one IED schedule row (ADR 0034); ports is text such as "2x100M MM + 1x1G RJ45" */
@@ -51,7 +51,7 @@
     const r = rowAt(Number(a)); if (!r) return '';
     if (kind === 'e' && b === 'cable_manager') return r.cable_manager ? String(r.cable_manager.on) : '';
     if (kind === 'e' && b === 'alarm_on_branch_mcb') return r.alarm ? String(r.alarm.on) : '';  // M58
-    if (kind === 'e' && b === 'panel_hint') return r.placement.panel_hint == null ? '' : String(r.placement.panel_hint);  // M74
+    if (kind === 'e' && (b === 'panel_hint' || b === 'priority')) return r.placement[b] == null ? '' : String(r.placement[b]);  // M74, M76
     if (kind === 'e' && r.bom_text && b in r.bom_text) { const v = r.bom_text[b]; return v == null ? '' : v; }
     if (kind === 'e') { const v = r[b]; return v == null ? '' : typeof v === 'boolean' ? String(v) : v; }
     if (kind === 'l') return r.link ? r.link[b] : '';
@@ -218,12 +218,18 @@
     const body = open ? `<div class="form form--3 prow-bomtext" id="pp-bt-${r.index}">${BOM_TEXT.map(([f, label, ph]) => mark(k(f), field(label, input(`p-${k(f)}`, shown(k(f)), { mono: f !== 'purpose', num: EQ[f] === 'int', placeholder: ph(r), invalid: !!PF.errors[k(f)] }), '', PF.err(k(f))))).join('')}</div>` : '';
     return `<div class="prow-sub prow-sub--foot"><button class="link-btn small" data-action="pp-bomtext" data-i="${r.index}" aria-expanded="${open}" aria-controls="pp-bt-${r.index}">${icon(open ? 'chevd' : 'chevr')}BOM text</button><span class="muted small prow-bt-sum">${esc(summary)}</span></div>${body}${dup}`;
   }
-  /* M74: steer a common row's units to a panel without pinning them; the layout says when they do not fit. */
+  /* M74: steer a common row's units to a panel without pinning them; the layout says when they do not fit.
+     M76: the row's rack priority, the category's when Automatic (spec "Where in the panel"). */
+  const PRIORITIES = [['1', '1 Top, with the time server'], ['2', '2 With the network devices'], ['3', '3 With the servers and workstations'], ['4', '4 With the rest']];
   function placeRow(p, r) {
-    if (!r.part_id || r.sized || !r.placement.steerable) return '';
+    if (!r.part_id) return '';
+    const pk = `e.${r.index}.priority`, auto = PRIORITIES[r.placement.default_priority - 1][1].replace(/^\d /, '');
+    const prio = `<span class="prow-sub-what">Rack priority</span>${mark(pk, select(`p-${pk}`, [['', `Automatic: ${auto.toLowerCase()}`], ...PRIORITIES], shown(pk)).replace('<select ', `<select aria-label="Rack priority of ${esc(r.label)}" `))}`;
+    const line = `<div class="prow-sub prow-link prow-place">${prio}</div>${err(pk)}`;
+    if (r.sized || !r.placement.steerable) return line;
     const key = `e.${r.index}.panel_hint`, v = shown(key), n = Math.max(App.panelCount() || p.panels || 0, +v || 0);
     const opts = [['', 'Automatic: most free space'], ...Array.from({ length: n }, (_, i) => [String(i + 1), `Panel ${i + 1}`])];
-    return `<div class="prow-sub prow-link prow-place"><span class="prow-sub-what">Panel</span>${mark(key, select(`p-${key}`, opts, v).replace('<select ', `<select aria-label="Panel for ${esc(r.label)}" aria-describedby="pp-pin-${r.index}" `))}<span class="muted small" id="pp-pin-${r.index}">Not a pin: if it does not fit there, it goes where there is room.</span></div>${err(key)}`;
+    return `<div class="prow-sub prow-link prow-place"><span class="prow-sub-what">Panel</span>${mark(key, select(`p-${key}`, opts, v).replace('<select ', `<select aria-label="Panel for ${esc(r.label)}" aria-describedby="pp-pin-${r.index}" `))}<span class="muted small" id="pp-pin-${r.index}">Not a pin: if it does not fit there, it goes where there is room.</span></div>${err(key)}${line}`;
   }
   function partRow(p, r, last) {
     const changed = Object.keys(PF.draft).some((k) => k.split('.')[1] === String(r.index) && 'eofcl'.includes(k[0]));

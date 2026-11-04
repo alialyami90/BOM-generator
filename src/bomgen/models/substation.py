@@ -123,6 +123,7 @@ class Equipment(InputModel):
     cable_manager: bool | None = None  # None: the category's rule (ADR 0013, amended)
     alarm_on_branch_mcb: bool | None = None  # None: the library's value (plan M58)
     panel_hint: PositiveInt | None = None  # a common row's panel, not a pin (plan M74)
+    priority: Annotated[int, Field(ge=1, le=4)] | None = None  # rack stack order (plan M76)
 
     @model_validator(mode="after")
     def _consistent(self) -> "Equipment":

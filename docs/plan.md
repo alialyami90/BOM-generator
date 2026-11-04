@@ -263,6 +263,7 @@ equipment:                             # what the layout places (design 3.2)
   - { id: ext-fw, part_id: FGR-60F, role: firewall, redundant: true, l2_ports: 1 }
   - { id: gps, part_id: SEL-2488, role: other, l2_ports: 1, l2_speed: 100M } # side: none
     # a common row may add panel_hint: 2, its units' panel when they fit, not a pin (M74)
+    # any row may add priority: 1-4, its rack stack order instead of its category's (M76)
   # id: unique; overrides and the UI name ids, never tags
   # role: l1_switch | l2_switch | ext_switch | firewall | fopp | other
   # redundant (one unit per side) or side: none | a | b; qty (not on l1_switch);
@@ -1324,7 +1325,8 @@ design basis says) are not milestones.
   design basis tagging (`nameplate_pattern`), defaulting to today's tag text.
 - **M76 — Rack priority per row.** *W4.* Review step 4. `Equipment.priority: 1–4` overrides the
   category's stack priority (spec "Where in the panel"); Parts row menu "Rack priority". Golden
-  unchanged when unset.
+  unchanged when unset. In review. The priority is a select on the row's Panel line, beside the
+  panel hint, rather than in the row menu (the menu is closed while the page has unsaved edits).
 - **M77 — Overrides in Checks, reasons for risky ones, the remaining rule texts.** *Lead; ADR.* Review
   "The automation contract" points 4 to 6. Checks gets an *Overrides* group listing every override with
   its automatic value and reason; an override that weakens a check (a smaller breaker, fewer spares or

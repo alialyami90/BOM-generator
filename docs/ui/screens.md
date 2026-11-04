@@ -172,6 +172,7 @@ with the save bar; everything on it is saved together.
      panels in; **Move up** and **Move down** in each row's menu change it.
      A common row (not A and B) has a **Panel** select, Automatic or a panel number (M74): not a
      pin, so a unit that does not fit there goes where there is room and Panels warns.
+     Every row has a **Rack priority** select beside it (M76): Automatic (its category's) or 1 to 4.
   4. **Catalogue brands:** MCB make and series (AC and DC, one select each, as in Settings) and Terminal
      blocks. No part number, no overrides.
 
