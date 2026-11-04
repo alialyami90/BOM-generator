@@ -1027,3 +1027,17 @@ def test_spares_page_and_preview_tab() -> None:
     assert "['spares_list', 'items', key]" in spares
     preview = (UI_DIR / "screens-preview.js").read_text(encoding="utf-8")
     assert "sparesView(d.spares)" in preview
+
+
+def test_suggest_cables_dialog_cable_columns_and_preview_tab() -> None:
+    # plan M65: Suggest cables… on Loose material, cable columns, and a Cable Schedule tab.
+    loose = (UI_DIR / "screens-loose.js").read_text(encoding="utf-8")
+    assert "Bridge.call('suggest_cables'" in loose
+    assert "Bridge.call('accept_cables'" in loose
+    assert "'fed_from', 'cable']" in loose  # Save keeps a row's cable data
+    assert "<th>From</th><th>To</th><th>Cord</th>" in loose
+    assert '<th style="min-width:150px">From</th>' in loose
+    assert 'title="Save or discard your changes first"' in loose
+    preview = (UI_DIR / "screens-preview.js").read_text(encoding="utf-8")
+    assert "cablesView(d.cables)" in preview
+    assert ".dialog--wide" in (UI_DIR / "styles.css").read_text(encoding="utf-8")

@@ -16,8 +16,9 @@ from bomgen.engine.errors import EngineError
 from bomgen.engine.pipeline import build as build_bom
 from bomgen.engine.spares import spares
 from bomgen.library_store.store import LibraryStore
-from bomgen.models.bom import BomLine, BomTable, BuildResult, Qty, QtySum
+from bomgen.models.bom import BomLine, BomTable, BuildResult, LooseTable, Qty, QtySum
 from bomgen.models.calc import CabinetHeat, LineRef, PowerBlock, PowerLine
+from bomgen.sheets.cable_sheet import cable_type, has_cables
 from bomgen.sheets.history_sheet import history_rows
 
 
@@ -218,8 +219,29 @@ def preview_page(project_file: Path, substation_id: str, store: LibraryStore) ->
             "sheet": sheet_names.spare_parts,
             "rows": [line.model_dump(mode="json") for line in spare_lines],
         },
+        "cables": None  # plan M65: the sheet is written once a loose row has cable data
+        if not has_cables(result.loose)
+        else {"sheet": sheet_names.cable_schedule, "rows": _cable_rows(result.loose)},
         "history": None  # ADR 0036: the sheet is written once there is a row
         if not (history := history_rows(loaded))
         else {"sheet": sheet_names.revision_history, "rows": [r._asdict() for r in history]},
         **_sheets(result, names),
     }
+
+
+def _cable_rows(loose: LooseTable | None) -> list[dict[str, Any]]:
+    assert loose is not None
+    return [
+        {
+            "from_tag": line.cable.from_tag,
+            "to_tag": line.cable.to_tag,
+            "type": cable_type(line),
+            "length_m": line.cable.length_m,
+            "qty": line.qty,
+            "make": line.make,
+            "model": line.model,
+            "ordering_code": line.ordering_code,
+        }
+        for line in loose.lines
+        if line.cable is not None
+    ]
