@@ -10,7 +10,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass, replace
 
 from bomgen.engine.ac_dist import ac_distribution
-from bomgen.engine.assemble import mark_revisions
+from bomgen.engine.assemble import mark_revisions, mark_rows
 from bomgen.engine.dc_dist import dc_distribution, single_fed_loads
 from bomgen.engine.enclosure import enclosure_item
 from bomgen.engine.grounding import grounding, misc_items
@@ -112,7 +112,7 @@ def build(loaded: LoadedSubstation) -> BuildResult:
                 rule=fan_rule(count, airflow, required, larger=draft.fan.part_id != catalogue_fan),
             )
         )
-    return BuildResult(
+    result = BuildResult(
         panels=panels,
         loose=loose,
         power=power,
@@ -135,6 +135,7 @@ def build(loaded: LoadedSubstation) -> BuildResult:
         ),
         nameplates=tuple(p for p in plates if p.plates),
     )
+    return mark_rows(result, loaded.substation.revision_marks)  # plan M79
 
 
 def _draft(

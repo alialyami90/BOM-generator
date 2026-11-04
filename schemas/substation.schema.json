@@ -1236,6 +1236,13 @@
           "title": "File",
           "type": "string"
         },
+        "marked": {
+          "items": {
+            "$ref": "#/$defs/RowMark"
+          },
+          "title": "Marked",
+          "type": "array"
+        },
         "overrides": {
           "items": {
             "$ref": "#/$defs/OverrideNote"
@@ -1926,6 +1933,63 @@
       "title": "PurdueLevel",
       "type": "string"
     },
+    "RowMark": {
+      "additionalProperties": false,
+      "description": "A row marked as revised for the next issue (plan M79): one the compare can't see.\n``panel_id`` None is the loose material; the row is found by its tag.",
+      "properties": {
+        "columns": {
+          "items": {
+            "enum": [
+              "A",
+              "B",
+              "C",
+              "D",
+              "E",
+              "F",
+              "G",
+              "H"
+            ],
+            "type": "string"
+          },
+          "title": "Columns",
+          "type": "array"
+        },
+        "panel_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Panel Id"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "tag": {
+          "minLength": 1,
+          "title": "Tag",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tag"
+      ],
+      "title": "RowMark",
+      "type": "object"
+    },
     "SfpChoice": {
       "additionalProperties": false,
       "description": "The SFP model picked for one port speed and media of a switch (ADR 0024), and the\nspare and extra SFPs on each of its BOM rows (plan M49). No ``part_id`` keeps the\nautomatic pick; no ``spare`` keeps the project's.",
@@ -2516,6 +2580,13 @@
         "type": "string"
       },
       "title": "Panels",
+      "type": "array"
+    },
+    "revision_marks": {
+      "items": {
+        "$ref": "#/$defs/RowMark"
+      },
+      "title": "Revision Marks",
       "type": "array"
     },
     "spares": {

@@ -43,6 +43,15 @@ the agent implementation plan reserves this ADR for milestone M66. The sheet its
 6. **Previous issues outside the tool** keep working through the picker; a record can't be made
    for a file the tool didn't write.
 
+## Amendment (2026-11-04, plan M79): rows marked as revised
+
+A change the compare can't see (new firmware behind the same ordering code, say) is marked by
+hand: `revision_marks` on the substation lists rows by panel (none for loose material) and tag,
+with the columns to highlight (B to H by default) and an optional reason. The build highlights
+them as OUT-8 does; a mark whose row is gone is ignored. *Build as issued…* first shows the change
+list, the compare's changes then the marked rows, and recording the issue copies the marks into the
+record's `marked` and clears `revision_marks`, so they belong to that issue only.
+
 ## Consequences
 
 - The second and later builds compare with no clicks, and the history sheet and record agree

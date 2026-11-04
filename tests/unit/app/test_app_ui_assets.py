@@ -1081,3 +1081,13 @@ def test_ied_schedule_sheet_switch_and_preview_tab() -> None:
     assert "ACTIONS['build-ieds'] = includeSheet('ied_schedule');" in verify
     preview = (UI_DIR / "screens-preview.js").read_text(encoding="utf-8")
     assert "iedView(d.ied_schedule)" in preview
+
+
+def test_mark_as_revised_in_preview_and_the_change_list_on_build_as_issued() -> None:
+    # plan M79: Preview marks a row for the next issue; Build as issued lists the changes first.
+    preview = (UI_DIR / "screens-preview.js").read_text(encoding="utf-8")
+    assert "['revision_marks'], marks.length ? marks : null" in preview
+    assert 'data-action="pv-mark"' in preview
+    verify = (UI_DIR / "screens-verify.js").read_text(encoding="utf-8")
+    assert "Bridge.call('issue_changes', S.project.file, S.sub," in verify
+    assert "${changeList(c)}" in verify

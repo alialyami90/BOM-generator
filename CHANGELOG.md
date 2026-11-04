@@ -30,6 +30,10 @@ project uses [Semantic Versioning](https://semver.org/).
 - IED Schedule sheet (M80, ADR 0035 amendment): Build can add a reference sheet of the IED
   schedule, one row per IED row and port need with each side's ports, then totals per speed, media
   and landing as formulas, so the L1 switch count can be audited. Preview has the tab.
+- Mark as revised (M79, ADR 0036 amendment): Preview can mark a BOM row as revised, with a reason,
+  when the compare can't see the change. The row is highlighted yellow, *Build as issued…* lists the
+  compare's changes and the marked rows before writing, and the issue records the marks and clears
+  them (`revision_marks`, `issues[].marked`).
 
 ## [0.4.0] - 2026-11-04
 

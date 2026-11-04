@@ -473,6 +473,22 @@ class OverrideNote(InputModel):
     reason: str | None = None
 
 
+MarkColumn = Literal["A", "B", "C", "D", "E", "F", "G", "H"]
+
+
+WHOLE_ROW: tuple[MarkColumn, ...] = ("B", "C", "D", "E", "F", "G", "H")
+
+
+class RowMark(InputModel):
+    """A row marked as revised for the next issue (plan M79): one the compare can't see.
+    ``panel_id`` None is the loose material; the row is found by its tag."""
+
+    panel_id: str | None = None
+    tag: NonBlank
+    columns: list[MarkColumn] = Field(default_factory=lambda: list(WHOLE_ROW))
+    reason: str | None = None
+
+
 class IssueRecord(InputModel):
     """One issued workbook (ADR 0036): ``file`` is relative to ``substation.yaml`` when
     inside the project folder, ``sha256`` the file as written."""
@@ -487,6 +503,7 @@ class IssueRecord(InputModel):
     approved: str | None = None
     accepted_warnings: list[AcceptedWarning] = Field(default_factory=list)
     overrides: list[OverrideNote] = Field(default_factory=list)  # the risky ones (ADR 0040)
+    marked: list[RowMark] = Field(default_factory=list)  # plan M79: the rows marked for it
 
 
 class Substation(InputModel):
@@ -510,6 +527,7 @@ class Substation(InputModel):
     issues: list[IssueRecord] = Field(default_factory=list)  # ADR 0036, in issue order
     checks: Checks | None = None  # ADR 0036
     spares_list: SparesList | None = None  # plan M64
+    revision_marks: list[RowMark] = Field(default_factory=list)  # plan M79: for the next issue
 
     @model_validator(mode="after")
     def _consistent(self) -> "Substation":
