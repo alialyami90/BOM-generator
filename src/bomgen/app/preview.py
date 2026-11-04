@@ -20,6 +20,7 @@ from bomgen.models.bom import BomLine, BomTable, BuildResult, LooseTable, Qty, Q
 from bomgen.models.calc import CabinetHeat, LineRef, PowerBlock, PowerLine
 from bomgen.sheets.cable_sheet import cable_type, has_cables
 from bomgen.sheets.history_sheet import history_rows
+from bomgen.sheets.notes_sheet import noted_rows
 
 
 def _qty(qty: Qty) -> int | str:
@@ -48,6 +49,7 @@ def _rows(table: BomTable) -> list[dict[str, Any]]:
             "hwio": line.hwio,
             "revised": sorted(line.revised),
             "separator_before": index in separators,
+            "note": line.note,  # plan M71: preview only
         }
         for index, line in enumerate(table.lines)
     ]
@@ -222,6 +224,13 @@ def preview_page(project_file: Path, substation_id: str, store: LibraryStore) ->
         "cables": None  # plan M65: the sheet is written once a loose row has cable data
         if not has_cables(result.loose)
         else {"sheet": sheet_names.cable_schedule, "rows": _cable_rows(result.loose)},
+        "notes": None  # plan M71: the sheet is written when chosen and a row has a note
+        if "notes" not in loaded.substation.output.include
+        or not (noted := noted_rows(result, sheet_names.loose_material))
+        else {
+            "sheet": sheet_names.notes,
+            "rows": [{"sheet": s, "tag": t, "description": d, "note": n} for s, t, d, n in noted],
+        },
         "history": None  # ADR 0036: the sheet is written once there is a row
         if not (history := history_rows(loaded))
         else {"sheet": sheet_names.revision_history, "rows": [r._asdict() for r in history]},

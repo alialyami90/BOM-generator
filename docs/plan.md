@@ -1303,7 +1303,7 @@ design basis says) are not milestones.
   (e.g. "Miscellaneous: cable ties, labels"). Panel editor: a Notes field on the Document tab and the
   rows on Options. *Spec sentence* for the group H row. Acceptance: a misc row prints last in group H
   on its panel only; notes appear nowhere in the workbook.
-- **M71 — Row notes and a notes column in Preview.** *W2.* Review F16, steps 7 and 10. `note` on
+- **M71 — Row notes and a notes column in Preview.** *W2. In review.* Review F16, steps 7 and 10. `note` on
   equipment rows, hand-written panel rows and loose items; Preview shows a Notes column (preview
   only); Build offers an optional Notes sheet (ADR 0035 amendment, one paragraph). Acceptance: a note
   typed on Parts shows in Preview and on the Notes sheet when chosen, nowhere else.

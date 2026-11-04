@@ -81,6 +81,7 @@ class DeviceInstance(InputModel):
     first_nn: PositiveInt | None = None  # first {nn} of the row, continuing a range (ADR 0013)
     cable_manager: bool | None = None  # None: the category's rule (ADR 0013, amended)
     alarm_on_branch_mcb: bool | None = None  # None: the library's value (plan M58)
+    note: str | None = None  # plan M71: never printed on a BOM sheet
 
 
 class PortAllocation(InputModel):

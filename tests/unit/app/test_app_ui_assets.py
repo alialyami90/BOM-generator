@@ -1043,7 +1043,7 @@ def test_suggest_cables_dialog_cable_columns_and_preview_tab() -> None:
     loose = (UI_DIR / "screens-loose.js").read_text(encoding="utf-8")
     assert "Bridge.call('suggest_cables'" in loose
     assert "Bridge.call('accept_cables'" in loose
-    assert "'fed_from', 'cable']" in loose  # Save keeps a row's cable data
+    assert "'fed_from', 'cable', 'note']" in loose  # Save keeps a row's cable data
     assert "<th>From</th><th>To</th><th>Cord</th>" in loose
     assert '<th style="min-width:150px">From</th>' in loose
     assert 'title="Save or discard your changes first"' in loose
@@ -1058,3 +1058,18 @@ def test_project_has_a_vendor_lists_tab() -> None:
     assert "['vendors', 'Vendor lists']" in proj
     assert "Bridge.call('save_vendor_list', curProject().file, i, entry)" in proj
     assert "Bridge.call('remove_vendor_list', curProject().file, i)" in proj
+
+
+def test_row_notes_on_parts_panels_loose_preview_and_build() -> None:
+    # plan M71: a note field on each input row, a Notes column in Preview, a Notes sheet switch.
+    parts = (UI_DIR / "screens-parts.js").read_text(encoding="utf-8")
+    assert "['note', 'Note (not printed)', () => 'None']" in parts
+    editor = (UI_DIR / "screens-panel-editor.js").read_text(encoding="utf-8")
+    assert "first_nn: 'int', note: 'text' }" in editor
+    loose = (UI_DIR / "screens-loose.js").read_text(encoding="utf-8")
+    assert "'cable', 'note']" in loose
+    preview = (UI_DIR / "screens-preview.js").read_text(encoding="utf-8")
+    assert "notesView(d.notes)" in preview
+    assert "Preview only: never printed on the BOM" in preview
+    verify = (UI_DIR / "screens-verify.js").read_text(encoding="utf-8")
+    assert "ACTIONS['build-notes'] = includeSheet('notes');" in verify
