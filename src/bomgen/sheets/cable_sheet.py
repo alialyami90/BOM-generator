@@ -7,7 +7,7 @@ Loose Material quantity cell (OUT-5).
 
 from collections.abc import Mapping
 
-from bomgen.models.bom import LooseTable
+from bomgen.models.bom import BomLine, LooseTable
 from bomgen.models.calc import LineRef
 from bomgen.models.sheet import CellRange, CellValue, Formula, HeaderFooter, PrintSetup, SheetModel
 from bomgen.sheets import styles
@@ -34,6 +34,16 @@ def has_cables(loose: LooseTable | None) -> bool:
     return loose is not None and any(line.cable is not None for line in loose.lines)
 
 
+def cable_type(line: BomLine) -> str:
+    """The TYPE cell: the description's first line, then the speed and media given."""
+    kind = line.description.split("\n")[0]
+    cable = line.cable
+    if cable is not None and (cable.speed is not None or cable.media is not None):
+        given = (c.value for c in (cable.speed, cable.media) if c is not None)
+        kind += f" ({' '.join(given)})"
+    return kind
+
+
 def cable_sheet(
     name: str,
     substation: str,
@@ -58,15 +68,11 @@ def cable_sheet(
         row += 1
         sr_no: CellValue = 1 if row == 3 else Formula(text=f"=A{row - 1}+1", result=row - 2)
         source, source_row = cells[LineRef(panel_id=None, line=index)]
-        kind = line.description.split("\n")[0]
-        if cable.speed is not None or cable.media is not None:
-            given = (c.value for c in (cable.speed, cable.media) if c is not None)
-            kind += f" ({' '.join(given)})"
         values = (
             sr_no,
             cable.from_tag,
             cable.to_tag,
-            kind,
+            cable_type(line),
             cable.length_m,
             Formula(text=f"={quote_sheet(source)}!{QTY_COL}{source_row}", result=line.qty),
             line.make,

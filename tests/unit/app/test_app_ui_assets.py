@@ -1022,3 +1022,31 @@ def test_checks_leads_a_design_basis_item_to_its_field() -> None:
     assert 'data-action="checks-field" data-loc="${esc(i.values.field)}">Go to the field' in verify
     ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
     assert "hash: '#/settings/basis', focus: id(`st-db_${f}`)" in ui
+
+
+def test_spares_page_and_preview_tab() -> None:
+    # plan M64: a Spares page under Loose material and a Spare Parts Preview tab.
+    ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    assert "navItem('#/spares', 'shield', 'Spares'" in ui
+    assert '<script src="screens-spares.js"></script>' in (UI_DIR / "index.html").read_text(
+        encoding="utf-8"
+    )
+    spares = (UI_DIR / "screens-spares.js").read_text(encoding="utf-8")
+    assert "Bridge.call('spares'" in spares
+    assert "['spares_list', 'items', key]" in spares
+    preview = (UI_DIR / "screens-preview.js").read_text(encoding="utf-8")
+    assert "sparesView(d.spares)" in preview
+
+
+def test_suggest_cables_dialog_cable_columns_and_preview_tab() -> None:
+    # plan M65: Suggest cables… on Loose material, cable columns, and a Cable Schedule tab.
+    loose = (UI_DIR / "screens-loose.js").read_text(encoding="utf-8")
+    assert "Bridge.call('suggest_cables'" in loose
+    assert "Bridge.call('accept_cables'" in loose
+    assert "'fed_from', 'cable']" in loose  # Save keeps a row's cable data
+    assert "<th>From</th><th>To</th><th>Cord</th>" in loose
+    assert '<th style="min-width:150px">From</th>' in loose
+    assert 'title="Save or discard your changes first"' in loose
+    preview = (UI_DIR / "screens-preview.js").read_text(encoding="utf-8")
+    assert "cablesView(d.cables)" in preview
+    assert ".dialog--wide" in (UI_DIR / "styles.css").read_text(encoding="utf-8")

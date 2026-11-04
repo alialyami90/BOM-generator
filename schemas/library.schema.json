@@ -472,6 +472,19 @@
           "default": null,
           "title": "Inrush Ms"
         },
+        "length_m": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Length M"
+        },
         "load_type": {
           "anyOf": [
             {
@@ -501,6 +514,17 @@
           ],
           "default": null,
           "title": "Make"
+        },
+        "media": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Media"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "min_branch_mcb_a": {
           "anyOf": [

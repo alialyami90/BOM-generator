@@ -542,5 +542,10 @@ The rules are in ADR 0013 and the design spec (R1–R10).
   with it, fetch the node again from its parent before appending, or the edit is lost (M60b).
 - An engine error raised while `io/edit.py` previews the edited file came after the write and
   crashed the endpoint; `_preview` now returns None on `EngineError`, so the check report shows it.
+- **W2 (2026-11-04).** A form page's `clean()` keeps only the keys it lists, and Save writes
+  the cleaned item over the file's, so a new model field (here `cable`) must join that list or an
+  edit silently drops it (M65c).
+- A table that can grow wide inside a `.stack` grid pushes the whole page sideways; give the grid
+  child `min-width:0` so the table scrolls inside its `.table-wrap` (M65c).
 - Playwright `evaluate` on the Proxy bridge stub hung for `choose_file`; the screenshot server reads
   the chosen path from a `choose.txt` beside it instead.

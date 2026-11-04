@@ -236,6 +236,7 @@ table.table { width: 100%; border-collapse: separate; border-spacing: 0; font-si
 /* ---------- dialogs, popovers, toast ---------- */
 .scrim { position: fixed; inset: 0; background: rgba(5, 20, 33, 0.5); display: grid; place-items: center; z-index: 50; animation: fade var(--duration-base) var(--ease-out); }
 .dialog { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-dialog); width: min(520px, calc(100vw - 48px)); max-height: calc(100vh - 48px); display: flex; flex-direction: column; animation: rise var(--duration-slow) var(--ease-out); }
+.dialog--wide { width: min(880px, calc(100vw - 48px)); }
 .dialog h2 { padding: var(--space-5) var(--space-5) var(--space-2); font-size: 18px; }
 .dialog .body { padding: 0 var(--space-5) var(--space-4); color: var(--color-text); flex: 1 1 auto; min-height: 0; overflow: auto; }
 .dialog h2, .dialog .foot { flex: none; }
