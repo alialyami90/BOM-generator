@@ -598,3 +598,18 @@ def test_external_links_are_edited_on_parts_and_counted_on_the_result_card(
     data = ok(app.remove_external_link(str(project), "gis01", 0))
     assert data["row"]["name"] == "CCR"
     assert data["page"]["parts"]["links"] == []
+
+
+def test_a_common_row_offers_a_panel_hint(project: Path, store: LibraryStore) -> None:
+    """M74: a common row may be steered to a panel; a redundant row may not."""
+    found = parts(project, store)
+    assert row(found, "gps")["placement"] == {"panel_hint": None, "steerable": True}
+    assert row(found, "l2")["placement"]["steerable"] is False
+
+
+def test_a_panel_hint_on_a_redundant_row_is_refused(app: api.Api, project: Path) -> None:
+    l2 = 1  # the example's redundant L2 switch row
+    problem = ok(
+        app.check_substation_field(str(project), "gis01", ["equipment", l2, "panel_hint"], 2)
+    )
+    assert "panel_hint steers a common device" in problem

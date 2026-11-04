@@ -534,6 +534,19 @@
           ],
           "default": null
         },
+        "panel_hint": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Panel Hint"
+        },
         "part_id": {
           "anyOf": [
             {
