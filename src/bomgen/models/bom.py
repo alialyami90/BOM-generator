@@ -201,3 +201,25 @@ class SummaryLine(OutputModel):
 
 class SummaryTable(OutputModel):
     lines: tuple[SummaryLine, ...]
+
+
+class SpareLine(OutputModel):
+    """One Spare Parts line (ADR 0035, plan M64). ``summary_line`` indexes the Summary BOM
+    line it counts; ``percent`` and ``minimum`` are the rule a policy line follows, unset
+    for an overridden line or an extra."""
+
+    description: str
+    installed: int | None  # None for an extra
+    spare: int
+    make: str | None = None
+    model: str | None = None
+    ordering_code: str | None = None
+    basis: str
+    summary_line: int | None = None
+    percent: float | None = None
+    minimum: int = 0
+    overridden: bool = False
+
+
+class SparesTable(OutputModel):
+    lines: tuple[SpareLine, ...]

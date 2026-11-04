@@ -355,6 +355,29 @@ class SparesPolicy(InputModel):
     categories: list[Category] = Field(default_factory=list)
 
 
+class SpareExtra(InputModel):
+    """A spare the policy does not give: a library part or a free-text item (plan M64)."""
+
+    part_id: PartId | None = None
+    description: str | None = None
+    qty: PositiveInt
+
+    @model_validator(mode="after")
+    def _part_or_description(self) -> "SpareExtra":
+        if (self.part_id is None) == (not (self.description or "").strip()):
+            raise ValueError("a spare extra names a library part_id or a description (exactly one)")
+        return self
+
+
+class SparesList(InputModel):
+    """The substation's edits to the spares list (plan M64): a spare quantity per ordering
+    code (the model when a part has none), codes left out, and extra items."""
+
+    items: dict[str, NonNegativeInt] = Field(default_factory=dict)
+    excluded: list[str] = Field(default_factory=list)
+    extra: list[SpareExtra] = Field(default_factory=list)
+
+
 class DesignBasis(InputModel):
     """What the engineer states first (ADR 0031). It only sets defaults: a value the
     substation writes itself wins. Unset keys mean today's behaviour."""
@@ -434,6 +457,7 @@ class Substation(InputModel):
     design_basis: DesignBasis | None = None  # ADR 0031
     issues: list[IssueRecord] = Field(default_factory=list)  # ADR 0036, in issue order
     checks: Checks | None = None  # ADR 0036
+    spares_list: SparesList | None = None  # plan M64
 
     @model_validator(mode="after")
     def _consistent(self) -> "Substation":

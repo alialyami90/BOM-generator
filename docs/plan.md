@@ -323,6 +323,10 @@ design_basis:                          # optional (ADR 0031, M52); only sets def
   spares_policy: { percent: { sfp: 10 }, minimum_per_part: 1, categories: [sfp] }  # M64
   vendor_list: client-avl              # a project vendor list's key (M53)
   notes: "Client SCADA spec rev 2"
+spares_list:                           # edits to the Spare Parts sheet (M64, ADR 0035)
+  items: { A9F74202: 5 }               # spare qty per ordering code (model when none); wins over the policy
+  excluded: [FR-TRAN-SX]               # left off the list
+  extra: [{ part_id: SK3243-FAN, qty: 2 }, { description: "Fuse kit", qty: 1 }]
 ```
 
 **Templates** (plan M55) are `templates/<key>.yaml` in the project folder (Q63), schema
@@ -1197,7 +1201,7 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
   only into a panel within it, and a unit that fits nowhere is a `panel-limit` layout error naming the
   unit and the U it is short. Moves past the cap are unknown panels. No "Exactly n" (Q68).
 - **M63 — Summary BOM.** *W2; ADR 0035.* Done (#324). `engine/summary.py` groups every panel's and the loose material's lines by (make, model, ordering code), free text by (make, description), a text quantity on its own; `sheets/summary_sheet.py` writes it after Heat Calculations when `output.include` has `summary_bom`, quantities as `SUM` formulas over the BOM sheets' quantity cells. Build has the switch and *Export summary as CSV*; Preview a *Summary BOM* tab.
-- **M64 — Spares list.** *W2; ADR 0035, Q65.* Planned.
+- **M64 — Spares list.** *W2; ADR 0035, Q65.* Split. **M64a** (engine, sheet) in review: `engine/spares.py` takes each Summary BOM line whose part's category the design basis `spares_policy` names, spare = `max(minimum_per_part, ceil(percent × installed))` with the rule text, then `spares_list` overrides, exclusions and extras; the Spare Parts sheet after the Summary BOM, INSTALLED QTY a formula on the Summary BOM when written, a policy line's SPARE QTY `=MAX(min,ROUNDUP(C×pct/100,0))`. No `round` field: always up, per Q65's recommended answer. Only library parts have a category, so MCB and terminal lines get spares by override only; the plan's "MCB lines at their minimums" needs a category for catalogue lines and is left out. On the example with 10% on SFPs and minimum 1: 1 each of the LX, 100BASE-FX and FR-TRAN SFPs (4 installed each) and 9 of the 1000BASE-SX (84 installed), not the plan's "3 per type". **M64b** (app) planned: the Spares page and a Preview tab.
 - **M65 — Cable schedule.** *W2; ADR 0035, Q66, Q71.* Split. **M65a** (model, sheet) in review: `loose_material.items[].cable` (`from_tag`, `to_tag`, `length_m`, `media`, `speed`) and the Cable Schedule sheet after the Summary BOM, written when any loose row has cable data, quantities as formulas on the Loose Material cells; no `output.include` switch, like the history sheet. **M65b** planned: the suggestions from the port plans (Q71) with design-basis lengths (Q66), Suggest cables on Loose material, the cable columns and a Preview tab.
 - **M66 — Revision history and recorded issues.** *W2; ADR 0036, Q67.* Done, split. **M66a** (engine, CLI) done (#349): `issues:` records, `checks.accepted:`, register names, the Revision History sheet, the automatic compare with the last recorded issue when its hash matches (else a warning and the picker), `bomgen build --issue`. **M66b** (app) done (#351): Build as issued, Accept with reason on Checks, names in Project › Documents (the register), Preview tab. The history sheet is written whenever it has rows; it has no `output.include` switch.
 - **M67 — Record sources and lifecycle.** *W1; ADR 0037 (accepted).* In two PRs so that W5's M53
@@ -1648,6 +1652,12 @@ SFP slots any media of their speed). Should `ied_count` keep today's rule, every
 whatever its speed and media (recommended: no project's switch count moves), or act strictly as
 n dual 100M MM IEDs, so copper and 1G IED ports stop counting? The two differ only on L1 switches
 with IED ports of more than one speed or media. Until Ali answers, M60a keeps today's rule.
+
+**Q65 — How the spares list sets spare quantities** (M64, ADR 0035). *Open.* Spare = installed ×
+the policy's percent for each chosen category, rounded up, at least the minimum, every line
+editable with items added or left out (recommended); the same with no minimum; or no rule, every
+spare typed. Until Ali answers, M64a ships the first, with `minimum_per_part` as the policy states it
+(default 0).
 
 **Q64 — External links beside the device rows' L2 ports** (M61). *Open.* Keep `l2_ports` on
 equipment rows for the devices in the cabinets and add the links that leave the substation as
