@@ -76,6 +76,9 @@ class EquipmentRole(StrEnum):
     CONSOLE = "console"
     ANNUNCIATOR = "annunciator"
     TIME_ACCESSORY = "time_accessory"
+    # a mixed network (ADR 0038): sized as other
+    REDBOX = "redbox"
+    MEDIA_CONVERTER = "media_converter"
 
 
 class Side(StrEnum):

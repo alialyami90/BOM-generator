@@ -264,6 +264,7 @@ equipment:                             # what the layout places (design 3.2)
   - { id: gps, part_id: SEL-2488, role: other, l2_ports: 1, l2_speed: 100M } # side: none
     # a common row may add panel_hint: 2, its units' panel when they fit, not a pin (M74)
     # any row may add priority: 1-4, its rack stack order instead of its category's (M76)
+    # role: redbox or media_converter draws a mixed network, sized as other (ADR 0038, M73)
   # id: unique; overrides and the UI name ids, never tags
   # role: l1_switch | l2_switch | ext_switch | firewall | fopp | other
   # redundant (one unit per side) or side: none | a | b; qty (not on l1_switch);
@@ -1315,7 +1316,9 @@ design basis says) are not milestones.
   In review.
 - **M73 — RedBox and media converter roles.** *W4; ADR.* Review step 3. Equipment roles `redbox` and
   `media_converter` (library categories, tag types, DC feeds, L2 link) so a mixed network can be drawn;
-  PRP and HSR stay refused. Acceptance: a media converter row builds with its MCBs, power and tag.
+  PRP and HSR stay refused. Acceptance: a media converter row builds with its MCBs, power and tag. In review.
+  ADR 0038 (accepted). Parts' Add a device offers both; a new row starts with 1 L2 port (RedBox
+  100M, media converter 1G).
 - **M74 — Steer common devices to a panel.** *W4.* Review step 5. `Equipment.panel_hint: PositiveInt`
   puts every unit of a common row in that panel without pinning; the fill reports when it doesn't fit.
   ADR 0013 amendment paragraph. In review. The Parts row gets a Panel select (Automatic or a

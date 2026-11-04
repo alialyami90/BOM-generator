@@ -13,6 +13,10 @@ project uses [Semantic Versioning](https://semver.org/).
   the busier side (all, reserved, kept spare, in use, free) with the rule behind them, and its L1
   and L2 switch counts are derived values: `network.l1_per_side` and `l2_per_side` add switches
   above the sizing's count; a lower count stops the sizing and names the shortfall (Q72).
+- RedBox and media converter roles (M73, ADR 0038): library categories `redbox` and
+  `media_converter` and equipment roles of the same names, sized as any other device, tagged,
+  stacked with the network devices and linked to the L2 switches by their own L2 link. Parts'
+  Add a device offers both. PRP and HSR stay refused.
 - Rack priority per row (M76): `priority` (1 to 4) on an equipment row replaces its category's
   stack order in the panel; Parts has a Rack priority select on each row.
 - Steer a common device to a panel (M74): `panel_hint` on a common equipment row puts its units

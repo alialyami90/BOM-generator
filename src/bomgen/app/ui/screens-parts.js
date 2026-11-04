@@ -584,7 +584,7 @@
   };
   ACTIONS['pp-add'] = () => keep(() => { UI.addOpen = !UI.addOpen; UI.menu = -1; });
   /* Add a device: the model takes no row without a part, so the part is picked first. */
-  const ROLE_OF = { patch_panel: 'fopp', firewall: 'firewall', network_switch: 'ext_switch', kvm: 'kvm', console: 'console' };
+  const ROLE_OF = { patch_panel: 'fopp', firewall: 'firewall', network_switch: 'ext_switch', kvm: 'kvm', console: 'console', redbox: 'redbox', media_converter: 'media_converter' };
   const aName = (label) => {  // "an RTAC", "a KVM", "an I/O rack", "a fibre patch panel"
     const s = label.split(' ').map((w) => (/^[A-Z/]{2,}$/.test(w) ? w : w.toLowerCase())).join(' ');
     return `${/^[aeiou]/.test(s) || /^[AEFHILMNORSX][A-Z/]/.test(s) ? 'an' : 'a'} ${s}`;

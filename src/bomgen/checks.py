@@ -223,6 +223,8 @@ TAGGED_CATEGORIES = frozenset(
         Category.RTAC,
         Category.IO_CHASSIS,
         Category.WORKSTATION,
+        Category.REDBOX,
+        Category.MEDIA_CONVERTER,
     }
 )
 

@@ -47,6 +47,8 @@ ROLE_LABEL = {
     EquipmentRole.EXT_SWITCH: "External switch",
     EquipmentRole.FIREWALL: "Firewall",
     EquipmentRole.FOPP: "Fibre patch panel",
+    EquipmentRole.REDBOX: "RedBox",
+    EquipmentRole.MEDIA_CONVERTER: "Media converter",
 }
 # a row with role "other" is named by its part's category
 CATEGORY_LABEL = {
@@ -63,6 +65,8 @@ CATEGORY_LABEL = {
     Category.CONSOLE: "Console",
     Category.MONITOR: "Monitor",
     Category.PERIPHERAL: "Keyboard and mouse",
+    Category.REDBOX: "RedBox",
+    Category.MEDIA_CONVERTER: "Media converter",
 }
 ROLE_CATEGORY = {
     EquipmentRole.TIME_SERVER: Category.GPS_CLOCK,
@@ -77,6 +81,8 @@ ROLE_CATEGORY = {
     EquipmentRole.ANNUNCIATOR: Category.ANNUNCIATOR,
     EquipmentRole.FIREWALL: Category.FIREWALL,
     EquipmentRole.FOPP: Category.PATCH_PANEL,
+    EquipmentRole.REDBOX: Category.REDBOX,
+    EquipmentRole.MEDIA_CONVERTER: Category.MEDIA_CONVERTER,
 }
 # the design §3 rows a new substation starts with, in order
 DEFAULT_ROWS = (
@@ -96,6 +102,8 @@ ADD_CATEGORIES = (
     Category.FIREWALL,
     Category.NETWORK_SWITCH,
     Category.GATEWAY,
+    Category.REDBOX,  # ADR 0038
+    Category.MEDIA_CONVERTER,
     Category.RTAC,
     Category.IO_CHASSIS,
     Category.WORKSTATION,
@@ -105,7 +113,14 @@ ADD_CATEGORIES = (
     Category.PERIPHERAL,
 )
 NETWORK_CATEGORIES = frozenset(
-    {Category.NETWORK_SWITCH, Category.PATCH_PANEL, Category.FIREWALL, Category.GATEWAY}
+    {
+        Category.NETWORK_SWITCH,
+        Category.PATCH_PANEL,
+        Category.FIREWALL,
+        Category.GATEWAY,
+        Category.REDBOX,
+        Category.MEDIA_CONVERTER,
+    }
 )
 VALUES = (
     "height_u",
