@@ -43,6 +43,7 @@ class SheetNames(InputModel):
     heat_calculations: ExcelSheetName = "Heat Calculations"
     summary_bom: ExcelSheetName = "Summary BOM"  # ADR 0035
     revision_history: ExcelSheetName = "Revision History"  # ADR 0035, ADR 0036
+    spare_parts: ExcelSheetName = "Spare Parts"  # ADR 0035, plan M64
     cable_schedule: ExcelSheetName = "Cable Schedule"  # ADR 0035, plan M65
 
 

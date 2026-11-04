@@ -8,6 +8,7 @@ any (ADR 0036).
 
 from pathlib import Path
 
+from bomgen.engine.spares import spares
 from bomgen.engine.summary import summarize
 from bomgen.io.loader import LoadedSubstation
 from bomgen.models.bom import BomTable, BuildResult
@@ -21,6 +22,7 @@ from bomgen.sheets.header_footer import bom_header_footer, calc_header_footer, f
 from bomgen.sheets.history_sheet import history_rows, history_sheet
 from bomgen.sheets.nameplate_sheet import nameplate_sheet
 from bomgen.sheets.power_sheet import BomSource
+from bomgen.sheets.spares_sheet import spares_sheet
 from bomgen.sheets.summary_sheet import summary_sheet
 
 
@@ -134,6 +136,20 @@ def build_workbook(
                 cells,
                 tables,
                 bom_header_footer(project_name, loaded.substation.substation.name, document, logo),
+            )
+        )
+    spare_table = spares(loaded, result)
+    if spare_table.lines:
+        substation = loaded.substation.substation.name
+        sheets.append(
+            spares_sheet(
+                names.spare_parts,
+                substation,
+                spare_table,
+                names.summary_bom if "summary_bom" in loaded.substation.output.include else None,
+                bom_header_footer(
+                    project_name, substation, loaded.documents[loaded.substation.document], logo
+                ),
             )
         )
     if has_cables(result.loose):
