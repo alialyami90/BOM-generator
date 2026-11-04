@@ -3,6 +3,16 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-11-04: v0.4.0 released, M48–M69 done (Lead)
+
+- **Base:** main `65837a3` (#370). Docs-only PR.
+- **Done:** the changelog section (#369) and the version bump (#370) published v0.4.0 with
+  `bomgen-setup-0.4.0.exe` and `default.bomlib` from psa-devices 1.16.0. All five workstreams'
+  milestones are merged (the entries below). `plan.md` marks M48–M69 Done and plans M70–M81 with a
+  coverage table of the workflow review (#364).
+- **Next:** hand out M70–M81 one PR each (owners in `plan.md`); ADR 0038 and Q72 are the next free
+  numbers, given out by the lead one at a time.
+
 ## 2026-11-04: W5 Setup and design basis, M51–M55 merged (W5)
 
 - **Base:** main `7540497` (#366). Docs-only PR.

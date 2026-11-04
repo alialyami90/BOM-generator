@@ -13,9 +13,9 @@ setup, and page headers/footers.
 
 ## Status
 
-v0.3.4 is released ([`CHANGELOG.md`](CHANGELOG.md)) and finishes the v0.3
-roadmap, M35 to M47 in `docs/plan.md`. The next work waits on Ali's review of
-it.
+v0.4.0 is released ([`CHANGELOG.md`](CHANGELOG.md)): the engineer-controlled
+workflow, M48 to M69 in `docs/plan.md`. Next are M70 to M81, the points of the
+workflow review that M48 to M69 left out.
 
 Done in v0.1:
 
@@ -125,7 +125,7 @@ preview"):
   a duplicate-tag check (ADR 0030), larger Rittal fans in psa-devices 1.11.0
   (ADR 0029), and the console sheet's 53.1 pt header row.
 
-On `main` for the next release (the v0.3 roadmap, M35 to M47):
+Done in v0.3.4 (the v0.3 roadmap, M35 to M47):
 
 - M35: the spec's "Automatic panel layout" section.
 - M36: Library › Catalogues edits every brand set: MCBs, aux contacts,
@@ -145,6 +145,28 @@ On `main` for the next release (the v0.3 roadmap, M35 to M47):
 - M46: an L2 link with no matching library SFP is a located problem on
   Parts, Checks and Build instead of stopping the engine.
 - M47: an edited panel-numbering pattern is no longer marked ASSUMED.
+
+Done in v0.4.0 (the engineer-controlled workflow, M48 to M69; the review in
+`docs/superpowers/specs/2026-11-03-engineering-workflow-review.md`):
+
+- M48: every computed value shows the rule it came from and can be
+  overridden and reset, starting with the main MCB.
+- M49: SFP quantities per switch with their rule, spare and extra SFPs.
+- M50, M56 to M58: a panel's enclosure, kind, housekeeping kit, breakers,
+  terminals, grounding busbars and branch-trip alarms are inputs with the
+  spec's values as defaults (ADRs 0032, 0033).
+- M51 to M55: a new substation asks for its cabinets and documents, a design
+  basis with voltages and tagging, client vendor lists, design-basis checks
+  and substation templates (ADR 0031).
+- M59: BOM text per row (purpose, tag, type code, first number, HWIO).
+- M60 to M62: an IED schedule with CSV import (ADR 0034), external links and
+  a maximum panel count.
+- M63 to M66: Summary BOM, Spare Parts, Cable Schedule and Revision History
+  sheets, a CSV extract, suggested cables, recorded issues and accepted
+  warnings (ADRs 0035, 0036).
+- M67 to M69: library parts carry a lifecycle state and a source for every
+  sized figure, with Review and Health tabs and "Propose for the library"
+  from Parts (ADR 0037); psa-devices 1.16.0 sources every shipped part.
 
 The terms project, substation, side and stream are defined in `docs/plan.md` →
 "Glossary".

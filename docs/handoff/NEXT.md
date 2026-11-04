@@ -71,7 +71,8 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
 9. **Q51** (annunciator mounted in a panel), **Q54** (power of the -2 SEL computers) and **Q55**
    (categories for the contractor's other part types) are open in plan §6.
 
-**Next work:** M19–M26 shipped in v0.3.0, and v0.3.1 fixed the blank-substation crash (STATE.md §1). Engine model changes (step 4) come from A4's plan.
+**Next work:** v0.4.0 shipped M48–M69 (STATE.md §1). M70–M81 are next, one PR each, in the order of
+`plan.md` "M70–M81"; M72, M73, M77 and M78 start with a card or an ADR.
 
 ## 4. When Ali's feedback arrives
 
