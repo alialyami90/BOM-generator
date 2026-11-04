@@ -191,6 +191,19 @@
         "cable_entry": {
           "$ref": "#/$defs/CableEntry"
         },
+        "colour": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Colour"
+        },
         "d_mm": {
           "exclusiveMinimum": 0,
           "title": "D Mm",
@@ -200,6 +213,19 @@
           "exclusiveMinimum": 0,
           "title": "H Mm",
           "type": "integer"
+        },
+        "ip_rating": {
+          "anyOf": [
+            {
+              "pattern": "^IP[0-9X]{2}[A-Z]?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ip Rating"
         },
         "make": {
           "title": "Make",
@@ -403,6 +429,18 @@
           "default": null,
           "title": "Lan"
         },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Notes"
+        },
         "options": {
           "$ref": "#/$defs/PanelOptions"
         },
@@ -502,6 +540,18 @@
           "pattern": "^[a-z0-9][a-z0-9_-]*$",
           "title": "Mirror Of",
           "type": "string"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Notes"
         },
         "options": {
           "additionalProperties": true,
@@ -641,6 +691,14 @@
           ],
           "default": null,
           "title": "Main Mcb Override A"
+        },
+        "misc_items": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Misc Items",
+          "type": "array"
         },
         "smoke_detector": {
           "default": "terminals",

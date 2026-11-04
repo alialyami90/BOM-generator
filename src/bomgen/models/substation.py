@@ -298,6 +298,7 @@ class GeneratedPanels(InputModel):
     options_by_panel: dict[PositiveInt, dict[str, Any]] = Field(default_factory=dict)
     enclosure_by_panel: dict[PositiveInt, Enclosure] = Field(default_factory=dict)  # plan M50
     kind_by_panel: dict[PositiveInt, PanelKind] = Field(default_factory=dict)
+    notes_by_panel: dict[PositiveInt, str] = Field(default_factory=dict)  # plan M70
 
     @field_validator("id", "cabinet_number", "cabinet_name", "tag_prefix", "sheet_name")
     @classmethod
@@ -331,11 +332,27 @@ def _first_numbers() -> dict[PurdueLevel, PositiveInt]:
     return dict(FIRST_NUMBERS)
 
 
+NAMEPLATE_PLACEHOLDERS = frozenset({"tag", "full_tag", "purpose"})
+
+
 class Tagging(InputModel):
     """How device tags print their side and number (ADR 0030, 0031); defaults are today's."""
 
     side_letters: tuple[SideLetter, SideLetter] = ("A", "B")  # LAN A, LAN B
     first_numbers: dict[PurdueLevel, PositiveInt] = Field(default_factory=_first_numbers)
+    nameplate_pattern: dict[Category, str] = Field(default_factory=dict)  # plan M75
+
+    @field_validator("nameplate_pattern")
+    @classmethod
+    def _known_placeholders(cls, value: dict[Category, str]) -> dict[Category, str]:
+        for pattern in value.values():
+            names = {name for _, name, _, _ in Formatter().parse(pattern) if name is not None}
+            if not pattern.strip() or names - NAMEPLATE_PLACEHOLDERS:
+                raise ValueError(
+                    f"nameplate pattern {pattern!r}: use the placeholders {{tag}}, "
+                    "{full_tag} and {purpose}"
+                )
+        return value
 
     @field_validator("side_letters")
     @classmethod

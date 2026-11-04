@@ -24,6 +24,7 @@ from bomgen.models.library import Media, PortSpeed
 Lan = Literal["A", "B"]
 PanelId = Annotated[str, StringConstraints(pattern=r"^[a-z0-9][a-z0-9_-]*$")]
 TagPrefix = Annotated[str, StringConstraints(pattern=r"^[A-Z][A-Z0-9]*$")]
+NonBlank = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
 
 class PanelKind(StrEnum):
@@ -63,6 +64,8 @@ class Enclosure(InputModel):
     w_mm: PositiveInt
     base_frame: BaseFrame | None = None
     cable_entry: CableEntry
+    ip_rating: Annotated[str, StringConstraints(pattern=r"^IP[0-9X]{2}[A-Z]?$")] | None = None
+    colour: NonBlank | None = None  # e.g. RAL 7035 (plan M75)
 
 
 class DeviceInstance(InputModel):
@@ -134,6 +137,7 @@ class PanelOptions(InputModel):
         default_factory=lambda: ["ac_safety_ground", "instrument_ground"]
     )
     housekeeping: HousekeepingOptions = Field(default_factory=HousekeepingOptions)  # ADR 0032
+    misc_items: list[NonBlank] = Field(default_factory=list)  # group H "1 Lot" rows (plan M70)
 
     @field_validator("smoke_detector", mode="before")
     @classmethod
@@ -180,6 +184,7 @@ class Panel(InputModel):
     document: DocumentKey
     generated: bool = False  # written by the layout engine (ADR 0013)
     revision: Revision = Field(default_factory=Revision)
+    notes: str | None = None  # the engineer's own, never printed (plan M70)
 
 
 class PanelMirror(InputModel):
@@ -200,6 +205,7 @@ class PanelMirror(InputModel):
     document: DocumentKey
     generated: bool = False  # written by the layout engine (ADR 0013)
     revision: Revision = Field(default_factory=Revision)
+    notes: str | None = None  # the mirror's own; never the original's (plan M70)
 
     @model_validator(mode="after")
     def _not_self_mirror(self) -> "PanelMirror":

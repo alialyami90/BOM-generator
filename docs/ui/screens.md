@@ -119,7 +119,7 @@ line. "Apply to form" is available only when the YAML is valid.
 
 ### Substation settings
 Only what belongs to this substation: *Design basis* (voltages, time sync, Purdue scope, tag side
-letters and first numbers, notes: defaults only, ADR 0031), *General* (name, which is also the BOM title line, and a
+letters and first numbers, nameplate text per category (M75), notes: defaults only, ADR 0031), *General* (name, which is also the BOM title line, and a
 read-only "From the project" block with a link to the project page), *Documents*
 (which register entry each calculation sheet prints; cabinet BOMs choose theirs on
 each panel), *Output* (main document, file-name pattern with the resulting name,
@@ -248,18 +248,20 @@ with the save bar; everything on it is saved together.
   editor, as in the first design. Devices: reorder handle, device, quantity,
   purpose, HWIO override, generated tag, remove; "Add device" opens the picker.
 - **Tabs:** Enclosure (make,
-  model, code, H × D × W, base frame, cable entry top, side or bottom; on a generated panel also
+  model, code, H × D × W, base frame, cable entry top, side or bottom, IP rating and colour (M75); on a generated panel also
   Kind, with *All generated panels* / *This panel only*, M50), Port plans (a small table per
   switch with an "Engine result" footer), Options (spares, ventilation, diodes,
   main MCB override and the AC and DC spare ratings as derived values, socket, terminals, smoke
   detector, grounding busbars as checkboxes from the catalogue, Cabinet housekeeping (counts, heater,
-  hygrostat, each breaker as a derived value, M56), each override
+  hygrostat, each breaker as a derived value, M56), Miscellaneous rows (one per line, printed last in
+  group H as 1 Lot, M70), each override
   with a warning line; on a hand-written panel the Devices table has *Alarm on breaker trip*, and under each row
   its tag, type code and first number with the generated tag as placeholder (M59),
   and each Parts row with a branch MCB has the same switch, M58), Terminals (one row per group G
   strip: its block type, a select over the catalogue's types with the rule's type as default, and
   its quantity as a derived value with the rule and the spare terminals added; on a generated
-  panel with *All generated panels* / *This panel only*, M57), Document, `panels/<id>.yaml`.
+  panel with *All generated panels* / *This panel only*, M57), Document (the register entry, and the
+  panel's Notes, never printed, M70), `panels/<id>.yaml`.
 
 ### Library
 - **Layout:** title with the library name, version and install date; header actions *Add device…* (primary),

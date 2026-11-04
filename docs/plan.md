@@ -1297,7 +1297,7 @@ design basis says) are not milestones.
 | Automation contract | Rule texts where the app "stops at step 1": SFP counts, housekeeping, terminals, spare ratings | M49, M56, M57, M58 |
 | Automation contract | Rule texts for grounding, switch counts, cable managers' count, the fan choice | M77 |
 
-- **M70 — Panel notes and a miscellaneous row.** *W3.* Review F16 and step 6. `Panel.notes` (free
+- **M70 — Panel notes and a miscellaneous row.** *W3.* Done. Review F16 and step 6. `Panel.notes` (free
   text, never printed) and `PanelOptions.misc_items`: free-text rows printed in group H as "1 Lot"
   (e.g. "Miscellaneous: cable ties, labels"). Panel editor: a Notes field on the Document tab and the
   rows on Options. *Spec sentence* for the group H row. Acceptance: a misc row prints last in group H
@@ -1317,7 +1317,7 @@ design basis says) are not milestones.
 - **M74 — Steer common devices to a panel.** *W4.* Review step 5. `Equipment.panel_hint: PositiveInt`
   puts every unit of a common row in that panel without pinning; the fill reports when it doesn't fit.
   ADR 0013 amendment paragraph.
-- **M75 — PANEL row details and label rules.** *W3; spec sentence.* Review step 6. `Enclosure.ip_rating`
+- **M75 — PANEL row details and label rules.** *W3; spec sentence.* Done. Review step 6. `Enclosure.ip_rating`
   and `colour` printed in the PANEL row's description; nameplate text patterns per category in the
   design basis tagging (`nameplate_pattern`), defaulting to today's tag text.
 - **M76 — Rack priority per row.** *W4.* Review step 4. `Equipment.priority: 1–4` overrides the

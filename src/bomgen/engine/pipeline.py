@@ -13,7 +13,7 @@ from bomgen.engine.ac_dist import ac_distribution
 from bomgen.engine.assemble import mark_revisions
 from bomgen.engine.dc_dist import dc_distribution, single_fed_loads
 from bomgen.engine.enclosure import enclosure_item
-from bomgen.engine.grounding import grounding
+from bomgen.engine.grounding import grounding, misc_items
 from bomgen.engine.housekeeping import housekeeping, kit_counts, needs_change_over
 from bomgen.engine.items import BomItem, flatten
 from bomgen.engine.kits import annunciator_items, loose_table, main_equipment
@@ -69,7 +69,7 @@ def build(loaded: LoadedSubstation) -> BuildResult:
         for p in loaded.panels
     ]
     hwio_total = sum(draft.hwio for draft in drafts)
-    plates = [nameplates(d.panel, d.rows) for d in drafts]
+    plates = [nameplates(d.panel, d.rows, loaded.tagging) for d in drafts]
     panels = tuple(
         _finish(draft, library, substation, hwio_total, len(panel_plates.plates))
         for draft, panel_plates in zip(drafts, plates, strict=True)
@@ -209,6 +209,7 @@ def _finish(
         *terminal_strips(panel, library, draft.rows, strip_inputs),
         *grounding(panel, library),
         *([nameplate] if nameplate is not None else []),
+        *misc_items(panel),
     ]
     return PanelBom(
         panel_id=panel.id,

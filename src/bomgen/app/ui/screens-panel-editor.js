@@ -28,7 +28,7 @@
   const changed = () => { reload(); App.network.reload(); App.devicePreview.reload(); App.sub.reload(); };
 
   /* ---------- the form: keys e.<enclosure field>, doc, o.<all|panel>.<option>, p.<row>.… ---------- */
-  const ENC = { make: 'text', model: 'text', ordering_code: 'text', h_mm: 'int', d_mm: 'int', w_mm: 'int', cable_entry: 'choice', 'base_frame.h_mm': 'int', 'base_frame.d_mm': 'int', 'base_frame.w_mm': 'int' };
+  const ENC = { make: 'text', model: 'text', ordering_code: 'text', h_mm: 'int', d_mm: 'int', w_mm: 'int', cable_entry: 'choice', ip_rating: 'text', colour: 'text', 'base_frame.h_mm': 'int', 'base_frame.d_mm': 'int', 'base_frame.w_mm': 'int' };
   const OPT = { dc_spare_branches_per_feed: 'int', ac_spare_branches: 'int', ventilation: 'choice', change_over_diodes: 'choice', main_mcb_override_a: 'int', ac_spare_rating_a: 'int', dc_spare_rating_a: 'int', aux_socket_a: 'int', inter_panel_terminals: 'int', smoke_detector: 'choice' };
   const PORT = { count: 'int', speed: 'choice', media: 'choice', spare: 'int' };
   const TERM = { t: 'terminal_overrides', tb: 'terminal_block_overrides' };  // t.<all|panel>.<strip>, tb.… (ADR 0033)
@@ -41,6 +41,8 @@
     if (k === 'eo') { const f = r.join('.'); return ENC[f] ? [['generated_panels', 'enclosure_by_panel', Number(a), ...r], ENC[f]] : null; }  // plan M50
     if (k === 'kind') return [a === 'all' ? ['generated_panels', 'kind'] : ['generated_panels', 'kind_by_panel', Number(a)], 'choice'];
     if (k === 'doc') return [['generated_panels', 'document'], 'choice'];
+    if (k === 'nt') return [['generated_panels', 'notes_by_panel', Number(a)], 'text'];  // plan M70
+    if (k === 'mi') return [a === 'all' ? ['generated_panels', 'options', 'misc_items'] : ['generated_panels', 'options_by_panel', Number(a), 'misc_items'], 'lines'];
     if (k === 'g') return [['generated_panels', a], 'text'];  // a numbering pattern every generated panel shares
     if (k === 'o') return OPT[r[0]] ? [a === 'all' ? ['generated_panels', 'options', r[0]] : ['generated_panels', 'options_by_panel', Number(a), r[0]], OPT[r[0]]] : null;
     if (k === 't' || k === 'tb') return [[...(a === 'all' ? ['generated_panels', 'options'] : ['generated_panels', 'options_by_panel', Number(a)]), TERM[k], r.join('.')], k === 't' ? 'int' : 'choice'];  // ADR 0033
@@ -56,6 +58,8 @@
     if (k === 'eo') return p.shared && p.shared.own_enclosure ? str(r.reduce((o, x) => (o == null ? o : o[x]), p.enclosure)) : '';
     if (k === 'kind') return a === 'all' ? str(p.shared && p.shared.kind) : p.shared && p.shared.own_kind ? p.panel.kind : '';
     if (k === 'doc') return p.document;
+    if (k === 'nt') return str(p.panel.notes);
+    if (k === 'mi') { const o = p.options.find((x) => x.key === 'misc_items'); return (a === 'all' ? o.shared : o.own && Number(a) === p.panel.number ? o.value : []).join('\n'); }
     if (k === 'g') return p.template ? str(p.template[a]) : '';
     if (k === 'o') {
       const o = p.options.find((x) => x.key === r[0]); if (!o) return '';
@@ -95,6 +99,8 @@
     if (k === 'c') return CAB[a] ? [[a], CAB[a]] : null;
     if (k === 'e') { const f = [a, ...r].join('.'); return ENC[f] ? [['enclosure', ...f.split('.')], ENC[f]] : null; }
     if (k === 'doc') return [['document'], 'choice'];
+    if (k === 'nt') return [['notes'], 'text'];  // plan M70
+    if (k === 'mi') return [['options', 'misc_items'], 'lines'];
     if (k === 'o') return OPT[a] ? [['options', a], OPT[a]] : null;
     if (k === 'd') return DEV[r[0]] ? [['devices', Number(a), r[0]], DEV[r[0]]] : null;
     if (k === 't' || k === 'tb') return [['options', TERM[k], [a, ...r].join('.')], k === 't' ? 'int' : 'choice'];
@@ -107,6 +113,8 @@
     if (k === 'c') return str(p.panel[a === 'sheet_name' ? 'sheet' : a]);
     if (k === 'e') return str([a, ...r].reduce((o, x) => (o == null ? o : o[x]), p.enclosure));
     if (k === 'doc') return p.document;
+    if (k === 'nt') return str(p.panel.notes);
+    if (k === 'mi') { const o = p.options.find((x) => x.key === 'misc_items'); return o.own ? o.value.join('\n') : ''; }
     if (k === 'o') { const o = p.options.find((x) => x.key === a); return o && o.own ? str(o.value) : ''; }
     if (k === 'd') { const d = p.devices[Number(a)]; return d ? str(d[r[0]]) : ''; }
     if (k === 't' || k === 'tb') { const o = p.options.find((x) => x.key === TERM[k]); return o && o.own ? str(o.value[[a, ...r].join('.')]) : ''; }
@@ -127,6 +135,7 @@
   const edit = (key, label, html, help) => F.mark(key, field(label, html, help, err(key)));
   const text = (key, o = {}) => input(PFX + key, str(F.shown(key)), { invalid: !!F.errors[key], ...o });
   const num = (key, unit, o = {}) => `<div class="input-affix">${text(key, { num: true, mono: true, ...o })}${unit ? `<span class="affix">${esc(unit)}</span>` : ''}</div>`;
+  const area = (key, o = {}) => `<textarea class="input" id="${PFX}${key}" rows="${o.rows || 3}" style="height:auto;padding:8px 10px"${o.placeholder ? ` placeholder="${esc(o.placeholder)}"` : ''}${F.errors[key] ? ' aria-invalid="true"' : ''}>${esc(str(F.shown(key)))}</textarea>`;
   const choice = (key, opts) => select(PFX + key, opts, str(F.shown(key)), { invalid: !!F.errors[key] });
   /* A rating as a derived value (plan M48): the engine's rating and its rule; a typed rating overrides it.
      `inherited` is the shared override a panel-only key falls back to. The main MCB, and the spares (M58). */
@@ -158,7 +167,7 @@
   /* ---------- the page ---------- */
   const TABS = [['enclosure', 'Enclosure'], ['devices', 'Devices'], ['ports', 'Port plans'], ['options', 'Options'], ['terminals', 'Terminals'], ['document', 'Document'], ['yaml', 'YAML']];
   const KIND = { network: 'Network', control: 'Control', console: 'Console' };
-  const TAB_OF = (key) => ({ c: 'enclosure', e: 'enclosure', eo: 'enclosure', kind: 'enclosure', g: 'enclosure', doc: 'document', o: 'options', hk: 'options', t: 'terminals', tb: 'terminals', p: 'ports', d: 'devices' })[key.split('.')[0]];
+  const TAB_OF = (key) => ({ c: 'enclosure', e: 'enclosure', eo: 'enclosure', kind: 'enclosure', g: 'enclosure', doc: 'document', nt: 'document', o: 'options', hk: 'options', mi: 'options', t: 'terminals', tb: 'terminals', p: 'ports', d: 'devices' })[key.split('.')[0]];
   function tabMark(tab) {
     const bad = Object.keys(F.errors).filter((k) => TAB_OF(k) === tab).length, n = Object.keys(F.draft).filter((k) => TAB_OF(k) === tab).length;
     if (bad) return ` <span class="dot dot--bad" aria-hidden="true"></span><span class="sr-only">(${bad} to fix)</span>`;
@@ -229,7 +238,8 @@
     ${edit(`${e}.make`, 'Make', text(`${e}.make`))}${edit(`${e}.model`, 'Model', text(`${e}.model`))}${edit(`${e}.ordering_code`, 'Ordering code', text(`${e}.ordering_code`, { mono: true, placeholder: 'Optional' }))}
     ${edit(`${e}.h_mm`, 'Height', num(`${e}.h_mm`, 'mm'))}${edit(`${e}.d_mm`, 'Depth', num(`${e}.d_mm`, 'mm'))}${edit(`${e}.w_mm`, 'Width', num(`${e}.w_mm`, 'mm'))}
     ${edit(`${e}.base_frame.h_mm`, 'Base frame height', num(`${e}.base_frame.h_mm`, 'mm'))}${edit(`${e}.base_frame.d_mm`, 'Base frame depth', num(`${e}.base_frame.d_mm`, 'mm'))}${edit(`${e}.base_frame.w_mm`, 'Base frame width', num(`${e}.base_frame.w_mm`, 'mm'))}
-    ${edit(`${e}.cable_entry`, 'Cable entry', choice(`${e}.cable_entry`, [['top', 'Top'], ['side', 'Side'], ['bottom', 'Bottom']]))}</div>`;
+    ${edit(`${e}.cable_entry`, 'Cable entry', choice(`${e}.cable_entry`, [['top', 'Top'], ['side', 'Side'], ['bottom', 'Bottom']]))}
+    ${edit(`${e}.ip_rating`, 'IP rating', text(`${e}.ip_rating`, { mono: true, placeholder: 'e.g. IP54' }), 'Printed on the PANEL row when given.')}${edit(`${e}.colour`, 'Colour', text(`${e}.colour`, { placeholder: 'e.g. RAL 7035' }), 'Printed on the PANEL row when given.')}</div>`;
 
   /* ---------- Devices: what the layout placed, read-only ---------- */
   const ROLES = { fopp: 'Fibre patch panel', l2_switch: 'L2 switch', l1_switch: 'L1 switch', ext_switch: 'External switch', firewall: 'Firewall' };
@@ -296,7 +306,7 @@
       const ctl = Array.isArray(kind) ? choice(key, [['', `Default: ${shownValue(o.shared, kind)}`], ...kind]) : num(key, kind, { placeholder: `Default: ${str(o.shared) || 'none'}` });
       const note = o.own ? `${badge('info', `Own value · default ${shownValue(o.shared, kind)}`)} <button class="btn btn--ghost btn--sm" data-action="ph-use-default" data-key="${key}">Use the default</button>` : '';
       return edit(key, esc(label), ctl, [help || '', note].filter(Boolean).join(' '));
-    }).join('')}</div>${busbars(p, false)}${kitSection(p, '', false)}`;
+    }).join('')}</div>${busbars(p, false)}${kitSection(p, '', false)}${miscSection(p, 'mi', false)}`;
   }
   ACTIONS['ph-use-default'] = (el) => { HD.set(el.dataset.key, ''); S.dirty = true; App.render(); };
   /* Delete panel…: the writer refuses while something still names the panel; Undo writes the copy back. */
@@ -407,7 +417,7 @@
       return edit(key, esc(label), ctl, [help || '', note].filter(Boolean).join(' '));
     }).join('');
     return `${scopeField(own, `${own ? `Values you set are kept for ${esc(p.panel.cabinet_name)} only and marked Own value.` : 'Values you set apply to every generated panel that has no value of its own.'}${owned.length ? ` This panel has ${plural(owned.length, 'own value')}.` : ''}`)}
-      <div class="form form--2">${rows}</div>${busbars(p, own)}${kitSection(p, `${own ? p.panel.number : 'all'}.`, own)}`;
+      <div class="form form--2">${rows}</div>${busbars(p, own)}${kitSection(p, `${own ? p.panel.number : 'all'}.`, own)}${miscSection(p, `mi.${own ? p.panel.number : 'all'}`, own)}`;
   }
   const scopeField = (own, help) => `<div class="field" style="margin-bottom:var(--space-4)"><span class="label" id="pe-scope-l">Apply to</span><div class="segmented" role="radiogroup" aria-labelledby="pe-scope-l">
         <label><input type="radio" name="pe-scope" value="all" data-action="pe-scope" ${own ? '' : 'checked'}><span>All generated panels</span></label><label><input type="radio" name="pe-scope" value="own" data-action="pe-scope" ${own ? 'checked' : ''}><span>This panel only</span></label></div>
@@ -482,12 +492,22 @@
       <div class="form form--3">${counts}${extras}</div><div class="form form--2" style="margin-top:var(--space-3)">${ratings}</div></section>`;
   }
 
+  /* ---------- Miscellaneous rows (plan M70): free text, each printed last in group H as 1 Lot ---------- */
+  function miscSection(p, key, own) {
+    const o = p.options.find((x) => x.key === 'misc_items'), inh = own && !o.own ? o.shared.join(', ') : '';
+    const note = !p.panel.generated ? '' : own && o.own ? ` ${badge('info', 'Own value')} Once this panel has its own rows, the shared ones no longer reach it.` : !own && o.own ? ' <span class="muted small">This panel has its own rows.</span>' : '';
+    return `<section class="section" style="margin-top:var(--space-5)"><h3>Miscellaneous rows</h3>
+      <p class="lede">Each line is a group H row, printed last with a quantity of 1 Lot.${note}</p>
+      <div class="form">${edit(key, 'Rows', area(key, { placeholder: inh ? `Shared: ${inh}` : 'e.g. Miscellaneous: cable ties, labels' }), 'One row per line. Empty uses none.')}</div></section>`;
+  }
+
   /* ---------- Document ---------- */
   function docTab(p) {
-    const e = p.documents.find((x) => x.key === str(F.shown('doc')));
+    const e = p.documents.find((x) => x.key === str(F.shown('doc'))), nt = p.panel.generated ? `nt.${p.panel.number}` : 'nt';
     return `<div class="form form--3">${edit('doc', 'Register document', choice('doc', p.documents.map((x) => [x.key, x.key])), `${p.panel.generated ? 'Shared by every generated panel. ' : ''}Chosen from the project's document register.`)}
       ${field('Document number', input('pe-dn', e ? e.doc_no : '', { mono: true, readonly: true }), 'Printed in the page header and footer.')}${field('Revision', input('pe-dr', e ? e.rev : '', { mono: true, readonly: true }))}</div>
-      <div class="row" style="margin-top:var(--space-3)"><a class="btn btn--secondary btn--sm" href="#/project/documents">Edit in the register</a></div>`;
+      <div class="row" style="margin-top:var(--space-3)"><a class="btn btn--secondary btn--sm" href="#/project/documents">Edit in the register</a></div>
+      <div class="form" style="margin-top:var(--space-5)">${edit(nt, 'Notes', area(nt, { rows: 4 }), `Your own notes on ${esc(p.panel.cabinet_name)}. Never printed in the workbook.`)}</div>`;
   }
 
   /* ---------- YAML: read-only ---------- */
