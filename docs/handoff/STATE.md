@@ -9,18 +9,18 @@ rather than copy it.
 
 ## 1. Overview (2026-11-04)
 
-- Repo `alialyami90/BOM-generator`, default branch `main`, at `9b25f6b` (#389, the last phase G
-  checkpoint). Check open PRs with `list_pull_requests` before starting.
-- **M70–M81 are merged on main, unreleased** (2026-11-04, #373–#389; `plan.md` "M70–M81" has
+- Repo `alialyami90/BOM-generator`, default branch `main`, at `6bc9721` (#392, the v0.5.0
+  release). Check open PRs with `list_pull_requests` before starting.
+- **v0.5.0 is released** (#392, 2026-11-04) with `bomgen-setup-0.5.0.exe` and psa-devices 1.17.0.
+  It ships M70–M81 (#373–#389; `plan.md` "M70–M81" has
   each PR number and the coverage table of the workflow review): panel and row notes with a
   Notes sheet (M70, M71), switch counts and the port budget (M72, Q72), RedBox and media
   converter roles (M73, ADR 0038), steering and rack priority per row (M74, M76), PANEL row
   details and nameplate text (M75), overrides in Checks with reasons and the Revision History
   OVERRIDES column (M77, ADR 0040), PDF export (M78, ADR 0039, Q73), mark as revised with a
   change list (M79), the IED Schedule sheet (M80) and function tags (M81, psa-devices 1.17.0).
-  The golden values are unchanged except five more `override` passes in the check counts. The
-  changelog's `[Unreleased]` lists them; the next release is v0.5.0 (new inputs and a new
-  runtime dependency, reportlab).
+  The golden values are unchanged except five more `override` passes in the check counts.
+  reportlab is a new runtime dependency (M78).
 - **v0.4.0 is released** (#370, 2026-11-04) with `bomgen-setup-0.4.0.exe` and psa-devices 1.16.0.
   It is the engineer-controlled workflow, M48–M69 of the
   [agent implementation plan](../superpowers/plans/2026-11-03-agent-implementation-plan.md)
@@ -110,13 +110,12 @@ rather than copy it.
   round-trip writers (ADR 0021), and the loose material sheet and page (ADR 0020, ADR 0022). v0.2.1 is
   the UI polish pass from [`docs/ui/polish-v02.md`](../ui/polish-v02.md) (items 1–16, #205–#208) plus
   #194, #198–#201.
-- **Numbers (2026-11-04, after M70–M81).** ADRs 0001–0027 and 0029–0040 are Accepted and 0028
+- **Numbers (2026-11-04, after v0.5.0).** ADRs 0001–0027 and 0029–0040 are Accepted and 0028
   is Rejected. The next free ADR is **0041**, the next free question **Q74** and the next
   milestone **M82** (M70–M81 are done; Q72 "only above", Q73 "both, built-in by default").
   Q51 (annunciator) and Q55 (categories for the contractor's other part types) are open.
-- **Changelog** has a `[0.4.0]` section and `[Unreleased]` holds M70–M81.
-- **Next work:** release v0.5.0 (changelog PR, then the bump PR; "How a release happens"), then
-  Ali's field feedback: try *Use Excel* in PDF export on Windows (NEXT §3), his hand test of drag
+- **Changelog** has a `[0.5.0]` section, and `[Unreleased]` is empty.
+- **Next work:** Ali's field feedback on v0.5.0: try *Use Excel* in PDF export on Windows (NEXT §3), his hand test of drag
   and drop on Windows (ALI-8), and his answers on the v0.3.4 review list (keyboard nameplate, a
   DC supply-voltage check, Q51, Q55, reviewer mode, Q11/Q23). Open ends the workstreams left:
   psa-devices has no RedBox or media converter part and no nameplate pattern for them, the

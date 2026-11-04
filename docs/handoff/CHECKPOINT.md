@@ -3,6 +3,15 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-11-04: v0.5.0 released (Lead)
+
+- **Base:** main `6bc9721` (#392). Docs-only PR.
+- **Done:** the changelog section (#391) and the version bump (#392) published v0.5.0 with
+  `bomgen-setup-0.5.0.exe` (36 MB) and `default.bomlib` from psa-devices 1.17.0. It ships
+  M70–M81 (the entry below).
+- **Next:** Ali's field tests of v0.5.0 (PDF export with Excel, drag and drop), then the open ends
+  in STATE.md §1.
+
 ## 2026-11-04: Phase G done, M70–M81 merged (Lead)
 
 - **Base:** main `9b25f6b` (#389). Docs-only PR.

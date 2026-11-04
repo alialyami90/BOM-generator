@@ -146,6 +146,20 @@ Done in v0.3.4 (the v0.3 roadmap, M35 to M47):
   Parts, Checks and Build instead of stopping the engine.
 - M47: an edited panel-numbering pattern is no longer marked ASSUMED.
 
+Done in v0.5.0 (the review points M48 to M69 left out, M70 to M81):
+
+- M70, M71: panel and row notes, never printed, with an optional Notes sheet.
+- M72, M73: port budget and switch counts per side; RedBox and media
+  converter roles.
+- M74, M76: steer a common device to a panel; rack priority per row.
+- M75: IP rating and colour on the PANEL row; nameplate text patterns.
+- M77: every override listed in Checks, a reason for a risky one, printed
+  on the Revision History sheet (ADR 0040).
+- M78: PDF export, built-in or with Excel (ADR 0039).
+- M79: mark a row as revised and see the change list before issuing.
+- M80: an IED Schedule reference sheet.
+- M81: function tags on library parts, matched by search.
+
 Done in v0.4.0 (the engineer-controlled workflow, M48 to M69; the review in
 `docs/superpowers/specs/2026-11-03-engineering-workflow-review.md`):
 
