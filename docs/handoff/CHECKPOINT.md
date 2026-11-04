@@ -3,6 +3,22 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-11-04: W5 Setup and design basis, M51–M55 merged (W5)
+
+- **Base:** main `7540497` (#366). Docs-only PR.
+- **Done:** ADR 0031 design basis accepted (#330). M51 New substation › *Cabinets and documents*
+  step instead of ASSUMED seeds (#333, Q62: prefill, previous substation first). M52 design basis
+  in two PRs: M52a model, loader voltages and tagging (#338: side letters, first numbers), M52b
+  Settings › *Design basis* tab (#341). M55 substation templates in `templates/` of the project
+  folder (#344, Q63). M53 vendor lists in two PRs: M53a model, `vendor_list` and `part_state`
+  checks, Parts chips and picker order, the Design basis select (#350); M53b Project › *Vendor
+  lists* tab (#366). M54 `design_basis_checks` with *Go to the field* (#358). Screenshots in
+  `/mnt/project-files/a11-screens/` (`m51`… `m55`, `m53`, `m54`).
+- **Left for later:** a hand-written panel's tags and port-plan keys do not follow new side
+  letters. The example library has no input ranges, so the design basis DC check bites only with
+  the shipped library (`psa-devices`). Catalogue brand sets off a vendor list warn once per
+  catalogue, not per line.
+
 ## 2026-11-04: W2 Issue outputs, M63, M66, M64 and M65 merged (W2)
 
 - **Base:** main `23a5a6c` (#362). Docs-only PR.

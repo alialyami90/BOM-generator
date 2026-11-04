@@ -1167,11 +1167,11 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
   Settings › *Design basis* tab; the substation page carries `design_basis` (written values,
   tagging in force, which voltages it feeds) instead of a separate `design_basis_page`. The spares
   policy and vendor list get their fields with M64 and M53.
-- **M53 — Vendor list and part lifecycle states.** *W5; ADRs 0031 and 0037.* In two PRs. **M53a** (#350, done):
+- **M53 — Vendor list and part lifecycle states.** *W5; ADRs 0031 and 0037.* Done, in two PRs. **M53a** (#350):
   `Project.vendor_lists` (`VendorList`), a design basis's `vendor_list` must name one,
   Checks `vendor_list` and `part_state` warn, Parts lists the list's parts first in the picker and
   chips a row off the list, Design basis tab selects the list. The state field, CSV columns and
-  Library state badges came with M67. **M53b** in review: Project › *Vendor lists* tab and dialog
+  Library state badges came with M67. **M53b** (#366): Project › *Vendor lists* tab and dialog
   (`save_vendor_list`, `remove_vendor_list`, refused while a substation names the list).
 - **M54 — Design-basis checks.** *W5.* Done (#358). `design_basis_checks`, one Checks group
   *Design basis*: a DC part rated outside the DC voltage fails; an AC part at another voltage, a
