@@ -269,8 +269,9 @@ No task is open; the next is the model changes (step 4) in A4's plan. Likely wor
   write the failing test named after the rule, change the code, keep the goldens unless an ADR moves
   them. Check `sheets/` when `BuildResult` changes shape.
 
-Panel detailing (W3, M50–M58) is done. Open ends: the socket as a pick list from the library's
-sockets (M56 plan, gap 11).
+Panel detailing (W3, M50–M58, M70, M75) is done. Open ends: the socket as a pick list from the
+library's sockets (M56 plan, gap 11). Panel notes are never printed; a note on the BOM header is not
+planned (plan M70, ask Ali before adding one).
 
 Don't: give housekeeping branches the 2 A branch floor (ADR 0032 item 4 keeps the lamp at 1 A);
 revive `DeviceType.min_branch_mcb_a` as a rating input (ADR 0019 item 4); count inrush peaks
