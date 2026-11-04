@@ -3,6 +3,18 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-11-04: W4 Parts and network, M60 and M61 merged (W4)
+
+- **Base:** main `b63ccda` (#353). Docs-only PR.
+- **Done:** M60 IED schedule in two PRs (ADR 0034): M60a model and sizing (#343, per-side pools,
+  fixed ports by speed and media, SFP slots by speed, L1 count the max of the sides, overflow onto
+  slots as L1 downlinks), M60b Parts screen IED table and CSV import (#348, `io/ied_csv.py`).
+  M61 external links (#353, Q64): `network.external_links`, EXT links on the L2 and external
+  switch port plans, the `external_link` check, the Parts links table. Screenshots in
+  `/mnt/project-files/a11-screens/m60-ied-schedule/`, `m61-external-links/`.
+- **Waiting:** Ali's cards on Q70 (quick IED count on mixed-media L1 switches) and Q64 (external
+  links as their own list). Both ship the recommended option. W2's M65 can start (it waited on M61).
+
 ## 2026-11-03: W3 Panel detailing, M50, M58, M57, M56 merged (W3)
 
 - **Base:** main `26b9f4a` (#345). Docs-only PR.

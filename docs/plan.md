@@ -1177,7 +1177,7 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
   Parts has a *BOM text* section per row. The hand-written panel editor's tag fields came from W3 in a
   follow-up PR: tag, type code and first number under each Devices row, with the duplicate-tag check.
 - **M60 — IED schedule.** *W4; ADR 0034.* M60a (model and sizing) done (#343); M60b (Parts screen, CSV import) done (#348).
-- **M61 — External links.** *W4; Q64.* In review.
+- **M61 — External links.** *W4; Q64.* Done (#353).
 - **M62 — Panel count control.** *W4; Q68.* Done (#325). ADR 0013 amendment: `layout.max_panels`
   caps the fill (R5, R6): a pair opens only while both its panels are within the cap, a common device
   only into a panel within it, and a unit that fits nowhere is a `panel-limit` layout error naming the
