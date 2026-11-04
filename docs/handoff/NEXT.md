@@ -67,9 +67,7 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
 6. **THF when the housekeeping kit changes** (W3): answered 2026-11-04. Ali chose the built option,
    the spec's 12 or 5 plus 3 per fan and 2 per thermostat beyond the spec's kit. Nothing to do.
 7. **Q70** answered 2026-11-04: keep today's rule (plan §6); nothing to change.
-8. **Q64** (W4, card sent 2026-11-03): external links are their own list, `network.external_links`
-   beside the device rows' `l2_ports` (recommended). If Ali picks "one list", fold `l2_ports` into
-   it with a migration and record it in plan §6.
+8. **Q64** answered 2026-11-04: external links stay their own list (plan §6); nothing to change.
 9. **Q51** (annunciator mounted in a panel), **Q54** (power of the -2 SEL computers) and **Q55**
    (categories for the contractor's other part types) are open in plan §6.
 

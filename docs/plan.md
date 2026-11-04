@@ -1784,7 +1784,7 @@ minimum one.* Spare = installed × the policy's percent for each chosen category
 the minimum, every line editable with items added or left out; the same with no minimum; or no rule,
 every spare typed. `spares_policy.minimum_per_part` defaults to 1; a policy can still set 0.
 
-**Q64 — External links beside the device rows' L2 ports** (M61). *Open.* Keep `l2_ports` on
+**Q64 — External links beside the device rows' L2 ports** (M61). *Answered (Ali, 2026-11-04): own list*, as shipped in M61 (#353). Keep `l2_ports` on
 equipment rows for the devices in the cabinets and add the links that leave the substation as
 their own list, `network.external_links` (recommended: existing files and the example keep
-working), or fold both into one list of links? Until Ali answers, M61 ships its own list.
+working), or fold both into one list of links?
