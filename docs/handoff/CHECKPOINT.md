@@ -3,6 +3,18 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-11-04: W1 phase G, M81 function tags merged (W1)
+
+- **Done:** M81 function tags (#376): `DeviceType.tags` (trimmed, no blank tag; a saved library
+  leaves out empty tags and needs this app version when tags are used), one `devices.csv` cell
+  split by `|`, a *Function tags* field (one per line) on the device editor's Identity tab, and
+  Library search and the part picker match tags. `data/library/build.py` tags every shipped part
+  with its category, a switch's Purdue level and its largest port group ("Network switch",
+  "L2 switch", "24-port"): psa-devices 1.17.0. No ADR or Q. Golden unchanged. Screenshots in
+  `/mnt/project-files/a11-screens/m81-tags/`.
+- **Left for later:** the Library detail pane does not show a part's tags; the port tag counts
+  the largest port group, not uplinks or slots.
+
 ## 2026-11-04: W4 phase G, M72, M74, M76 and M73 merged (W4)
 
 - **Done:** M72 port budget and switch-count override (#375): the Parts Result card lists each
