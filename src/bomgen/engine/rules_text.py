@@ -41,3 +41,24 @@ def dc_spare_rule(rating_a: int, *, branches: int) -> str:
     return f"{rating_a} A: the largest of {branches} device branch" + (
         "" if branches == 1 else "es"
     )
+
+
+def switch_count_rule(count: int, used: int, usable: int, *, ieds: bool) -> str:
+    """A switch level's count per side: the ports it takes and the usable on each (plan M72)."""
+    if ieds and not used:
+        return f"{count}: no IED port lands on L1"
+    what = "IED ports" if ieds else "ports"
+    return f"{count}: {used} {what} per side, {usable} usable on each"
+
+
+def reserved_rule(*, uplinks: int, interlink: bool, ring: bool) -> str:
+    """The ports each switch keeps off the devices (ADR 0013, R1 and R2; plan M72)."""
+    if ring:
+        return "2 ring ports on each switch"
+    text = f"{uplinks} uplink" + ("" if uplinks == 1 else "s")
+    return text + (" and the A\u2013B interlink" if interlink else "") + " on each switch"
+
+
+def spare_ports_rule(fraction: float) -> str:
+    """The share of a switch's device ports the spare keeps free (R1; plan M72)."""
+    return f"{fraction:.0%} of the device ports kept free"

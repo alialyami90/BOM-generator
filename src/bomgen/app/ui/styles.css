@@ -512,6 +512,7 @@ body.is-dragging-dev { user-select: none; }
 .dv.is-bad .dv-val { color: var(--color-danger-text); }
 .dv.is-editing { padding: 0 2px; }
 .dv:has(.dv-rule) { flex-wrap: wrap; }
+.result-counts { display: grid; gap: var(--space-2); }  /* M72: the switch counts on the Result card */
 .dv-input { height: 24px; width: 84px; font-size: 12px; padding: 0 6px; }
 .btn--xs { width: 22px; height: 22px; padding: 0; }
 .btn--xs svg.i { width: 13px; height: 13px; }

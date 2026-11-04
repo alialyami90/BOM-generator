@@ -1422,11 +1422,37 @@
           "title": "L1 Interlink",
           "type": "boolean"
         },
+        "l1_per_side": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "L1 Per Side"
+        },
         "l1_uplinks_per_switch": {
           "default": 1,
           "exclusiveMinimum": 0,
           "title": "L1 Uplinks Per Switch",
           "type": "integer"
+        },
+        "l2_per_side": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "L2 Per Side"
         },
         "l3_uplinks_per_l2": {
           "default": 2,

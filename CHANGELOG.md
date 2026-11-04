@@ -7,6 +7,13 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Switch counts and port budget (M72): the Parts Result card lists each switch level's ports on
+  the busier side (all, reserved, kept spare, in use, free) with the rule behind them, and its L1
+  and L2 switch counts are derived values: `network.l1_per_side` and `l2_per_side` add switches
+  above the sizing's count; a lower count stops the sizing and names the shortfall (Q72).
+
 ## [0.4.0] - 2026-11-04
 
 The engineer-controlled workflow: milestones M48 to M69 of the
