@@ -157,6 +157,8 @@ PRIORITY: dict[Category, int] = {
     Category.PATCH_PANEL: 2,
     Category.FIREWALL: 2,
     Category.GATEWAY: 2,
+    Category.REDBOX: 2,
+    Category.MEDIA_CONVERTER: 2,
     Category.WORKSTATION: 3,
 }
 WAIST: frozenset[Category] = frozenset({Category.KVM, Category.CONSOLE})

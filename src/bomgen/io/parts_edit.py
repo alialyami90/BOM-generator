@@ -49,6 +49,8 @@ CATEGORY_LINKS = {
     Category.GPS_CLOCK: (1, "100M"),
     Category.RTAC: (2, "1G"),
     Category.WORKSTATION: (1, "1G"),
+    Category.REDBOX: (1, "100M"),  # ADR 0038
+    Category.MEDIA_CONVERTER: (1, "1G"),
 }
 FIREWALL_SFPS = 2  # a firewall's own MM SFPs, at most its SFP slots (A1, 2026-11-01)
 LINK_KEYS = ("l2_ports", "l2_speed", "port_plan")

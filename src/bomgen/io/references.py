@@ -27,7 +27,14 @@ from bomgen.models.substation import Equipment, EquipmentRole, PairMove, Substat
 
 # The parts a cable_manager choice may switch on or off (ADR 0013, amended)
 NETWORK_DEVICES = frozenset(
-    {Category.NETWORK_SWITCH, Category.PATCH_PANEL, Category.FIREWALL, Category.GATEWAY}
+    {
+        Category.NETWORK_SWITCH,
+        Category.PATCH_PANEL,
+        Category.FIREWALL,
+        Category.GATEWAY,
+        Category.REDBOX,
+        Category.MEDIA_CONVERTER,
+    }
 )
 NO_CABLE_MANAGER = "only network devices have a cable manager"
 
