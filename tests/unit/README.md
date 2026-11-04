@@ -100,6 +100,13 @@ A milestone with several modules may group them in a subfolder,
 | `app/test_app_library_catalogues.py` | M36 | Library › Catalogues: brand sets per catalogue edited as pending changes, Add brand, Make default |
 | `test_device_db_tools.py` | M41 | the M14 generator in `data/device-db/tools/`: alternative tiers as library parts, idempotent, skipped tiers listed |
 | `engine/test_annunciator_row.py` | M45 | an annunciator equipment row goes to loose material with its part's `loose_items` as its kit, fed from panel 001 |
+| `engine/test_engine_summary.py`, `sheets/test_summary_sheet.py` | M63 | the Summary BOM: lines consolidated by ordering code across panels and loose material, and its sheet (ADR 0035) |
+| `engine/test_engine_spares.py`, `sheets/test_spares_sheet.py`, `app/test_app_spares_api.py` | M64 | the spares list: quantities from the policy (Q65), then overrides, exclusions and extras; its sheet and the Spares page |
+| `engine/test_engine_cables.py`, `sheets/test_cable_sheet.py` | M65 | cable suggestions from the port plans, one cord per link at its upper end (Q66, Q71), and the Cable Schedule sheet |
+| `test_recorded_issue.py`, `test_cli_issue.py`, `sheets/test_history_sheet.py` | M66 | recorded issues (ADR 0036): the previous issue from the record, `bomgen build --issue`, and the Revision History sheet |
+| `sheets/test_notes_sheet.py` | M71 | row notes reach their BOM lines, print nowhere on a BOM sheet, and the optional Notes sheet |
+| `sheets/test_ied_sheet.py` | M80 | the optional IED Schedule sheet: one row per schedule row and port need, side ports as formulas, totals per speed, media and landing |
+| `test_revision_marks.py` | M79 | rows marked as revised: highlighted on their sheet, the change list before issuing, recorded with the issue and cleared |
 
 `builders.py`, `engine/engine_factories.py`, `project_store/project_builders.py`
 and `writer/writer_helpers.py` hold the small builders those tests share.
