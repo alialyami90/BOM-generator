@@ -14,10 +14,20 @@ from typing import Any
 from bomgen.app.output import problems_of
 from bomgen.app.substations import layout_message, resolve
 from bomgen.engine.errors import EngineError
-from bomgen.engine.layout import LayoutResult, Unit, blank_plates, layout_preview
+from bomgen.engine.layout import (
+    LayoutResult,
+    Unit,
+    blank_plates,
+    layout_preview,
+    network_inputs,
+)
+from bomgen.engine.rules_text import reserved_rule, spare_ports_rule, switch_count_rule
+from bomgen.engine.sizing import NetworkPlan, PortBudget, port_budgets, switch_ports
 from bomgen.io.loader import LoadedSubstation
 from bomgen.library_store.store import LibraryStore
-from bomgen.models.substation import EquipmentRole, Side
+from bomgen.models.library import DeviceType
+from bomgen.models.output import Derived
+from bomgen.models.substation import EquipmentRole, Side, Topology
 
 
 def _label(loaded: LoadedSubstation, unit: Unit) -> str:
@@ -101,10 +111,59 @@ def _ied_ports(loaded: LoadedSubstation) -> list[dict[str, Any]] | None:
     return list(found.values())
 
 
+def _device(loaded: LoadedSubstation, part_id: str) -> DeviceType:
+    found = loaded.library.get(part_id)
+    assert found is not None  # the sizing picked it from this library
+    return found
+
+
+def _budget(loaded: LoadedSubstation, plan: NetworkPlan) -> list[dict[str, Any]]:
+    """Each switch level's ports on the busier side, with the rules behind them (plan M72)."""
+    net = network_inputs(loaded)
+    l1, l2 = (switch_ports(_device(loaded, p)) for p in (plan.l1_part_id, plan.l2_part_id))
+    ring = net.topology is Topology.RING
+    uplinks, interlink = net.l1_uplinks_per_switch, net.l1_interlink
+    rules = {
+        "L1": reserved_rule(uplinks=uplinks, interlink=interlink, ring=ring),
+        "L2": reserved_rule(uplinks=net.l3_uplinks_per_l2, interlink=False, ring=False),
+    }
+
+    def row(level: str, b: PortBudget) -> dict[str, Any]:
+        return {
+            "level": level,
+            "switches": b.switches,
+            "ports": b.ports,
+            "reserved": b.reserved,
+            "spare": b.spare,
+            "used": b.used,
+            "free": b.free,
+            "reserved_rule": rules[level],
+            "spare_rule": spare_ports_rule(net.port_fraction),
+        }
+
+    return [
+        row(level, b)
+        for level, b in zip(("L1", "L2"), port_budgets(plan, net, l1, l2), strict=True)
+    ]
+
+
+def _counts(loaded: LoadedSubstation, plan: NetworkPlan, budget: list[Any]) -> dict[str, Any]:
+    """The switch counts per side as derived values: the sizing's, and the engineer's."""
+    network = loaded.substation.network
+    l1 = switch_count_rule(plan.l1_needed, budget[0]["used"], plan.l1_usable_ports, ieds=True)
+    l2 = switch_count_rule(plan.l2_needed, budget[1]["used"], plan.l2_usable_ports, ieds=False)
+    return {
+        "l1_count": Derived[int](value=plan.l1_needed, rule=l1, override=network.l1_per_side),
+        "l2_count": Derived[int](value=plan.l2_needed, rule=l2, override=network.l2_per_side),
+    }
+
+
 def _network(loaded: LoadedSubstation, page: dict[str, Any]) -> None:
     result = layout_preview(loaded)
     plan = result.plan
     l1 = next(e for e in loaded.substation.equipment if e.role is EquipmentRole.L1_SWITCH)
+    budget = _budget(loaded, plan)
+    counts = {k: v.model_dump(mode="json") for k, v in _counts(loaded, plan, budget).items()}
     page |= {
         "plan": {
             "ied_count": plan.ied_count,
@@ -120,6 +179,8 @@ def _network(loaded: LoadedSubstation, page: dict[str, Any]) -> None:
             "l2_usable_ports": plan.l2_usable_ports,
             "l2_demand_per_side": plan.l2_demand_per_side,
             "ied_ports": _ied_ports(loaded),
+            "budget": budget,  # M72
+            **counts,
             "external_links": [
                 {
                     "name": x.name,
