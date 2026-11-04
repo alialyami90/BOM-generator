@@ -13,8 +13,7 @@ keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detai
   (#361, Q66 lengths per link class, Q71 once at the link's upper end: the example gives 40 MM
   and 4 SM cords), M65c Suggest cables dialog, cable columns and Preview tab (#362). Screenshots
   in `/mnt/project-files/a11-screens/` (`m64b`, `m65c` and earlier W2 folders).
-- **Waiting:** Ali's card on Q65 (how spare quantities are set). M64 ships the recommended
-  percent with a minimum.
+- **Answered (2026-11-04):** Q65, percent with a minimum of one: `minimum_per_part` defaults to 1.
 - **Left for later:** the library has no LC patch cords with `media` and `length_m`, so every
   suggested cord is free text with a warning until such parts are added. Catalogue lines (MCBs,
   terminal blocks) have no category, so they get spares by override only.

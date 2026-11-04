@@ -351,7 +351,7 @@ class SparesPolicy(InputModel):
     """The spares list's policy (ADR 0031); read by the spares list (plan M64) only."""
 
     percent: dict[Category, NonNegativeFloat] = Field(default_factory=dict)
-    minimum_per_part: NonNegativeInt = 0
+    minimum_per_part: NonNegativeInt = 1  # Q65: at least one spare per policy line
     categories: list[Category] = Field(default_factory=list)
 
 

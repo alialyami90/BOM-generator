@@ -65,7 +65,13 @@ def test_a_category_without_a_percent_gets_the_minimum(example: LoadedSubstation
 
 
 def test_a_zero_result_is_left_out(example: LoadedSubstation) -> None:
-    assert setup(example, SparesPolicy(categories=[Category.FAN])) == []
+    assert setup(example, SparesPolicy(minimum_per_part=0, categories=[Category.FAN])) == []
+
+
+def test_the_minimum_is_one_unless_the_policy_says_otherwise(example: LoadedSubstation) -> None:
+    # Q65 (answered 2026-11-04): percent of installed, rounded up, at least one.
+    (fan,) = setup(example, SparesPolicy(categories=[Category.FAN]))
+    assert (fan.installed, fan.spare, fan.basis) == (6, 1, "0% of 6, min 1 = 1")
 
 
 def test_override_replaces_computed_qty(example: LoadedSubstation) -> None:
