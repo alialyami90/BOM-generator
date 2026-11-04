@@ -1073,3 +1073,11 @@ def test_row_notes_on_parts_panels_loose_preview_and_build() -> None:
     assert "Preview only: never printed on the BOM" in preview
     verify = (UI_DIR / "screens-verify.js").read_text(encoding="utf-8")
     assert "ACTIONS['build-notes'] = includeSheet('notes');" in verify
+
+
+def test_ied_schedule_sheet_switch_and_preview_tab() -> None:
+    # plan M80: an optional IED Schedule sheet, chosen on Build, previewed as a tab.
+    verify = (UI_DIR / "screens-verify.js").read_text(encoding="utf-8")
+    assert "ACTIONS['build-ieds'] = includeSheet('ied_schedule');" in verify
+    preview = (UI_DIR / "screens-preview.js").read_text(encoding="utf-8")
+    assert "iedView(d.ied_schedule)" in preview

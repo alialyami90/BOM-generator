@@ -66,6 +66,14 @@ Preview shows it in a Notes column. An optional Notes sheet, written when `outpu
 after the Cable Schedule and before the Revision History, and is issued under the substation's
 main document like the other ADR 0035 sheets.
 
+## Amendment (2026-11-04, plan M80): the IED Schedule sheet
+
+An optional IED Schedule sheet, written when `output.include` names `ied_schedule` and the
+network has a schedule, lists one row per schedule row and port need (bay, IED, quantity, ports
+per IED, speed, media, attachment, landing) with each side's ports as a formula, then the totals
+per speed, media and landing as `SUMIFS`, so the L1 switch count can be audited. It goes after
+the Notes sheet and before the Revision History.
+
 ## Consequences
 
 - The workbook stays the one issued file; procurement, spares and cables read from the same build

@@ -1338,7 +1338,7 @@ design basis says) are not milestones.
 - **M79 — Mark as revised and a change log before issuing.** *W2.* Review steps 10 and 12. Preview:
   *Mark as revised* on a row the compare can't see (stored per issue, highlighted yellow as the spec's
   revision rule); Build as issued shows the change list (compare result plus marked rows) before writing.
-- **M80 — IED schedule reference sheet.** *W2.* Review step 2. An optional sheet listing the schedule
+- **M80 — IED schedule reference sheet.** *W2. In review.* Review step 2. An optional sheet listing the schedule
   rows and the ports per speed, media and side, written when a schedule exists and the sheet is chosen
   (ADR 0035 amendment).
 - **M81 — Function tags for library search.** *W1.* Review "What each part record needs".
