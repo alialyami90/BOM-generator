@@ -1766,12 +1766,12 @@ someone confirms the watts), as `datasheet` citing the workbook, or with a fifth
 the client's documents (amends ADR 0037)? Parts and Checks flag them until a datasheet or a
 measurement confirms the watts.
 
-**Q70 — The quick IED count on mixed-media L1 switches** (M60, ADR 0034 item 4). *Open.* A
+**Q70 — The quick IED count on mixed-media L1 switches** (M60, ADR 0034 item 4). *Answered (Ali, 2026-11-04): keep today's rule*, as shipped in M60a. A
 schedule matches each IED port to a switch port of its speed and media (fixed ports their own,
 SFP slots any media of their speed). Should `ied_count` keep today's rule, every IED port counts
 whatever its speed and media (recommended: no project's switch count moves), or act strictly as
 n dual 100M MM IEDs, so copper and 1G IED ports stop counting? The two differ only on L1 switches
-with IED ports of more than one speed or media. Until Ali answers, M60a keeps today's rule.
+with IED ports of more than one speed or media.
 
 **Q71 — Where a suggested cord is counted** (M65; ADR 0035). *Answered 2026-11-04: once, at the
 link's upper end.* A link has two port plan ends (an L1 uplink and an L2 downlink). Count each
@@ -1784,7 +1784,7 @@ minimum one.* Spare = installed × the policy's percent for each chosen category
 the minimum, every line editable with items added or left out; the same with no minimum; or no rule,
 every spare typed. `spares_policy.minimum_per_part` defaults to 1; a policy can still set 0.
 
-**Q64 — External links beside the device rows' L2 ports** (M61). *Open.* Keep `l2_ports` on
+**Q64 — External links beside the device rows' L2 ports** (M61). *Answered (Ali, 2026-11-04): own list*, as shipped in M61 (#353). Keep `l2_ports` on
 equipment rows for the devices in the cabinets and add the links that leave the substation as
 their own list, `network.external_links` (recommended: existing files and the example keep
-working), or fold both into one list of links? Until Ali answers, M61 ships its own list.
+working), or fold both into one list of links?
