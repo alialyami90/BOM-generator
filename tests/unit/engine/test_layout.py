@@ -42,6 +42,7 @@ from bomgen.models.substation import (
     EquipmentRole,
     ExternalLink,
     IedRow,
+    Network,
     PairMove,
     PortNeed,
     Side,
@@ -1099,3 +1100,25 @@ def test_a_link_landing_on_ext_is_on_the_ext_switch_port_plan(example: LoadedSub
     ext = first.port_plans["SEL-2730M-EXT"]
     assert PortAllocation(count=1, speed=PortSpeed.G1, media=Media.MM) in ext.uplinks
     assert not second.port_plans.get("SEL-2730M-EXT", PortPlan()).uplinks
+
+
+# --- Switch-count override (plan M72, Q72) ---------------------------------------------
+
+
+def with_counts(loaded: LoadedSubstation, **counts: int) -> LoadedSubstation:
+    network = Network.model_validate({**loaded.substation.network.model_dump(), **counts})
+    return with_changes(loaded, network=network)
+
+
+def test_switch_count_override_adds_l1_and_l2_units(example: LoadedSubstation) -> None:
+    before = layout_preview(example).plan
+    result = layout_preview(with_counts(example, l1_per_side=before.l1_per_side + 1, l2_per_side=2))
+    assert (result.plan.l1_per_side, result.plan.l2_per_side) == (before.l1_per_side + 1, 2)
+    assert (result.plan.l1_needed, result.plan.l2_needed) == (before.l1_per_side, 1)
+    l2_units = [u for f in result.fills for u in f.units if u.device == "l2"]
+    assert len(l2_units) == 4  # two per side
+
+
+def test_switch_count_override_below_the_sizing_fails(example: LoadedSubstation) -> None:
+    with pytest.raises(SizingError, match="L1 switches per side is set to 1"):
+        layout_preview(with_counts(example, l1_per_side=1))

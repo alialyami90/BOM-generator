@@ -175,6 +175,10 @@ with the save bar; everything on it is saved together.
 
   Right: the **Result** card as before (L1 and L2 switches per side, ports used, links), plus
   **Generate preview** (primary). The L1 ranking table is gone: the L1 switch is picked in its row.
+  The L1 and L2 switch counts are derived values (M72): the sizing's count with its rule, a click to
+  type more switches per side, a reset back. Under them, the busier side's **port budget** per level
+  (all ports, reserved, kept spare, in use, free) with the reserved and spare rules. A count below the
+  sizing's leaves the card with the engine's reason and a **Use the automatic L1 count** button.
 - **Behaviour:** picking a part fills the row's details strip from the library. A value clicked in the
   strip becomes an input; a value that differs from the library is an **override**, marked, with a reset.
   The Result card recalculates after each change, as before. Rows with no part number get a warning on

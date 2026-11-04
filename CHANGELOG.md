@@ -9,6 +9,10 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Switch counts and port budget (M72): the Parts Result card lists each switch level's ports on
+  the busier side (all, reserved, kept spare, in use, free) with the rule behind them, and its L1
+  and L2 switch counts are derived values: `network.l1_per_side` and `l2_per_side` add switches
+  above the sizing's count; a lower count stops the sizing and names the shortfall (Q72).
 - Panel notes and miscellaneous rows (M70). A panel's `notes` (`generated_panels.notes_by_panel`
   on a generated panel) are the engineer's own and never printed; `options.misc_items` print
   last in group H, one "1 Lot" row each. The panel editor has Notes on the Document tab and the

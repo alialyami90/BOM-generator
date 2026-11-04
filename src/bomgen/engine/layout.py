@@ -6,7 +6,6 @@ most free U. ``auto_layout`` drops removed units first and applies the engineer'
 after. Units are named by equipment id and unit number, never by tag.
 """
 
-import math
 import re
 import shutil
 from collections.abc import Iterable, Sequence
@@ -30,6 +29,7 @@ from bomgen.engine.sizing import (
     l1_links,
     l1_reserved_ports,
     l1_slot_downlinks,
+    l2_count,
     l2_port_plan,
     pick_l1_switch,
     rank_l1_switches,
@@ -685,6 +685,8 @@ def network_inputs(loaded: LoadedSubstation) -> NetworkInputs:
         l1_interlink=network.l1_interlink,
         l3_uplinks_per_l2=network.l3_uplinks_per_l2,
         port_fraction=loaded.spares.port_fraction,
+        l1_per_side=network.l1_per_side,
+        l2_per_side=network.l2_per_side,
     )
 
 
@@ -1086,9 +1088,11 @@ def layout_preview(loaded: LoadedSubstation, overrides: LayoutInputs | None = No
     kept = [x for x in units if not _removed(x, inputs.removed)]
     sides = {side: _side_ports(loaded, kept, side, net) for side in (Side.A, Side.B)}
     demand = max(s.demand for s in sides.values())
+    l2_per_side, l2_needed = l2_count(net, demand, plan.l2_usable_ports)
     kept_plan = replace(
         plan,
-        l2_per_side=max(1, math.ceil(demand / plan.l2_usable_ports)),
+        l2_per_side=l2_per_side,
+        l2_needed=l2_needed,
         l2_demand_per_side=demand,
         l1_links_per_side=max(s.l1_links for s in sides.values()),
     )
