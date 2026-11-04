@@ -28,7 +28,7 @@ from bomgen.models._base import (
     Quantity,
     check_template,
 )
-from bomgen.models.library import CatalogueChoice, Media, PortSpeed
+from bomgen.models.library import BrandId, CatalogueChoice, Media, PortSpeed
 from bomgen.models.panel import DocumentInfo, PanelId
 
 FILE_NAME_PLACEHOLDERS = {"doc_no", "rev"}
@@ -229,6 +229,39 @@ class Defaults(InputModel):
     layout: LayoutDefaults = Field(default_factory=LayoutDefaults)
 
 
+class VendorList(InputModel):
+    """A client's approved vendor list (ADR 0031, plan M53): a part, brand set or make
+    outside it is a warning, never a build failure."""
+
+    key: PanelId  # what a design basis's ``vendor_list`` names
+    name: str
+    brands: dict[str, list[BrandId]] = Field(default_factory=dict)  # allowed sets per catalogue
+    makes: list[str] = Field(default_factory=list)  # allowed manufacturers; empty: any
+    parts_allowed: list[PartId] = Field(default_factory=list)  # allowed whatever their make
+    parts_banned: list[PartId] = Field(default_factory=list)
+
+    @field_validator("brands")
+    @classmethod
+    def _catalogues(cls, value: dict[str, list[str]]) -> dict[str, list[str]]:
+        unknown = sorted(set(value) - set(CatalogueChoice.model_fields))
+        if unknown:
+            known = ", ".join(CatalogueChoice.model_fields)
+            raise ValueError(f"brands names no catalogue {', '.join(unknown)} (known: {known})")
+        return value
+
+    def allows(self, part_id: str, make: str | None) -> bool:
+        """Whether the list allows the part: banned never, allowed always, else by make."""
+        if part_id in self.parts_banned:
+            return False
+        if part_id in self.parts_allowed or not self.makes:
+            return True
+        return (make or "").casefold() in {m.casefold() for m in self.makes}
+
+    def allows_brand(self, kind: str, brand_id: str) -> bool:
+        allowed = self.brands.get(kind)
+        return allowed is None or brand_id in allowed
+
+
 class Project(InputModel):
     """The project file (``project.yaml``)."""
 
@@ -237,6 +270,20 @@ class Project(InputModel):
     documents: list[RegisterEntry] = Field(default_factory=list)
     defaults: Defaults = Field(default_factory=Defaults)
     substations: list[Path]  # required, but a new project may list none yet
+    vendor_lists: list[VendorList] = Field(default_factory=list)  # plan M53
+
+    @field_validator("vendor_lists")
+    @classmethod
+    def _unique_lists(cls, lists: list[VendorList]) -> list[VendorList]:
+        seen: set[str] = set()
+        for entry in lists:
+            if entry.key in seen:
+                raise ValueError(f"duplicate vendor list key '{entry.key}'")
+            seen.add(entry.key)
+        return lists
+
+    def vendor_list(self, key: str | None) -> VendorList | None:
+        return next((v for v in self.vendor_lists if v.key == key), None)
 
     @field_validator("documents")
     @classmethod

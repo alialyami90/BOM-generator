@@ -207,6 +207,13 @@ defaults:                              # inherited key by key by every substatio
     terminals_fraction: 0              # M57, ADR 0033; added to each wiring strip, rounded up
 substations:
   - substations/gis01/substation.yaml
+vendor_lists:                          # optional (ADR 0031, M53); outside a list only warns
+  - key: client-avl                    # what a design basis's vendor_list names
+    name: "Client AVL rev 3"
+    brands: { mcb: [schneider-acti9] } # allowed brand sets per catalogue; unlisted: any
+    makes: [Siemens, SEL]              # allowed manufacturers; empty: any
+    parts_allowed: [FGR-60F]           # allowed whatever their make
+    parts_banned: []                   # never allowed
 ```
 
 ### 3.2 `substation.yaml` (ADR 0012/0013)
@@ -1160,9 +1167,13 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
   Settings › *Design basis* tab; the substation page carries `design_basis` (written values,
   tagging in force, which voltages it feeds) instead of a separate `design_basis_page`. The spares
   policy and vendor list get their fields with M64 and M53.
-- **M53 — Vendor list and part lifecycle states.** *W5; ADRs 0031 and 0037.* Planned.
+- **M53 — Vendor list and part lifecycle states.** *W5; ADRs 0031 and 0037.* In two PRs. **M53a**
+  in review: `Project.vendor_lists` (`VendorList`), a design basis's `vendor_list` must name one,
+  Checks `vendor_list` and `part_state` warn, Parts lists the list's parts first in the picker and
+  chips a row off the list, Design basis tab selects the list. The state field, CSV columns and
+  Library state badges came with M67. **M53b** planned: Project › *Vendor lists* editor.
 - **M54 — Design-basis checks.** *W5.* Planned.
-- **M55 — Substation templates.** *W5; Q63.* In review. `templates/<key>.yaml` in the project folder
+- **M55 — Substation templates.** *W5; Q63.* Done (#344). `templates/<key>.yaml` in the project folder
   (`SubstationTemplate`): design basis, brands, spares, the generated panels' look, equipment parts
   and roles (no `qty`, `tag`, `first_nn`) and loose items (no `fed_from`). New substation › Start
   from offers them; Settings › General has *Save as template…*. A loose list's `host_panel` is not

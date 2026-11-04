@@ -16,7 +16,7 @@
     library_version: 'Library version', branch_mcb: 'Branch MCB covers the device', dc_float: 'Rated for the battery float voltage',
     part_number: 'Part number on the BOM', external_ac: 'AC loose loads left out of the totals', l2_link: 'Link to the L2 switch', external_link: 'External link',
     duplicate_tag: 'Unique device tags', untagged_device: 'Devices carry a tag', document_number_placeholder: 'Document number typed',
-    part_source: 'Power and inrush from a source'
+    part_source: 'Power and inrush from a source', vendor_list: 'Parts on the vendor list', part_state: 'Parts released, not draft or obsolete'
   };
   const STATUS = { pass: ['ok', 'Pass', 'check'], warn: ['warn', 'Flag', 'warn'], fail: ['bad', 'Fail', 'error'] };
   const status = (s) => badge(...STATUS[s]);

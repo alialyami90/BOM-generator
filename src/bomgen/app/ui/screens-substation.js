@@ -110,6 +110,7 @@
     dc_voltage_v: [['design_basis', 'dc_voltage_v'], 'num'], ac_voltage_v: [['design_basis', 'ac_voltage_v'], 'num'],
     purdue_scope: [['design_basis', 'purdue_scope'], 'list'], time_sync: [['design_basis', 'time_sync'], 'choice'],
     side_letters: [['design_basis', 'tagging', 'side_letters'], 'list'], notes: [['design_basis', 'notes'], 'text'],
+    vendor_list: [['design_basis', 'vendor_list'], 'choice'],
     ...Object.fromEntries(LEVELS.map((l) => [`first_${l}`, [['design_basis', 'tagging', 'first_numbers', l], 'int']]))
   };
   const SCOPE_ORDER = ['L1', 'L2', 'EXT'];
@@ -130,6 +131,7 @@
     ${field('LAN redundancy', ro(input('db-redundancy', 'Duplicated LAN, A and B')), 'PRP and HSR are not supported yet.')}
     ${edit('db_time_sync', 'Time synchronisation', choice('db_time_sync', SYNC))}
     ${edit('db_purdue_scope', 'Purdue scope', choice('db_purdue_scope', SCOPES), 'The levels the client asked for. It changes no quantity.')}
+    ${edit('db_vendor_list', 'Vendor list', choice('db_vendor_list', [['', 'None'], ...p.design_basis.vendor_lists.map((v) => [v.key, v.name])]), p.design_basis.vendor_lists.length ? 'Parts outside it still build; Parts marks them and Checks warns.' : 'The project has no vendor list yet.')}
     <div class="span-2 section" style="margin:0"><h3>Device tags</h3><p class="lede">Side letters and the first number of each level. Empty uses the standard values.</p>
       <div class="form form--2" style="margin-top:var(--space-3)">
       ${edit('db_side_letters', 'Side letters', text('db_side_letters', { mono: true, placeholder: tg.side_letters.join(',') }), 'LAN A, then LAN B, for example A,B.')}

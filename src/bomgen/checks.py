@@ -20,9 +20,18 @@ from bomgen.io.parts_edit import CATEGORY_LINKS
 from bomgen.library_store.store import LibraryRef, library_mismatch
 from bomgen.models.bom import BomTable, BuildResult, LooseTable, PanelBom, QtySum
 from bomgen.models.calc import BranchMcb, DcMains, HeatResult
-from bomgen.models.library import Category, Library, Media, PortKind, PortSpeed, SupplyType
+from bomgen.models.library import (
+    DEFAULT_BRAND,
+    CatalogueChoice,
+    Category,
+    Library,
+    Media,
+    PortKind,
+    PortSpeed,
+    SupplyType,
+)
 from bomgen.models.panel import Panel, Ventilation
-from bomgen.models.project import DesignConstants, RegisterEntry
+from bomgen.models.project import DesignConstants, RegisterEntry, VendorList, merge_defaults
 from bomgen.models.report import CheckItem, CheckReport, CheckStatus
 from bomgen.models.substation import AcceptedWarning, Equipment, EquipmentRole, ExternalLink
 
@@ -57,6 +66,15 @@ def check_report(loaded: LoadedSubstation, result: BuildResult) -> CheckReport:
     )
     items += external_ac_checks(result.loose, loaded.library)
     items += document_number_checks(loaded.documents)
+    parts = picked_parts(loaded)
+    items += part_state_checks(parts, loaded.library)
+    basis = loaded.substation.design_basis
+    avl = loaded.project.vendor_list(basis.vendor_list) if basis is not None else None
+    if avl is not None:
+        choice = merge_defaults(
+            loaded.project.defaults.catalogue_choice, loaded.substation.catalogue_choice
+        )
+        items += vendor_list_checks(parts, choice, loaded.library, avl)
     report = CheckReport(items=tuple(items))
     checks = loaded.substation.checks
     return apply_acceptances(report, checks.accepted) if checks else report
@@ -576,6 +594,71 @@ def document_number_checks(documents: Mapping[str, RegisterEntry]) -> list[Check
         for key, entry in documents.items()
         if entry.doc_no.strip().upper() == "TBD"
     ]
+
+
+def vendor_list_checks(
+    part_ids: Iterable[str],
+    choice: CatalogueChoice,
+    library: Library,
+    vendor_list: VendorList,
+) -> list[CheckItem]:
+    """A warning per picked part, and per chosen brand set, outside the design basis's
+    vendor list (ADR 0031, plan M53)."""
+    items = []
+    for part_id in sorted(set(part_ids)):
+        part = library.get(part_id)
+        if part is None or vendor_list.allows(part_id, part.make):
+            continue
+        items.append(
+            CheckItem(
+                check="vendor_list",
+                status=CheckStatus.WARN,
+                subject=part_id,
+                message=f"{part.make} {part_id} is not on {vendor_list.name}"
+                if part.make
+                else f"{part_id} (no make) is not on {vendor_list.name}",
+            )
+        )
+    for kind in CatalogueChoice.model_fields:
+        brand = getattr(choice, kind) or DEFAULT_BRAND
+        if not vendor_list.allows_brand(kind, brand):
+            items.append(
+                CheckItem(
+                    check="vendor_list",
+                    status=CheckStatus.WARN,
+                    subject=kind,
+                    message=f"the {kind} brand set '{brand}' is not on {vendor_list.name}",
+                )
+            )
+    return items
+
+
+def part_state_checks(part_ids: Iterable[str], library: Library) -> list[CheckItem]:
+    """A warning per picked part that is a draft or obsolete (ADR 0037, plan M53)."""
+    items = []
+    for part_id in sorted(set(part_ids)):
+        part = library.get(part_id)
+        if part is None or part.state not in ("draft", "obsolete"):
+            continue
+        message = f"{part_id} is a draft: its values are not checked yet"
+        if part.state == "obsolete":
+            message = f"{part_id} is obsolete" + (
+                f"; replaced by {part.successor}" if part.successor else ""
+            )
+        items.append(
+            CheckItem(check="part_state", status=CheckStatus.WARN, subject=part_id, message=message)
+        )
+    return items
+
+
+def picked_parts(loaded: LoadedSubstation) -> set[str]:
+    """Every part the substation's panels and loose material use."""
+    parts = {d.part_id for panel in loaded.panels for d in panel.devices}
+    loose = loaded.substation.loose_material
+    if loose is not None:
+        parts |= {i.part_id for i in loose.items if i.part_id is not None}
+        parts |= {child for i in loose.items for child in i.children}
+    return parts
 
 
 def library_check(recorded: LibraryRef, active: LibraryRef | None) -> CheckItem:
