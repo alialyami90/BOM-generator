@@ -170,3 +170,35 @@ def test_library_parts_carry_their_data_quality_from_the_installed_library(
 def test_parts_from_a_library_file_have_no_data_quality(app: api.Api, project: Path) -> None:
     parts = ok(app.loose_material(str(project), "gis01"))["parts"]
     assert {p["data_quality"] for p in parts} == {None}
+
+
+def test_suggest_cables_gives_the_rows_and_writes_nothing(
+    app: api.Api, project: Path, substation: Path
+) -> None:
+    before = substation.read_text("utf-8")
+    data = ok(app.suggest_cables(str(project), "gis01"))
+    assert data["reason"] is None
+    fw = next(r for r in data["rows"] if r["to_tag"] == "PSA1-EXT-FW-A01")
+    assert (fw["from_tag"], fw["qty"], fw["length_m"], fw["length_class"]) == (
+        "PSA1-L2-ESW-A01",
+        2,
+        2,
+        "in_cabinet",
+    )
+    assert fw["item"]["cable"]["media"] == "MM"
+    assert "No library cable for MM 2 m: 16 cords are free text" in data["warnings"]
+    assert substation.read_text("utf-8") == before
+
+
+def test_accepted_cables_become_loose_rows_and_are_not_suggested_again(
+    app: api.Api, project: Path
+) -> None:
+    rows = ok(app.suggest_cables(str(project), "gis01"))["rows"]
+    page = ok(app.accept_cables(str(project), "gis01", [r["item"] for r in rows[:2]], None))
+    assert page["written"] is True
+    cables = [i["cable"] for i in page["page"]["items"] if i.get("cable")]
+    assert [(c["from_tag"], c["to_tag"]) for c in cables] == [
+        (r["from_tag"], r["to_tag"]) for r in rows[:2]
+    ]
+    again = ok(app.suggest_cables(str(project), "gis01"))["rows"]
+    assert len(again) == len(rows) - 2

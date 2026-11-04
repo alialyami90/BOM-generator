@@ -125,3 +125,26 @@ def test_a_missing_item_index_is_an_edit_error(project: Path) -> None:
         loose_edit.set_loose_item(project, "gis01", 99, {"description": "x"})
     with pytest.raises(EditError, match="no loose item 99"):
         loose_edit.validate_loose_item(project, "gis01", 99, {"description": "x"})
+
+
+def test_add_loose_items_appends_every_item_in_one_write(project: Path) -> None:
+    count = len(material(project).items)
+    cable = {"from_tag": "PSA1-L2-ESW-A01", "to_tag": "PSA1-EXT-FW-A01", "media": "MM"}
+    items: list[dict[str, object]] = [
+        {"description": "Cord A", "qty": 2, "cable": cable},
+        {"description": "Cord B"},
+    ]
+    assert loose_edit.add_loose_items(project, "gis01", items).written
+    added = material(project).items[count:]
+    assert [i.description for i in added] == ["Cord A", "Cord B"]
+    assert added[0].cable is not None
+    assert added[0].cable.to_tag == "PSA1-EXT-FW-A01"
+
+
+def test_add_loose_items_starts_loose_material_under_a_host_panel(project: Path) -> None:
+    drop_loose_material(project)
+    with pytest.raises(EditError, match="host_panel"):
+        loose_edit.add_loose_items(project, "gis01", [{"description": "Cord"}])
+    assert loose_edit.add_loose_items(
+        project, "gis01", [{"description": "Cord"}], host_panel="ws"
+    ).written

@@ -91,6 +91,39 @@
       "title": "BaseFrame",
       "type": "object"
     },
+    "CableDefaults": {
+      "additionalProperties": false,
+      "description": "Cord lengths per link class for the cable suggestions (plan M65, Q66): within one\ncabinet, between cabinets, and leaving the substation when the link row gives none.",
+      "properties": {
+        "external_m": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "External M"
+        },
+        "in_cabinet_m": {
+          "default": 2,
+          "exclusiveMinimum": 0,
+          "title": "In Cabinet M",
+          "type": "number"
+        },
+        "inter_cabinet_m": {
+          "default": 5,
+          "exclusiveMinimum": 0,
+          "title": "Inter Cabinet M",
+          "type": "number"
+        }
+      },
+      "title": "CableDefaults",
+      "type": "object"
+    },
     "CableEntry": {
       "enum": [
         "top",
@@ -433,6 +466,17 @@
           ],
           "default": null,
           "title": "Ac Voltage V"
+        },
+        "cables": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CableDefaults"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "dc_voltage_v": {
           "anyOf": [

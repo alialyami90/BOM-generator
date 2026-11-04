@@ -1202,7 +1202,7 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
   unit and the U it is short. Moves past the cap are unknown panels. No "Exactly n" (Q68).
 - **M63 — Summary BOM.** *W2; ADR 0035.* Done (#324). `engine/summary.py` groups every panel's and the loose material's lines by (make, model, ordering code), free text by (make, description), a text quantity on its own; `sheets/summary_sheet.py` writes it after Heat Calculations when `output.include` has `summary_bom`, quantities as `SUM` formulas over the BOM sheets' quantity cells. Build has the switch and *Export summary as CSV*; Preview a *Summary BOM* tab.
 - **M64 — Spares list.** *W2; ADR 0035, Q65.* Split. **M64a** (engine, sheet) in review: `engine/spares.py` takes each Summary BOM line whose part's category the design basis `spares_policy` names, spare = `max(minimum_per_part, ceil(percent × installed))` with the rule text, then `spares_list` overrides, exclusions and extras; the Spare Parts sheet after the Summary BOM, INSTALLED QTY a formula on the Summary BOM when written, a policy line's SPARE QTY `=MAX(min,ROUNDUP(C×pct/100,0))`. No `round` field: always up, per Q65's recommended answer. Only library parts have a category, so MCB and terminal lines get spares by override only; the plan's "MCB lines at their minimums" needs a category for catalogue lines and is left out. On the example with 10% on SFPs and minimum 1: 1 each of the LX, 100BASE-FX and FR-TRAN SFPs (4 installed each) and 9 of the 1000BASE-SX (84 installed), not the plan's "3 per type". **M64b** (app) in review: the Spares page under Loose material (override a quantity, leave a line out, add an item, each written at once as a `spares_list` field) and a Spare Parts Preview tab.
-- **M65 — Cable schedule.** *W2; ADR 0035, Q66, Q71.* Split. **M65a** (model, sheet) in review: `loose_material.items[].cable` (`from_tag`, `to_tag`, `length_m`, `media`, `speed`) and the Cable Schedule sheet after the Summary BOM, written when any loose row has cable data, quantities as formulas on the Loose Material cells; no `output.include` switch, like the history sheet. **M65b** planned: the suggestions from the port plans (Q71) with design-basis lengths (Q66), Suggest cables on Loose material, the cable columns and a Preview tab.
+- **M65 — Cable schedule.** *W2; ADR 0035, Q66, Q71.* Split. **M65a** (model, sheet) in review: `loose_material.items[].cable` (`from_tag`, `to_tag`, `length_m`, `media`, `speed`) and the Cable Schedule sheet after the Summary BOM, written when any loose row has cable data, quantities as formulas on the Loose Material cells; no `output.include` switch, like the history sheet. M65a merged (#355). **M65b** in review: `engine/cables.py` suggestions from the port plans (Q71) with design-basis lengths (`design_basis.cables`, Q66), library cable parts by `media` and `length_m`, and the `suggest_cables` and `accept_cables` endpoints. **M65c** planned: Suggest cables… on Loose material, the cable columns and a Preview tab. The example suggests 40 MM cords and 4 SM (per side 6 L2-L1 and 2 L2-firewall in the cabinet, 9 L2 downlinks to other cabinets, 2 SM L3 uplinks; 6 L1 A-B interlinks once), not the "12 MM per side" the acceptance first guessed.
 - **M66 — Revision history and recorded issues.** *W2; ADR 0036, Q67.* Done, split. **M66a** (engine, CLI) done (#349): `issues:` records, `checks.accepted:`, register names, the Revision History sheet, the automatic compare with the last recorded issue when its hash matches (else a warning and the picker), `bomgen build --issue`. **M66b** (app) done (#351): Build as issued, Accept with reason on Checks, names in Project › Documents (the register), Preview tab. The history sheet is written whenever it has rows; it has no `output.include` switch.
 - **M67 — Record sources and lifecycle.** *W1; ADR 0037 (accepted).* In two PRs so that W5's M53
   gets the state field early. **M67a** (merged, #331): `state`, `successor`, `sources` and the change
@@ -1628,6 +1628,10 @@ substation dialog. Prefill it with these values, or the previous substation's wh
 `templates/*.yaml`, so they travel with the `.bomproj` (recommended), or in the app's home folder,
 shared by every project on the PC? *Answered 2026-11-03: the project folder.*
 
+**Q66 — Lengths of suggested cables** (M65; ADR 0035). *Answered 2026-11-04: defaults per link
+class.* In-cabinet 2 m, inter-cabinet 5 m, an external link at its own `cable_length_m`, all
+design-basis defaults (`design_basis.cables`) and editable on each accepted row.
+
 **Q67 — Where prepared, checked and approved names print** (M66; ADR 0036). *Answered 2026-11-03: the history sheet only, footer as it is.* The register
 gains the three names per document. They print on the Revision History sheet (ADR 0035) for each
 recorded issue. To ask Ali: the history sheet only, with the footer as it is (recommended); also in
@@ -1652,6 +1656,12 @@ SFP slots any media of their speed). Should `ied_count` keep today's rule, every
 whatever its speed and media (recommended: no project's switch count moves), or act strictly as
 n dual 100M MM IEDs, so copper and 1G IED ports stop counting? The two differ only on L1 switches
 with IED ports of more than one speed or media. Until Ali answers, M60a keeps today's rule.
+
+**Q71 — Where a suggested cord is counted** (M65; ADR 0035). *Answered 2026-11-04: once, at the
+link's upper end.* A link has two port plan ends (an L1 uplink and an L2 downlink). Count each
+link once at its upper end, the L2 switch's downlinks, L3 uplinks and external links, with the L1
+A-B interlinks once from side A and ring links once per neighbour pair. The example gives 40 MM and 4 SM
+cords.
 
 **Q65 — How the spares list sets spare quantities** (M64, ADR 0035). *Open.* Spare = installed ×
 the policy's percent for each chosen category, rounded up, at least the minimum, every line
