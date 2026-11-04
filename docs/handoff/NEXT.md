@@ -69,7 +69,9 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
    the spec's 12 or 5 plus 3 per fan and 2 per thermostat beyond the spec's kit. Nothing to do.
 7. **Q70** answered 2026-11-04: keep today's rule (plan §6); nothing to change.
 8. **Q64** answered 2026-11-04: external links stay their own list (plan §6); nothing to change.
-9. **Q51** (annunciator mounted in a panel), **Q54** (power of the -2 SEL computers) and **Q55**
+9. **Q72** answered 2026-11-04: a switch-count override only goes above the sizing (plan §6),
+   as M72 shipped; nothing to change.
+10. **Q51** (annunciator mounted in a panel), **Q54** (power of the -2 SEL computers) and **Q55**
    (categories for the contractor's other part types) are open in plan §6.
 
 **Next work:** v0.4.0 shipped M48–M69 (STATE.md §1). M70–M81 are next, one PR each, in the order of
