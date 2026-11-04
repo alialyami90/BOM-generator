@@ -15,7 +15,7 @@ from fractions import Fraction
 from bomgen.engine.errors import EngineError
 from bomgen.models.library import DeviceType, Media, PortKind, PortSpeed, PortUse
 from bomgen.models.panel import PortAllocation, PortPlan
-from bomgen.models.substation import IedRow, Topology
+from bomgen.models.substation import ExternalLink, IedRow, Topology
 
 __all__ = [
     "L1Candidate",
@@ -25,6 +25,8 @@ __all__ = [
     "SizingError",
     "SwitchPorts",
     "Topology",
+    "external_l2_links",
+    "external_sides",
     "ied_l2_links",
     "ied_ports_per_side",
     "l1_links",
@@ -155,6 +157,20 @@ def ied_l2_links(rows: Iterable[IedRow], side: SideKey) -> list["L2Link"]:
         for row in rows
         if row.lands_on == "l2" and side in _sides(row)
         for need in row.ports
+    ]
+
+
+def external_sides(link: ExternalLink) -> tuple[SideKey, ...]:
+    """The sides an external link is on: both when redundant, else side A."""
+    return ("a", "b") if link.redundant else ("a",)
+
+
+def external_l2_links(links: Iterable[ExternalLink], side: SideKey) -> list["L2Link"]:
+    """The external links landing on one side's L2 switches (plan M61)."""
+    return [
+        L2Link(link.name, link.count, link.speed, link.media)
+        for link in links
+        if link.lands_on == "l2" and side in external_sides(link)
     ]
 
 

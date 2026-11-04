@@ -17,6 +17,8 @@
   /* M60: one IED schedule row (ADR 0034); ports is text such as "2x100M MM + 1x1G RJ45" */
   const IED = { bay: 'text', name: 'text', qty: 'int', ports: 'text', attachment: 'choice', lands_on: 'choice', notes: 'text' };
   const ATTACH = [['dual', 'Both'], ['single_a', 'A only'], ['single_b', 'B only']], LANDS = [['l1', 'L1'], ['l2', 'L2']];
+  /* M61: one external link (control centre, PCC, third party) */
+  const XL = { name: 'text', count: 'int', speed: 'choice', media: 'choice', lands_on: 'choice', through_firewall: 'bool', redundant: 'bool', cable_length_m: 'num' };
   const LINK = { l2_ports: 'int', l2_speed: 'choice', l2_media: 'choice' };  // the row's link to the L2 switch
   const BRANDS = [['mcb', 'MCB make and series, AC'], ['mcb_dc', 'MCB make and series, DC'], ['terminal_blocks', 'Terminal blocks']];
   const pct = (v) => Math.round(v * 1000) / 10;
@@ -26,6 +28,7 @@
     if (kind === 's') return [['spares', a], SPARES[a][2]];
     if (kind === 'y') return [['layout', a], 'int'];  // M62: y.max_panels
     if (kind === 'i') return [['network', 'ied_schedule', Number(a), b], IED[b]];  // M60: i.<row>.<field>
+    if (kind === 'x') return [['network', 'external_links', Number(a), b], XL[b]];  // M61: x.<row>.<field>
     if (kind === 'b') return [['catalogue_choice', a], 'choice'];
     if (kind === 'e') return [['equipment', Number(a), b], EQ[b]];
     if (kind === 'l') return [['equipment', Number(a), b], LINK[b]];
@@ -43,6 +46,7 @@
     if (kind === 's') { const r = p.spares.find((x) => x.key === a); return r ? (SPARES[a][2] === 'pct' ? pct(r.value) : r.value) : ''; }
     if (kind === 'b') return p.catalogue_choice[a] || '';
     if (kind === 'y') return p[a] == null ? '' : p[a];
+    if (kind === 'x') { const r = p.parts.links[Number(a)]; if (!r) return ''; const v = r[b]; return v == null ? '' : typeof v === 'boolean' ? String(v) : v; }
     if (kind === 'i') { const r = p.parts.ieds[Number(a)]; if (!r) return ''; const v = b === 'ports' ? r.ports_text : r[b]; return v == null ? '' : v; }
     const r = rowAt(Number(a)); if (!r) return '';
     if (kind === 'e' && b === 'cable_manager') return r.cable_manager ? String(r.cable_manager.on) : '';
@@ -63,6 +67,7 @@
   function write(path, value) {
     const f = S.project.file, sid = S.sub;
     if (path[1] === 'ied_schedule') return Bridge.call('set_ied_field', f, sid, path[2], path[3], value);
+    if (path[1] === 'external_links') return Bridge.call('set_external_link_field', f, sid, path[2], path[3], value);
     if (path[0] === 'equipment' && path[2] === 'overrides') return Bridge.call('set_part_override', f, sid, path[1], path[3], value);
     if (path[0] === 'equipment' && path[2] === 'cable_manager') return Bridge.call('set_cable_manager', f, sid, path[1], value === true);  // written only when it differs from the default
     if (path[0] === 'equipment' && path[2] === 'sfp' && path[5]) return Bridge.call('set_sfp_count', f, sid, path[1], path[3], path[4], path[5], value);
@@ -81,7 +86,7 @@
   }
   const PF = App.draftForm({
     prefix: 'p-', screen: 'parts', file: 'substation.yaml', label: 'Save parts', spec, saved,
-    check: (path, value) => (path[1] === 'ied_schedule' || path[2] === 'sfp' || path[2] === 'cable_manager' || path[2] === 'alarm_on_branch_mcb' ? Promise.resolve(null) : Bridge.call('check_substation_field', S.project.file, S.sub, path, value)),
+    check: (path, value) => (path[1] === 'ied_schedule' || path[1] === 'external_links' || path[2] === 'sfp' || path[2] === 'cable_manager' || path[2] === 'alarm_on_branch_mcb' ? Promise.resolve(null) : Bridge.call('check_substation_field', S.project.file, S.sub, path, value)),
     write,
     done: (page) => {
       if (page && page.parts) sub().set(page); else sub().reload();
@@ -369,6 +374,24 @@
       <div class="row" style="margin-top:var(--space-3)"><button class="btn btn--secondary btn--sm" data-action="pp-ied-add" ${dirty ? 'disabled title="Save or discard the changes first"' : ''}>${icon('plus')}Add a row</button>
         <button class="btn btn--secondary btn--sm" data-action="pp-ied-csv" ${dirty ? 'disabled title="Save or discard the changes first"' : ''}>Import CSV…</button></div></div>`;
   }
+  /* ---------- external links (M61) ---------- */
+  const XL_LABEL = { name: 'Name', count: 'Links', speed: 'Speed', media: 'Media', lands_on: 'Lands on', through_firewall: 'Through the firewall', redundant: 'Sides', cable_length_m: 'Cable length' };
+  function linksTable(p) {
+    const rows = p.parts.links, dirty = PF.dirty();
+    const cell = (i, f) => { const key = `x.${i}.${f}`, id = `p-${key}`, v = shown(key);
+      const ctl = f === 'speed' ? select(id, ['10M', '100M', '1G', '10G'], v) : f === 'media' ? select(id, ['SM', 'MM', 'RJ45'], v)
+        : f === 'lands_on' ? select(id, [['l2', 'L2'], ['ext', 'EXT']], v) : f === 'through_firewall' ? select(id, [['false', 'No'], ['true', 'Yes']], v)
+        : f === 'redundant' ? select(id, [['true', 'Both'], ['false', 'A only']], v)
+        : input(id, v, { mono: f !== 'name', num: f === 'count' || f === 'cable_length_m', invalid: !!PF.errors[key], placeholder: f === 'cable_length_m' ? '—' : '' });
+      return `<td>${mark(key, ctl.replace(/<(input|select) /, `<$1 aria-label="${esc(XL_LABEL[f])}, link ${i + 1}" `))}${err(key)}</td>`; };
+    const body = rows.map((r, i) => `<tr>${Object.keys(XL).map((f) => cell(i, f)).join('')}
+        <td><button class="btn btn--ghost btn--sm btn--icon" data-action="pp-xl-rm" data-i="${i}" aria-label="Remove ${esc(r.name)}" ${dirty ? 'disabled title="Save or discard the changes first"' : ''}>${icon('trash')}</button></td></tr>`).join('');
+    return `<div style="margin-top:var(--space-4)"><h4 id="h-xl">External links</h4>
+      <p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">Links that leave the substation, to the control centre, a PCC or a third party. Each takes a port and an SFP of its speed and media on the L2 or external switch, on each side it is on.</p>
+      ${rows.length ? `<div class="table-wrap"><table class="table ied-table xl-table" aria-labelledby="h-xl"><thead><tr><th>Name</th><th class="num">Links</th><th>Speed</th><th>Media</th><th>Lands on</th><th>Firewall</th><th>Sides</th><th class="num">Cable m</th><th><span class="sr-only">Remove</span></th></tr></thead><tbody>${body}</tbody></table></div>`
+        : '<p class="muted small">No external links. Devices in the cabinets keep their own link to the L2 switch on their row.</p>'}
+      <div class="row" style="margin-top:var(--space-3)"><button class="btn btn--secondary btn--sm" data-action="pp-xl-add" ${dirty ? 'disabled title="Save or discard the changes first"' : ''}>${icon('plus')}Add a link</button></div></div>`;
+  }
   const IED_LABEL = { bay: 'Bay', name: 'IED', qty: 'Quantity', ports: 'Ports per side', attachment: 'Attached to', lands_on: 'Lands on', notes: 'Notes' };
   function brands(p) {
     if (!Object.keys(p.brands).length) return '';
@@ -402,6 +425,7 @@
               ${mark('n.topology', field('Topology', select('p-n.topology', [['star', 'Star'], ['ring', 'Ring']], topo), topo === 'ring' ? 'L1 switches are joined in rings. Two ports close each ring.' : 'Each L1 switch has one uplink to its L2 switch plus an A–B interlink.'))}
             </div>
             ${schedule ? iedTable(p) : ''}
+            ${fresh ? '' : linksTable(p)}
             ${tuning(p)}</section>
           <section aria-labelledby="h-dev"><h3 id="h-dev">Devices</h3>
             <p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">The layout fills the panels in this order. The part number is printed on the BOM; leave it empty to print the library's code. Click a value under a part to change it for this design only.</p>
@@ -500,6 +524,19 @@
     Bridge.call('remove_ied_row', file, sid, i).then((d) => {
       reloaded(d.page);
       toast(`Removed ${r.bay} ${r.name}`, 'trash', () => Bridge.call('add_ied_row', file, sid, d.row, i).then(reloaded).catch(fail));
+    }).catch(fail);
+  };
+  ACTIONS['pp-xl-add'] = () => {
+    const n = sub().page().parts.links.length;
+    Bridge.call('add_external_link', S.project.file, S.sub, { name: n ? `Link ${n + 1}` : 'Control centre' }, null).then((page) => {
+      reloaded(page); const el = document.getElementById(`p-x.${n}.name`); if (el) { el.focus(); el.select(); }
+    }).catch(fail);
+  };
+  ACTIONS['pp-xl-rm'] = (el) => {
+    const i = +el.dataset.i, file = S.project.file, sid = S.sub, r = sub().page().parts.links[i];
+    Bridge.call('remove_external_link', file, sid, i).then((d) => {
+      reloaded(d.page);
+      toast(`Removed ${r.name}`, 'trash', () => Bridge.call('add_external_link', file, sid, d.row, i).then(reloaded).catch(fail));
     }).catch(fail);
   };
   ACTIONS['pp-ied-csv'] = () => Bridge.call('choose_file', 'csv').then((path) => {

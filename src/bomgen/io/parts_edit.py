@@ -391,20 +391,21 @@ def _network(data: CommentedMap) -> CommentedMap:
     return network
 
 
-def _schedule(data: CommentedMap) -> CommentedSeq:
+def _schedule(data: CommentedMap, key: str = "ied_schedule") -> CommentedSeq:
     network = _network(data)
-    rows = network.get("ied_schedule")
+    rows = network.get(key)
     if not isinstance(rows, CommentedSeq):
-        set_entry(network, "ied_schedule", [])
-        rows = network["ied_schedule"]
+        set_entry(network, key, [])
+        rows = network[key]
     assert isinstance(rows, CommentedSeq)
     return rows
 
 
-def _ied_row(data: CommentedMap, index: int) -> CommentedMap:
-    rows = _schedule(data)
+def _ied_row(data: CommentedMap, index: int, key: str = "ied_schedule") -> CommentedMap:
+    rows = _schedule(data, key)
     if not 0 <= index < len(rows) or not isinstance(rows[index], CommentedMap):
-        raise EditError(f"no IED schedule row {index + 1}")
+        what = "IED schedule row" if key == "ied_schedule" else "external link"
+        raise EditError(f"no {what} {index + 1}")
     row: CommentedMap = rows[index]
     return row
 
@@ -490,3 +491,68 @@ def set_ied_schedule(
         set_entry(_network(data), "ied_schedule", _plain([dict(r) for r in rows]))
 
     return edit_substation(project_file, substation_id, change, store=store, dry_run=dry_run)
+
+
+# --- External links (plan M61) --------------------------------------------------------
+
+LINK_FIELDS = (
+    "name",
+    "count",
+    "speed",
+    "media",
+    "lands_on",
+    "through_firewall",
+    "redundant",
+    "cable_length_m",
+)
+
+
+def add_external_link(
+    project_file: Path,
+    substation_id: str,
+    row: Mapping[str, Any],
+    index: int | None = None,
+    *,
+    store: LibraryStore | None = None,
+) -> EditResult:
+    """Insert an external link (at the end when ``index`` is None)."""
+
+    def change(data: CommentedMap) -> None:
+        rows = _schedule(data, "external_links")
+        insert_entry(rows, len(rows) if index is None else index, _plain(dict(row)))
+
+    return edit_substation(project_file, substation_id, change, store=store)
+
+
+def set_external_link_field(
+    project_file: Path,
+    substation_id: str,
+    index: int,
+    field: str,
+    value: object,
+    *,
+    store: LibraryStore | None = None,
+) -> EditResult:
+    """Write one field of external link ``index``; an empty value removes the field."""
+    if field not in LINK_FIELDS:
+        raise EditError(f"an external link has no field '{field}'")
+
+    def change(data: CommentedMap) -> None:
+        target = _ied_row(data, index, "external_links")
+        if value is None or value == "":
+            if field in target:
+                remove_entry(target, field)
+        else:
+            set_entry(target, field, _plain(value))
+
+    return edit_substation(project_file, substation_id, change, store=store)
+
+
+def remove_external_link(
+    project_file: Path, substation_id: str, index: int, *, store: LibraryStore | None = None
+) -> EditResult:
+    def change(data: CommentedMap) -> None:
+        _ied_row(data, index, "external_links")
+        remove_entry(_schedule(data, "external_links"), index)
+
+    return edit_substation(project_file, substation_id, change, store=store)

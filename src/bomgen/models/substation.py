@@ -174,9 +174,23 @@ class IedRow(InputModel):
     notes: str | None = None
 
 
+class ExternalLink(InputModel):
+    """A link leaving the substation, e.g. to the control centre or PCC (plan M61, Q64)."""
+
+    name: str
+    count: PositiveInt = 1  # links on each side it is on
+    speed: SizedSpeed = PortSpeed.G1
+    media: Media = Media.SM
+    lands_on: Literal["l2", "ext"] = "l2"  # the L2 switches or the external switch
+    through_firewall: bool = False
+    redundant: bool = True  # one per side; else side A only
+    cable_length_m: PositiveFloat | None = None  # for the cable schedule (M65)
+
+
 class Network(InputModel):
     ied_count: NonNegativeInt = 0  # field IEDs: sizes the L1 switches, never a BOM row
     ied_schedule: list[IedRow] = Field(default_factory=list)  # replaces ied_count (ADR 0034)
+    external_links: list[ExternalLink] = Field(default_factory=list)  # plan M61
     topology: Topology = Topology.STAR
     ring_max_switches: PositiveInt = 6
     l1_uplinks_per_switch: PositiveInt = 1

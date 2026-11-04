@@ -408,6 +408,7 @@ def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
                 for c in sorted(categories)
             },
             "ieds": [ied_csv.shown(r) for r in substation.network.ied_schedule],  # M60
+            "links": [x.model_dump(mode="json") for x in substation.network.external_links],
             "default_rows": [
                 {"role": r.value, "label": ROLE_LABEL[r], "category": ROLE_CATEGORY[r].value}
                 for r in DEFAULT_ROWS

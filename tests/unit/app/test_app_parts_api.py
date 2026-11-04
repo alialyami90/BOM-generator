@@ -545,3 +545,28 @@ def test_undo_puts_a_removed_ied_row_back_in_its_place(app: api.Api, project: Pa
     data = ok(app.remove_ied_row(str(project), "gis01", 1))
     page = ok(app.add_ied_row(str(project), "gis01", data["row"], 1))
     assert [r["bay"] for r in page["parts"]["ieds"]] == ["E01", "E02", "E03"]
+
+
+# --- External links (plan M61) --------------------------------------------------------
+
+
+def test_external_links_are_edited_on_parts_and_counted_on_the_result_card(
+    app: api.Api, project: Path
+) -> None:
+    page = ok(app.add_external_link(str(project), "gis01", {"name": "CCR", "count": 2}, None))
+    (link,) = page["parts"]["links"]
+    assert (link["name"], link["speed"], link["media"], link["lands_on"]) == (
+        "CCR",
+        "1G",
+        "SM",
+        "l2",
+    )
+    page = ok(app.set_external_link_field(str(project), "gis01", 0, "redundant", False))
+    assert page["parts"]["links"][0]["redundant"] is False
+    plan = ok(app.substation_layout(str(project), "gis01"))["plan"]
+    assert plan["external_links"] == [
+        {"name": "CCR", "count": 2, "speed": "1G", "media": "SM", "lands_on": "l2", "a": 2, "b": 0}
+    ]
+    data = ok(app.remove_external_link(str(project), "gis01", 0))
+    assert data["row"]["name"] == "CCR"
+    assert data["page"]["parts"]["links"] == []

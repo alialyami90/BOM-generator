@@ -14,7 +14,7 @@
     sfp_slots: 'SFPs fit the port plans', dc_main: 'Main MCB covers the feed current', airflow: 'Fans cover the heat load',
     line_up: 'Line-up airflow', natural_convection: 'Natural convection', di_capacity: 'Digital inputs cover the hardwired points',
     library_version: 'Library version', branch_mcb: 'Branch MCB covers the device', dc_float: 'Rated for the battery float voltage',
-    part_number: 'Part number on the BOM', external_ac: 'AC loose loads left out of the totals', l2_link: 'Link to the L2 switch',
+    part_number: 'Part number on the BOM', external_ac: 'AC loose loads left out of the totals', l2_link: 'Link to the L2 switch', external_link: 'External link',
     duplicate_tag: 'Unique device tags', untagged_device: 'Devices carry a tag', document_number_placeholder: 'Document number typed',
     part_source: 'Power and inrush from a source'
   };

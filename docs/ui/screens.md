@@ -157,6 +157,9 @@ with the save bar; everything on it is saved together.
      problems and how many rows it replaces. Field IEDs then reads the count from the schedule, and the
      Result card adds the IED ports per speed and media on each side. Quick count is disabled while the
      schedule has rows.
+     Under them, **External links** (M61): one row per link leaving the substation (name, links per side,
+     speed, media, lands on L2 or EXT, through the firewall, Both sides or A only, cable length), with
+     **Add a link** and remove with Undo; the Result card lists them with their count on each side.
   2. **Network fine tuning**, a disclosure under them, closed once the substation is set up. Closed, it
      is one muted summary line ("Star · 1 uplink per L1 · A–B interlink · 20% ports kept free · 4 U kept
      free"); open, it holds switches per ring (Ring only), L1 uplinks per switch, A–B interlink, L3

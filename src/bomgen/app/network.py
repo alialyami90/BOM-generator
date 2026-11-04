@@ -120,6 +120,18 @@ def _network(loaded: LoadedSubstation, page: dict[str, Any]) -> None:
             "l2_usable_ports": plan.l2_usable_ports,
             "l2_demand_per_side": plan.l2_demand_per_side,
             "ied_ports": _ied_ports(loaded),
+            "external_links": [
+                {
+                    "name": x.name,
+                    "count": x.count,
+                    "speed": x.speed.value,
+                    "media": x.media.value,
+                    "lands_on": x.lands_on,
+                    "a": x.count,
+                    "b": x.count if x.redundant else 0,
+                }
+                for x in loaded.substation.network.external_links
+            ],
         },
         "panels": _board(loaded, result),
         "issues": [

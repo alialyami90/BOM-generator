@@ -23,6 +23,8 @@ from bomgen.engine.sizing import (
     L2Link,
     NetworkInputs,
     NetworkPlan,
+    external_l2_links,
+    external_sides,
     ied_l2_links,
     ied_ports_per_side,
     l1_links,
@@ -706,11 +708,19 @@ def _role(loaded: LoadedSubstation, role: EquipmentRole) -> Equipment:
 
 
 def _links(loaded: LoadedSubstation, side: Side) -> list[L2Link]:
-    return [
-        L2Link(e.id, e.l2_ports, e.l2_speed, e.l2_media)
-        for e in loaded.substation.equipment
-        if e.l2_ports and (e.redundant or e.side in (Side.NONE, side))
-    ] + ied_l2_links(loaded.substation.network.ied_schedule, side.value)
+    return (
+        [
+            L2Link(e.id, e.l2_ports, e.l2_speed, e.l2_media)
+            for e in loaded.substation.equipment
+            if e.l2_ports and (e.redundant or e.side in (Side.NONE, side))
+        ]
+        + ied_l2_links(loaded.substation.network.ied_schedule, side.value)
+        + _external(loaded, side)
+    )
+
+
+def _external(loaded: LoadedSubstation, side: Side) -> list[L2Link]:
+    return external_l2_links(loaded.substation.network.external_links, side.value)
 
 
 def _units(loaded: LoadedSubstation, plan: NetworkPlan, issues: list[LayoutIssue]) -> list[Unit]:
@@ -764,10 +774,11 @@ class _SidePorts:
     links: list[L2Link]
     l1_switches: int
     l1_links: int
+    external: list[L2Link]  # the links leaving the substation from L2 (plan M61)
 
     @property
     def demand(self) -> int:
-        return self.l1_links + sum(link.ports for link in self.links)
+        return self.l1_links + sum(link.ports for link in (*self.links, *self.external))
 
 
 def _side_ports(
@@ -785,7 +796,7 @@ def _side_ports(
     l1 = sum(
         n for device, n in counts.items() if _entry(loaded, device).role is EquipmentRole.L1_SWITCH
     )
-    return _SidePorts(links, l1, l1_links(l1, net))
+    return _SidePorts(links, l1, l1_links(l1, net), _external(loaded, side))
 
 
 def _entry(loaded: LoadedSubstation, device: str) -> Equipment:
@@ -940,13 +951,24 @@ def _port_plans(
             for a in side_plan.uplinks_l3
         ]
         downlinks = side_plan.downlinks if first_home is panel else []
+        external = _allocations(sides[side].external) if first_home is panel else []
         plans.setdefault(plan.l2_part_id, []).append(
-            PortPlan(uplinks_l3=uplinks, downlinks=downlinks)
+            PortPlan(uplinks_l3=uplinks, uplinks=external, downlinks=downlinks)
         )
     for unit in panel.units:
         extra = entries[unit.device].port_plan
         if extra is not None:
             plans.setdefault(unit.part_id, []).append(extra)
+    for unit in _ext_homes(panel, fills, entries):
+        links = [
+            x
+            for x in loaded.substation.network.external_links
+            if x.lands_on == "ext"
+            and (unit.side is Side.NONE or unit.side.value in external_sides(x))
+        ]
+        if links:
+            uplinks = _allocations(L2Link(x.name, x.count, x.speed, x.media) for x in links)
+            plans.setdefault(unit.part_id, []).append(PortPlan(uplinks=uplinks))
     return {
         part: PortPlan(
             uplinks_l3=_merge(a for p in parts for a in p.uplinks_l3),
@@ -990,6 +1012,20 @@ def _l1_downlinks(
             for (speed, media), count in slots.items()
         ]
     return allocations
+
+
+def _allocations(links: Iterable[L2Link]) -> list[PortAllocation]:
+    return _merge(PortAllocation(count=x.ports, speed=x.speed, media=x.media) for x in links)
+
+
+def _ext_homes(
+    panel: PanelFill, fills: Sequence[PanelFill], entries: dict[str, Equipment]
+) -> list[Unit]:
+    """The first external switch unit of each side, when it is in ``panel``: the external
+    links that land on EXT go on its port plan (plan M61)."""
+    ext = [x for p in fills for x in p.units if entries[x.device].role is EquipmentRole.EXT_SWITCH]
+    firsts = [next(x for x in ext if x.side is side) for side in dict.fromkeys(x.side for x in ext)]
+    return [x for x in firsts if x in panel.units]
 
 
 def _all_l2(fills: Sequence[PanelFill], entries: dict[str, Equipment], side: Side) -> list[Unit]:

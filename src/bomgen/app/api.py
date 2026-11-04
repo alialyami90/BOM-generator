@@ -1319,6 +1319,49 @@ class Api:
         return {"page": page, "row": row}
 
     @endpoint
+    def add_external_link(
+        self, project_file: str, substation_id: str, row: dict[str, Any], index: int | None = None
+    ) -> dict[str, Any]:
+        """Insert an external link (at the end when ``index`` is None) (plan M61)."""
+        return self._parts_write(
+            project_file,
+            substation_id,
+            functools.partial(parts_edit.add_external_link, row=row, index=index),
+        )
+
+    @endpoint
+    def set_external_link_field(
+        self, project_file: str, substation_id: str, index: int, field: str, value: Any
+    ) -> dict[str, Any]:
+        """Write one field of an external link; returns the Parts page."""
+        return self._parts_write(
+            project_file,
+            substation_id,
+            functools.partial(
+                parts_edit.set_external_link_field, index=index, field=field, value=value
+            ),
+        )
+
+    @endpoint
+    def remove_external_link(
+        self, project_file: str, substation_id: str, index: int
+    ) -> dict[str, Any]:
+        """Remove an external link; returns the Parts page and the row as written, for Undo."""
+        store = self._library_store()
+        with self._substation(substation_id):
+            file = resolve(Path(project_file), substation_id, store).file
+        rows = (read_yaml(file).data.get("network") or {}).get("external_links") or []
+        if not 0 <= index < len(rows):
+            raise AppError("edit_refused", f"There is no external link {index + 1}.")
+        row = json.loads(json.dumps(rows[index], default=str))
+        page = self._parts_write(
+            project_file,
+            substation_id,
+            functools.partial(parts_edit.remove_external_link, index=index),
+        )
+        return {"page": page, "row": row}
+
+    @endpoint
     def import_ied_csv(
         self, project_file: str, substation_id: str, path: str, dry_run: bool
     ) -> dict[str, Any]:
