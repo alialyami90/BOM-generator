@@ -423,7 +423,7 @@ front view. The workbook's sheet preview (above) is unchanged.
   workbook contains (the Loose Material sheet only when it will be written), library, project revision and warning count.
 - **States:** blocked (errors: red banner, disabled button with a reason);
   ready; building (button busy, four named steps with a progress bar);
-  success (path, size, sheet count, Open workbook primary, Show in folder, Export summary as CSV, and
+  success (path, size, sheet count, Open workbook primary, Show in folder, Export PDF…, Export summary as CSV, and
   a short check report); failed because the file is open in Excel (red banner,
   "Try again", "Save as new name"). An existing file with the same name asks
   for confirmation in a dialog before it is replaced.
@@ -432,6 +432,11 @@ front view. The workbook's sheet preview (above) is unchanged.
   It is disabled with the reason when that rev is already recorded. With no
   previous issue chosen, the build compares with the last recorded issue; the
   options say which, or warn when its file is missing or changed.
+- **PDF export (ADR 0039, plan M78):** **Export PDF…** after a build lists the
+  workbook's sheets, all ticked, and the renderer: Built-in (default, no Excel
+  needed, pages close to Excel's) or Use Excel (exact pages; disabled with the
+  reason off Windows or without Excel). It writes `<workbook>.pdf` next to the
+  workbook, warns before replacing one, and opens it.
 
 ## Departures in the built app
 

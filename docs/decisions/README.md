@@ -44,4 +44,5 @@ An ADR stays "Proposed" until Ali accepts it in review.
 | 0036 | [Recorded issues](0036-recorded-issues.md) | Accepted (Ali, 2026-11-03) |
 | 0037 | [Record lifecycle and sources](0037-record-lifecycle-and-sources.md) | Accepted (Ali, 2026-11-03) |
 | 0038 | [RedBox and media converter roles](0038-redbox-and-media-converter-roles.md) | Accepted (Ali, 2026-11-04) |
+| 0039 | [PDF export of the issued sheets](0039-pdf-export.md) | Accepted (Ali, 2026-11-04) |
 | 0040 | [Overrides listed in Checks, reasons for risky ones](0040-overrides-in-checks-and-reasons.md) | Accepted |

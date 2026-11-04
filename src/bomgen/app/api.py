@@ -50,8 +50,10 @@ from bomgen.app.output import (
     build_file,
     build_target,
     checks_page,
+    export_pdf,
     export_summary_csv,
     issue_changes,
+    pdf_options,
 )
 from bomgen.app.panel_page import PanelNotFoundError, panel_page, part_list
 from bomgen.app.parts import parts_page
@@ -2115,6 +2117,31 @@ class Api:
             result = export_summary_csv(
                 Path(project_file), substation_id, self._library_store(), Path(chosen)
             )
+        self._list(result["path"])
+        return result
+
+    @endpoint
+    def pdf_options(self, workbook: str) -> dict[str, Any]:
+        """The sheets *Export PDF…* offers for a written workbook, and whether Excel can be
+        used (plan M78, ADR 0039)."""
+        try:
+            return pdf_options(Path(workbook))
+        except OutputRefusedError as exc:
+            raise AppError(exc.kind, str(exc)) from None
+
+    @endpoint
+    def export_pdf(
+        self,
+        workbook: str,
+        sheets: list[str] | None = None,
+        engine: str = "builtin",
+        replace: bool = False,
+    ) -> dict[str, Any]:
+        """Write the chosen sheets of a written workbook as a PDF next to it (ADR 0039)."""
+        try:
+            result = export_pdf(Path(workbook), sheets, engine, replace)
+        except OutputRefusedError as exc:
+            raise AppError(exc.kind, str(exc)) from None
         self._list(result["path"])
         return result
 

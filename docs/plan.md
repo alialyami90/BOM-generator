@@ -1337,7 +1337,7 @@ design basis says) are not milestones.
   terminals than the policy, a fan below the required airflow) needs a one-line reason, stored with it
   and printed on the Revision History sheet. Rule texts for grounding busbars, switch counts, cable
   manager count and the fan choice.
-- **M78 — PDF export of the issued sheets.** *W2; ADR and Q.* Review step 11. After a build, *Export
+- **M78 — PDF export of the issued sheets.** *W2; ADR 0039, Q73.* In review. Review step 11. After a build, *Export
   PDF* writes the chosen sheets with their print settings. Q: Excel on the engineer's PC (exact page
   setup, Windows only) or a built-in renderer (no Excel needed, approximate).
 - **M79 — Mark as revised and a change log before issuing.** *W2.* Done (#383). Review steps 10 and 12. Preview:
@@ -1807,3 +1807,8 @@ working), or fold both into one list of links?
 Checks warning that lists the ports left without a switch, or only above it, a lower count
 stopping the sizing and naming the shortfall (recommended: a BOM with too few switches is wrong on
 site)?
+
+**Q73 — How Export PDF renders the issued sheets** (M78). *Answered (Ali, 2026-11-04): both,
+built-in by default* (ADR 0039). Drive Excel on the engineer's PC (exact page setup, Windows with
+Excel only), draw the PDF with a built-in renderer (no Excel, works in tests, pages close to
+Excel's; recommended), or both with the built-in renderer as the default?

@@ -40,6 +40,9 @@ project uses [Semantic Versioning](https://semver.org/).
   *Function tags* field in the device editor, and Library search and the part picker match them.
   psa-devices 1.17.0 tags every part with its category, a switch's Purdue level and its largest
   port group, such as "Network switch", "L2 switch" and "24-port".
+- PDF export (M78, ADR 0039, Q73): after a build, *Export PDF…* writes the chosen sheets of the
+  workbook as a PDF next to it, with each sheet's page setup, header and footer. The built-in
+  renderer needs no Excel; on Windows with Excel, *Use Excel* prints exact pages.
 - Mark as revised (M79, ADR 0036 amendment): Preview can mark a BOM row as revised, with a reason,
   when the compare can't see the change. The row is highlighted yellow, *Build as issued…* lists the
   compare's changes and the marked rows before writing, and the issue records the marks and clears
