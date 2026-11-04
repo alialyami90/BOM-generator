@@ -227,7 +227,8 @@ output:
   file_name: "{doc_no}_PSA_BOM_Rev{rev}.xlsx"   # OUT-2
   sheet_names: { loose_material: "Loose Material", power_consumption: "Power Consumption",
                  heat_dissipation: "Heat Dissipation", heat_calculations: "Heat Calculations",
-                 summary_bom: "Summary BOM", revision_history: "Revision History" }
+                 summary_bom: "Summary BOM", cable_schedule: "Cable Schedule",
+                 revision_history: "Revision History" }
   include: [summary_bom]                # optional sheets to write (ADR 0035); default none
   power_footnotes: ["*Printer Power Consumption: 622 watts (Printing), …"]  # rows after NOTES; optional
 issues:                                # recorded issues, in order (ADR 0036); `bomgen build --issue`
@@ -245,6 +246,8 @@ loose_material:                        # extras not tied to a device
     - { part_id: NAP-K55, children: [LPA37-696], fed_from: psa3 }   # Q13
     - { part_id: FO-PATCH-CORDS, qty: "1 Lot" }
     - { description: "Cable tray, 300 mm", qty: "1 Lot", tag: Tray }   # free text (ADR 0022)
+    - { description: "LC-LC duplex patch cord", qty: 4,   # cable data: listed on the Cable Schedule (M65)
+        cable: { from_tag: L2-ESW-A01, to_tag: L1-ESW-A11, length_m: 2, media: MM, speed: 1G } }
 equipment:                             # what the layout places (design 3.2)
   - { id: l2, part_id: RST2228-L2, role: l2_switch, redundant: true }       # exactly one
   - { id: l1, part_id: RST2228-L1-24MM, role: l1_switch, redundant: true }  # exactly one; no qty
@@ -1184,7 +1187,7 @@ B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
   unit and the U it is short. Moves past the cap are unknown panels. No "Exactly n" (Q68).
 - **M63 — Summary BOM.** *W2; ADR 0035.* Done (#324). `engine/summary.py` groups every panel's and the loose material's lines by (make, model, ordering code), free text by (make, description), a text quantity on its own; `sheets/summary_sheet.py` writes it after Heat Calculations when `output.include` has `summary_bom`, quantities as `SUM` formulas over the BOM sheets' quantity cells. Build has the switch and *Export summary as CSV*; Preview a *Summary BOM* tab.
 - **M64 — Spares list.** *W2; ADR 0035, Q65.* Planned.
-- **M65 — Cable schedule.** *W2; ADR 0035, Q66.* Planned.
+- **M65 — Cable schedule.** *W2; ADR 0035, Q66, Q71.* Split. **M65a** (model, sheet) in review: `loose_material.items[].cable` (`from_tag`, `to_tag`, `length_m`, `media`, `speed`) and the Cable Schedule sheet after the Summary BOM, written when any loose row has cable data, quantities as formulas on the Loose Material cells; no `output.include` switch, like the history sheet. **M65b** planned: the suggestions from the port plans (Q71) with design-basis lengths (Q66), Suggest cables on Loose material, the cable columns and a Preview tab.
 - **M66 — Revision history and recorded issues.** *W2; ADR 0036, Q67.* Done, split. **M66a** (engine, CLI) done (#349): `issues:` records, `checks.accepted:`, register names, the Revision History sheet, the automatic compare with the last recorded issue when its hash matches (else a warning and the picker), `bomgen build --issue`. **M66b** (app) done (#351): Build as issued, Accept with reason on Checks, names in Project › Documents (the register), Preview tab. The history sheet is written whenever it has rows; it has no `output.include` switch.
 - **M67 — Record sources and lifecycle.** *W1; ADR 0037 (accepted).* In two PRs so that W5's M53
   gets the state field early. **M67a** (merged, #331): `state`, `successor`, `sources` and the change

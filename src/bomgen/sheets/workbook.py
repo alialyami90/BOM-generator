@@ -16,6 +16,7 @@ from bomgen.models.sheet import SheetModel, WorkbookModel
 from bomgen.sheets import heat_calc_sheet, heat_diss_sheet, styles
 from bomgen.sheets import power_sheet as power_module
 from bomgen.sheets.bom_sheet import BomSheet, bom_sheet, loose_sheet
+from bomgen.sheets.cable_sheet import cable_sheet, has_cables
 from bomgen.sheets.header_footer import bom_header_footer, calc_header_footer, fitting_size
 from bomgen.sheets.history_sheet import history_rows, history_sheet
 from bomgen.sheets.nameplate_sheet import nameplate_sheet
@@ -133,6 +134,20 @@ def build_workbook(
                 cells,
                 tables,
                 bom_header_footer(project_name, loaded.substation.substation.name, document, logo),
+            )
+        )
+    if has_cables(result.loose):
+        assert result.loose is not None
+        substation = loaded.substation.substation.name
+        sheets.append(
+            cable_sheet(
+                names.cable_schedule,
+                substation,
+                result.loose,
+                {ref: (source.sheet, source.row) for ref, source in sources.items()},
+                bom_header_footer(
+                    project_name, substation, loaded.documents[loaded.substation.document], logo
+                ),
             )
         )
     history = history_rows(loaded)

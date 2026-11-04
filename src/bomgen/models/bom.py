@@ -22,6 +22,7 @@ from bomgen.models.calc import (
 )
 from bomgen.models.output import OutputModel
 from bomgen.models.panel import PanelKind
+from bomgen.models.project import CableRef
 
 Column = Literal["A", "B", "C", "D", "E", "F", "G", "H"]
 
@@ -75,6 +76,7 @@ class BomLine(OutputModel):
     parent: NonNegativeInt | None = None
     merge_fg: bool = False
     revised: frozenset[Column] = frozenset()
+    cable: CableRef | None = None  # a loose row's cable data (plan M65)
 
 
 class BomTable(OutputModel):
