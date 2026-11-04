@@ -71,9 +71,8 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
 8. **Q64** answered 2026-11-04: external links stay their own list (plan §6); nothing to change.
 9. **Q72** answered 2026-11-04: a switch-count override only goes above the sizing (plan §6),
    as M72 shipped; nothing to change.
-10. **Q73** (W2, M78): how Export PDF renders the issued sheets. The card is posted; options
-   "Built-in renderer" (recommended: no Excel needed, works in tests), "Excel on the PC" and "Both,
-   built-in by default". M78 and ADR 0039 start on the answer.
+10. **Q73** answered 2026-11-04: both, built-in by default (ADR 0039), shipped in M78 (#388).
+   Ask Ali to try *Export PDF… › Use Excel* once on his PC; CI can't run it.
 11. **Q51** (annunciator mounted in a panel), **Q54** (power of the -2 SEL computers) and **Q55**
    (categories for the contractor's other part types) are open in plan §6.
 
