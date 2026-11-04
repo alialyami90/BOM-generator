@@ -106,12 +106,15 @@
   }
   /* ---------- Design basis (ADR 0031, plan M52b): defaults only; a value set elsewhere wins ---------- */
   const LEVELS = ['L2', 'L1', 'L3'];
+  /* plan M75: the nameplate text per category; {tag} is today's text */
+  const PLATES = [['network_switch', 'Switches'], ['firewall', 'Firewalls'], ['gateway', 'Gateways'], ['patch_panel', 'Patch panels'], ['gps_clock', 'GPS clocks'], ['rtac', 'RTACs'], ['io_chassis', 'I/O chassis'], ['workstation', 'Workstations'], ['monitor', 'Monitors'], ['kvm', 'KVMs'], ['console', 'Consoles']];
   const DB = {
     dc_voltage_v: [['design_basis', 'dc_voltage_v'], 'num'], ac_voltage_v: [['design_basis', 'ac_voltage_v'], 'num'],
     purdue_scope: [['design_basis', 'purdue_scope'], 'list'], time_sync: [['design_basis', 'time_sync'], 'choice'],
     side_letters: [['design_basis', 'tagging', 'side_letters'], 'list'], notes: [['design_basis', 'notes'], 'text'],
     vendor_list: [['design_basis', 'vendor_list'], 'choice'],
-    ...Object.fromEntries(LEVELS.map((l) => [`first_${l}`, [['design_basis', 'tagging', 'first_numbers', l], 'int']]))
+    ...Object.fromEntries(LEVELS.map((l) => [`first_${l}`, [['design_basis', 'tagging', 'first_numbers', l], 'int']])),
+    ...Object.fromEntries(PLATES.map(([c]) => [`nameplate_pattern_${c}`, [['design_basis', 'tagging', 'nameplate_pattern', c], 'text']]))
   };
   const SCOPE_ORDER = ['L1', 'L2', 'EXT'];
   function dbSaved(p, rest) {
@@ -119,6 +122,7 @@
     if (rest === 'purdue_scope') return w.purdue_scope ? SCOPE_ORDER.filter((l) => w.purdue_scope.includes(l)).join(',') : '';
     if (rest === 'side_letters') return t.side_letters ? t.side_letters.join(',') : '';
     if (rest.startsWith('first_')) return (t.first_numbers || {})[rest.slice(6)] ?? '';
+    if (rest.startsWith('nameplate_pattern_')) return (t.nameplate_pattern || {})[rest.slice(18)] ?? '';
     return w[rest] ?? '';
   }
   const SCOPES = [['', 'Not stated'], ['L1,L2', 'L1 and L2'], ['L1,L2,EXT', 'L1, L2 and EXT'], ['L2', 'L2 only'], ['L2,EXT', 'L2 and EXT']];
@@ -136,6 +140,10 @@
       <div class="form form--2" style="margin-top:var(--space-3)">
       ${edit('db_side_letters', 'Side letters', text('db_side_letters', { mono: true, placeholder: tg.side_letters.join(',') }), 'LAN A, then LAN B, for example A,B.')}
       ${LEVELS.map((l) => edit(`db_first_${l}`, `First number, ${l}`, text(`db_first_${l}`, { num: true, mono: true, placeholder: String(tg.first_numbers[l]) }))).join('')}
+      </div></div>
+    <div class="span-2 section" style="margin:0"><h3>Nameplate text</h3><p class="lede">What each plate says, per kind of device. Use {tag} (the tag without the panel prefix, as today), {full_tag} and {purpose}. Empty uses {tag}.</p>
+      <div class="form form--3" style="margin-top:var(--space-3)">
+      ${PLATES.map(([c, l]) => edit(`db_nameplate_pattern_${c}`, esc(l), text(`db_nameplate_pattern_${c}`, { mono: true, placeholder: '{tag}' }))).join('')}
       </div></div>
     <div class="span-2">${edit('db_notes', 'Notes', text('db_notes', { placeholder: 'For example, the client specification and its revision' }))}</div>
     </div>`; };

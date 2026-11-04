@@ -179,6 +179,19 @@
         "cable_entry": {
           "$ref": "#/$defs/CableEntry"
         },
+        "colour": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Colour"
+        },
         "d_mm": {
           "exclusiveMinimum": 0,
           "title": "D Mm",
@@ -188,6 +201,19 @@
           "exclusiveMinimum": 0,
           "title": "H Mm",
           "type": "integer"
+        },
+        "ip_rating": {
+          "anyOf": [
+            {
+              "pattern": "^IP[0-9X]{2}[A-Z]?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ip Rating"
         },
         "make": {
           "title": "Make",

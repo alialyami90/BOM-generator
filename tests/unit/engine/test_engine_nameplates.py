@@ -5,12 +5,14 @@ from pathlib import Path
 
 import engine_factories as f
 import pytest
+from pydantic import ValidationError
 
 from bomgen.engine.nameplates import nameplate_item, nameplates
 from bomgen.engine.pipeline import build
 from bomgen.engine.units import expand_devices
 from bomgen.io.loader import LoadedSubstation, load_substation
 from bomgen.models.bom import BomLine, BuildResult, Group
+from bomgen.models.substation import Tagging
 
 EXAMPLE = Path(__file__).parents[3] / "examples" / "substations" / "gis01" / "substation.yaml"
 
@@ -119,3 +121,27 @@ def test_a_panel_with_no_tagged_units_has_no_plates_and_no_row() -> None:
 
 def test_two_gateways_in_a_panel_get_different_plates() -> None:
     assert plate_texts({"part_id": "GW"}, {"part_id": "GW"}) == ["L2_GW_A01", "L2_GW_A02"]
+
+
+# Nameplate text patterns per category in the design basis tagging (plan M75).
+
+
+def patterned(pattern: dict[str, str], *devices: dict[str, object]) -> list[str]:
+    p = f.panel(list(devices))
+    tagging = Tagging.model_validate({"nameplate_pattern": pattern})
+    return [x.text for x in nameplates(p, expand_devices(p, LIB), tagging).plates]
+
+
+def test_a_category_pattern_writes_the_plate_text() -> None:
+    pattern = {"gateway": "{purpose} - {tag}"}
+    texts = patterned(pattern, {"part_id": "GW", "purpose": "DHPCC"}, {"part_id": "L1"})
+    assert texts == ["DHPCC - L2_GW_A01", "L1_ESW_A11"]  # other categories keep today's
+
+
+def test_a_pattern_may_print_the_full_tag() -> None:
+    assert patterned({"network_switch": "{full_tag}"}, {"part_id": "L1"}) == ["PSA1-L1-ESW-A11"]
+
+
+def test_an_unknown_placeholder_is_refused() -> None:
+    with pytest.raises(ValidationError, match="placeholder"):
+        Tagging.model_validate({"nameplate_pattern": {"gateway": "{room}"}})
