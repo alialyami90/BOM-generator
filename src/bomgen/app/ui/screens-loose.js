@@ -6,7 +6,7 @@
   const { esc, S, ACTIONS, SCREENS, badge, banner, field, input, select, pageHead, dialog, closeDialog, toast, go, $, $$ } = App;
   const real = () => S.backend === 'yes' && S.project && S.project.real && S.sub;
   const plural = (n, one) => `${n} ${one}${n === 1 ? '' : 's'}`;
-  const KEYS = ['part_id', 'description', 'qty', 'tag', 'children', 'fed_from'];
+  const KEYS = ['part_id', 'description', 'qty', 'tag', 'children', 'fed_from', 'cable'];
 
   /* ---------- data: the file's list (data) and the draft the page edits ---------- */
   const LM = { key: '', state: 'idle', data: null, error: null };
@@ -15,7 +15,7 @@
   let saving = false, refusal = '';
   const clean = (item) => {  // the keys the writers take, without the empty ones
     const o = {};
-    KEYS.forEach((k) => { const v = item[k]; if (v != null && v !== '' && !(Array.isArray(v) && !v.length) && !(k === 'qty' && v === 1)) o[k] = v; });  // qty 1 is the default
+    KEYS.forEach((k) => { const v = k === 'cable' && item.cable ? Object.fromEntries(Object.entries(item.cable).filter(([, x]) => x != null && x !== '')) : item[k]; if (v != null && v !== '' && !(Array.isArray(v) && !v.length) && !(k === 'qty' && v === 1)) o[k] = v; });  // qty 1 is the default
     return o;
   };
   const same = (a, b) => JSON.stringify(clean(a)) === JSON.stringify(clean(b));
@@ -47,6 +47,9 @@
     const p = {}, q = it.qty;
     if (!((Number.isInteger(q) && q > 0) || q === '1 Lot')) p.qty = QTY;
     if (!it.part_id && !(it.description || '').trim()) p.description = 'Describe the item.';
+    if (it.cable && !(it.cable.from_tag || '').trim()) p.from_tag = 'Name the end.';
+    if (it.cable && !(it.cable.to_tag || '').trim()) p.to_tag = 'Name the end.';
+    if (it.cable && it.cable.length_m != null && !(it.cable.length_m > 0)) p.length_m = 'More than 0.';
     return p;
   };
   const invalid = () => (draft ? draft.rows.reduce((n, r) => n + Object.keys(fieldProblems(r.item)).length, 0) : 0);
@@ -59,7 +62,7 @@
   const makeModel = (it) => [it.make, it.model].filter(Boolean).join(' ');
   const fedOptions = () => [['', 'Not fed'], ...LM.data.fed_options.map((p) => [p.id, p.name])];
   const ctl = (html) => html.replace('class="input', 'class="ctl input').replace('class="select', 'class="ctl select');
-  const ADD = `<button class="btn btn--secondary" data-action="lm-add-free" ${saving ? 'disabled' : ''}>${icon('plus')}Add free text…</button><button class="btn btn--primary" data-action="lm-add-lib" ${saving ? 'disabled' : ''}>${icon('plus')}Add from library…</button>`;
+  const ADD = () => `<button class="btn btn--secondary" data-action="lm-suggest" ${saving || dirty() ? `disabled title="Save or discard your changes first"` : ''}>${icon('network')}Suggest cables…</button><button class="btn btn--secondary" data-action="lm-add-free" ${saving ? 'disabled' : ''}>${icon('plus')}Add free text…</button><button class="btn btn--primary" data-action="lm-add-lib" ${saving ? 'disabled' : ''}>${icon('plus')}Add from library…</button>`;
   const LEDE = 'Items that are not mounted in any cabinet: software, cables, displays, patch cords. They are issued on their own sheet, after the cabinet sheets.';
 
   SCREENS.loose = () => {
@@ -68,12 +71,13 @@
     if (!l || !l.data) return `<div class="page">${pageHead('Loose material', l && l.error ? esc(l.error.message) : 'Reading the list…')}</div>`;
     const d = l.data;
     if (d.reason) return `<div class="page">${pageHead('Loose material', LEDE)}${banner('bad', `<b>The list cannot be shown.</b> ${esc(d.reason)}.`, '<a class="btn btn--secondary btn--sm" href="#/checks">Open checks</a>')}</div>`;
-    const head = pageHead('Loose material', LEDE, ADD);
+    const head = pageHead('Loose material', LEDE, ADD());
     const notice = refusal ? `<div style="margin-bottom:var(--space-4)">${banner('bad', `<b>Not saved.</b> ${esc(refusal)}`, '<button class="btn btn--ghost btn--icon btn--sm" data-action="lm-refusal-close" aria-label="Close">' + icon('x') + '</button>')}</div>` : '';
     if (!draft.rows.length) {
       return `<div class="page">${head}${notice}<div class="empty" style="max-width:720px"><b>No loose material.</b><div class="muted small" style="max-width:56ch;margin:4px auto 12px">With no items the workbook has no Loose Material sheet. Add an item from the library, or type one in when it is not in the library.</div>
         <div class="row" style="justify-content:center"><button class="btn btn--primary" data-action="lm-add-lib">${icon('plus')}Add from library…</button><button class="btn btn--secondary" data-action="lm-add-free">Add free text…</button></div></div>${saveBar()}</div>`;
     }
+    const anyCable = draft.rows.some((r) => r.item.cable);
     const rows = draft.rows.map((r, i) => {
       const it = r.item, free = !it.part_id, bad = fieldProblems(it);
       const first = free
@@ -85,14 +89,20 @@
       const isNew = r.orig == null, [ncls, ndot] = App.changedCell(isNew);
       const ch = (k) => App.changedCell(!isNew && !same({ [k]: it[k] }, { [k]: r.base[k] }));
       const [c1, d1] = ch(free ? 'description' : 'part_id'), [c2, d2] = ch('tag'), [c3, d3] = ch('qty'), [c4, d4] = free ? ['', ''] : ch('fed_from');
+      const cableCells = !anyCable ? '' : !it.cable ? '<td colspan="3" class="muted small"><span aria-hidden="true">—</span><span class="sr-only">Not a cable</span></td>'
+        : ['from_tag', 'to_tag', 'length_m'].map((k) => {
+          const id = `lm-c${k.split('_')[0]}-${i}`, v = it.cable[k], [cc, cd] = ch('cable');
+          const opts = k === 'length_m' ? { num: true, mono: true, invalid: !!bad[k], placeholder: 'm' } : { mono: true, invalid: !!bad[k] };
+          return `<td${cc}>${cd}${described(ctl(input(id, v == null ? '' : String(v), opts)), id, bad[k])}${cellErr(id, bad[k])}${k === 'to_tag' && (it.cable.speed || it.cable.media) ? `<span class="cell-sub">${esc([it.cable.speed, it.cable.media].filter(Boolean).join(' '))}</span>` : ''}</td>`;
+        }).join('');
       return `<tr><td class="num muted${ncls ? ' is-changed' : ''}" style="width:44px">${ndot}${i + 1}</td><td${c1}>${d1}${first}</td><td${c2}>${d2}${ctl(input('lm-tag-' + i, it.tag || '', { placeholder: 'Designation on the sheet' }))}</td>
-        <td${c3}>${d3}${described(ctl(input('lm-qty-' + i, it.qty == null ? '' : String(it.qty), { num: true, mono: true, invalid: !!bad.qty })), 'lm-qty-' + i, bad.qty)}${cellErr('lm-qty-' + i, bad.qty)}</td><td${c4}>${d4}${fed}</td>
+        <td${c3}>${d3}${described(ctl(input('lm-qty-' + i, it.qty == null ? '' : String(it.qty), { num: true, mono: true, invalid: !!bad.qty })), 'lm-qty-' + i, bad.qty)}${cellErr('lm-qty-' + i, bad.qty)}</td><td${c4}>${d4}${fed}</td>${cableCells}
         <td><button class="btn btn--ghost btn--icon btn--sm btn--del" data-action="lm-remove" data-i="${i}" aria-label="Remove ${esc(free ? (it.description || 'item ' + (i + 1)) : it.part_id)}" ${saving ? 'disabled' : ''}>${icon('trash')}</button></td></tr>`;
     }).join('');
     const host = d.host_options.map((p) => [p.id, `${p.name} (${p.sheet})`]);
     return `<div class="page">${head}${notice}
       <div class="stack" style="gap:var(--space-5)">
-        <div><div class="table-wrap"><table class="table"><caption class="sr-only">Loose material, in the sheet's order</caption><thead><tr><th class="num">No.</th><th style="min-width:190px">Part or description</th><th style="min-width:230px">Designation</th><th style="width:110px">Qty</th><th style="width:200px">Fed from</th><th style="width:40px"><span class="sr-only">Actions</span></th></tr></thead><tbody>${rows}</tbody></table>
+        <div style="min-width:0"><div class="table-wrap"><table class="table"${anyCable ? ' style="min-width:1240px"' : ''}><caption class="sr-only">Loose material, in the sheet's order</caption><thead><tr><th class="num">No.</th><th style="min-width:190px">Part or description</th><th style="min-width:230px">Designation</th><th style="width:110px">Qty</th><th style="width:200px">Fed from</th>${anyCable ? '<th style="min-width:150px">From</th><th style="min-width:150px">To</th><th style="width:96px">Length (m)</th>' : ''}<th style="width:40px"><span class="sr-only">Actions</span></th></tr></thead><tbody>${rows}</tbody></table>
           <div class="table-foot"><span>${plural(draft.rows.length, 'item')}</span><span>Quantity is a whole number, or 1 Lot.</span></div></div>
           <p class="muted small" style="margin-top:var(--space-3);max-width:68ch">An item that needs power names the cabinet that feeds it, and the engine adds its load to that cabinet. Parts that come with an item are added by the library and listed under it.</p></div>
         <aside class="lm-cards" aria-label="Where it goes in the workbook">
@@ -118,8 +128,11 @@
   const qtyOf = (v) => (/^\d+$/.test(v.trim()) ? Number(v.trim()) : v.trim());
   document.addEventListener('change', (e) => {
     if (!draft || !real() || App.route().a !== 'loose') return;
-    const t = e.target, m = /^lm-(tag|qty|fed|desc)-(\d+)$/.exec(t.id || ''), r = m && draft.rows[+m[2]];
-    if (r) r.item[{ tag: 'tag', qty: 'qty', fed: 'fed_from', desc: 'description' }[m[1]]] = m[1] === 'qty' ? qtyOf(t.value) : t.value.trim() || null;
+    const t = e.target, m = /^lm-(tag|qty|fed|desc|cfrom|cto|clength)-(\d+)$/.exec(t.id || ''), r = m && draft.rows[+m[2]];
+    if (r && m[1].startsWith('c')) {  /* a cable end or length: a new object, so the saved one stays the base */
+      const k = { cfrom: 'from_tag', cto: 'to_tag', clength: 'length_m' }[m[1]], v = t.value.trim();
+      r.item.cable = { ...r.item.cable, [k]: k === 'length_m' ? (v === '' ? null : Number(v)) : v };
+    } else if (r) r.item[{ tag: 'tag', qty: 'qty', fed: 'fed_from', desc: 'description' }[m[1]]] = m[1] === 'qty' ? qtyOf(t.value) : t.value.trim() || null;
     if (t.id === 'lm-host') draft.host = t.value;
     if (r || t.id === 'lm-host') queueMicrotask(App.render);  /* change can fire on a blur inside a render */
   });
@@ -218,6 +231,47 @@
     if (!desc) { $('#lm-fd').setAttribute('aria-invalid', 'true'); $('#lm-fd').focus(); return; }
     if (!qty) { $('#lm-fq').setAttribute('aria-invalid', 'true'); $('#lm-fq').focus(); return; }
     check(clean({ description: desc, qty: qtyOf(qty), tag: $('#lm-ft').value.trim() || null }), () => toast('Added a free-text item. Save to write it.', 'plus'));
+  };
+
+  /* ---------- Suggest cables (plan M65, Q66, Q71): the cords the port plans call for, accepted in one write ---------- */
+  const CLASSES = { in_cabinet: 'In the cabinet', inter_cabinet: 'Between cabinets', external: 'Leaves the substation' };
+  let suggested = null;  // { rows, warnings, reason } from suggest_cables
+  const suggestBody = () => {
+    if (!suggested) return '<p class="muted"><span class="spinner"></span> Reading the port plans…</p>';
+    if (suggested.reason) return banner('bad', `<b>No suggestions.</b> ${esc(suggested.reason)}.`);
+    if (!suggested.rows.length) return '<div class="empty"><b>Nothing to suggest.</b><div class="muted small">Every cord the port plans call for is already on the list.</div></div>';
+    const rows = suggested.rows.map((r, i) => `<tr><td><input type="checkbox" id="lm-sg-${i}" checked aria-label="Add ${r.qty} from ${esc(r.from_tag)} to ${esc(r.to_tag)}"></td><td class="mono small">${esc(r.from_tag)}</td><td class="mono small">${esc(r.to_tag)}<span class="cell-sub">${esc(r.rule)}</span></td>
+      <td class="small">${esc(r.part_id || r.description)}${r.speed || r.media ? `<span class="cell-sub">${esc([r.speed, r.media].filter(Boolean).join(' '))}</span>` : ''}</td><td class="num">${r.length_m == null ? '<span class="muted">—</span>' : r.length_m}<span class="cell-sub">${CLASSES[r.length_class]}</span></td><td class="num">${r.qty}</td></tr>`).join('');
+    const warn = suggested.warnings.length ? `<div style="margin-bottom:var(--space-3)">${banner('warn', suggested.warnings.map(esc).join('<br>'))}</div>` : '';
+    return `${warn}<p class="muted small" style="margin-bottom:var(--space-2)">One cord per link, counted once at its upper end. Lengths come from the design basis; an external link uses its own. Nothing is written until you add them.</p>
+      <div class="table-wrap" style="max-height:50vh"><table class="table"><caption class="sr-only">Suggested cables</caption><thead><tr><th style="width:36px"><input type="checkbox" id="lm-sg-all" checked aria-label="Select all"></th><th>From</th><th>To</th><th>Cord</th><th class="num">Length (m)</th><th class="num">Qty</th></tr></thead><tbody>${rows}</tbody></table></div><div id="lm-err"></div>`;
+  };
+  const suggestActions = () => `<button class="btn btn--secondary" data-action="close">Cancel</button>${suggested && suggested.rows.length ? '<button class="btn btn--primary" data-action="lm-suggest-do">Add selected cords</button>' : ''}`;
+  function showSuggest() {
+    const body = $('.dialog .body'), foot = $('.dialog .foot');
+    if (!body) return;
+    body.innerHTML = suggestBody(); foot.innerHTML = suggestActions();
+  }
+  ACTIONS['lm-suggest'] = () => {
+    suggested = null;
+    dialog({ title: 'Suggest cables', body: suggestBody(), actions: suggestActions() });
+    $('.dialog').classList.add('dialog--wide');
+    Bridge.call('suggest_cables', S.project.file, S.sub).then((d) => { suggested = d; showSuggest(); })
+      .catch((err) => { suggested = { reason: err.message.replace(/[.]$/, ''), rows: [], warnings: [] }; showSuggest(); });
+  };
+  document.addEventListener('change', (e) => {
+    if (e.target.id === 'lm-sg-all') $$('.dialog input[id^="lm-sg-"]').forEach((x) => { x.checked = e.target.checked; });
+  });
+  ACTIONS['lm-suggest-do'] = (el) => {
+    const items = suggested.rows.filter((r, i) => $('#lm-sg-' + i).checked).map((r) => r.item);
+    if (!items.length) { $('#lm-err').innerHTML = banner('bad', 'Select at least one cord.'); return; }
+    el.disabled = true;
+    const host = LM.data.host_panel ? null : draft.host || (LM.data.host_options[0] || {}).id;
+    Bridge.call('accept_cables', S.project.file, S.sub, items, host).then((reply) => {
+      if (!reply.written) throw new Error((reply.issues[0] && reply.issues[0].message) || 'The project cannot take these cords.');
+      reset(reply.page); closeDialog(); if (App.preview) App.preview.reload(); App.render();
+      toast(`Added ${plural(items.length, 'cable row')}`, 'plus');
+    }).catch((err) => { el.disabled = false; $('#lm-err').innerHTML = banner('bad', esc(err.message)); });
   };
 
   /* Leaving the page or the substation with unsaved changes asks first. */
