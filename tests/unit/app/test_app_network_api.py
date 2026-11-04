@@ -241,3 +241,50 @@ def test_generated_panels_with_a_layout_error_still_show_the_board(
     assert data["panels"]
     assert any(i["level"] == "error" for i in data["issues"])
     assert any(p["level"] == "error" for p in data["problems"])  # Build is blocked
+
+
+def test_the_result_card_has_each_switch_levels_port_budget(app: api.Api, project: Path) -> None:
+    plan = page(app, project)["plan"]
+    l1, l2 = plan["budget"]
+    # three RST2228-L1-24MM of 28 ports: 2 reserved each, 24 - 19 spare each, 40 IEDs
+    assert (l1["level"], l1["ports"], l1["reserved"], l1["spare"], l1["used"]) == (
+        "L1",
+        84,
+        6,
+        15,
+        40,
+    )
+    assert l1["free"] == 84 - 6 - 15 - 40
+    assert l1["reserved_rule"] == "1 uplink and the A\u2013B interlink on each switch"
+    assert l1["spare_rule"] == "20% of the device ports kept free"
+    assert (l2["level"], l2["used"], l2["reserved_rule"]) == ("L2", 8, "2 uplinks on each switch")
+
+
+def test_switch_counts_are_derived_values_with_their_rule(app: api.Api, project: Path) -> None:
+    plan = page(app, project)["plan"]
+    assert plan["l1_count"] == {
+        "value": 3,
+        "rule": "3: 40 IED ports per side, 19 usable on each",
+        "override": None,
+        "unit": None,
+        "source": "engine",
+    }
+    assert plan["l2_count"]["rule"] == "1: 8 ports per side, 16 usable on each"
+
+
+def test_a_switch_count_override_is_shown_beside_the_engines(
+    app: api.Api, project: Path, substation: Path
+) -> None:
+    edit(substation, "  l3_uplinks_per_l2: 2\n", "  l3_uplinks_per_l2: 2\n  l1_per_side: 4\n")
+    plan = page(app, project)["plan"]
+    assert plan["l1_per_side"] == 4
+    assert (plan["l1_count"]["value"], plan["l1_count"]["override"]) == (3, 4)
+
+
+def test_a_switch_count_below_the_sizing_gives_the_reason(
+    app: api.Api, project: Path, substation: Path
+) -> None:
+    edit(substation, "  l3_uplinks_per_l2: 2\n", "  l3_uplinks_per_l2: 2\n  l1_per_side: 2\n")
+    data = page(app, project)
+    assert data["plan"] is None
+    assert "fewer than the 3" in data["reason"]

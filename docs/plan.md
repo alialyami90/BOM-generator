@@ -288,6 +288,8 @@ network:
   l1_uplinks_per_switch: 1
   l1_interlink: true
   l3_uplinks_per_l2: 2
+  l1_per_side: 4                       # optional (M72, Q72): switches per side in place of the
+  l2_per_side: 2                       #   sizing's; fewer than it needs stops the sizing
 layout:                                # panel capacity = enclosure_u − rack_u_reserved
   blank_plate_u: 1                     # space only, no BOM row (Q25)
   max_panels: 4                        # optional cap (M62): no panel past it; a unit that does not
@@ -1307,7 +1309,8 @@ design basis says) are not milestones.
 - **M72 — Port budget per switch and switch-count override.** *W4; Q.* Review step 3. Parts' Result
   card lists per switch used, reserved, spare and free ports with their rule (M48); `network.l1_per_side`
   and `l2_per_side` override the sizing (a lower count than the demand fails sizing naming the
-  shortfall). Q: may an override go below the computed count with a warning, or only above it?
+  shortfall). Q72: may an override go below the computed count with a warning, or only above it?
+  In review.
 - **M73 — RedBox and media converter roles.** *W4; ADR.* Review step 3. Equipment roles `redbox` and
   `media_converter` (library categories, tag types, DC feeds, L2 link) so a mixed network can be drawn;
   PRP and HSR stay refused. Acceptance: a media converter row builds with its MCBs, power and tag.
@@ -1788,3 +1791,9 @@ every spare typed. `spares_policy.minimum_per_part` defaults to 1; a policy can 
 equipment rows for the devices in the cabinets and add the links that leave the substation as
 their own list, `network.external_links` (recommended: existing files and the example keep
 working), or fold both into one list of links?
+
+**Q72 — A switch-count override below the sizing** (M72). *Open, card sent 2026-11-04.* May
+`network.l1_per_side` or `l2_per_side` go below the count the sizing computes, building with a
+Checks warning that lists the ports left without a switch, or only above it, a lower count
+stopping the sizing and naming the shortfall (recommended: a BOM with too few switches is wrong on
+site)? Until Ali answers, M72 ships "only above".

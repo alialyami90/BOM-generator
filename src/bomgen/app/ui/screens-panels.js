@@ -30,17 +30,21 @@
   const counted = (d) => { const sub = App.curSub(); if (sub && !d.reason) sub.panels = d.list.length; };
 
   /* ---------- Result card (called from screens-parts.js) ---------- */
-  function resultCard() {
+  /* `count(key, label, derived)`: the Parts form's control for a switch count per side (M72); `held(keys)`: the
+     saved counts' reset buttons while the sizing refuses them. */
+  function resultCard(o = {}) {
     const l = layout();
     if (!l || !l.data) return `<div class="card"><h3>Result</h3><p class="row" style="margin-top:var(--space-3)"><span class="spinner"></span>Calculating…</p></div>`;
     const d = l.data, p = d.plan;
-    if (!p) return `<div class="card"><h3>Result</h3><p class="muted small" style="margin-top:var(--space-2)">${esc(d.reason || 'Appears when the IED count and the equipment are set.')}</p></div>`;
+    if (!p) return `<div class="card"><h3>Result</h3><p class="muted small" style="margin-top:var(--space-2)">${esc(d.reason || 'Appears when the IED count and the equipment are set.')}</p>${o.held ? o.held() : ''}</div>`;
     const ring = p.topology === 'ring';
-    const row = (label, v) => `<tr><td>${label}</td><td class="num">${v}</td></tr>`;
-    return `<div class="card"><h3>Result</h3><p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">Worked out by the engine. Read-only.</p>
-      <table class="table table--plain"><thead><tr><th></th><th class="num">Each side</th></tr></thead><tbody>
-        ${row('L1 switches', `<b>${p.l1_per_side}</b>`)}${row('L2 switches', `<b>${p.l2_per_side}</b>`)}
-        ${row('L2 ports in use', `${p.l2_demand_per_side} of ${p.l2_usable_ports * p.l2_per_side}`)}${row(ring ? 'Rings' : 'L1 to L2 links', ring ? p.rings_per_side : p.l1_links_per_side)}</tbody></table>
+    const count = (key, label, dv, n) => (o.count ? o.count(key, label, dv) : `<span class="dv"><span class="dv-label">${label}</span><span class="dv-val">${n}</span></span>`);
+    const [b1, b2] = p.budget, brow = (label, f) => `<tr><td>${label}</td><td class="num">${b1[f]}</td><td class="num">${b2[f]}</td></tr>`;
+    return `<div class="card"><h3>Result</h3><p class="muted small" style="margin:var(--space-1) 0 var(--space-3)">Worked out by the engine. Click a switch count to set your own.</p>
+      <div class="result-counts" role="group" aria-label="Switches on each side">${count('n.l1_per_side', 'L1 switches', p.l1_count, p.l1_per_side)}${count('n.l2_per_side', 'L2 switches', p.l2_count, p.l2_per_side)}</div>
+      <table class="table table--plain" style="margin-top:var(--space-3)" aria-label="Port budget, busier side"><thead><tr><th>Ports, busier side</th><th class="num">L1</th><th class="num">L2</th></tr></thead><tbody>
+        ${brow('All ports', 'ports')}${brow('Reserved', 'reserved')}${brow('Kept spare', 'spare')}${brow('In use', 'used')}${brow('<b>Free</b>', 'free')}</tbody></table>
+      <p class="muted small" style="margin-top:var(--space-2)">Reserved: L1 ${esc(b1.reserved_rule)}; L2 ${esc(b2.reserved_rule)}. Spare: ${esc(b1.spare_rule)}. ${ring ? plural(p.rings_per_side, 'ring') : plural(p.l1_links_per_side, 'L1 to L2 link')} on each side.</p>
       ${p.ied_ports ? `<table class="table table--plain" style="margin-top:var(--space-3)" aria-label="IED ports from the schedule"><thead><tr><th>IED ports</th><th class="num">A</th><th class="num">B</th></tr></thead><tbody>${p.ied_ports.map((x) => `<tr><td><span class="mono">${esc(x.speed)} ${esc(x.media)}</span>${x.lands_on === 'l2' ? ' <span class="muted small">on L2</span>' : ''}</td><td class="num">${x.a}</td><td class="num">${x.b}</td></tr>`).join('')}</tbody></table>` : ''}
       ${p.external_links && p.external_links.length ? `<table class="table table--plain" style="margin-top:var(--space-3)" aria-label="External links"><thead><tr><th>External links</th><th class="num">A</th><th class="num">B</th></tr></thead><tbody>${p.external_links.map((x) => `<tr><td>${esc(x.name)} <span class="muted small mono">${esc(x.speed)} ${esc(x.media)} on ${x.lands_on.toUpperCase()}</span></td><td class="num">${x.a}</td><td class="num">${x.b}</td></tr>`).join('')}</tbody></table>` : ''}
       <p class="small" style="margin-top:var(--space-3)">L1 model: <span class="mono">${esc(p.l1_part_id)}</span>${p.l1_pinned ? ' (pinned)' : ''}. L2 model: <span class="mono">${esc(p.l2_part_id)}</span>.</p>

@@ -8,7 +8,7 @@
   const sub = () => App.sub;
 
   /* ---------- the draft form: every field is saved together with the save bar ---------- */
-  const NET = { ied_count: 'int', topology: 'choice', ring_max_switches: 'int', l1_uplinks_per_switch: 'int', l1_interlink: 'bool', l3_uplinks_per_l2: 'int' };
+  const NET = { ied_count: 'int', topology: 'choice', ring_max_switches: 'int', l1_uplinks_per_switch: 'int', l1_interlink: 'bool', l3_uplinks_per_l2: 'int', l1_per_side: 'int', l2_per_side: 'int' };
   const SPARES = { port_fraction: ['Ports kept free on each switch', '%', 'pct'], sfp_per_l1: ['Spare SFPs on each L1', '', 'int'], dc_branches_per_feed: ['Spare DC branches per feed', '', 'int'], ac_branches: ['Spare AC branches', '', 'int'], rack_u_reserved: ['Rack space kept free', 'U', 'int'], terminals_fraction: ['Spare terminals on each wiring strip', '%', 'pct'] };
   const VALUES = [['height_u', 'Height', 'int'], ['unit_power_w', 'Power', 'num'], ['supply_type', 'Supply', 'choice'], ['voltage_v', 'Voltage', 'int'], ['power_supplies', 'Supplies', 'int'], ['inrush_a', 'Inrush', 'num'], ['load_type', 'Load', 'choice']];
   const EQ = { part_id: 'choice', ordering_code: 'text', qty: 'int', redundant: 'bool', cable_manager: 'bool', alarm_on_branch_mcb: 'bool', purpose: 'text', tag: 'text', tag_type: 'text', first_nn: 'int', hwio_points: 'int', note: 'text' };
@@ -437,9 +437,20 @@
           </section>
           ${brands(p)}
         </div>
-        <aside class="net-result" aria-live="polite">${App.network.resultCard()}</aside>
+        <aside class="net-result" aria-live="polite">${App.network.resultCard({ count: switchCount, held: heldCounts })}</aside>
       </div>${PF.bar()}</div>`;
   };
+  /* M72: a switch count per side as a derived value; empty is the sizing's count. */
+  function switchCount(key, label, d) {
+    const v = shown(key), id = `p-${key}`, auto = String(d.value);
+    if (UI.editing === key) return App.derived(key, { editing: true, id, label, rule: d.rule, control: input(id, v === '' ? auto : v, { mono: true, num: true, invalid: !!PF.errors[key] }).replace('class="input', 'class="dv-input input').replace('<input ', `<input data-dv="${key}" aria-label="${label} on each side" `) });
+    return App.derived(key, { label, shown: v === '' ? auto : v, auto, overridden: v !== '', changed: key in PF.draft, bad: !!PF.errors[key], rule: d.rule, edit: 'pp-edit', reset: 'pp-reset' });
+  }
+  /* The saved counts the sizing refuses, each with its way back to the automatic count. */
+  function heldCounts() {
+    const set = [['n.l1_per_side', 'L1'], ['n.l2_per_side', 'L2']].filter(([k]) => shown(k) !== '');
+    return set.length ? `<div class="row" style="margin-top:var(--space-2);gap:var(--space-2)">${set.map(([k, l]) => `<button class="btn btn--secondary btn--sm" data-action="pp-reset" data-key="${k}">${icon('undo')}Use the automatic ${l} count</button>`).join('')}</div>` : '';
+  }
   function addDevice(p) {
     const dirty = PF.dirty();
     return `<div class="popwrap prow-add"><button class="btn btn--secondary btn--sm" data-action="pp-add" aria-haspopup="menu" aria-expanded="${UI.addOpen}" ${dirty ? 'disabled title="Save or discard the changes first"' : ''}>${icon('plus')}Add a device</button>
@@ -466,7 +477,7 @@
   ACTIONS['pp-edit'] = (el) => { keep(() => { UI.editing = el.dataset.key; }); const c = document.getElementById('p-' + el.dataset.key); if (c) { c.focus(); if (c.select) c.select(); } };
   const resetTo = (key) => {
     const [kind, i, f] = key.split('.');
-    PF.set(key, kind === 'f' ? (key.endsWith('.extra') ? '0' : '') : libValue(rowAt(Number(i)), f)); S.dirty = PF.dirty();  /* f: an SFP spare or extra (M49) */
+    PF.set(key, kind === 'f' ? (key.endsWith('.extra') ? '0' : '') : kind === 'n' ? '' : libValue(rowAt(Number(i)), f)); S.dirty = PF.dirty();  /* f: an SFP spare or extra (M49); n: a switch count (M72) */
   };
   ACTIONS['pp-expand'] = (el) => { const i = +el.dataset.i; keep(() => UI.expanded.add(i)); const b = document.querySelector(`[data-action="pp-edit"][data-key^="o.${i}."]`); if (b) b.focus(); };
   ACTIONS['pp-reset'] = (el) => keep(() => resetTo(el.dataset.key));

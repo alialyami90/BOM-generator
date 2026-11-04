@@ -22,6 +22,7 @@ __all__ = [
     "L2Link",
     "NetworkInputs",
     "NetworkPlan",
+    "PortBudget",
     "SizingError",
     "SwitchPorts",
     "Topology",
@@ -33,8 +34,10 @@ __all__ = [
     "l1_port_plan",
     "l1_reserved_ports",
     "l1_slot_downlinks",
+    "l2_count",
     "l2_port_plan",
     "pick_l1_switch",
+    "port_budgets",
     "rank_l1_switches",
     "size_network",
     "switch_ports",
@@ -86,6 +89,9 @@ class NetworkInputs:
     port_fraction: float = 0.20
     # IED ports per side by speed and media, from the schedule; None: the quick count
     ied_ports_per_side: Mapping[SideKey, Mapping[Need, int]] | None = None
+    # the engineer's switch counts per side (plan M72); None: the sizing's
+    l1_per_side: int | None = None
+    l2_per_side: int | None = None
 
 
 @dataclass(frozen=True)
@@ -113,6 +119,24 @@ class NetworkPlan:
     l2_usable_ports: int
     l2_demand_per_side: int
     l1_by_side: tuple[int, int] = field(default=(0, 0))  # L1 switches sides A and B need
+    l1_needed: int = 0  # the sizing's counts per side, before the engineer's (plan M72)
+    l2_needed: int = 0
+
+
+@dataclass(frozen=True)
+class PortBudget:
+    """One side's ports on one switch level (plan M72): every port of its switches, the
+    reserved uplink, interlink or ring ports, the spare kept free, and the ports in use."""
+
+    switches: int = 0
+    ports: int = 0
+    reserved: int = 0
+    spare: int = 0
+    used: int = 0
+
+    @property
+    def free(self) -> int:
+        return self.ports - self.reserved - self.spare - self.used
 
 
 @dataclass(frozen=True)
@@ -349,7 +373,7 @@ def size_network(
             f"{l1_reserved_ports(net)} reserved and {net.port_fraction:.0%} spare"
         )
     by_side = _l1_by_side(l1, net)
-    n_l1 = max(by_side)
+    n_l1 = _counted("L1", max(by_side), net.l1_per_side, _l1_need_text(l1, net))
     links_l1 = l1_links(n_l1, net)
     rings = math.ceil(n_l1 / net.ring_max_switches) if net.topology is Topology.RING else 0
     l2_usable = usable_ports(l2, reserved=net.l3_uplinks_per_l2, port_fraction=net.port_fraction)
@@ -359,6 +383,7 @@ def size_network(
             f"uplinks and {net.port_fraction:.0%} spare"
         )
     demand = links_l1 + sum(link.ports for link in links)
+    l2_per_side, l2_needed = l2_count(net, demand, l2_usable)
     return NetworkPlan(
         ied_count=net.ied_count,
         l1_part_id=l1.part_id,
@@ -367,10 +392,75 @@ def size_network(
         l1_links_per_side=links_l1,
         rings_per_side=rings,
         l2_part_id=l2.part_id,
-        l2_per_side=max(1, math.ceil(demand / l2_usable)),
+        l2_per_side=l2_per_side,
         l2_usable_ports=l2_usable,
         l2_demand_per_side=demand,
         l1_by_side=by_side,
+        l1_needed=max(by_side),
+        l2_needed=l2_needed,
+    )
+
+
+def l2_count(net: NetworkInputs, demand: int, usable: int) -> tuple[int, int]:
+    """L2 switches per side for ``demand`` ports, and the count the sizing needs (R2): the
+    engineer's count when set, which may add switches but never take one away (plan M72)."""
+    needed = max(1, math.ceil(demand / usable))
+    text = f"{demand} L2 ports per side, {usable} usable on each switch"
+    return _counted("L2", needed, net.l2_per_side, text), needed
+
+
+def _counted(level: str, needed: int, override: int | None, text: str) -> int:
+    if override is None:
+        return needed
+    if override < needed:
+        raise SizingError(
+            f"{level} switches per side is set to {override}, fewer than the {needed} "
+            f"the sizing needs: {text}"
+        )
+    return override
+
+
+def _l1_demand(net: NetworkInputs) -> int:
+    """IED ports on the busier side's L1 switches."""
+    if net.ied_ports_per_side is None:
+        return net.ied_count
+    return max((sum(side.values()) for side in net.ied_ports_per_side.values()), default=0)
+
+
+def _l1_need_text(ports: SwitchPorts, net: NetworkInputs) -> str:
+    return f"{_l1_demand(net)} IED ports per side, {_l1_usable(ports, net)} usable on each switch"
+
+
+def _device_ports(ports: SwitchPorts, reserved: int) -> int:
+    """A switch's ports a device may take once the reserved ports are off (R1)."""
+    return max(0, ports.ied + ports.any - max(0, reserved - ports.uplink))
+
+
+def port_budgets(
+    plan: NetworkPlan, net: NetworkInputs, l1: SwitchPorts, l2: SwitchPorts
+) -> tuple[PortBudget, PortBudget]:
+    """The busier side's L1 and L2 port budgets for the plan's switch counts (plan M72)."""
+    if net.ied_ports_per_side is None:
+        l1_devices = _device_ports(l1, l1_reserved_ports(net))
+    else:
+        l1_devices = sum(n for n, _ in _ied_pools(l1, net).values())
+    n1, n2 = plan.l1_per_side, plan.l2_per_side
+    l2_devices = _device_ports(l2, net.l3_uplinks_per_l2)
+    return (
+        PortBudget(
+            switches=n1,
+            ports=n1 * l1.total,
+            reserved=n1 * l1_reserved_ports(net),
+            spare=n1 * (l1_devices - plan.l1_usable_ports),
+            used=_l1_demand(net),
+        ),
+        PortBudget(
+            switches=n2,
+            ports=n2 * l2.total,
+            reserved=n2 * net.l3_uplinks_per_l2,
+            spare=n2 * (l2_devices - plan.l2_usable_ports),
+            used=plan.l2_demand_per_side,
+        ),
     )
 
 

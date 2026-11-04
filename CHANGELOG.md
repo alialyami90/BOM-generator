@@ -9,6 +9,10 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Switch counts and port budget (M72): the Parts Result card lists each switch level's ports on
+  the busier side (all, reserved, kept spare, in use, free) with the rule behind them, and its L1
+  and L2 switch counts are derived values: `network.l1_per_side` and `l2_per_side` add switches
+  above the sizing's count; a lower count stops the sizing and names the shortfall (Q72).
 - Row notes (M71, ADR 0035 amendment): `note` on equipment rows (Parts › BOM text), hand-written
   panel rows (the panel editor) and loose items. A note is never printed on a BOM sheet; Preview
   shows a Notes column, and Build can add a Notes sheet listing every noted row.

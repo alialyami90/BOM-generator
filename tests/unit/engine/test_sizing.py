@@ -17,6 +17,7 @@ from bomgen.engine.sizing import (
     l1_slot_downlinks,
     l2_port_plan,
     pick_l1_switch,
+    port_budgets,
     rank_l1_switches,
     size_network,
     switch_ports,
@@ -340,3 +341,51 @@ def test_a_single_external_link_lands_on_side_a_only() -> None:
 
 def test_ext_landing_links_take_no_l2_port() -> None:
     assert external_l2_links([ExternalLink(name="3rd party", lands_on="ext")], "a") == []
+
+
+# Switch-count override and port budget (plan M72, Q72)
+
+
+def test_l1_override_above_the_sizing_adds_switches() -> None:
+    plan = size_network(NetworkInputs(ied_count=40, l1_per_side=3), L1_ANY, L2_28, [])
+    assert (plan.l1_per_side, plan.l1_needed, plan.l1_links_per_side) == (3, 2, 3)
+
+
+def test_l1_override_below_the_sizing_fails_naming_the_shortfall() -> None:
+    with pytest.raises(SizingError, match=r"set to 1, fewer than the 2 .* 40 IED ports per side"):
+        size_network(NetworkInputs(ied_count=40, l1_per_side=1), L1_ANY, L2_28, [])
+
+
+def test_l2_override_above_the_sizing_adds_switches() -> None:
+    plan = size_network(NetworkInputs(ied_count=40, l2_per_side=2), L1_ANY, L2_28, [])
+    assert (plan.l2_per_side, plan.l2_needed) == (2, 1)
+
+
+def test_l2_override_below_the_sizing_fails_naming_the_shortfall() -> None:
+    links = [link("a", 10), link("b", 10), link("c", 10)]
+    with pytest.raises(SizingError, match=r"L2 switches .* set to 1, fewer than the 2 .* 30 L2"):
+        size_network(NetworkInputs(ied_count=0, l2_per_side=1), L1_ANY, L2_28, links)
+
+
+def test_port_budget_lists_reserved_spare_used_and_free_per_level() -> None:
+    net = NetworkInputs(ied_count=40)
+    plan = size_network(net, L1_ANY, L2_28, [])
+    l1, l2 = port_budgets(plan, net, L1_ANY, L2_28)
+    # two switches of 28: 2 reserved each, 26 - 20 usable kept spare, 40 IEDs
+    assert (l1.switches, l1.ports, l1.reserved, l1.spare, l1.used, l1.free) == (2, 56, 4, 12, 40, 0)
+    # one switch of 28: 2 L3 uplinks, 26 - 20 kept spare, the 2 L1 links
+    assert (l2.switches, l2.ports, l2.reserved, l2.spare, l2.used, l2.free) == (1, 28, 2, 6, 2, 18)
+
+
+def test_port_budget_follows_the_override() -> None:
+    net = NetworkInputs(ied_count=40, l1_per_side=3)
+    l1, _ = port_budgets(size_network(net, L1_ANY, L2_28, []), net, L1_ANY, L2_28)
+    assert (l1.ports, l1.reserved, l1.spare, l1.used, l1.free) == (84, 6, 18, 40, 20)
+
+
+def test_port_budget_of_a_schedule_uses_the_busier_side() -> None:
+    net = schedule({MM100: 40}, {MM100: 10})
+    plan = size_network(net, L1_MM, L2_RST, [])
+    l1, _ = port_budgets(plan, net, L1_MM, L2_RST)
+    assert (l1.switches, l1.used) == (3, 40)
+    assert l1.free == l1.ports - l1.reserved - l1.spare - 40 >= 0

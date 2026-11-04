@@ -197,6 +197,8 @@ class Network(InputModel):
     l1_uplinks_per_switch: PositiveInt = 1
     l1_interlink: bool = True
     l3_uplinks_per_l2: NonNegativeInt = 2
+    l1_per_side: PositiveInt | None = None  # the engineer's switch counts (plan M72, Q72)
+    l2_per_side: PositiveInt | None = None
 
     @model_validator(mode="after")
     def _consistent(self) -> Self:
