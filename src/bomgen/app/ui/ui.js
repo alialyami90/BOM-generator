@@ -151,6 +151,7 @@
       ${navItem('#/device-preview', 'elevation', 'Device preview', '', '', !ns || noParts(), r === 'device-preview')}
       ${navItem('#/panels', 'panels', 'Panels', ns ? esc(App.panelCount && App.panelCount() != null ? App.panelCount() : curSub().panels) : '', '', !ns, r === 'panels')}
       ${navItem('#/loose', 'pkg', 'Loose material', App.looseCount && App.looseCount() != null ? String(App.looseCount()) : '', '', !ns, r === 'loose')}
+      ${navItem('#/spares', 'shield', 'Spares', '', '', !ns, r === 'spares')}
       <div class="nav-group">Verify and issue</div>
       ${navItem('#/checks', 'checks', 'Checks', checksTail, bad ? 'bad' : 'ok', !ns, r === 'checks')}
       ${navItem('#/preview', 'preview', 'Preview', '', '', !ns, r === 'preview')}
@@ -173,8 +174,8 @@
     const { a } = route();
     if (a === 'network') { location.replace('#/parts'); return; }  // Network became Parts (M23)
     if (S.backend === 'no') { $('#main').innerHTML = noBackend(); document.title = 'BOM Generator'; return; }
-    const key = ({ home: 'home', project: 'project', settings: 'settings', parts: 'parts', 'device-preview': 'device-preview', panels: 'panels', loose: 'loose', library: 'library', checks: 'checks', preview: 'preview', build: 'build' })[a] || 'home';
-    const needsProject = key === 'project', needsSub = ['settings', 'parts', 'device-preview', 'panels', 'loose', 'checks', 'preview', 'build'].includes(key);
+    const key = ({ home: 'home', project: 'project', settings: 'settings', parts: 'parts', 'device-preview': 'device-preview', panels: 'panels', loose: 'loose', spares: 'spares', library: 'library', checks: 'checks', preview: 'preview', build: 'build' })[a] || 'home';
+    const needsProject = key === 'project', needsSub = ['settings', 'parts', 'device-preview', 'panels', 'loose', 'spares', 'checks', 'preview', 'build'].includes(key);
     const m = $('#main');
     m.innerHTML = (needsProject && !hasProject()) || (needsSub && !hasSub()) ? SCREENS.home() : SCREENS[key]();
     if (SCREENS[key + 'After']) SCREENS[key + 'After']();
@@ -281,7 +282,7 @@
     if (f.hash.startsWith('#/settings/')) S.tab.settings = f.hash.split('/')[2];
     if (location.hash === f.hash) render(); else go(f.hash);
   }
-  const switchTo = (id) => { S.sub = id || null; S.dirty = false; const { a } = route(); go(['settings', 'parts', 'device-preview', 'panels', 'loose', 'checks', 'preview', 'build'].includes(a) ? '#/' + a : '#/panels'); };
+  const switchTo = (id) => { S.sub = id || null; S.dirty = false; const { a } = route(); go(['settings', 'parts', 'device-preview', 'panels', 'loose', 'spares', 'checks', 'preview', 'build'].includes(a) ? '#/' + a : '#/panels'); };
   ACTIONS['sub-switch'] = (el) => {
     const value = el.value;
     el.value = S.sub || '';  // the switch waits for the dialog's answer

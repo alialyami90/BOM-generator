@@ -155,3 +155,16 @@ def test_revision_history_tab_once_a_name_is_set(app: api.Api, project: Path, pa
             "approved": None,
         }
     ]
+
+
+def test_spare_parts_tab_once_the_policy_gives_a_line(
+    app: api.Api, project: Path, page: Any
+) -> None:
+    # plan M64: the Preview mirrors the workbook.
+    assert page["spares"] is None
+    policy = {"percent": {"sfp": 10}, "minimum_per_part": 1, "categories": ["sfp"]}
+    ok(app.set_substation_field(str(project), "gis01", ["design_basis", "spares_policy"], policy))
+    spares = ok(app.preview_substation(str(project), "gis01"))["spares"]
+    assert spares["sheet"] == "Spare Parts"
+    sx = next(r for r in spares["rows"] if r["ordering_code"] == "6GK6000-8FG51-0AA0")
+    assert (sx["installed"], sx["spare"], sx["basis"]) == (84, 9, "10% of 84, min 1 = 9")

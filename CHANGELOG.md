@@ -104,6 +104,9 @@ project uses [Semantic Versioning](https://semver.org/).
   its categories a spare quantity (percent of installed, rounded up, at least the minimum), and
   `spares_list` overrides a quantity, leaves a line out or adds an item. The workbook then gets
   a Spare Parts sheet after the Summary BOM, with the rule as a live formula and its text in BASIS.
+- The app has a Spares page under Loose material (M64b): the policy it follows, each line's spare
+  quantity to set by hand or reset, *Leave out*, *Put back* and *Add item…*. Preview has a Spare Parts
+  tab.
 - Cable Schedule (M65a, ADR 0035): a loose material row can carry cable data
   (`cable: { from_tag, to_tag, length_m, media, speed }`); the workbook then gets a Cable
   Schedule sheet after the Summary BOM listing each such row with its quantity as a formula on

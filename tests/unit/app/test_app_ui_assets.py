@@ -1002,3 +1002,17 @@ def test_issue_actions_on_build_checks_register_and_preview() -> None:
     assert "historyView(d.history)" in preview
     sub = (UI_DIR / "screens-substation.js").read_text(encoding="utf-8")
     assert "revision_history: 'Revision history'" in sub
+
+
+def test_spares_page_and_preview_tab() -> None:
+    # plan M64: a Spares page under Loose material and a Spare Parts Preview tab.
+    ui = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    assert "navItem('#/spares', 'shield', 'Spares'" in ui
+    assert '<script src="screens-spares.js"></script>' in (UI_DIR / "index.html").read_text(
+        encoding="utf-8"
+    )
+    spares = (UI_DIR / "screens-spares.js").read_text(encoding="utf-8")
+    assert "Bridge.call('spares'" in spares
+    assert "['spares_list', 'items', key]" in spares
+    preview = (UI_DIR / "screens-preview.js").read_text(encoding="utf-8")
+    assert "sparesView(d.spares)" in preview

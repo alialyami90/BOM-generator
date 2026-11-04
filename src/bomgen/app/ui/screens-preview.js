@@ -6,6 +6,7 @@
   const PLATES = 'nameplates';
   const SUMMARY = 'summary';
   const HISTORY = 'history';
+  const SPARES = 'spares';
   const real = () => S.backend === 'yes' && S.project && S.project.real && S.sub;
   const GROUPS = { A: 'Enclosure', B: 'Main equipment', C: 'Network and IO accessories', D: 'Cabinet housekeeping', E: 'AC distribution', F: 'DC distribution', G: 'Terminal blocks', H: 'Grounding' };  // the spec's group names, labels only
   const fmt = (n, d = 1) => Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -48,13 +49,14 @@
       ['power', 'Power', '', d.calc_sheets.power], ['heatdiss', 'Heat dissipation', '', d.calc_sheets.heat_dissipation],
       ['heatcalc', 'Heat calculations', '', d.calc_sheets.heat_calculations],
       ...(d.summary ? [[SUMMARY, `${d.summary.sheet} (${d.summary.rows.length})`, '', 'Every part totalled by ordering code']] : []),
+      ...(d.spares ? [[SPARES, `${d.spares.sheet} (${d.spares.rows.length})`, '', 'Spares from the policy and your edits']] : []),
       ...(d.history ? [[HISTORY, d.history.sheet, '', 'Each issue with its names']] : [])];
     const { b } = App.route();
     let t = b || S.tab.preview;
     if (!sheets.some(([k]) => k === t)) t = sheets[0][0];
     S.tab.preview = t;
     const panel = t === LOOSE ? d.loose : d.panels.find((x) => x.panel_id === t);
-    const body = panel ? bomView(panel, t === LOOSE) : t === PLATES ? nameplatesView(d.nameplates) : t === SUMMARY ? summaryView(d.summary) : t === HISTORY ? historyView(d.history) : t === 'power' ? powerView(d) : t === 'heatdiss' ? heatDissView(d) : heatCalcView(d);
+    const body = panel ? bomView(panel, t === LOOSE) : t === PLATES ? nameplatesView(d.nameplates) : t === SUMMARY ? summaryView(d.summary) : t === SPARES ? sparesView(d.spares) : t === HISTORY ? historyView(d.history) : t === 'power' ? powerView(d) : t === 'heatdiss' ? heatDissView(d) : heatCalcView(d);
     return `<div class="page">${pageHead('Preview', 'What the workbook will contain. Values are calculated by the engine; nothing here is editable.',
       `<a class="btn btn--primary" href="#/build">${icon('build')}Continue to Build</a>`)}
       ${tabs('preview', sheets, t, 'Workbook sheets')}
@@ -111,6 +113,13 @@
     const rows = m.rows.map((r, i) => `<tr><td class="num">${i + 1}</td><td class="wrap">${esc(r.description.split('\n')[0])}</td><td class="num">${esc(String(r.qty))}</td><td>${esc(r.make || '')}</td><td class="mono">${esc(r.model || '')}</td><td class="mono">${esc(r.ordering_code || '')}</td><td class="wrap small">${esc(r.where_used)}</td></tr>`).join('');
     return `<div class="table-wrap" style="max-height:calc(100vh - 320px)"><table class="table"><thead><tr><th class="num">S.No</th><th>Description</th><th class="num">Qty</th><th>Make</th><th>Model</th><th>Ordering code</th><th>Where used</th></tr></thead><tbody>${rows}</tbody></table></div>
       <p class="muted small" style="margin-top:var(--space-2)">${plural(m.rows.length, 'line')}. In the workbook each quantity is a formula over the BOM sheets' cells.</p>`;
+  }
+
+  /* ---------- Spare Parts (plan M64): spares from the design basis policy and the substation's edits ---------- */
+  function sparesView(m) {
+    const rows = m.rows.map((r, i) => `<tr><td class="num">${i + 1}</td><td class="wrap">${esc(r.description.split('\n')[0])}</td><td class="num">${r.installed == null ? '' : r.installed}</td><td class="num">${r.spare}</td><td>${esc(r.make || '')}</td><td class="mono">${esc(r.model || '')}</td><td class="mono">${esc(r.ordering_code || '')}</td><td class="small">${esc(r.basis)}</td></tr>`).join('');
+    return `<div class="table-wrap" style="max-height:calc(100vh - 320px)"><table class="table"><thead><tr><th class="num">S.No</th><th>Description</th><th class="num">Installed</th><th class="num">Spare</th><th>Make</th><th>Model</th><th>Ordering code</th><th>Basis</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="muted small" style="margin-top:var(--space-2)">${plural(m.rows.length, 'line')}. <a href="#/spares">Edit them on Spares.</a></p>`;
   }
 
   /* ---------- Revision History (ADR 0036): recorded issues, then the current revision ---------- */

@@ -61,6 +61,7 @@ from bomgen.app.projects import (
     project_only,
     summarize,
 )
+from bomgen.app.spares import spares_page
 from bomgen.app.substations import (
     ProjectInvalidError,
     SubstationNotFoundError,
@@ -1836,6 +1837,12 @@ class Api:
         """The substation's loose material, for the Loose material page."""
         with self._substation(substation_id):
             return loose_page(Path(project_file), substation_id, self._library_store())
+
+    @endpoint
+    def spares(self, project_file: str, substation_id: str) -> dict[str, Any]:
+        """The spares list with its policy and edits, for the Spares page (plan M64)."""
+        with self._substation(substation_id):
+            return spares_page(Path(project_file), substation_id, self._library_store())
 
     @endpoint
     def add_loose_item(

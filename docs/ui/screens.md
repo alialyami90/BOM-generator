@@ -324,6 +324,17 @@ with the save bar; everything on it is saved together.
   it, state) with "Make active" on non-active versions, which opens a confirm
   dialog. Making a version active never edits project files.
 
+### Spares (plan M64)
+Per substation, under Loose material in the rail.
+- **Layout:** the policy from the design basis in the lede with *Edit the policy* (Settings, Design basis)
+  and *Add item…*; a table of the Spare Parts sheet's lines: S.No, description, installed, spare (an
+  input), make, model, ordering code, basis, then *Reset* on a line set by hand and *Leave out*; an
+  added item has *Remove*. Lines left out are listed under the table with *Put back*.
+- **Behaviour:** each edit writes one field at once (`spares_list.items`, `excluded`, `extra`), so
+  there is no save bar. Typing a spare quantity sets it by hand ("Set by hand", basis "set to n (rule
+  gives m)"); *Reset* gives the policy's back. *Add item…* takes a library part or a description and
+  a quantity.
+
 ### Checks
 Per substation. Problems in the project files (register, defaults) appear here
 too and their "Go to field" opens the project page.
@@ -343,7 +354,7 @@ too and their "Go to field" opens the project page.
 
 ### Preview
 - **Layout:** title, a banner when the last load had errors, sheet tabs (one
-  Sheet per panel, then **Loose Material (n)** when the substation has loose material, then **Nameplates (n)** when some panel has plates, then Power Consumption, Heat Dissipation, Heat Calculations, then **Summary BOM (n)** when included, ADR 0035, then **Revision History** when it has rows, ADR 0036),
+  Sheet per panel, then **Loose Material (n)** when the substation has loose material, then **Nameplates (n)** when some panel has plates, then Power Consumption, Heat Dissipation, Heat Calculations, then **Summary BOM (n)** when included, ADR 0035, then **Spare Parts (n)** when the policy or the edits give a line, plan M64, then **Revision History** when it has rows, ADR 0036),
   then the sheet.
 - **BOM sheet:** group chips A to H with counts, a row filter, a switch for the
   hidden HWIO column (the revised-cells switch was dropped, see *Departures in
