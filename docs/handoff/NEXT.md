@@ -45,8 +45,9 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
   either. Don't move golden values without an ADR. Only Ali marks ADRs Accepted. Don't commit `.xlsx`.
   Don't force-push (LESSONS "Branch restart"). Don't bump the version outside a release PR (on main it
   publishes at once). Don't push tags.
-- Next free numbers: ADR 0038, Q72, milestone M82 (M70 to M81 are planned in `plan.md` "M70–M81";
-  while workstreams run in parallel, the lead gives out ADR and Q numbers one at a time).
+- Next free numbers: ADR 0041, Q74, milestone M82. Handed out for M70–M81 (2026-11-04): ADR 0038 to
+  W4 for M73, ADR 0039 and Q73 to W2 for M78, ADR 0040 to the lead for M77, Q72 to W4 for M72;
+  the lead gives out any further number one at a time.
 
 ## 3. Questions for Ali (one card each, recommendation marked)
 
