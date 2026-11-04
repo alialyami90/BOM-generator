@@ -17,7 +17,7 @@ from bomgen.app.loose import _records
 from bomgen.app.substations import _library, resolve, substation_page
 from bomgen.checks import duplicate_tag_checks
 from bomgen.engine.errors import EngineError
-from bomgen.engine.layout import CABLE_MANAGED, LayoutResult, layout_preview, runs
+from bomgen.engine.layout import CABLE_MANAGED, PRIORITY, LayoutResult, layout_preview, runs
 from bomgen.engine.mcb import has_branch_mcb
 from bomgen.engine.network import unserved_links
 from bomgen.engine.rules_text import sfp_rule, sfp_spare_rule
@@ -321,6 +321,8 @@ def _row(
         "placement": {
             "panel_hint": entry.panel_hint,
             "steerable": not entry.redundant and entry.side is Side.NONE,
+            "priority": entry.priority,  # M76: the row's rack stack order, or the category's
+            "default_priority": PRIORITY.get(category, 4) if category is not None else 4,
         },
         # M31: the link to the L2 switch (none for the sized switches and the patch panel)
         "link": None

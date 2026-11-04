@@ -772,7 +772,7 @@ def _units(loaded: LoadedSubstation, plan: NetworkPlan, issues: list[LayoutIssue
             EquipmentRole.L2_SWITCH: plan.l2_per_side,
         }.get(entry.role, entry.qty)
         sides = [Side.A, Side.B] if entry.redundant else [entry.side]
-        priority = PRIORITY.get(device.category, 4)
+        priority = entry.priority or PRIORITY.get(device.category, 4)  # M76: the row's own
         waist = device.category in WAIST
         units += [
             Unit(

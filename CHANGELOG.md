@@ -13,6 +13,8 @@ project uses [Semantic Versioning](https://semver.org/).
   the busier side (all, reserved, kept spare, in use, free) with the rule behind them, and its L1
   and L2 switch counts are derived values: `network.l1_per_side` and `l2_per_side` add switches
   above the sizing's count; a lower count stops the sizing and names the shortfall (Q72).
+- Rack priority per row (M76): `priority` (1 to 4) on an equipment row replaces its category's
+  stack order in the panel; Parts has a Rack priority select on each row.
 - Steer a common device to a panel (M74): `panel_hint` on a common equipment row puts its units
   in that panel when they fit, without pinning them; otherwise they go where there is room and the
   layout warns. Parts has a Panel select on each common row (ADR 0013, amended).
