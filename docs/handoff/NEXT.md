@@ -62,9 +62,8 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
    table in Excel's Print Preview?" Options "It fits" (recommended: the size is computed to fit at the
    print scale) and "It overlaps". See section 14 for what each answer means.
 4. **Q23** (issued sheets vs masters): keep the default (the masters) until he answers.
-5. **Q69** (W1, card sent 2026-11-03): seven original parts carry the example workbook's power, which
-   their datasheet does not state. They ship as `assumed` (recommended). If Ali picks another answer,
-   change the `WORKBOOK` source kind in `data/library/build.py`, rebuild, and record it in plan §6 Q69.
+5. **Q69** answered 2026-11-04: the seven workbook power figures stay `assumed`, as shipped. Nothing
+   to change.
 6. **THF when the housekeeping kit changes** (W3): answered 2026-11-04. Ali chose the built option,
    the spec's 12 or 5 plus 3 per fan and 2 per thermostat beyond the spec's kit. Nothing to do.
 7. **Q70** (W4, card sent 2026-11-03): the quick `ied_count` keeps today's media-agnostic rule on

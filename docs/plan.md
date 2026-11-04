@@ -1643,12 +1643,13 @@ fewer: spread them evenly, keep the spare panels empty, or offer At most n only 
 Panels board already opens a new pair when a device is dragged onto it). M62 ships At most n
 (`layout.max_panels`); there is no `panel_count`.
 
-**Q69 — Power figures no datasheet states** (M67, ADR 0037 item 6). *Open.* Seven original
+**Q69 — Power figures no datasheet states** (M67, ADR 0037 item 6). *Answered (Ali, 2026-11-04): `assumed`, the ref naming the workbook*, as shipped in psa-devices 1.16.0. Seven original
 parts carry the spec's example workbook power, which their datasheet does not state (SEL-3355
 91 W against 189 W at most; SEL-2488, SEL-3555-RTAC, SEL-3555-GW, SEL-2240, NAP-F23, IPR-2903685).
 Source them as `assumed` naming the workbook (recommended: Parts and Checks then flag them until
 someone confirms the watts), as `datasheet` citing the workbook, or with a fifth source kind for
-the client's documents (amends ADR 0037)? Until Ali answers, M67b ships them as `assumed`.
+the client's documents (amends ADR 0037)? Parts and Checks flag them until a datasheet or a
+measurement confirms the watts.
 
 **Q70 — The quick IED count on mixed-media L1 switches** (M60, ADR 0034 item 4). *Open.* A
 schedule matches each IED port to a switch port of its speed and media (fixed ports their own,
