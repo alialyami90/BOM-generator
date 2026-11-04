@@ -13,6 +13,9 @@ project uses [Semantic Versioning](https://semver.org/).
   the busier side (all, reserved, kept spare, in use, free) with the rule behind them, and its L1
   and L2 switch counts are derived values: `network.l1_per_side` and `l2_per_side` add switches
   above the sizing's count; a lower count stops the sizing and names the shortfall (Q72).
+- Steer a common device to a panel (M74): `panel_hint` on a common equipment row puts its units
+  in that panel when they fit, without pinning them; otherwise they go where there is room and the
+  layout warns. Parts has a Panel select on each common row (ADR 0013, amended).
 - PANEL row details and nameplate text (M75). An enclosure's `ip_rating` and `colour` end the
   PANEL row's description; the design basis tagging's `nameplate_pattern` sets each category's
   plate text from `{tag}`, `{full_tag}` and `{purpose}` (unset prints today's tag text). The

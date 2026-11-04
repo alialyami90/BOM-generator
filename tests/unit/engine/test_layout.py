@@ -6,6 +6,7 @@ from typing import Any
 
 import pytest
 import yaml
+from pydantic import ValidationError
 
 from bomgen.engine.errors import EngineError
 from bomgen.engine.layout import (
@@ -1122,3 +1123,57 @@ def test_switch_count_override_adds_l1_and_l2_units(example: LoadedSubstation) -
 def test_switch_count_override_below_the_sizing_fails(example: LoadedSubstation) -> None:
     with pytest.raises(SizingError, match="L1 switches per side is set to 1"):
         layout_preview(with_counts(example, l1_per_side=1))
+
+
+# --- Steer a common device to a panel (plan M74, ADR 0013 amended) ---------------------
+
+
+def hinted(device: str, hint: int, h: int = 1, rank: int = 1) -> Unit:
+    return replace(u(device, 1, NONE, h, rank), panel_hint=hint)
+
+
+def test_a_panel_hint_puts_a_common_unit_in_that_panel() -> None:
+    layout = fill([*_thirteen_u_pair(), hinted("rtac", 2, h=2), hinted("io", 2, rank=2)], RULES)
+    assert where(layout)["rtac#1/none"] == 2
+    assert where(layout)["io#1/none"] == 2  # most free U would be panel 1
+    assert layout.issues == []
+
+
+def test_a_hinted_unit_is_not_pinned() -> None:
+    layout = fill([*_thirteen_u_pair(), hinted("io", 2)], RULES)
+    panel = layout.panels[1]
+    assert not panel.is_pinned(next(x for x in panel.units if x.device == "io"))
+
+
+def test_a_hint_that_does_not_fit_places_the_unit_as_usual_and_says_so() -> None:
+    units = [x for n in range(1, 17) for x in pair("sw", n)]  # 31U each side
+    layout = fill([*units, hinted("rtac", 1, h=2)], RULES)
+    assert where(layout)["rtac#1/none"] == 3
+    (issue,) = layout.issues
+    assert (issue.kind, issue.is_error) == ("panel-hint", False)
+    assert issue.message == "rtac#1 does not fit in panel 1, its panel_hint: placed in panel 3"
+
+
+def test_a_hint_past_the_last_panel_places_the_unit_as_usual_and_says_so() -> None:
+    layout = fill([*_thirteen_u_pair(), hinted("io", 5)], RULES)
+    assert where(layout)["io#1/none"] == 1
+    (issue,) = layout.issues
+    assert issue.message == "io#1 has panel_hint 5, but there are 2 panels: placed in panel 1"
+
+
+def test_panel_hint_reaches_the_units_of_a_common_row(example: LoadedSubstation) -> None:
+    before = layout_preview(example)
+    assert [n for n, f in enumerate(before.fills, 1) for x in f.units if x.device == "gps"] == [1]
+    rows = [
+        e.model_validate({**e.model_dump(exclude_unset=True), "panel_hint": 2})
+        if e.id == "gps"
+        else e
+        for e in example.substation.equipment
+    ]
+    result = layout_preview(with_changes(example, equipment=rows))
+    assert [n for n, f in enumerate(result.fills, 1) for x in f.units if x.device == "gps"] == [2]
+
+
+def test_panel_hint_is_for_a_common_row() -> None:
+    with pytest.raises(ValidationError, match="panel_hint steers a common device"):
+        Equipment(id="l2", part_id="X", role=EquipmentRole.OTHER, redundant=True, panel_hint=1)

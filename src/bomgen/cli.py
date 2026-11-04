@@ -13,6 +13,7 @@ from bomgen.build import build_substation, issue_refusal, record_issue, workbook
 from bomgen.checks import render_text
 from bomgen.engine.errors import EngineError
 from bomgen.engine.layout import with_layout
+from bomgen.engine.overrides import risky_notes
 from bomgen.io.errors import InputError
 from bomgen.io.loader import LoadedProject, LoadedSubstation, load_inputs, project_file_of
 from bomgen.io.schema import write_json_schemas
@@ -218,7 +219,13 @@ def build(
             if outcome.failed:
                 typer.echo(f"{name}: not recorded as issued: a check failed", err=True)
             else:
-                record = record_issue(_project_file(loaded), target, outcome.path, issue)
+                record = record_issue(
+                    _project_file(loaded),
+                    target,
+                    outcome.path,
+                    issue,
+                    overrides=risky_notes(target, outcome.result),
+                )
                 typer.echo(f"Recorded rev {record.rev} as issued ({record.file.as_posix()})")
     if failed:
         raise typer.Exit(1)

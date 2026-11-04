@@ -17,11 +17,13 @@
     part_number: 'Part number on the BOM', external_ac: 'AC loose loads left out of the totals', l2_link: 'Link to the L2 switch', external_link: 'External link',
     duplicate_tag: 'Unique device tags', untagged_device: 'Devices carry a tag', document_number_placeholder: 'Document number typed',
     part_source: 'Power and inrush from a source', vendor_list: 'Parts on the vendor list', part_state: 'Parts released, not draft or obsolete',
-    design_basis: 'Design basis'
+    design_basis: 'Design basis', override: 'Overrides (ADR 0040)'
   };
   const STATUS = { pass: ['ok', 'Pass', 'check'], warn: ['warn', 'Flag', 'warn'], fail: ['bad', 'Fail', 'error'] };
   const status = (s) => badge(...STATUS[s]);
   const open = (i) => i.status === 'warn' && !i.accepted;  // ADR 0036: an accepted warning is not open
+  /* ADR 0040: a risky override warns until it has a reason; the reason is edited where the override is listed. */
+  const reasonable = (i) => i.check === 'override' && (open(i) || !!(i.values && i.values.reason));
 
   /* One cached answer per (project file, substation id); "Run checks again" and a build reload it. */
   function cache(name, call) {
@@ -87,7 +89,7 @@
       ${groups.map((g) => { const list = items.filter((i) => i.check === g), all = worst(list) === 'pass';  // groups that all pass stay folded into their header
         return `<tr class="band"><td colspan="2">${esc(CHECKS[g] || g)}</td><td>${status(worst(list))}</td><td class="muted small" colspan="2">${plural(list.length, 'item')}${all ? '' : ` · ${list.filter((i) => i.status === 'fail' || open(i)).length} to read`}</td></tr>
         ${all ? '' : list.map((i) => `<tr><td class="wrap">${esc(i.subject || '')}</td><td class="mono small">${esc(i.panel_id || '—')}</td><td>${i.accepted ? badge('info', 'Accepted', 'check') : status(i.status)}</td><td class="wrap">${esc(i.message)}${goto(i)}${i.accepted ? `<span class="cell-sub">Accepted: ${esc(i.accepted)}</span>` : ''}</td>
-          <td>${open(i) ? `<button class="btn btn--ghost btn--sm" data-action="checks-accept" data-i="${items.indexOf(i)}">Accept…</button>` : ''}</td></tr>`).join('')}`; }).join('')}</tbody></table></div>`;
+          <td>${reasonable(i) ? `<button class="btn btn--ghost btn--sm" data-action="checks-reason" data-i="${items.indexOf(i)}">${i.values.reason ? 'Edit the reason…' : 'Give a reason…'}</button>` : open(i) ? `<button class="btn btn--ghost btn--sm" data-action="checks-accept" data-i="${items.indexOf(i)}">Accept…</button>` : ''}</td></tr>`).join('')}`; }).join('')}</tbody></table></div>`;
   }
   /* ADR 0036: an acceptance no warning matches any more stays listed until removed. */
   const unusedTable = (list) => (!list.length ? '' : `<div class="toolbar" style="margin-top:var(--space-6)"><h2>Unused acceptances</h2></div>
@@ -108,6 +110,19 @@
     Bridge.call('accept_warning', S.project.file, S.sub, i.check, i.panel_id, i.subject, $('#ac-reason').value, $('#ac-by').value || null)
       .then((page) => { closeDialog(); rechecked(page); toast('Warning accepted'); })
       .catch((e) => { const n = $('#ac-err'); if (n) n.innerHTML = banner('bad', esc(e.message)); });
+  };
+  ACTIONS['checks-reason'] = (el) => {
+    const i = cache.checks.data.engine.items[+el.dataset.i];
+    dialog({ title: 'Why this override?', body: `<div class="form"><p>${i.panel_id ? `<span class="mono">${esc(i.panel_id)}</span> · ` : ''}${esc(i.subject)}: ${esc(i.message)}</p>
+      ${field('Reason', editable(input('or-reason', (i.values && i.values.reason) || '', { placeholder: 'For example, the client feeds this panel at 6 A' })), 'Saved beside the override and printed on the Revision History sheet of the next issue. Empty removes it.')}<div id="or-err"></div></div>`,
+      actions: `<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="checks-reason-do" data-i="${el.dataset.i}">Save reason</button>` });
+    setTimeout(() => { const n = $('#or-reason'); if (n) n.focus(); }, 0);
+  };
+  ACTIONS['checks-reason-do'] = (el) => {
+    const i = cache.checks.data.engine.items[+el.dataset.i];
+    Bridge.call('set_override_reason', S.project.file, S.sub, i.panel_id, i.subject, $('#or-reason').value)
+      .then((page) => { closeDialog(); rechecked(page); toast('Reason saved'); })
+      .catch((e) => { const n = $('#or-err'); if (n) n.innerHTML = banner('bad', esc(e.message)); });
   };
   ACTIONS['checks-unaccept'] = (el) => Bridge.call('remove_acceptance', S.project.file, S.sub, +el.dataset.i)
     .then((page) => { rechecked(page); toast('Acceptance removed', 'trash'); }).catch((e) => toast(e.message, 'error'));

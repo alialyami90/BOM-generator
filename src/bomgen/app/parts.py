@@ -31,7 +31,7 @@ from bomgen.library_store.store import LibraryStore
 from bomgen.models.library import Category, DeviceType, Library, Media
 from bomgen.models.output import Derived
 from bomgen.models.project import Project
-from bomgen.models.substation import Equipment, EquipmentRole, Substation
+from bomgen.models.substation import Equipment, EquipmentRole, Side, Substation
 
 ROLE_LABEL = {
     EquipmentRole.TIME_SERVER: "Time server clock",
@@ -317,6 +317,11 @@ def _row(
         "overrides": entry.overrides.values() if entry.overrides is not None else {},
         "sfp": sfp,
         "bom_text": {k: getattr(entry, k) for k in BOM_TEXT},  # M59
+        # M74: a common row may be steered to a panel; a redundant or one-side row follows its LAN
+        "placement": {
+            "panel_hint": entry.panel_hint,
+            "steerable": not entry.redundant and entry.side is Side.NONE,
+        },
         # M31: the link to the L2 switch (none for the sized switches and the patch panel)
         "link": None
         if entry.role in (*SIZED, EquipmentRole.FOPP)

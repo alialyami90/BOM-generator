@@ -26,14 +26,16 @@ from bomgen.engine.housekeeping import (
 )
 from bomgen.engine.layout import layout_preview
 from bomgen.engine.mcb import has_branch_mcb
+from bomgen.engine.network import cable_managers
 from bomgen.engine.pipeline import build
+from bomgen.engine.rules_text import cable_manager_rule, grounding_rule
 from bomgen.engine.units import expand_devices
 from bomgen.io.edit import panel_options
 from bomgen.io.loader import LoadedSubstation
 from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.store import LibraryStore
 from bomgen.models.bom import BomLine, Group, QtySum, StripRow
-from bomgen.models.calc import DcMains, HousekeepingBranch, SpareRatings
+from bomgen.models.calc import DcMains, FanChoice, HousekeepingBranch, SpareRatings
 from bomgen.models.output import Derived
 from bomgen.models.panel import Panel, PanelOptions
 from bomgen.models.substation import EquipmentRole, GeneratedPanels
@@ -178,6 +180,8 @@ def panel_page(
     spares: SpareRatings | None = None
     strips: Sequence[StripRow] = ()
     kit: list[HousekeepingBranch] = []
+    fan: FanChoice | None = None
+    managers: Derived[int] | None = None
     try:
         result = build(loaded)
         lines = next(b.lines for b in result.panels if b.panel_id == panel.id)
@@ -185,8 +189,13 @@ def panel_page(
         spares = next((s for s in result.spares if s.panel_id == panel.id), None)
         strips = next((s.strips for s in result.strips if s.panel_id == panel.id), ())
         kit = [b for b in result.housekeeping if b.panel_id == panel.id]
+        fan = next((f for f in result.fans if f.panel_id == panel.id), None)
+        count = cable_managers(expand_devices(panel, loaded.library, tagging=loaded.tagging))
+        managers = Derived[int](value=count, rule=cable_manager_rule(count))
     except EngineError as exc:
         page["engine_error"] = str(exc)
+    busbars = loaded.library.catalogues.busbars
+    chosen = [busbars[k].tag or k for k in panel.options.grounding_busbars if k in busbars]
     tagging = _tagging(loaded, panel)
     page |= {
         "panel": {
@@ -274,7 +283,20 @@ def panel_page(
             ).model_dump(mode="json")
             if spares is not None and spares.dc_rule_a
             else None,
+            # read-only rules (ADR 0040): the fan a forced cabinet gets, the busbars, the
+            # cable managers; none of them is overridden here
+            "fan": Derived[str](value=_part_label(loaded, fan.part_id), rule=fan.rule).model_dump(
+                mode="json"
+            )
+            if fan is not None
+            else None,
+            "grounding": Derived[int](value=len(chosen), rule=grounding_rule(chosen)).model_dump(
+                mode="json"
+            ),
+            "cable_managers": managers.model_dump(mode="json") if managers is not None else None,
         },
+        # why an override weakens a check, by the Overrides check's subject (ADR 0040)
+        "override_reasons": dict(panel.options.override_reasons),
         # the busbar catalogue, for the grounding choice (plan M58)
         "busbars": [
             {"key": k, "tag": b.tag, "description": b.description}

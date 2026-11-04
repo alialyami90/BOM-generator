@@ -39,6 +39,8 @@ from bomgen.models.library import (
 from bomgen.models.panel import Enclosure, PanelId, PanelKind, PortPlan, TagPrefix
 from bomgen.models.project import ConstantOverrides, LooseMaterial, OutputSettings, Spares
 
+NonBlank = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
+
 
 class SubstationInfo(InputModel):
     id: PanelId
@@ -122,6 +124,7 @@ class Equipment(InputModel):
     sfp: list[SfpChoice] = Field(default_factory=list)
     cable_manager: bool | None = None  # None: the category's rule (ADR 0013, amended)
     alarm_on_branch_mcb: bool | None = None  # None: the library's value (plan M58)
+    panel_hint: PositiveInt | None = None  # a common row's panel, not a pin (plan M74)
     note: str | None = None  # plan M71: never printed on a BOM sheet
 
     @model_validator(mode="after")
@@ -141,6 +144,11 @@ class Equipment(InputModel):
             )
         if self.redundant and self.side is not Side.NONE:
             raise ValueError("a redundant device has one unit per side; leave side out")
+        if self.panel_hint is not None and (self.redundant or self.side is not Side.NONE):
+            raise ValueError(
+                "panel_hint steers a common device; a redundant or one-side row follows "
+                "its LAN's panels"
+            )
         if self.role is EquipmentRole.L1_SWITCH and "qty" in self.model_fields_set:
             raise ValueError(
                 "the L1 switch count is computed from network.ied_count; leave qty out"
@@ -396,6 +404,9 @@ class SparesList(InputModel):
     items: dict[str, NonNegativeInt] = Field(default_factory=dict)
     excluded: list[str] = Field(default_factory=list)
     extra: list[SpareExtra] = Field(default_factory=list)
+    reasons: dict[str, NonBlank] = Field(
+        default_factory=dict
+    )  # per key, when below the rule (ADR 0040)
 
 
 class CableDefaults(InputModel):
@@ -432,7 +443,6 @@ class DesignBasis(InputModel):
         return value
 
 
-NonBlank = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 Sha256 = Annotated[str, StringConstraints(pattern=r"^[0-9a-f]{64}$")]
 
 
@@ -452,6 +462,17 @@ class Checks(InputModel):
     accepted: list[AcceptedWarning] = Field(default_factory=list)
 
 
+class OverrideNote(InputModel):
+    """An override that weakened a check when an issue was recorded, with its reason
+    (ADR 0040); printed on the Revision History sheet."""
+
+    panel_id: str | None = None
+    subject: str
+    automatic: str
+    override: str
+    reason: str | None = None
+
+
 class IssueRecord(InputModel):
     """One issued workbook (ADR 0036): ``file`` is relative to ``substation.yaml`` when
     inside the project folder, ``sha256`` the file as written."""
@@ -465,6 +486,7 @@ class IssueRecord(InputModel):
     checked: str | None = None
     approved: str | None = None
     accepted_warnings: list[AcceptedWarning] = Field(default_factory=list)
+    overrides: list[OverrideNote] = Field(default_factory=list)  # the risky ones (ADR 0040)
 
 
 class Substation(InputModel):

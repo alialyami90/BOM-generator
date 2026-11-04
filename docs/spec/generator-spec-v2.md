@@ -39,7 +39,7 @@ The workbook holds hidden master BOMs that drive the calculations, visible issue
 | Spare Parts | Visible, when the spares policy or `spares_list` gives a line (ADR 0035, plan M64) | One row per spare: installed and spare quantity with the rule that gave it | Reads the Summary BOM quantity cells when that sheet is written |
 | Cable Schedule | Visible, when a loose row carries cable data (ADR 0035, plan M65) | One row per loose cable row: from, to, type, length, quantity, make, model, ordering code | Reads the Loose Material quantity cells |
 | Notes | Visible, when `output.include` names it and a row has a note (ADR 0035, plan M71) | One row per noted row: sheet, tag, description, note; notes print nowhere else | Fed by `note` on equipment, panel and loose rows |
-| Revision History | Visible, when the substation has a recorded issue or names (ADR 0036) | One row per recorded issue, then the current revision, with prepared, checked and approved names | Fed by `issues:` and the register |
+| Revision History | Visible, when the substation has a recorded issue or names (ADR 0036) | One row per recorded issue, then the current revision, with prepared, checked and approved names, and an OVERRIDES column listing the issue's risky overrides with their reasons (ADR 0040) | Fed by `issues:` and the register |
 
 All printable sheets use A4 and page-break preview. Panel BOMs print portrait; the three calculation sheets print landscape.
 
@@ -386,6 +386,7 @@ The L1 switches are sized from `network.ied_count`, or from the IED schedule whe
 **Where in the panel**
 
 - Rack units stack top to bottom by priority: 1 the time server (`gps_clock`); 2 network (`network_switch`, `patch_panel`, `firewall`, `gateway`); 3 servers and workstations (`workstation`); 4 the rest. Ties keep equipment order. The BOM row order (group B) stays equipment order.
+- A common device (not redundant, side `none`) may name a `panel_hint`: its units go into that panel when they fit, without a pin; a unit that does not fit there goes to the panel with the most free U and the layout warns, naming where it went (ADR 0013, amended).
 - A KVM or console (`kvm`, `console`) sits with its bottom edge at waist height: U = round((`waist_height_mm` − `rack_start_mm`) / 44.45), counted from 1 at the bottom of the rack space, with the project's `defaults.layout` (ASSUMED 1000 mm and 200 mm, U18). A second one sits directly above it with the normal clearance. The other units fill from the top down to it, and those that do not fit above go below it in stack order. A panel fits only when every unit gets a place. A panel too short for the anchor is a layout error naming the panel, and its units stack from the top.
 - A move may give a `position` among the panel's rack devices (1 = top) or a `top_u`, the U the top of the unit's block sits on, but not both. A `top_u` unit is placed first, then the waist anchor, then the rest from the top in stack order. A `position` wins over the priority and the anchor. A `top_u` block that leaves the rack or overlaps another fixed block or the anchor is a layout error naming the panel.
 

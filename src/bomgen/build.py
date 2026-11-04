@@ -7,6 +7,7 @@ happens next. Errors keep their types: ``EngineError`` from the engine, ``Writer
 """
 
 import os
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -20,7 +21,7 @@ from bomgen.io.fields import insert_item
 from bomgen.io.loader import LoadedSubstation
 from bomgen.models.bom import BuildResult
 from bomgen.models.report import CheckReport, PreviousIssue, RevisionReport
-from bomgen.models.substation import IssueRecord
+from bomgen.models.substation import IssueRecord, OverrideNote
 from bomgen.revision import compare_with_previous, file_sha256
 from bomgen.sheets.workbook import build_workbook
 from bomgen.writer import write_workbook
@@ -91,10 +92,12 @@ def record_issue(
     path: Path,
     description: str,
     *,
+    overrides: Sequence[OverrideNote] = (),
     today: date | None = None,
 ) -> IssueRecord:
     """Append the issue of the workbook at ``path`` to ``target``'s ``issues`` (ADR 0036):
-    the main document's rev and names, the file's hash, the acceptances in force."""
+    the main document's rev and names, the file's hash, the acceptances in force and the
+    risky ``overrides`` with their reasons (ADR 0040)."""
     document = target.documents[target.substation.document]
     folder = target.file.parent
     resolved = path.resolve()
@@ -111,6 +114,7 @@ def record_issue(
         checked=document.checked,
         approved=document.approved,
         accepted_warnings=list(checks.accepted) if checks else [],
+        overrides=list(overrides),
     )
     value = record.model_dump(mode="json", exclude_none=True, exclude_defaults=True)
     value |= {"rev": record.rev, "date": record.date.isoformat(), "file": file.as_posix()}
