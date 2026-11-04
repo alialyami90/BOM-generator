@@ -293,6 +293,7 @@ def test_options_carry_what_the_device_picker_shows(project: Path, store: Librar
         "part_id": "RST2228-L2",
         "make": "Ruggedcom",
         "model": "RST-2228",
+        "tags": [],  # the example library tags no part (plan M81)
         "supply_type": "VDC",
         "unit_power_w": 77,
         "data_quality": None,  # a library file has no device records

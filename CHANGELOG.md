@@ -36,6 +36,10 @@ project uses [Semantic Versioning](https://semver.org/).
 - IED Schedule sheet (M80, ADR 0035 amendment): Build can add a reference sheet of the IED
   schedule, one row per IED row and port need with each side's ports, then totals per speed, media
   and landing as formulas, so the L1 switch count can be audited. Preview has the tab.
+- Function tags on library parts (`tags`, plan M81): a `tags` column in the CSV (split by `|`), a
+  *Function tags* field in the device editor, and Library search and the part picker match them.
+  psa-devices 1.17.0 tags every part with its category, a switch's Purdue level and its largest
+  port group, such as "Network switch", "L2 switch" and "24-port".
 
 ## [0.4.0] - 2026-11-04
 

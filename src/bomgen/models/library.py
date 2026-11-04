@@ -259,6 +259,10 @@ class DeviceType(InputModel):
     changed_by: str | None = None  # the last local save that touched the part
     changed_on: dt.date | None = None
     note: str | None = None
+    # what the part is for, to find it by in Library and the part picker (plan M81)
+    tags: list[Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]] = Field(
+        default_factory=list
+    )
     # set by the loader on a part derived from an equipment entry, never in a file (ADR 0024)
     derived_from: SkipJsonSchema[PartId | None] = None
     sfp_choice: SkipJsonSchema[list[SfpChoice]] = Field(default_factory=list)

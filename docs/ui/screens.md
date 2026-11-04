@@ -271,7 +271,7 @@ with the save bar; everything on it is saved together.
   *Export…* and *Import…* (a menu: update package or CSV). Tabs *Devices*, *Catalogues*, *Review* and *Health*. A
   **pending bar** at the foot while there are unapplied edits (see [`editing.md`](editing.md), "Library
   editing").
-- **Devices tab:** a toolbar (search, category, data quality, "Has alternatives", "Assumed values", count); a
+- **Devices tab:** a toolbar (search over part id, make, model and function tags, category, data quality, "Has alternatives", "Assumed values", count); a
   table (part id, make and model, supply and rated power, data-quality badge) beside a 400 px detail pane. A
   part that is not released carries a state badge beside its id: *Draft* (warning), *Reviewed* (info),
   *Obsolete* (bad). "Assumed values" keeps the parts whose power or inrush is assumed (ADR 0037).
@@ -462,7 +462,8 @@ reviewed by the design owner and is the intended behaviour; the prototype in
 - **Parts (M23).** The app differs from the M22 prototype in these ways:
   - A long part name is cut at the edge of the part select (or the Device picker's
     button), and the full name is its tooltip. The picker lists the row's current part
-    first and says how many matches it hides ("Showing 8 of 20").
+    first and says how many matches it hides ("Showing 8 of 20"). Its search also matches a
+    part's function tags, such as "24-port" (M81).
   - *Add a device* opens a dialog that picks the part. The model takes no equipment
     row without one, so a row cannot be added empty.
   - A category the library has no parts for (KVM, console) shows "The library has no

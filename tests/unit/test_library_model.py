@@ -506,3 +506,16 @@ def test_change_metadata_is_optional() -> None:
         "2026-11-03",
         "power from datasheet",
     )
+
+
+# M81: function tags for library search
+
+
+def test_function_tags_default_to_none_and_are_trimmed() -> None:
+    assert device().tags == []
+    assert device(tags=["  L1 access switch ", "24-port"]).tags == ["L1 access switch", "24-port"]
+
+
+def test_a_blank_function_tag_is_refused() -> None:
+    with pytest.raises(ValidationError, match="tags"):
+        device(tags=["24-port", "  "])
