@@ -561,3 +561,6 @@ The rules are in ADR 0013 and the design spec (R1–R10).
   and expect `merge_pull_request` to refuse with "merge conflicts" even after green CI.
 - The DC power total carries `constants.power_margin`; a test of one added device's power expects
   `w * (1 + margin)`, not `w`.
+- **W1 M81 (2026-11-04).** A part's port tag counts its largest port group: summing every group
+  tagged the C9300-24T "33-port" (24 access + 8 SFP slots + 1 management). A `list[str]` field
+  that is one CSV cell needs excluding from the "every list is a child table" test.

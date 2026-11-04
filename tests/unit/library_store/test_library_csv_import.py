@@ -949,3 +949,18 @@ def test_larger_fans_survive_the_round_trip_one_row_each(
 
     assert preview.problems == []
     assert preview.library == edited
+
+
+def test_function_tags_survive_the_round_trip(
+    tmp_path: Path, store: LibraryStore, base: Library
+) -> None:
+    data = base.model_dump(mode="json")
+    next(d for d in data["devices"] if d["part_id"] == SWITCH)["tags"] = ["L1 switch", "24-port"]
+    edited = Library.model_validate(data)
+    out = tmp_path / "tags.zip"
+    export_csv(edited, out, name="psa", based_on="1.0.0")
+
+    preview = _preview(store, out)
+
+    assert preview.problems == []
+    assert preview.library == edited

@@ -56,7 +56,7 @@ def test_the_shipped_library_is_the_example_plus_the_originals_datasheet_figures
     shipped: Library,
 ) -> None:
     example = load_library(EXAMPLE)
-    keys = {"inrush_a", "inrush_ms", "input_v_min", "input_v_max", "make", "sources"}
+    keys = {"inrush_a", "inrush_ms", "input_v_min", "input_v_max", "make", "sources", "tags"}
     overrides = yaml.safe_load(ADDITIONS.read_text(encoding="utf-8"))["overrides"]
 
     originals = shipped.devices[: len(example.devices)]
@@ -70,7 +70,7 @@ def test_the_shipped_library_is_the_example_plus_the_originals_datasheet_figures
         changed = keys | set(overrides["devices"].get(ours.part_id, {}))
         assert ours.model_dump(exclude=changed) == theirs.model_dump(exclude=changed), ours.part_id
         if ours.tier is not None:
-            tier_keys = {"sources", *overrides["devices"].get(ours.part_id, {})}
+            tier_keys = {"sources", "tags", *overrides["devices"].get(ours.part_id, {})}
             assert ours.model_dump(exclude=tier_keys) == theirs.model_dump(exclude=tier_keys)
 
 
@@ -80,8 +80,8 @@ def test_the_shipped_library_ends_with_the_additions(shipped: Library) -> None:
 
     assert [d.part_id for d in added] == [a["part_id"] for a in additions]
     for device, entry in zip(added, additions, strict=True):
-        expected = DeviceType.model_validate(entry).model_dump(exclude={"sources"})
-        assert device.model_dump(exclude={"sources"}) == expected, device.part_id
+        expected = DeviceType.model_validate(entry).model_dump(exclude={"sources", "tags"})
+        assert device.model_dump(exclude={"sources", "tags"}) == expected, device.part_id
 
 
 def test_each_addition_is_a_valid_part_new_to_the_example() -> None:
@@ -468,3 +468,26 @@ def test_an_alternatives_computed_power_is_sourced_to_its_datasheet(shipped: Lib
     source = moxa.sources["unit_power_w"]
     assert source.kind == "datasheet"
     assert "0.313 x 110" in source.ref
+
+
+# plan M81: function tags for library search
+
+
+def test_m81_every_shipped_part_is_tagged_with_its_category(shipped: Library) -> None:
+    for part in shipped.devices:
+        words = part.category.value.replace("_", " ")
+        assert part.tags, part.part_id
+        assert part.tags[0].lower() == words, part.part_id
+
+
+def test_m81_a_switch_is_tagged_with_its_level_and_port_count(shipped: Library) -> None:
+    switch = shipped.get("C9300-24T-A")
+    assert switch is not None
+
+    assert switch.tags == ["Network switch", "L2 switch", "24-port"]  # its largest group
+
+
+def test_m81_a_part_without_ports_has_no_port_tag(shipped: Library) -> None:
+    fan = next(p for p in shipped.devices if p.category.value == "fan")
+
+    assert fan.tags == ["Fan"]

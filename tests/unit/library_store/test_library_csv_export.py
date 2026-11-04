@@ -61,7 +61,9 @@ def test_every_device_field_is_a_column_or_a_child_table() -> None:
     nested = {
         name
         for name, info in DeviceType.model_fields.items()
-        if str(info.annotation).startswith("list[") and name not in LOADER_ONLY
+        if str(info.annotation).startswith("list[")
+        and name not in LOADER_ONLY
+        and name != "tags"  # plan M81: one cell, tags split by bars
     }
     columns = set(TABLES["devices.csv"])
 
@@ -69,6 +71,7 @@ def test_every_device_field_is_a_column_or_a_child_table() -> None:
 
     assert nested == set(CHILD_TABLES)
     assert sourced <= columns
+    assert "tags" in columns
     assert (columns - sourced) | nested | set(LOADER_ONLY) | {"sources"} == set(
         DeviceType.model_fields
     )
@@ -340,3 +343,15 @@ def test_the_table_columns_are_exactly_the_documented_ones() -> None:
     for name, columns in expected.items():
         assert tuple(TABLES[name]) == columns, name
     assert tuple(TABLES["mcb.csv"])[:5] == ("catalogue_id", "name", "family", "make", "poles")
+
+
+def test_function_tags_are_one_cell_split_by_bars(library: Library) -> None:
+    data = library.model_dump(mode="json")
+    next(d for d in data["devices"] if d["part_id"] == SWITCH)["tags"] = ["L1 switch", "24-port"]
+    row = next(
+        r
+        for r in library_tables(Library.model_validate(data))["devices.csv"]
+        if r["part_id"] == SWITCH
+    )
+
+    assert row["tags"] == "L1 switch|24-port"

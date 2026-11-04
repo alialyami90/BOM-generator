@@ -51,7 +51,7 @@
   const row = (d, records) => {
     const r = records[d.part_id];
     return {
-      id: d.part_id, make: d.make || (r && r.make) || '', model: d.model || '', cat: d.category,
+      id: d.part_id, make: d.make || (r && r.make) || '', model: d.model || '', cat: d.category, tags: d.tags || [],
       supply: d.supply_type ? `${d.voltage_v ? d.voltage_v + ' ' : ''}${d.supply_type}` : '—', w: d.unit_power_w,
       code: d.ordering_code, tagType: d.tag_type, level: d.purdue_level, power: feeds[d.power_supplies] || '',
       mcb: d.min_branch_mcb_a ? `${d.min_branch_mcb_a} A branch` : '',
@@ -158,14 +158,14 @@
   const STATE = { draft: ['warn', 'Draft'], reviewed: ['info', 'Reviewed'], obsolete: ['bad', 'Obsolete'] };
   const stateBadge = (st) => (STATE[st] ? ` ${badge(...STATE[st])}` : '');
   function filtered() {
-    return devices().filter((d) => (!F.q || (d.id + d.make + d.model).toLowerCase().includes(F.q.toLowerCase()))
+    return devices().filter((d) => (!F.q || [d.id, d.make, d.model, ...d.tags].join(' ').toLowerCase().includes(F.q.toLowerCase()))
       && (!F.cat || F.cat === d.cat) && (!F.ver || F.ver === d.verified) && (!F.alt || d.alt) && (!F.assumed || d.assumed));
   }
   function devicesView() {
     const all = devices(), list = filtered(), cats = [...new Set(all.map((d) => d.cat))], quality = hasDeviceDb();
     const sel = all.find((d) => d.id === S.selectedDevice) || list[0];
     return `<div class="toolbar" role="search">
-        <div class="input-wrap" style="width:280px"><label class="sr-only" for="lib-q">Search library</label>${icon('search')}<input class="input" id="lib-q" type="search" placeholder="Search part, make, model" value="${esc(F.q)}"></div>
+        <div class="input-wrap" style="width:280px"><label class="sr-only" for="lib-q">Search library</label>${icon('search')}<input class="input" id="lib-q" type="search" placeholder="Search part, make, model, tag" value="${esc(F.q)}"></div>
         <label class="sr-only" for="lib-cat">Category</label>${select('lib-cat', [['', 'All categories'], ...cats.map((c) => [c, catName(c)])], F.cat, { cls: 'ctl' }).replace('data-dirty="1"', 'data-action="lib-cat"').replace('class="select ctl"', 'class="select" style="width:190px"')}
         ${quality ? `<label class="sr-only" for="lib-ver">Data quality</label>${select('lib-ver', [['', 'Any data quality'], ['confirmed', 'Confirmed'], ['partial', 'Partial'], ['unverified', 'Unverified']], F.ver, {}).replace('data-dirty="1"', 'data-action="lib-ver"').replace('class="select "', 'class="select" style="width:190px"')}
         <label class="check"><input type="checkbox" data-action="lib-alt" ${F.alt ? 'checked' : ''}> Has alternatives</label>` : ''}

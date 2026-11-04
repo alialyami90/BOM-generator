@@ -159,6 +159,16 @@ def test_in_use_rows_are_named_as_the_screens_show_them() -> None:
     assert "Fixed once created: projects refer to it." in edit
 
 
+def test_m81_function_tags_are_edited_and_searched() -> None:
+    edit = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
+    library = (UI_DIR / "screens-library.js").read_text(encoding="utf-8")
+    parts = (UI_DIR / "screens-parts.js").read_text(encoding="utf-8")
+    assert "['tags', 'Function tags', 'tags'" in edit
+    assert "if (kind === 'tags') return [t.split" in edit  # none is an empty list, not null
+    assert "[d.id, d.make, d.model, ...d.tags].join(' ')" in library
+    assert "...(o.tags || [])].join(' ')" in parts
+
+
 def test_the_device_editor_has_a_datasheet_tab_on_the_record() -> None:
     edit = (UI_DIR / "screens-libedit.js").read_text(encoding="utf-8")
     assert "datasheet: ['Datasheet'" in edit
@@ -439,7 +449,7 @@ def test_the_app_ships_none_of_the_prototypes_illustrative_data() -> None:
         text = path.read_text(encoding="utf-8")
         assert not re.search(r"\bDB\.", text), path.name
         assert not re.search(r"\bEngine\.", text), path.name
-        assert "psa-devices 1.16.0" not in text, path.name
+        assert "psa-devices 1.17.0" not in text, path.name
 
 
 def test_without_its_bridge_the_app_says_so_instead_of_showing_example_pages() -> None:

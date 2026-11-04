@@ -77,6 +77,7 @@
   /* [key, label, kind, help]; kinds: text, mono, area, int, num, choice, feeds, bool. The model checks every value. */
   const TABS = {
     identity: ['Identity', [['part_id', 'Part ID', 'fixed', 'Fixed: projects refer to it. To rename, add a copy and retire this one.'], ['category', 'Category', 'choice'], ['make', 'Make', 'text'], ['model', 'Model', 'text'],
+      ['tags', 'Function tags', 'tags', 'One per line: what the part is for, for example L1 switch or 24-port. Library search and the part picker find it by them.', 2],
       ['ordering_code', 'Ordering code', 'mono', 'Printed in the BOM. Leave empty if the manufacturer gives none.', 2],
       ['description_template', 'Description in the BOM', 'area', 'Placeholders in braces, such as <span class="mono">{side}</span> and <span class="mono">{level}</span>, are filled in by the engine.', 2],
       ['tag_type', 'Tag type', 'mono', 'First part of the generated tag, e.g. ESW.'], ['purdue_level', 'Purdue level', 'choice'],
@@ -141,6 +142,7 @@
     const t = String(raw).trim();
     if (kind === 'bool') return [raw === true, null];
     if (kind === 'feeds') return [Number(t), null];
+    if (kind === 'tags') return [t.split('\n').map((x) => x.trim()).filter(Boolean), null];  // none is an empty list (plan M81)
     if (!t) return [null, null];
     if (kind === 'int') return /^\d+$/.test(t) ? [Number(t), null] : [t, 'Enter a whole number, for example 2.'];
     if (kind === 'num') return /^\d+(\.\d+)?$/.test(t) ? [Number(t), null] : [t, 'Enter a number, for example 25 or 12.5.'];
@@ -160,7 +162,7 @@
     else if (kind === 'choice') html = select(id, [['', 'Not set'], ...choices.map((c) => [c, choiceName(key, c)])], v == null ? '' : String(v), o);
     else if (kind === 'part') html = input(id, v == null ? '' : String(v), { ...o, mono: true }).replace('<input', '<input list="dl-parts"');
     else if (kind === 'feeds') html = select(id, [['0', 'None'], ['1', 'Single feed'], ['2', 'Dual feed (2 supplies)']], String(v || 0), o);
-    else if (kind === 'area' || kind === 'lines') html = `<textarea class="input input--mono" id="${id}" rows="3" ${err ? 'aria-invalid="true"' : ''} style="height:auto;padding:8px 10px">${esc(v == null ? '' : v)}</textarea>`;
+    else if (kind === 'area' || kind === 'lines' || kind === 'tags') html = `<textarea class="input input--mono" id="${id}" rows="3" ${err ? 'aria-invalid="true"' : ''} style="height:auto;padding:8px 10px">${esc(v == null ? '' : v)}</textarea>`;
     else html = input(id, v == null ? '' : String(v), { ...o, mono: kind !== 'text' && kind !== 'csv', num: kind === 'int' || kind === 'num' || kind === 'snum' });
     if (unit) html = `<div class="input-affix">${html}<span class="affix">${unit}</span></div>`;
     const out = field(esc(label), html, help, err ? esc(err) : '');

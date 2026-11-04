@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Any, NamedTuple
 
 import yaml
-from ruamel.yaml.comments import CommentedMap
+from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from ruamel.yaml.scalarstring import DoubleQuotedScalarString
 
 from bomgen.io.round_trip import dump_text, load_text, set_entry
@@ -118,6 +118,7 @@ def build(example: str, figures: dict[str, dict[str, Any]], additions: str, foun
     data["catalogue_brands"]["mcb"].extend(extra["catalogue_brands"]["mcb"])
     delivered = {device["part_id"] for device in extra["devices"]}
     for device in data["devices"]:
+        set_entry(device, "tags", _tags(device))
         sources = {
             name: _source(device, name, device["part_id"] in delivered, found)
             for name in SOURCED
@@ -131,6 +132,19 @@ def build(example: str, figures: dict[str, dict[str, Any]], additions: str, foun
     while lines and lines[0].startswith("#"):
         lines.pop(0)  # the example's own header describes the example workbook
     return HEADER + "".join(lines)
+
+
+def _tags(device: Any) -> CommentedSeq:
+    """Function tags to find the part by (plan M81): its category, a switch's level and
+    the size of its largest port group."""
+    tags = [str(device["category"]).replace("_", " ").capitalize()]
+    if device["category"] == "network_switch" and device.get("purdue_level"):
+        tags.append(f"{device['purdue_level']} switch")
+    if ports := max((group["count"] for group in device.get("ports") or []), default=0):
+        tags.append(f"{ports}-port")
+    node = CommentedSeq(DoubleQuotedScalarString(tag) for tag in tags)
+    node.fa.set_flow_style()
+    return node
 
 
 def _flow(source: dict[str, Any]) -> CommentedMap:

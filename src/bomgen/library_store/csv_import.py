@@ -482,6 +482,8 @@ def _devices(
         old = base_by_id.get(pid)
         data = _row_dict(table, cells, TABLES["devices.csv"], old)
         data["part_id"] = pid
+        if isinstance(data.get("tags"), str):  # plan M81: one cell, tags split by bars
+            data["tags"] = [tag for tag in data["tags"].split(LIST_SEPARATOR) if tag.strip()]
         if not _sources(table, cells, data, old, (pid, row), asm):
             if skip and old is not None:
                 candidates.append(old)
