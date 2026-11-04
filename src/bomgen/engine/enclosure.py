@@ -13,6 +13,10 @@ def enclosure_item(panel: Panel) -> BomItem:
     if frame is not None:
         text.append(f"Base Frame: H{frame.h_mm} x D{frame.d_mm} x W{frame.w_mm} mm")
     text.append(f"Cable Entry: {enclosure.cable_entry.value.capitalize()} Entry")
+    if enclosure.ip_rating is not None:
+        text.append(f"IP Rating: {enclosure.ip_rating}")
+    if enclosure.colour is not None:
+        text.append(f"Colour: {enclosure.colour}")
     return BomItem(
         BomLine(
             group=Group.A,

@@ -180,6 +180,8 @@ Part numbers come from the chosen catalogue brand (ADR 0017). The quantities bel
 
 **Miscellaneous rows (group H, plan M70).** A panel's `options.misc_items` print after its nameplate row, one row per entry in order: column C the text as written (e.g. "Miscellaneous: cable ties, labels"), quantity 1 Lot, no tag, make, model, code, HWIO or power line. A panel's `notes` are never printed.
 
+**Nameplate text and the PANEL row (plan M75).** The design basis tagging may give a category a `nameplate_pattern`, with the placeholders `{tag}` (the plate text above), `{full_tag}` and `{purpose}`; a category without one prints `{tag}`. An enclosure's `ip_rating` and `colour`, when given, end the PANEL row's description as "IP Rating: IP54" and "Colour: RAL 7035".
+
 **Housekeeping kit (group D).** Every cabinet gets lamp + door switch, interposing relay kit (relay, base, suppression module, bracket) for the high-temperature alarm, and either 2 fans + 3 thermostats (forced ventilation) or vent filters + 1 thermostat (natural convection). The choice follows from Heat Calculations. Part numbers come from the chosen catalogue brand (ADR 0017). These counts are panel inputs whose defaults are the values stated; a panel may also add a heater or hygrostat, and say whether its smoke detector is supplied or only wired to terminals (ADR 0032).
 
 **HWIO points (hidden column H).** Each row contributes its hardwired alarm inputs: 1 per L2/EXT switch, 1 for the GPS clock, 3 for the AC aux contacts, 2 for the DC aux contacts on the mains. Panel totals in the example are 17, 17 and 6. Summed across panels, they give the hardwired DI count that the Axion DI modules in Cabinet 003 must cover.

@@ -28,7 +28,7 @@
   const changed = () => { reload(); App.network.reload(); App.devicePreview.reload(); App.sub.reload(); };
 
   /* ---------- the form: keys e.<enclosure field>, doc, o.<all|panel>.<option>, p.<row>.… ---------- */
-  const ENC = { make: 'text', model: 'text', ordering_code: 'text', h_mm: 'int', d_mm: 'int', w_mm: 'int', cable_entry: 'choice', 'base_frame.h_mm': 'int', 'base_frame.d_mm': 'int', 'base_frame.w_mm': 'int' };
+  const ENC = { make: 'text', model: 'text', ordering_code: 'text', h_mm: 'int', d_mm: 'int', w_mm: 'int', cable_entry: 'choice', ip_rating: 'text', colour: 'text', 'base_frame.h_mm': 'int', 'base_frame.d_mm': 'int', 'base_frame.w_mm': 'int' };
   const OPT = { dc_spare_branches_per_feed: 'int', ac_spare_branches: 'int', ventilation: 'choice', change_over_diodes: 'choice', main_mcb_override_a: 'int', ac_spare_rating_a: 'int', dc_spare_rating_a: 'int', aux_socket_a: 'int', inter_panel_terminals: 'int', smoke_detector: 'choice' };
   const PORT = { count: 'int', speed: 'choice', media: 'choice', spare: 'int' };
   const TERM = { t: 'terminal_overrides', tb: 'terminal_block_overrides' };  // t.<all|panel>.<strip>, tb.… (ADR 0033)
@@ -238,7 +238,8 @@
     ${edit(`${e}.make`, 'Make', text(`${e}.make`))}${edit(`${e}.model`, 'Model', text(`${e}.model`))}${edit(`${e}.ordering_code`, 'Ordering code', text(`${e}.ordering_code`, { mono: true, placeholder: 'Optional' }))}
     ${edit(`${e}.h_mm`, 'Height', num(`${e}.h_mm`, 'mm'))}${edit(`${e}.d_mm`, 'Depth', num(`${e}.d_mm`, 'mm'))}${edit(`${e}.w_mm`, 'Width', num(`${e}.w_mm`, 'mm'))}
     ${edit(`${e}.base_frame.h_mm`, 'Base frame height', num(`${e}.base_frame.h_mm`, 'mm'))}${edit(`${e}.base_frame.d_mm`, 'Base frame depth', num(`${e}.base_frame.d_mm`, 'mm'))}${edit(`${e}.base_frame.w_mm`, 'Base frame width', num(`${e}.base_frame.w_mm`, 'mm'))}
-    ${edit(`${e}.cable_entry`, 'Cable entry', choice(`${e}.cable_entry`, [['top', 'Top'], ['side', 'Side'], ['bottom', 'Bottom']]))}</div>`;
+    ${edit(`${e}.cable_entry`, 'Cable entry', choice(`${e}.cable_entry`, [['top', 'Top'], ['side', 'Side'], ['bottom', 'Bottom']]))}
+    ${edit(`${e}.ip_rating`, 'IP rating', text(`${e}.ip_rating`, { mono: true, placeholder: 'e.g. IP54' }), 'Printed on the PANEL row when given.')}${edit(`${e}.colour`, 'Colour', text(`${e}.colour`, { placeholder: 'e.g. RAL 7035' }), 'Printed on the PANEL row when given.')}</div>`;
 
   /* ---------- Devices: what the layout placed, read-only ---------- */
   const ROLES = { fopp: 'Fibre patch panel', l2_switch: 'L2 switch', l1_switch: 'L1 switch', ext_switch: 'External switch', firewall: 'Firewall' };

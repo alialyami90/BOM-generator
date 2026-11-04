@@ -50,6 +50,14 @@ def test_enclosure_without_base_frame_skips_that_line() -> None:
     assert item.line.description == "Cabinet : H2100 x D1000 x W800 mm\nCable Entry: Side Entry"
 
 
+def test_enclosure_row_states_ip_rating_and_colour_when_given() -> None:
+    # Plan M75: the PANEL row's description ends with the IP rating and colour.
+    p = panel([{"part_id": "LAMP"}])
+    enclosure = p.enclosure.model_copy(update={"ip_rating": "IP54", "colour": "RAL 7035"})
+    item = enclosure_item(p.model_copy(update={"enclosure": enclosure}))
+    assert item.line.description.splitlines()[-2:] == ["IP Rating: IP54", "Colour: RAL 7035"]
+
+
 def test_bottom_entry_text() -> None:
     p = panel([{"part_id": "LAMP"}])
     enclosure = p.enclosure.model_copy(update={"cable_entry": CableEntry.BOTTOM})

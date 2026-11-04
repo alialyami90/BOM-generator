@@ -69,7 +69,7 @@ def build(loaded: LoadedSubstation) -> BuildResult:
         for p in loaded.panels
     ]
     hwio_total = sum(draft.hwio for draft in drafts)
-    plates = [nameplates(d.panel, d.rows) for d in drafts]
+    plates = [nameplates(d.panel, d.rows, loaded.tagging) for d in drafts]
     panels = tuple(
         _finish(draft, library, substation, hwio_total, len(panel_plates.plates))
         for draft, panel_plates in zip(drafts, plates, strict=True)
