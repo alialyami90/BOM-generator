@@ -3,6 +3,20 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-11-04: W4 phase G, M72, M74, M76 and M73 merged (W4)
+
+- **Done:** M72 port budget and switch-count override (#375): the Parts Result card lists each
+  level's ports on the busier side with their rule, and `network.l1_per_side`/`l2_per_side` add
+  switches above the sizing (Q72 answered "only above"; a lower count fails sizing). M74
+  `panel_hint` steers a common row to a panel without pinning, with a `panel-hint` warning (#377,
+  ADR 0013 amended). M76 `priority` 1–4 per row replaces the category's stack order, a select on
+  the row's Panel line (#380). M73 `redbox` and `media_converter` categories and roles (#384, ADR
+  0038 Accepted): sized as other, tagged, priority 2, cable manager allowed but off, 1 L2 port by
+  default; PRP and HSR stay refused. Golden unchanged. Screenshots in
+  `/mnt/project-files/a11-screens/m72-switch-counts/`, `m74-panel-hint/`, `m76-rack-priority/`.
+- **Left for later:** psa-devices has no RedBox or media converter part yet (library intake,
+  ADR 0037); their nameplate pattern is not in the Design basis list (M75 `PLATES`).
+
 ## 2026-11-04: M77 overrides in Checks merged (Lead)
 
 - **Done:** `engine/overrides.py` lists every override (panel options, terminals, part values and
