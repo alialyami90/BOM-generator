@@ -1428,6 +1428,58 @@ class Api:
             return checks_page(Path(project_file), substation_id, self._library_store())
 
     @endpoint
+    def accept_warning(
+        self,
+        project_file: str,
+        substation_id: str,
+        check: str,
+        panel_id: str | None,
+        subject: str | None,
+        reason: str,
+        by: str | None = None,
+    ) -> dict[str, Any]:
+        """Accept a check warning with a reason, dated today (ADR 0036); returns the Checks
+        page."""
+        store = self._library_store()
+        value = {"check": check, "panel_id": panel_id, "subject": subject, "reason": reason}
+        value = {k: v for k, v in value.items() if v is not None}
+        value |= {"by": by.strip()} if by and by.strip() else {}
+        value["date"] = date.today().isoformat()
+        with self._substation(substation_id), _edit_refusals():
+            result = insert_item(
+                Path(project_file),
+                ("checks", "accepted"),
+                None,
+                value,
+                substation=substation_id,
+                store=store,
+            )
+        _written(result)
+        with self._substation(substation_id):
+            return checks_page(Path(project_file), substation_id, store)
+
+    @endpoint
+    def remove_acceptance(
+        self, project_file: str, substation_id: str, index: int
+    ) -> dict[str, Any]:
+        """Remove an accepted warning; the list, then ``checks``, go when left empty."""
+        store = self._library_store()
+        project = Path(project_file)
+        with self._substation(substation_id), _edit_refusals():
+            result = remove_item(
+                project, ("checks", "accepted"), index, substation=substation_id, store=store
+            )
+            _written(result)
+            file = resolve(project, substation_id, store).file
+            if not (read_yaml(file).data.get("checks") or {}).get("accepted"):
+                _written(
+                    remove_field(
+                        project, ("checks", "accepted"), substation=substation_id, store=store
+                    )
+                )
+            return checks_page(project, substation_id, store)
+
+    @endpoint
     def build_target(self, project_file: str, substation_id: str) -> dict[str, Any]:
         """The workbook's file name and default folder, and the problems that block a build."""
         with self._substation(substation_id):
@@ -1837,8 +1889,10 @@ class Api:
         file_name: str | None = None,
         compare: str | None = None,
         replace: bool = False,
+        issue: str | None = None,
     ) -> dict[str, Any]:
-        """Write the substation's workbook; ``compare`` marks changes since that issue."""
+        """Write the substation's workbook; ``compare`` marks changes since that issue, else
+        the latest recorded issue; ``issue`` records this build as issued (ADR 0036)."""
         with self._substation(substation_id):
             result = build_file(
                 Path(project_file),
@@ -1848,6 +1902,7 @@ class Api:
                 file_name or None,
                 Path(compare) if compare else None,
                 replace,
+                issue,
             )
         self._list(result["path"])
         return result

@@ -225,7 +225,7 @@
   ACTIONS['open-sub'] = (el, e) => { if (e && e.target.closest('button') && e.target.closest('button') !== el) return; S.sub = el.dataset.id; S.dirty = false; go('#/panels'); };
 
   /* ---------- Documents: the register, edited in place (docs/ui/editing.md, Project › Documents) ---------- */
-  const RG_FIELDS = ['doc_no', 'rev', 'issue_date', 'title'];
+  const RG_FIELDS = ['doc_no', 'rev', 'issue_date', 'title', 'prepared', 'checked', 'approved'];
   const rgSplit = (key) => { const m = /^d(\d+)_(\w+)$/.exec(key); return m && RG_FIELDS.includes(m[2]) ? [Number(m[1]), m[2]] : null; };
   const RG = App.draftForm({
     prefix: 'rg-', screen: 'project', file: 'project.yaml', label: 'Save register',
@@ -244,6 +244,7 @@
     const assumed = d.assumed.includes('issue_date') && !(`d${d.index}_issue_date` in RG.draft);
     return `<tr>${rgCell(d, 'title', 'Name', { plain: true, placeholder: d.key })}${rgCell(d, 'doc_no', 'Document no.')}${rgCell(d, 'rev', 'Revision')}
       ${rgCell(d, 'issue_date', 'Issue date', { after: assumed ? `<span class="row" style="gap:var(--space-2);margin-top:4px;flex-wrap:nowrap">${badge('warn', 'Assumed date', 'warn')}<button class="btn btn--ghost btn--sm" data-action="rg-confirm" data-i="${d.index}">Confirm</button></span>` : '' })}
+      ${['prepared', 'checked', 'approved'].map((f) => rgCell(d, f, f[0].toUpperCase() + f.slice(1), { plain: true })).join('')}
       <td class="small">${used && used.length ? esc(used.map((u) => u.replace(`${d.substation}: `, '')).join(', ')) : '<span class="muted">Not used</span>'}</td>
       <td><button class="btn btn--ghost btn--sm btn--icon btn--del" data-action="rg-remove" data-i="${d.index}" aria-label="Remove ${esc(d.key)}" title="${esc(why || (RG.dirty() ? 'Save or discard the changes first' : 'Remove'))}" ${why || RG.dirty() ? 'disabled' : ''}>${icon('trash')}</button></td></tr>`;
   }
@@ -253,8 +254,8 @@
     const assumed = p.register.filter((d) => d.assumed.includes('issue_date')).length;
     return `<p class="lede muted" style="max-width:68ch;margin-bottom:var(--space-4)">One register for the whole project. Each panel and calculation sheet picks a document from it, so a single transmittal list drives every header.</p>
       ${assumed ? banner('warn', `<b>The issue date${assumed === 1 ? '' : 's'} of ${count(assumed, 'document')} ${assumed === 1 ? 'is' : 'are'} assumed.</b> Confirm the dates before issuing.`) : ''}
-      <div class="table-wrap" style="margin-top:var(--space-4)"><table class="table"><caption class="sr-only">Document register</caption><thead><tr><th>Document</th><th style="width:220px">Document no.</th><th style="width:76px">Rev</th><th style="width:170px">Issue date</th><th>Used by</th><th style="width:44px"><span class="sr-only">Remove</span></th></tr></thead>
-      <tbody>${groups.map((g) => `<tr class="band"><td colspan="6"><div class="row"><b>${esc(g.s.name)}</b> <span class="muted">· ${count(g.rows.length, 'document')}</span><span class="sp" style="flex:1"></span><button class="btn btn--ghost btn--sm" data-action="rg-add" data-sub="${esc(g.s.id)}" ${RG.dirty() ? 'disabled title="Save or discard the changes first"' : ''}>${icon('plus')}Add</button></div></td></tr>
+      <div class="table-wrap" style="margin-top:var(--space-4)"><table class="table" style="min-width:1240px"><caption class="sr-only">Document register</caption><thead><tr><th>Document</th><th style="width:220px">Document no.</th><th style="width:76px">Rev</th><th style="width:170px">Issue date</th><th style="width:130px">Prepared</th><th style="width:130px">Checked</th><th style="width:130px">Approved</th><th style="width:170px">Used by</th><th style="width:44px"><span class="sr-only">Remove</span></th></tr></thead>
+      <tbody>${groups.map((g) => `<tr class="band"><td colspan="9"><div class="row"><b>${esc(g.s.name)}</b> <span class="muted">· ${count(g.rows.length, 'document')}</span><span class="sp" style="flex:1"></span><button class="btn btn--ghost btn--sm" data-action="rg-add" data-sub="${esc(g.s.id)}" ${RG.dirty() ? 'disabled title="Save or discard the changes first"' : ''}>${icon('plus')}Add</button></div></td></tr>
         ${g.rows.map((d) => rgRow(p, d)).join('')}`).join('')}</tbody></table>
       <div class="table-foot"><span>${count(p.register.length, 'document')} in ${count(groups.filter((g) => g.rows.length).length, 'substation')} · issue dates are written as YYYY-MM-DD</span></div></div>${RG.bar()}`;
   };
