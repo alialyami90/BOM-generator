@@ -52,6 +52,8 @@ def dump_library(library: Library) -> bytes:
             del device["state"]
         if not device.get("sources"):
             device.pop("sources", None)
+        if not device.get("tags"):  # plan M81
+            device.pop("tags", None)
     return yaml.safe_dump(data, sort_keys=False, allow_unicode=True).encode("utf-8")
 
 
@@ -212,9 +214,12 @@ def _user() -> str | None:
 
 def _min_app_version(base: str, library: Library) -> str:
     """The base's requirement, raised to this app when the library uses ADR 0037 fields,
-    which older apps refuse (ADR 0037 item 8)."""
+    or function tags (plan M81), which older apps refuse (ADR 0037 item 8)."""
     uses = any(
-        d.state != "released" or d.sources or any(getattr(d, f) is not None for f in CHANGE_FIELDS)
+        d.state != "released"
+        or d.sources
+        or d.tags  # plan M81
+        or any(getattr(d, f) is not None for f in CHANGE_FIELDS)
         for d in library.devices
     )
     if uses and Version.parse(bomgen.__version__) > Version.parse(base):

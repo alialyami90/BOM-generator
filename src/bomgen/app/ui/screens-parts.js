@@ -273,7 +273,7 @@
     const p = sub().page(), lib = p.project.library, opts = p.parts.options[btn.dataset.cat] || [], label = btn.dataset.label;
     const pop = document.createElement('div');
     pop.className = 'popover pk';
-    pop.innerHTML = `<div class="input-wrap">${icon('search')}<input class="input" id="pk-q" role="combobox" aria-expanded="true" aria-controls="pk-list" aria-autocomplete="list" aria-label="Search the ${esc(label)} parts" placeholder="Search part, make or model" autocomplete="off"></div>
+    pop.innerHTML = `<div class="input-wrap">${icon('search')}<input class="input" id="pk-q" role="combobox" aria-expanded="true" aria-controls="pk-list" aria-autocomplete="list" aria-label="Search the ${esc(label)} parts" placeholder="Search part, make, model or tag" autocomplete="off"></div>
       <div class="listbox" id="pk-list" role="listbox" aria-label="${esc(label)} parts in ${esc(lib.name)} ${esc(lib.version)}"></div>
       <div class="pk-hint small muted" id="pk-hint"></div>`;
     btn.after(pop); btn.setAttribute('aria-expanded', 'true');
@@ -282,7 +282,7 @@
     let active = 0;
     const draw = () => {
       const t = q.value.trim().toLowerCase();
-      const all = t ? opts.filter((o) => `${o.part_id} ${o.make || ''} ${o.model || ''}`.toLowerCase().includes(t))
+      const all = t ? opts.filter((o) => [o.part_id, o.make, o.model, ...(o.tags || [])].join(' ').toLowerCase().includes(t))
         : [...opts.filter((o) => o.part_id === btn.value), ...opts.filter((o) => o.part_id !== btn.value)];  // the current part first
       const shown = all.slice(0, 8), first = !t && btn.dataset.first ? [{ part_id: '', sizing: true }] : [];
       const items = [...first, ...shown];

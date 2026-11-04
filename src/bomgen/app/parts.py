@@ -411,6 +411,7 @@ def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
                         "part_id": d.part_id,
                         "make": d.make,
                         "model": d.model,
+                        "tags": d.tags,
                         "supply_type": d.supply_type.value if d.supply_type else None,
                         "unit_power_w": d.unit_power_w,
                         "data_quality": records[d.part_id].verified

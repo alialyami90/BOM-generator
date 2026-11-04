@@ -325,6 +325,21 @@ def test_a_saved_library_keeps_a_set_state_and_its_sources() -> None:
     assert again == library
 
 
+def test_a_saved_library_leaves_out_empty_function_tags() -> None:
+    text = dump_library(load_library(EXAMPLE_LIBRARY)).decode("utf-8")
+    assert "tags:" not in text
+
+
+def test_a_save_that_uses_function_tags_needs_this_app_version(
+    store: LibraryStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("bomgen.__version__", "9.9.0")
+
+    saved = save_local_version(store, "psa", _edited(_active(store), tags=["24-port"]))
+
+    assert saved.manifest.min_app_version == "9.9.0"
+
+
 # ADR 0037 items 4, 5 and 8: a sized change needs its source; the save says who and when
 
 

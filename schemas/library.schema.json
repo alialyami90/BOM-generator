@@ -683,6 +683,14 @@
           "default": null,
           "title": "Tag Type"
         },
+        "tags": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
         "terminals": {
           "items": {
             "$ref": "#/$defs/TerminalRule"

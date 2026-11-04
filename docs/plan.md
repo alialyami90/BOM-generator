@@ -1343,9 +1343,11 @@ design basis says) are not milestones.
 - **M80 — IED schedule reference sheet.** *W2. In review.* Review step 2. An optional sheet listing the schedule
   rows and the ports per speed, media and side, written when a schedule exists and the sheet is chosen
   (ADR 0035 amendment).
-- **M81 — Function tags for library search.** *W1.* Review "What each part record needs".
+- **M81 — Function tags for library search.** *W1.* Merged. Review "What each part record needs".
   `DeviceType.tags: list[str]` (CSV column, device editor, library search and the part picker filter);
-  the shipped library gets tags from its category and port counts in `build.py`.
+  the shipped library gets tags from its category and port counts in `build.py`. Each shipped part
+  gets its category ("Network switch"), a switch's Purdue level ("L2 switch") and its largest port
+  group ("24-port"); psa-devices 1.17.0.
 
 ## 5. Testing strategy
 
