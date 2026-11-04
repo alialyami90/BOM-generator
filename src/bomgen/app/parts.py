@@ -145,7 +145,7 @@ def _category(entry: Equipment, part: DeviceType | None) -> Category | None:
     return ROLE_CATEGORY.get(entry.role)
 
 
-BOM_TEXT = ("purpose", "tag", "tag_type", "first_nn", "hwio_points")  # Parts BOM text (M59)
+BOM_TEXT = ("purpose", "tag", "tag_type", "first_nn", "hwio_points", "note")  # M59; note M71
 
 
 def _label(entry: Equipment, category: Category | None) -> str:

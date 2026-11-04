@@ -26,6 +26,9 @@ project uses [Semantic Versioning](https://semver.org/).
   on a generated panel) are the engineer's own and never printed; `options.misc_items` print
   last in group H, one "1 Lot" row each. The panel editor has Notes on the Document tab and the
   rows on Options.
+- Row notes (M71, ADR 0035 amendment): `note` on equipment rows (Parts › BOM text), hand-written
+  panel rows (the panel editor) and loose items. A note is never printed on a BOM sheet; Preview
+  shows a Notes column, and Build can add a Notes sheet listing every noted row.
 
 ## [0.4.0] - 2026-11-04
 

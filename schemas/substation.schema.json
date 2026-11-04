@@ -817,6 +817,18 @@
           "$ref": "#/$defs/PortSpeed",
           "default": "1G"
         },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        },
         "ordering_code": {
           "anyOf": [
             {
@@ -1384,6 +1396,18 @@
           "default": null,
           "title": "Fed From"
         },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        },
         "part_id": {
           "anyOf": [
             {
@@ -1552,7 +1576,10 @@
         },
         "include": {
           "items": {
-            "const": "summary_bom",
+            "enum": [
+              "summary_bom",
+              "notes"
+            ],
             "type": "string"
           },
           "title": "Include",
@@ -2015,6 +2042,17 @@
           "minLength": 1,
           "pattern": "^(?!')(?:[^\\[\\]:*?/\\\\']|'(?!$))*$",
           "title": "Nameplates",
+          "type": [
+            "string",
+            "integer"
+          ]
+        },
+        "notes": {
+          "default": "Notes",
+          "maxLength": 31,
+          "minLength": 1,
+          "pattern": "^(?!')(?:[^\\[\\]:*?/\\\\']|'(?!$))*$",
+          "title": "Notes",
           "type": [
             "string",
             "integer"

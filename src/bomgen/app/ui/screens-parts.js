@@ -11,9 +11,9 @@
   const NET = { ied_count: 'int', topology: 'choice', ring_max_switches: 'int', l1_uplinks_per_switch: 'int', l1_interlink: 'bool', l3_uplinks_per_l2: 'int', l1_per_side: 'int', l2_per_side: 'int' };
   const SPARES = { port_fraction: ['Ports kept free on each switch', '%', 'pct'], sfp_per_l1: ['Spare SFPs on each L1', '', 'int'], dc_branches_per_feed: ['Spare DC branches per feed', '', 'int'], ac_branches: ['Spare AC branches', '', 'int'], rack_u_reserved: ['Rack space kept free', 'U', 'int'], terminals_fraction: ['Spare terminals on each wiring strip', '%', 'pct'] };
   const VALUES = [['height_u', 'Height', 'int'], ['unit_power_w', 'Power', 'num'], ['supply_type', 'Supply', 'choice'], ['voltage_v', 'Voltage', 'int'], ['power_supplies', 'Supplies', 'int'], ['inrush_a', 'Inrush', 'num'], ['load_type', 'Load', 'choice']];
-  const EQ = { part_id: 'choice', ordering_code: 'text', qty: 'int', redundant: 'bool', cable_manager: 'bool', alarm_on_branch_mcb: 'bool', purpose: 'text', tag: 'text', tag_type: 'text', first_nn: 'int', hwio_points: 'int', panel_hint: 'int', priority: 'int' };
+  const EQ = { part_id: 'choice', ordering_code: 'text', qty: 'int', redundant: 'bool', cable_manager: 'bool', alarm_on_branch_mcb: 'bool', purpose: 'text', tag: 'text', tag_type: 'text', first_nn: 'int', hwio_points: 'int', panel_hint: 'int', priority: 'int', note: 'text' };
   /* M59: the row's BOM text, [field, label, placeholder when unset] */
-  const BOM_TEXT = [['purpose', 'Purpose', () => 'None'], ['tag', 'Tag', (r) => r.tags.join(', ') || 'Generated'], ['tag_type', 'Type code', () => 'From the library'], ['first_nn', 'First number', () => 'Automatic'], ['hwio_points', 'HWIO points', () => 'From the library']];
+  const BOM_TEXT = [['purpose', 'Purpose', () => 'None'], ['tag', 'Tag', (r) => r.tags.join(', ') || 'Generated'], ['tag_type', 'Type code', () => 'From the library'], ['first_nn', 'First number', () => 'Automatic'], ['hwio_points', 'HWIO points', () => 'From the library'], ['note', 'Note (not printed)', () => 'None']];  // note: plan M71
   /* M60: one IED schedule row (ADR 0034); ports is text such as "2x100M MM + 1x1G RJ45" */
   const IED = { bay: 'text', name: 'text', qty: 'int', ports: 'text', attachment: 'choice', lands_on: 'choice', notes: 'text' };
   const ATTACH = [['dual', 'Both'], ['single_a', 'A only'], ['single_b', 'B only']], LANDS = [['l1', 'L1'], ['l2', 'L2']];
@@ -215,7 +215,7 @@
     const set = BOM_TEXT.filter(([f]) => shown(k(f)) !== '');
     const summary = set.length ? set.map(([f, label]) => `${label} ${shown(k(f))}`).join(' · ') : r.tags[0] || 'As generated';
     const dup = r.duplicate ? `<div class="prow-err"><span class="err small">${icon('error')}<span>${esc(r.duplicate)}</span></span></div>` : '';
-    const body = open ? `<div class="form form--3 prow-bomtext" id="pp-bt-${r.index}">${BOM_TEXT.map(([f, label, ph]) => mark(k(f), field(label, input(`p-${k(f)}`, shown(k(f)), { mono: f !== 'purpose', num: EQ[f] === 'int', placeholder: ph(r), invalid: !!PF.errors[k(f)] }), '', PF.err(k(f))))).join('')}</div>` : '';
+    const body = open ? `<div class="form form--3 prow-bomtext" id="pp-bt-${r.index}">${BOM_TEXT.map(([f, label, ph]) => mark(k(f), field(label, input(`p-${k(f)}`, shown(k(f)), { mono: f !== 'purpose' && f !== 'note', num: EQ[f] === 'int', placeholder: ph(r), invalid: !!PF.errors[k(f)] }), '', PF.err(k(f))))).join('')}</div>` : '';
     return `<div class="prow-sub prow-sub--foot"><button class="link-btn small" data-action="pp-bomtext" data-i="${r.index}" aria-expanded="${open}" aria-controls="pp-bt-${r.index}">${icon(open ? 'chevd' : 'chevr')}BOM text</button><span class="muted small prow-bt-sum">${esc(summary)}</span></div>${body}${dup}`;
   }
   /* M74: steer a common row's units to a panel without pinning them; the layout says when they do not fit.

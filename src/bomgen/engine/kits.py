@@ -28,6 +28,7 @@ def device_item(row: DeviceRow, library: Library, group: Group) -> BomItem:
         hwio=device.hwio_points * instance.qty if hwio is None else hwio,
         part_id=device.part_id,
         merge_fg=bool(device.children),
+        note=instance.note,
     )
     children = []
     for rule in device.children:
@@ -118,12 +119,13 @@ def _loose_extra(extra: LooseExtra, library: Library) -> BomItem:
                 description=extra.description,
                 qty=extra.qty,
                 cable=extra.cable,
+                note=extra.note,
             )
         )
     per_parent = extra.qty if isinstance(extra.qty, int) else 1
     line = _loose_line(extra.part_id, extra.tag, extra.qty, library)
     children = tuple(_loose_line(c, None, per_parent, library) for c in extra.children)
-    update = {"merge_fg": bool(children), "cable": extra.cable}
+    update = {"merge_fg": bool(children), "cable": extra.cable, "note": extra.note}
     return BomItem(line.model_copy(update=update), children)
 
 

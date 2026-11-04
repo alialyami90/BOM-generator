@@ -93,7 +93,7 @@
 
   /* A hand-written panel's own file (M32b): keys c.<identity field>, e.…, doc, o.<option>, d.<row>.<field>. */
   const CAB = { cabinet_name: 'text', cabinet_number: 'text', tag_prefix: 'text', sheet_name: 'text', kind: 'choice', lan: 'choice' };
-  const DEV = { qty: 'int', purpose: 'text', hwio_points: 'int', alarm_on_branch_mcb: 'choice', tag: 'text', tag_type: 'text', first_nn: 'int' };
+  const DEV = { qty: 'int', purpose: 'text', hwio_points: 'int', alarm_on_branch_mcb: 'choice', tag: 'text', tag_type: 'text', first_nn: 'int', note: 'text' };
   function hSpec(key) {
     const [k, a, ...r] = key.split('.');
     if (k === 'c') return CAB[a] ? [[a], CAB[a]] : null;
@@ -300,10 +300,12 @@
         <td>${cell(i, 'qty', `Quantity of ${esc(d.part_id)}`, { num: true, mono: true })}</td><td>${cell(i, 'purpose', `Purpose of ${esc(d.part_id)}`, { placeholder: 'Optional' })}</td><td>${cell(i, 'hwio_points', `HWIO points of ${esc(d.part_id)}`, { num: true, mono: true, placeholder: 'Auto' })}</td>
         <td>${d.branch_mcb ? `<label class="sr-only" for="ph-d.${i}.alarm_on_branch_mcb">Alarm on the breaker trip of ${esc(d.part_id)}</label>${choice(`d.${i}.alarm_on_branch_mcb`, [['', `Library: ${d.alarm_default ? 'on' : 'off'}`], ['true', 'On'], ['false', 'Off']]).replace('class="select', 'class="ctl select')}` : '<span class="muted small">No branch MCB</span>'}</td>
         <td><button class="btn btn--ghost btn--icon btn--sm" data-action="ph-dev-remove" data-i="${i}" aria-label="Remove ${esc(d.part_id)}" ${n === 1 ? 'disabled title="A panel lists at least one device. Delete the panel instead."' : blocked()}>${icon('trash')}</button></td></tr>
-        <tr class="row-sub${chg ? ' is-changed' : ''}"><td></td><td colspan="5"><div style="display:flex;gap:var(--space-4);align-items:center;flex-wrap:wrap">${tagCell(i, 'tag', 'Tag', d.tags.join(', ') || 'Generated', 220)}${tagCell(i, 'tag_type', 'Type code', 'From the library', 150)}${tagCell(i, 'first_nn', 'First number', 'Automatic', 110, true)}
+        <tr class="row-sub${chg ? ' is-changed' : ''}"><td></td><td colspan="5"><div style="display:flex;gap:var(--space-4);align-items:center;flex-wrap:wrap">${tagCell(i, 'tag', 'Tag', d.tags.join(', ') || 'Generated', 220)}${tagCell(i, 'tag_type', 'Type code', 'From the library', 150)}${tagCell(i, 'first_nn', 'First number', 'Automatic', 110, true)}${noteCell(i)}
           ${d.duplicate ? `<span class="err small">${icon('error')}<span>${esc(d.duplicate)}</span></span>` : ''}</div></td><td></td></tr>`; }).join('')}</tbody></table>
       <div class="table-foot"><span>${plural(n, 'row')}</span><span>HWIO comes from the device unless you set it. An alarm on breaker trip adds an auxiliary contact on the device's branch MCBs; on an AC branch it is also one HWIO point.</span></div></div>`;
   }
+  /* A row's note (plan M71): shown in Preview and on the optional Notes sheet, never on the BOM. */
+  const noteCell = (i) => `<label class="small muted" for="ph-d.${i}.note" style="display:flex;gap:var(--space-2);align-items:center">Note${text(`d.${i}.note`, { placeholder: 'Not printed' }).replace('class="input', 'style="width:260px" class="ctl input')}</label>`;
   /* Tag, type code and first number of a hand-written row (plan M59); the placeholders are what the engine generates. */
   const tagCell = (i, f, label, ph, w, numeric) => `<label class="small muted" for="ph-d.${i}.${f}" style="display:flex;gap:var(--space-2);align-items:center">${label}${text(`d.${i}.${f}`, { mono: true, num: !!numeric, placeholder: ph }).replace('class="input', `style="width:${w}px" class="ctl input`)}</label>`;
   /* Adding, moving or removing a device writes the whole list at once, without what the page adds to a row. */
