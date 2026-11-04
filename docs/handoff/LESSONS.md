@@ -38,6 +38,12 @@ replaced entry "superseded by …".
   remote branch (no force-push), then cherry-pick. Main moves fast with five workstreams, so merge
   main in right before merging; appended tests in `test_app_ui_assets.py` and `test_checks.py`
   conflict every time and keep both sides.
+- **Stacked milestones (W2, M71→M80→M79):** after the lower PR squash-merges, split the stack with
+  `git rebase --onto origin/main <old lower tip> <branch>` one branch at a time; a merge of main into
+  an open PR branch (not a rebase) keeps its pushes fast-forward. `CHANGELOG.md` and the schemas
+  conflict on every such merge: keep both entries, then rerun `bomgen schema`.
+- **Right after a release** the newest `### Added` list is the released one: put new entries under
+  `## [Unreleased]` (add its `### Added` heading), not under the version just shipped (M71, M80).
 - The clone may be shallow: `git fetch --unshallow` before using old shas; `git fetch --tags` if
   `v0.2.x` tags are missing locally.
 

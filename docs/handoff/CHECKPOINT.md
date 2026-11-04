@@ -3,6 +3,23 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-11-04: W2 phase G, M71, M80 and M79 merged; M78 waits on Q73 (W2)
+
+- **Done:** M71 row notes (#373): `note` on equipment, hand-written panel and loose rows, never
+  printed on a BOM sheet; Preview's Notes column and an optional Notes sheet (`output.include`
+  `notes`). M80 IED Schedule sheet (#382): optional, one row per schedule row and port need, side
+  ports as formulas and SUMIFS totals per speed, media and landing (`ied_schedule`). M79 Mark as
+  revised (#383, ADR 0036 amendment): `revision_marks` (panel, tag, columns, reason) highlight a row
+  like OUT-8, *Build as issued…* shows the change list (`issue_changes`) before writing, and the
+  issue keeps them as `issues[].marked` and clears them. Golden unchanged. Screenshots in
+  `/mnt/project-files/a11-screens/m71/` and `m79/`. `tests/unit/README.md` now lists W2's M63–M80
+  modules.
+- **Waiting:** M78 PDF export needs Ali's Q73 card (built-in renderer recommended, Excel on the PC,
+  or both); ADR 0039 and Q73 stay with W2. A second W2 checkpoint follows M78.
+- **Left for later:** six unit test modules from other workstreams are still missing from
+  `tests/unit/README.md` (`test_app_derived_values`, `test_overrides`, `test_redbox_and_converter`,
+  `test_rules_text`, `test_health`, `test_ied_csv`).
+
 ## 2026-11-04: W1 phase G, M81 function tags merged (W1)
 
 - **Done:** M81 function tags (#376): `DeviceType.tags` (trimmed, no blank tag; a saved library

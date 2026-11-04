@@ -1340,7 +1340,7 @@ design basis says) are not milestones.
 - **M78 — PDF export of the issued sheets.** *W2; ADR and Q.* Review step 11. After a build, *Export
   PDF* writes the chosen sheets with their print settings. Q: Excel on the engineer's PC (exact page
   setup, Windows only) or a built-in renderer (no Excel needed, approximate).
-- **M79 — Mark as revised and a change log before issuing.** *W2. In review.* Review steps 10 and 12. Preview:
+- **M79 — Mark as revised and a change log before issuing.** *W2.* Done (#383). Review steps 10 and 12. Preview:
   *Mark as revised* on a row the compare can't see (stored per issue, highlighted yellow as the spec's
   revision rule); Build as issued shows the change list (compare result plus marked rows) before writing.
 - **M80 — IED schedule reference sheet.** *W2.* Done (#382). Review step 2. An optional sheet listing the schedule
