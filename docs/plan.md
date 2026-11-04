@@ -1298,7 +1298,7 @@ design basis says) are not milestones.
 | Automation contract | Rule texts where the app "stops at step 1": SFP counts, housekeeping, terminals, spare ratings | M49, M56, M57, M58 |
 | Automation contract | Rule texts for grounding, switch counts, cable managers' count, the fan choice | M77 |
 
-- **M70 — Panel notes and a miscellaneous row.** *W3.* Review F16 and step 6. `Panel.notes` (free
+- **M70 — Panel notes and a miscellaneous row.** *W3.* Done. Review F16 and step 6. `Panel.notes` (free
   text, never printed) and `PanelOptions.misc_items`: free-text rows printed in group H as "1 Lot"
   (e.g. "Miscellaneous: cable ties, labels"). Panel editor: a Notes field on the Document tab and the
   rows on Options. *Spec sentence* for the group H row. Acceptance: a misc row prints last in group H

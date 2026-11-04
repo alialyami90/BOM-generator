@@ -893,6 +893,15 @@ def test_generated_panel_takes_its_own_enclosure_and_kind(example: LoadedSubstat
     assert (second.enclosure.w_mm, second.kind) == (600, PanelKind.CONTROL)
 
 
+def test_generated_panel_takes_its_own_notes(example: LoadedSubstation) -> None:
+    # Plan M70: notes_by_panel gives one generated panel its notes; the others have none.
+    generated = example.substation.generated_panels
+    assert generated is not None
+    own = generated.model_copy(update={"notes_by_panel": {2: "Spare rail at the top"}})
+    first, second = layout_substation(with_changes(example, generated_panels=own)).panels
+    assert (first.notes, second.notes) == (None, "Spare rail at the top")
+
+
 def test_natural_convection_uses_own_enclosure(example: LoadedSubstation) -> None:
     # Plan M50 acceptance: panel 1 at 600 mm wide and kind control builds its own PANEL
     # row, X4-DC1 (26, no longer rounded up to 32) and natural-convection area; panel 2 keeps the

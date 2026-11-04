@@ -203,6 +203,7 @@ def panel_page(
             "generated": panel.generated,
             "manual": panel.id in loaded.manual_panel_ids,
             "mirror_of": read_yaml(file).data.get("mirror_of"),
+            "notes": panel.notes,  # never printed (plan M70)
             "file": str(file),
         },
         # the numbering every generated panel shares (ALI-5, ALI-13); {n} is the panel number

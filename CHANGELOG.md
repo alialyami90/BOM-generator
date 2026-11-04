@@ -16,6 +16,10 @@ project uses [Semantic Versioning](https://semver.org/).
 - Steer a common device to a panel (M74): `panel_hint` on a common equipment row puts its units
   in that panel when they fit, without pinning them; otherwise they go where there is room and the
   layout warns. Parts has a Panel select on each common row (ADR 0013, amended).
+- Panel notes and miscellaneous rows (M70). A panel's `notes` (`generated_panels.notes_by_panel`
+  on a generated panel) are the engineer's own and never printed; `options.misc_items` print
+  last in group H, one "1 Lot" row each. The panel editor has Notes on the Document tab and the
+  rows on Options.
 
 ## [0.4.0] - 2026-11-04
 

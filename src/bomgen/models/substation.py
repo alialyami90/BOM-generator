@@ -303,6 +303,7 @@ class GeneratedPanels(InputModel):
     options_by_panel: dict[PositiveInt, dict[str, Any]] = Field(default_factory=dict)
     enclosure_by_panel: dict[PositiveInt, Enclosure] = Field(default_factory=dict)  # plan M50
     kind_by_panel: dict[PositiveInt, PanelKind] = Field(default_factory=dict)
+    notes_by_panel: dict[PositiveInt, str] = Field(default_factory=dict)  # plan M70
 
     @field_validator("id", "cabinet_number", "cabinet_name", "tag_prefix", "sheet_name")
     @classmethod

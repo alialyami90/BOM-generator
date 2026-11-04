@@ -54,6 +54,7 @@ def mirror_panel(base: Panel, mirror: PanelMirror) -> Panel:
             "document": mirror.document,
             "generated": mirror.generated,
             "revision": mirror.revision,
+            "notes": mirror.notes,
         }
     )
 

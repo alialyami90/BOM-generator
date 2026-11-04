@@ -282,3 +282,26 @@ def test_hand_written_rows_carry_their_tags_and_a_duplicate_tag(
     devices = ok(app.panel_page(str(generated), "gis01", "ws"))["devices"]
     assert devices[1]["tag"] == tag
     assert devices[0]["duplicate"].startswith(f"{tag}: 2 device units share this tag")
+
+
+def test_notes_and_misc_items_round_trip_on_a_generated_panel(
+    app: api.Api, generated: Path
+) -> None:
+    # Plan M70: a generated panel's notes are its own (notes_by_panel); misc rows are options.
+    notes: list[str | int] = ["generated_panels", "notes_by_panel", 2]
+    ok(app.set_substation_field(str(generated), "gis01", notes, "Glass door\nAsk the client"))
+    misc: list[str | int] = ["generated_panels", "options_by_panel", 2, "misc_items"]
+    ok(app.set_substation_field(str(generated), "gis01", misc, ["Miscellaneous: cable ties"]))
+
+    page = ok(app.panel_page(str(generated), "gis01", "psa2"))
+    assert page["panel"]["notes"] == "Glass door\nAsk the client"
+    options = {o["key"]: o for o in page["options"]}
+    assert options["misc_items"]["value"] == ["Miscellaneous: cable ties"]
+    assert ok(app.panel_page(str(generated), "gis01", "psa1"))["panel"]["notes"] is None
+
+
+def test_notes_round_trip_on_a_hand_written_panel(app: api.Api, project: Path) -> None:
+    ok(app.set_panel_field(str(project), "gis01", "ws", ["notes"], "Console desk by others"))
+    assert ok(app.panel_page(str(project), "gis01", "ws"))["panel"]["notes"] == (
+        "Console desk by others"
+    )
