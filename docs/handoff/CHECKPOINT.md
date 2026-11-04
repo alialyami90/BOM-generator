@@ -3,6 +3,18 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-11-04: W3 phase G, M70 and M75 merged (W3)
+
+- **Base:** main `ecce117` (#378). Docs-only PR.
+- **Done:** M70 panel notes and miscellaneous rows (#374): `Panel.notes` (never printed;
+  `generated_panels.notes_by_panel` on a generated panel, a mirror's own), `options.misc_items`
+  printed last in group H as "1 Lot", Notes on the Document tab and the rows on Options. M75 PANEL
+  row details and nameplate text (#378): `Enclosure.ip_rating` and `colour` end the PANEL row's
+  description; the design basis tagging's `nameplate_pattern` per category with `{tag}`,
+  `{full_tag}` and `{purpose}`. Spec sentences only, no ADR or Q. Screenshots in
+  `/mnt/project-files/a11-screens/m70/` and `m75/`.
+- **Left for later:** the socket pick list (M56 plan, gap 11).
+
 ## 2026-11-04: v0.4.0 released, M48–M69 done (Lead)
 
 - **Base:** main `65837a3` (#370). Docs-only PR.
