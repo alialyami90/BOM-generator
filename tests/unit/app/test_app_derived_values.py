@@ -9,6 +9,7 @@ import pytest
 import yaml
 
 from bomgen.app import api
+from bomgen.io.yaml_source import read_yaml
 from bomgen.models.output import Derived
 
 EXAMPLES = Path(__file__).parents[3] / "examples"
@@ -198,3 +199,50 @@ def test_generated_panels_share_a_housekeeping_count(app: api.Api, generated: Pa
     sheet = ok(app.preview_substation(str(generated), "gis01"))["panels"][0]
     lamp = next(r for r in sheet["rows"] if r["description"].startswith("Illumination Lamp"))
     assert lamp["qty"] == 2
+
+
+def test_panel_page_carries_the_fan_busbar_and_cable_manager_rules(
+    app: api.Api, project: Path
+) -> None:
+    """ADR 0040: the remaining rule texts, read-only on the panel editor's Options tab."""
+    derived = ok(app.panel_page(str(project), "gis01", "psa1"))["derived"]
+
+    fan = derived["fan"]
+    assert (fan["override"], fan["source"]) == (None, "engine")
+    assert fan["rule"] == "the catalogue fan; 2 fans move 716 m³/h for the 391 m³/h required"
+    assert derived["grounding"] == {
+        "value": 2,
+        "rule": "2 busbars from the panel options: AC SAFETY POWER-GROUND, INSTRUMENT-GROUND",
+        "override": None,
+        "source": "engine",
+        "unit": None,
+    }
+    managers = derived["cable_managers"]
+    assert (
+        managers["rule"]
+        == f"{managers['value']}: one under each rack-mounted switch, firewall and patch panel"
+    )
+
+
+def test_a_filter_cooled_panel_has_no_fan_rule(app: api.Api, project: Path) -> None:
+    derived = ok(app.panel_page(str(project), "gis01", "ws"))["derived"]
+    assert derived["fan"] is None
+    assert derived["grounding"]["value"] == 1
+
+
+def test_a_reason_on_a_generated_panel_follows_the_override_s_scope(
+    app: api.Api, generated: Path
+) -> None:
+    ok(app.set_panel_option(str(generated), "gis01", "main_mcb_override_a", 6, None))
+    ok(app.set_panel_option(str(generated), "gis01", "ac_spare_rating_a", 1, 1))
+
+    ok(app.set_override_reason(str(generated), "gis01", "psa1", "main_mcb", "Shared feeder"))
+    ok(app.set_override_reason(str(generated), "gis01", "psa1", "ac_spare", "Own spare"))
+
+    gp = substation_yaml(generated)["generated_panels"]
+    assert gp["options"]["override_reasons"] == {"main_mcb": "Shared feeder"}
+    assert gp["options_by_panel"][1]["override_reasons"] == {"ac_spare": "Own spare"}
+
+
+def substation_yaml(project: Path) -> Any:
+    return read_yaml(project.parent / "substations" / "gis01" / "substation.yaml").data

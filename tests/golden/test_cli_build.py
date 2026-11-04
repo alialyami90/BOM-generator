@@ -49,12 +49,13 @@ def test_build_prints_and_writes_the_check_report(tmp_path: Path) -> None:
     assert result.exit_code == 0, result.output
     # Four warnings: the 16 A main MCB override on psa1/psa2 (plan Q3), the iC60N's
     # 125 V DC rating under the 140 V battery float, and the hwio entry with no part
-    # number (ADR 0024). 50 of the passes are the branch MCBs (plan Q35).
-    assert result.stdout.splitlines()[-1] == "0 failed, 4 warnings, 64 passed"
+    # number (ADR 0024). 50 of the passes are the branch MCBs (plan Q35) and 5 the
+    # overrides the example sets (ADR 0040), none below its automatic value.
+    assert result.stdout.splitlines()[-1] == "0 failed, 4 warnings, 69 passed"
     assert "PASS  psa1  PSA1-EXT-FW-A01  sfp_slots  2 SFPs in 2 SFP slots" in result.stdout
     report = json.loads((tmp_path / FILE_NAME).with_suffix(".checks.json").read_text("utf-8"))
     assert report["failed"] is False
-    assert len(report["items"]) == 68
+    assert len(report["items"]) == 73
 
 
 def test_no_checks_skips_the_report(tmp_path: Path) -> None:

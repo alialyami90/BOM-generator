@@ -14,6 +14,7 @@ from pydantic import Field, NonNegativeInt, PositiveInt
 from bomgen.models.calc import (
     BranchMcb,
     DcMains,
+    FanChoice,
     HeatResult,
     HousekeepingBranch,
     LineRef,
@@ -164,6 +165,7 @@ class BuildResult(OutputModel):
     strips: tuple[PanelStrips, ...] = ()  # group G before the BOM rows (ADR 0033)
     housekeeping: tuple[HousekeepingBranch, ...] = ()  # the kit's C branches (ADR 0032)
     nameplates: tuple[PanelNameplates, ...] = ()  # empty when the library has no nameplate
+    fans: tuple[FanChoice, ...] = ()  # each cabinet's fan with its rule (ADR 0040)
 
 
 class SummarySource(OutputModel):
@@ -219,6 +221,7 @@ class SpareLine(OutputModel):
     percent: float | None = None
     minimum: int = 0
     overridden: bool = False
+    rule_spare: int | None = None  # what the policy gives an overridden line (ADR 0040)
 
 
 class SparesTable(OutputModel):

@@ -3,6 +3,19 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-11-04: M77 overrides in Checks merged (Lead)
+
+- **Done:** `engine/overrides.py` lists every override (panel options, terminals, part values and
+  SFP counts, layout moves, the spares list, switch counts) as the Checks *Overrides* group; a risky
+  one (below its automatic value) warns until it has a reason, stored in `options.override_reasons`
+  or `spares_list.reasons` and set from the Checks row or the derived value's reason line
+  (`set_override_reason`). Recorded issues keep the risky overrides, printed in the Revision
+  History OVERRIDES column. Rule texts for the fan, grounding busbars and cable managers. ADR 0040
+  Accepted; Ali keeps panel notes off the workbook (plan coverage table). The example's five
+  overrides add five passes to the golden check counts.
+- **Next:** W1 M81; W2 M71, M78 (ADR 0039, Q73), M79, M80; W4 M73 (ADR 0038), M76. Then a
+  v0.4.1 changelog and the handoff.
+
 ## 2026-11-04: W3 phase G, M70 and M75 merged (W3)
 
 - **Base:** main `ecce117` (#378). Docs-only PR.

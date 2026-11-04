@@ -38,7 +38,7 @@ The workbook holds hidden master BOMs that drive the calculations, visible issue
 | Summary BOM | Visible, when included (ADR 0035) | Every part totalled by ordering code across the cabinets and loose material, with where it is used | Reads the BOM sheets' quantity cells |
 | Spare Parts | Visible, when the spares policy or `spares_list` gives a line (ADR 0035, plan M64) | One row per spare: installed and spare quantity with the rule that gave it | Reads the Summary BOM quantity cells when that sheet is written |
 | Cable Schedule | Visible, when a loose row carries cable data (ADR 0035, plan M65) | One row per loose cable row: from, to, type, length, quantity, make, model, ordering code | Reads the Loose Material quantity cells |
-| Revision History | Visible, when the substation has a recorded issue or names (ADR 0036) | One row per recorded issue, then the current revision, with prepared, checked and approved names | Fed by `issues:` and the register |
+| Revision History | Visible, when the substation has a recorded issue or names (ADR 0036) | One row per recorded issue, then the current revision, with prepared, checked and approved names, and an OVERRIDES column listing the issue's risky overrides with their reasons (ADR 0040) | Fed by `issues:` and the register |
 
 All printable sheets use A4 and page-break preview. Panel BOMs print portrait; the three calculation sheets print landscape.
 

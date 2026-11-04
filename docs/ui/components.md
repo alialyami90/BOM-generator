@@ -436,6 +436,15 @@ override on save. `App.derived()` in `ui.js` renders both this and the detail va
 "Library"`, no rule). Used for the panel editor's main MCB; later milestones put SFP quantities,
 housekeeping, terminals and spare ratings on it.
 
+A value the engine derives but the file can't override (the fan, the grounding busbars' count, the
+cable managers' count) shows as a read-only line: the value, then the rule in the same muted style.
+
+An override that weakens a check (ADR 0040: a breaker below the rule's rating, fewer terminals than the
+rule, filters where the heat check wants fans) gets a reason line under the rule: "Reason: Feeder is
+fused upstream" with *Edit the reason…*, or in warning colour "Below the automatic value: give a reason"
+with *Give a reason…*. The button opens a one-line dialog; an empty reason removes it. The same button
+sits on the Overrides group of the Checks page.
+
 ### SFP sub-row
 Under an L1 or L2 row, one per media and speed the sizing needs: "1G · Multi-mode · 6 needed" in muted
 text (the count is the engine's), then a select of the library's SFPs for that media and speed. The first

@@ -153,6 +153,7 @@ def test_revision_history_tab_once_a_name_is_set(app: api.Api, project: Path, pa
             "prepared": "A. Engineer",
             "checked": None,
             "approved": None,
+            "overrides": "",
         }
     ]
 

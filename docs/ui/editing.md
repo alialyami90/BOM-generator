@@ -29,6 +29,14 @@ computes it and returns it with a `rule` text (`bomgen.models.output.Derived`: `
 never re-implements a rule. Today: the main MCB (`panel_page` `derived.main_mcb_a`) and the part
 overrides on Parts.
 
+Every override a build applies is listed once, in the *Overrides* group of the Checks page
+(`engine/overrides.py`, ADR 0040): the subject, "16 A instead of the automatic 10 A", the reason when one
+is stored, and *Go to the field*. An override that weakens a check is a warning until it carries a
+one-line reason, given on the Checks row or on the derived value itself and stored beside the override
+(`options.override_reasons` by subject, `spares_list.reasons` by ordering code). Recording an issue
+copies the risky overrides and their reasons into the issue, and the Revision History sheet prints them
+in its OVERRIDES column.
+
 ## Save bar
 
 A strip fixed to the foot of the content area, shown only while the page has unsaved changes.

@@ -139,13 +139,36 @@
   const choice = (key, opts) => select(PFX + key, opts, str(F.shown(key)), { invalid: !!F.errors[key] });
   /* A rating as a derived value (plan M48): the engine's rating and its rule; a typed rating overrides it.
      `inherited` is the shared override a panel-only key falls back to. The main MCB, and the spares (M58). */
+  /* A value the engine derives and nobody overrides here (ADR 0040): the value and its rule, nothing to click. */
+  const shownRule = (label, d, unit = '') => (!d ? '' : `<span class="dv"><span class="dv-label">${esc(label)}</span><span class="dv-val">${esc(String(d.value))}${unit}</span><span class="dv-rule">${esc(d.rule)}</span></span>`);
+  /* Why an override weakens a check (ADR 0040): shown under a derived value typed below its automatic value, kept with Reason…. */
+  const reasonLine = (p, subject, shown, auto) => {
+    const below = Number(String(shown).replace(/[^\d.]/g, '')) < Number(String(auto).replace(/[^\d.]/g, ''));
+    const reason = (p.override_reasons || {})[subject];
+    if (!below && !reason) return '';
+    return `<span class="dv-reason ${reason ? '' : 'is-missing'}">${reason ? `Reason: ${esc(reason)}` : 'Below the automatic value: give a reason'} <button class="btn btn--ghost btn--sm" data-action="pe-reason" data-subject="${esc(subject)}" ${F.dirty() ? 'disabled title="Save or discard the changes first"' : ''}>${reason ? 'Edit…' : 'Reason…'}</button></span>`;
+  };
+  ACTIONS['pe-reason'] = (el) => {
+    const p = PE.page, subject = el.dataset.subject, reason = (p.override_reasons || {})[subject] || '';
+    App.dialog({ title: 'Why this override?', body: `<div class="form"><p>${esc(p.panel.cabinet_name)} · ${esc(subject)}</p>${App.field('Reason', App.input('pe-or-reason', reason, { placeholder: 'For example, the client feeds this panel at 6 A' }).replace('data-dirty="1"', 'data-dirty="0"'), 'Saved beside the override and printed on the Revision History sheet of the next issue. Empty removes it.')}<div id="pe-or-err"></div></div>`,
+      actions: `<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="pe-reason-do" data-subject="${esc(subject)}">Save reason</button>` });
+    setTimeout(() => { const n = document.getElementById('pe-or-reason'); if (n) n.focus(); }, 0);
+  };
+  ACTIONS['pe-reason-do'] = (el) => {
+    const p = PE.page;
+    Bridge.call('set_override_reason', S.project.file, S.sub, p.panel.id, el.dataset.subject, document.getElementById('pe-or-reason').value)
+      .then(() => { App.closeDialog(); changed(); App.render(); toast('Reason saved'); })
+      .catch((e) => { const n = document.getElementById('pe-or-err'); if (n) n.innerHTML = App.banner('bad', esc(e.message)); });
+  };
   const DV = { main_mcb_override_a: ['main_mcb_a', 'Main MCB'], ac_spare_rating_a: ['ac_spare_a', 'AC spare rating'], dc_spare_rating_a: ['dc_spare_a', 'DC spare rating'] };
   function mainMcb(p, key, inherited, name = 'main_mcb_a') {
     const d = p.derived[name];
     if (PE.dv === key) return App.derived(key, { editing: true, id: PFX + key, label: 'Rating', rule: d.rule, control: num(key, 'A').replace('<input ', `<input data-pdv="${key}" `) });
     const eff = str(F.shown(key)) || str(inherited);
-    return App.derived(key, { label: 'Rating', shown: `${eff || d.value} A`, auto: `${d.value} A`, overridden: !!eff, bad: !!F.errors[key], rule: d.rule, edit: 'pe-dv-edit', reset: 'pe-dv-reset' });
+    return App.derived(key, { label: 'Rating', shown: `${eff || d.value} A`, auto: `${d.value} A`, overridden: !!eff, bad: !!F.errors[key], rule: d.rule, edit: 'pe-dv-edit', reset: 'pe-dv-reset' })
+      + (eff ? reasonLine(p, SUBJECT[name], eff, d.value) : '');
   }
+  const SUBJECT = { main_mcb_a: 'main_mcb', ac_spare_a: 'ac_spare', dc_spare_a: 'dc_spare' };
   ACTIONS['pe-dv-edit'] = (el) => { PE.dv = el.dataset.key; App.render(); const c = document.getElementById(PFX + el.dataset.key); if (c) { c.focus(); c.select(); } };
   ACTIONS['pe-dv-reset'] = (el) => { F.set(el.dataset.key, ''); S.dirty = true; App.render(); };
   /* Enter keeps the typed rating, Esc puts the shown one back; leaving the field keeps it as a change does. */
@@ -415,8 +438,10 @@
       return edit(key, esc(label), ctl, [help || '', note].filter(Boolean).join(' '));
     }).join('');
     return `${scopeField(own, `${own ? `Values you set are kept for ${esc(p.panel.cabinet_name)} only and marked Own value.` : 'Values you set apply to every generated panel that has no value of its own.'}${owned.length ? ` This panel has ${plural(owned.length, 'own value')}.` : ''}`)}
-      <div class="form form--2">${rows}</div>${busbars(p, own)}${kitSection(p, `${own ? p.panel.number : 'all'}.`, own)}${miscSection(p, `mi.${own ? p.panel.number : 'all'}`, own)}`;
+      <div class="form form--2">${rows}</div>${derivedRules(p)}${busbars(p, own)}${kitSection(p, `${own ? p.panel.number : 'all'}.`, own)}${miscSection(p, `mi.${own ? p.panel.number : 'all'}`, own)}`;
   }
+  /* ADR 0040: what the engine chose for this panel and why; read here, changed through the inputs above. */
+  const derivedRules = (p) => (!p.derived.fan && !p.derived.cable_managers ? '' : `<div class="form form--2" style="margin-top:var(--space-3)">${p.derived.fan ? field('Fan', shownRule('Fitted', p.derived.fan), 'From the heat calculation and the library\'s fans; the ventilation option above decides whether fans are fitted.') : ''}${p.derived.cable_managers ? field('Cable managers', shownRule('Quantity', p.derived.cable_managers), 'Switched per device on Parts.') : ''}</div>`);
   const scopeField = (own, help) => `<div class="field" style="margin-bottom:var(--space-4)"><span class="label" id="pe-scope-l">Apply to</span><div class="segmented" role="radiogroup" aria-labelledby="pe-scope-l">
         <label><input type="radio" name="pe-scope" value="all" data-action="pe-scope" ${own ? '' : 'checked'}><span>All generated panels</span></label><label><input type="radio" name="pe-scope" value="own" data-action="pe-scope" ${own ? 'checked' : ''}><span>This panel only</span></label></div>
       <span class="help">${help}</span></div>`;
@@ -427,7 +452,7 @@
     const note = p.panel.generated && own && o.own ? `${badge('info', 'Own value')} <button class="btn btn--ghost btn--sm" data-action="pe-bus-shared" ${busy}>Use the shared busbars</button>`
       : p.panel.generated && !own && o.own ? '<span class="muted small">This panel has its own busbars.</span>' : '';
     return `<fieldset class="section" style="margin-top:var(--space-5);border:0;padding:0"><legend style="padding:0"><h3 style="margin:0">Grounding busbars</h3></legend>
-      <p class="lede">Each one ticked is a group H row.${note ? ' ' + note : ''}</p>
+      <p class="lede">Each one ticked is a group H row.${note ? ' ' + note : ''}</p>${p.derived.grounding ? `<span class="dv-rule">${esc(p.derived.grounding.rule)}</span>` : ''}
       ${p.busbars.map((b) => `<label class="check" style="display:flex;gap:var(--space-2);align-items:center;margin-top:var(--space-2)"><input type="checkbox" data-action="pe-busbar" data-key="${esc(b.key)}" ${on.includes(b.key) ? 'checked' : ''} ${busy}><span>${esc(b.description)} <span class="muted small mono">${esc(b.tag)}</span></span></label>`).join('')}</fieldset>`;
   }
   function writeBusbars(list) {
@@ -452,10 +477,11 @@
   const stripTable = (p, block, qty, changed = () => false) => `<div class="table-wrap"><table class="table"><thead><tr><th>Strip</th><th style="width:220px">Block type</th><th>Quantity</th></tr></thead>
     <tbody>${p.terminals.map((s) => `<tr${changed(s) ? ' class="is-changed"' : ''}><td><span class="mono">${esc(s.code)}</span><span class="cell-sub">${esc(s.description)}</span></td><td>${block(s)}</td><td>${qty(s)}</td></tr>`).join('')}</tbody></table>
     <div class="table-foot"><span>${plural(p.terminals.length, 'strip')}</span><span>The spare terminals of Project settings are added to the wiring strips. Strips a device brings stay as its part gives them.</span></div></div>`;
-  function stripQty(key, d, inherited, label = 'Quantity', unit = '') {
+  function stripQty(key, d, inherited, label = 'Quantity', unit = '', subject = '') {
     if (PE.dv === key) return App.derived(key, { editing: true, id: PFX + key, label, rule: d.rule, control: num(key, unit).replace('<input ', `<input data-pdv="${key}" `) });
     const eff = str(F.shown(key)) || str(inherited), u = unit ? ` ${unit}` : '';
-    return App.derived(key, { label, shown: `${eff || d.value}${u}`, auto: `${d.value}${u}`, overridden: !!eff, changed: key in F.draft, bad: !!F.errors[key], rule: d.rule, edit: 'pe-dv-edit', reset: 'pe-dv-reset' });
+    return App.derived(key, { label, shown: `${eff || d.value}${u}`, auto: `${d.value}${u}`, overridden: !!eff, changed: key in F.draft, bad: !!F.errors[key], rule: d.rule, edit: 'pe-dv-edit', reset: 'pe-dv-reset' })
+      + (eff && subject ? reasonLine(PE.page, subject, eff, d.value) : '');
   }
   function terminals(p) {
     if (!p.terminals.length) return `<p class="muted">${p.engine_error ? 'The strips show once the engine runs on this substation.' : 'This panel has no terminal strips.'}</p>`;
@@ -467,7 +493,7 @@
     return head + stripTable(p, (s) => { const key = `tb.${pre}${s.code}`, inh = inherited(bo, s.code);
       return `<label class="sr-only" for="${PFX}${key}">Block type of ${esc(s.code)}</label>${choice(key, [['', inh ? `Shared: ${inh}` : `Rule: ${s.block}`], ...p.terminal_blocks]).replace('class="select', 'class="ctl select')}`;
     }, (s) => { const key = `t.${pre}${s.code}`, bad = err(key) || err(`tb.${pre}${s.code}`);
-      return stripQty(key, s.qty, inherited(ov, s.code)) + (bad ? `<span class="err small">${icon('error')}<span>${esc(bad)}</span></span>` : '');
+      return stripQty(key, s.qty, inherited(ov, s.code), 'Quantity', '', `terminals.${s.code}`) + (bad ? `<span class="err small">${icon('error')}<span>${esc(bad)}</span></span>` : '');
     }, (s) => `t.${pre}${s.code}` in F.draft || `tb.${pre}${s.code}` in F.draft);
   }
 
@@ -483,7 +509,7 @@
       if (!hk.roles[f]) return field(esc(label), `<span class="muted small">The library has no ${f} part. Add one under Library › Catalogues › Housekeeping.</span>`);
       return edit(key, esc(label), choice(key, [['', `${own && !o.own ? 'Shared' : 'Default'}: ${shownBool(inh([f]) || false)}`], ['true', 'Yes'], ['false', 'No']]), f === 'heater' ? 'Adds its row, its own breaker and its strips.' : ''); }).join('');
     const ratings = Object.keys(LOADS).filter((k) => hk.ratings[k]).map((k) => { const key = `hk.${pre}branch_ratings.${k}`;
-      return edit(key, LOADS[k], stripQty(key, hk.ratings[k], inh(['branch_ratings', k]), 'Rating', 'A'), 'Click the rating to type your own.'); }).join('');
+      return edit(key, LOADS[k], stripQty(key, hk.ratings[k], inh(['branch_ratings', k]), 'Rating', 'A', `housekeeping.${k}`), 'Click the rating to type your own.'); }).join('');
     const note = !p.panel.generated ? '' : own && o.own ? ` ${badge('info', 'Own value')} Once this panel has its own kit, the shared one no longer reaches it.` : !own && o.own ? ' <span class="muted small">This panel has its own kit.</span>' : '';
     return `<section class="section" style="margin-top:var(--space-5)"><h3>Cabinet housekeeping</h3>
       <p class="lede">Empty counts use the spec's kit. Fans or filters follow the ventilation.${note}</p>

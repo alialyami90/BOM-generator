@@ -512,6 +512,8 @@ body.is-dragging-dev { user-select: none; }
 .dv.is-bad .dv-val { color: var(--color-danger-text); }
 .dv.is-editing { padding: 0 2px; }
 .dv:has(.dv-rule) { flex-wrap: wrap; }
+.dv-reason { display: inline-flex; align-items: center; gap: var(--space-2); flex-basis: 100%; font-size: 11.5px; color: var(--color-text-muted); }  /* ADR 0040 */
+.dv-reason.is-missing { color: var(--color-warning); }
 .result-counts { display: grid; gap: var(--space-2); }  /* M72: the switch counts on the Result card */
 .dv-input { height: 24px; width: 84px; font-size: 12px; padding: 0 6px; }
 .btn--xs { width: 22px; height: 22px; padding: 0; }

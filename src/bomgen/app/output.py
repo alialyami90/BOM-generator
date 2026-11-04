@@ -20,6 +20,7 @@ from bomgen.build import build_substation, issue_refusal, record_issue, workbook
 from bomgen.checks import check_report, unused_acceptances
 from bomgen.engine.errors import EngineError
 from bomgen.engine.network import unserved_links
+from bomgen.engine.overrides import risky_notes
 from bomgen.engine.pipeline import build as build_bom
 from bomgen.engine.summary import summarize
 from bomgen.io.errors import InputError
@@ -324,7 +325,13 @@ def build_file(
     if issue is not None and report.failed:
         not_issued = "Not recorded as issued: a check failed."
     elif issue is not None:
-        recorded = record_issue(project_file, loaded, path, issue.strip())
+        recorded = record_issue(
+            project_file,
+            loaded,
+            path,
+            issue.strip(),
+            overrides=risky_notes(loaded, outcome.result),
+        )
         issued = {"rev": recorded.rev, "file": recorded.file.as_posix()}
     return {
         "path": path,
