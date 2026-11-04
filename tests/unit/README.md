@@ -106,6 +106,7 @@ A milestone with several modules may group them in a subfolder,
 | `test_recorded_issue.py`, `test_cli_issue.py`, `sheets/test_history_sheet.py` | M66 | recorded issues (ADR 0036): the previous issue from the record, `bomgen build --issue`, and the Revision History sheet |
 | `sheets/test_notes_sheet.py` | M71 | row notes reach their BOM lines, print nowhere on a BOM sheet, and the optional Notes sheet |
 | `sheets/test_ied_sheet.py` | M80 | the optional IED Schedule sheet: one row per schedule row and port need, side ports as formulas, totals per speed, media and landing |
+| `test_pdf.py` | M78 | PDF export (ADR 0039): the built-in renderer's pages, paper, headers, repeated title rows and hidden columns, chosen sheets, and the Excel script and its refusals |
 | `test_revision_marks.py` | M79 | rows marked as revised: highlighted on their sheet, the change list before issuing, recorded with the issue and cleared |
 
 `builders.py`, `engine/engine_factories.py`, `project_store/project_builders.py`

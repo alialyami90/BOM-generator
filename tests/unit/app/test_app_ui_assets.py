@@ -1101,3 +1101,12 @@ def test_mark_as_revised_in_preview_and_the_change_list_on_build_as_issued() -> 
     verify = (UI_DIR / "screens-verify.js").read_text(encoding="utf-8")
     assert "Bridge.call('issue_changes', S.project.file, S.sub," in verify
     assert "${changeList(c)}" in verify
+
+
+def test_export_pdf_after_a_build() -> None:
+    # plan M78, ADR 0039: Export PDF lists the sheets and the renderer, built-in by default.
+    verify = (UI_DIR / "screens-verify.js").read_text(encoding="utf-8")
+    assert 'data-action="build-pdf">Export PDF…</button>' in verify
+    assert "Bridge.call('pdf_options', B.result.path)" in verify
+    assert 'name="pdf-engine" value="builtin" checked' in verify
+    assert "Bridge.call('export_pdf', B.result.path," in verify

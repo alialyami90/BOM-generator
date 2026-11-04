@@ -177,8 +177,9 @@
     const notPass = r.checks.items.filter((i) => i.status !== 'pass');
     const changes = r.revisions ? r.revisions.changes.length : null;
     return `${banner(r.checks.failed ? 'warn' : 'ok', `<b>Workbook written.</b><div class="small muted">${kb(r.size)} · ${plural(r.sheets.length, 'sheet')}${changes !== null ? ` · ${plural(changes, 'change')} marked since the previous issue` : ''}</div>`,
-      '<div class="row" style="flex-wrap:nowrap"><button class="btn btn--primary btn--sm" data-action="build-open">Open workbook</button><button class="btn btn--secondary btn--sm" data-action="build-show">Show in folder</button><button class="btn btn--ghost btn--sm" data-action="build-summary-csv">Export summary as CSV</button></div>')}
+      '<div class="row" style="flex-wrap:nowrap"><button class="btn btn--primary btn--sm" data-action="build-open">Open workbook</button><button class="btn btn--secondary btn--sm" data-action="build-show">Show in folder</button></div>')}
       <p class="mono small path-line">${breakable(r.path)}</p>
+      <div class="row" style="gap:var(--space-2)"><button class="btn btn--secondary btn--sm" data-action="build-pdf">Export PDF…</button><button class="btn btn--ghost btn--sm" data-action="build-summary-csv">Export summary as CSV</button></div>
       ${r.issued ? banner('ok', `<b>Recorded Rev ${esc(r.issued.rev)} as issued.</b> The next build compares with it.`) : ''}
       ${r.not_issued ? banner('warn', `<b>${esc(r.not_issued)}</b> Read the failed checks below, fix them and build as issued again.`) : ''}
       ${r.record_warning ? banner('warn', `<b>Not compared with the recorded issue.</b> ${esc(r.record_warning)}`) : ''}
@@ -264,5 +265,26 @@
     .catch((err) => toast(err.message, 'error'));
   ACTIONS['build-previous'] = () => { keep(); Bridge.call('choose_file', 'xlsx').then((f) => { if (f) { B.previous = f; App.render(); } }).catch((err) => toast(err.message, 'error')); };
   ACTIONS['build-open'] = () => Bridge.call('open_file', B.result.path).catch((err) => toast(err.message, 'error'));
+  /* plan M78, ADR 0039: the written workbook as a PDF next to it, built-in renderer by default */
+  ACTIONS['build-pdf'] = () => Bridge.call('pdf_options', B.result.path).then((o) => {
+    const sheets = o.sheets.map((s, i) => `<label class="check"><input type="checkbox" name="pdf-sheet" value="${i}" checked> <span>${esc(s)}</span></label>`).join('');
+    dialog({ title: 'Export PDF', body: `<div class="form"><p>Prints the chosen sheets of the written workbook with their page setup, as <span class="mono">${esc(tail(o.file))}</span>.</p>
+      <div class="field"><span class="label">Sheets</span><div class="stack" style="gap:4px;max-height:220px;overflow:auto">${sheets}</div></div>
+      <div class="field"><span class="label">Renderer</span><div class="stack" style="gap:8px">
+        <label class="check"><input type="radio" name="pdf-engine" value="builtin" checked> <span><b>Built-in</b><span class="small muted" style="display:block">No Excel needed. Pages are close to Excel's; page breaks and fonts can differ slightly.</span></span></label>
+        <label class="check"><input type="radio" name="pdf-engine" value="excel" ${o.excel ? 'disabled' : ''}> <span><b>Use Excel</b><span class="small muted" style="display:block">${esc(o.excel || 'Exact pages, printed by Excel on this PC.')}</span></span></label></div></div>
+      ${o.exists ? banner('warn', `<b>${esc(tail(o.file))} is already there.</b> Exporting replaces it.`) : ''}<div id="pdf-err"></div></div>`,
+      actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="build-pdf-do">Export PDF</button>' });
+    B.pdf = o;
+  }).catch((err) => toast(err.message, 'error'));
+  ACTIONS['build-pdf-do'] = (el) => {
+    const picked = [...document.querySelectorAll('input[name="pdf-sheet"]:checked')].map((n) => B.pdf.sheets[+n.value]);
+    if (!picked.length) { $('#pdf-err').innerHTML = banner('bad', 'Choose at least one sheet.'); return; }
+    const engine = (document.querySelector('input[name="pdf-engine"]:checked') || {}).value || 'builtin';
+    el.disabled = true; el.setAttribute('aria-busy', 'true'); el.innerHTML = '<span class="spinner"></span>Exporting…';
+    Bridge.call('export_pdf', B.result.path, picked.length === B.pdf.sheets.length ? null : picked, engine, B.pdf.exists)
+      .then((r) => { closeDialog(); toast(r.pages ? `PDF written: ${plural(r.pages, 'page')}` : 'PDF written'); Bridge.call('open_file', r.path).catch((err) => toast(err.message, 'error')); })
+      .catch((err) => { el.disabled = false; el.removeAttribute('aria-busy'); el.textContent = 'Export PDF'; $('#pdf-err').innerHTML = banner('bad', esc(err.message)); });
+  };
   ACTIONS['build-show'] = () => Bridge.call('show_in_folder', B.result.path).catch((err) => toast(err.message, 'error'));
 })();

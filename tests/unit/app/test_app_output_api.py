@@ -11,7 +11,7 @@ from typing import Any
 import pytest
 import xlsxwriter.workbook
 
-from bomgen import build
+from bomgen import build, pdf
 from bomgen.app import api
 from bomgen.engine.errors import EngineError
 from bomgen.io import lifecycle
@@ -660,3 +660,37 @@ def test_the_change_list_compares_with_the_recorded_issue(app: api.Api, project:
     folder = project.parent / "substations" / "gis01" / "out"
     ok(app.build_workbook(str(project), "gis01", str(folder), issue="For review"))
     assert ok(app.issue_changes(str(project), "gis01")) == {"previous": WORKBOOK, "rows": []}
+
+
+# --- PDF export (plan M78, ADR 0039) ---
+
+
+def test_pdf_options_list_the_workbooks_sheets_and_the_renderers(
+    app: api.Api, project: Path, tmp_path: Path
+) -> None:
+    built = ok(app.build_workbook(str(project), "gis01", str(tmp_path)))
+    options = ok(app.pdf_options(str(built["path"])))
+    assert options["sheets"] == built["sheets"]
+    assert options["file"] == str(tmp_path / WORKBOOK.replace(".xlsx", ".pdf"))
+    assert options["exists"] is False
+    assert options["excel"] == pdf.excel_refusal()
+
+
+def test_export_pdf_writes_the_chosen_sheets_next_to_the_workbook(
+    app: api.Api, project: Path, tmp_path: Path
+) -> None:
+    built = ok(app.build_workbook(str(project), "gis01", str(tmp_path)))
+    done = ok(app.export_pdf(str(built["path"]), ["Loose Material"]))
+    assert done["path"] == str(tmp_path / WORKBOOK.replace(".xlsx", ".pdf"))
+    assert done["pages"] == 1
+    assert Path(done["path"]).is_file()
+    assert refused(app.export_pdf(str(built["path"]), ["Loose Material"])) == "file_exists"
+    assert ok(app.export_pdf(str(built["path"]), None, replace=True))["pages"] > 1
+
+
+def test_export_pdf_refusals(app: api.Api, project: Path, tmp_path: Path) -> None:
+    built = ok(app.build_workbook(str(project), "gis01", str(tmp_path)))
+    assert refused(app.export_pdf(str(tmp_path / "gone.xlsx"), None)) == "not_found"
+    assert refused(app.export_pdf(str(built["path"]), ["Nope"])) == "pdf"
+    if pdf.excel_refusal() is not None:
+        assert refused(app.export_pdf(str(built["path"]), None, engine="excel")) == "excel"

@@ -14,6 +14,9 @@ import os
 from pathlib import Path
 from typing import Any
 
+import openpyxl
+
+from bomgen import pdf
 from bomgen.app.projects import library_note
 from bomgen.app.substations import Resolved, resolve
 from bomgen.build import build_substation, issue_refusal, record_issue, workbook_name
@@ -380,3 +383,53 @@ def build_file(
         "issued": issued,
         "not_issued": not_issued,
     }
+
+
+def _issued_workbook(workbook: Path) -> Path:
+    if workbook.suffix.lower() != ".xlsx" or not workbook.is_file():
+        raise OutputRefusedError("not_found", f"{workbook.name} is not a workbook on this PC.")
+    return workbook
+
+
+def pdf_options(workbook: Path) -> dict[str, Any]:
+    """What *Export PDF…* offers for a written workbook (plan M78, ADR 0039): its visible
+    sheets in order, the PDF's path, and why Excel can't be used, if it can't."""
+    book = openpyxl.load_workbook(_issued_workbook(workbook), read_only=True)
+    target = workbook.with_suffix(".pdf")
+    return {
+        "sheets": [ws.title for ws in book.worksheets if ws.sheet_state == "visible"],
+        "file": target,
+        "exists": target.exists(),
+        "excel": pdf.excel_refusal(),
+    }
+
+
+def export_pdf(
+    workbook: Path,
+    sheets: list[str] | None,
+    engine: str = "builtin",
+    replace: bool = False,
+) -> dict[str, Any]:
+    """Write the workbook's ``sheets`` (default: all visible) as ``<workbook>.pdf`` with the
+    built-in renderer or, on a PC with Excel, with Excel (ADR 0039)."""
+    source = _issued_workbook(workbook)
+    target = source.with_suffix(".pdf")
+    if target.exists() and not replace:
+        raise OutputRefusedError("file_exists", f"{target.name} is already in {target.parent}.")
+    try:
+        if engine == "excel":
+            refusal = pdf.excel_refusal()
+            if refusal is not None:
+                raise OutputRefusedError("excel", refusal)
+            chosen = sheets if sheets is not None else pdf_options(source)["sheets"]
+            pdf.excel_pdf(source, target, chosen)
+            pages = None
+        else:
+            pages = pdf.render_pdf(source, target, sheets)
+    except pdf.PdfError as exc:
+        raise OutputRefusedError("pdf", str(exc)) from None
+    except PermissionError:
+        raise OutputRefusedError(
+            "file_open", f"{target.name} is open in another program, such as a PDF viewer."
+        ) from None
+    return {"path": target, "pages": pages, "size": target.stat().st_size}
