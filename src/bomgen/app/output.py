@@ -29,8 +29,14 @@ from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.store import LibraryStore
 from bomgen.models.bom import BuildResult
 from bomgen.models.project import _FILE_NAME_FORBIDDEN
-from bomgen.models.report import CheckReport
-from bomgen.revision import previous_from_record, read_previous_issue, record_warning
+from bomgen.models.report import CheckReport, PreviousIssue
+from bomgen.revision import (
+    change_list,
+    compare_with_previous,
+    previous_from_record,
+    read_previous_issue,
+    record_warning,
+)
 from bomgen.sheets.summary_sheet import HEADERS as SUMMARY_HEADERS
 from bomgen.sheets.workbook import build_workbook
 from bomgen.writer import WriterError
@@ -263,6 +269,37 @@ def _locked(exc: BaseException) -> bool:
             return True
         seen = seen.__cause__ or seen.__context__
     return False
+
+
+def issue_changes(
+    project_file: Path, substation_id: str, store: LibraryStore, compare: Path | None = None
+) -> dict[str, Any]:
+    """What Build as issued would record (plan M79): the compare's changes with ``compare``,
+    else with the latest recorded issue, then the rows marked as revised."""
+    found = resolve(project_file, substation_id, store)
+    loaded = found.loaded
+    if loaded is None:
+        raise OutputRefusedError("has_errors", f"{_errors(found)} block the build.")
+    previous: PreviousIssue | None
+    if compare is not None:
+        try:
+            previous = read_previous_issue(compare)
+        except InputError as exc:
+            raise OutputRefusedError("bad_previous", str(exc)) from None
+    else:
+        previous, _ = previous_from_record(loaded)
+    try:
+        result = build_bom(loaded)
+    except EngineError as exc:
+        raise OutputRefusedError("engine", f"The engine stopped: {exc}") from None
+    report = None
+    if previous is not None:
+        loose_sheet = loaded.substation.output.sheet_names.loose_material
+        _, report = compare_with_previous(result, previous, loose_sheet=loose_sheet)
+    return {
+        "previous": report.previous if report else None,
+        "rows": change_list(loaded, result, report),
+    }
 
 
 def build_file(

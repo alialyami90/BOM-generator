@@ -239,6 +239,10 @@ def preview_page(project_file: Path, substation_id: str, store: LibraryStore) ->
             "sheet": sheet_names.ied_schedule,
             "rows": schedule_lines(loaded.substation.network.ied_schedule),
         },
+        "revision_marks": [  # plan M79: rows marked for the next issue
+            mark.model_dump(mode="json", exclude_defaults=True)
+            for mark in loaded.substation.revision_marks
+        ],
         "history": None  # ADR 0036: the sheet is written once there is a row
         if not (history := history_rows(loaded))
         else {"sheet": sheet_names.revision_history, "rows": [r._asdict() for r in history]},

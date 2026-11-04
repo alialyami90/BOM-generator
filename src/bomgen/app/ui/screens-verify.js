@@ -219,11 +219,25 @@
     if (B.compare && !B.previous) { toast('Choose the previous issue first, or turn highlighting off.', 'warn'); return; }
     keep();
     const t = cache.target.data;
+    // plan M79: read what this issue changes before it is written
+    Bridge.call('issue_changes', S.project.file, S.sub, B.compare && B.previous ? B.previous : null)
+      .then((c) => issueDialog(t, c)).catch((err) => toast(err.message, 'error'));
+  };
+  const KIND = { added: 'Added', changed: 'Changed', removed: 'Removed', marked: 'Marked' };
+  function changeList(c) {
+    const since = c.previous ? `since <span class="mono">${esc(c.previous)}</span>` : 'with no previous issue to compare with';
+    if (!c.rows.length) return `<p class="muted small">No changes ${since}, and no row is marked as revised.</p>`;
+    const rows = c.rows.map((r) => `<tr><td>${KIND[r.kind]}</td><td>${esc(r.sheet)}</td><td class="mono" style="white-space:nowrap">${esc(r.tag || '')}</td><td class="wrap">${esc(r.description || '')}</td><td class="wrap">${esc(r.detail || '')}</td></tr>`).join('');
+    return `<p class="small"><b>${plural(c.rows.length, 'row')} to review</b>: the changes ${since}, then the rows marked as revised.</p>
+      <div class="table-wrap" style="max-height:220px"><table class="table"><thead><tr><th>Change</th><th>Sheet</th><th>Tag</th><th>Description</th><th>Columns or reason</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  function issueDialog(t, c) {
     dialog({ title: `Build Rev ${esc(t.revision)} as issued`, body: `<div class="form"><p>Builds the workbook, then records Rev ${esc(t.revision)} with today's date, the file's fingerprint and the names in the register. Nothing is recorded if a check fails.</p>
+      ${changeList(c)}
       ${field('Description', editable(input('bi-desc', '', { placeholder: 'For example, Issued for approval' })), 'Printed on the Revision History sheet.')}<div id="bi-err"></div></div>`,
       actions: '<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="build-issue-do">Build as issued</button>' });
     setTimeout(() => { const n = $('#bi-desc'); if (n) n.focus(); }, 0);
-  };
+  }
   ACTIONS['build-issue-do'] = () => {
     const text = $('#bi-desc').value.trim();
     if (!text) { $('#bi-err').innerHTML = banner('bad', 'Describe the issue, for example Issued for approval.'); return; }

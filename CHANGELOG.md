@@ -40,6 +40,10 @@ project uses [Semantic Versioning](https://semver.org/).
   *Function tags* field in the device editor, and Library search and the part picker match them.
   psa-devices 1.17.0 tags every part with its category, a switch's Purdue level and its largest
   port group, such as "Network switch", "L2 switch" and "24-port".
+- Mark as revised (M79, ADR 0036 amendment): Preview can mark a BOM row as revised, with a reason,
+  when the compare can't see the change. The row is highlighted yellow, *Build as issued…* lists the
+  compare's changes and the marked rows before writing, and the issue records the marks and clears
+  them (`revision_marks`, `issues[].marked`).
 
 ## [0.4.0] - 2026-11-04
 

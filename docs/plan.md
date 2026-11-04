@@ -1305,7 +1305,7 @@ design basis says) are not milestones.
   (e.g. "Miscellaneous: cable ties, labels"). Panel editor: a Notes field on the Document tab and the
   rows on Options. *Spec sentence* for the group H row. Acceptance: a misc row prints last in group H
   on its panel only; notes appear nowhere in the workbook.
-- **M71 — Row notes and a notes column in Preview.** *W2. In review.* Review F16, steps 7 and 10. `note` on
+- **M71 — Row notes and a notes column in Preview.** *W2.* Done (#373). Review F16, steps 7 and 10. `note` on
   equipment rows, hand-written panel rows and loose items; Preview shows a Notes column (preview
   only); Build offers an optional Notes sheet (ADR 0035 amendment, one paragraph). Acceptance: a note
   typed on Parts shows in Preview and on the Notes sheet when chosen, nowhere else.
@@ -1340,10 +1340,10 @@ design basis says) are not milestones.
 - **M78 — PDF export of the issued sheets.** *W2; ADR and Q.* Review step 11. After a build, *Export
   PDF* writes the chosen sheets with their print settings. Q: Excel on the engineer's PC (exact page
   setup, Windows only) or a built-in renderer (no Excel needed, approximate).
-- **M79 — Mark as revised and a change log before issuing.** *W2.* Review steps 10 and 12. Preview:
+- **M79 — Mark as revised and a change log before issuing.** *W2. In review.* Review steps 10 and 12. Preview:
   *Mark as revised* on a row the compare can't see (stored per issue, highlighted yellow as the spec's
   revision rule); Build as issued shows the change list (compare result plus marked rows) before writing.
-- **M80 — IED schedule reference sheet.** *W2. In review.* Review step 2. An optional sheet listing the schedule
+- **M80 — IED schedule reference sheet.** *W2.* Done (#382). Review step 2. An optional sheet listing the schedule
   rows and the ports per speed, media and side, written when a schedule exists and the sheet is chosen
   (ADR 0035 amendment).
 - **M81 — Function tags for library search.** *W1.* Merged. Review "What each part record needs".

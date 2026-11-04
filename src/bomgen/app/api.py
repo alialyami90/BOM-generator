@@ -51,6 +51,7 @@ from bomgen.app.output import (
     build_target,
     checks_page,
     export_summary_csv,
+    issue_changes,
 )
 from bomgen.app.panel_page import PanelNotFoundError, panel_page, part_list
 from bomgen.app.parts import parts_page
@@ -2057,6 +2058,20 @@ class Api:
         if self._window is None:
             return None
         return _first(self._window.create_file_dialog(FOLDER_DIALOG))
+
+    @endpoint
+    def issue_changes(
+        self, project_file: str, substation_id: str, compare: str | None = None
+    ) -> dict[str, Any]:
+        """The compare's changes and the rows marked as revised, shown before Build as
+        issued writes (plan M79)."""
+        with self._substation(substation_id):
+            return issue_changes(
+                Path(project_file),
+                substation_id,
+                self._library_store(),
+                Path(compare) if compare else None,
+            )
 
     @endpoint
     def build_workbook(

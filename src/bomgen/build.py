@@ -17,7 +17,7 @@ from bomgen.checks import render_json as render_checks_json
 from bomgen.engine.errors import EngineError
 from bomgen.engine.pipeline import build as build_bom
 from bomgen.io.errors import InputError
-from bomgen.io.fields import insert_item
+from bomgen.io.fields import insert_item, remove_field
 from bomgen.io.loader import LoadedSubstation
 from bomgen.models.bom import BuildResult
 from bomgen.models.report import CheckReport, PreviousIssue, RevisionReport
@@ -115,6 +115,7 @@ def record_issue(
         approved=document.approved,
         accepted_warnings=list(checks.accepted) if checks else [],
         overrides=list(overrides),
+        marked=list(target.substation.revision_marks),  # plan M79
     )
     value = record.model_dump(mode="json", exclude_none=True, exclude_defaults=True)
     value |= {"rev": record.rev, "date": record.date.isoformat(), "file": file.as_posix()}
@@ -123,4 +124,10 @@ def record_issue(
     )
     if not result.written:
         raise InputError(list(result.issues))
+    if record.marked:  # the marks belonged to this issue (plan M79)
+        cleared = remove_field(
+            project_file, ("revision_marks",), substation=target.substation.substation.id
+        )
+        if not cleared.written:
+            raise InputError(list(cleared.issues))
     return record

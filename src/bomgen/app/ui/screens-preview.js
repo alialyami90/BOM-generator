@@ -1,7 +1,7 @@
 /* Screen: Preview on bomgen.app.api (plan M10d). Every figure comes from preview_substation, which flattens the
    engine's build result; this file only lays the rows out. */
 (function () {
-  const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, pageHead, toast, go, $ } = App;
+  const { esc, S, ACTIONS, SCREENS, badge, banner, tabs, pageHead, toast, go, $, dialog, closeDialog, field, input } = App;
   const LOOSE = 'loose-material';  // not a panel id: those name panel files
   const PLATES = 'nameplates';
   const SUMMARY = 'summary';
@@ -62,8 +62,8 @@
     if (!sheets.some(([k]) => k === t)) t = sheets[0][0];
     S.tab.preview = t;
     const panel = t === LOOSE ? d.loose : d.panels.find((x) => x.panel_id === t);
-    const body = panel ? bomView(panel, t === LOOSE) : t === PLATES ? nameplatesView(d.nameplates) : t === SUMMARY ? summaryView(d.summary) : t === SPARES ? sparesView(d.spares) : t === CABLES ? cablesView(d.cables) : t === NOTES ? notesView(d.notes) : t === IEDS ? iedView(d.ied_schedule) : t === HISTORY ? historyView(d.history) : t === 'power' ? powerView(d) : t === 'heatdiss' ? heatDissView(d) : heatCalcView(d);
-    return `<div class="page">${pageHead('Preview', 'What the workbook will contain. Values are calculated by the engine; nothing here is editable.',
+    const body = panel ? bomView(panel, t === LOOSE, d.revision_marks) : t === PLATES ? nameplatesView(d.nameplates) : t === SUMMARY ? summaryView(d.summary) : t === SPARES ? sparesView(d.spares) : t === CABLES ? cablesView(d.cables) : t === NOTES ? notesView(d.notes) : t === IEDS ? iedView(d.ied_schedule) : t === HISTORY ? historyView(d.history) : t === 'power' ? powerView(d) : t === 'heatdiss' ? heatDissView(d) : heatCalcView(d);
+    return `<div class="page">${pageHead('Preview', 'What the workbook will contain. Values are calculated by the engine; only Mark as revised is set here.',
       `<a class="btn btn--primary" href="#/build">${icon('build')}Continue to Build</a>`)}
       ${tabs('preview', sheets, t, 'Workbook sheets')}
       <div role="tabpanel" aria-labelledby="tab-preview-${esc(t)}">${body}</div></div>`;
@@ -71,8 +71,8 @@
 
   /* ---------- BOM sheet ---------- */
   const matches = (r) => (grp === 'all' || r.group === grp) && (!q || [r.tag, r.description, r.make, r.model, r.ordering_code].join(' ').toLowerCase().includes(q.toLowerCase()));
-  function bomRows(rows, filtering, notes) {
-    const cols = (showHwio ? 9 : 8) + (notes ? 1 : 0);
+  function bomRows(rows, filtering, notes, marked) {
+    const cols = (showHwio ? 10 : 9) + (notes ? 1 : 0);
     let out = '', skip = 0;
     rows.forEach((r) => {
       if (filtering && !matches(r)) return;
@@ -82,16 +82,22 @@
       else if (!filtering && r.tag_rows > 1) { skip = r.tag_rows - 1; tag = `<td class="merged mono" rowspan="${r.tag_rows}">${esc(r.tag || '')}</td>`; }
       else tag = `<td class="mono">${esc(r.tag || '')}</td>`;
       const rev = (c) => (r.revised.includes(c) ? 'changed' : '');
-      out += `<tr><td class="muted" style="width:34px">${r.group}</td><td class="num" style="width:56px">${r.sr}</td>${tag}<td class="wrap pv-desc ${rev('D')}">${esc(r.description).replace(/\n/g, '<br>')}</td><td class="num ${rev('E')}" style="width:70px">${esc(r.qty)}</td><td class="${rev('F')}">${esc(r.make || '')}</td><td class="mono pv-code ${rev('G')}">${seg(r.model)}</td><td class="mono pv-code ${rev('H')}">${r.ordering_code && r.ordering_code === r.model ? '<span class="muted small pv-same" title="The workbook repeats the model here">Same as model</span>' : seg(r.ordering_code)}</td>${showHwio ? `<td class="num">${r.hwio || ''}</td>` : ''}${notes ? `<td class="wrap small pv-note">${esc(r.note || '')}</td>` : ''}</tr>`;
+      // plan M79: a row the compare can't see is marked for the next issue, once per tag
+      const on = r.tag && marked(r.tag);
+      const mark = r.tag && tag ? `<td style="width:96px"><button class="btn btn--ghost btn--sm" data-action="pv-mark" data-tag="${esc(r.tag)}" aria-pressed="${on ? 'true' : 'false'}" title="${on ? esc(on.reason || 'Marked as revised') + '. Click to clear the mark.' : 'Highlight this row as revised in the next issue'}">${on ? 'Marked' : 'Mark'}</button></td>` : '<td></td>';
+      out += `<tr><td class="muted" style="width:34px">${r.group}</td><td class="num" style="width:56px">${r.sr}</td>${tag}<td class="wrap pv-desc ${rev('D')}">${esc(r.description).replace(/\n/g, '<br>')}</td><td class="num ${rev('E')}" style="width:70px">${esc(r.qty)}</td><td class="${rev('F')}">${esc(r.make || '')}</td><td class="mono pv-code ${rev('G')}">${seg(r.model)}</td><td class="mono pv-code ${rev('H')}">${r.ordering_code && r.ordering_code === r.model ? '<span class="muted small pv-same" title="The workbook repeats the model here">Same as model</span>' : seg(r.ordering_code)}</td>${showHwio ? `<td class="num">${r.hwio || ''}</td>` : ''}${notes ? `<td class="wrap small pv-note">${esc(r.note || '')}</td>` : ''}${mark}</tr>`;
     });
     return out;
   }
-  const head = (notes) => `<thead><tr><th title="Group (preview only)">Grp</th><th class="num">SR.NO</th><th>Item designation</th><th>Description</th><th class="num">Quantity</th><th>Make</th><th>Model</th><th>Ordering code</th>${showHwio ? '<th class="num">HWIO</th>' : ''}${notes ? '<th title="Preview only: never printed on the BOM">Notes</th>' : ''}</tr></thead>`;
-  function bomView(p, loose) {
+  const head = (notes) => `<thead><tr><th title="Group (preview only)">Grp</th><th class="num">SR.NO</th><th>Item designation</th><th>Description</th><th class="num">Quantity</th><th>Make</th><th>Model</th><th>Ordering code</th>${showHwio ? '<th class="num">HWIO</th>' : ''}${notes ? '<th title="Preview only: never printed on the BOM">Notes</th>' : ''}<th title="Mark a row as revised for the next issue (preview only)">Revised</th></tr></thead>`;
+  let markPanel = null;  // the sheet whose rows the Mark buttons name
+  function bomView(p, loose, marks) {
+    markPanel = loose ? null : p.panel_id;
+    const marked = (tag) => marks.find((m) => (m.panel_id || null) === markPanel && m.tag === tag);
     const counts = {}; p.rows.forEach((r) => { counts[r.group] = (counts[r.group] || 0) + 1; });
     const filtering = grp !== 'all' || !!q;
     const notes = p.rows.some((r) => r.note);  // plan M71: a Notes column, preview only
-    const out = bomRows(p.rows, filtering, notes);
+    const out = bomRows(p.rows, filtering, notes, marked);
     return `<div class="toolbar">
       <label class="sr-only" for="bom-grp">Show group</label>
       <select class="select" id="bom-grp" data-action="pv-grp" style="width:260px"><option value="all">All groups</option>${Object.keys(GROUPS).filter((g) => counts[g]).map((g) => `<option value="${g}" ${grp === g ? 'selected' : ''}>${g}  ${esc(GROUPS[g])} (${counts[g]})</option>`).join('')}</select>
@@ -104,6 +110,25 @@
       <div class="row" style="justify-content:space-between;margin-top:var(--space-2)"><span class="muted small">${plural(p.rows.length, 'row')} · Groups (A to H) and the HWIO column are for review. The issued sheet shows neither, and the HWIO column is hidden in the workbook.</span><span class="muted small">${loose ? 'HWIO total' : 'Panel HWIO total'}: <b>${p.hwio_total}</b></span></div>`;
   }
   ACTIONS['pv-grp'] = (el) => { grp = el.value; App.render(); };
+  /* plan M79: marks are stored on the substation until Build as issued records them */
+  const same = (m, tag) => (m.panel_id || null) === markPanel && m.tag === tag;
+  function saveMarks(marks, done) {
+    Bridge.call('set_substation_field', S.project.file, S.sub, ['revision_marks'], marks.length ? marks : null)
+      .then(() => { P.state = 'idle'; toast(done); App.render(); }).catch((err) => toast(err.message, 'error'));
+  }
+  ACTIONS['pv-mark'] = (el) => {
+    const tag = el.dataset.tag, marks = P.data.revision_marks;
+    if (marks.some((m) => same(m, tag))) { saveMarks(marks.filter((m) => !same(m, tag)), `Cleared the mark on ${tag}`); return; }
+    dialog({ title: `Mark ${esc(tag)} as revised`, body: `<div class="form"><p>The whole row is highlighted yellow in the next issue, and Build as issued lists it with the compare's changes. The mark is recorded with that issue, then cleared.</p>
+      ${field('Reason', input('pv-mark-why', '', { placeholder: 'For example, New firmware' }).replace('data-dirty="1"', 'data-dirty="0"'), 'Optional. Shown in the change list and kept with the issue.')}</div>`,
+      actions: `<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="pv-mark-do" data-tag="${esc(tag)}">Mark as revised</button>` });
+    setTimeout(() => { const n = $('#pv-mark-why'); if (n) n.focus(); }, 0);
+  };
+  ACTIONS['pv-mark-do'] = (el) => {
+    const tag = el.dataset.tag, reason = $('#pv-mark-why').value.trim();
+    closeDialog();
+    saveMarks([...P.data.revision_marks, { ...(markPanel ? { panel_id: markPanel } : {}), tag, ...(reason ? { reason } : {}) }], `Marked ${tag} as revised`);
+  };
   ACTIONS['pv-hwio'] = (el) => { showHwio = el.checked; App.render(); };
   document.addEventListener('input', (e) => { if (e.target.id === 'pv-q') { q = e.target.value; const pos = e.target.selectionStart; App.render(); const n = $('#pv-q'); if (n) { n.focus(); n.setSelectionRange(pos, pos); } } });
 

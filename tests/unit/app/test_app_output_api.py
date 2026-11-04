@@ -612,3 +612,51 @@ def test_a_panel_reason_needs_its_panel(app: api.Api, project: Path) -> None:
     envelope = app.set_override_reason(str(project), "gis01", None, "main_mcb", "x")
     assert refused(envelope) == "edit_refused"
     assert "names its panel" in str(envelope["error"])
+
+
+L2 = "PSA1-L2-ESW-A01"
+
+
+def test_marking_a_row_shows_it_in_preview_and_the_change_list(app: api.Api, project: Path) -> None:
+    """Plan M79: a row marked as revised is stored for the next issue, highlighted, and
+    listed before Build as issued writes."""
+    mark = {"panel_id": "psa1", "tag": L2, "reason": "New firmware"}
+    ok(app.set_substation_field(str(project), "gis01", ["revision_marks"], [mark]))
+
+    page = ok(app.preview_substation(str(project), "gis01"))
+    assert page["revision_marks"] == [mark]
+    psa1 = next(p for p in page["panels"] if p["panel_id"] == "psa1")
+    assert next(r for r in psa1["rows"] if r["tag"] == L2)["revised"] == list("BCDEFGH")
+    changes = ok(app.issue_changes(str(project), "gis01"))
+    assert changes == {
+        "previous": None,
+        "rows": [
+            {
+                "kind": "marked",
+                "sheet": "1",
+                "tag": L2,
+                "description": next(r for r in psa1["rows"] if r["tag"] == L2)["description"].split(
+                    "\n"
+                )[0],
+                "detail": "New firmware",
+            }
+        ],
+    }
+
+
+def test_build_as_issued_records_the_marks_and_clears_them(app: api.Api, project: Path) -> None:
+    mark = {"panel_id": "psa1", "tag": L2, "reason": "New firmware"}
+    ok(app.set_substation_field(str(project), "gis01", ["revision_marks"], [mark]))
+    folder = project.parent / "substations" / "gis01" / "out"
+    ok(app.build_workbook(str(project), "gis01", str(folder), issue="For review"))
+
+    data = substation_yaml(project)
+    assert "revision_marks" not in data
+    assert data["issues"][0]["marked"] == [mark]
+    assert ok(app.preview_substation(str(project), "gis01"))["revision_marks"] == []
+
+
+def test_the_change_list_compares_with_the_recorded_issue(app: api.Api, project: Path) -> None:
+    folder = project.parent / "substations" / "gis01" / "out"
+    ok(app.build_workbook(str(project), "gis01", str(folder), issue="For review"))
+    assert ok(app.issue_changes(str(project), "gis01")) == {"previous": WORKBOOK, "rows": []}

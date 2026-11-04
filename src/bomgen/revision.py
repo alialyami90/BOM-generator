@@ -290,3 +290,41 @@ def render_revisions(report: RevisionReport) -> str:
     )
     lines.append(f"against {report.previous}: {counts}")
     return "\n".join(lines)
+
+
+def change_list(
+    loaded: LoadedSubstation, result: BuildResult, report: RevisionReport | None
+) -> list[dict[str, str | None]]:
+    """What the next issue changes, to read before Build as issued writes (plan M79): the
+    compare's changes, then each row marked as revised with its reason."""
+    rows: list[dict[str, str | None]] = [
+        {
+            "kind": change.kind.value,
+            "sheet": change.sheet,
+            "tag": change.tag,
+            "description": change.description.split("\n")[0],
+            "detail": ",".join(sorted(change.columns)) or None,
+        }
+        for change in (report.changes if report else ())
+    ]
+    tables: dict[str | None, tuple[str, BomTable]] = {
+        p.panel_id: (p.sheet_name, p) for p in result.panels
+    }
+    if result.loose is not None:
+        tables[None] = (loaded.substation.output.sheet_names.loose_material, result.loose)
+    for mark in loaded.substation.revision_marks:
+        sheet, table = tables.get(mark.panel_id, (mark.panel_id or "", None))
+        line = next((x for x in table.lines if x.tag == mark.tag), None) if table else None
+        detail = mark.reason or ""
+        if line is None:
+            detail = f"{detail} (the row is no longer on the sheet)".strip()
+        rows.append(
+            {
+                "kind": "marked",
+                "sheet": sheet,
+                "tag": mark.tag,
+                "description": line.description.split("\n")[0] if line else "",
+                "detail": detail or None,
+            }
+        )
+    return rows

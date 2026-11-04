@@ -341,7 +341,7 @@ The tool shall write a single Excel workbook in which every printed sheet has a 
 | OUT-5 | Calculated cells are live Excel formulas, not pasted values: SR.NO, Power Consumption references to BOM cells, J = F × I, block totals × 1.25, summary sums, Heat Dissipation references and heat formulas, Heat Calculations airflow and ΔT. The workbook is set to recalculate fully on open. |
 | OUT-6 | Formatting follows the Formatting section: fonts, fills, borders, column widths, row heights, merges, number formats. |
 | OUT-7 | Print setup per sheet: A4, orientation, scale or fit-to-page, margins, print area, repeating title rows 1:2 on BOM sheets, page-break preview view. |
-| OUT-8 | Cells changed since the previous revision can be highlighted yellow (#FFFF00) when a revision comparison is requested. The comparison includes the Loose Material sheet; a previous issue from before v0.2 is compared through the second table of the host panel's sheet, where v0.1 printed it. Without a chosen file, the comparison uses the substation's last recorded issue when its file is unchanged (ADR 0036). |
+| OUT-8 | Cells changed since the previous revision can be highlighted yellow (#FFFF00) when a revision comparison is requested. The comparison includes the Loose Material sheet; a previous issue from before v0.2 is compared through the second table of the host panel's sheet, where v0.1 printed it. Without a chosen file, the comparison uses the substation's last recorded issue when its file is unchanged (ADR 0036). A row marked as revised by hand is highlighted the same way, and the mark is recorded with the next issue (ADR 0036 amendment, plan M79). |
 
 **Page header (every printed sheet, every page)**
 
