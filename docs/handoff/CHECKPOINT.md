@@ -24,10 +24,9 @@ keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detai
   M56b panel editor and Library roles (#345, ADR 0032). Spec sentences for M50, M58, M57 and M56
   are in. Screenshots in `/mnt/project-files/a11-screens/m50/`, `m58/`, `m59-hand-written/`,
   `m57/`, `m56/`.
-- **Waiting:** Ali's card on how THF counts when the kit changes. Built as recommended: the spec's 12
-  or 5, plus 3 per fan and 2 per thermostat beyond the spec's kit (`engine/terminals.py` `_thf`);
-  a heater or hygrostat brings its library part's own strips. The other option, keep 12 or 5 and
-  override by hand, is a one-function change.
+- **Answered (2026-11-04):** THF when the kit changes. Ali chose the built option: the spec's 12 or
+  5, plus 3 per fan and 2 per thermostat beyond the spec's kit (`engine/terminals.py` `_thf`); a
+  heater or hygrostat brings its library part's own strips. No code change.
 - **Left for later:** the socket as a pick list from the library's sockets (M56 plan, gap 11).
 
 ## 2026-11-03: W1 Library, M67, M68, M69 merged (W1)

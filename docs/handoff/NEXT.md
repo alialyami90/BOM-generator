@@ -65,10 +65,8 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
 5. **Q69** (W1, card sent 2026-11-03): seven original parts carry the example workbook's power, which
    their datasheet does not state. They ship as `assumed` (recommended). If Ali picks another answer,
    change the `WORKBOOK` source kind in `data/library/build.py`, rebuild, and record it in plan §6 Q69.
-6. **THF when the housekeeping kit changes** (W3, card sent 2026-11-03): built as the recommended
-   option, the spec's 12 or 5 plus 3 per fan and 2 per thermostat beyond the spec's kit. If Ali picks
-   "keep 12 or 5, override by hand", make `_thf` in `engine/terminals.py` return the spec's value
-   and update `test_thf_follows_fan_and_thermostat_count`.
+6. **THF when the housekeeping kit changes** (W3): answered 2026-11-04. Ali chose the built option,
+   the spec's 12 or 5 plus 3 per fan and 2 per thermostat beyond the spec's kit. Nothing to do.
 7. **Q70** (W4, card sent 2026-11-03): the quick `ied_count` keeps today's media-agnostic rule on
    L1 switches with mixed ports (recommended). If Ali picks "strict 100M MM", make the quick count
    build one `PortNeed()` row per IED in `engine/layout.py` `network_inputs` and record it in plan §6.
@@ -275,7 +273,7 @@ No task is open; the next is the model changes (step 4) in A4's plan. Likely wor
   them. Check `sheets/` when `BuildResult` changes shape.
 
 Panel detailing (W3, M50–M58) is done. Open ends: the socket as a pick list from the library's
-sockets (M56 plan, gap 11), and the THF card above.
+sockets (M56 plan, gap 11).
 
 Don't: give housekeeping branches the 2 A branch floor (ADR 0032 item 4 keeps the lamp at 1 A);
 revive `DeviceType.min_branch_mcb_a` as a rating input (ADR 0019 item 4); count inrush peaks
