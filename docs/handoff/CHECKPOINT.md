@@ -3,6 +3,22 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-11-04: W2 Issue outputs, M63, M66, M64 and M65 merged (W2)
+
+- **Base:** main `23a5a6c` (#362). Docs-only PR.
+- **Done:** M63 Summary BOM (#324, ADR 0035). M66 recorded issues and Revision History in two PRs,
+  M66a engine and CLI (#349), M66b app (#351, ADR 0036, Q67). M64 spares list in two PRs, M64a
+  engine and sheet (#356), M64b Spares page and Preview tab (#357). M65 cable schedule in three
+  PRs: M65a cable data on loose rows and the sheet (#355), M65b suggestions from the port plans
+  (#361, Q66 lengths per link class, Q71 once at the link's upper end: the example gives 40 MM
+  and 4 SM cords), M65c Suggest cables dialog, cable columns and Preview tab (#362). Screenshots
+  in `/mnt/project-files/a11-screens/` (`m64b`, `m65c` and earlier W2 folders).
+- **Waiting:** Ali's card on Q65 (how spare quantities are set). M64 ships the recommended
+  percent with a minimum.
+- **Left for later:** the library has no LC patch cords with `media` and `length_m`, so every
+  suggested cord is free text with a warning until such parts are added. Catalogue lines (MCBs,
+  terminal blocks) have no category, so they get spares by override only.
+
 ## 2026-11-04: W4 Parts and network, M60 and M61 merged (W4)
 
 - **Base:** main `b63ccda` (#353). Docs-only PR.
