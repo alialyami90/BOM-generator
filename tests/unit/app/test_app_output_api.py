@@ -550,3 +550,65 @@ def test_an_accepted_warning_leaves_builds_flag_count(app: api.Api, project: Pat
         )
     )
     assert ok(app.build_target(str(project), "gis01"))["flags"] == flags - 1
+
+
+# --- override reasons (ADR 0040) ---
+
+
+def override_items(app: api.Api, project: Path) -> list[dict[str, Any]]:
+    items = ok(app.run_checks(str(project), "gis01"))["engine"]["items"]
+    return [i for i in items if i["check"] == "override"]
+
+
+def test_the_checks_list_every_override_with_its_automatic_value(
+    app: api.Api, project: Path
+) -> None:
+    items = override_items(app, project)
+    main = next(i for i in items if (i["panel_id"], i["subject"]) == ("psa1", "main_mcb"))
+    assert main["status"] == "pass"
+    assert main["message"] == "16 A instead of the automatic 10 A"
+    assert main["values"] == {"automatic": "10 A", "override": "16 A"}
+
+
+def test_a_reason_on_a_hand_written_panel_goes_to_its_file(app: api.Api, project: Path) -> None:
+    ok(app.set_panel_field(str(project), "gis01", "psa1", ["options", "main_mcb_override_a"], 6))
+    (item,) = [
+        i
+        for i in override_items(app, project)
+        if (i["panel_id"], i["subject"]) == ("psa1", "main_mcb")
+    ]
+    assert item["status"] == "warn"
+
+    page = ok(app.set_override_reason(str(project), "gis01", "psa1", "main_mcb", " Feeder is 6 A "))
+
+    item = next(
+        i
+        for i in page["engine"]["items"]
+        if (i["check"], i["panel_id"], i["subject"]) == ("override", "psa1", "main_mcb")
+    )
+    assert (item["status"], item["values"]["reason"]) == ("pass", "Feeder is 6 A")
+    panel = read_yaml(project.parent / "substations" / "gis01" / "panels" / "psa1.yaml").data
+    assert panel["options"]["override_reasons"] == {"main_mcb": "Feeder is 6 A"}
+    reasons = ok(app.panel_page(str(project), "gis01", "psa1"))["override_reasons"]
+    assert reasons == {"main_mcb": "Feeder is 6 A"}
+
+    ok(app.set_override_reason(str(project), "gis01", "psa1", "main_mcb", ""))
+    panel = read_yaml(project.parent / "substations" / "gis01" / "panels" / "psa1.yaml").data
+    assert "override_reasons" not in panel["options"]
+
+
+def test_a_spares_reason_goes_to_the_spares_list(app: api.Api, project: Path) -> None:
+    code = "6GK6000-8FG51-0AA0"
+    ok(app.set_substation_field(str(project), "gis01", ["spares_list", "items", code], 2))
+
+    page = ok(app.set_override_reason(str(project), "gis01", None, f"spares.{code}", "Client's"))
+
+    assert substation_yaml(project)["spares_list"]["reasons"] == {code: "Client's"}
+    item = next(i for i in page["engine"]["items"] if i["subject"] == f"spares.{code}")
+    assert item["values"]["reason"] == "Client's"
+
+
+def test_a_panel_reason_needs_its_panel(app: api.Api, project: Path) -> None:
+    envelope = app.set_override_reason(str(project), "gis01", None, "main_mcb", "x")
+    assert refused(envelope) == "edit_refused"
+    assert "names its panel" in str(envelope["error"])

@@ -10,7 +10,7 @@ import pytest
 
 from bomgen.build import build_substation, issue_refusal, record_issue
 from bomgen.io.loader import LoadedSubstation, load_substation
-from bomgen.models.substation import AcceptedWarning, Checks, IssueRecord
+from bomgen.models.substation import AcceptedWarning, Checks, IssueRecord, OverrideNote
 from bomgen.revision import file_sha256, previous_from_record
 
 EXAMPLES = Path(__file__).parents[2] / "examples"
@@ -128,3 +128,18 @@ def test_a_file_outside_the_project_is_recorded_absolute(
     path = build_substation(loaded, out, checks=False).path
     record = record_issue(project_of(loaded), loaded, path, "x", today=date(2026, 11, 3))
     assert record.file == path
+
+
+def test_an_issue_records_the_risky_overrides_with_their_reasons(loaded: LoadedSubstation) -> None:
+    """ADR 0040: what weakened a check at issue time, printed on the Revision History sheet."""
+    notes = [
+        OverrideNote(
+            panel_id="psa1", subject="main_mcb", automatic="10 A", override="6 A", reason="Feeder"
+        )
+    ]
+    path = issued(loaded)
+    record_issue(
+        loaded.file.parents[2] / "project.yaml", loaded, path, "For review", overrides=notes
+    )
+    again = load_substation(loaded.file)
+    assert again.substation.issues[-1].overrides == notes

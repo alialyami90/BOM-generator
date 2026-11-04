@@ -1264,7 +1264,7 @@ design basis says) are not milestones.
 | 4 Parts | "Why this quantity" on sized rows | M48 (the rule text), M72 (switch counts) |
 | 5 Layout preview | Fixed or maximum panel count | M62 |
 | 5 Layout preview | Common devices steered to a panel without pinning | M74 |
-| 5 Layout preview | Per-panel note on the BOM header | M70 (notes are never printed; a header note is not planned, Q to Ali if wanted) |
+| 5 Layout preview | Per-panel note on the BOM header | M70 (notes are never printed; Ali chose on 2026-11-04 to keep notes off the workbook, so no header note) |
 | 6 Panel detailing | Enclosure and kind per panel, bottom entry | M50 |
 | 6 Panel detailing | IP rating and colour on the PANEL row; nameplate and label text rules | M75 |
 | 6 Panel detailing | Housekeeping section (counts, breakers, heater, hygrostat, smoke detector, socket pick list) | M56 |
@@ -1295,9 +1295,9 @@ design basis says) are not milestones.
 | Library | Release of an official version from reviewed records | Existing release flow (STATE.md "How a release happens"); the state field makes "reviewed parts only" checkable (M67) |
 | F14 Templates | New substation from a template | M55 |
 | Automation contract | Computed, explained, overridable, marked and resettable (points 1 to 4) | M48 and every milestone with a derived value |
-| Automation contract | Checks lists every override in one place (point 4); sourced defaults (point 5); reason for a risky override (point 6) | M77 (point 5 is in M52 for the design basis) |
+| Automation contract | Checks lists every override in one place (point 4); sourced defaults (point 5); reason for a risky override (point 6) | M77 Done (ADR 0040; point 5 is in M52 for the design basis) |
 | Automation contract | Rule texts where the app "stops at step 1": SFP counts, housekeeping, terminals, spare ratings | M49, M56, M57, M58 |
-| Automation contract | Rule texts for grounding, switch counts, cable managers' count, the fan choice | M77 |
+| Automation contract | Rule texts for grounding, switch counts, cable managers' count, the fan choice | M77 Done (switch counts' text came with M72) |
 
 - **M70 — Panel notes and a miscellaneous row.** *W3.* Done. Review F16 and step 6. `Panel.notes` (free
   text, never printed) and `PanelOptions.misc_items`: free-text rows printed in group H as "1 Lot"
@@ -1327,7 +1327,8 @@ design basis says) are not milestones.
   category's stack priority (spec "Where in the panel"); Parts row menu "Rack priority". Golden
   unchanged when unset. In review. The priority is a select on the row's Panel line, beside the
   panel hint, rather than in the row menu (the menu is closed while the page has unsaved edits).
-- **M77 — Overrides in Checks, reasons for risky ones, the remaining rule texts.** *Lead; ADR.* Review
+- **M77 — Overrides in Checks, reasons for risky ones, the remaining rule texts.** *Lead; ADR 0040.* **Done**
+  (2026-11-04). Review
   "The automation contract" points 4 to 6. Checks gets an *Overrides* group listing every override with
   its automatic value and reason; an override that weakens a check (a smaller breaker, fewer spares or
   terminals than the policy, a fan below the required airflow) needs a one-line reason, stored with it

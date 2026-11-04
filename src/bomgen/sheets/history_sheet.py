@@ -1,5 +1,5 @@
 """The Revision History sheet: one row per recorded issue, then the current revision,
-after the Summary BOM (ADR 0035, ADR 0036, plan M66).
+after the Summary BOM (ADR 0035, ADR 0036, plan M66; the OVERRIDES column, ADR 0040).
 
 Laid out like the Summary BOM sheet, A4 portrait. Written when the substation has a
 recorded issue or its main document has prepared, checked or approved names.
@@ -11,13 +11,14 @@ from typing import NamedTuple
 
 from bomgen.io.loader import LoadedSubstation
 from bomgen.models.sheet import CellRange, HeaderFooter, PrintSetup, SheetModel
+from bomgen.models.substation import OverrideNote
 from bomgen.sheets import styles
 from bomgen.sheets.grid import SheetBuilder
 from bomgen.sheets.summary_sheet import CENTRE, HEADER, TEXT, TITLE_HEIGHT, TITLE_STYLE
 
-HEADERS = ("REV", "DATE", "DESCRIPTION", "PREPARED", "CHECKED", "APPROVED")
-WIDTHS = (8.0, 14.0, 50.0, 20.0, 20.0, 20.0)
-CELL_STYLES = (CENTRE, CENTRE, TEXT, TEXT, TEXT, TEXT)
+HEADERS = ("REV", "DATE", "DESCRIPTION", "PREPARED", "CHECKED", "APPROVED", "OVERRIDES")
+WIDTHS = (8.0, 14.0, 50.0, 20.0, 20.0, 20.0, 50.0)
+CELL_STYLES = (CENTRE, CENTRE, TEXT, TEXT, TEXT, TEXT, TEXT)
 TITLE = "Revision History"
 
 
@@ -28,6 +29,17 @@ class HistoryRow(NamedTuple):
     prepared: str | None
     checked: str | None
     approved: str | None
+    overrides: str = ""  # the risky overrides recorded with the issue, one per line (ADR 0040)
+
+
+def override_lines(notes: Sequence[OverrideNote]) -> str:
+    """What the OVERRIDES cell says: where, what, instead of what, and why."""
+    lines = []
+    for note in notes:
+        where = f"{note.panel_id} " if note.panel_id else ""
+        line = f"{where}{note.subject}: {note.override} instead of {note.automatic}"
+        lines.append(line + (f": {note.reason}" if note.reason else " (no reason given)"))
+    return "\n".join(lines)
 
 
 def history_rows(loaded: LoadedSubstation) -> list[HistoryRow]:
@@ -39,7 +51,16 @@ def history_rows(loaded: LoadedSubstation) -> list[HistoryRow]:
     if not records and not any(names):
         return []
     rows = [
-        HistoryRow(r.rev, r.date, r.description, r.prepared, r.checked, r.approved) for r in records
+        HistoryRow(
+            r.rev,
+            r.date,
+            r.description,
+            r.prepared,
+            r.checked,
+            r.approved,
+            override_lines(r.overrides),
+        )
+        for r in records
     ]
     if document.rev not in {r.rev for r in records}:
         rows.append(HistoryRow(document.rev, document.issue_date, "", *names))
@@ -63,7 +84,7 @@ def history_sheet(
     row = 2
     for entry in rows:
         row += 1
-        values = (entry.rev, entry.date.isoformat(), *entry[2:])
+        values = (entry.rev, entry.date.isoformat(), *entry[2:])  # the overrides last
         for col, (value, style) in enumerate(zip(values, CELL_STYLES, strict=True), start=1):
             sheet.set(row, col, value, style)
     setup = PrintSetup(

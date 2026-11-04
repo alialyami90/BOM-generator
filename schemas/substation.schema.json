@@ -1238,6 +1238,13 @@
           "title": "File",
           "type": "string"
         },
+        "overrides": {
+          "items": {
+            "$ref": "#/$defs/OverrideNote"
+          },
+          "title": "Overrides",
+          "type": "array"
+        },
         "prepared": {
           "anyOf": [
             {
@@ -1564,6 +1571,55 @@
         }
       },
       "title": "OutputSettings",
+      "type": "object"
+    },
+    "OverrideNote": {
+      "additionalProperties": false,
+      "description": "An override that weakened a check when an issue was recorded, with its reason\n(ADR 0040); printed on the Revision History sheet.",
+      "properties": {
+        "automatic": {
+          "title": "Automatic",
+          "type": "string"
+        },
+        "override": {
+          "title": "Override",
+          "type": "string"
+        },
+        "panel_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Panel Id"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "subject": {
+          "title": "Subject",
+          "type": "string"
+        }
+      },
+      "required": [
+        "subject",
+        "automatic",
+        "override"
+      ],
+      "title": "OverrideNote",
       "type": "object"
     },
     "PairMove": {
@@ -2132,6 +2188,14 @@
             "type": "integer"
           },
           "title": "Items",
+          "type": "object"
+        },
+        "reasons": {
+          "additionalProperties": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Reasons",
           "type": "object"
         }
       },

@@ -20,13 +20,18 @@ CABLE_MANAGED = frozenset({Category.NETWORK_SWITCH, Category.PATCH_PANEL})
 def accessories(panel: Panel, rows: Sequence[DeviceRow], library: Library) -> list[BomItem]:
     """SFPs per host in group B order, then cable managers, then serial cables."""
     items = [item for row in rows for item in _sfp_items(panel, row, library)]
-    managed = sum(row.instance.qty for row in rows if _managed(row))
+    managed = cable_managers(rows)
     if managed:
         items.append(_commodity(panel, library, Category.CABLE_MANAGER, managed))
     serial_ports = sum(plan.serial_ports for row in rows if (plan := port_plan(panel, row)))
     if serial_ports:
         items.append(_commodity(panel, library, Category.SERIAL_CABLE, serial_ports))
     return items
+
+
+def cable_managers(rows: Sequence[DeviceRow]) -> int:
+    """The cable managers a panel's rows take: one under each managed unit (Q32)."""
+    return sum(row.instance.qty for row in rows if _managed(row))
 
 
 def _managed(row: DeviceRow) -> bool:

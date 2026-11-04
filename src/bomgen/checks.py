@@ -14,6 +14,7 @@ from collections import Counter
 from collections.abc import Iterable, Mapping, Sequence
 
 from bomgen.engine.network import port_plan
+from bomgen.engine.overrides import override_checks
 from bomgen.engine.units import DeviceRow, expand_devices
 from bomgen.io.loader import LoadedSubstation
 from bomgen.io.parts_edit import CATEGORY_LINKS
@@ -84,6 +85,7 @@ def check_report(loaded: LoadedSubstation, result: BuildResult) -> CheckReport:
             loaded.project.defaults.catalogue_choice, loaded.substation.catalogue_choice
         )
         items += vendor_list_checks(parts, choice, loaded.library, avl)
+    items += override_checks(loaded, result)
     report = CheckReport(items=tuple(items))
     checks = loaded.substation.checks
     return apply_acceptances(report, checks.accepted) if checks else report

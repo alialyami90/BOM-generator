@@ -100,9 +100,10 @@ rather than copy it.
   round-trip writers (ADR 0021), and the loose material sheet and page (ADR 0020, ADR 0022). v0.2.1 is
   the UI polish pass from [`docs/ui/polish-v02.md`](../ui/polish-v02.md) (items 1–16, #205–#208) plus
   #194, #198–#201.
-- **Numbers (2026-11-04, after v0.4.0).** ADRs 0001–0027 and 0029–0037 are Accepted and 0028 is
-  Rejected; the next free ADR is **0038**. Q62–Q71 are answered; the next free question is
-  **Q72** and the next milestone **M82** (M70–M81 are planned). Q51 (annunciator) and Q55
+- **Numbers (2026-11-04, after v0.4.0).** ADRs 0001–0027, 0029–0037 and 0040 are Accepted and 0028
+  is Rejected; 0038 and 0039 are with W4 and W2. The next free ADR is **0041**, the next free
+  question **Q74** and the next milestone **M82** (M70–M81 are planned; M70, M72, M74, M75 and M77
+  are done). Q51 (annunciator) and Q55
   (categories for the contractor's other part types) are open.
 - **Changelog** has a `[0.4.0]` section, and `[Unreleased]` is empty.
 - **Next work:** M70–M81 (`plan.md` "M70–M81"), one PR each, handed out by the lead to the
@@ -590,7 +591,9 @@ consume `BuildResult`.
 | `engine/power.py` | step 4: Power Consumption rows and totals (2,177.5 W DC, 1,090.3 W AC on the example) |
 | `engine/thermal.py` | heat checks and the ventilation choice (forced and natural) |
 | `engine/items.py`, `errors.py` | `BomItem` with kit children and `flatten`; `EngineError` |
-| `checks.py` | `check_report(loaded, result) -> CheckReport`; ids `sfp_slots`, `dc_main`, `branch_mcb`, `dc_float`, `airflow`, `natural_convection`, `line_up`, `di_capacity`, `library_version`; `render_text`, `render_json` |
+| `checks.py` | `check_report(loaded, result) -> CheckReport`; ids `sfp_slots`, `dc_main`, `branch_mcb`, `dc_float`, `airflow`, `natural_convection`, `line_up`, `di_capacity`, `library_version`, `override`; `render_text`, `render_json` |
+| `engine/overrides.py` | every override the build applied (`overrides`), the *Overrides* check group (`override_checks`: a risky one without a reason warns) and the risky notes an issue records (`risky_notes`) (M77, ADR 0040) |
+| `engine/rules_text.py` | the rule texts the derived values carry: main MCB, SFPs, spare ratings, switch counts (M72), grounding busbars, cable managers and the fan choice (M77) |
 | `revision.py` | `read_previous_issue(path)`, `compare_with_previous(...)`, `render_revisions` (ADR 0016) |
 
 History: M2 #22; M3 #36; M4 #44, #46; M7 engine #58 (ADR 0016), #67 (Q34, ADR 0014); M15 #103 (ADR

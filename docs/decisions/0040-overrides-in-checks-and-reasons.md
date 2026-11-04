@@ -1,6 +1,6 @@
 # 0040. Overrides listed in Checks, reasons for risky ones
 
-- Status: Proposed
+- Status: Accepted (Ali, 2026-11-04)
 - Date: 2026-11-04
 - Spec sections: Derivation rules (DC distribution, AC distribution, terminals, grounding,
   housekeeping, heat dissipation); Inputs → 2. Panel definition; Revision History sheet (ADR 0036)

@@ -688,6 +688,14 @@
           "title": "Misc Items",
           "type": "array"
         },
+        "override_reasons": {
+          "additionalProperties": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Override Reasons",
+          "type": "object"
+        },
         "smoke_detector": {
           "default": "terminals",
           "enum": [
