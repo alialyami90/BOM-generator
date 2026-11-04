@@ -112,6 +112,15 @@ R1–R10 are in the design document named in ADR 0012.
   block that leaves the rack (`pin-outside-rack`) or overlaps another fixed block or
   the anchor (`pin-overlaps`) is a layout error naming the panel; the units still get
   their U.
+
+  *Amended (2026-11-04, M74, the workflow review's step 5):* a common equipment entry
+  (not redundant, side `none`) may give `panel_hint`, a panel number. Each of its units
+  goes into that panel when the panel exists under the cap and the unit fits; it is not
+  a pin, so later changes may move it like any filled unit and `PanelFill.is_pinned`
+  stays false. A unit that does not fit there, or whose panel does not exist, is placed
+  by the rule above (most free U) and the layout warns (`panel-hint`), naming the panel
+  it went to. A redundant or one-side entry with `panel_hint` is refused: its units
+  follow their LAN's panels.
 - **Pipeline**: a step 0 (`engine/sizing.py`, `engine/layout.py`,
   `bomgen layout`) runs before the existing steps 1–15; `bomgen build
   --no-layout` keeps hand-written panels working.

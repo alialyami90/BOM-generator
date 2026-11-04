@@ -170,6 +170,8 @@ with the save bar; everything on it is saved together.
      L2 switch, L1 switch, Operator workstation, Engineering workstation, DA server, KVM, Console,
      Annunciator, then any rows added with **Add a device**. The order is the order the layout fills
      panels in; **Move up** and **Move down** in each row's menu change it.
+     A common row (not A and B) has a **Panel** select, Automatic or a panel number (M74): not a
+     pin, so a unit that does not fit there goes where there is room and Panels warns.
   4. **Catalogue brands:** MCB make and series (AC and DC, one select each, as in Settings) and Terminal
      blocks. No part number, no overrides.
 

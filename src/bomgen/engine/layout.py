@@ -71,9 +71,10 @@ IssueKind = Literal[
     "pin-overlaps",
     "pin-outside-rack",
     "panel-limit",
+    "panel-hint",
 ]
 WARNING_KINDS: frozenset[IssueKind] = frozenset(
-    {"stale-override", "stale-removal", "replaced-panel"}
+    {"stale-override", "stale-removal", "replaced-panel", "panel-hint"}
 )
 
 
@@ -90,6 +91,7 @@ class Unit:
     cable_manager_u: int = 0  # a 1U manager directly under a rack switch or patch panel
     priority: int = 4  # stack order inside a panel, 1 = top (ADR 0013, amended M21)
     waist: bool = False  # a KVM or console, placed at waist height
+    panel_hint: int | None = None  # a common unit's panel when it fits (plan M74)
 
     @property
     def key(self) -> str:
@@ -416,6 +418,11 @@ class _Builder:
             tall = not self.check_height(unit)
             cap = self.rules.max_panels
             usable = [p for p in self.panels if cap is None or p.number <= cap]
+            hint = next((p for p in usable if p.number == unit.panel_hint), None)
+            count = len(usable)
+            if hint is not None and not tall and hint.fits(unit, self.rules):
+                hint.add(unit)
+                continue
             best = max(usable, key=lambda p: (p.free_u(self.rules), -p.number), default=None)
             if tall or best is None or not best.fits(unit, self.rules):
                 if best is not None and not tall and not self.can_open(both=False):
@@ -423,6 +430,20 @@ class _Builder:
                     continue
                 best = self.open_pair()[0]
             best.add(unit)
+            if unit.panel_hint is not None:
+                self.missed_hint(unit, best.number, None if hint else count)
+
+    def missed_hint(self, unit: Unit, placed: int, panels: int | None) -> None:
+        """A panel hint the fill could not follow (plan M74): a warning, never an error.
+        ``panels`` is how many there were when the hinted panel is not one of them."""
+        if panels is None:
+            message = f"does not fit in panel {unit.panel_hint}, its panel_hint"
+        else:
+            there = f"there {'is' if panels == 1 else 'are'} {_panels(panels)}"
+            message = f"has panel_hint {unit.panel_hint}, but {there}"
+        self.issues.append(
+            LayoutIssue("panel-hint", unit.key, f"{unit.key} {message}: placed in panel {placed}")
+        )
 
     def move(
         self,
@@ -754,7 +775,9 @@ def _units(loaded: LoadedSubstation, plan: NetworkPlan, issues: list[LayoutIssue
         priority = PRIORITY.get(device.category, 4)
         waist = device.category in WAIST
         units += [
-            Unit(entry.id, n, side, part_id, rank, height, manager, priority, waist)
+            Unit(
+                entry.id, n, side, part_id, rank, height, manager, priority, waist, entry.panel_hint
+            )
             for n in range(1, count + 1)
             for side in sides
         ]

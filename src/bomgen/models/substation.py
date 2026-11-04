@@ -122,6 +122,7 @@ class Equipment(InputModel):
     sfp: list[SfpChoice] = Field(default_factory=list)
     cable_manager: bool | None = None  # None: the category's rule (ADR 0013, amended)
     alarm_on_branch_mcb: bool | None = None  # None: the library's value (plan M58)
+    panel_hint: PositiveInt | None = None  # a common row's panel, not a pin (plan M74)
 
     @model_validator(mode="after")
     def _consistent(self) -> "Equipment":
@@ -140,6 +141,11 @@ class Equipment(InputModel):
             )
         if self.redundant and self.side is not Side.NONE:
             raise ValueError("a redundant device has one unit per side; leave side out")
+        if self.panel_hint is not None and (self.redundant or self.side is not Side.NONE):
+            raise ValueError(
+                "panel_hint steers a common device; a redundant or one-side row follows "
+                "its LAN's panels"
+            )
         if self.role is EquipmentRole.L1_SWITCH and "qty" in self.model_fields_set:
             raise ValueError(
                 "the L1 switch count is computed from network.ied_count; leave qty out"
