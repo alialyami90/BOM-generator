@@ -27,9 +27,10 @@ owning the areas below: a lead and reviewer (plan milestones, ADRs, PR review an
 files, cards to Ali; Opus 5.5, high effort), engine, models and writers (sections 6, 12–14; Opus 5.5,
 high), desktop app and UI (sections 8, 10, 15; Sonnet 5.5, high; Opus 5.5 only for a new screen designed
 from scratch) and data and docs (sections 7, 11; Sonnet 5.5, medium). Haiku 5.5 at low effort only for
-mechanical loops run inside a role. The lead hands one milestone to one role as one PR. The agent
-definitions used for M48–M81 (the lead, five workstreams and the workflow reviewer) are in
-`.claude/agents/`; [CLI-HANDOFF.md](CLI-HANDOFF.md) has each one's state.
+mechanical loops run inside a role. The lead hands one milestone to one role as one PR.
+**Since 2026-11-10** the main session is the lead developer and orchestrator, and the roles are
+the nine agents in `.claude/agents/`, each owning named files (`CLAUDE.md` "Agents");
+[CLI-HANDOFF.md](CLI-HANDOFF.md) has each one's state. This replaces the four roles above.
 
 **Where work runs (2026-11-10).** Three places, each used for what the one before it cannot do:
 

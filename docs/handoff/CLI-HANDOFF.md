@@ -27,14 +27,21 @@ None. All 22 project PRs (#317 to #393) are merged with green CI.
    - Built-in PDF renderer leaves out the header logo.
 
 ## Agents (`.claude/agents/`)
+Revised 2026-11-10: the main session is the lead developer and orchestrator (`CLAUDE.md`
+"Agents"), so the `lead` agent is gone; `panel-notes` is now `panel-detailing`; the agent files
+list owned files instead of finished milestones, and their state is kept here.
+
 | Agent | Former thread | State |
 |---|---|---|
-| `lead` | Lead: Deliver the engineering workflow plan | Done; owns releases and relays |
-| `issue-outputs` | W2 Issue outputs and revisions | Blocked on Use Excel test |
-| `library-parts` | W1 Library parts, review and function tags | Done |
-| `panel-notes` | W3 Panel notes, misc rows and labels | Done (ALI-8 hand test pending) |
-| `parts-network` | W4 Parts and network | Done |
+| Main session (lead) | Lead: Deliver the engineering workflow plan | Owns review, merges, releases, relays and the core modules |
+| `issue-outputs` | W2 Issue outputs and revisions | Blocked on Use Excel test; the built-in PDF renderer leaves out the header logo |
+| `library-parts` | W1 Library parts, review and function tags | Done; the Library detail pane does not show tags |
+| `device-research` | New: datasheet research for `data/device-db/` | Not started; first task is a RedBox and a media converter part |
+| `panel-detailing` | W3 Panel notes, misc rows and labels | Done; the socket pick list is open |
+| `panel-layout` | New: the layout engine, Panels board and Device preview | ALI-8 hand test pending |
+| `parts-network` | W4 Parts and network | Done; waits on `device-research` for RedBox and media converter parts |
 | `setup-design-basis` | W5 Setup and design basis | Done |
+| `ui-design` | New: design in `docs/ui/`, audits and polish | Not started |
 | `bom-workflow-reviewer` | Review BOM workflow for missing user inputs | Done |
 
 ## Working rules

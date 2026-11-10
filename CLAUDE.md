@@ -156,3 +156,55 @@ with the `impeccable` skill first: tokens, component specs and an HTML/CSS
 prototype in `docs/ui/` (M9). The app (M10) implements the approved design and
 ends with an impeccable polish pass. Business rules stay in the engine, never
 in the UI.
+
+## Agents
+
+The main session is the lead developer and orchestrator; there is no lead agent. The lead:
+
+- plans milestones in `docs/plan.md` and hands out the ADR, question and milestone numbers;
+- dispatches the agents in `.claude/agents/`, one milestone to one agent on one branch, and
+  gives agents that run at the same time a git worktree each;
+- reviews each agent's work, pushes its branch, opens and merges the PR ("Review and merge"),
+  and cuts releases;
+- puts the agents' questions to Ali, as multiple choice with a recommendation, and relays
+  between agents, which never talk to each other;
+- writes `docs/handoff/`, `CHANGELOG.md`, `README.md` and the ADR index;
+- develops every file no agent file lists: the pipeline and the core engine modules
+  (`pipeline.py`, `assemble.py`, `units.py`, `items.py`, `kits.py`, `power.py`, `overrides.py`,
+  `rules_text.py`), the engine's output models (`models/bom.py`, `calc.py`, `output.py`),
+  `checks.py`, `build.py`, `cli.py`, the loader and the shared writers in `io/`, `bundle/`, the
+  app shell (`app/api.py`, `editing.py`, `window.py`, `launcher.py`, `ui.js`, `app.js`,
+  `bridge.js`, `styles.css`), loose material, `packaging/` and `.github/`.
+
+Each agent file lists what that agent owns. A small change, or work in the lead's own areas,
+needs no agent.
+
+### Dispatched agents
+
+Rules for an agent the lead dispatched. Your own file adds the rules of your area.
+
+- Your final message is your report to the lead. Nobody else reads it, and you cannot ask Ali
+  or another agent anything: put questions in the report.
+- Do the one milestone or task you were given, in the files you own. In a shared file
+  (`checks.py`, `app/api.py`, `io/fields.py`, `models/substation.py`, `app/ui/ui.js`,
+  `styles.css`, `index.html`, `tests/unit/test_checks.py`,
+  `tests/unit/app/test_app_ui_assets.py`) only add; never rewrite or reorder another area's
+  lines. If the task needs a change in a file another agent or the lead owns, stop and report
+  it.
+- Work test-first ("Testing rules"). With the Skill tool, use `test-driven-development`,
+  `systematic-debugging` for a failure and `verification-before-completion` before you report.
+- Run the gate as modules: `ruff check . && ruff format --check .`, `python -m mypy`,
+  `python -m pytest -q -p no:cacheprovider`. In a git worktree the installed `bomgen` points at
+  the main checkout: prefix `PYTHONPATH=src` and check
+  `python -c "import bomgen; print(bomgen.__file__)"` first.
+- After a model change regenerate `schemas/` with `python -m bomgen schema`. A new test module
+  gets its row in `tests/unit/README.md` or `tests/golden/README.md`.
+- Commit on the branch you were given, with a conventional commit, only when the gate passes.
+  Do not push, open or merge a PR, change the version or create a tag.
+- Do not edit `docs/spec/`, `docs/handoff/`, `docs/plan.md`, `CHANGELOG.md`, the golden values
+  in `tests/golden/` or the `examples/` values they check. A new decision is an ADR with status
+  Proposed, under the number the lead gave you; only Ali accepts it.
+- Report: what you changed and why; each gate command with its result line; anything you could
+  not do or verify; a proposed `CHANGELOG.md` entry; notes for `docs/handoff/` (new facts,
+  traps, open ends); what must be checked on Ali's Windows PC; and each question for Ali as
+  options with your recommendation first.

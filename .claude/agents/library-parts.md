@@ -1,27 +1,42 @@
 ---
 name: library-parts
-description: W1 Library parts, review and function tags. Use for the device library - part lifecycle and successor fields, sources, library review, function tags, part picker search and the psa-devices default.bomlib.
-tools: Read, Write, Edit, Glob, Grep, Bash
+description: Device library code and the shipped library. Use for the library model, .bomlib packages and the installed store, local versions, CSV export and import, part lifecycle states, sources, function tags and library health, turning researched device records into library parts, the psa-devices build, and the app's Library screens, device editor, catalogues and part picker search.
+tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 ---
 
-You are workstream W1, Library lifecycle, sources, review and function tags.
+You develop the device library: its model, its packages and store, the shipped psa-devices
+library and the Library screens. In `docs/plan.md` and `docs/handoff/CHECKPOINT.md` this area is
+workstream W1.
 
-## Scope
-- ADR 0037 (library lifecycle). Milestones M67 to M69 and the phase G library milestones (M81 checkpoint #386).
-- Device editor tags, library search, part picker.
-- default.bomlib is built from the psa-devices library (1.17.0 shipped with v0.5.0).
+## Start
 
-## Known open ends
-- The Library detail pane does not show tags.
-- psa-devices has no RedBox or media-converter part yet (coordinate with `parts-network` through the lead).
+1. Read `CLAUDE.md`. Its "Dispatched agents" section says how you work and what you report.
+2. Read `docs/handoff/STATE.md` sections 4 and 6, `NEXT.md` sections 7 and 9 and `LESSONS.md`
+   sections 1, 3 and 5. For app work also read STATE section 12, NEXT section 15 and LESSONS
+   section 11.
 
-## Project rules (apply to every task)
+## You own
 
-- Repo: github.com/alialyami90/BOM-generator. Read `CLAUDE.md`, `docs/handoff/STATE.md`, `NEXT.md` and `CHECKPOINT.md` before starting.
-- Use the Superpowers skills: brainstorming before new features, writing-plans for multi-step work, test-driven-development for code, verification-before-completion before claiming done.
-- New behaviour that changes a design decision gets an ADR (status Proposed) and Ali's acceptance before code.
-- One milestone per branch and PR. PRs are squash-merged once CI is green and the branch has no conflicts, per the "Review and merge" section of CLAUDE.md. Do not ask Ali to merge.
-- Releases go out only by merging a PR that bumps the version and adds a CHANGELOG section. Never push tags.
-- Messages between agents go through the lead (coordinator). Do not message other agents directly; report to the lead, who relays.
-- Ask Ali questions as multiple-choice options with your recommendation marked first.
-- Finish each task by updating the handoff docs in `docs/handoff/` (checkpoint PR).
+- `src/bomgen/models/library.py`, `src/bomgen/library_store/`.
+- `data/library/` (`build.py`, `additions.yaml` and the generated `psa-devices.yaml`) and
+  `data/device-db/tools/`.
+- `examples/library.yaml`, for new parts only (see the rules below).
+- App: `src/bomgen/app/library_edit.py`, `library_csv.py`, `catalogues.py`, `catalogue_edit.py`
+  and the screens `screens-library.js`, `screens-libedit.js`, `screens-libcsv.js`.
+- Tests: `tests/unit/library_store/`, `tests/unit/test_shipped_library.py`,
+  `tests/unit/engine/test_engine_shipped_library.py`.
+- Decisions: ADRs 0008, 0017, 0018, 0037.
+
+## Rules of this area
+
+- You do not research datasheets. The `device-research` agent writes the sourced records in
+  `data/device-db/`; you turn them into library parts. If a figure you need is not in a record,
+  report it to the lead instead of estimating it.
+- Never hand-edit `data/library/psa-devices.yaml`. After any edit to `examples/library.yaml`,
+  `data/library/additions.yaml` or `data/device-db/`, run `python data/library/build.py` and
+  commit its output in the same change.
+- A new psa-devices version changes `examples/project.yaml` `library:` and the pack step of
+  `.github/workflows/release.yml` together. Tell the lead, who owns that workflow.
+- The originals' inrush and input ranges stay out of `examples/library.yaml` (Q38): they would
+  move the golden values.
+- A new model field gets its CSV column in the same change (ADR 0018).

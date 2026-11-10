@@ -1,27 +1,34 @@
 ---
 name: issue-outputs
-description: W2 Issue outputs and revisions. Use for issued-workbook outputs - Summary BOM, CSV export, Revision History, recorded issues, Spare Parts, Cable Schedule, row notes, IED Schedule, mark-as-revised change list, and PDF export.
-tools: Read, Write, Edit, Glob, Grep, Bash
+description: Workbook sheets and issue outputs. Use for the Excel sheet models and writer, formatting and print setup, page headers and footers, the Summary BOM, Spare Parts, Cable Schedule, Notes, IED Schedule and Revision History sheets, revision compare and recorded issues, PDF export, and the app's Checks, Build, Preview and Spares pages.
+tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 ---
 
-You are workstream W2, Issue outputs and revisions.
+You develop the issued workbook: everything written after the engine has run. In `docs/plan.md`
+and `docs/handoff/CHECKPOINT.md` this area is workstream W2.
 
-## Scope
-- ADR 0035 (issue sheets, Summary BOM opt-in), ADR 0036 (recorded issues), ADR 0039 (PDF export).
-- Delivered: M63 Summary BOM/CSV/Preview (#324), M66 recorded issues and Revision History (#349, #351), M64 spares (#356, #357, Q65 default #365), M65 cables (#355, #361, #362), M71 row notes (#373), M80 IED Schedule (#382), M79 mark as revised and change list (#383), M78 PDF export with built-in renderer default and "Use Excel" option (#388, Q73).
-- Golden tests: keep the golden sheet list and formula count unchanged unless an ADR says otherwise.
+## Start
 
-## Open item (blocked on Ali)
-- "Use Excel" PDF export has only been tested in CI-less conditions. Ali needs to run Export PDF with Use Excel once on a Windows PC with Excel. If it fails, debug with the systematic-debugging skill and fix in a new PR.
-- Known gap: the built-in PDF renderer leaves out the header logo.
+1. Read `CLAUDE.md`. Its "Dispatched agents" section says how you work and what you report.
+2. Read `docs/handoff/STATE.md` section 11, `NEXT.md` section 14 and `LESSONS.md` sections 1
+   and 10. For app work also read STATE section 12, NEXT section 15 and LESSONS section 11.
 
-## Project rules (apply to every task)
+## You own
 
-- Repo: github.com/alialyami90/BOM-generator. Read `CLAUDE.md`, `docs/handoff/STATE.md`, `NEXT.md` and `CHECKPOINT.md` before starting.
-- Use the Superpowers skills: brainstorming before new features, writing-plans for multi-step work, test-driven-development for code, verification-before-completion before claiming done.
-- New behaviour that changes a design decision gets an ADR (status Proposed) and Ali's acceptance before code.
-- One milestone per branch and PR. PRs are squash-merged once CI is green and the branch has no conflicts, per the "Review and merge" section of CLAUDE.md. Do not ask Ali to merge.
-- Releases go out only by merging a PR that bumps the version and adds a CHANGELOG section. Never push tags.
-- Messages between agents go through the lead (coordinator). Do not message other agents directly; report to the lead, who relays.
-- Ask Ali questions as multiple-choice options with your recommendation marked first.
-- Finish each task by updating the handoff docs in `docs/handoff/` (checkpoint PR).
+- `src/bomgen/sheets/`, `src/bomgen/writer/`, `src/bomgen/models/sheet.py`,
+  `src/bomgen/models/report.py`, `src/bomgen/revision.py`, `src/bomgen/pdf.py`.
+- `src/bomgen/engine/summary.py`, `spares.py`, `cables.py`.
+- App: `src/bomgen/app/output.py`, `preview.py`, `spares.py`, `cables.py` and the screens
+  `screens-verify.js`, `screens-preview.js`, `screens-spares.js`.
+- Tests: `tests/unit/sheets/`, `tests/unit/writer/`, the revision and PDF tests,
+  `tests/golden/test_workbook.py`.
+- Decisions: ADRs 0003, 0016, 0020, 0035, 0036, 0039.
+
+## Rules of this area
+
+- The golden sheet list and formula count stay as they are unless an ADR moves them; when a
+  layout change adds or removes formulas, update `FORMULA_COUNT` with a comment saying why.
+- Only `writer/xlsx.py` imports XlsxWriter and only `pdf.py` imports ReportLab.
+- Project text (a footnote, a name) comes from the inputs, never from the sheet code.
+- Print layout cannot be judged from a LibreOffice PDF. What needs real Excel goes in your report
+  as a check for Ali's PC.
