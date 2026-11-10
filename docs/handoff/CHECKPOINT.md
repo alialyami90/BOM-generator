@@ -3,6 +3,25 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-11-10: agents and the CLI handoff in the repo, where work runs
+
+- **Base:** main `d980714` (#393). Docs-only PR. No code change since v0.5.0.
+- **Done:** `.claude/agents/`, `HANDOFF.md` and [CLI-HANDOFF.md](CLI-HANDOFF.md) are committed,
+  so a cloud session sees them; until now they were only on Ali's PC. NEXT.md §1 "Where work
+  runs" records the split: cloud sessions and GitHub Actions for the work, Ali's Windows PC for
+  what needs Excel or a person at the screen. NEXT.md §3 no longer lists Q54 as open.
+- **Agents revised (Ali, 2026-11-10):** the main session is the lead developer and
+  orchestrator and the `lead` agent is gone (`CLAUDE.md` "Agents", with the rules for a
+  dispatched agent). The agent files now list owned files, not finished milestones.
+  `panel-notes` became `panel-detailing`; new are `panel-layout` (layout engine, Panels board,
+  Device preview), `device-research` (sourced `data/device-db/` records) and `ui-design`
+  (`docs/ui/`, audits). Agents commit only; the lead pushes, merges and writes these files and
+  the changelog. Each agent file sets its model and effort (NEXT.md §1).
+- **Not done:** the gate was not run on the PC (no `bomgen` install there yet).
+  `README.md` Status still says v0.4.0 and the status line of `docs/plan.md` stops at v0.3.3.
+- **Next:** unchanged: Ali's field tests of v0.5.0 (PDF export with Excel, drag and drop), then
+  the open ends in STATE.md §1.
+
 ## 2026-11-04: v0.5.0 released (Lead)
 
 - **Base:** main `6bc9721` (#392). Docs-only PR.

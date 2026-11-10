@@ -1155,6 +1155,11 @@ this section, `schemas/`, `docs/ui/editing.md`) take additive changes only: reba
 merge and keep the other workstream's lines. Releases follow the plan's phases (v0.4.0 after A and
 B, v0.5.0 after C and D, v0.6.0 after E and F) and are cut by the lead.
 
+Since 2026-11-10 the workstream threads are replaced by the agents in `.claude/agents/`, with the
+main session as the lead (`CLAUDE.md` "Agents"). Each agent file lists the files it owns; the table
+above records how M48–M81 were delivered. From M82 on, an agent does not edit this file or
+`CHANGELOG.md`: it reports, and the lead writes both.
+
 - **M48 — Derived-value component and the override contract.** *Lead.* Done (#321). The main MCB is the
   first derived value; the SFP, housekeeping and terminal rule texts land with M49, M56 and M57, which put
   those values on screen.

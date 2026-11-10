@@ -11,6 +11,10 @@ rather than copy it.
 
 - Repo `alialyami90/BOM-generator`, default branch `main`, at `6bc9721` (#392, the v0.5.0
   release). Check open PRs with `list_pull_requests` before starting.
+- **Where work runs (2026-11-10):** Claude cloud sessions and GitHub Actions, with Ali's Windows
+  PC only for what needs Excel or a person at the screen (NEXT.md §1). The main session is the
+  lead; the nine agents are in `.claude/agents/` (`CLAUDE.md` "Agents") and their state in
+  [CLI-HANDOFF.md](CLI-HANDOFF.md).
 - **v0.5.0 is released** (#392, 2026-11-04) with `bomgen-setup-0.5.0.exe` and psa-devices 1.17.0.
   It ships M70–M81 (#373–#389; `plan.md` "M70–M81" has
   each PR number and the coverage table of the workflow review): panel and row notes with a
