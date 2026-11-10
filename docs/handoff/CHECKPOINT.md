@@ -16,7 +16,7 @@ keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detai
   `panel-notes` became `panel-detailing`; new are `panel-layout` (layout engine, Panels board,
   Device preview), `device-research` (sourced `data/device-db/` records) and `ui-design`
   (`docs/ui/`, audits). Agents commit only; the lead pushes, merges and writes these files and
-  the changelog.
+  the changelog. Each agent file sets its model and effort (NEXT.md §1).
 - **Not done:** the gate was not run on the PC (no `bomgen` install there yet).
   `README.md` Status still says v0.4.0 and the status line of `docs/plan.md` stops at v0.3.3.
 - **Next:** unchanged: Ali's field tests of v0.5.0 (PDF export with Excel, drag and drop), then

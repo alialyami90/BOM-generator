@@ -2,6 +2,8 @@
 name: parts-network
 description: Equipment rows and the network. Use for the Parts page and its writers, part overrides and derived parts, SFP choices and quantities, cable managers and serial cables, switch sizing from the IED count or IED schedule, the port budget and switch-count overrides, port plans, external links, RedBox and media converter roles, and the IED schedule CSV import.
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill
+model: opus
+effort: high
 ---
 
 You develop the equipment list and the network: which parts a substation has, how many switches

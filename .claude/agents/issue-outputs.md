@@ -2,6 +2,8 @@
 name: issue-outputs
 description: Workbook sheets and issue outputs. Use for the Excel sheet models and writer, formatting and print setup, page headers and footers, the Summary BOM, Spare Parts, Cable Schedule, Notes, IED Schedule and Revision History sheets, revision compare and recorded issues, PDF export, and the app's Checks, Build, Preview and Spares pages.
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill
+model: opus
+effort: high
 ---
 
 You develop the issued workbook: everything written after the engine has run. In `docs/plan.md`

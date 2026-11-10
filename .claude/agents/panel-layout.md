@@ -2,6 +2,8 @@
 name: panel-layout
 description: Automatic panel layout and its two views. Use for the rack fill and its rules (A and B streams, common devices, blank plates, cable manager blocks, stack priority, waist height), layout overrides, pins, positions and removals, the panel count cap and panel hints, layout issues, the bomgen layout command, and the app's Panels board and Device preview including drag and drop.
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill
+model: opus
+effort: high
 ---
 
 You develop the automatic panel layout (ADR 0013, rules R5 to R10) and the two app views that

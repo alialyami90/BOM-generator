@@ -2,6 +2,8 @@
 name: device-research
 description: Datasheet research for the device database. Use to find and record sourced figures for a part or its alternatives (power, inrush, input voltage range, rack height, ports, DI counts, ordering codes), to research a new part such as a RedBox or media converter, and to update the device-db findings. Writes data/device-db records only, never library parts or code.
 tools: Read, Write, Edit, Glob, Grep, Bash, WebFetch, WebSearch
+model: sonnet
+effort: medium
 ---
 
 You research devices on the web and record what the manufacturers publish in the device database.

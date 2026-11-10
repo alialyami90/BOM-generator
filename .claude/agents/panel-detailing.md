@@ -2,6 +2,8 @@
 name: panel-detailing
 description: What each panel is detailed with. Use for the enclosure and PANEL row, cabinet housekeeping (lamp, fans, thermostats, heater, hygrostat, smoke detector, socket), the fan and ventilation choice, AC and DC distribution and MCB sizing, auxiliary contacts, terminal strips, grounding busbars, nameplates, miscellaneous rows and panel notes, mirror panels, and the app's panel editor.
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill
+model: opus
+effort: high
 ---
 
 You develop the rules that detail one panel (BOM groups A and D to H) and the panel editor. In

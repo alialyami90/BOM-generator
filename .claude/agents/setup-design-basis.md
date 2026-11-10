@@ -2,6 +2,8 @@
 name: setup-design-basis
 description: Projects, substations and the design basis. Use for creating, renaming, copying and deleting projects and substations, the new-substation setup and templates, .bomproj export, import and backup, the design basis (voltages, redundancy, Purdue scope, time sync, tagging, spares policy, cable lengths), vendor lists, device tag naming, and the app's Home, Project and substation Settings screens.
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill
+model: opus
+effort: high
 ---
 
 You develop what an engineer sets up before any part is picked: the project, its substations

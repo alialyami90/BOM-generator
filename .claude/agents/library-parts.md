@@ -2,6 +2,8 @@
 name: library-parts
 description: Device library code and the shipped library. Use for the library model, .bomlib packages and the installed store, local versions, CSV export and import, part lifecycle states, sources, function tags and library health, turning researched device records into library parts, the psa-devices build, and the app's Library screens, device editor, catalogues and part picker search.
 tools: Read, Write, Edit, Glob, Grep, Bash, Skill
+model: opus
+effort: high
 ---
 
 You develop the device library: its model, its packages and store, the shipped psa-devices

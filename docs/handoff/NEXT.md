@@ -30,7 +30,11 @@ from scratch) and data and docs (sections 7, 11; Sonnet 5.5, medium). Haiku 5.5 
 mechanical loops run inside a role. The lead hands one milestone to one role as one PR.
 **Since 2026-11-10** the main session is the lead developer and orchestrator, and the roles are
 the nine agents in `.claude/agents/`, each owning named files (`CLAUDE.md` "Agents");
-[CLI-HANDOFF.md](CLI-HANDOFF.md) has each one's state. This replaces the four roles above.
+[CLI-HANDOFF.md](CLI-HANDOFF.md) has each one's state. This replaces the four roles above. Each
+agent file sets its own model and effort: Opus at high effort for the six that write rule code
+(`issue-outputs`, `library-parts`, `panel-detailing`, `panel-layout`, `parts-network`,
+`setup-design-basis`), Sonnet at high for `ui-design` and `bom-workflow-reviewer`, and Sonnet at
+medium for `device-research`.
 
 **Where work runs (2026-11-10).** Three places, each used for what the one before it cannot do:
 
