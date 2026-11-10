@@ -188,7 +188,8 @@ Rules for an agent the lead dispatched. Your own file adds the rules of your are
 - Do the one milestone or task you were given, in the files you own. In a shared file
   (`checks.py`, `app/api.py`, `io/fields.py`, `models/substation.py`, `app/ui/ui.js`,
   `styles.css`, `index.html`, `tests/unit/test_checks.py`,
-  `tests/unit/app/test_app_ui_assets.py`) only add; never rewrite or reorder another area's
+  `tests/unit/app/test_app_ui_assets.py`, the field inventory of `docs/ui/editing.md`) only
+  add; never rewrite or reorder another area's
   lines. If the task needs a change in a file another agent or the lead owns, stop and report
   it.
 - Work test-first ("Testing rules"). With the Skill tool, use `test-driven-development`,
@@ -205,6 +206,7 @@ Rules for an agent the lead dispatched. Your own file adds the rules of your are
   in `tests/golden/` or the `examples/` values they check. A new decision is an ADR with status
   Proposed, under the number the lead gave you; only Ali accepts it.
 - Report: what you changed and why; each gate command with its result line; anything you could
-  not do or verify; a proposed `CHANGELOG.md` entry; notes for `docs/handoff/` (new facts,
+  not do or verify; every new input field with its meaning and default (the lead adds it to
+  `docs/plan.md` section 3); a proposed `CHANGELOG.md` entry; notes for `docs/handoff/` (new facts,
   traps, open ends); what must be checked on Ali's Windows PC; and each question for Ali as
   options with your recommendation first.

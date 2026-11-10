@@ -18,7 +18,8 @@ None. All 22 project PRs (#317 to #393) are merged with green CI.
 ## Open work
 1. **W2 Issue outputs and revisions (blocked on Ali):** run Export PDF with
    *Use Excel* once on a Windows PC with Excel installed (CI cannot run Excel).
-   Report pass or fail to the `issue-outputs` agent; a failure becomes a fix PR.
+   Report pass or fail to the lead (the main session); a failure becomes a fix PR by
+   `issue-outputs`.
 2. **Panels board drag-and-drop hand test (ALI-8):** waiting on Ali.
 3. Open ends listed in STATE.md, not yet scheduled:
    - psa-devices has no RedBox or media-converter part (blocks ADR 0038 roles in practice).

@@ -87,9 +87,15 @@ replaced entry "superseded by …".
 
 - **Parallel PRs and the changelog (2026-11-01).** Every PR adds to `[Unreleased]`, so parallel PRs
   conflict there. Merge them one at a time, have each owner merge main (not rebase), and keep the
-  release PR last; merge main into it after each merge and rerun CI.
+  release PR last; merge main into it after each merge and rerun CI. *Superseded by "Agents
+  commit, the lead integrates" below for who writes the entry; the merge order still holds.*
 - **Hold a release for a rejected ADR.** A Proposed ADR can merge before Ali answers. If he rejects
   it, revert it on main before the release PR merges (ADR 0028 → #285), not after.
+- **Agents commit, the lead integrates (2026-11-10).** The main session is the lead; a dispatched
+  agent commits on its branch and reports, and the lead pushes, opens and merges the PR and writes
+  `CHANGELOG.md`, `docs/handoff/` and `docs/plan.md` (`CLAUDE.md` "Agents"). This removes the
+  changelog and checkpoint conflicts of the five-workstream rounds. An agent cannot ask Ali or
+  another agent anything, so a rule that says "ask Ali on a card" means the lead asks.
 
 ### Reviewing a PR
 
