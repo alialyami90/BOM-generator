@@ -27,7 +27,26 @@ owning the areas below: a lead and reviewer (plan milestones, ADRs, PR review an
 files, cards to Ali; Opus 5.5, high effort), engine, models and writers (sections 6, 12–14; Opus 5.5,
 high), desktop app and UI (sections 8, 10, 15; Sonnet 5.5, high; Opus 5.5 only for a new screen designed
 from scratch) and data and docs (sections 7, 11; Sonnet 5.5, medium). Haiku 5.5 at low effort only for
-mechanical loops run inside a role. The lead hands one milestone to one role as one PR.
+mechanical loops run inside a role. The lead hands one milestone to one role as one PR. The agent
+definitions used for M48–M81 (the lead, five workstreams and the workflow reviewer) are in
+`.claude/agents/`; [CLI-HANDOFF.md](CLI-HANDOFF.md) has each one's state.
+
+**Where work runs (2026-11-10).** Three places, each used for what the one before it cannot do:
+
+- **Claude cloud sessions** (a Linux container on this repo): code, the gate, PRs and these files.
+  The setup steps above are written for it.
+- **GitHub Actions:** the gate on Python 3.12 for every PR, "Build Windows installer" (the frozen
+  app, the install and the real window) and releases.
+- **Ali's Windows PC** (Claude Code CLI): only what needs Excel or a person at the screen:
+  *Export PDF… › Use Excel*, Q11 in Excel's Print Preview, the drag-and-drop hand test (ALI-8)
+  and screen checks of the installed app. The released installer is enough for these. On
+  2026-11-10 the PC had Python 3.13 and no `bomgen` install, `node` or `gh`: run
+  `pip install -e ".[dev,app]"` before debugging there, and open and merge PRs from a cloud
+  session unless `gh` is installed.
+
+Sessions share no memory, so these files and `.claude/agents/` are all that carries over between
+them. The project files folder (`/mnt/project-files/…`) was not checked on 2026-11-10; confirm a
+path exists before relying on it.
 
 ## 2. Working rules
 
@@ -73,8 +92,8 @@ mechanical loops run inside a role. The lead hands one milestone to one role as 
    as M72 shipped; nothing to change.
 10. **Q73** answered 2026-11-04: both, built-in by default (ADR 0039), shipped in M78 (#388).
    Ask Ali to try *Export PDF… › Use Excel* once on his PC; CI can't run it.
-11. **Q51** (annunciator mounted in a panel), **Q54** (power of the -2 SEL computers) and **Q55**
-   (categories for the contractor's other part types) are open in plan §6.
+11. **Q51** (annunciator mounted in a panel) and **Q55** (categories for the contractor's other
+   part types) are open in plan §6. Q54 (power of the -2 SEL computers) was answered 2026-11-01.
 
 **Next work:** v0.5.0 shipped M70–M81 (STATE.md §1). Next are Ali's field tests of v0.5.0 (PDF
 export with Excel, drag and drop) and the open ends in STATE.md §1 "Next work", as Ali orders them.
