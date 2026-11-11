@@ -1318,3 +1318,20 @@ def test_a_library_row_is_named_by_make_and_model_not_by_its_id(tmp_path: Path) 
     assert "<th>Device</th>" in js
     assert "of: (originalOf || {})[d.part_id] || null" in js  # row() keeps the original
     assert "<dt>Part ID</dt>" in js  # the id is in the detail pane
+
+
+def test_m89_the_ports_tab_offers_an_allocation_only_where_the_page_says() -> None:
+    """Plan M89, Ali's v0.5.0 point 5: a monitor gets no *Add allocation*, no serial ports
+    and no "No SFPs" line; the page decides (``offered``), and a device with no link has
+    ``l2`` null, so nothing reads its ports, speed or media."""
+    js = (UI_DIR / "screens-panel-editor.js").read_text(encoding="utf-8")
+    section = js[js.index("function portSection(r, p)") : js.index("const ports = (p) =>")]
+    plain = section.index("if (!r.offered)")
+    assert plain < section.index('data-action="pe-alloc-add"')
+    assert plain < section.index("'Serial ports'")
+    assert "Not on the network, so it has no port plan." in section
+    assert "r.l2 && r.l2.ports ? `Linked to the L2 switch: ${r.l2.ports}" in js
+    assert '${r.l2 ? ` <a href="#/parts" data-action="pe-parts"' in js
+    assert "const link = row.l2 || {};" in js
+    assert "speed: link.speed || '1G', media: link.media || 'MM'" in js
+    assert "row.l2.speed" not in js
