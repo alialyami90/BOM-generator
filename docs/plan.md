@@ -1539,7 +1539,9 @@ running the tests, so the suite had never run on the one system the app ships fo
   faults done** (`setup-design-basis`): replacing a project folder that Windows will not rename
   is refused in words (`importer.py`), the safety backup of that attempt is taken back, and
   the page reports the logo path as the file holds it. The two restore tests assert the
-  refusal on Windows and the restore elsewhere. Next: the Windows job in CI.
+  refusal on Windows and the restore elsewhere. **CI done:** the job `test-windows` runs the
+  suite on `windows-latest` and joins `ci-status` (ADR 0006). On the owner's PC the suite went
+  from 16 failed to 3604 passed, 16 skipped.
   Traced on 2026-11-11 (first pass). Faults of the app: restoring or importing over a project stops with a raw
   `PermissionError` when Windows will not rename the folder, which happens when the command runs
   from inside it and, likely, when a file in it is open (the workbook in Excel): it should refuse

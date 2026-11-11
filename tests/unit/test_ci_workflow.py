@@ -28,3 +28,12 @@ def test_every_ci_job_gates_ci_status() -> None:
     jobs = ci_workflow()["jobs"]
     assert set(jobs["ci-status"]["needs"]) == set(jobs) - {"ci-status"}
     assert jobs["ci-status"]["if"] == "always()"
+
+
+def test_the_tests_also_run_on_windows() -> None:
+    # plan M95: the app ships for Windows only, and the suite had never run there.
+    job = ci_workflow()["jobs"]["test-windows"]
+    assert job["runs-on"] == "windows-latest"
+    assert job["needs"] == "changes"
+    assert job["if"] == "needs.changes.outputs.code == 'true'"
+    assert job["steps"][-1]["run"] == "pytest"

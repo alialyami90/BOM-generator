@@ -12,7 +12,7 @@ name: CI
 #   1. `changes` always runs and uses dorny/paths-filter to decide whether any
 #      non-docs file, or a file under docs/ui or data, changed (output `code` =
 #      'true' / 'false').
-#   2. `lint`, `typecheck` and `test` run only when `code` is 'true'. When they
+#   2. `lint`, `typecheck`, `test` and `test-windows` run only when `code` is 'true'. When they
 #      are skipped by their `if:`, GitHub records them as "skipped", not pending.
 #   3. `ci-status` always runs, after everything else, and is the ONE job to mark
 #      as a required status check in branch protection. It passes when every
@@ -99,12 +99,27 @@ jobs:
       - run: pip install -e ".[dev]"
       - run: pytest
 
+  # The app ships for Windows only (plan M95): the same suite on the platform it runs on.
+  test-windows:
+    name: Tests on Windows (pytest)
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - run: pytest
+
   ci-status:
     name: ci-status
     # always(): run even when jobs above were skipped (docs-only) or failed,
     # so this required check always reports instead of hanging.
     if: always()
-    needs: [changes, lint, typecheck, test]
+    needs: [changes, lint, typecheck, test, test-windows]
     runs-on: ubuntu-latest
     steps:
       - name: Passed, or skipped for a docs-only change
