@@ -34,13 +34,13 @@ list owned files instead of finished milestones, and their state is kept here.
 
 | Agent | Former thread | State |
 |---|---|---|
-| Main session (lead) | Lead: Deliver the engineering workflow plan | Owns review, merges, releases, relays and the core modules; M82 and M95 done; next the release, M92 |
+| Main session (lead) | Lead: Deliver the engineering workflow plan | Owns review, merges, releases, relays and the core modules; M82 and M95 done; next the v0.6.0 release on Ali's word, then M92 |
 | `issue-outputs` | W2 Issue outputs and revisions | Blocked on Use Excel test; the built-in PDF renderer leaves out the header logo |
 | `library-parts` | W1 Library parts, review and function tags | M84 and M85 done; next M93 after the research; the Library detail pane does not show tags |
 | `device-research` | New: datasheet research for `data/device-db/` | Not started; M93's duplicates and defects, and a RedBox and a media converter part |
 | `panel-detailing` | W3 Panel notes, misc rows and labels | M89's Ports tab done (#404); the socket pick list is open |
 | `panel-layout` | New: the layout engine, Panels board and Device preview | M96 (port plans per row), M94 to confirm; ALI-8 hand test pending |
-| `parts-network` | W4 Parts and network | M83, M86, M87 and M89 done; M90 in review; next M91; M88 after ADR 0041; its half of M96 after `panel-layout` |
+| `parts-network` | W4 Parts and network | M83, M86, M87, M89 and M90 done; M91 is PR #411, waiting to merge; next M88 after ADR 0041 and its half of M96 after `panel-layout` |
 | `setup-design-basis` | W5 Setup and design basis | M95's two app faults done (#406); nothing open |
 | `ui-design` | New: design in `docs/ui/`, audits and polish | Not started; first task is to record M83 and M84 in the design docs |
 | `bom-workflow-reviewer` | Review BOM workflow for missing user inputs | Done |

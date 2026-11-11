@@ -120,17 +120,21 @@ rather than copy it.
   the UI polish pass from [`docs/ui/polish-v02.md`](../ui/polish-v02.md) (items 1–16, #205–#208) plus
   #194, #198–#201.
 - **Numbers (2026-11-04, after v0.5.0).** ADRs 0001–0027 and 0029–0040 are Accepted and 0028
-  is Rejected. The next free ADR is **0042**, the next free question **Q90** and the next
+  is Rejected. The next free ADR is **0042**, the next free question **Q93** and the next
   milestone **M97** (M70–M81 are done; Q72 "only above", Q73 "both, built-in by default").
   M82–M96 are planned (2026-11-11), ADR 0041 is reserved for M88 and Q74–Q84 belong to them
-  (Q75, Q82 and Q85 answered, Q78 partly; Q86–Q89 came out of the work). **On main, not yet
-  released:** M82–M87, M89 and M95 (#397–#408); psa-devices is 1.18.0. Q51 (annunciator) and Q55 (categories for the contractor's other part types) are open.
+  (Q75, Q82 and Q85 answered, Q78 partly; Q86–Q92 came out of the work). **On main, not yet
+  released:** M82–M87, M89, M90 and M95 (#397–#410); psa-devices is 1.18.0. **M91 is PR #411,
+  open:** its tests passed on Linux and Windows, but GitHub had not closed the run when work
+  stopped (`ci-status` still queued); merge it first. **The release (v0.6.0) waits for Ali's
+  go-ahead**, asked on 2026-11-11. Q51 (annunciator) and Q55 (categories for the contractor's other part types) are open.
 - **Changelog** has a `[0.5.0]` section, and `[Unreleased]` is empty.
 - **Next work:** the rest of M82–M96, Ali's six points on v0.5.0 of 2026-11-11 (`plan.md`
   "M82–M94", `backlog.md` "v0.6"). Done on main: the substation switch (M82), the part picker
   (M83), the Library list (M84), SFP alternatives (M85), SFP rows and a typed quantity (M86,
-  M87), the L2 link line on Parts and on Panels › Ports (M89), and the suite green on
-  Windows with a CI job (M95). Next: M90 (in review), M91, then a release. Still
+  M87), the L2 link line on Parts and on Panels › Ports (M89), the row controls (M90), and
+  the suite green on Windows with a CI job (M95). Next: merge M91 (#411), then the v0.6.0
+  release once Ali says go, then M96, M92 to M94, and M88 after ADR 0041. Still
   waiting on Ali: try *Use Excel* in PDF export on Windows (NEXT §3), his hand test of drag
   and drop on Windows (ALI-8), and his answers on the v0.3.4 review list (keyboard nameplate, a
   DC supply-voltage check, Q51, Q55, reviewer mode, Q11/Q23). Open ends the workstreams left:

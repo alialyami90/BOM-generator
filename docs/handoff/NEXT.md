@@ -74,7 +74,7 @@ path exists before relying on it.
   either. Don't move golden values without an ADR. Only Ali marks ADRs Accepted. Don't commit `.xlsx`.
   Don't force-push (LESSONS "Branch restart"). Don't bump the version outside a release PR (on main it
   publishes at once). Don't push tags.
-- Next free numbers: ADR 0042, Q90, milestone M97. Handed out for M82–M94 (2026-11-11): ADR 0041
+- Next free numbers: ADR 0042, Q93, milestone M97. Handed out for M82–M94 (2026-11-11): ADR 0041
   to `parts-network` for M88, Q74–Q81 as `plan.md` section 6 lists them. Handed out for M70–M81
   (2026-11-04): ADR 0038 to
   W4 for M73, ADR 0039 and Q73 to W2 for M78, ADR 0040 to the lead for M77, Q72 to W4 for M72;
@@ -107,7 +107,7 @@ path exists before relying on it.
 11. **Q51** (annunciator mounted in a panel) and **Q55** (categories for the contractor's other
    part types) are open in plan §6. Q54 (power of the -2 SEL computers) was answered 2026-11-01.
 
-12. **Q74, Q76 to Q81, Q83, Q84 and Q86 to Q89** (2026-11-11) are open in plan §6, from Ali's six
+12. **Q74, Q76 to Q81, Q83, Q84 and Q86 to Q92** (2026-11-11) are open in plan §6, from Ali's six
    points on v0.5.0 and the work on them; Q82 and Q85 are answered. Q83 (the SFP a Cisco or
    Moxa switch picks by itself) is still unanswered: the rule is as M85 left it, and since M86
    the row names the part it picks.
@@ -117,8 +117,15 @@ path exists before relying on it.
    being an IP KVM (Q78, partly answered). Each open question has a recommended answer that its
    milestone assumes until Ali answers.
 
-**Next work:** M82 to M87, M89 and M95 are on main. Then M90 (in review) and M91, one after the
-other (they share `app/parts.py` and `screens-parts.js`), then a release so Ali can check them; he must
+**Next work: merge M91, then the v0.6.0 release, on Ali's word.** PR #411 (M91) is open: its
+tests passed on Linux and on Windows, but GitHub had not closed the run when work stopped, so
+`ci-status` was still queued. Check it (`gh pr checks 411`), re-run the job if it is stuck,
+and squash-merge it; its branch `fix/m91-add-a-device-roles` is on the remote. M82 to M87,
+M89, M90 and M95 are on main and `[Unreleased]` holds their entries; M91's entry comes with
+its PR. On 2026-11-11 Ali was asked to choose: release now with
+today's rule for Q83 (recommended), hold for Q83, or hold for more fixes. He stopped for the
+day before answering, so **ask again before anything else and do not publish without his
+go-ahead**. Then section 5's steps: the changelog PR, then the bump PR. After it, he must
 import that release's `default.bomlib` to get psa-devices 1.18.0, since an upgrade keeps the
 installed library. M96, M92 to M94 and M88 follow. Ali's field tests of
 v0.5.0 (PDF export with Excel, drag and drop) and the open ends in STATE.md §1 stay open.

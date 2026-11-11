@@ -3,6 +3,25 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-11-11, end of day: M82 to M90 and M95 on main, M91 in PR #411; the release waits for Ali (Lead)
+
+- **Base:** main `5306449` (#409) plus this docs PR. **Open: PR #411 (M91).** Its tests passed on
+  Linux and on Windows (every step of both jobs ended in success), but GitHub had not closed the
+  run when work stopped: the two jobs still read "in progress" and `ci-status` was queued, 35
+  minutes after they finished. Not a fault of the change. Merge it first tomorrow; re-run the
+  job if it is still stuck. No worktree is left on the PC.
+- **Done today:** Ali's six points on v0.5.0 were traced, planned (M82 to M96) and, for most,
+  fixed: M82 (#397), M83 (#399), M84 (#400), M85 (#398), M86 (#403), M87 (#408), M89 (#402,
+  #404), M90 (#409), M91 (#411, open); and M95 (#405, #406, #407), which made the suite green
+  on Windows and put it in CI. Ali answered Q75, Q82 and Q85, and Q78 in part.
+- **Waiting on Ali:** the go-ahead for v0.6.0 (NEXT §3 "Next work": ask first, do not publish
+  without it); Q83 (the SFP a Cisco or Moxa switch picks); the other open questions, each with
+  a recommended answer that the code already follows.
+- **Not done:** none of the fixes has been seen in the app window; that needs the release.
+  M88 (ADR 0041 not written), M92, M93, M94 and M96 are planned and not started. `docs/ui/` still
+  describes the old Parts rows, picker, Library table, Ports tab and Add a device (NEXT §8).
+- **Next:** ask Ali about the release; if yes, the changelog PR and the bump PR; then M96.
+
 ## 2026-11-11: M86, M87, M89 and M95 on main; M90 in review (Lead)
 
 - **Base:** main `3fff89d` (#408). Not released: `[Unreleased]` holds every entry since v0.5.0.
