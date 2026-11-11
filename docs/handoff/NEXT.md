@@ -48,7 +48,10 @@ medium for `device-research`.
   2026-11-11 the PC has a virtual environment in `.venv` (Python 3.13, `.[dev,app]`): run the
   gate as `.venv/Scripts/python -m ruff`, `-m mypy` and `-m pytest`. `gh` is installed and
   logged in but not on Git Bash's PATH: call `"/c/Program Files/GitHub CLI/gh.exe"`. `node` is
-  not installed, so the `node --check` and prototype steps run in a cloud session.
+  not installed; VS Code's runtime stands in for it:
+  `ELECTRON_RUN_AS_NODE=1 "<VS Code>/Code.exe" --check file.js`, and a `node.cmd` that calls it,
+  first on PATH, makes the node-based tests run instead of skipping (LESSONS section 1). An
+  agent in a worktree runs the main checkout's `.venv` with `PYTHONPATH=src`.
 
 Sessions share no memory, so these files and `.claude/agents/` are all that carries over between
 them. The project files folder (`/mnt/project-files/…`) was not checked on 2026-11-10; confirm a
@@ -70,7 +73,7 @@ path exists before relying on it.
   either. Don't move golden values without an ADR. Only Ali marks ADRs Accepted. Don't commit `.xlsx`.
   Don't force-push (LESSONS "Branch restart"). Don't bump the version outside a release PR (on main it
   publishes at once). Don't push tags.
-- Next free numbers: ADR 0042, Q83, milestone M96. Handed out for M82–M94 (2026-11-11): ADR 0041
+- Next free numbers: ADR 0042, Q85, milestone M97. Handed out for M82–M94 (2026-11-11): ADR 0041
   to `parts-network` for M88, Q74–Q81 as `plan.md` section 6 lists them. Handed out for M70–M81
   (2026-11-04): ADR 0038 to
   W4 for M73, ADR 0039 and Q73 to W2 for M78, ADR 0040 to the lead for M77, Q72 to W4 for M72;
@@ -103,15 +106,19 @@ path exists before relying on it.
 11. **Q51** (annunciator mounted in a panel) and **Q55** (categories for the contractor's other
    part types) are open in plan §6. Q54 (power of the -2 SEL computers) was answered 2026-11-01.
 
-12. **Q74 and Q76 to Q82** (2026-11-11) are open in plan §6, from Ali's six points on v0.5.0.
+12. **Q74, Q76 to Q81, Q83 and Q84** (2026-11-11) are open in plan §6, from Ali's six points on
+   v0.5.0; Q82 is answered (a part is named by its model only). Q83 (the SFP a Cisco or Moxa
+   switch picks by itself) should be answered before the next release.
    Ali answered Q75 the same day: the substation list stays open only while the mouse button is
    held, which fits M82's cause; the "duplicate" is the library id `SEL-2730M-EXT` shown as a
    part's name (Q82); and the SFPs on a monitor and a KVM are the link line of M89, his KVM not
    being an IP KVM (Q78, partly answered). Each open question has a recommended answer that its
    milestone assumes until Ali answers.
 
-**Next work:** M82–M94 in `plan.md`, in the order its last paragraph gives, and M95: the 16
-tests that fail on Windows (`plan.md` "M95"), of which the possible app faults come first. Ali's field tests of
+**Next work:** M82 to M85 are on main. Then M89, M86, M87, M90 and M91, one after another (they
+share `app/parts.py` and `screens-parts.js`), then a release so Ali can check them; he must
+import that release's `default.bomlib` to get psa-devices 1.18.0, since an upgrade keeps the
+installed library. M95's two app faults and its test isolation, M96, M92 to M94 and M88 follow. Ali's field tests of
 v0.5.0 (PDF export with Excel, drag and drop) and the open ends in STATE.md §1 stay open.
 
 ## 4. When Ali's feedback arrives
@@ -207,7 +214,11 @@ and `release.yml` together.
    the save bar meets the window bottom on short and long tabs. On failure, fix it with the exact symptom
    and CSS in mind.
 2. **Fix the wording nits** in STATE.md section 5, drift item 2, if they are still there.
-3. **New screens or flows** start with the `impeccable` skill, a section in
+3. **Record M83 and M84 in the design docs** (`ui-design`): `docs/ui/components.md` "Device picker
+   (combobox)" and "Part row" and `docs/ui/screens.md` "Library" still describe lists that lead
+   with the part id. The built picker and table name a part by make and model, offer the row's
+   own choices with *Search all parts*, and fold alternatives under their original.
+4. **New screens or flows** start with the `impeccable` skill, a section in
    `editing.md`/`screens.md`/`components.md` and a prototype screen (CLAUDE.md "UI work").
 
 Setup: gate venv `uv venv /tmp/venv && uv pip install -p /tmp/venv -e ".[dev]"`; impeccable via

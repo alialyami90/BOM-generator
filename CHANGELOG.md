@@ -9,6 +9,11 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Parts shows SFP rows on every switch row (M86). An L1 switch left to the sizing shows the SFP
+  rows of the switch the sizing picked, read-only, with *Pin this switch to change its SFPs*.
+  When the substation does not load or its layout fails, the switch rows say why their SFP rows
+  are missing. The Spare editor opens on the automatic value, and *Automatic* names the SFP it
+  will use, by make and model, as every other SFP option now is.
 - The Library list shows each device once (M84): the Devices table opens on the 94 originals,
   each with its alternatives folded under it by make and tier, and *List every part* shows all
   parts flat. A search that finds an alternative opens its original on it. A part is named by its
@@ -28,6 +33,9 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Panels › Ports offers a port allocation and serial ports only to a device with a link to the
+  L2 switch or a port plan already written (M89); a monitor, keyboard, plain KVM or patch panel
+  shows "Not on the network" instead.
 - Parts shows "Link to the L2 switch" only on networked rows (M89): a monitor, keyboard, plain
   KVM, console or annunciator has none; a part that lists a network port (an IP KVM) does, and a
   link already written always shows. A new workstation row is linked RJ45, so it adds no fibre

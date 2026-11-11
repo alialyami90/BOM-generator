@@ -172,11 +172,32 @@
   }
   /* M46: a link the library has no SFP for stops the build; say so on the row first. */
   const noSfp = (speed, media) => `<span class="err small">${icon('warn')}<span>No ${esc(speed)} ${esc(media)} SFP in the library: pick another speed or media, or add the SFP to the library.</span></span>`;
+  /* M86: an SFP part is named by its make and model like every other part (Q82); the automatic choice
+     names the part the engine takes without one. */
+  const sfpOpt = (id) => (sub().page().parts.options.sfp || []).find((o) => o.part_id === id) || { part_id: id };
+  const autoText = (f) => (f.auto ? `Automatic: ${nameOf(sfpOpt(f.auto))}` : 'Automatic');
+  /* M86, Q76 (a): an L1 row left to the sizing shows the SFPs of the switch the sizing picked, read-only;
+     pinning that switch to the row makes them the editable rows below, with the same numbers. */
+  function sizedSfpRows(r) {
+    if (!r.sfp.length) return '';
+    const dirty = PF.dirty(), help = `pp-pinhelp-${r.index}`;
+    const rows = r.sfp.map((f) => `<div class="prow-sub"><span class="prow-sub-what">${esc(f.speed)} · ${esc(f.media)} SFP</span><span class="small">${esc(autoText(f))}</span></div>
+      <div class="prow-strip prow-sfp" role="group" aria-label="${esc(`${f.speed} ${f.media} SFPs, ${r.label}`)}">
+        <span class="dv" title="From the switch sizing"><span class="dv-label">Links</span><span class="dv-val">${f.used}</span></span>
+        <span class="dv"><span class="dv-label">Spare</span><span class="dv-val">${f.spare.value}</span></span>
+        <span class="dv" title="${esc(f.rule)}"><span class="dv-label">Each BOM row</span><span class="dv-val">${f.total}</span></span>
+        <span class="dv-rule">${esc(f.rule)}. Automatic spare ${esc(f.spare.rule)}.</span>
+      </div>${f.candidates.length ? '' : `<div class="prow-err">${noSfp(f.speed, f.media)}</div>`}`).join('');
+    return `${rows}<div class="prow-sub prow-sub--foot"><button class="btn btn--secondary btn--sm" data-action="pp-pin" data-i="${r.index}" aria-describedby="${help}" ${dirty ? 'disabled title="Save or discard the changes first"' : ''}>Pin this switch to change its SFPs</button>
+      <span class="muted small" id="${help}">The sizing picked ${esc(nameOf(r.pin))}. Pinning writes it to this row: the row then keeps this switch when the IED count changes.</span></div>`;
+  }
   function sfpRows(r) {
+    if (r.sfp_reason) return `<div class="prow-err"><span class="err small">${icon('warn')}<span>${esc(r.sfp_reason)}</span></span></div>`;
+    if (r.pin) return sizedSfpRows(r);
     return r.sfp.map((f) => {
       const key = `f.${r.index}.${f.speed}.${f.media}`;
       return `<div class="prow-sub"><span class="prow-sub-what">${esc(f.speed)} · ${esc(f.media)} SFP</span>
-        ${mark(key, select(`p-${key}`, [['', 'Automatic: same make first'], ...f.candidates.map((c) => [c, c])], shown(key)).replace('<select ', `<select aria-label="SFP for ${esc(f.speed)} ${esc(f.media)}, ${esc(r.label)}" `))}</div>${sfpCounts(r, f, key)}${f.candidates.length ? '' : `<div class="prow-err">${noSfp(f.speed, f.media)}</div>`}`;
+        ${mark(key, select(`p-${key}`, [['', autoText(f)], ...f.candidates.map((c) => [c, partText(sfpOpt(c))])], shown(key)).replace('<select ', `<select aria-label="SFP for ${esc(f.speed)} ${esc(f.media)}, ${esc(r.label)}" `))}</div>${sfpCounts(r, f, key)}${f.candidates.length ? '' : `<div class="prow-err">${noSfp(f.speed, f.media)}</div>`}`;
     }).join('');
   }
   /* M49: the SFPs on each BOM row of the switch: links (the sizing's), spare and extra (derived values), total. */
@@ -184,7 +205,8 @@
     const what = `${f.speed} ${f.media} SFPs, ${r.label}`, sk = `${base}.spare`, xk = `${base}.extra`;
     const dv = (key, label, auto) => {
       const v = shown(key), id = `p-${key}`;
-      if (UI.editing === key) return App.derived(key, { editing: true, id, label, control: input(id, v, { mono: true, num: true, invalid: !!PF.errors[key] }).replace('class="input', 'class="dv-input input').replace('<input ', `<input data-dv="${key}" aria-label="${label}, ${esc(what)}" `) });
+      /* M86: the editor opens on the automatic value, as the switch-count editor does */
+      if (UI.editing === key) return App.derived(key, { editing: true, id, label, control: input(id, v === '' ? String(auto) : v, { mono: true, num: true, invalid: !!PF.errors[key] }).replace('class="input', 'class="dv-input input').replace('<input ', `<input data-dv="${key}" aria-label="${label}, ${esc(what)}" `) });
       return App.derived(key, { label, shown: v === '' ? String(auto) : v, auto: String(auto), overridden: v !== '' && v !== String(auto), changed: key in PF.draft, bad: !!PF.errors[key], edit: 'pp-edit', reset: 'pp-reset' });
     };
     const dirty = sk in PF.draft || xk in PF.draft, errs = [sk, xk].map(err).join('');
@@ -546,6 +568,14 @@
       reloaded(page);
       toast(`Moved ${page.parts.rows[to].label} ${to < i ? 'up' : 'down'}`, 'check', () => Bridge.call('move_equipment', S.project.file, S.sub, to, i).then(reloaded).catch(fail));
     }).catch(fail);
+  };
+  /* M86: pin the switch the sizing picked, through the part writer, so its SFP rows can be edited. */
+  ACTIONS['pp-pin'] = (el) => {
+    const r = rowAt(+el.dataset.i), name = nameOf(r.pin);
+    el.disabled = true;
+    Bridge.call('set_equipment_part', S.project.file, S.sub, r.index, r.pin.part_id)
+      .then((d) => { reloaded(d.page); toast(`Pinned ${name} to the ${r.label} row. Its SFPs can be changed now.`, 'check'); })
+      .catch((e) => { el.disabled = false; fail(e); });
   };
   ACTIONS['pp-remove'] = (el) => {
     const i = +el.dataset.i, file = S.project.file, sid = S.sub, label = rowAt(i).label; UI.menu = -1;
