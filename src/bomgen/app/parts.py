@@ -19,7 +19,7 @@ from bomgen.checks import duplicate_tag_checks
 from bomgen.engine.errors import EngineError
 from bomgen.engine.layout import CABLE_MANAGED, PRIORITY, LayoutResult, layout_preview, runs
 from bomgen.engine.mcb import has_branch_mcb
-from bomgen.engine.network import unserved_links
+from bomgen.engine.network import automatic_sfp, unserved_links
 from bomgen.engine.rules_text import sfp_rule, sfp_spare_rule
 from bomgen.engine.units import expand_devices
 from bomgen.io import ied_csv
@@ -28,7 +28,7 @@ from bomgen.io.errors import InputError
 from bomgen.io.loader import LoadedSubstation
 from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.store import LibraryStore
-from bomgen.models.library import Category, DeviceType, Library, Media, PurdueLevel
+from bomgen.models.library import Category, DeviceType, Library, Media, PortSpeed, PurdueLevel
 from bomgen.models.output import Derived
 from bomgen.models.project import Project
 from bomgen.models.substation import Equipment, EquipmentRole, Side, Substation
@@ -218,15 +218,24 @@ def row_label(entry: Equipment, library: Library) -> str:
 SfpCounts = dict[tuple[str, str], tuple[int, int]]  # (speed, media) -> (links, spare)
 
 
-def _preview(loaded: LoadedSubstation | None) -> LayoutResult | None:
-    """The layout the page describes; none for a blank substation, which has no switches
-    to size yet (the model takes both or none, ADR 0013), or when the sizing fails."""
-    if loaded is None or not loaded.substation.equipment:
-        return None
+NOT_LOADED = (
+    "The SFPs cannot be counted until the substation loads: fix the problems listed at the "
+    "top of this page."
+)
+
+
+def _preview(loaded: LoadedSubstation | None) -> tuple[LayoutResult | None, str | None]:
+    """The layout the page describes, or why the switch rows have no SFP rows (plan M86);
+    neither for a blank substation, which has no switches to size yet (the model takes
+    both or none, ADR 0013)."""
+    if loaded is None:
+        return None, NOT_LOADED
+    if not loaded.substation.equipment:
+        return None, None
     try:
-        return layout_preview(loaded)
-    except EngineError:
-        return None
+        return layout_preview(loaded), None
+    except EngineError as exc:
+        return None, f"The SFPs cannot be counted while the layout fails: {str(exc).rstrip('.')}."
 
 
 def _tag_info(
@@ -262,10 +271,13 @@ def _tag_info(
 
 def _sfp_needs(loaded: LoadedSubstation, result: LayoutResult) -> dict[str, SfpCounts]:
     """The (speed, media) pairs each sized switch entry's ports use, from the layout, with
-    the links and automatic spare of the first panel row that hosts it (plan M49)."""
+    the links and automatic spare of the first panel row that hosts it (plan M49); an L1
+    row with no part has those of the switch the sizing picked (plan M86)."""
     needs: dict[str, SfpCounts] = {}
     for entry in loaded.substation.equipment:
-        if entry.role not in SIZED or entry.part_id is None:
+        if entry.role not in SIZED or (
+            entry.role is EquipmentRole.L2_SWITCH and entry.part_id is None
+        ):
             continue
         key = (
             result.plan.l1_part_id
@@ -288,9 +300,15 @@ def _sfp_needs(loaded: LoadedSubstation, result: LayoutResult) -> dict[str, SfpC
 
 
 def _sfp(
-    entry: Equipment, speed: str, media: str, counts: tuple[int, int], candidates: list[str]
+    entry: Equipment,
+    speed: str,
+    media: str,
+    counts: tuple[int, int],
+    candidates: list[str],
+    pick: str | None,
 ) -> dict[str, Any]:
-    """One SFP sub-row of a switch: its part choice and its quantity per BOM row."""
+    """One SFP sub-row of a switch: its part choice, the part the engine takes without
+    one (``pick``, plan M86) and its quantity per BOM row."""
     choice = next((c for c in entry.sfp if (c.speed.value, c.media.value) == (speed, media)), None)
     used, auto = counts
     override = choice.spare if choice is not None else None
@@ -302,6 +320,7 @@ def _sfp(
         "media": media,
         "choice": choice.part_id if choice is not None else None,
         "candidates": candidates,
+        "auto": pick,
         "used": used,
         "spare": Derived[int](value=auto, rule=rule, override=override).model_dump(mode="json"),
         "extra": extra,
@@ -324,10 +343,24 @@ def _row(
     needs: SfpCounts,
     loose: list[dict[str, Any]],
     host_panel: str | None,
+    named: dict[str, dict[str, Any]],
+    sized_part: DeviceType | None,
+    sfp_reason: str | None,
 ) -> dict[str, Any]:
+    """``named``: each library part as the picker names it; ``sized_part``: the switch the
+    sizing picked for an L1 row with no part; ``sfp_reason``: why a switch row has no SFP
+    rows (plan M86). An SFP row names its parts by id; ``options["sfp"]`` names them."""
     part = library.get(entry.part_id) if library and entry.part_id else None
     category = _category(entry, part)
     default = category in CABLE_MANAGED  # the layout's rule (ADR 0013, amended)
+    host = part or sized_part  # the switch whose ports take the SFPs
+
+    def auto(speed: str, media: str) -> str | None:
+        if host is None or library is None:
+            return None
+        pick = automatic_sfp(host, PortSpeed(speed), Media(media), library)
+        return pick.part_id if pick is not None else None
+
     sfp = [
         _sfp(
             entry,
@@ -335,6 +368,7 @@ def _row(
             media,
             needs[(speed, media)],
             [d.part_id for d in _parts(library) if _serves(d, speed, media)] if library else [],
+            auto(speed, media),
         )
         for speed, media in sorted(needs)
     ]
@@ -371,6 +405,9 @@ def _row(
         ],
         "overrides": entry.overrides.values() if entry.overrides is not None else {},
         "sfp": sfp,
+        # M86, Q76 (a): the sized L1's SFP rows are read-only until its switch is pinned
+        "pin": named.get(sized_part.part_id) if sized_part is not None else None,
+        "sfp_reason": sfp_reason if entry.role in SIZED else None,
         "bom_text": {k: getattr(entry, k) for k in BOM_TEXT},  # M59
         # M74: a common row may be steered to a panel; a redundant or one-side row follows its LAN
         "placement": {
@@ -431,8 +468,9 @@ def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
     substation, library, loaded, project = _source(project_file, substation_id, store)
     if substation is None:
         return page | {"parts": None}
-    result = _preview(loaded)
+    result, sfp_reason = _preview(loaded)
     needs = _sfp_needs(loaded, result) if loaded is not None and result is not None else {}
+    picked = library.get(result.plan.l1_part_id) if library and result else None
     tags, duplicates = _tag_info(loaded, result) if loaded and result else ({}, {})
     items = substation.loose_material.items if substation.loose_material else []
     # loose material starts with its host panel, so accessories can be added only then
@@ -491,11 +529,22 @@ def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
     def row_category(entry: Equipment) -> Category | None:
         return _category(entry, library.get(entry.part_id) if library and entry.part_id else None)
 
-    categories = {*ROLE_CATEGORY.values(), *ADD_CATEGORIES, Category.ACCESSORY}
+    # SFP: the names of the parts the SFP rows offer (plan M86)
+    categories = {*ROLE_CATEGORY.values(), *ADD_CATEGORIES, Category.ACCESSORY, Category.SFP}
     return page | {
         "parts": {
             "rows": [
-                _row(i, e, library, needs.get(e.id, {}), loose, host)
+                _row(
+                    i,
+                    e,
+                    library,
+                    needs.get(e.id, {}),
+                    loose,
+                    host,
+                    opts,
+                    picked if e.role is EquipmentRole.L1_SWITCH and e.part_id is None else None,
+                    sfp_reason,
+                )
                 | {"tags": tags.get(e.id, []), "duplicate": duplicates.get(e.id)}
                 | {"on_list": on_list(e.part_id)}
                 | {"choices": choices(e.role, row_category(e), e.part_id)}  # M83

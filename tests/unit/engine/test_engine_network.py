@@ -8,10 +8,10 @@ from engine_factories import device, library, panel, powered, sfp, switch
 
 from bomgen.engine.errors import EngineError
 from bomgen.engine.items import BomItem
-from bomgen.engine.network import accessories
+from bomgen.engine.network import accessories, automatic_sfp
 from bomgen.engine.units import expand_devices
 from bomgen.models.bom import Group, QtySum
-from bomgen.models.library import SfpChoice
+from bomgen.models.library import DeviceType, Media, PortSpeed, SfpChoice
 
 PARTS = (
     switch("L2", "L2"),
@@ -254,3 +254,20 @@ def test_sfp_spare_zero_leaves_the_links_alone() -> None:
 def test_sfp_extra_on_a_row_without_spares() -> None:
     items = build_with_choice([{"speed": "1G", "media": "MM", "extra": 2}], MM_DOWNLINKS)
     assert summary(items)[0] == ("L2-ESW-A01 SFP (MM)", QtySum(parts=(4, 2)), "SFP-SX")
+
+
+def test_the_automatic_sfp_the_parts_page_names_is_the_one_the_bom_takes() -> None:
+    """plan M86: the page names the pick before any choice; same make first, else library order."""
+    lib = library(*PARTS)
+    fw, rtac = lib.get("FW"), lib.get("RTAC")
+    assert fw is not None
+    assert rtac is not None
+
+    def pick(host: DeviceType, speed: PortSpeed) -> str | None:
+        part = automatic_sfp(host, speed, Media.MM, lib)
+        return part.part_id if part is not None else None
+
+    plans = {"FW": {"downlinks": [{"count": 2, "speed": "1G", "media": "MM"}]}}
+    assert pick(fw, PortSpeed.G1) == summary(build([{"part_id": "FW"}], plans))[0][2] == "FR-SX"
+    assert pick(rtac, PortSpeed.G1) == "SFP-SX"
+    assert pick(rtac, PortSpeed.G10) is None

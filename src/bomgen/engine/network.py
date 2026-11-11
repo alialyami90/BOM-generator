@@ -9,7 +9,7 @@ from bomgen.engine.kits import device_item
 from bomgen.engine.tags import without_prefix
 from bomgen.engine.units import DeviceRow, describe, expand_devices
 from bomgen.models.bom import BomLine, Group, Qty, QtySum
-from bomgen.models.library import Category, DeviceType, Library, Media, SfpChoice
+from bomgen.models.library import Category, DeviceType, Library, Media, PortSpeed, SfpChoice
 from bomgen.models.panel import DeviceInstance, Panel, PortAllocation, PortPlan
 from bomgen.models.substation import Equipment
 
@@ -98,21 +98,30 @@ def _sfp_for(row: DeviceRow, allocation: PortAllocation, library: Library) -> De
     chosen = choice.part_id if choice is not None else None
     if chosen is not None:
         part = library.get(chosen)
-        if part is None or not _serves(part, allocation):
+        if part is None or not _serves(part, allocation.speed, allocation.media):
             host = row.tag or row.device.part_id
             raise EngineError(
                 f"{host}: SFP {chosen} is not {allocation.speed.value} {allocation.media.value}"
             )
         return part
-    matches = [device for device in library.devices if _serves(device, allocation)]
-    if not matches:
+    part = automatic_sfp(row.device, allocation.speed, allocation.media, library)
+    if part is None:
         host = row.tag or row.device.part_id
         raise EngineError(
             f"{host}: no SFP in the library for {allocation.speed.value} "
             f"{allocation.media.value} ports"
         )
-    same_make = [device for device in matches if device.make == row.device.make]
-    return (same_make or matches)[0]
+    return part
+
+
+def automatic_sfp(
+    host: DeviceType, speed: PortSpeed, media: Media, library: Library
+) -> DeviceType | None:
+    """The SFP ``host``'s ``speed`` ``media`` ports take with no choice: the host's make
+    first, else library order; none when no library SFP serves them."""
+    matches = [device for device in library.devices if _serves(device, speed, media)]
+    same_make = [device for device in matches if device.make == host.make]
+    return next(iter(same_make or matches), None)
 
 
 def _choice(row: DeviceRow, allocation: PortAllocation) -> SfpChoice | None:
@@ -127,9 +136,9 @@ def _choice(row: DeviceRow, allocation: PortAllocation) -> SfpChoice | None:
     )
 
 
-def _serves(device: DeviceType, allocation: PortAllocation) -> bool:
+def _serves(device: DeviceType, speed: PortSpeed, media: Media) -> bool:
     return device.category is Category.SFP and any(
-        p.speed is allocation.speed and p.media is allocation.media for p in device.ports
+        p.speed is speed and p.media is media for p in device.ports
     )
 
 

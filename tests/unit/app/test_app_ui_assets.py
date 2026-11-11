@@ -1318,3 +1318,30 @@ def test_a_library_row_is_named_by_make_and_model_not_by_its_id(tmp_path: Path) 
     assert "<th>Device</th>" in js
     assert "of: (originalOf || {})[d.part_id] || null" in js  # row() keeps the original
     assert "<dt>Part ID</dt>" in js  # the id is in the detail pane
+
+
+def test_m86_every_switch_row_shows_its_sfp_rows_or_says_why_not() -> None:
+    """plan M86 (Ali's v0.5.0 point 2, Q76 (a)): a sized L1 shows the picked switch's SFPs
+    read-only with one pin control; missing rows say why; the Spare editor opens on the
+    automatic value; the automatic choice names its part by make and model."""
+    js = PARTS.read_text(encoding="utf-8")
+    rows = js[js.index("function sfpRows(r)") : js.index("function sfpCounts(")]
+    # the reason comes from the API; the JS only shows it, before anything else
+    assert rows.index("if (r.sfp_reason)") < rows.index("if (r.pin) return sizedSfpRows(r);")
+    assert "${esc(r.sfp_reason)}" in rows
+    # the automatic option and every other option are named by make and model (Q82)
+    assert "(f.auto ? `Automatic: ${nameOf(sfpOpt(f.auto))}` : 'Automatic')" in js
+    assert "sub().page().parts.options.sfp" in js  # the API's names, never the id alone
+    assert "[['', autoText(f)], ...f.candidates.map((c) => [c, partText(sfpOpt(c))])]" in rows
+    assert "Automatic: same make first" not in js
+    sized = js[js.index("function sizedSfpRows(r)") : js.index("function sfpRows(r)")]
+    assert "select(" not in sized  # read-only
+    assert "pp-edit" not in sized
+    assert "Pin this switch to change its SFPs" in sized
+    assert "the row then keeps this switch when the IED count changes" in sized
+    assert "${dirty ? 'disabled title=\"Save or discard the changes first\"' : ''}" in sized
+    pin = js[js.index("ACTIONS['pp-pin']") :]
+    assert "Bridge.call('set_equipment_part', S.project.file, S.sub, r.index, r.pin.part_id)" in pin
+    # the Spare editor opens on the automatic value, as the switch-count editor does
+    counts = js[js.index("function sfpCounts(") : js.index("function linkRow(r)")]
+    assert "input(id, v === '' ? String(auto) : v, " in counts
