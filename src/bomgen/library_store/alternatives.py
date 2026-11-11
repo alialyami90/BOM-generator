@@ -51,6 +51,20 @@ def compare_alternatives(
     return [_row(member, device, records) for member in members]
 
 
+def alternative_of(library: Library) -> dict[str, str]:
+    """Each alternative's original: a part with a tier maps to the first part of its group
+    without one (plan M84). An alternative whose group has no such part maps to nothing."""
+    originals: dict[str, str] = {}
+    for device in library.devices:
+        if device.alt_group is not None and device.tier is None:
+            originals.setdefault(device.alt_group, device.part_id)
+    return {
+        device.part_id: original
+        for device in library.devices
+        if device.tier is not None and (original := originals.get(device.alt_group or ""))
+    }
+
+
 def _row(
     member: DeviceType, reference: DeviceType, records: Mapping[str, DeviceRecord] | None
 ) -> AlternativeRow:

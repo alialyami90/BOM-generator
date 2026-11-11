@@ -93,6 +93,7 @@ from bomgen.io.fields import (
 )
 from bomgen.io.loader import PROJECT_FILE, load_library
 from bomgen.io.yaml_source import read_yaml
+from bomgen.library_store.alternatives import alternative_of
 from bomgen.library_store.csv_export import GROUPS as CSV_GROUPS
 from bomgen.library_store.device_db import DeviceRecord, load_device_records
 from bomgen.library_store.health import parts_in_use
@@ -394,6 +395,7 @@ class Api:
                 "records": {},
                 "records_problem": None,
                 "catalogues": None,
+                "alternative_of": {},
             }
         store = self._library_store()
         manifest, problem = self._manifest(installed.name, installed.active)
@@ -422,6 +424,7 @@ class Api:
             "records": records,
             "records_problem": records_problem,
             "catalogues": catalogues_page(library.catalogues, set(library.part_ids()), records),
+            "alternative_of": alternative_of(library),  # plan M84
         }
 
     @endpoint
