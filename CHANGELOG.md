@@ -7,6 +7,27 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- The part picker on Parts offers the parts that fit each row (M83): an L1, L2 or external switch
+  row lists only switches of its level, alternatives appear only for the row's own part, and
+  obsolete parts are left out. A part is named by its make and model, not by its library id, and
+  an alternative says which part it replaces ("Low-tier alternative to Ruggedcom RST-2228").
+  *Search all parts* in the picker lists the whole category, where a switch also says its level.
+  *Add a device › Switch* offers external switches only.
+- The shipped library's Cisco and Moxa SFP alternatives carry the speed and media of the part
+  they replace (M85), so Parts offers them for a link and a switch can take one; before, 23 of the
+  27 SFP parts could never be chosen. Two single-mode parts listed in the 100M multimode group
+  stay out until they are researched. A Cisco or Moxa switch now picks its own make's SFP
+  automatically. psa-devices 1.18.0.
+
+### Fixed
+
+- The substation list in the left rail stays open (M82). The click that opened it ran the switch
+  itself, which redrew the window and shut the list unless the mouse button was held; on Home,
+  Project or Library it jumped to Panels. A list now acts only when a choice is made. Preview's
+  group filter had the same fault.
+
 ## [0.5.0] - 2026-11-04
 
 ### Added

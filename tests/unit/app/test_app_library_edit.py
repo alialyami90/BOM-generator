@@ -597,7 +597,7 @@ def project_on_installed_library(tmp_path: Path) -> tuple[str, int]:
     folder = tmp_path / "workspace" / "jfgp2"
     shutil.copytree(EXAMPLES, folder)
     text = (folder / "project.yaml").read_text(encoding="utf-8")
-    text = text.replace("  file: library.yaml\n", "").replace("version: 1.17.0", "version: 1.0.0")
+    text = text.replace("  file: library.yaml\n", "").replace("version: 1.18.0", "version: 1.0.0")
     (folder / "project.yaml").write_text(text, encoding="utf-8")
     equipment = read_yaml(folder / "substations" / "gis01" / "substation.yaml").data["equipment"]
     index = next(i for i, e in enumerate(equipment) if e.get("part_id") == PART)
