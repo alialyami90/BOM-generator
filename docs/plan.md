@@ -2120,3 +2120,35 @@ substation cabinet is not an office). (b) Keep the rule; the engineer changes th
 have only a length for a model ("10m"). (a) Their description leads, then the make or model:
 "USB cable for Annunciator 10m" (built in the Library list; recommended). (b) Only what the make
 and model give, even when two rows read the same. (c) Give each a make and model in the data.
+
+**Q85 — The SFP quantity when one switch group sits in two cabinets** (M87). *Answered (Ali,
+2026-11-11): as built.* One stored spare applies to every cabinet's BOM row of the entry, so the
+rows differ when their links differ (at 300 IEDs, 26 and 6 links). (a) The engineer types the
+total of the row with the most links and the page lists each cabinet's row with its own sum
+(chosen). (b) A typed quantity per cabinet row, which needs `spare` per panel row in the model
+and an ADR.
+
+**Q86 — The values a row's details strip offers** (M90). *Open.* The strip is the same on every
+row, so an annunciator row offers Height, which does nothing there. (a) The API sends the strip's
+fields per row and a row offers only values that act (recommended). (b) Leave the strip alike on
+every row.
+
+**Q87 — Hand-written panels and the choices made on Parts** (M87). *Open.* An entry's part number,
+overrides and SFP choice live on its derived part (ADR 0024), which only generated panels place;
+a hand-written panel file names the library part, so no such choice made on Parts has ever
+reached its BOM. Since M87 the SFP rows say so and are read-only there. (a) Keep it: the panel
+file is the source for a hand-written panel, and *Generate* makes the rows editable
+(recommended). (b) Have the loader place the entry's derived part on a hand-written row that
+names its base part, which changes what existing hand-written projects print and amends
+ADR 0024.
+
+**Q88 — An annunciator row's text** (M90). *Open.* Its loose row prints the part's own text; the
+row's tag, purpose and note are not used, so M90 took those fields off the row. (a) Keep it
+(recommended: the example matches the workbook this way). (b) Let the tag and the note reach the
+loose row and offer those two fields. (c) Also append the purpose to the description, as on a
+panel row.
+
+**Q89 — Port allocations on the patch panel** (M89). *Open.* Since M89 Panels › Ports offers
+*Add allocation* only to a device with a link to the L2 switch or a written plan, so the fibre
+patch panel no longer gets it. (a) Leave it: it has no link and no SFPs to plan (recommended).
+(b) Offer it again, as an exception for the patch panel.

@@ -3,6 +3,22 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-11-11: M86, M87, M89 and M95 on main; M90 in review (Lead)
+
+- **Base:** main `3fff89d` (#408). Not released: `[Unreleased]` holds every entry since v0.5.0.
+- **Done:** M89 the L2 link line only on networked rows, on Parts (#402, `parts-network`) and on
+  Panels › Ports (#404, `panel-detailing`); M86 SFP rows on every switch row (#403); M87 a typed
+  SFP quantity, counted from the panels the build uses (#408, three passes); M95 the suite green
+  on Windows: twelve test faults (#405, the lead), two faults of the app (#406,
+  `setup-design-basis`), the CI job `test-windows` (#407). M90 is PR #409. Ali answered Q85.
+- **Found:** no SFP edit made on Parts ever reached a hand-written BOM (Q87); one stored spare
+  gives different totals when a switch group is split over cabinets (Q85, shown per cabinet);
+  replacing a project folder failed with Windows' own error whenever a file in it was open.
+  Q86 to Q89 are new.
+- **Not done:** none of the fixes has been seen in the app window. Q83 is unanswered. `docs/ui/`
+  still describes the old Parts rows, picker, Library table and Ports tab (NEXT §8).
+- **Next:** merge M90, then M91, then the release (changelog PR, then the bump PR).
+
 ## 2026-11-11: M82, M83, M84 and M85 on main (Lead)
 
 - **Base:** main `609f924` (#400). Not released: `[Unreleased]` holds the four entries.
