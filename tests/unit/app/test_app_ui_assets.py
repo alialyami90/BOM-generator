@@ -1375,3 +1375,17 @@ def test_m87_the_sfp_total_is_the_derived_value_the_engineer_types() -> None:
     sized = js[js.index("function sizedSfpRows(r)") : js.index("function sfpRows(r)")]
     assert "pp-edit" not in sized
     assert "${f.total}" in sized
+
+
+def test_m87_hand_written_panels_show_their_sfp_rows_read_only_with_why() -> None:
+    """plan M87: on hand-written panels the BOM takes the files' port plans, so the switch
+    rows are the read-only ones, with the API's sentence where the Pin button would be."""
+    js = PARTS.read_text(encoding="utf-8")
+    rows = js[js.index("function sfpRows(r)") : js.index("function sfpCounts(")]
+    assert rows.index("if (r.sfp_hand) return sizedSfpRows(r);") < rows.index(
+        "if (r.pin) return sizedSfpRows(r);"
+    )
+    sized = js[js.index("function sizedSfpRows(r)") : js.index("function sfpRows(r)")]
+    hand = sized.index("if (r.sfp_hand) return")
+    assert '<span class="muted small">${esc(r.sfp_hand)}</span>' in sized[hand:]
+    assert hand < sized.index("Pin this switch to change its SFPs")

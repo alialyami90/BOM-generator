@@ -1403,8 +1403,8 @@ class Api:
         """Why ``total`` SFPs on each BOM row would be refused, or None (plan M87)."""
         project, store = Path(project_file), self._library_store()
         with self._substation(substation_id), _edit_refusals():
-            links = sfp_links(project, substation_id, store, index, speed, media)
             try:
+                links = sfp_links(project, substation_id, store, index, speed, media)
                 parts_edit.sfp_spare_for_total(
                     project, substation_id, index, speed, media, total, links=links, extra=extra
                 )

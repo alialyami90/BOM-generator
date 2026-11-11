@@ -192,11 +192,14 @@
         <span class="dv" title="${esc(f.rule)}"><span class="dv-label">Each BOM row</span><span class="dv-val">${f.total}</span></span>
         <span class="dv-rule">${esc(f.rule)}. Automatic spare ${esc(f.spare.rule)}.</span>
       </div>${f.candidates.length ? '' : `<div class="prow-err">${noSfp(f.speed, f.media)}</div>`}`).join('');
+    /* M87: on hand-written panels the BOM takes the files' port plans: the same read-only rows, no pin */
+    if (r.sfp_hand) return `${rows}<div class="prow-sub prow-sub--foot"><span class="muted small">${esc(r.sfp_hand)}</span></div>`;
     return `${rows}<div class="prow-sub prow-sub--foot"><button class="btn btn--secondary btn--sm" data-action="pp-pin" data-i="${r.index}" aria-describedby="${help}" ${dirty ? 'disabled title="Save or discard the changes first"' : ''}>Pin this switch to change its SFPs</button>
       <span class="muted small" id="${help}">The sizing picked ${esc(nameOf(r.pin))}. Pinning writes it to this row: the row then keeps this switch when the IED count changes.</span></div>`;
   }
   function sfpRows(r) {
     if (r.sfp_reason) return `<div class="prow-err"><span class="err small">${icon('warn')}<span>${esc(r.sfp_reason)}</span></span></div>`;
+    if (r.sfp_hand) return sizedSfpRows(r);  /* M87: read-only, from the hand-written panel files */
     if (r.pin) return sizedSfpRows(r);
     return r.sfp.map((f) => {
       const key = `f.${r.index}.${f.speed}.${f.media}`;
