@@ -28,7 +28,7 @@ from bomgen.io.errors import InputError
 from bomgen.io.loader import LoadedSubstation
 from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.store import LibraryStore
-from bomgen.models.library import Category, DeviceType, Library, Media
+from bomgen.models.library import Category, DeviceType, Library, Media, PurdueLevel
 from bomgen.models.output import Derived
 from bomgen.models.project import Project
 from bomgen.models.substation import Equipment, EquipmentRole, Side, Substation
@@ -134,9 +134,49 @@ VALUES = (
 SIZED = (EquipmentRole.L1_SWITCH, EquipmentRole.L2_SWITCH)
 
 
+# Add a device makes a row of this role for its category; "other" for the rest
+ADD_ROLE = {
+    Category.PATCH_PANEL: EquipmentRole.FOPP,
+    Category.FIREWALL: EquipmentRole.FIREWALL,
+    Category.NETWORK_SWITCH: EquipmentRole.EXT_SWITCH,
+    Category.KVM: EquipmentRole.KVM,
+    Category.CONSOLE: EquipmentRole.CONSOLE,
+    Category.REDBOX: EquipmentRole.REDBOX,
+    Category.MEDIA_CONVERTER: EquipmentRole.MEDIA_CONVERTER,
+}
+# the switch roles offer the switches of their Purdue level (the loader's L1 rule, plan M83)
+ROLE_LEVEL = {
+    EquipmentRole.L1_SWITCH: PurdueLevel.L1,
+    EquipmentRole.L2_SWITCH: PurdueLevel.L2,
+    EquipmentRole.EXT_SWITCH: PurdueLevel.EXT,
+}
+
+
 def _parts(library: Library) -> list[DeviceType]:
     """The library's own parts: derived parts are this design's, never a choice."""
     return [d for d in library.devices if d.derived_from is None]
+
+
+def row_choices(
+    library: Library, role: EquipmentRole, category: Category, current: str | None
+) -> list[DeviceType]:
+    """The parts a row of ``role`` offers (plan M83, Q74 (a)): its category, at the role's
+    level for a switch; an alternative only of the current part's group; no obsolete part;
+    and the current part always."""
+    own = library.get(current) if current else None
+    group = own.alt_group if own is not None else None
+    level = ROLE_LEVEL.get(role)
+    return [
+        d
+        for d in _parts(library)
+        if d.part_id == current
+        or (
+            d.category is category
+            and (level is None or d.purdue_level is level)
+            and (d.tier is None or (group is not None and d.alt_group == group))
+            and d.state != "obsolete"
+        )
+    ]
 
 
 def time_accessory_parts(library: Library, part_id: str) -> frozenset[str]:
@@ -411,6 +451,42 @@ def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
         part = library.get(part_id) if library is not None and part_id else None
         return avl is None or part is None or avl.allows(part.part_id, part.make)
 
+    originals = {d.alt_group: d for d in own if d.alt_group is not None and d.tier is None}
+
+    def option(d: DeviceType) -> dict[str, Any]:
+        """What the picker shows of a part; an alternative names the part it replaces (M83)."""
+        replaced = originals.get(d.alt_group) if d.tier is not None and d.alt_group else None
+        return {
+            "part_id": d.part_id,
+            "make": d.make,
+            "model": d.model,
+            "tags": d.tags,
+            "supply_type": d.supply_type.value if d.supply_type else None,
+            "unit_power_w": d.unit_power_w,
+            "data_quality": records[d.part_id].verified if d.part_id in records else None,
+            "on_list": on_list(d.part_id),
+            "tier": d.tier,
+            "replaces": None
+            if replaced is None
+            else {"part_id": replaced.part_id, "make": replaced.make, "model": replaced.model},
+        }
+
+    opts = {d.part_id: option(d) for d in own}
+
+    def first(d: DeviceType) -> bool:  # the list's parts first
+        return not opts[d.part_id]["on_list"]
+
+    def choices(
+        role: EquipmentRole, category: Category | None, current: str | None
+    ) -> list[dict[str, Any]]:
+        if library is None or category is None:
+            return []
+        found = row_choices(library, role, category, current)
+        return [opts[d.part_id] for d in sorted(found, key=first)]
+
+    def row_category(entry: Equipment) -> Category | None:
+        return _category(entry, library.get(entry.part_id) if library and entry.part_id else None)
+
     categories = {*ROLE_CATEGORY.values(), *ADD_CATEGORIES, Category.ACCESSORY}
     return page | {
         "parts": {
@@ -418,35 +494,33 @@ def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
                 _row(i, e, library, needs.get(e.id, {}), loose, host)
                 | {"tags": tags.get(e.id, []), "duplicate": duplicates.get(e.id)}
                 | {"on_list": on_list(e.part_id)}
+                | {"choices": choices(e.role, row_category(e), e.part_id)}  # M83
                 for i, e in enumerate(substation.equipment)
             ],
+            # the whole category, for "Search all parts"
             "options": {
-                c.value: [
-                    {
-                        "part_id": d.part_id,
-                        "make": d.make,
-                        "model": d.model,
-                        "tags": d.tags,
-                        "supply_type": d.supply_type.value if d.supply_type else None,
-                        "unit_power_w": d.unit_power_w,
-                        "data_quality": records[d.part_id].verified
-                        if d.part_id in records
-                        else None,
-                        "on_list": on_list(d.part_id),
-                    }
-                    for d in sorted(own, key=lambda d: not on_list(d.part_id))  # the list's first
-                    if d.category is c
-                ]
+                c.value: [opts[d.part_id] for d in sorted(own, key=first) if d.category is c]
                 for c in sorted(categories)
             },
             "ieds": [ied_csv.shown(r) for r in substation.network.ied_schedule],  # M60
             "links": [x.model_dump(mode="json") for x in substation.network.external_links],
             "default_rows": [
-                {"role": r.value, "label": ROLE_LABEL[r], "category": ROLE_CATEGORY[r].value}
+                {
+                    "role": r.value,
+                    "label": ROLE_LABEL[r],
+                    "category": ROLE_CATEGORY[r].value,
+                    "choices": choices(r, ROLE_CATEGORY[r], None),
+                }
                 for r in DEFAULT_ROWS
             ],
             "add_categories": [
-                {"category": c.value, "label": CATEGORY_LABEL[c]} for c in ADD_CATEGORIES
+                {
+                    "category": c.value,
+                    "label": CATEGORY_LABEL[c],
+                    "role": (role := ADD_ROLE.get(c, EquipmentRole.OTHER)).value,
+                    "choices": choices(role, c, None),
+                }
+                for c in ADD_CATEGORIES
             ],
             "vendor_list": avl.name if avl is not None else None,
         }
