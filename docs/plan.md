@@ -1454,7 +1454,16 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   on the automatic value; the automatic choice names its part. Since M85 a Cisco or Moxa switch
   picks its own make's low-tier SFP, a commercial-temperature part for some: the pick rule is
   settled here (Q83). Size S.
-- **M87 — A typed SFP quantity.** *`parts-network`; Q77.* Point 2. Cause: M49 lets the engineer set
+- **M87 — A typed SFP quantity.** *`parts-network`; Q77.* **Done**, on Q77's answer (a). A typed
+  total is stored as the spare it implies (`io/parts_edit.set_sfp_total`, endpoints
+  `set_sfp_total` and `check_sfp_total`); Spare folds under the total, Extra stays. Two faults
+  found and fixed on the way: the page counted SFPs from the layout preview, not from the
+  panels the build uses, so on hand-written panels it showed 9 where the BOM prints 27, and
+  no SFP edit made on Parts has ever reached a hand-written BOM (the derived part is never
+  placed there): those rows are now read-only and say so. And one stored spare gives a
+  different total per cabinet when a switch group is split (at 300 IEDs, 100 and 80): the
+  page lists each cabinet's row (Q85). A test compares every row on the page with its BOM
+  line on hand-written, generated and split panels. Point 2. Cause: M49 lets the engineer set
   `spare` and `extra` on top of a computed number; the quantity itself (`screens-parts.js`
   `sfpCounts`) is display only, and on an L2 switch, where the automatic spare is 0, it can only
   go up. Fix: the quantity is the derived value the engineer edits; a typed total is stored as

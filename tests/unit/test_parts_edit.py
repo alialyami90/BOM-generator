@@ -449,3 +449,38 @@ def test_external_links_round_trip(project: Path) -> None:
     assert (link.name, link.count, link.media, link.through_firewall) == ("CCR", 2, "MM", True)
     assert parts_edit.remove_external_link(project, "gis01", 0).written
     assert "external_links" not in network(project) or not network(project)["external_links"]
+
+
+# --- A typed SFP quantity (plan M87, Q77 (a)) -----------------------------------------
+
+L1_ROW = "{ id: l1, part_id: RST2228-L1-24MM, role: l1_switch, redundant: true }"
+L1_SFP = (
+    "{ id: l1, part_id: RST2228-L1-24MM, role: l1_switch, redundant: true,"
+    " sfp: [{ speed: 1G, media: MM, spare: 5, extra: 2 }] }"
+)
+
+
+def test_m49_a_file_with_spare_and_extra_reads_and_writes_unchanged(project: Path) -> None:
+    file = substation_yaml(project)
+    file.write_text(file.read_text(encoding="utf-8").replace(L1_ROW, L1_SFP), encoding="utf-8")
+    before = file.read_text(encoding="utf-8")
+    (choice,) = equipment(project)[L1].sfp
+    assert (choice.spare, choice.extra) == (5, 2)
+
+    # the total the row already carries (6 links + 5 spare + 2 extra) writes the same file
+    assert parts_edit.set_sfp_total(project, "gis01", L1, "1G", "MM", 13, links=6).written
+    assert file.read_text(encoding="utf-8") == before
+    # and a new one moves the spare only
+    assert parts_edit.set_sfp_total(project, "gis01", L1, "1G", "MM", 20, links=6).written
+    (choice,) = equipment(project)[L1].sfp
+    assert (choice.spare, choice.extra) == (12, 2)
+
+
+def test_m49_a_total_below_the_links_and_the_extra_is_refused(project: Path) -> None:
+    file = substation_yaml(project)
+    file.write_text(file.read_text(encoding="utf-8").replace(L1_ROW, L1_SFP), encoding="utf-8")
+    before = file.read_text(encoding="utf-8")
+
+    with pytest.raises(EditError, match=r"^Enter at least 8: the switch has 6 1G MM links"):
+        parts_edit.set_sfp_total(project, "gis01", L1, "1G", "MM", 7, links=6)
+    assert file.read_text(encoding="utf-8") == before

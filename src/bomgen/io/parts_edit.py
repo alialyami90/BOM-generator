@@ -247,6 +247,67 @@ def set_sfp_count(
     return _set_sfp(project_file, substation_id, index, speed, media, field, value, store)
 
 
+def sfp_spare_for_total(
+    project_file: Path,
+    substation_id: str,
+    index: int,
+    speed: str,
+    media: str,
+    total: int,
+    *,
+    links: int,
+    extra: int | None = None,
+) -> int:
+    """The spare SFPs a typed ``total`` on each BOM row implies: what it leaves after the
+    ``links`` and the extra (plan M87, Q77 (a)). ``extra`` is the one the same save
+    writes; None reads the row's. A total below them is refused: an SFP per link is the
+    least that works."""
+    if extra is None:
+        choices = _row_of(project_file, substation_id, index).get("sfp") or []
+        extra = next(
+            (
+                int(c.get("extra", 0))
+                for c in choices
+                if (str(c.get("speed")), str(c.get("media"))) == (speed, media)
+            ),
+            0,
+        )
+    if total >= links + extra:
+        return total - links - extra
+    each = f"{links} {speed} {media} link" + ("" if links == 1 else "s")
+    why = (
+        f"and the {extra} extra SFPs come on top. Lower Extra to go below that."
+        if extra
+        else "and each link needs an SFP."
+    )
+    raise EditError(f"Enter at least {links + extra}: the switch has {each} on each BOM row, {why}")
+
+
+def set_sfp_total(
+    project_file: Path,
+    substation_id: str,
+    index: int,
+    speed: str,
+    media: str,
+    total: int | None,
+    *,
+    links: int,
+    extra: int | None = None,
+    store: LibraryStore | None = None,
+) -> EditResult:
+    """Set the SFPs on each BOM row of switch ``index`` for ``speed`` and ``media`` to
+    ``total``, stored as the spare it implies (plan M87); None goes back to the
+    automatic spare. The extra is kept."""
+    spare = (
+        None
+        if total is None
+        else sfp_spare_for_total(
+            project_file, substation_id, index, speed, media, total, links=links, extra=extra
+        )
+    )
+    return _set_sfp(project_file, substation_id, index, speed, media, "spare", spare, store)
+
+
 def _set_sfp(
     project_file: Path,
     substation_id: str,

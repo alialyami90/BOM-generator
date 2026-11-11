@@ -388,9 +388,9 @@ def test_a_monitor_row_is_named_by_its_category(
     assert row(parts(project, store), "mon")["label"] == "Monitor"
 
 
-def test_parts_page_sfp_counts_carry_rule(project: Path, store: LibraryStore) -> None:
+def test_parts_page_sfp_counts_carry_rule(laid_out: Path, store: LibraryStore) -> None:
     """M49: each SFP sub-row gives the links, spare, extra and total of each BOM row."""
-    (sfp,) = row(parts(project, store), "l1")["sfp"]
+    (sfp,) = row(parts(laid_out, store), "l1")["sfp"]
 
     assert (sfp["used"], sfp["extra"], sfp["total"]) == (6, 0, 9)
     assert sfp["spare"] == {
@@ -403,7 +403,8 @@ def test_parts_page_sfp_counts_carry_rule(project: Path, store: LibraryStore) ->
     assert sfp["rule"] == "6 links + 3 spare"
 
 
-def test_sfp_spare_and_extra_are_set_from_the_parts_page(app: api.Api, project: Path) -> None:
+def test_sfp_spare_and_extra_are_set_from_the_parts_page(app: api.Api, laid_out: Path) -> None:
+    project = laid_out
     l1 = row(ok(app.parts_page(str(project), "gis01"))["parts"], "l1")["index"]
 
     ok(app.set_sfp_count(str(project), "gis01", l1, "1G", "MM", "spare", 1))
@@ -640,6 +641,7 @@ def counts(sfps: list[Any]) -> list[tuple[Any, ...]]:
     return [(s["speed"], s["media"], s["used"], s["spare"]["value"], s["total"]) for s in sfps]
 
 
+@pytest.mark.usefixtures("laid_out")  # M87: hand-written panels have no pin (below)
 def test_m49_a_sized_l1_row_shows_the_sfp_rows_of_the_switch_the_sizing_picked(
     project: Path, substation: Path, store: LibraryStore
 ) -> None:
@@ -658,6 +660,7 @@ def test_m49_a_sized_l1_row_shows_the_sfp_rows_of_the_switch_the_sizing_picked(
     assert pinned["pin"] is None  # a row with a part is edited, not pinned
 
 
+@pytest.mark.usefixtures("laid_out")
 def test_m49_pinning_the_sized_l1_keeps_its_sfp_rows_and_makes_them_editable(
     app: api.Api, project: Path, substation: Path, store: LibraryStore
 ) -> None:
@@ -721,3 +724,301 @@ def test_m49_an_sfp_row_names_the_automatic_part(project: Path, store: LibrarySt
         ("Fortigate", "FR-TRAN-SX"),
     ]
     assert {s["auto"] for s in sfps.values()} <= set(names)
+
+
+# plan M87, Q77 (a): the quantity on each BOM row is the value the engineer types; it is
+# stored as the spare it implies. The example laid out has 6 1G MM links per L1 row.
+def sfp_of(page: Any, entry_id: str = "l1") -> Any:
+    (sfp,) = row(page["parts"], entry_id)["sfp"]
+    return sfp
+
+
+def written_sfp(substation: Path) -> Any:
+    return next(e for e in read_yaml(substation).data["equipment"] if e["id"] == "l1").get("sfp")
+
+
+@pytest.mark.usefixtures("laid_out")
+def test_m49_a_typed_total_is_stored_as_the_spare_it_implies(
+    app: api.Api, project: Path, substation: Path
+) -> None:
+    l1 = row(ok(app.parts_page(str(project), "gis01"))["parts"], "l1")["index"]
+
+    page = ok(app.set_sfp_total(str(project), "gis01", l1, "1G", "MM", 20))
+
+    assert written_sfp(substation) == [{"speed": "1G", "media": "MM", "spare": 14}]
+    sfp = sfp_of(page)
+    assert (sfp["used"], sfp["spare"]["override"], sfp["total"]) == (6, 14, 20)
+    assert sfp["quantity"] == {
+        "value": 9,
+        "rule": "6 links + 3 spare (the project's spare SFPs per L1 row)",
+        "override": 20,
+        "unit": None,
+        "source": "override",
+    }
+    assert sfp["rule"] == "6 links + 14 spare"
+
+
+@pytest.mark.usefixtures("laid_out")
+def test_m49_a_total_below_the_links_is_refused_naming_the_links(
+    app: api.Api, project: Path, substation: Path
+) -> None:
+    l1 = row(ok(app.parts_page(str(project), "gis01"))["parts"], "l1")["index"]
+    before = substation.read_text(encoding="utf-8")
+    said = "Enter at least 6: the switch has 6 1G MM links on each BOM row"
+
+    refused = app.set_sfp_total(str(project), "gis01", l1, "1G", "MM", 5)
+
+    assert refused["ok"] is False
+    assert said in str(refused["error"])
+    assert substation.read_text(encoding="utf-8") == before
+    # the draft form asks the same question before Save
+    assert said in ok(app.check_sfp_total(str(project), "gis01", l1, "1G", "MM", 5))
+    assert ok(app.check_sfp_total(str(project), "gis01", l1, "1G", "MM", 6)) is None
+    page = ok(app.set_sfp_total(str(project), "gis01", l1, "1G", "MM", 6))  # one per link
+    assert (sfp_of(page)["spare"]["override"], sfp_of(page)["total"]) == (0, 6)
+
+
+@pytest.mark.usefixtures("laid_out")
+def test_m49_resetting_the_total_returns_the_automatic_spare(
+    app: api.Api, project: Path, substation: Path
+) -> None:
+    l1 = row(ok(app.parts_page(str(project), "gis01"))["parts"], "l1")["index"]
+    ok(app.set_sfp_total(str(project), "gis01", l1, "1G", "MM", 20))
+
+    page = ok(app.set_sfp_total(str(project), "gis01", l1, "1G", "MM", None))
+
+    assert written_sfp(substation) is None
+    sfp = sfp_of(page)
+    assert (sfp["quantity"]["override"], sfp["quantity"]["source"]) == (None, "engine")
+    assert (sfp["spare"]["override"], sfp["total"]) == (None, 9)
+
+
+@pytest.mark.usefixtures("laid_out")
+def test_m49_a_typed_total_keeps_the_extra(app: api.Api, project: Path, substation: Path) -> None:
+    l1 = row(ok(app.parts_page(str(project), "gis01"))["parts"], "l1")["index"]
+    ok(app.set_sfp_count(str(project), "gis01", l1, "1G", "MM", "extra", 2))
+
+    page = ok(app.set_sfp_total(str(project), "gis01", l1, "1G", "MM", 20))
+
+    assert written_sfp(substation) == [{"speed": "1G", "media": "MM", "extra": 2, "spare": 12}]
+    sfp = sfp_of(page)
+    assert (sfp["extra"], sfp["total"], sfp["rule"]) == (2, 20, "6 links + 12 spare + 2 extra")
+    # the extra comes on top of the links: a total that leaves no room for it is refused
+    said = ok(app.check_sfp_total(str(project), "gis01", l1, "1G", "MM", 7))
+    assert said.startswith("Enter at least 8: the switch has 6 1G MM links")
+    assert "the 2 extra SFPs" in said
+
+
+@pytest.mark.usefixtures("laid_out")
+def test_m49_a_typed_total_uses_the_extra_the_same_save_writes(
+    app: api.Api, project: Path, substation: Path
+) -> None:
+    """Save writes the drafted total and extra in the order they were typed; each BOM row
+    carries the total the engineer typed in either order."""
+    l1 = row(ok(app.parts_page(str(project), "gis01"))["parts"], "l1")["index"]
+
+    ok(app.set_sfp_total(str(project), "gis01", l1, "1G", "MM", 20, 4))
+    page = ok(app.set_sfp_count(str(project), "gis01", l1, "1G", "MM", "extra", 4))
+
+    assert sfp_of(page)["total"] == 20
+    assert ok(app.check_sfp_total(str(project), "gis01", l1, "1G", "MM", 9, 4)) is not None
+
+
+@pytest.mark.usefixtures("laid_out")
+def test_m49_the_l2_total_can_go_above_its_links(app: api.Api, project: Path) -> None:
+    """Ali's point 2: an L2 switch's automatic spare is 0; its total is typed like an L1's."""
+
+    def mm(page: Any) -> Any:
+        found = row(page["parts"], "l2")["sfp"]
+        return next(s for s in found if (s["speed"], s["media"]) == ("1G", "MM"))
+
+    before = mm(ok(app.parts_page(str(project), "gis01")))
+    assert before["quantity"]["rule"].endswith("(the project sets spare SFPs on L1 rows only)")
+    l2 = row(ok(app.parts_page(str(project), "gis01"))["parts"], "l2")["index"]
+
+    page = ok(app.set_sfp_total(str(project), "gis01", l2, "1G", "MM", before["used"] + 2))
+
+    assert (mm(page)["spare"]["override"], mm(page)["total"]) == (2, before["used"] + 2)
+
+
+@pytest.fixture
+def laid_out(app: api.Api, project: Path, substation: Path) -> Path:
+    """The example laid out: generated panels, whose SFPs the Parts page edits (on its own
+    hand-written panels they are read-only, plan M87). 6 links per L1 row."""
+    text = substation.read_text("utf-8")
+    substation.write_text(text[: text.index("\nloose_material:") + 1], "utf-8")
+    ok(app.generate_panels(str(project), "gis01"))
+    return project
+
+
+def test_m49_the_sfp_quantity_cell_still_reads_links_plus_spare(
+    app: api.Api, laid_out: Path, substation: Path
+) -> None:
+    from bomgen.engine.layout import with_layout
+    from bomgen.engine.pipeline import build
+    from bomgen.io.loader import load_substation
+    from bomgen.models.bom import Group, QtySum
+
+    found = ok(app.parts_page(str(laid_out), "gis01"))
+    links, l1 = sfp_of(found)["used"], row(found["parts"], "l1")["index"]
+    ok(app.set_sfp_total(str(laid_out), "gis01", l1, "1G", "MM", links + 10))
+
+    result = build(with_layout(load_substation(substation))[0])
+
+    cells = [
+        line.qty
+        for panel in result.panels
+        for line in panel.lines
+        if line.group is Group.C and line.tag is not None and line.tag.startswith("L1-")
+    ]
+    # one L1 row per cabinet, as on the page: its cell is still links + spare
+    assert cells == [QtySum(parts=(links, 10))] * 2
+
+
+@pytest.fixture
+def split(app: api.Api, project: Path, substation: Path) -> Path:
+    """The example laid out for 300 IEDs: each side's L1 switches fill one cabinet and spill
+    into the next of their side (psa1 and psa3 on A), so one entry's BOM rows differ."""
+    text = substation.read_text("utf-8")
+    text = text[: text.index("\nloose_material:") + 1].replace("ied_count: 40", "ied_count: 300")
+    substation.write_text(text, "utf-8")
+    ws = substation.parent / "panels" / "ws.yaml"  # its sheet "4" is the fourth cabinet's
+    ws.write_text(ws.read_text("utf-8").replace('sheet_name: "4"', 'sheet_name: "WS"'), "utf-8")
+    ok(app.generate_panels(str(project), "gis01"))
+    return project
+
+
+Cell = tuple[str, str, str, str]  # cabinet, switch level, media, SFP part
+
+
+def bom_sfps(substation: Path) -> dict[Cell, int]:
+    """The SFP quantity the build prints on each switch's BOM rows, by cabinet."""
+    from bomgen.engine.layout import with_layout
+    from bomgen.engine.pipeline import build
+    from bomgen.io.loader import load_substation
+    from bomgen.models.bom import Group, QtySum
+
+    built = with_layout(load_substation(substation))[0]
+    names = {p.id: p.cabinet_name for p in built.panels}
+    return {
+        (names[panel.panel_id], line.tag[:2], line.tag[-3:-1], str(line.part_id)): (
+            line.qty.value if isinstance(line.qty, QtySum) else int(str(line.qty))
+        )
+        for panel in build(built).panels
+        for line in panel.lines
+        if line.group is Group.C and line.tag and line.tag[:2] in ("L1", "L2") and "SFP" in line.tag
+    }
+
+
+def page_sfps(found: Any) -> dict[Cell, int]:
+    """The quantity the page gives each switch's SFP rows on each BOM row, keyed as
+    ``bom_sfps``."""
+    return {
+        (x["cabinet"], r["role"][:2].upper(), f["media"], f["choice"] or f["auto"]): x["quantity"]
+        for r in found["parts"]["rows"]
+        if r["role"] in ("l1_switch", "l2_switch")
+        for f in r["sfp"]
+        for x in f["rows"]
+    }
+
+
+def l1_cells(cells: dict[Cell, int]) -> list[int]:
+    return [n for (_cab, level, _media, _part), n in sorted(cells.items()) if level == "L1"]
+
+
+@pytest.mark.parametrize("panels", ["hand-written", "generated", "split"])
+def test_m49_the_total_on_the_page_is_the_quantity_in_the_bom(
+    app: api.Api, project: Path, substation: Path, panels: str, request: pytest.FixtureRequest
+) -> None:
+    """plan M87: the page counts the SFPs from the panels the build uses, on every BOM row of
+    the entry, so each quantity it shows is the one the BOM prints there, before and after a
+    typed total."""
+    if panels != "hand-written":
+        request.getfixturevalue("laid_out" if panels == "generated" else "split")
+    found = ok(app.parts_page(str(project), "gis01"))
+    assert page_sfps(found) == bom_sfps(substation)
+
+    l1 = row(found["parts"], "l1")
+    total = 30 if panels == "generated" else 100
+    typed = app.set_sfp_total(str(project), "gis01", l1["index"], "1G", "MM", total)
+
+    if panels == "generated":  # psa1 and psa2, one side each, 6 links per row
+        assert typed["ok"] is True
+        assert page_sfps(typed["data"]) == bom_sfps(substation)
+        assert l1_cells(bom_sfps(substation)) == [30, 30]
+        assert all(f["agree"] for r in found["parts"]["rows"] for f in r["sfp"])
+    elif panels == "split":  # psa1 to psa4: 26 and 6 links per side, 3 spare
+        assert l1_cells(page_sfps(found)) == [29, 29, 9, 9]
+        # the total is typed on the row with the most links, the first of equals
+        assert (l1["sfp"][0]["agree"], l1["sfp"][0]["on"]) == (False, "PSA Cabinet - 001")
+        assert l1["sfp"][0]["quantity"]["value"] == 29
+        assert typed["ok"] is True
+        assert page_sfps(typed["data"]) == bom_sfps(substation)
+        assert l1_cells(bom_sfps(substation)) == [100, 100, 80, 80]
+    else:
+        # the hand-written files name the library part, which no SFP choice reaches (ADR
+        # 0024): the BOM keeps the files' port plans, so the page refuses a total
+        assert typed["ok"] is False
+        assert "hand-written" in str(typed["error"])
+        assert page_sfps(ok(app.parts_page(str(project), "gis01"))) == bom_sfps(substation)
+
+
+def test_m87_hand_written_panels_give_their_files_sfps_read_only(
+    app: api.Api, project: Path, substation: Path, store: LibraryStore
+) -> None:
+    """The example's own panels are hand-written: its switch rows show the files' port plans
+    (the spec's =24+3), read-only, and a choice in the file changes neither them nor the BOM."""
+    from bomgen.app.parts import HAND_WRITTEN
+
+    found = parts(project, store)
+    l1, l2 = row(found, "l1"), row(found, "l2")
+    assert counts(l1["sfp"]) == [("1G", "MM", 24, 3, 27)]
+    assert counts(l2["sfp"]) == [
+        ("100M", "MM", 2, 0, 2),
+        ("1G", "MM", 15, 0, 15),
+        ("1G", "SM", 2, 0, 2),
+    ]
+    assert l1["sfp_hand"] == l2["sfp_hand"] == HAND_WRITTEN
+    assert (l1["pin"], l1["sfp_reason"], row(found, "gw")["sfp_hand"]) == (None, None, None)
+    said = ok(app.check_sfp_total(str(project), "gis01", l1["index"], "1G", "MM", 30))
+    assert said == HAND_WRITTEN
+
+    ok(app.set_sfp_count(str(project), "gis01", l1["index"], "1G", "MM", "spare", 1))
+
+    assert counts(row(parts(project, store), "l1")["sfp"]) == [("1G", "MM", 24, 3, 27)]
+    assert l1_cells(bom_sfps(substation)) == [27, 27]
+
+
+def test_m87_an_unpinned_l1_on_hand_written_panels_shows_the_files_sfps_without_a_pin(
+    project: Path, substation: Path, store: LibraryStore
+) -> None:
+    """M86's sized L1 rows on hand-written panels: the files' numbers, and no Pin, which
+    would change nothing the BOM prints."""
+    from bomgen.app.parts import HAND_WRITTEN
+
+    edit(substation, *UNPIN_L1)
+
+    l1 = row(parts(project, store), "l1")
+
+    assert l1["part_id"] is None
+    assert counts(l1["sfp"]) == [("1G", "MM", 24, 3, 27)]
+    assert (l1["pin"], l1["sfp_hand"]) == (None, HAND_WRITTEN)
+
+
+def test_m87_a_switch_the_hand_written_files_do_not_place_says_so(
+    project: Path, substation: Path, store: LibraryStore
+) -> None:
+    from bomgen.app.parts import NOT_PLACED
+
+    edit(substation, *UNPIN_L1)
+    for name in ("psa1", "psa2"):
+        panel = substation.parent / "panels" / f"{name}.yaml"
+        text = panel.read_text(encoding="utf-8").replace(
+            "RST2228-L1-24MM", "RST2228-L1-24MM.CISCO-MID"
+        )
+        panel.write_text(text, encoding="utf-8")
+
+    l1 = row(parts(project, store), "l1")
+
+    assert l1["pin"] is None
+    assert (l1["sfp"], l1["sfp_reason"], l1["sfp_hand"]) == ([], NOT_PLACED, None)

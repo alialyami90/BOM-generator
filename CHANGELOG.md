@@ -9,6 +9,13 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Parts: type the SFP quantity of a BOM row (M87). On a pinned L1 or an L2 switch row the total
+  is a derived value with its rule; a typed total is stored as the spare it implies, a total
+  below the links is refused naming them, and Reset returns to the automatic spare. Spare folds
+  under the total; Extra stays. The page counts SFPs from the panels the build uses, so its
+  numbers are the BOM's: when a switch group is split over cabinets it lists each cabinet's row,
+  and on hand-written panels, whose BOM never took an SFP edit made on Parts, the rows are
+  read-only and say so.
 - Parts shows SFP rows on every switch row (M86). An L1 switch left to the sizing shows the SFP
   rows of the switch the sizing picked, read-only, with *Pin this switch to change its SFPs*.
   When the substation does not load or its layout fails, the switch rows say why their SFP rows
