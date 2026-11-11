@@ -1395,7 +1395,13 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   select runs its action on `change` only. First see it in the installed app, then a test that the
   click handler skips selects. Acceptance: the list opens and stays open on every page; choosing a
   substation switches once. Size S.
-- **M83 — The picker offers the parts that fit the row.** *`parts-network`; Q74.* Points 3 and 6.
+- **M83 — The picker offers the parts that fit the row.** *`parts-network`; Q74.* **Done.**
+  `parts.row_choices` is the rule; each row, default row and *Add a device* category carries its
+  own `choices`, and `options` stays the whole category for *Search all parts*, where a switch
+  also says its level. With the shipped library the L1 row offers 9 switches, the L2 row 10 and
+  the EXT row 7. The double count below is real (confirmed on a copy of `examples/`: an L1 part
+  on the L2 row adds 38 SFPs over both panels) and is not fixed here: the generated port plans
+  are keyed by part id in `engine/layout.py`. Points 3 and 6.
   Cause: `app/parts.py` builds the choices per category, not per row, with no role, level, group or
   state filter, and the picker (`screens-parts.js` `openPicker`) labels nothing as an alternative.
   On the L1 row 17 of the 26 offered switches are refused by the loader, which wants an L1 part
@@ -1410,7 +1416,11 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   library the L1 row offers 9 switches, the L2 row 10 and the EXT row 7, none an alternative of
   another part. The picker and the row name a part by its make and model, with the ordering
   code where two parts share a model; the library id is not the name (Q82). Size S to M.
-- **M84 — The Library list shows each device once.** *`library-parts`; Q74, Q75.* Points 3 and 4.
+- **M84 — The Library list shows each device once.** *`library-parts`; Q74, Q75.* **Done.** The row
+  logic is `libraryRows` in `screens-library.js`, tested in node on the shipped library;
+  `library_store.alternatives.alternative_of` gives each alternative its original. A part with no
+  make or no model (7 cables and accessories) is named by its description. Review, Health and the
+  detail pane's Alternatives tab still lead with the id. Points 3 and 4.
   Cause: the Devices table lists all 381 parts flat and drops `tier` and `alt_group`, which the
   page already receives; one part reads as two names, its id in one column (`SEL-2730M-EXT`) and
   its model in the next (`SEL-2730M`). Ali (2026-11-11): the "EXT" after the switch comes from
@@ -1421,7 +1431,11 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   ("EXT switch") and the ordering code, and the id moves to the detail pane (Q82); a filter for
   all parts. Acceptance: the
   table opens on 94 rows (381 parts less 287 alternatives). Size S.
-- **M85 — SFP alternatives carry their speed and media.** *`library-parts`.* Point 2. Cause: the 23
+- **M85 — SFP alternatives carry their speed and media.** *`library-parts`.* **Done.** `build.py` gives
+  21 of the 23 the port of the part they replace, with the source `assumed`; the two high tiers
+  of the 100M MM group are single-mode by the device database and stay without one (M93). The
+  example's picks are unchanged; a Cisco or Moxa switch now takes its own make's low-tier SFP
+  (Q83). psa-devices 1.18.0. Point 2. Cause: the 23
   Cisco and Moxa SFP alternatives have no `ports`, and both the page (`parts.py` `_serves`) and the
   engine (`engine/network.py` `_serves`) match an SFP to a link by its port, so they are never
   offered and never picked; the 1G SM and 100M MM lists hold one part each. Fix in the data
