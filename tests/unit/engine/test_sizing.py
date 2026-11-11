@@ -1,7 +1,11 @@
 """Network sizing: rules R1-R4 of the substations and auto-layout design (ADR 0013)."""
 
+from dataclasses import replace
+from pathlib import Path
+
 import pytest
 
+from bomgen.engine.layout import layout_preview
 from bomgen.engine.sizing import (
     L2Link,
     NetworkInputs,
@@ -23,9 +27,12 @@ from bomgen.engine.sizing import (
     switch_ports,
     usable_ports,
 )
+from bomgen.io.loader import load_substation
 from bomgen.models.library import DeviceType, Media, PortSpeed
 from bomgen.models.panel import PortAllocation
 from bomgen.models.substation import ExternalLink, IedRow, PortNeed
+
+EXAMPLE = Path(__file__).parents[3] / "examples" / "substations" / "gis01" / "substation.yaml"
 
 # 24 fixed IED ports and 4 SFP slots that may take anything (the design's reading).
 L1_ANY = SwitchPorts("L1-ANY", ied=24, uplink=0, any=4)
@@ -389,3 +396,21 @@ def test_port_budget_of_a_schedule_uses_the_busier_side() -> None:
     l1, _ = port_budgets(plan, net, L1_MM, L2_RST)
     assert (l1.switches, l1.used) == (3, 40)
     assert l1.free == l1.ports - l1.reserved - l1.spare - 40 >= 0
+
+
+def test_r2_a_row_with_no_l2_ports_changes_neither_the_sizing_nor_the_port_plans() -> None:
+    """M89: a row with no link to the L2 switch keeps the model's 1G MM; at 0 ports any speed
+    and media add nothing, so hiding the inputs on such a row changes no result."""
+    loaded = load_substation(EXAMPLE)
+    equipment = [
+        e.model_copy(update={"l2_speed": PortSpeed.G10, "l2_media": Media.SM})
+        if e.id == "hwio"
+        else e
+        for e in loaded.substation.equipment
+    ]
+    changed = replace(
+        loaded, substation=loaded.substation.model_copy(update={"equipment": equipment})
+    )
+    before, after = layout_preview(loaded), layout_preview(changed)
+    assert after.plan == before.plan
+    assert [p.port_plans for p in after.panels] == [p.port_plans for p in before.panels]
