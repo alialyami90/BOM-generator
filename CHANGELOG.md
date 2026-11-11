@@ -28,6 +28,10 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Parts shows "Link to the L2 switch" only on networked rows (M89): a monitor, keyboard, plain
+  KVM, console or annunciator has none; a part that lists a network port (an IP KVM) does, and a
+  link already written always shows. A new workstation row is linked RJ45, so it adds no fibre
+  SFP to the L2 switch.
 - The substation list in the left rail stays open (M82). The click that opened it ran the switch
   itself, which redrew the window and shut the list unless the mouse button was held; on Home,
   Project or Library it jumped to Panels. A list now acts only when a choice is made. Preview's
