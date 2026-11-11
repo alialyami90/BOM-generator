@@ -29,6 +29,18 @@ def sfp_spare_rule(spare: int, *, l1: bool) -> str:
     return "0: the project sets spare SFPs on L1 rows only"
 
 
+def sfp_total_rule(used: int, spare: int, extra: int, *, l1: bool) -> str:
+    """An SFP row's automatic quantity on each BOM row: an SFP per link, the automatic
+    spare and the extra (plan M87)."""
+    if not l1:
+        why = "the project sets spare SFPs on L1 rows only"
+    elif spare:
+        why = "the project's spare SFPs per L1 row"
+    else:
+        why = "the project keeps no spare SFPs per L1 row"
+    return f"{sfp_rule(used, spare, extra)} ({why})"
+
+
 def ac_spare_rule(rating_a: int) -> str:
     """An AC spare branch (spec: Derivation rules -> AC distribution, plan M58)."""
     return f"{rating_a} A: the largest housekeeping branch"

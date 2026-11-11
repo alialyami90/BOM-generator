@@ -56,7 +56,7 @@ from bomgen.app.output import (
     pdf_options,
 )
 from bomgen.app.panel_page import PanelNotFoundError, panel_page, part_list
-from bomgen.app.parts import parts_page
+from bomgen.app.parts import parts_page, sfp_links
 from bomgen.app.preview import preview_page
 from bomgen.app.projects import (
     RecentProjects,
@@ -1357,6 +1357,60 @@ class Api:
                 value=value,
             ),
         )
+
+    @endpoint
+    def set_sfp_total(
+        self,
+        project_file: str,
+        substation_id: str,
+        index: int,
+        speed: str,
+        media: str,
+        total: int | None,
+        extra: int | None = None,
+    ) -> dict[str, Any]:
+        """Set the SFPs on each BOM row for one speed and media of a switch row, stored as
+        the spare it implies; ``None`` is the automatic spare. ``extra``: the extra the same
+        save writes, else the row's (plan M87)."""
+        store = self._library_store()
+        with self._substation(substation_id), _edit_refusals():
+            links = sfp_links(Path(project_file), substation_id, store, index, speed, media)
+        return self._parts_write(
+            project_file,
+            substation_id,
+            functools.partial(
+                parts_edit.set_sfp_total,
+                index=index,
+                speed=speed,
+                media=media,
+                total=total,
+                links=links,
+                extra=extra,
+            ),
+        )
+
+    @endpoint
+    def check_sfp_total(
+        self,
+        project_file: str,
+        substation_id: str,
+        index: int,
+        speed: str,
+        media: str,
+        total: int,
+        extra: int | None = None,
+    ) -> str | None:
+        """Why ``total`` SFPs on each BOM row would be refused, or None (plan M87)."""
+        project, store = Path(project_file), self._library_store()
+        with self._substation(substation_id), _edit_refusals():
+            links = sfp_links(project, substation_id, store, index, speed, media)
+            try:
+                parts_edit.sfp_spare_for_total(
+                    project, substation_id, index, speed, media, total, links=links, extra=extra
+                )
+            except EditError as exc:
+                return str(exc)
+        return None
 
     @endpoint
     def add_ied_row(

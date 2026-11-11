@@ -20,10 +20,11 @@ from bomgen.engine.errors import EngineError
 from bomgen.engine.layout import CABLE_MANAGED, PRIORITY, LayoutResult, layout_preview, runs
 from bomgen.engine.mcb import has_branch_mcb
 from bomgen.engine.network import automatic_sfp, unserved_links
-from bomgen.engine.rules_text import sfp_rule, sfp_spare_rule
+from bomgen.engine.rules_text import sfp_rule, sfp_spare_rule, sfp_total_rule
 from bomgen.engine.units import expand_devices
 from bomgen.io import ied_csv
 from bomgen.io.derived import effective_part_id
+from bomgen.io.edit import EditError
 from bomgen.io.errors import InputError
 from bomgen.io.loader import LoadedSubstation
 from bomgen.io.parts_edit import has_l2_link
@@ -300,6 +301,29 @@ def _sfp_needs(loaded: LoadedSubstation, result: LayoutResult) -> dict[str, SfpC
     return needs
 
 
+def sfp_links(
+    project_file: Path,
+    substation_id: str,
+    store: LibraryStore,
+    index: int,
+    speed: str,
+    media: str,
+) -> int:
+    """The ``speed`` ``media`` links on each BOM row of switch row ``index``, as its SFP row
+    on the page counts them (plan M87); an ``EditError`` says why there are none."""
+    _substation, _lib, loaded, _project = _source(project_file, substation_id, store)
+    result, reason = _preview(loaded)
+    if loaded is None or result is None:
+        raise EditError(reason or NOT_LOADED)
+    rows = loaded.substation.equipment
+    if not 0 <= index < len(rows):
+        raise EditError(f"no equipment row {index + 1}")
+    counts = _sfp_needs(loaded, result).get(rows[index].id, {}).get((speed, media))
+    if counts is None:
+        raise EditError(f"Equipment row {index + 1} has no {speed} {media} SFPs to count.")
+    return counts[0]
+
+
 def _sfp(
     entry: Equipment,
     speed: str,
@@ -315,7 +339,14 @@ def _sfp(
     override = choice.spare if choice is not None else None
     extra = choice.extra if choice is not None else 0
     spare = auto if override is None else override
-    rule = sfp_spare_rule(auto, l1=entry.role is EquipmentRole.L1_SWITCH)
+    l1 = entry.role is EquipmentRole.L1_SWITCH
+    rule = sfp_spare_rule(auto, l1=l1)
+    # M87, Q77 (a): the quantity is the value typed; it is stored as the spare it implies
+    quantity = Derived[int](
+        value=used + auto + extra,
+        rule=sfp_total_rule(used, auto, extra, l1=l1),
+        override=None if override is None else used + override + extra,
+    )
     return {
         "speed": speed,
         "media": media,
@@ -326,6 +357,7 @@ def _sfp(
         "spare": Derived[int](value=auto, rule=rule, override=override).model_dump(mode="json"),
         "extra": extra,
         "total": used + spare + extra,
+        "quantity": quantity.model_dump(mode="json"),
         "rule": sfp_rule(used, spare, extra),
     }
 

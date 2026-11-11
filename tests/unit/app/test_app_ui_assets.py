@@ -1345,3 +1345,33 @@ def test_m86_every_switch_row_shows_its_sfp_rows_or_says_why_not() -> None:
     # the Spare editor opens on the automatic value, as the switch-count editor does
     counts = js[js.index("function sfpCounts(") : js.index("function linkRow(r)")]
     assert "input(id, v === '' ? String(auto) : v, " in counts
+
+
+def test_m87_the_sfp_total_is_the_derived_value_the_engineer_types() -> None:
+    """plan M87 (Ali's v0.5.0 point 2, Q77 (a)): on an editable SFP row the quantity on each
+    BOM row is a derived value: typed, checked and written by the API as the spare it
+    implies, marked when set and reset to automatic; the spare has no editor of its own."""
+    js = PARTS.read_text(encoding="utf-8")
+    counts = js[js.index("function sfpCounts(") : js.index("function linkRow(r)")]
+    assert "dv(tk, 'Each BOM row', f.quantity.value, { always: true" in counts
+    assert "${total}${dv(xk, 'Extra', 0)}" in counts
+    assert "'Spare'" not in counts  # folded under the total
+    assert "overridden: v !== '' && (o.always || v !== String(auto))" in counts
+    assert "${esc(f.quantity.rule)}." in counts  # the automatic total with its rule
+    # the saved value is the typed total, empty when the spare is automatic
+    assert "if (d === 'total') return f.quantity.override == null ? '' : f.quantity.override;" in js
+    # the API refuses a total below the links, before Save and on Save
+    assert (
+        "Bridge.call('check_sfp_total', S.project.file, S.sub, path[1], path[3], path[4], "
+        "value, draftExtra(path))" in js
+    )
+    assert (
+        "Bridge.call('set_sfp_total', f, sid, path[1], path[3], path[4], value, "
+        "draftExtra(path))" in js
+    )
+    # reset to automatic clears the total, as the other derived values do
+    assert "PF.set(key, kind === 'f' ? (key.endsWith('.extra') ? '0' : '') :" in js
+    # a sized L1 that is not pinned stays read-only (M86)
+    sized = js[js.index("function sizedSfpRows(r)") : js.index("function sfpRows(r)")]
+    assert "pp-edit" not in sized
+    assert "${f.total}" in sized
