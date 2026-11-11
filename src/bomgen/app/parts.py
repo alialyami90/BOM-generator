@@ -434,6 +434,19 @@ def _serves(device: DeviceType, speed: str, media: str) -> bool:
     )
 
 
+def _effective(part: DeviceType | None, entry: Equipment) -> DeviceType | None:
+    """``part`` with ``entry``'s overrides, the values its derived part has (ADR 0024)."""
+    if part is None or entry.overrides is None:
+        return part
+    return part.model_copy(update=entry.overrides.values())
+
+
+def offers_ab(role: EquipmentRole) -> bool:
+    """Whether a row of ``role`` offers the A and B box (plan M90): never a sized switch,
+    which the model needs redundant, nor an annunciator, one loose item of its qty."""
+    return role not in SIZED and role is not EquipmentRole.ANNUNCIATOR
+
+
 def _row(
     index: int,
     entry: Equipment,
@@ -454,6 +467,12 @@ def _row(
     category = _category(entry, part)
     default = category in CABLE_MANAGED  # the layout's rule (ADR 0013, amended)
     host = part or sized_part  # the switch whose ports take the SFPs
+    # M90: the layout racks no annunciator and gives a 0 U part no cable manager; the
+    # engine takes the supply from the derived part
+    racked = entry.role is not EquipmentRole.ANNUNCIATOR
+    effective = _effective(host, entry)
+    zero_u = effective is not None and not effective.height_u
+    supplied = _effective(part, entry)
 
     def auto(speed: str, media: str) -> str | None:
         if host is None or library is None:
@@ -494,6 +513,7 @@ def _row(
         "qty": entry.qty,
         "sized": entry.role in SIZED,
         "redundant": entry.redundant,
+        "ab": offers_ab(entry.role),  # M90
         "network": category in NETWORK_CATEGORIES,
         "library": {k: getattr(part, k) for k in VALUES} if part is not None else None,
         # ADR 0037: the figures its part assumes, for the chip on the row
@@ -513,14 +533,16 @@ def _row(
         if entry.role not in SIZED
         else sfp_reason or (NOT_PLACED if hand and not needs else None),
         "sfp_hand": HAND_WRITTEN if hand and needs and entry.role in SIZED else None,
-        "bom_text": {k: getattr(entry, k) for k in BOM_TEXT},  # M59
+        "bom_text": {k: getattr(entry, k) for k in BOM_TEXT} if racked else None,  # M59
         # M74: a common row may be steered to a panel; a redundant or one-side row follows its LAN
         "placement": {
             "panel_hint": entry.panel_hint,
             "steerable": not entry.redundant and entry.side is Side.NONE,
             "priority": entry.priority,  # M76: the row's rack stack order, or the category's
             "default_priority": PRIORITY.get(category, 4) if category is not None else 4,
-        },
+        }
+        if racked
+        else None,
         # M31: the link to the L2 switch, on the rows that have one (M89)
         "link": None
         if not has_l2_link(entry, part)
@@ -534,20 +556,22 @@ def _row(
         if category is Category.RTAC
         else None,
         "accessories": accessories,
+        # M90: a 0 U part shows only a choice written in the file; the BOM has none for it
         "cable_manager": {
             "on": entry.cable_manager if entry.cable_manager is not None else default,
             "default": default,
+            "zero_u": zero_u,
         }
-        if category in NETWORK_CATEGORIES
+        if category in NETWORK_CATEGORIES and (not zero_u or entry.cable_manager is not None)
         else None,
         # M58: the alarm on its branch MCBs' trip, over the library's value
         "alarm": {
             "on": entry.alarm_on_branch_mcb
             if entry.alarm_on_branch_mcb is not None
-            else part.alarm_on_branch_mcb,
-            "default": part.alarm_on_branch_mcb,
+            else supplied.alarm_on_branch_mcb,
+            "default": supplied.alarm_on_branch_mcb,
         }
-        if part is not None and has_branch_mcb(part)
+        if supplied is not None and racked and has_branch_mcb(supplied)
         else None,
     }
 
@@ -670,6 +694,7 @@ def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
                     "label": ROLE_LABEL[r],
                     "category": ROLE_CATEGORY[r].value,
                     "choices": choices(r, ROLE_CATEGORY[r], None),
+                    "ab": offers_ab(r),  # M90
                 }
                 for r in DEFAULT_ROWS
             ],

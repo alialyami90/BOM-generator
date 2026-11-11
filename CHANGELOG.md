@@ -40,6 +40,11 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- A Parts row offers only the controls that change the BOM (M90): no cable manager on a 0 U part
+  (one written in the file still shows, with "none in the BOM"); no A and B box on the L1 and L2
+  rows, where unticking it was always an error; no A and B, panel, rack priority, BOM text or
+  alarm on an annunciator row; and *Alarm on branch MCB trip* follows the row's supply
+  overrides.
 - Restoring a backup, or replacing a project on import, while its folder is in use (the workbook
   open in Excel, a terminal or Explorer window inside it) is refused in words that say what to
   close, and the project is left as it was, without the safety backup the attempt wrote (M95).

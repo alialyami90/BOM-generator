@@ -1491,7 +1491,13 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   no network link, so neither is in the set; a KVM part that lists a network port (an IP KVM)
   gets the inputs from its ports. Workstation rows are seeded 1G MM because the seeding never
   sets the media (Q79). Size S.
-- **M90 — A Parts row shows only what does something.** *`parts-network`.* Point 6. Four findings:
+- **M90 — A Parts row shows only what does something.** *`parts-network`.* **Done.** Each finding
+  was confirmed by a build before it was fixed, in the API: the cable manager toggle follows
+  the row's height after its own override (`zero_u` marks a written choice on a 0 U part);
+  `offers_ab` says whether a row has the A and B box; an annunciator row's `placement`,
+  `bom_text` and `alarm` are `None`; the alarm toggle is decided on the part with the row's
+  overrides. Left: the Height value still shows on an annunciator row (Q86). Point 6. Four
+  findings:
   the cable manager toggle shows on a 0 U network part (the FGR-60F row says On, the layout adds
   none); an annunciator row offers A and B, Panel, Rack priority, BOM text and the L2 link, none of
   which reach its loose item; the A and B box shows on L1 and L2 rows, where unticking is always
