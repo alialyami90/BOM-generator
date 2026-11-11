@@ -1503,7 +1503,12 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   which reach its loose item; the A and B box shows on L1 and L2 rows, where unticking is always
   an error; *Alarm on branch trip* is decided from the library part, not from the row's supply
   overrides. Fix each in the API with its test. Size S.
-- **M91 — Add a device offers every role.** *`parts-network`.* Point 6. Cause: *Add a device* has no
+- **M91 — Add a device offers every role.** *`parts-network`.* **Done.** `parts.add_categories` is the
+  role entries (`ADD_ROLES`: the default rows without the sized switches), then the category
+  entries, each with its role, the set-up card's id and whether it offers A and B. The time
+  server is offered only while no clock row exists, because the page's accessory sub-row
+  assumes one (Q90). A workstation added by category still has role `other` and takes the
+  library's type code. Point 6. Cause: *Add a device* has no
   Annunciator and no Time server, so a removed default row cannot come back; a workstation added
   through it gets role `other` and loses its OWS, EWS or SRV type code. KVM and Console rows stay
   empty by Ali's earlier choice (backlog v0.3, point 7). Size S.
