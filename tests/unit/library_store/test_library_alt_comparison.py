@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from bomgen.io.loader import load_library
-from bomgen.library_store.alternatives import compare_alternatives
+from bomgen.library_store.alternatives import alternative_of, compare_alternatives
 from bomgen.library_store.device_db import DeviceRecord, parse_device_records
 from bomgen.library_store.edit import SetValue, apply_edits
 from bomgen.models.library import Library
@@ -119,3 +119,56 @@ def test_a_device_without_a_group_is_alone(base: Library) -> None:
 def test_an_unknown_part_is_refused(base: Library) -> None:
     with pytest.raises(KeyError, match="NO-SUCH"):
         compare_alternatives(base, "NO-SUCH")
+
+
+def _group_of_three(base: Library, *tiers: str | None) -> Library:
+    """FIRST, SECOND and SEL-2730M-EXT in one group, with `tiers` in that order."""
+    ids = (FIRST, SECOND, "SEL-2730M-EXT")
+    edits = [
+        *(SetValue(path=["devices", i, "alt_group"], value="SWITCHES") for i in ids),
+        *(SetValue(path=["devices", i, "tier"], value=t) for i, t in zip(ids, tiers, strict=True)),
+    ]
+    result = apply_edits(base, edits)
+    assert result.library is not None, result.problems
+    return result.library
+
+
+def test_an_alternative_is_an_alternative_of_the_part_of_its_group_without_a_tier(
+    base: Library,
+) -> None:
+    # plan M84: the Library list folds each alternative under its original
+    original_of = alternative_of(_group_of_three(base, "low", None, "high"))
+
+    assert original_of[FIRST] == SECOND
+    assert original_of["SEL-2730M-EXT"] == SECOND
+    assert SECOND not in original_of
+
+
+def test_a_second_part_without_a_tier_is_no_alternative(base: Library) -> None:
+    original_of = alternative_of(_group_of_three(base, None, None, "mid"))
+
+    assert FIRST not in original_of
+    assert SECOND not in original_of
+    assert original_of["SEL-2730M-EXT"] == SECOND  # it comes before FIRST in the library
+
+
+def test_an_alternative_whose_group_has_no_original_stands_alone(base: Library) -> None:
+    assert (
+        alternative_of(_group_of_three(base, "low", "mid", "high"))
+        .keys()
+        .isdisjoint({FIRST, SECOND, "SEL-2730M-EXT"})
+    )
+
+
+def test_the_shipped_alternatives_each_have_their_original() -> None:
+    shipped = load_library(ROOT / "data" / "library" / "psa-devices.yaml")
+
+    original_of = alternative_of(shipped)
+
+    tiered = [d.part_id for d in shipped.devices if d.tier]
+    assert sorted(original_of) == sorted(tiered)
+    for part_id, original in original_of.items():
+        device, first = shipped.get(part_id), shipped.get(original)
+        assert device is not None
+        assert first is not None
+        assert (first.tier, first.alt_group) == (None, device.alt_group)

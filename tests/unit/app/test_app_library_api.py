@@ -66,7 +66,22 @@ def test_library_overview_with_nothing_installed(app: api.Api) -> None:
         "records": {},
         "records_problem": None,
         "catalogues": None,
+        "alternative_of": {},
     }
+
+
+def test_the_library_overview_gives_each_alternative_its_original(
+    app: api.Api, package: Any
+) -> None:
+    # plan M84: the Devices table folds an alternative under the part it is an alternative of
+    ok(app.import_library(str(package("1.0.0"))))
+
+    overview = ok(app.library_overview())
+
+    tiered = {d["part_id"]: d for d in overview["devices"] if d["tier"]}
+    assert tiered
+    assert overview["alternative_of"].keys() == tiered.keys()
+    assert overview["alternative_of"]["SEL-2730M-EXT.MOXA-LOW"] == "SEL-2730M-EXT"
 
 
 def test_library_overview_lists_the_active_library_devices(app: api.Api, package: Any) -> None:

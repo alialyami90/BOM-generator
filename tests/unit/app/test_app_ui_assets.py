@@ -5,6 +5,7 @@ import re
 import shutil
 import subprocess
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -1158,3 +1159,144 @@ def test_choosing_in_a_select_runs_its_action_once(tmp_path: Path) -> None:
 
 def test_clicking_a_button_still_runs_its_action(tmp_path: Path) -> None:
     assert _actions_run("BUTTON", "theme", "click", tmp_path) == ["theme"]
+
+
+LIBRARY = UI_DIR / "screens-library.js"
+
+
+def _shipped_library_rows() -> list[dict[str, object]]:
+    """The shipped library's parts as the Library page's `row()` keeps them (plan M84)."""
+    from bomgen.io.loader import load_library
+    from bomgen.library_store.alternatives import alternative_of
+
+    library = load_library(REPO / "data" / "library" / "psa-devices.yaml")
+    original_of = alternative_of(library)
+    rows = []
+    for device in library.devices:
+        d = device.model_dump(mode="json")
+        rows.append(
+            {
+                "id": d["part_id"],
+                "make": d["make"] or "",
+                "model": d["model"] or "",
+                "desc": d["description_template"],
+                "cat": d["category"],
+                "level": d["purdue_level"],
+                "tier": d["tier"],
+                "of": original_of.get(d["part_id"]),
+            }
+        )
+    return rows
+
+
+def _library_js(call: str, rows: list[dict[str, object]], tmp_path: Path) -> Any:
+    """Runs `call`, a JS expression over `all` (the given rows), against the Devices table's
+    helpers in screens-library.js, in node."""
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("node is not installed")
+    js = LIBRARY.read_text(encoding="utf-8")
+    source = js[js.index('  /* "SEL SEL-2730M" reads') : js.index("  const F = {")]
+    script = tmp_path / "library-rows.js"
+    script.write_text(
+        "const esc = (s) => String(s == null ? '' : s);\n"
+        f"{source}\nconst all = {json.dumps(rows)};\n"
+        f"console.log(JSON.stringify({call}));\n",
+        encoding="utf-8",
+    )
+    run = subprocess.run([node, str(script)], capture_output=True, encoding="utf-8", check=True)
+    return json.loads(run.stdout)
+
+
+def _shown(rows: list[dict[str, Any]]) -> list[tuple[str, int]]:
+    return [(r["d"]["id"], r["depth"]) for r in rows]
+
+
+def test_the_library_table_opens_on_originals(tmp_path: Path) -> None:
+    """plan M84, Ali's v0.5.0 point 3: one row per device, its alternatives folded under it."""
+    parts = _shipped_library_rows()
+
+    rows = _library_js("libraryRows(all, () => true)", parts, tmp_path)
+
+    originals = [p["id"] for p in parts if not p["tier"]]
+    assert _shown(rows) == [(i, 0) for i in originals]
+    assert len(rows) == 94  # 381 parts less 287 alternatives in psa-devices 1.17.0
+    ext = next(r for r in rows if r["d"]["id"] == "SEL-2730M-EXT")
+    assert (ext["kids"], ext["open"]) == (6, False)
+
+
+def test_an_original_lists_its_alternatives_by_tier(tmp_path: Path) -> None:
+    parts = _shipped_library_rows()
+
+    rows = _library_js(
+        "libraryRows(all, () => true, { toggled: ['SEL-2730M-EXT'] })"
+        ".map((r) => ({ ...r, sub: rowSub(r) }))",
+        parts,
+        tmp_path,
+    )
+
+    at = _shown(rows).index(("SEL-2730M-EXT", 0))
+    under = rows[at + 1 : at + 7]
+    # by make, then tier: the Siemens low tier came last in the library (an addition)
+    assert [(r["d"]["id"], r["depth"]) for r in under] == [
+        (f"SEL-2730M-EXT.{make}-{tier}", 1)
+        for make in ("MOXA", "SIEMENS")
+        for tier in ("LOW", "MID", "HIGH")
+    ]
+    assert [r["sub"] for r in under] == ["Low tier", "Mid tier", "High tier"] * 2
+    assert rows[at]["open"] is True
+    assert rows[at + 7]["depth"] == 0
+
+
+def test_a_search_that_matches_an_alternative_shows_it(tmp_path: Path) -> None:
+    parts = _shipped_library_rows()
+
+    rows = _library_js(
+        "libraryRows(all, (d) => d.id === 'SEL-2730M-EXT.MOXA-MID')", parts, tmp_path
+    )
+
+    # its original opens on it, and only on it
+    assert _shown(rows) == [("SEL-2730M-EXT", 0), ("SEL-2730M-EXT.MOXA-MID", 1)]
+    assert (rows[0]["kids"], rows[0]["open"]) == (1, True)
+
+
+def test_every_part_can_be_listed_flat(tmp_path: Path) -> None:
+    parts = _shipped_library_rows()
+
+    rows = _library_js(
+        "libraryRows(all, () => true, { flat: true }).map((r) => ({ ...r, sub: rowSub(r) }))",
+        parts,
+        tmp_path,
+    )
+
+    assert _shown(rows) == [(p["id"], 0) for p in parts]
+    moxa = next(r for r in rows if r["d"]["id"] == "SEL-2730M-EXT.MOXA-LOW")
+    assert moxa["sub"] == "EXT switch · Low tier"
+
+
+def test_a_library_row_is_named_by_make_and_model_not_by_its_id(tmp_path: Path) -> None:
+    """Ali's v0.5.0 point 4 (Q82): "SEL-2730M-EXT" is a key with a role, not a part number;
+    the role is the label beside the name, and it tells the two RST-2228 parts apart."""
+    parts = {p["id"]: p for p in _shipped_library_rows()}
+    ids = ["SEL-2730M-EXT", "RST2228-L2", "RST2228-L1-24MM", "SEL-3555-GW", "SEL-3555-RTAC"]
+
+    named = _library_js(
+        "all.map((d) => [partName(d), rowSub({ d, depth: 0 })])",
+        [parts[i] for i in [*ids, "ANN-USB-CABLE-10M"]],
+        tmp_path,
+    )
+
+    assert named == [
+        ["SEL-2730M", "EXT switch"],
+        ['Ruggedcom <span class="muted">RST-2228</span>', "L2 switch"],
+        ['Ruggedcom <span class="muted">RST-2228</span>', "L1 switch"],
+        ["SEL-3555", "Gateway"],
+        ["SEL-3555", "RTAC"],
+        # no make: its description leads, so the two 10 m cables differ
+        ['USB cable for Annunciator <span class="muted">10m</span>', "Cable"],
+    ]
+    js = LIBRARY.read_text(encoding="utf-8")
+    assert "<th>Part ID</th>" not in js
+    assert "<th>Device</th>" in js
+    assert "of: (originalOf || {})[d.part_id] || null" in js  # row() keeps the original
+    assert "<dt>Part ID</dt>" in js  # the id is in the detail pane
