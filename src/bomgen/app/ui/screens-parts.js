@@ -182,16 +182,19 @@
   const autoText = (f) => (f.auto ? `Automatic: ${nameOf(sfpOpt(f.auto))}` : 'Automatic');
   /* M86, Q76 (a): an L1 row left to the sizing shows the SFPs of the switch the sizing picked, read-only;
      pinning that switch to the row makes them the editable rows below, with the same numbers. */
+  /* M87: when one entry's BOM rows differ by cabinet, each cabinet's row with what it prints, read-only */
+  const cabinetRows = (r, f) => (f.agree ? '' : f.rows.map((x) => `<div class="prow-strip prow-sfp" role="group" aria-label="${esc(`${f.speed} ${f.media} SFPs in ${x.cabinet}, ${r.label}`)}">
+      <span class="dv"><span class="dv-label">${esc(x.cabinet)}</span><span class="dv-val">${x.quantity}</span></span><span class="dv-rule">${esc(x.rule)} = ${x.quantity}</span></div>`).join(''));
   function sizedSfpRows(r) {
     if (!r.sfp.length) return '';
     const dirty = PF.dirty(), help = `pp-pinhelp-${r.index}`;
     const rows = r.sfp.map((f) => `<div class="prow-sub"><span class="prow-sub-what">${esc(f.speed)} · ${esc(f.media)} SFP</span><span class="small">${esc(autoText(f))}</span></div>
-      <div class="prow-strip prow-sfp" role="group" aria-label="${esc(`${f.speed} ${f.media} SFPs, ${r.label}`)}">
+      ${f.agree ? `<div class="prow-strip prow-sfp" role="group" aria-label="${esc(`${f.speed} ${f.media} SFPs, ${r.label}`)}">
         <span class="dv" title="From the switch sizing"><span class="dv-label">Links</span><span class="dv-val">${f.used}</span></span>
         <span class="dv"><span class="dv-label">Spare</span><span class="dv-val">${f.spare.value}</span></span>
         <span class="dv" title="${esc(f.rule)}"><span class="dv-label">Each BOM row</span><span class="dv-val">${f.total}</span></span>
         <span class="dv-rule">${esc(f.rule)}. Automatic spare ${esc(f.spare.rule)}.</span>
-      </div>${f.candidates.length ? '' : `<div class="prow-err">${noSfp(f.speed, f.media)}</div>`}`).join('');
+      </div>` : cabinetRows(r, f)}${f.candidates.length ? '' : `<div class="prow-err">${noSfp(f.speed, f.media)}</div>`}`).join('');
     /* M87: on hand-written panels the BOM takes the files' port plans: the same read-only rows, no pin */
     if (r.sfp_hand) return `${rows}<div class="prow-sub prow-sub--foot"><span class="muted small">${esc(r.sfp_hand)}</span></div>`;
     return `${rows}<div class="prow-sub prow-sub--foot"><button class="btn btn--secondary btn--sm" data-action="pp-pin" data-i="${r.index}" aria-describedby="${help}" ${dirty ? 'disabled title="Save or discard the changes first"' : ''}>Pin this switch to change its SFPs</button>
@@ -219,17 +222,20 @@
     };
     /* a typed total is marked even when it equals the automatic one: it no longer follows the project's spare */
     const waiting = xk in PF.draft && !(tk in PF.draft), errs = [tk, xk].map(err).join('');
-    const total = dv(tk, 'Each BOM row', f.quantity.value, { always: true, more: waiting ? { shown: '…' } : {} });
+    /* M87: when the cabinets' rows differ, the total is typed for the row it is computed on, named by its cabinet */
+    const label = f.agree ? 'Each BOM row' : `Row in ${esc(f.on)}`;
+    const total = dv(tk, label, f.quantity.value, { always: true, more: waiting ? { shown: '…' } : {} });
     const leaves = `the spare is what your total leaves after the ${f.used} links${f.extra || xk in PF.draft ? ' and the extra' : ''}.`;
     const why = waiting ? 'Save to update the total.'
-      : tk in PF.draft ? (PF.draft[tk] === '' ? 'Save to go back to the automatic total.' : `Each BOM row carries the total you type; ${leaves}`)
-        : f.quantity.override != null ? `${esc(f.rule)}: ${leaves}`
-          : `${esc(f.quantity.rule)}.`;
+      : tk in PF.draft ? (PF.draft[tk] === '' ? 'Save to go back to the automatic total.' : `${f.agree ? 'Each BOM row' : `The row in ${esc(f.on)}`} carries the total you type; ${leaves}`)
+        : !f.agree ? `The rows differ by cabinet: you set the total of the row in ${esc(f.on)}, which has the most links, and the spare it implies is added to every cabinet's row.`
+          : f.quantity.override != null ? `${esc(f.rule)}: ${leaves}`
+            : `${esc(f.quantity.rule)}.`;
     return `<div class="prow-strip prow-sfp" role="group" aria-label="${esc(what)}">
       <span class="dv" title="From the switch sizing"><span class="dv-label">Links</span><span class="dv-val">${f.used}</span></span>
       ${total}${dv(xk, 'Extra', 0)}
       <span class="dv-rule">${why} Extra SFPs add to the BOM, not to the port budget.</span>
-    </div>${errs ? `<div class="prow-err">${errs}</div>` : ''}`;
+    </div>${errs ? `<div class="prow-err">${errs}</div>` : ''}${cabinetRows(r, f)}`;
   }
   function linkRow(r) {  // M31: how the device reaches the L2 switch, and an RTAC's COM ports
     if (!r.link || !r.part_id) return '';

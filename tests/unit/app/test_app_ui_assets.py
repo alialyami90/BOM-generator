@@ -1353,7 +1353,8 @@ def test_m87_the_sfp_total_is_the_derived_value_the_engineer_types() -> None:
     implies, marked when set and reset to automatic; the spare has no editor of its own."""
     js = PARTS.read_text(encoding="utf-8")
     counts = js[js.index("function sfpCounts(") : js.index("function linkRow(r)")]
-    assert "dv(tk, 'Each BOM row', f.quantity.value, { always: true" in counts
+    assert "const label = f.agree ? 'Each BOM row' : `Row in ${esc(f.on)}`;" in counts
+    assert "dv(tk, label, f.quantity.value, { always: true" in counts
     assert "${total}${dv(xk, 'Extra', 0)}" in counts
     assert "'Spare'" not in counts  # folded under the total
     assert "overridden: v !== '' && (o.always || v !== String(auto))" in counts
@@ -1389,3 +1390,23 @@ def test_m87_hand_written_panels_show_their_sfp_rows_read_only_with_why() -> Non
     hand = sized.index("if (r.sfp_hand) return")
     assert '<span class="muted small">${esc(r.sfp_hand)}</span>' in sized[hand:]
     assert hand < sized.index("Pin this switch to change its SFPs")
+
+
+def test_m87_sfp_rows_that_differ_by_cabinet_show_each_cabinets_row() -> None:
+    """plan M87: when one switch entry's BOM rows differ (an L1 entry spread over two
+    cabinets of a side), each cabinet's row is shown with what it prints, read-only, and the
+    typed total names the row it is set on; when they agree nothing more is drawn."""
+    js = PARTS.read_text(encoding="utf-8")
+    rows = js[js.index("const cabinetRows = ") : js.index("function sizedSfpRows(r)")]
+    assert "(f.agree ? '' : f.rows.map((x) =>" in rows
+    assert '<span class="dv-label">${esc(x.cabinet)}</span>' in rows
+    assert "${esc(x.rule)} = ${x.quantity}" in rows
+    assert "pp-edit" not in rows  # read-only
+    sized = js[js.index("function sizedSfpRows(r)") : js.index("function sfpRows(r)")]
+    assert ": cabinetRows(r, f)}" in sized
+    counts = js[js.index("function sfpCounts(") : js.index("function linkRow(r)")]
+    assert "${cabinetRows(r, f)}" in counts
+    assert (
+        "you set the total of the row in ${esc(f.on)}, which has the most links, and the spare "
+        "it implies is added to every cabinet's row." in counts
+    )

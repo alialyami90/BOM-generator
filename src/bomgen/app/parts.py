@@ -218,7 +218,14 @@ def row_label(entry: Equipment, library: Library) -> str:
     return _label(entry, _category(entry, part))
 
 
-SfpCounts = dict[tuple[str, str], tuple[int, int]]  # (speed, media) -> (links, spare)
+SfpRow = tuple[str, int, int]  # one BOM row of a switch entry: cabinet name, links, spare
+SfpCounts = dict[tuple[str, str], list[SfpRow]]  # (speed, media) -> its BOM rows, panel order
+
+
+def _typed_on(rows: list[SfpRow]) -> SfpRow:
+    """The BOM row a typed SFP total is computed on: the one with the most links, the first
+    of equals (plan M87), so the spare it implies leaves no row short of its links."""
+    return max(rows, key=lambda r: r[1])
 
 
 NOT_LOADED = (
@@ -299,7 +306,7 @@ def _built_panels(loaded: LoadedSubstation, result: LayoutResult) -> tuple[Panel
 
 def _sfp_needs(loaded: LoadedSubstation, result: LayoutResult) -> dict[str, SfpCounts]:
     """The (speed, media) pairs each sized switch entry's ports use, with the links and
-    automatic spare of the first BOM row that hosts it (plan M49), read from the panels the
+    automatic spare of every BOM row that hosts it (plan M49), read from the panels the
     build uses, as the BOM reads them (plan M87). An L1 row with no part has those of the
     switch the sizing picked (plan M86); hand-written files place the library part."""
     hand = _hand_written(loaded)
@@ -324,14 +331,14 @@ def _sfp_needs(loaded: LoadedSubstation, result: LayoutResult) -> dict[str, SfpC
                 plan = port_plan(panel, row) if row.device.part_id in keys else None
                 if plan is None:
                     continue
-                counts: SfpCounts = {}
+                counts: dict[tuple[str, str], tuple[int, int]] = {}
                 for a in (*plan.uplinks_l3, *plan.uplinks, *plan.downlinks):
                     if a.media is not Media.RJ45:
                         links, spare = counts.get((a.speed.value, a.media.value), (0, 0))
                         counts[(a.speed.value, a.media.value)] = (links + a.count, spare + a.spare)
-                needs.setdefault(entry.id, {})
-                for pair, value in counts.items():
-                    needs[entry.id].setdefault(pair, value)
+                found = needs.setdefault(entry.id, {})
+                for pair, (links, spare) in counts.items():
+                    found.setdefault(pair, []).append((panel.cabinet_name, links, spare))
     return needs
 
 
@@ -343,8 +350,9 @@ def sfp_links(
     speed: str,
     media: str,
 ) -> int:
-    """The ``speed`` ``media`` links on each BOM row of switch row ``index``, as its SFP row
-    on the page counts them (plan M87); an ``EditError`` says why there are none."""
+    """The ``speed`` ``media`` links of the BOM row of switch row ``index`` a typed total is
+    computed on, as its SFP row on the page counts them (plan M87); an ``EditError`` says
+    why there are none."""
     _substation, _lib, loaded, _project = _source(project_file, substation_id, store)
     result, reason = _preview(loaded)
     if loaded is None or result is None:
@@ -357,25 +365,26 @@ def sfp_links(
     counts = _sfp_needs(loaded, result).get(rows[index].id, {}).get((speed, media))
     if counts is None:
         raise EditError(f"Equipment row {index + 1} has no {speed} {media} SFPs to count.")
-    return counts[0]
+    return _typed_on(counts)[1]
 
 
 def _sfp(
     entry: Equipment,
     speed: str,
     media: str,
-    counts: tuple[int, int],
+    counts: list[SfpRow],
     candidates: list[str],
     pick: str | None,
     *,
     hand: bool = False,
 ) -> dict[str, Any]:
     """One SFP sub-row of a switch: its part choice, the part the engine takes without
-    one (``pick``, plan M86) and its quantity per BOM row. On ``hand``-written panels the
-    BOM takes none of the entry's choices, so neither does the row (plan M87)."""
+    one (``pick``, plan M86) and its quantity, computed on the BOM row a typed total is
+    computed on, then on each BOM row (plan M87). On ``hand``-written panels the BOM takes
+    none of the entry's choices, so neither does the row (plan M87)."""
     choices = () if hand else entry.sfp
     choice = next((c for c in choices if (c.speed.value, c.media.value) == (speed, media)), None)
-    used, auto = counts
+    on, used, auto = _typed_on(counts)
     override = choice.spare if choice is not None else None
     extra = choice.extra if choice is not None else 0
     spare = auto if override is None else override
@@ -399,6 +408,22 @@ def _sfp(
         "total": used + spare + extra,
         "quantity": quantity.model_dump(mode="json"),
         "rule": sfp_rule(used, spare, extra),
+        # M87: the BOM rows that carry these SFPs, each with what it prints; the typed total
+        # is computed on ``on``, and the spare it implies goes on every row
+        "on": on,
+        "agree": len({(n, s) for _cabinet, n, s in counts}) == 1,
+        "rows": [
+            {
+                "cabinet": cabinet,
+                "links": n,
+                "auto_spare": s,
+                "spare": (row_spare := s if override is None else override),
+                "extra": extra,
+                "quantity": n + row_spare + extra,
+                "rule": sfp_rule(n, row_spare, extra),
+            }
+            for cabinet, n, s in counts
+        ],
     }
 
 
