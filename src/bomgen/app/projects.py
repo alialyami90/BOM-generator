@@ -24,7 +24,7 @@ from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.errors import LibraryPackageError
 from bomgen.library_store.store import LibraryRef, LibraryStore, library_mismatch
 from bomgen.models.library import DEFAULT_BRAND, CatalogueBrands, Library
-from bomgen.models.project import LayoutDefaults, Project
+from bomgen.models.project import LayoutDefaults, Project, ProjectInfo
 
 RECENT_FILE = "recent-projects.json"
 MAX_RECENT = 50
@@ -292,7 +292,7 @@ def summarize(project_file: Path, store: LibraryStore, *, details: bool = False)
     if details:
         summary |= {
             "brands": brands(loaded.library) if loaded is not None else {},
-            "project": project.project if project else None,
+            "project": _project_info(project.project) if project else None,
             "defaults": project.defaults if project else None,
             "documents": project.documents if project else [],
             "register": register(project_file, project, loaded) if project else [],
@@ -304,6 +304,11 @@ def summarize(project_file: Path, store: LibraryStore, *, details: bool = False)
             else [],
         }
     return summary
+
+
+def _project_info(info: ProjectInfo) -> dict[str, Any]:
+    """The ``project`` block, with the logo path as the file writes it ('/' on Windows too)."""
+    return info.model_dump(mode="json") | {"logo": info.logo.as_posix() if info.logo else None}
 
 
 def _vendor_lists(project: Project | None, loaded: LoadedProject | None) -> list[dict[str, Any]]:

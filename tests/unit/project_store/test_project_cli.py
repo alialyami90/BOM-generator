@@ -4,7 +4,7 @@ import zipfile
 from pathlib import Path
 
 import pytest
-from project_builders import make_project
+from project_builders import hold_project_folder, make_project
 from typer.testing import CliRunner
 
 from bomgen.cli import app
@@ -84,6 +84,25 @@ def test_import_force_replaces_and_reports_the_backup(runner: CliRunner, tmp_pat
     assert result.exit_code == 0, result.output
     assert "Replaced the existing project; its backup is" in result.output
     assert list((tmp_path / "workspace" / "jfgp2" / "Backups").glob("*.bomproj"))
+
+
+def test_import_force_over_a_folder_in_use_exits_1_in_words(
+    runner: CliRunner, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    package = tmp_path / "p.bomproj"
+    runner.invoke(
+        app, ["project", "export", str(make_project(tmp_path / "s" / "jfgp2")), "-o", str(package)]
+    )
+    runner.invoke(app, ["project", "import", str(package)])
+    hold_project_folder(monkeypatch)
+
+    result = runner.invoke(app, ["project", "import", str(package), "--force"])
+
+    assert result.exit_code == 1
+    assert result.exception is None or isinstance(result.exception, SystemExit)
+    assert "error: the folder " in result.output
+    assert "close the project's workbook in Excel" in result.output
+    assert "Access is denied" not in result.output
 
 
 def test_import_into_a_chosen_workspace(runner: CliRunner, tmp_path: Path) -> None:
