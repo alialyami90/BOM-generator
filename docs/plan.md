@@ -1381,7 +1381,10 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
 | 5 SFPs on monitors and KVMs | M89 |
 | 6 Other inconsistencies | M83, M90, M91, M92, M94 |
 
-- **M82 — The substation switch opens.** *Lead; Q75.* Point 1. Cause, by reading: the switch in the
+- **M82 — The substation switch opens.** *Lead; Q75.* **Done.** Point 1. The page-wide click handler
+  skips a select, and every select that carries an action runs it on `change`; three tests run
+  the handlers in node. Still to do by hand: Ali opens the list in the installed app. Cause, by
+  reading: the switch in the
   rail carries `data-action="sub-switch"`, so the page-wide click handler in `app/ui/ui.js` runs
   the switch action on the click that opens the list, before anything is chosen. With the current
   substation that redraws the window, which closes the list; on Home, Project or Library it goes to
