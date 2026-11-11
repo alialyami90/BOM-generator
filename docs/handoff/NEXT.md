@@ -46,7 +46,8 @@ medium for `device-research`.
   *Export PDF… › Use Excel*, Q11 in Excel's Print Preview, the drag-and-drop hand test (ALI-8)
   and screen checks of the installed app. The released installer is enough for these. Since
   2026-11-11 the PC has a virtual environment in `.venv` (Python 3.13, `.[dev,app]`): run the
-  gate as `.venv/Scripts/python -m ruff`, `-m mypy` and `-m pytest`. `gh` is installed and
+  gate as `.venv/Scripts/python -m ruff`, `-m mypy` and `-m pytest`; it is green there since
+  M95 (0 failed), so any failure is a real one. `gh` is installed and
   logged in but not on Git Bash's PATH: call `"/c/Program Files/GitHub CLI/gh.exe"`. `node` is
   not installed; VS Code's runtime stands in for it:
   `ELECTRON_RUN_AS_NODE=1 "<VS Code>/Code.exe" --check file.js`, and a `node.cmd` that calls it,
@@ -73,7 +74,7 @@ path exists before relying on it.
   either. Don't move golden values without an ADR. Only Ali marks ADRs Accepted. Don't commit `.xlsx`.
   Don't force-push (LESSONS "Branch restart"). Don't bump the version outside a release PR (on main it
   publishes at once). Don't push tags.
-- Next free numbers: ADR 0042, Q85, milestone M97. Handed out for M82–M94 (2026-11-11): ADR 0041
+- Next free numbers: ADR 0042, Q90, milestone M97. Handed out for M82–M94 (2026-11-11): ADR 0041
   to `parts-network` for M88, Q74–Q81 as `plan.md` section 6 lists them. Handed out for M70–M81
   (2026-11-04): ADR 0038 to
   W4 for M73, ADR 0039 and Q73 to W2 for M78, ADR 0040 to the lead for M77, Q72 to W4 for M72;
@@ -106,19 +107,20 @@ path exists before relying on it.
 11. **Q51** (annunciator mounted in a panel) and **Q55** (categories for the contractor's other
    part types) are open in plan §6. Q54 (power of the -2 SEL computers) was answered 2026-11-01.
 
-12. **Q74, Q76 to Q81, Q83 and Q84** (2026-11-11) are open in plan §6, from Ali's six points on
-   v0.5.0; Q82 is answered (a part is named by its model only). Q83 (the SFP a Cisco or Moxa
-   switch picks by itself) should be answered before the next release.
+12. **Q74, Q76 to Q81, Q83, Q84 and Q86 to Q89** (2026-11-11) are open in plan §6, from Ali's six
+   points on v0.5.0 and the work on them; Q82 and Q85 are answered. Q83 (the SFP a Cisco or
+   Moxa switch picks by itself) is still unanswered: the rule is as M85 left it, and since M86
+   the row names the part it picks.
    Ali answered Q75 the same day: the substation list stays open only while the mouse button is
    held, which fits M82's cause; the "duplicate" is the library id `SEL-2730M-EXT` shown as a
    part's name (Q82); and the SFPs on a monitor and a KVM are the link line of M89, his KVM not
    being an IP KVM (Q78, partly answered). Each open question has a recommended answer that its
    milestone assumes until Ali answers.
 
-**Next work:** M82 to M85 are on main. Then M89, M86, M87, M90 and M91, one after another (they
-share `app/parts.py` and `screens-parts.js`), then a release so Ali can check them; he must
+**Next work:** M82 to M87, M89 and M95 are on main. Then M90 (in review) and M91, one after the
+other (they share `app/parts.py` and `screens-parts.js`), then a release so Ali can check them; he must
 import that release's `default.bomlib` to get psa-devices 1.18.0, since an upgrade keeps the
-installed library. M95's two app faults and its test isolation, M96, M92 to M94 and M88 follow. Ali's field tests of
+installed library. M96, M92 to M94 and M88 follow. Ali's field tests of
 v0.5.0 (PDF export with Excel, drag and drop) and the open ends in STATE.md §1 stay open.
 
 ## 4. When Ali's feedback arrives

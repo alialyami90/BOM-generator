@@ -87,10 +87,11 @@ rather than copy it.
   #267 (Settings and Parts crashed with "StopIteration:" on a new, blank substation: `parts_page`
   sized SFPs through `layout_preview`, which needs the switches; it now skips that with no
   equipment). `pyproject.toml` and `bomgen.__version__` are `0.3.1`.
-- **Gate on Windows, `246eecb` (2026-11-11, Ali's PC, Python 3.13):** ruff passes (401 files),
-  mypy passes (288 files), pytest has **16 failed**, 3540 passed, 5 skipped in 5 min 24 s. It was
-  the first run of the suite on Windows; CI runs it on Linux only. The failures are listed and
-  sorted in `plan.md` "M95"; some may be real faults of the app on Windows.
+- **Gate on Windows, `3fff89d` (2026-11-11, Ali's PC, Python 3.13):** ruff, ruff format and mypy
+  pass; pytest has **3622 passed, 16 skipped, 0 failed** in about 5 min 40 s. The first run
+  that morning, on `246eecb`, had 16 failed; M95 (#405–#407) fixed twelve test faults and two
+  faults of the app and added the CI job `test-windows`, so CI now runs the suite on Linux
+  and on Windows.
 - **Gate on `628ff1c`:** ruff and format pass (319 files), mypy passes (240 files), pytest has
   2852 passed. The table under "Verification" below is from 2026-10-30.
 - **Audit of 2026-10-30** ([Claude Doc "Repo audit after v0.2.1"](https://claude.ai/artifact/DXyJnufrHguPCCVWgeLGPh)): no code defect; 14
@@ -119,16 +120,17 @@ rather than copy it.
   the UI polish pass from [`docs/ui/polish-v02.md`](../ui/polish-v02.md) (items 1–16, #205–#208) plus
   #194, #198–#201.
 - **Numbers (2026-11-04, after v0.5.0).** ADRs 0001–0027 and 0029–0040 are Accepted and 0028
-  is Rejected. The next free ADR is **0042**, the next free question **Q85** and the next
+  is Rejected. The next free ADR is **0042**, the next free question **Q90** and the next
   milestone **M97** (M70–M81 are done; Q72 "only above", Q73 "both, built-in by default").
   M82–M96 are planned (2026-11-11), ADR 0041 is reserved for M88 and Q74–Q84 belong to them
-  (Q75 and Q82 answered, Q78 partly). **M82, M83, M84 and M85 are on main** (#397–#400), not
-  yet released; psa-devices is 1.18.0. Q51 (annunciator) and Q55 (categories for the contractor's other part types) are open.
+  (Q75, Q82 and Q85 answered, Q78 partly; Q86–Q89 came out of the work). **On main, not yet
+  released:** M82–M87, M89 and M95 (#397–#408); psa-devices is 1.18.0. Q51 (annunciator) and Q55 (categories for the contractor's other part types) are open.
 - **Changelog** has a `[0.5.0]` section, and `[Unreleased]` is empty.
 - **Next work:** the rest of M82–M96, Ali's six points on v0.5.0 of 2026-11-11 (`plan.md`
   "M82–M94", `backlog.md` "v0.6"). Done on main: the substation switch (M82), the part picker
-  (M83), the Library list (M84), SFP alternatives (M85). Next: M89 (L2 link line), then M86 and
-  M87 (SFP rows and a typed quantity), M90, M91, then a release. Still
+  (M83), the Library list (M84), SFP alternatives (M85), SFP rows and a typed quantity (M86,
+  M87), the L2 link line on Parts and on Panels › Ports (M89), and the suite green on
+  Windows with a CI job (M95). Next: M90 (in review), M91, then a release. Still
   waiting on Ali: try *Use Excel* in PDF export on Windows (NEXT §3), his hand test of drag
   and drop on Windows (ALI-8), and his answers on the v0.3.4 review list (keyboard nameplate, a
   DC supply-voltage check, Q51, Q55, reviewer mode, Q11/Q23). Open ends the workstreams left:

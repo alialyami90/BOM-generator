@@ -100,6 +100,20 @@ replaced entry "superseded by …".
 - **A backslash in text passed to Python through a shell heredoc** can arrive as an escape:
   `a\b.yaml` was written to `plan.md` as a backspace character. Search the result for
   control characters, or build such text with `chr(92)`.
+- **Before `git add -A` on a merge, list every conflicted file** (`git status --short` shows
+  `UU`). A script that resolved the expected conflict in `test_app_ui_assets.py` and then
+  staged everything committed `app/parts.py` with its markers still in (M90, caught by ruff
+  before any push). Two branches that both add keys to one dict in `parts.py` `_row` conflict
+  there: keep both.
+- **Send a finished milestone back when its own report names a trap.** M87's agent wrote that a
+  typed quantity printed a different number on hand-written panels. A second pass, asked to
+  prove the page's number is the BOM's on every kind of panel, found the claim was wrong in a
+  worse way (no Parts SFP edit ever reached a hand-written BOM) and a second fault (one spare,
+  two cabinets). The test that compares each row on the page with its BOM line is what made
+  the milestone safe to merge; ask for that kind of test whenever a page shows a number the
+  workbook also prints.
+- **The suite is green on Windows since M95.** A local failure on the PC is real: do not keep
+  a baseline list of expected failures.
 
 ### PRs and GitHub
 
