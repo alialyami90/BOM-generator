@@ -5,7 +5,30 @@
   const makeModel = (d) => (d.model && d.make && d.model.toLowerCase().startsWith(d.make.toLowerCase()) ? esc(d.model) : `${esc(d.make)} <span class="muted">${esc(d.model)}</span>`);
   const ACRONYMS = { io: 'IO', gps: 'GPS', rtac: 'RTAC', sfp: 'SFP' };
   const catName = (c) => c.split('_').map((w) => ACRONYMS[w] || w).join(' ').replace(/^./, (m) => m.toUpperCase());
-  const F = { q: '', cat: '', ver: '', alt: false, assumed: false };
+  /* ---------- the Devices table's rows (plan M84) ---------- */
+  /* A part is named by its make and model, never by its library id (Q82); without both, its description leads. */
+  const partName = (d) => (d.make && d.model ? makeModel(d) : `${esc(d.desc)}${d.make || d.model ? ` <span class="muted">${esc(d.make || d.model)}</span>` : ''}`);
+  /* What the part is for, beside its name: a switch by its level ("EXT switch"), any other part by its category. */
+  const role = (d) => (d.cat === 'network_switch' && d.level ? `${d.level} switch` : catName(d.cat));
+  const TIER = { low: 'Low tier', mid: 'Mid tier', high: 'High tier' };
+  /* Under its original an alternative says its tier; on a row of its own it also says what it is for. */
+  const rowSub = (r) => (r.depth ? TIER[r.d.tier] : [role(r.d), TIER[r.d.tier]].filter(Boolean).join(' · '));
+  /* Originals, each with its alternatives (`of`, from the API) folded under it and opened when in
+     `toggled`. An original shows when it or one of its alternatives matches; one shown only for its
+     alternatives (`hit` false) is open on those, by make and then tier. `flat` lists every matching part as a row. */
+  function libraryRows(all, match, { flat = false, toggled = [] } = {}) {
+    if (flat) return all.filter(match).map((d) => ({ d, depth: 0, kids: 0, open: false, hit: true }));
+    const kids = {}, rank = Object.keys(TIER);
+    all.forEach((d) => { if (d.of) (kids[d.of] = kids[d.of] || []).push(d); });
+    Object.values(kids).forEach((k) => k.sort((a, b) => a.make.localeCompare(b.make) || rank.indexOf(a.tier) - rank.indexOf(b.tier)));
+    return all.filter((d) => !d.of).flatMap((d) => {
+      const own = kids[d.id] || [], hit = match(d), shown = hit ? own : own.filter(match);
+      if (!hit && !shown.length) return [];
+      const open = !hit || toggled.includes(d.id);
+      return [{ d, depth: 0, kids: shown.length, open, hit }, ...(open ? shown.map((k) => ({ d: k, depth: 1, kids: 0, open: false, hit: match(k) })) : [])];
+    });
+  }
+  const F = { q: '', cat: '', ver: '', alt: false, assumed: false, flat: false, open: [] };
 
   /* ---------- data from Python ---------- */
   const LIB = { state: 'idle', overview: null, versions: null, projects: [], errors: {} };
@@ -48,10 +71,11 @@
     brand: a.make,
     rows: TIERS.map(([k, label]) => ({ tier: label, model: a.tiers[k].model, sub: a.tiers[k].description, verified: a.tiers[k].verified ? 'confirmed' : 'unverified', same_as: a.tiers[k].same_as ? TIERS.find(([x]) => x === a.tiers[k].same_as)[1] : '' }))
   }));
-  const row = (d, records) => {
+  const row = (d, records, originalOf) => {
     const r = records[d.part_id];
     return {
       id: d.part_id, make: d.make || (r && r.make) || '', model: d.model || '', cat: d.category, tags: d.tags || [],
+      desc: d.description_template, tier: d.tier, of: (originalOf || {})[d.part_id] || null,  /* plan M84 */
       supply: d.supply_type ? `${d.voltage_v ? d.voltage_v + ' ' : ''}${d.supply_type}` : '—', w: d.unit_power_w,
       code: d.ordering_code, tagType: d.tag_type, level: d.purdue_level, power: feeds[d.power_supplies] || '',
       mcb: d.min_branch_mcb_a ? `${d.min_branch_mcb_a} A branch` : '',
@@ -60,7 +84,7 @@
     };
   };
   const lib = () => (LIB.overview && LIB.overview.library ? { name: LIB.overview.library.name, version: LIB.overview.library.version, date: day(LIB.overview.library.created), notes: LIB.overview.library.notes } : null);
-  const devices = () => (LIB.overview ? LIB.overview.devices.map((d) => row(d, LIB.overview.records)) : []);
+  const devices = () => (LIB.overview ? LIB.overview.devices.map((d) => row(d, LIB.overview.records, LIB.overview.alternative_of)) : []);
   const versions = () => (LIB.versions ? LIB.versions.versions.map((v) => ({ ...v, projects: builtWith(LIB.versions.name, v.version) })) : []);
   const builtWith = (name, version) => LIB.projects.filter((p) => p.library && !p.library.local_file && p.library.name === name && p.library.version === version).length;
   /* Data quality, datasheets and alternatives come from the device database a package may carry. */
@@ -91,7 +115,7 @@
     if (!(LIB.overview && LIB.overview.catalogues)) return devicesView();
     const t = ['catalogues', 'review', 'health'].includes(S.tab.libview) ? S.tab.libview : 'devices';
     const view = { devices: devicesView, catalogues: cataloguesView, review: reviewView, health: healthView }[t];
-    return `${tabs('libview', [['devices', 'Devices', badge('plain', devices().length)], ['catalogues', 'Catalogues'], ['review', 'Review'], ['health', 'Health']], t, 'Library contents')}
+    return `${tabs('libview', [['devices', 'Devices', badge('plain', devices().filter((d) => !d.of).length)], ['catalogues', 'Catalogues'], ['review', 'Review'], ['health', 'Health']], t, 'Library contents')}
       <div role="tabpanel" aria-labelledby="tab-libview-${t}">${view()}</div>`;
   }
 
@@ -157,25 +181,30 @@
   /* ADR 0037: a released part shows nothing; the others say their state. */
   const STATE = { draft: ['warn', 'Draft'], reviewed: ['info', 'Reviewed'], obsolete: ['bad', 'Obsolete'] };
   const stateBadge = (st) => (STATE[st] ? ` ${badge(...STATE[st])}` : '');
-  function filtered() {
-    return devices().filter((d) => (!F.q || [d.id, d.make, d.model, ...d.tags].join(' ').toLowerCase().includes(F.q.toLowerCase()))
-      && (!F.cat || F.cat === d.cat) && (!F.ver || F.ver === d.verified) && (!F.alt || d.alt) && (!F.assumed || d.assumed));
-  }
+  const matches = (d) => (!F.q || [d.id, d.make, d.model, ...d.tags].join(' ').toLowerCase().includes(F.q.toLowerCase()))
+    && (!F.cat || F.cat === d.cat) && (!F.ver || F.ver === d.verified) && (!F.alt || d.alt) && (!F.assumed || d.assumed);
+  /* The first cell: name, state and what the part is for; an original that is a match opens and shuts its alternatives. */
+  const nameCell = (r) => {
+    const d = r.d, toggle = r.kids && r.hit ? ` · <button class="link-btn" data-action="lib-open" data-id="${esc(d.id)}" aria-expanded="${r.open}">${icon(r.open ? 'chevd' : 'chevr')}${r.kids} alternative${r.kids === 1 ? '' : 's'}</button>` : '';
+    return `<td${r.depth ? ' style="padding-left:var(--space-6)"' : ''}>${partName(d)}${stateBadge(d.state)}<span class="cell-sub">${esc(rowSub(r))}${toggle}</span></td>`;
+  };
   function devicesView() {
-    const all = devices(), list = filtered(), cats = [...new Set(all.map((d) => d.cat))], quality = hasDeviceDb();
-    const sel = all.find((d) => d.id === S.selectedDevice) || list[0];
+    const all = devices(), rows = libraryRows(all, matches, { flat: F.flat, toggled: F.open }), cats = [...new Set(all.map((d) => d.cat))], quality = hasDeviceDb();
+    const sel = all.find((d) => d.id === S.selectedDevice) || (rows[0] && rows[0].d);
+    const count = F.flat ? `${rows.length} of ${all.length} parts` : `${rows.filter((r) => !r.depth).length} of ${all.filter((d) => !d.of).length} devices`;
     return `<div class="toolbar" role="search">
         <div class="input-wrap" style="width:280px"><label class="sr-only" for="lib-q">Search library</label>${icon('search')}<input class="input" id="lib-q" type="search" placeholder="Search part, make, model, tag" value="${esc(F.q)}"></div>
         <label class="sr-only" for="lib-cat">Category</label>${select('lib-cat', [['', 'All categories'], ...cats.map((c) => [c, catName(c)])], F.cat, { cls: 'ctl' }).replace('data-dirty="1"', 'data-action="lib-cat"').replace('class="select ctl"', 'class="select" style="width:190px"')}
         ${quality ? `<label class="sr-only" for="lib-ver">Data quality</label>${select('lib-ver', [['', 'Any data quality'], ['confirmed', 'Confirmed'], ['partial', 'Partial'], ['unverified', 'Unverified']], F.ver, {}).replace('data-dirty="1"', 'data-action="lib-ver"').replace('class="select "', 'class="select" style="width:190px"')}
         <label class="check"><input type="checkbox" data-action="lib-alt" ${F.alt ? 'checked' : ''}> Has alternatives</label>` : ''}
         <label class="check"><input type="checkbox" data-action="lib-assumed" ${F.assumed ? 'checked' : ''}> Assumed values</label>
-        <span class="sp"></span><span class="muted small">${list.length} of ${all.length} devices</span></div>
+        <label class="check"><input type="checkbox" data-action="lib-flat" ${F.flat ? 'checked' : ''}> List every part</label>
+        <span class="sp"></span><span class="muted small">${count}</span></div>
       <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,400px);gap:var(--space-5);align-items:start">
-        <div><div class="table-wrap"><table class="table"><thead><tr><th>Part ID</th><th>Make and model</th><th>Supply</th>${quality ? '<th>Data</th>' : ''}</tr></thead><tbody>
-          ${list.map((d) => `<tr class="clickable" tabindex="0" data-action="lib-select" data-id="${esc(d.id)}" aria-selected="${sel && sel.id === d.id}"><td><span class="mono">${esc(d.id)}</span>${stateBadge(d.state)}<span class="cell-sub">${esc(catName(d.cat))}</span></td><td>${makeModel(d)}</td><td class="nowrap">${esc(d.supply)}${d.w ? `<span class="cell-sub">${d.w} W</span>` : ''}</td>${quality ? `<td style="white-space:nowrap">${d.verified ? verified(d.verified) : ''}</td>` : ''}</tr>`).join('') || `<tr class="empty-row"><td colspan="${quality ? 4 : 3}">No device matches these filters. Clear a filter or search for a different part.</td></tr>`}
+        <div><div class="table-wrap"><table class="table"><thead><tr><th>Device</th><th>Supply</th>${quality ? '<th>Data</th>' : ''}</tr></thead><tbody>
+          ${rows.map((r) => { const d = r.d; return `<tr class="clickable" tabindex="0" data-action="lib-select" data-id="${esc(d.id)}" aria-selected="${sel && sel.id === d.id}">${nameCell(r)}<td class="nowrap">${esc(d.supply)}${d.w ? `<span class="cell-sub">${d.w} W</span>` : ''}</td>${quality ? `<td style="white-space:nowrap">${d.verified ? verified(d.verified) : ''}</td>` : ''}</tr>`; }).join('') || `<tr class="empty-row"><td colspan="${quality ? 3 : 2}">No device matches these filters. Clear a filter or search for a different part.</td></tr>`}
         </tbody></table><div class="table-foot"><span>Select a row to see its details</span></div></div></div>
-        ${sel ? detail(sel) : ''}
+        ${sel ? detail(sel, all) : ''}
       </div>`;
   }
   /* The library's own alternatives (same alt_group), compact: part, power and inrush against this device. */
@@ -194,8 +223,8 @@
       <div class="table-foot"><span>${a.rows.length - 1} in group <span class="mono">${esc(a.group)}</span></span><a href="#/library/device/${encodeURIComponent(id)}" data-action="compare-full">Compare in full</a></div></div>`;
   }
   ACTIONS['compare-full'] = () => { S.tab.devEdit = 'alternatives'; return true; };
-  function detail(d) {
-    const t = S.tab.libdetail;
+  function detail(d, all) {
+    const t = S.tab.libdetail, original = d.of && all.find((x) => x.id === d.of);
     const tabsList = [['overview', 'Overview'], ['datasheet', 'Datasheet'], ['alternatives', 'Alternatives']];
     let body = '';
     if (t === 'overview') body = `<dl class="kv"><dt>Part ID</dt><dd class="mono">${esc(d.id)}</dd><dt>Make</dt><dd>${esc(d.make)}</dd><dt>Model</dt><dd>${esc(d.model)}</dd><dt>Ordering code</dt><dd class="mono">${esc(d.code || '—')}</dd><dt>Category</dt><dd>${esc(catName(d.cat))}</dd><dt>Tag</dt><dd class="mono">${d.tagType ? esc(d.tagType) + (d.level ? ' · ' + esc(d.level) : '') : '—'}</dd><dt>Supply</dt><dd>${esc(d.supply)}</dd><dt>Power</dt><dd>${esc(d.power || '—')}</dd><dt>Rated power</dt><dd class="num" style="text-align:left">${d.w != null ? d.w + ' W' : '—'}</dd><dt>Branch MCB</dt><dd>Sized by the engine${d.mcb ? ` <span class="muted">(the library's ${esc(d.mcb)} is deprecated, ADR 0019)</span>` : ''}</dd></dl>`;
@@ -204,7 +233,8 @@
     else body = `${altCompact(d.id)}${d.alt ? `<details class="section" style="margin-top:var(--space-4)"><summary>Researched brands <span class="muted small">(device database)</span></summary>
       ${d.alt.map((a) => `<h3 style="margin-top:var(--space-4)">${esc(a.brand)}</h3><div class="table-wrap" style="margin-top:6px"><table class="table"><thead><tr><th style="width:56px">Tier</th><th>Model</th><th>Data</th><th style="width:40px"><span class="sr-only">Copy</span></th></tr></thead><tbody>${a.rows.map((r) => `<tr><td>${esc(r.tier)}</td><td><span class="mono nowrap">${esc(r.model)}</span><span class="cell-sub">${r.same_as ? `Same as ${esc(r.same_as)}` : esc(r.sub || '')}</span></td><td>${verified(r.verified)}</td><td style="width:40px"><button class="btn btn--ghost btn--icon btn--sm" data-action="copy" data-v="${esc(r.model)}" aria-label="Copy ${esc(r.model)}">${icon('copy')}</button></td></tr>`).join('')}</tbody></table></div>`).join('')}</details>` : ''}`;
     const what = 'Device detail';
-    return `<aside class="detail" aria-label="${what}"><h2 class="mono" style="font-size:18px;font-family:var(--font-mono)">${esc(d.id)}</h2><p class="muted" style="margin-bottom:var(--space-3)">${makeModel(d)}</p><a class="btn btn--secondary btn--sm" style="margin-bottom:var(--space-3)" href="#/library/device/${encodeURIComponent(d.id)}">${icon('edit')}Edit device</a>
+    /* plan M84: named by make and model; the library id, the key links and projects use, comes after what the part is for */
+    return `<aside class="detail" aria-label="${what}"><h2 style="font-size:18px">${partName(d)}</h2><p class="muted" style="margin-bottom:var(--space-3)">${esc(role(d))}${original ? ` · ${esc(TIER[d.tier])} alternative to ${partName(original)}` : ''} · <span class="mono nowrap">${esc(d.id)}</span></p><a class="btn btn--secondary btn--sm" style="margin-bottom:var(--space-3)" href="#/library/device/${encodeURIComponent(d.id)}">${icon('edit')}Edit device</a>
       ${tabs('libdetail', tabsList, t, what)}<div role="tabpanel" aria-labelledby="tab-libdetail-${t}">${body}</div></aside>`;
   }
 
@@ -328,7 +358,13 @@
   };
 
   ACTIONS['lib-select'] = (el) => { S.selectedDevice = el.dataset.id; S.tab.libdetail = 'overview'; App.render(); };
-  document.addEventListener('keydown', (e) => { const r = e.target.closest && e.target.closest('tr.clickable[data-action^="lib-"]'); if (r && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); r.click(); } });
+  document.addEventListener('keydown', (e) => { const r = e.target.closest && e.target.closest('tr.clickable[data-action^="lib-"]'); if (r && e.target === r && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); r.click(); } });  /* a button in the row keeps its own keys */
+  ACTIONS['lib-open'] = (el) => {
+    const id = el.dataset.id;
+    F.open = F.open.includes(id) ? F.open.filter((x) => x !== id) : [...F.open, id];
+    App.render(); const n = $(`[data-action="lib-open"][data-id="${CSS.escape(id)}"]`); n && n.focus();
+  };
+  ACTIONS['lib-flat'] = () => { F.flat = !F.flat; App.render(); };
   document.addEventListener('change', (e) => { if (e.target.id === 'lib-cat') { F.cat = e.target.value; App.render(); } if (e.target.id === 'lib-ver') { F.ver = e.target.value; App.render(); } });
   ACTIONS['lib-cat'] = () => {}; ACTIONS['lib-ver'] = () => {};
   ACTIONS['lib-alt'] = () => { F.alt = !F.alt; App.render(); };

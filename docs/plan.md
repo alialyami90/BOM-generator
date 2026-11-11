@@ -1416,7 +1416,11 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   library the L1 row offers 9 switches, the L2 row 10 and the EXT row 7, none an alternative of
   another part. The picker and the row name a part by its make and model, with the ordering
   code where two parts share a model; the library id is not the name (Q82). Size S to M.
-- **M84 — The Library list shows each device once.** *`library-parts`; Q74, Q75.* Points 3 and 4.
+- **M84 — The Library list shows each device once.** *`library-parts`; Q74, Q75.* **Done.** The row
+  logic is `libraryRows` in `screens-library.js`, tested in node on the shipped library;
+  `library_store.alternatives.alternative_of` gives each alternative its original. A part with no
+  make or no model (7 cables and accessories) is named by its description. Review, Health and the
+  detail pane's Alternatives tab still lead with the id. Points 3 and 4.
   Cause: the Devices table lists all 381 parts flat and drops `tier` and `alt_group`, which the
   page already receives; one part reads as two names, its id in one column (`SEL-2730M-EXT`) and
   its model in the next (`SEL-2730M`). Ali (2026-11-11): the "EXT" after the switch comes from

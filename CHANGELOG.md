@@ -9,6 +9,11 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- The Library list shows each device once (M84): the Devices table opens on the 94 originals,
+  each with its alternatives folded under it by make and tier, and *List every part* shows all
+  parts flat. A search that finds an alternative opens its original on it. A part is named by its
+  make and model with its role under it ("EXT switch", "L2 switch", "Gateway", "RTAC"); the
+  library id moves to the detail pane.
 - The part picker on Parts offers the parts that fit each row (M83): an L1, L2 or external switch
   row lists only switches of its level, alternatives appear only for the row's own part, and
   obsolete parts are left out. A part is named by its make and model, not by its library id, and
