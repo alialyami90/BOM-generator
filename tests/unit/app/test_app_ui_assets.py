@@ -1347,6 +1347,23 @@ def test_m86_every_switch_row_shows_its_sfp_rows_or_says_why_not() -> None:
     assert "input(id, v === '' ? String(auto) : v, " in counts
 
 
+def test_m89_the_ports_tab_offers_an_allocation_only_where_the_page_says() -> None:
+    """Plan M89, Ali's v0.5.0 point 5: a monitor gets no *Add allocation*, no serial ports
+    and no "No SFPs" line; the page decides (``offered``), and a device with no link has
+    ``l2`` null, so nothing reads its ports, speed or media."""
+    js = (UI_DIR / "screens-panel-editor.js").read_text(encoding="utf-8")
+    section = js[js.index("function portSection(r, p)") : js.index("const ports = (p) =>")]
+    plain = section.index("if (!r.offered)")
+    assert plain < section.index('data-action="pe-alloc-add"')
+    assert plain < section.index("'Serial ports'")
+    assert "Not on the network, so it has no port plan." in section
+    assert "r.l2 && r.l2.ports ? `Linked to the L2 switch: ${r.l2.ports}" in js
+    assert '${r.l2 ? ` <a href="#/parts" data-action="pe-parts"' in js
+    assert "const link = row.l2 || {};" in js
+    assert "speed: link.speed || '1G', media: link.media || 'MM'" in js
+    assert "row.l2.speed" not in js
+
+
 def test_m87_the_sfp_total_is_the_derived_value_the_engineer_types() -> None:
     """plan M87 (Ali's v0.5.0 point 2, Q77 (a)): on an editable SFP row the quantity on each
     BOM row is a derived value: typed, checked and written by the API as the spare it

@@ -32,6 +32,7 @@ from bomgen.engine.rules_text import cable_manager_rule, grounding_rule
 from bomgen.engine.units import expand_devices
 from bomgen.io.edit import panel_options
 from bomgen.io.loader import LoadedSubstation
+from bomgen.io.parts_edit import has_l2_link
 from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.store import LibraryStore
 from bomgen.models.bom import BomLine, Group, QtySum, StripRow
@@ -62,7 +63,10 @@ def _qty(line: BomLine) -> str:
 def _ports(
     loaded: LoadedSubstation, panel: Panel, units: list[dict[str, Any]], lines: Sequence[BomLine]
 ) -> list[Any]:
-    """Each device's port plan: its own (editable unless sized), the panel's, the engine's lines."""
+    """Each device's port plan: its own (editable unless sized), the panel's, the engine's lines.
+
+    A device is offered an allocation only when it has a link to the L2 switch or a port plan
+    written (plan M89): a monitor or a plain KVM has neither."""
     equipment = loaded.substation.equipment
     rows = []
     for device in dict.fromkeys(u["device"] for u in units):
@@ -71,12 +75,15 @@ def _ports(
         tag = next((x.tag for x in lines if x.group is Group.B and x.part_id == part_id), None)
         short = (tag or "").removeprefix(f"{panel.tag_prefix}-")
         used = panel.port_plans.get(tag or "") or panel.port_plans.get(part_id)
+        base = loaded.library.get(entry.part_id) if entry.part_id else None  # not a derived id
+        linked = has_l2_link(entry, base)
         rows.append(
             {
                 "device": device,
                 "role": entry.role.value,
                 "part_id": part_id,
                 "editable": entry.role not in SIZED,
+                "offered": entry.role not in SIZED and (linked or entry.port_plan is not None),
                 "equipment": index,
                 "own": entry.port_plan.model_dump(mode="json") if entry.port_plan else None,
                 "used": used.model_dump(mode="json") if used else None,
@@ -84,7 +91,9 @@ def _ports(
                     "ports": entry.l2_ports,
                     "speed": entry.l2_speed.value,
                     "media": entry.l2_media.value,
-                },
+                }
+                if linked
+                else None,
                 "lines": [
                     {"description": x.description, "part_id": x.part_id, "qty": _qty(x)}
                     for x in lines

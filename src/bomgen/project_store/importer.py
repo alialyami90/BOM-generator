@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import os
 import shutil
 import uuid
@@ -111,7 +112,8 @@ def import_project(
 
     An existing project with the same id is refused unless `force`; a forced
     import saves it to its `Backups/` first, keeps its `Backups/` and `out/`
-    folders, and restores it if the import fails.
+    folders, and restores it if the import fails. A folder Windows will not rename because
+    a program uses it is refused, and the project is left as it was, without that backup.
 
     With `rename_to` the project is unpacked under that new id instead, with
     `project.id` rewritten in `project.yaml`; an id that is taken is always
@@ -156,9 +158,14 @@ def import_project(
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(data)
         if exists:
+            had_backups = (target / BACKUPS_DIR).exists()
             backup = _backup_existing(target, manifest.project_id, now)
             _carry_over(target, incoming)
-            os.replace(target, replaced)
+            try:
+                os.replace(target, replaced)
+            except PermissionError as exc:
+                _take_back(backup, keep_folder=had_backups)
+                raise _in_use(target, manifest.project_id) from exc
             try:
                 os.replace(incoming, target)
             except BaseException:
@@ -247,6 +254,26 @@ def _backup_existing(project_dir: Path, project_id: str, now: datetime | None) -
             f"cannot back up the existing project, so it was not replaced: {exc}",
             RefusalKind.INVALID_PROJECT,
         ) from exc
+
+
+def _in_use(project_dir: Path, project_id: str) -> LibraryPackageError:
+    """Windows will not rename a folder while a program uses it (a file in it is open, or a
+    terminal or Explorer window is inside it); the remedy is in the message, which the app
+    shows as it is."""
+    return LibraryPackageError(
+        f"the folder {project_dir} is in use by another program, so project {project_id!r} "
+        "was not replaced: close the project's workbook in Excel and any terminal or Explorer "
+        "window open inside the folder, then try again",
+        RefusalKind.INVALID_PROJECT,
+    )
+
+
+def _take_back(backup: Path, *, keep_folder: bool) -> None:
+    """Remove the safety backup of a replace that was refused, so the project is as it was."""
+    with contextlib.suppress(OSError):  # the refusal matters more than a leftover backup
+        backup.unlink()
+        if not keep_folder:
+            backup.parent.rmdir()
 
 
 def _carry_over(old: Path, new: Path) -> None:

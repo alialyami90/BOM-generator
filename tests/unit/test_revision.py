@@ -1,6 +1,7 @@
 """Revision comparison with the previous issue (spec: Output requirements, OUT-8; plan
 M7, Q10; ADR 0016)."""
 
+import os
 from pathlib import Path
 from typing import Any, cast
 
@@ -205,7 +206,9 @@ def test_previous_issue_tables_start_at_the_bom_header(tmp_path: Path) -> None:
             HEADERS,
             (1, "Q1", " 6A MCB ", 2.0, "Schneider", None, "A9F74206", 4),
             (None,) * 7,  # a separator
-            (2, None, "Card\r\nA", 1),
+            # a cell typed with a Windows line end; openpyxl on Windows writes \r\n as
+            # \r\r\n, which reads back as two line ends, so the fixture has \n there
+            (2, None, "Card\r\nA" if os.linesep == "\n" else "Card\nA", 1),
             ("S\nLoose",),
             HEADERS,
             (1, "ANN", "Annunciator", "1 Lot"),

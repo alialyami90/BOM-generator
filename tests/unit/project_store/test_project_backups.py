@@ -1,11 +1,12 @@
 """Listing and restoring the backups in a project's `Backups/` folder."""
 
 import os
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
-from project_builders import make_project
+from project_builders import hold_project_folder, make_project
 
 from bomgen.bundle.errors import LibraryPackageError, RefusalKind
 from bomgen.library_store.store import LibraryStore
@@ -94,6 +95,24 @@ def test_restore_refuses_a_file_outside_a_backups_folder(
     assert caught.value.kind is RefusalKind.INVALID_PROJECT
 
 
+def _restore_from_inside(backup: Path, project_dir: Path, store: LibraryStore) -> None:
+    """Restore while the current folder is inside the project. Elsewhere the folder is
+    replaced; Windows will not rename a folder a process is in, so the restore is refused in
+    words and nothing changes (the refusal comes after the path was found, so it shows that
+    too)."""
+    if sys.platform != "win32":
+        assert restore_backup(backup, store=store, now=SECOND).project_dir == project_dir
+        return
+    before = _tree(project_dir)
+    with pytest.raises(LibraryPackageError, match="is in use by another program"):
+        restore_backup(backup, store=store, now=SECOND)
+    assert _tree(project_dir) == before
+
+
+def _tree(root: Path) -> dict[str, bytes]:
+    return {p.relative_to(root).as_posix(): p.read_bytes() for p in root.rglob("*") if p.is_file()}
+
+
 def test_restore_accepts_a_path_relative_to_the_project_folder(
     tmp_path: Path, store: LibraryStore, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -101,9 +120,7 @@ def test_restore_accepts_a_path_relative_to_the_project_folder(
     saved = backup_project(project_file, now=FIRST)
     monkeypatch.chdir(tmp_path / "ws" / "jfgp2")
 
-    result = restore_backup(Path("Backups") / saved.name, store=store, now=SECOND)
-
-    assert result.project_dir == tmp_path / "ws" / "jfgp2"
+    _restore_from_inside(Path("Backups") / saved.name, tmp_path / "ws" / "jfgp2", store)
 
 
 def test_restore_accepts_a_bare_file_name_from_inside_backups(
@@ -113,9 +130,25 @@ def test_restore_accepts_a_bare_file_name_from_inside_backups(
     saved = backup_project(project_file, now=FIRST)
     monkeypatch.chdir(saved.parent)
 
-    result = restore_backup(Path(saved.name), store=store, now=SECOND)
+    _restore_from_inside(Path(saved.name), tmp_path / "ws" / "jfgp2", store)
 
-    assert result.project_dir == tmp_path / "ws" / "jfgp2"
+
+def test_a_restore_over_a_folder_in_use_is_refused_and_keeps_the_project(
+    tmp_path: Path, store: LibraryStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    project_file = make_project(tmp_path / "ws" / "jfgp2")
+    saved = backup_project(project_file, now=FIRST)
+    (tmp_path / "ws" / "jfgp2" / "substations/psa/substation.yaml").write_text("edited\n")
+    before = _tree(tmp_path / "ws")
+    hold_project_folder(monkeypatch)
+
+    with pytest.raises(LibraryPackageError) as caught:
+        restore_backup(saved, store=store, now=SECOND)
+
+    assert caught.value.kind is RefusalKind.INVALID_PROJECT
+    assert "so project 'jfgp2' was not replaced: close the project's workbook" in str(caught.value)
+    assert _tree(tmp_path / "ws") == before  # no safety backup is left beside the first
+    assert [p.name for p in (tmp_path / "ws").iterdir()] == ["jfgp2"]
 
 
 def test_restore_refuses_a_backup_of_another_project(tmp_path: Path, store: LibraryStore) -> None:

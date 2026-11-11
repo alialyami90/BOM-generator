@@ -369,7 +369,8 @@
   const cellNum = (key, label) => `<label class="sr-only" for="pe-${key}">${label}</label>${text(key, { num: true, mono: true }).replace('class="input', 'class="ctl input')}`;
   const allocs = (plan) => GROUPS.flatMap(([g, use]) => ((plan && plan[g]) || []).map((a, i) => ({ g, use, i, a })));
   const result = (r) => `<div class="table-foot"><span>Engine result</span><span>${r.lines.length ? r.lines.map((x) => `<span class="mono" style="color:var(--color-text)">${esc(x.qty)} × ${esc(x.part_id || '')}</span> <span class="muted">${esc(x.description)}</span>`).join('<br>') : '<span class="muted">No SFPs or cables for this device</span>'}</span></div>`;
-  const l2Line = (r) => `<p class="small" style="margin:var(--space-2) 0">${r.l2.ports ? `Linked to the L2 switch: ${r.l2.ports} × ${esc(r.l2.speed)} ${esc(r.l2.media)}.` : 'Not linked to the L2 switch.'} <a href="#/parts" data-action="pe-parts" data-i="${r.equipment}">Change on Parts</a></p>`;
+  /* r.l2 is null for a device with no link to the L2 switch (plan M89): nothing to change on Parts */
+  const l2Line = (r) => `<p class="small" style="margin:var(--space-2) 0">${r.l2 && r.l2.ports ? `Linked to the L2 switch: ${r.l2.ports} × ${esc(r.l2.speed)} ${esc(r.l2.media)}.` : 'Not linked to the L2 switch.'}${r.l2 ? ` <a href="#/parts" data-action="pe-parts" data-i="${r.equipment}">Change on Parts</a>` : ''}</p>`;
   function portSection(r, p) {
     const d = p.devices.find((x) => x.device === r.device) || { role: r.role, label: r.device }, head = `<h3>${esc(devName(d))} <span class="muted mono" style="font-weight:400;font-size:13px">${esc(r.part_id)}</span></h3>`;
     if (!r.editable) {
@@ -378,6 +379,8 @@
         <div class="table-wrap" style="max-width:820px"><table class="table"><thead><tr><th>Use</th><th class="num" style="width:90px">Ports</th><th style="width:100px">Speed</th><th style="width:100px">Media</th><th class="num" style="width:90px">Spare</th></tr></thead>
         <tbody>${rows.map(({ use, a }) => `<tr><td>${use}</td><td class="num">${a.count}</td><td class="mono">${esc(a.speed)}</td><td class="mono">${esc(a.media)}</td><td class="num">${a.spare}</td></tr>`).join('') || '<tr class="empty-row"><td colspan="5">No ports in use.</td></tr>'}</tbody></table>${result(r)}</div></section>`;
     }
+    /* a monitor or a plain KVM: no link and no plan written, so nothing to allocate (plan M89) */
+    if (!r.offered) return `<section class="section" style="padding-top:var(--space-4)">${head}<p class="muted small" style="margin:var(--space-1) 0 var(--space-2)">Not on the network, so it has no port plan.</p></section>`;
     const rows = allocs(r.own), k = (x, f) => `p.${r.equipment}.${x.g}.${x.i}.${f}`;
     return `<section class="section" style="padding-top:var(--space-4)"><div class="row" style="justify-content:space-between">${head}
         <span class="row" style="gap:var(--space-2)"><label class="sr-only" for="pa-g-${r.equipment}">Use of the new allocation</label><select class="select" id="pa-g-${r.equipment}" style="width:auto">${GROUPS.map(([g, u]) => `<option value="${g}" ${g === 'downlinks' ? 'selected' : ''}>${u}</option>`).join('')}</select>
@@ -404,7 +407,8 @@
   const planOf = (row) => JSON.parse(JSON.stringify(row.own || { uplinks_l3: [], uplinks: [], downlinks: [], serial_ports: 0 }));
   ACTIONS['pe-alloc-add'] = (el) => {
     const row = rowOf(el.dataset.i), plan = planOf(row), g = document.getElementById('pa-g-' + el.dataset.i).value;
-    plan[g] = [...(plan[g] || []), { count: 1, speed: row.l2.speed || '1G', media: row.l2.media || 'MM', spare: 0 }];
+    const link = row.l2 || {};
+    plan[g] = [...(plan[g] || []), { count: 1, speed: link.speed || '1G', media: link.media || 'MM', spare: 0 }];
     writePlan(row, plan);
   };
   ACTIONS['pe-alloc-remove'] = (el) => {

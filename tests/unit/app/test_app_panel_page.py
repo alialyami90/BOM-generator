@@ -305,3 +305,75 @@ def test_notes_round_trip_on_a_hand_written_panel(app: api.Api, project: Path) -
     assert ok(app.panel_page(str(project), "gis01", "ws"))["panel"]["notes"] == (
         "Console desk by others"
     )
+
+
+# Plan M89, Ali's v0.5.0 point 5: Panels > Ports offers a port allocation only to a device
+# that can be on the network (``io.parts_edit.has_l2_link``) or has a port plan written.
+HWIO = "  - { id: hwio, part_id: SEL-2240, role: other }  # Axion I/O, no L2 link\n"
+DESK = """  - { id: mon, part_id: NAP-F23, role: other }
+  - { id: kbm, part_id: KEYTEK-KBM, role: other }
+"""
+
+
+@pytest.fixture
+def desk(app: api.Api, project: Path) -> Path:
+    """The example laid out with a monitor and a keyboard row; both land on psa2."""
+    file = project.parent / "substations" / "gis01" / "substation.yaml"
+    text = file.read_text("utf-8").replace(HWIO, HWIO + DESK, 1)
+    file.write_text(text[: text.index("\nloose_material:") + 1], "utf-8")  # fed from psa3
+    ok(app.generate_panels(str(project), "gis01"))
+    return project
+
+
+def ports_of(app: api.Api, project: Path, panel_id: str) -> dict[str, Any]:
+    return {p["device"]: p for p in ok(app.panel_page(str(project), "gis01", panel_id))["ports"]}
+
+
+def test_m89_a_monitor_on_the_ports_tab_is_not_offered_an_allocation(
+    app: api.Api, desk: Path
+) -> None:
+    """Ali: "Monitors and KVMs are showing SFPs that shouldn't be there"."""
+    ports = ports_of(app, desk, "psa2")
+
+    for device in ("mon", "kbm"):
+        assert ports[device]["offered"] is False
+        assert ports[device]["l2"] is None  # no link, not "0 x 1G MM"
+        assert ports[device]["own"] is None
+
+
+def test_m89_the_patch_panel_is_not_offered_an_allocation(app: api.Api, desk: Path) -> None:
+    """The rule gives the patch panel no link to the L2 switch."""
+    assert ports_of(app, desk, "psa1")["fopp"]["offered"] is False
+
+
+def test_m89_a_device_with_a_written_port_plan_keeps_its_table(app: api.Api, desk: Path) -> None:
+    """Written data is never hidden, whatever the device's category."""
+    plan = {"uplinks_l3": [], "uplinks": [], "downlinks": [], "serial_ports": 1}
+    assert ok(app.set_port_plan(str(desk), "gis01", "mon", plan))["written"]
+
+    monitor = ports_of(app, desk, "psa2")["mon"]
+    assert monitor["offered"] is True
+    assert monitor["own"]["serial_ports"] == 1
+    assert monitor["l2"] is None
+
+
+def test_m89_a_networked_device_is_still_offered_an_allocation(app: api.Api, desk: Path) -> None:
+    ports = ports_of(app, desk, "psa2")
+
+    assert ports["rtac"]["offered"] is True
+    assert ports["rtac"]["l2"] == {"ports": 2, "speed": "1G", "media": "MM"}
+    assert ports["gw"]["offered"] is True
+    # Q78 (a): the I/O chassis and the EXT switch may be linked; the example links neither
+    hwio = ports_of(app, desk, "psa1")["hwio"]
+    assert (hwio["offered"], hwio["l2"]) == (True, {"ports": 0, "speed": "1G", "media": "MM"})
+    assert ports["ext-esw"]["offered"] is True
+
+
+def test_m89_the_sized_switches_keep_their_generated_plans(app: api.Api, desk: Path) -> None:
+    ports = ports_of(app, desk, "psa1")
+
+    for device in ("l1", "l2"):
+        assert ports[device]["editable"] is False
+        assert ports[device]["used"] is not None
+    sfps = {(line["part_id"], line["qty"]) for line in ports["l2"]["lines"]}
+    assert ("SFP-1G-LX-SM", "2") in sfps

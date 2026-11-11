@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 
 import pytest
-from project_builders import FILES, PROJECT_YAML, make_project
+from project_builders import FILES, PROJECT_YAML, hold_project_folder, make_project
 
 from bomgen.bundle.errors import LibraryPackageError, RefusalKind
 from bomgen.library_store.package import pack
@@ -89,7 +89,7 @@ def test_import_refuses_an_existing_project_unless_forced(
     workspace: Path, package: Path, store: LibraryStore
 ) -> None:
     import_project(package, workspace=workspace, store=store)
-    (workspace / "jfgp2" / "project.yaml").write_text("edited locally\n")
+    (workspace / "jfgp2" / "project.yaml").write_text("edited locally\n", newline="\n")
 
     with pytest.raises(LibraryPackageError) as caught:
         import_project(package, workspace=workspace, store=store)
@@ -104,7 +104,7 @@ def test_forced_import_backs_up_then_overwrites(
 ) -> None:
     import_project(package, workspace=workspace, store=store)
     project_dir = workspace / "jfgp2"
-    (project_dir / "substations/psa/substation.yaml").write_text("edited locally\n")
+    (project_dir / "substations/psa/substation.yaml").write_text("edited locally\n", newline="\n")
 
     result = import_project(package, workspace=workspace, force=True, store=store, now=NOW)
 
@@ -148,7 +148,7 @@ def test_failed_forced_import_keeps_the_existing_project(
 ) -> None:
     import_project(package, workspace=workspace, store=store)
     project_dir = workspace / "jfgp2"
-    (project_dir / "project.yaml").write_text("edited locally\n")
+    (project_dir / "project.yaml").write_text("edited locally\n", newline="\n")
     before = _tree(workspace)
     real_replace = os.replace
 
@@ -165,6 +165,33 @@ def test_failed_forced_import_keeps_the_existing_project(
     after = _tree(workspace)
     after.pop("jfgp2/Backups/jfgp2-20261028-150000.bomproj", None)  # the safety backup may remain
     assert after == before
+    assert not [p for p in workspace.iterdir() if p.name.startswith(".")]
+
+
+IN_USE = (
+    "is in use by another program, so project 'jfgp2' was not replaced: close the project's "
+    "workbook in Excel and any terminal or Explorer window open inside the folder, then try again"
+)
+
+
+def test_a_forced_import_over_a_folder_in_use_is_refused_and_changes_nothing(
+    workspace: Path, package: Path, store: LibraryStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import_project(package, workspace=workspace, store=store)
+    project_dir = workspace / "jfgp2"
+    (project_dir / "project.yaml").write_text("edited locally\n")
+    (project_dir / "substations/psa/out").mkdir()
+    (project_dir / "substations/psa/out/BOM.xlsx").write_text("workbook open in Excel")
+    before = _tree(workspace)
+    hold_project_folder(monkeypatch)
+
+    with pytest.raises(LibraryPackageError) as caught:
+        import_project(package, workspace=workspace, force=True, store=store, now=NOW)
+
+    assert caught.value.kind is RefusalKind.INVALID_PROJECT
+    assert str(caught.value) == f"the folder {project_dir} {IN_USE}"
+    assert _tree(workspace) == before
+    assert not (project_dir / "Backups").exists()  # the safety backup is taken back too
     assert not [p for p in workspace.iterdir() if p.name.startswith(".")]
 
 

@@ -1,6 +1,9 @@
 """Helpers that build a small project folder on disk for the project-store tests."""
 
+import os
 from pathlib import Path
+
+import pytest
 
 PROJECT_YAML = """\
 project:
@@ -22,9 +25,22 @@ FILES = {
 def make_project(root: Path, project_yaml: str = PROJECT_YAML, **extra: str) -> Path:
     """Create `root` as a project folder and return the path of its `project.yaml`."""
     root.mkdir(parents=True, exist_ok=True)
-    (root / "project.yaml").write_text(project_yaml)
+    (root / "project.yaml").write_text(project_yaml, newline="\n")
     for name, text in {**FILES, **extra}.items():
         path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(text)
+        path.write_text(text, newline="\n")
     return root / "project.yaml"
+
+
+def hold_project_folder(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Refuse to move a project folder away, as Windows does while a program uses it (a
+    workbook open in Excel, a terminal inside the folder); every other rename works."""
+    real_replace = os.replace
+
+    def replace(src: str | Path, dst: str | Path) -> None:
+        if Path(dst).name.startswith(".replaced-"):
+            raise PermissionError(13, "Access is denied", str(src))
+        real_replace(src, dst)
+
+    monkeypatch.setattr(os, "replace", replace)
