@@ -119,10 +119,10 @@ rather than copy it.
   the UI polish pass from [`docs/ui/polish-v02.md`](../ui/polish-v02.md) (items 1–16, #205–#208) plus
   #194, #198–#201.
 - **Numbers (2026-11-04, after v0.5.0).** ADRs 0001–0027 and 0029–0040 are Accepted and 0028
-  is Rejected. The next free ADR is **0042**, the next free question **Q82** and the next
+  is Rejected. The next free ADR is **0042**, the next free question **Q83** and the next
   milestone **M96** (M70–M81 are done; Q72 "only above", Q73 "both, built-in by default").
-  M82–M95 are planned (2026-11-11), ADR 0041 is reserved for M88 and Q74–Q81 are open with
-  them. Q51 (annunciator) and Q55 (categories for the contractor's other part types) are open.
+  M82–M95 are planned (2026-11-11), ADR 0041 is reserved for M88 and Q74–Q82 are open with
+  them (Q75 answered, Q78 partly). Q51 (annunciator) and Q55 (categories for the contractor's other part types) are open.
 - **Changelog** has a `[0.5.0]` section, and `[Unreleased]` is empty.
 - **Next work:** M82–M94, Ali's six points on v0.5.0 of 2026-11-11 (`plan.md` "M82–M94",
   `backlog.md` "v0.6"): the substation switch, SFP quantities, the part picker and the Library

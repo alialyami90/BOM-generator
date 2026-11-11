@@ -70,7 +70,7 @@ path exists before relying on it.
   either. Don't move golden values without an ADR. Only Ali marks ADRs Accepted. Don't commit `.xlsx`.
   Don't force-push (LESSONS "Branch restart"). Don't bump the version outside a release PR (on main it
   publishes at once). Don't push tags.
-- Next free numbers: ADR 0042, Q82, milestone M96. Handed out for M82–M94 (2026-11-11): ADR 0041
+- Next free numbers: ADR 0042, Q83, milestone M96. Handed out for M82–M94 (2026-11-11): ADR 0041
   to `parts-network` for M88, Q74–Q81 as `plan.md` section 6 lists them. Handed out for M70–M81
   (2026-11-04): ADR 0038 to
   W4 for M73, ADR 0039 and Q73 to W2 for M78, ADR 0040 to the lead for M77, Q72 to W4 for M72;
@@ -103,10 +103,12 @@ path exists before relying on it.
 11. **Q51** (annunciator mounted in a panel) and **Q55** (categories for the contractor's other
    part types) are open in plan §6. Q54 (power of the -2 SEL computers) was answered 2026-11-01.
 
-12. **Q74 to Q81** (2026-11-11) are open in plan §6, from Ali's six points on v0.5.0. Q75 asks
-   where three of the points were seen and should be answered first: the cause of the
-   substation switch bug (M82) was found by reading and has not been seen on screen. Each of the
-   others has a recommended answer that its milestone assumes until Ali answers.
+12. **Q74 and Q76 to Q82** (2026-11-11) are open in plan §6, from Ali's six points on v0.5.0.
+   Ali answered Q75 the same day: the substation list stays open only while the mouse button is
+   held, which fits M82's cause; the "duplicate" is the library id `SEL-2730M-EXT` shown as a
+   part's name (Q82); and the SFPs on a monitor and a KVM are the link line of M89, his KVM not
+   being an IP KVM (Q78, partly answered). Each open question has a recommended answer that its
+   milestone assumes until Ali answers.
 
 **Next work:** M82–M94 in `plan.md`, in the order its last paragraph gives, and M95: the 16
 tests that fail on Windows (`plan.md` "M95"), of which the possible app faults come first. Ali's field tests of

@@ -1386,7 +1386,9 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   the switch action on the click that opens the list, before anything is chosen. With the current
   substation that redraws the window, which closes the list; on Home, Project or Library it goes to
   Panels; with unsaved changes it opens the leave dialog. The wiring dates from M10a (#28) and no
-  test covers it. Preview's group-by select (`screens-preview.js`) is wired the same way. Fix: a
+  test covers it. Ali's description fits (2026-11-11): the list stays open only while the mouse
+  button is held, and the click event comes on release. Preview's group-by select
+  (`screens-preview.js`) is wired the same way. Fix: a
   select runs its action on `change` only. First see it in the installed app, then a test that the
   click handler skips selects. Acceptance: the list opens and stays open on every page; choosing a
   substation switches once. Size S.
@@ -1403,12 +1405,18 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   whether SFPs are counted twice when two rows share one part (suspected in the generated port
   plans, not run); if so it gets its own regression test here. Acceptance: with the shipped
   library the L1 row offers 9 switches, the L2 row 10 and the EXT row 7, none an alternative of
-  another part. Size S to M.
+  another part. The picker and the row name a part by its make and model, with the ordering
+  code where two parts share a model; the library id is not the name (Q82). Size S to M.
 - **M84 — The Library list shows each device once.** *`library-parts`; Q74, Q75.* Points 3 and 4.
   Cause: the Devices table lists all 381 parts flat and drops `tier` and `alt_group`, which the
   page already receives; one part reads as two names, its id in one column (`SEL-2730M-EXT`) and
-  its model in the next (`SEL-2730M`). Fix: originals by default with "N alternatives" that
-  expand, the Purdue level shown beside the model, and a filter for all parts. Acceptance: the
+  its model in the next (`SEL-2730M`). Ali (2026-11-11): the "EXT" after the switch comes from
+  a tag, it is not part of the part number. Five originals carry their role in their id
+  (`RST2228-L2`, `RST2228-L1-24MM`, `SEL-2730M-EXT`, `SEL-3555-GW`, `SEL-3555-RTAC`), and the
+  id of 63 of the 94 originals is not their model. Fix: originals by default with "N
+  alternatives" that expand; the first column is the make and model, with the role as a label
+  ("EXT switch") and the ordering code, and the id moves to the detail pane (Q82); a filter for
+  all parts. Acceptance: the
   table opens on 94 rows (381 parts less 287 alternatives). Size S.
 - **M85 — SFP alternatives carry their speed and media.** *`library-parts`.* Point 2. Cause: the 23
   Cisco and Moxa SFP alternatives have no `ports`, and both the page (`parts.py` `_serves`) and the
@@ -1442,7 +1450,9 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   to the L2 switch. The M31 design meant the inputs for networked parts only. Panels › Ports
   likewise lists every placed device with *Add allocation* (`app/panel_page.py`). Fix: one set of
   categories that have an L2 link, used by the page, Checks and the Ports tab; a row with ports
-  already written keeps its inputs. Workstation rows are seeded 1G MM because the seeding never
+  already written keeps its inputs. Ali (2026-11-11): his KVM is not an IP KVM and a monitor has
+  no network link, so neither is in the set; a KVM part that lists a network port (an IP KVM)
+  gets the inputs from its ports. Workstation rows are seeded 1G MM because the seeding never
   sets the media (Q79). Size S.
 - **M90 — A Parts row shows only what does something.** *`parts-network`.* Point 6. Four findings:
   the cable manager toggle shows on a 0 U network part (the FGR-60F row says On, the layout adds
@@ -1978,7 +1988,12 @@ under them (recommended: an L1 row then offers 9 switches, none of them another 
 alternative). (b) Originals only, with a row's alternatives reached through *See alternatives*.
 (c) Everything, grouped under its original and collapsed.
 
-**Q75 — Where three of the v0.5.0 points were seen** (M82, M84, M89). *Open.* The causes were found
+**Q75 — Where three of the v0.5.0 points were seen** (M82, M84, M89). *Answered (Ali,
+2026-11-11).* Point 5: "It shows SFP as if the KVM is connected to the switch, when in reality
+it's not an IP KVM. Same for monitor", which is the link line of M89. Point 1: "I have to click and hold so that it keeps showing",
+which fits the cause under M82. Point 4: he does not recall the screen, but "there's a switch
+followed by EXT; that's taken from a tag name but not a part number", so the complaint is the
+library id `SEL-2730M-EXT` shown as the part's name (M84, Q82). The causes were found
 by reading, and three need Ali's screen to be sure. Point 1: what happens when the substation
 list in the left rail is clicked (the list shuts at once, the page jumps to Panels, a dialog
 opens, or something else)? Point 4: where "SEL-2731-EXT and SEL-2731" stood (the Library table,
@@ -1997,9 +2012,11 @@ spare it implies and never goes below the links (recommended: an SFP per link is
 works on site). (b) Keep Spare and Extra, as plain inputs. (c) Allow a total below the links,
 as a risky override with a reason (ADR 0040).
 
-**Q78 — Which rows have a link to the L2 switch** (M89). *Open.* (a) Gateway, firewall, GPS clock,
-RTAC, workstation, RedBox, media converter, EXT switch, I/O chassis and KVM; none for a monitor,
-keyboard, annunciator, console or patch panel (recommended). (b) Only the first seven, the
+**Q78 — Which rows have a link to the L2 switch** (M89). *Partly answered (Ali, 2026-11-11): none
+for a KVM that is not an IP KVM, none for a monitor.* Still open for the EXT switch and the I/O
+chassis: (a) gateway, firewall, GPS clock, RTAC, workstation, RedBox, media converter, EXT
+switch and I/O chassis, plus any part that lists a network port; none for a monitor, keyboard,
+KVM, annunciator, console or patch panel (recommended). (b) Only the first seven, the
 categories a new row is seeded for.
 
 **Q79 — The media a new workstation row is linked with** (M89). *Open.* A new operator workstation,
@@ -2016,3 +2033,12 @@ ADRs 0017, 0024 and 0030). (c) Leave the data as it is and only change the lists
 **Q81 — Where a monitor and a keyboard go** (M94). *Open, to confirm first.* If the layout does
 place them as 0 U units in a PSA cabinet: (a) they stay with the workstation console, out of the
 generated cabinets (recommended). (b) They become loose material. (c) Keep today's placement.
+
+**Q82 — The name a part is shown by** (M83, M84; Ali's v0.5.0 point 4). *Open.* The lists lead with
+the library id, an internal key that carries the role for five parts (`SEL-2730M-EXT` is the
+SEL-2730M, `RST2228-L2` and `RST2228-L1-24MM` are two configurations of the RST-2228). The BOM
+never prints the id. (a) Show the make and model as the name, the ordering code where two parts
+share a model, and the role as a label; keep the ids as they are, out of sight (recommended: no
+change to the data, the example, the golden values or projects already saved). (b) Also rename
+the five ids to drop the role, which changes `examples/`, the tests that name them and every
+saved project that uses them, and still needs a way to tell the two RST-2228 parts apart.
