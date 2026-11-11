@@ -5,6 +5,7 @@ figures, and with data/library/psa-devices.yaml, which adds each original's data
 inrush and input range. The goldens stay on examples/ (Q38).
 """
 
+import dataclasses
 import shutil
 from pathlib import Path
 
@@ -14,6 +15,7 @@ from bomgen.checks import check_report
 from bomgen.engine.pipeline import build
 from bomgen.io.loader import load_substation
 from bomgen.models.bom import BuildResult, Group
+from bomgen.models.library import SfpChoice
 from bomgen.models.report import CheckReport, CheckStatus
 
 REPO = Path(__file__).resolve().parents[3]
@@ -116,6 +118,45 @@ def test_float_check_warns_for_the_ic60n_and_the_125v_firewall(shipped: Built) -
     }
     assert {"SEL-3555-GW", "SEL-3555-RTAC", "SEL-3355"} <= passed
     assert not report.failed
+
+
+def _sfp_lines(result: BuildResult) -> list[tuple[str, str | None, str | None]]:
+    return [
+        (panel.panel_id, line.tag, line.part_id)
+        for panel in result.panels
+        for line in panel.lines
+        if line.tag is not None and "SFP" in line.tag
+    ]
+
+
+def test_m85_the_alternative_sfps_leave_the_automatic_picks_as_the_examples(
+    shipped: Built, example: Built
+) -> None:
+    # The switch's make first, else library order: the originals still come first.
+    picks = _sfp_lines(shipped[0])
+
+    assert picks
+    assert picks == _sfp_lines(example[0])
+
+
+def test_m85_a_switch_takes_a_chosen_alternative_sfp(tmp_path: Path) -> None:
+    project = tmp_path / "examples"
+    shutil.copytree(REPO / "examples", project)
+    shutil.copyfile(SHIPPED, project / "library.yaml")
+    loaded = load_substation(project / "substations" / "gis01" / "substation.yaml")
+    choice = SfpChoice.model_validate(
+        {"speed": "1G", "media": "SM", "part_id": "SFP-1G-LX-SM.CISCO-MID"}
+    )
+    devices = [  # the L2 switch carrying the choice, as its derived part does (ADR 0024)
+        d.model_copy(update={"sfp_choice": [choice]}) if d.part_id == "RST2228-L2" else d
+        for d in loaded.library.devices
+    ]
+    library = loaded.library.model_copy(update={"devices": devices})
+
+    result = build(dataclasses.replace(loaded, library=library))
+
+    sm = {part for _panel, tag, part in _sfp_lines(result) if tag and tag.endswith("SFP (SM)")}
+    assert sm == {"SFP-1G-LX-SM.CISCO-MID"}
 
 
 @pytest.mark.parametrize(("dc", "failed"), [(125, set()), (220, {"FGR-60F", "NAP-F23", "NAP-K55"})])

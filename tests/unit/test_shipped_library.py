@@ -13,8 +13,10 @@ from types import ModuleType
 import pytest
 import yaml
 
+from bomgen.app.parts import parts_page
 from bomgen.build import build_substation
 from bomgen.io.loader import load_library, load_substation
+from bomgen.library_store.store import LibraryStore
 from bomgen.models.library import SOURCED_FIELDS, DeviceType, Library, McbBrand
 
 REPO = Path(__file__).resolve().parents[2]
@@ -67,10 +69,12 @@ def test_the_shipped_library_is_the_example_plus_the_originals_datasheet_figures
     brands = shipped.catalogue_brands.model_dump(exclude={"mcb"})  # mcb: the next tests
     assert brands == example.catalogue_brands.model_dump(exclude={"mcb"})
     for ours, theirs in zip(originals, example.devices, strict=True):
-        changed = keys | set(overrides["devices"].get(ours.part_id, {}))
+        # an SFP alternative's port: the M85 tests below
+        derived = {"ports"} if theirs.category == "sfp" and theirs.tier else set()
+        changed = keys | derived | set(overrides["devices"].get(ours.part_id, {}))
         assert ours.model_dump(exclude=changed) == theirs.model_dump(exclude=changed), ours.part_id
         if ours.tier is not None:
-            tier_keys = {"sources", "tags", *overrides["devices"].get(ours.part_id, {})}
+            tier_keys = {"sources", "tags", *derived, *overrides["devices"].get(ours.part_id, {})}
             assert ours.model_dump(exclude=tier_keys) == theirs.model_dump(exclude=tier_keys)
 
 
@@ -491,3 +495,60 @@ def test_m81_a_part_without_ports_has_no_port_tag(shipped: Library) -> None:
     fan = next(p for p in shipped.devices if p.category.value == "fan")
 
     assert fan.tags == ["Fan"]
+
+
+# plan M85: an SFP is matched to a link by its port's speed and media
+
+# Single-mode parts in the 100M multimode group (data/device-db/network.yaml): no port until
+# the device database settles them
+SINGLE_MODE_IN_A_MULTIMODE_GROUP = ["SFP-100M-FX-MM.CISCO-HIGH", "SFP-100M-FX-MM.MOXA-HIGH"]
+
+
+def test_every_sfp_part_declares_its_speed_and_media(shipped: Library) -> None:
+    without = [
+        part.part_id
+        for part in shipped.devices
+        if part.category == "sfp" and not any(p.media is not None for p in part.ports)
+    ]
+
+    assert without == SINGLE_MODE_IN_A_MULTIMODE_GROUP
+
+
+def test_m85_an_sfp_alternative_takes_the_port_of_the_part_it_replaces(
+    shipped: Library,
+) -> None:
+    alternatives = [
+        part
+        for part in shipped.devices
+        if part.category == "sfp"
+        and part.tier is not None
+        and part.part_id not in SINGLE_MODE_IN_A_MULTIMODE_GROUP
+    ]
+
+    assert len(alternatives) == 21
+    for part in alternatives:
+        original = shipped.get(str(part.alt_group))
+        assert original is not None
+        assert part.ports == original.ports, part.part_id
+        source = part.sources["ports"]
+        assert (source.kind, source.ref) == (
+            "assumed",
+            f"the port of {original.part_id}, the part it replaces",
+        ), part.part_id
+
+
+def test_m85_the_parts_page_offers_the_alternative_sfps_for_a_link(tmp_path: Path) -> None:
+    project = tmp_path / "examples"
+    shutil.copytree(REPO / "examples", project)
+    shutil.copyfile(SHIPPED, project / "library.yaml")
+    page = parts_page(project / "project.yaml", "gis01", LibraryStore(tmp_path / "libraries"))
+
+    l2 = next(row for row in page["parts"]["rows"] if row["id"] == "l2")
+    offered = {(s["speed"], s["media"]): s["candidates"] for s in l2["sfp"]}
+
+    lx = "SFP-1G-LX-SM"
+    assert offered[("1G", "SM")] == [lx] + [
+        f"{lx}.{make}-{tier}" for make in ("CISCO", "MOXA") for tier in ("LOW", "MID", "HIGH")
+    ]
+    fx = "SFP-100M-FX-MM"  # its single-mode high tiers serve no multimode link
+    assert offered[("100M", "MM")] == [fx, f"{fx}.CISCO-LOW", f"{fx}.CISCO-MID", f"{fx}.MOXA-LOW"]
