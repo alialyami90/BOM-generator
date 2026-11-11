@@ -1533,8 +1533,11 @@ Found on 2026-11-11, the first run of the gate on Windows (Ali's PC, Python 3.13
 runs pytest on Linux only, and "Build Windows installer" smoke-tests the frozen app without
 running the tests, so the suite had never run on the one system the app ships for.
 
-- **M95 — Triage the 16 failures, then run pytest on Windows in CI.** *Lead.* Traced on 2026-11-11
-  (first pass). Faults of the app: restoring or importing over a project stops with a raw
+- **M95 — Triage the 16 failures, then run pytest on Windows in CI.** *Lead.* **Tests done:** twelve
+  of the sixteen were faults of the tests and pass or skip with a reason on Windows; a plugin,
+  `tests/per_user_folders.py`, points every test's per-user folders at a temp folder. Four
+  remain, the two app faults below (`setup-design-basis`); the Windows job in CI follows them.
+  Traced on 2026-11-11 (first pass). Faults of the app: restoring or importing over a project stops with a raw
   `PermissionError` when Windows will not rename the folder, which happens when the command runs
   from inside it and, likely, when a file in it is open (the workbook in Excel): it should refuse
   in words (`project_store/importer.py`); the page reports the logo as `assets\company-logo.png`

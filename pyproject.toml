@@ -74,7 +74,10 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra --strict-markers"
+# tests/per_user_folders.py keeps every test off the per-user folders of the PC (plan M95).
+# It is a plugin, not a conftest.py, because mypy takes two conftest.py files for one module.
+pythonpath = ["tests"]
+addopts = "-ra --strict-markers -p per_user_folders"
 markers = [
     "golden: reproduces the spec's example project values",
 ]

@@ -1,6 +1,7 @@
 """Packing and verifying `.bomlib` packages (ADR 0008, plan M8 tests)."""
 
 import json
+import os
 import zipfile
 from datetime import UTC, datetime
 from pathlib import Path
@@ -71,7 +72,7 @@ def test_pack_carries_only_yaml_files_from_extra_directories(
 ) -> None:
     extras = tmp_path / "extras"
     (extras / "sub").mkdir(parents=True)
-    (extras / "network.yaml").write_text("a: 1\n")
+    (extras / "network.yaml").write_text("a: 1\n", newline="\n")
     (extras / "sub" / "more.yml").write_text("x\n")
     (extras / "FINDINGS.md").write_text("notes\n")
     out = tmp_path / "with-db.bomlib"
@@ -149,7 +150,15 @@ def test_manifest_without_library_file_is_rejected(tmp_path: Path, package_file:
         read_package(no_lib)
 
 
-@pytest.mark.parametrize("member", ["../evil.yaml", "/abs.yaml", "dir/../../x", "a\\b.yaml"])
+# On Windows zipfile turns a backslash in a member name into a slash before any check sees
+# it, so the member is `a/b.yaml` there: the other three cases cover what it could become.
+BACKSLASH = pytest.param(
+    "a\\b.yaml",
+    marks=pytest.mark.skipif(os.sep == "\\", reason="zipfile writes it as a/b.yaml"),
+)
+
+
+@pytest.mark.parametrize("member", ["../evil.yaml", "/abs.yaml", "dir/../../x", BACKSLASH])
 def test_unsafe_member_is_rejected(tmp_path: Path, package_file: Path, member: str) -> None:
     unsafe = _rewrite(package_file, tmp_path / "u.bomlib", {member: b"x"})
 
@@ -226,7 +235,7 @@ def test_members_that_differ_only_by_case_are_rejected_when_packing(
 ) -> None:
     extra = tmp_path / "db"
     (extra / "A").mkdir(parents=True)
-    (extra / "a").mkdir()
+    (extra / "a").mkdir(exist_ok=True)  # the same folder where the file system folds case
     (extra / "A" / "x.yaml").write_text("1\n")
     (extra / "a" / "x.yaml").write_text("2\n")
     if len({p.name for p in extra.iterdir()}) < 2:  # case-insensitive file system

@@ -1,5 +1,6 @@
 """Round-trip YAML editing keeps the hand-written files as they are (ADR 0021)."""
 
+import sys
 from collections.abc import Callable
 from pathlib import Path
 
@@ -65,6 +66,7 @@ def test_atomic_write_replaces_the_file(tmp_path: Path) -> None:
     assert [p.name for p in tmp_path.iterdir()] == ["s.yaml"]
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="Windows has no POSIX file modes")
 def test_atomic_write_keeps_the_file_mode(tmp_path: Path) -> None:
     path = tmp_path / "s.yaml"
     path.write_text("old\n", encoding="utf-8")
