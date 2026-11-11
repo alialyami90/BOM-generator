@@ -25,7 +25,7 @@ from bomgen.io.round_trip import insert_entry, load_text, remove_entry, set_entr
 from bomgen.io.yaml_source import read_yaml
 from bomgen.models.library import Category, DeviceType, Library, PortKind
 from bomgen.models.project import Project
-from bomgen.models.substation import EquipmentRole, PartOverrides
+from bomgen.models.substation import Equipment, EquipmentRole, PartOverrides
 
 if TYPE_CHECKING:
     from bomgen.library_store.store import LibraryStore
@@ -52,8 +52,10 @@ CATEGORY_LINKS = {
     Category.REDBOX: (1, "100M"),  # ADR 0038
     Category.MEDIA_CONVERTER: (1, "1G"),
 }
+# the seeded media where it is not the model's MM: a workstation lists no fibre port (Q79 (a))
+CATEGORY_MEDIA = {Category.WORKSTATION: "RJ45"}
 FIREWALL_SFPS = 2  # a firewall's own MM SFPs, at most its SFP slots (A1, 2026-11-01)
-LINK_KEYS = ("l2_ports", "l2_speed", "port_plan")
+LINK_KEYS = ("l2_ports", "l2_speed", "l2_media", "port_plan")
 SIZED_ROLES = (EquipmentRole.L1_SWITCH.value, EquipmentRole.L2_SWITCH.value)
 NO_L2 = "Pick the L2 switch first: the network is sized from it."
 # what a part change clears: it described the old part (decision 1 of the M23 plan)
@@ -67,6 +69,8 @@ def link_defaults(part: DeviceType | None, role: object) -> dict[str, Any]:
         return {}
     ports, speed = CATEGORY_LINKS[part.category]
     seeded: dict[str, Any] = {"l2_ports": ports, "l2_speed": speed}
+    if part.category in CATEGORY_MEDIA:
+        seeded["l2_media"] = CATEGORY_MEDIA[part.category]
     downlinks, left = [], FIREWALL_SFPS
     for group in part.ports if part.category is Category.FIREWALL else ():
         if group.kind is PortKind.SFP_SLOT and left:
@@ -75,6 +79,23 @@ def link_defaults(part: DeviceType | None, role: object) -> dict[str, Any]:
     if downlinks:
         seeded["port_plan"] = {"downlinks": downlinks}
     return seeded
+
+
+# the categories whose rows have a link to the L2 switch (plan M89, Q78 (a)): those seeded
+# with one, the I/O chassis, and a switch that is not sized (an EXT switch)
+LINKED_CATEGORIES = frozenset({*CATEGORY_LINKS, Category.IO_CHASSIS, Category.NETWORK_SWITCH})
+UNLINKED_ROLES = (EquipmentRole.L1_SWITCH, EquipmentRole.L2_SWITCH, EquipmentRole.FOPP)
+
+
+def has_l2_link(entry: Equipment, part: DeviceType | None) -> bool:
+    """Whether row ``entry`` of ``part`` has a link to the L2 switch (plan M89): a link it
+    writes always; never a sized switch or the patch panel; else its part's category, or a
+    part that lists a network port, as an IP KVM does. A monitor or a plain KVM has none."""
+    if entry.l2_ports:
+        return True
+    if part is None or entry.role in UNLINKED_ROLES:
+        return False
+    return part.category in LINKED_CATEGORIES or bool(part.ports)
 
 
 def _ordered(row: Mapping[str, Any]) -> dict[str, Any]:

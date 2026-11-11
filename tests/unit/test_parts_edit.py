@@ -332,6 +332,22 @@ def test_a_new_part_keeps_a_link_the_engineer_changed(project: Path) -> None:
     assert equipment(project)[GW].l2_ports == 3
 
 
+def test_m31_a_workstation_row_is_seeded_rj45(project: Path) -> None:
+    """Q79 (a): the library's workstations list no fibre port, so no SFP on the L2 switch."""
+    row = started(project)["SEL-3355"]  # the DA server
+    assert (row.l2_ports, row.l2_speed.value, row.l2_media.value) == (1, "1G", "RJ45")
+
+
+def test_m31_a_new_part_reseeds_a_workstations_rj45_link(project: Path) -> None:
+    """The media is seeded, so a part change with the seeded link unchanged reseeds it too."""
+    rows = started(project)
+    index = list(rows).index("SEL-3355")
+    parts_edit.set_equipment_part(project, "gis01", index, "SEL-3555-GW")
+    row = equipment(project)[index]
+    assert (row.l2_ports, row.l2_speed.value, row.l2_media.value) == (1, "1G", "MM")
+    assert "RJ45" not in text(project)
+
+
 def test_an_added_row_gets_the_defaults_for_the_fields_it_leaves_out() -> None:
     lib = load_project(EXAMPLES / "project.yaml").library
     row = {"id": "gw-2", "role": "other", "part_id": "SEL-3555-GW", "l2_speed": "100M"}

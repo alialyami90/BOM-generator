@@ -113,6 +113,7 @@ A milestone with several modules may group them in a subfolder,
 | `test_pdf.py` | M78 | PDF export (ADR 0039): the built-in renderer's pages, paper, headers, repeated title rows and hidden columns, chosen sheets, and the Excel script and its refusals |
 | `test_revision_marks.py` | M79 | rows marked as revised: highlighted on their sheet, the change list before issuing, recorded with the issue and cleared |
 | `app/test_app_part_choices.py` | M83 | the parts a Parts row offers: its role's level for a switch, the alternatives of its own part only, no obsolete part, its current part always, the whole category still searchable, Add a device's switch list, and the choices that share a make and model in the shipped library |
+| `app/test_app_l2_link_rows.py` | M89 | which Parts rows have a link to the L2 switch: none for a monitor, a keyboard or a KVM with no network port; one for a part that lists a network port, the I/O chassis and the EXT switch; a written link always shown |
 
 `builders.py`, `engine/engine_factories.py`, `project_store/project_builders.py`
 and `writer/writer_helpers.py` hold the small builders those tests share.
