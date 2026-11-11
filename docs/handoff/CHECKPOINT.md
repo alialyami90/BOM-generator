@@ -17,7 +17,11 @@ keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detai
   time: ruff and mypy pass, pytest has 16 failed, 3540 passed, 5 skipped. Planned as M95.
 - **Not done:** no fix is written. Point 1's cause is from reading, not seen on screen (Q75).
   The double count under M83 and the placement under M94 are suspected, not run.
-- **Next:** M82, then M83 and M89; M95's possible app faults. Ali's answers to Q74–Q81, Q75 first.
+- **Ali's answers the same day:** the substation list stays open only while the button is held
+  (fits M82's cause); the "duplicate" of point 4 is the role in a part's id, `SEL-2730M-EXT`,
+  shown as its name; the SFPs on a monitor and a KVM are the L2 link line, and his KVM is not an
+  IP KVM (M89, Q78). M83 and M84 now name a part by make and model (Q82).
+- **Next:** M82, then M83 and M89; M95's possible app faults. Ali's answers to Q74 and Q76–Q82.
 
 ## 2026-11-10: agents and the CLI handoff in the repo, where work runs
 
