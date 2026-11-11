@@ -526,12 +526,6 @@ def _row(
         ],
         "overrides": entry.overrides.values() if entry.overrides is not None else {},
         "sfp": sfp,
-<<<<<<< HEAD
-        # M86, Q76 (a): the sized L1's SFP rows are read-only until its switch is pinned
-        "pin": named.get(sized_part.part_id) if sized_part is not None else None,
-        "sfp_reason": sfp_reason if entry.role in SIZED else None,
-        "bom_text": {k: getattr(entry, k) for k in BOM_TEXT} if racked else None,  # M59
-=======
         # M86, Q76 (a): the sized L1's SFP rows are read-only until its switch is pinned;
         # M87: on hand-written panels they are read-only, and pinning would change nothing
         "pin": named.get(sized_part.part_id) if sized_part is not None and not hand else None,
@@ -539,8 +533,7 @@ def _row(
         if entry.role not in SIZED
         else sfp_reason or (NOT_PLACED if hand and not needs else None),
         "sfp_hand": HAND_WRITTEN if hand and needs and entry.role in SIZED else None,
-        "bom_text": {k: getattr(entry, k) for k in BOM_TEXT},  # M59
->>>>>>> origin/main
+        "bom_text": {k: getattr(entry, k) for k in BOM_TEXT} if racked else None,  # M59
         # M74: a common row may be steered to a panel; a redundant or one-side row follows its LAN
         "placement": {
             "panel_hint": entry.panel_hint,
