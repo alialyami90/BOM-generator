@@ -33,6 +33,11 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Restoring a backup, or replacing a project on import, while its folder is in use (the workbook
+  open in Excel, a terminal or Explorer window inside it) is refused in words that say what to
+  close, and the project is left as it was, without the safety backup the attempt wrote (M95).
+  Before, Windows' own error text was shown. The Project page shows the logo path with `/`, as
+  `project.yaml` holds it.
 - Panels › Ports offers a port allocation and serial ports only to a device with a link to the
   L2 switch or a port plan already written (M89); a monitor, keyboard, plain KVM or patch panel
   shows "Not on the network" instead.
