@@ -136,7 +136,8 @@ def test_a_sized_l1_row_without_a_part_has_no_library_values(
     assert l1["sized"] is True
     assert l1["part_id"] is None
     assert l1["library"] is None
-    assert l1["sfp"] == []
+    # M86: it shows the SFP rows of the switch the sizing picked (was none before M86)
+    assert [(s["speed"], s["media"]) for s in l1["sfp"]] == [("1G", "MM")]
 
 
 def test_a_part_missing_from_the_library_is_unknown_and_the_page_still_loads(
@@ -628,3 +629,95 @@ def test_a_row_shows_its_rack_priority_and_its_categorys(
     rtac = row(found, "rtac")["placement"]
     assert (rtac["priority"], rtac["default_priority"]) == (None, 4)
     assert row(found, "gps")["placement"]["default_priority"] == 1
+
+
+# plan M86 (Ali's v0.5.0 point 2): SFP rows on every switch row
+
+UNPIN_L1 = ("{ id: l1, part_id: RST2228-L1-24MM, role:", "{ id: l1, role:")
+
+
+def counts(sfps: list[Any]) -> list[tuple[Any, ...]]:
+    return [(s["speed"], s["media"], s["used"], s["spare"]["value"], s["total"]) for s in sfps]
+
+
+def test_m49_a_sized_l1_row_shows_the_sfp_rows_of_the_switch_the_sizing_picked(
+    project: Path, substation: Path, store: LibraryStore
+) -> None:
+    pinned = row(parts(project, store), "l1")
+    edit(substation, *UNPIN_L1)
+
+    l1 = row(parts(project, store), "l1")
+
+    assert l1["part_id"] is None
+    # the sizing picks the example's own switch, so the numbers are the pinned row's
+    assert l1["pin"]["part_id"] == "RST2228-L1-24MM"
+    assert (l1["pin"]["make"], l1["pin"]["model"]) == ("Ruggedcom", "RST-2228")
+    assert counts(l1["sfp"]) == counts(pinned["sfp"]) == [("1G", "MM", 6, 3, 9)]
+    assert l1["sfp"][0]["rule"] == pinned["sfp"][0]["rule"]
+    assert l1["sfp"][0]["choice"] is None
+    assert pinned["pin"] is None  # a row with a part is edited, not pinned
+
+
+def test_m49_pinning_the_sized_l1_keeps_its_sfp_rows_and_makes_them_editable(
+    app: api.Api, project: Path, substation: Path, store: LibraryStore
+) -> None:
+    edit(substation, *UNPIN_L1)
+    sized = row(parts(project, store), "l1")
+
+    done = ok(
+        app.set_equipment_part(str(project), "gis01", sized["index"], sized["pin"]["part_id"])
+    )
+
+    l1 = row(done["page"]["parts"], "l1")
+    assert l1["part_id"] == "RST2228-L1-24MM"
+    assert l1["pin"] is None
+    assert counts(l1["sfp"]) == counts(sized["sfp"])
+    written = next(e for e in read_yaml(substation).data["equipment"] if e["id"] == "l1")
+    assert written["part_id"] == "RST2228-L1-24MM"
+    page = ok(app.set_sfp_count(str(project), "gis01", l1["index"], "1G", "MM", "spare", 1))
+    assert row(page["parts"], "l1")["sfp"][0]["total"] == 7
+
+
+@pytest.mark.parametrize(
+    ("old", "new", "said"),
+    [
+        # the layout fails: the sizing refuses the count
+        (
+            "  l3_uplinks_per_l2: 2\n",
+            "  l3_uplinks_per_l2: 2\n  l1_per_side: 1\n",
+            "fewer than the 3 the sizing needs",
+        ),
+        # the project does not load
+        ("part_id: SEL-3555-RTAC", "part_id: SEL-3555-RTAC-OLD", "problems listed at the top"),
+    ],
+)
+def test_m49_switch_rows_say_why_their_sfp_rows_are_missing(
+    project: Path, substation: Path, store: LibraryStore, old: str, new: str, said: str
+) -> None:
+    assert row(parts(project, store), "l1")["sfp_reason"] is None
+    edit(substation, old, new)
+
+    found = parts(project, store)
+
+    for entry in ("l1", "l2"):
+        switch = row(found, entry)
+        assert switch["sfp"] == []
+        assert said in switch["sfp_reason"]
+    assert row(found, "gw")["sfp_reason"] is None  # only the switch rows have SFP rows
+
+
+def test_m49_an_sfp_row_names_the_automatic_part(project: Path, store: LibraryStore) -> None:
+    """The engine's pick with no choice: the switch's make first (engine/network.py)."""
+    found = parts(project, store)
+    sfps = {(s["speed"], s["media"]): s for s in row(found, "l2")["sfp"]}
+    names = {o["part_id"]: (o["make"], o["model"]) for o in found["options"]["sfp"]}
+
+    mm = sfps[("1G", "MM")]
+    assert mm["auto"] == "SFP-1G-SX-MM"  # the Ruggedcom switch takes the Ruggedcom SFP
+    assert names[mm["auto"]] == ("Ruggedcom", "6GK6000-8FG51-0AA0")
+    # the other parts are named the same way, by make and model
+    assert [names[c] for c in mm["candidates"]] == [
+        ("Ruggedcom", "6GK6000-8FG51-0AA0"),
+        ("Fortigate", "FR-TRAN-SX"),
+    ]
+    assert {s["auto"] for s in sfps.values()} <= set(names)
