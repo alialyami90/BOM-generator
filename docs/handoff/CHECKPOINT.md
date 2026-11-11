@@ -3,6 +3,23 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-11-11: M82, M83, M84 and M85 on main (Lead)
+
+- **Base:** main `609f924` (#400). Not released: `[Unreleased]` holds the four entries.
+- **Done:** M82 the substation switch (#397, the lead); M85 SFP alternatives carry their speed
+  and media, psa-devices 1.18.0 (#398, `library-parts`); M83 the part picker offers the parts
+  that fit the row (#399, `parts-network`, with a level label added in review); M84 the Library
+  list shows each device once (#400, `library-parts`). Each PR had green CI and a green "Build
+  Windows installer"; the local gate on the PC showed only the 16 known Windows failures.
+  Ali answered Q82: a part is named by its model only.
+- **Found:** SFPs are counted twice when two rows share a part (M96); a Cisco or Moxa switch now
+  picks its own make's low-tier SFP (Q83); two 100M "multimode" alternatives are single-mode
+  (M93); M95's first pass leaves two app faults and a test-isolation gap. The library store on
+  this PC holds psa-devices 1.15.0 and no installed app, so Ali tested v0.5.0 elsewhere.
+- **Not done:** none of the four fixes has been seen in the app window. `docs/ui/` still
+  describes the old picker and Library table (NEXT §8).
+- **Next:** M89 (`parts-network`, in progress), then M86, M87, M90, M91, then a release.
+
 ## 2026-11-11: Ali's six points on v0.5.0 planned as M82–M94; first gate on Windows (Lead)
 
 - **Base:** main `246eecb` (#394). Docs-only PR. No code change.

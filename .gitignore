@@ -31,3 +31,6 @@ htmlcov/
 # Project packages and backups are build outputs too
 *.bomproj
 Backups/
+
+# Agent worktrees (CLAUDE.md "Agents")
+.claude/worktrees/
