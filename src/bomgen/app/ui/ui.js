@@ -203,12 +203,13 @@
   /* ---------- events ---------- */
   document.addEventListener('click', (e) => {
     const el = e.target.closest('[data-action]'); if (!el) return;
+    if (el.tagName === 'SELECT') return;  // a select acts on change: the click that opens its list is no choice (M82)
     const name = el.dataset.action;
     if (name === 'scrim' && e.target !== el) return;
     if (ACTIONS[name]) { ACTIONS[name](el, e); }
   });
   document.addEventListener('input', (e) => { if (e.target.dataset && e.target.dataset.dirty && !S.dirty) { S.dirty = true; renderStatus(); } });
-  document.addEventListener('change', (e) => { const sw = e.target.closest('select[data-action="sub-switch"]'); if (sw) ACTIONS['sub-switch'](sw); });
+  document.addEventListener('change', (e) => { const sel = e.target.closest('select[data-action]'); if (sel && ACTIONS[sel.dataset.action]) ACTIONS[sel.dataset.action](sel); });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && $('#overlay').innerHTML) { e.preventDefault(); closeDialog(); }
     if (e.key === 'Tab' && $('#overlay .dialog')) {

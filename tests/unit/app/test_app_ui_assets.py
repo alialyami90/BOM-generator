@@ -1110,3 +1110,51 @@ def test_export_pdf_after_a_build() -> None:
     assert "Bridge.call('pdf_options', B.result.path)" in verify
     assert 'name="pdf-engine" value="builtin" checked' in verify
     assert "Bridge.call('export_pdf', B.result.path," in verify
+
+
+def _actions_run(tag: str, action: str, event: str, tmp_path: Path) -> list[str]:
+    """Runs ui.js's page-wide event handlers in node: one `event` on a `tag` element that
+    carries `data-action`. Returns the actions that ran."""
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("node is not installed")
+    js = (UI_DIR / "ui.js").read_text(encoding="utf-8")
+    source = js[js.index("  /* ---------- events ---------- */") : js.index("  ACTIONS.tab = ")]
+    script = tmp_path / "events.js"
+    script.write_text(
+        "const ran = [], listeners = {};\n"
+        "const document = { addEventListener: (type, f) => (listeners[type] ||= []).push(f) };\n"
+        "const ACTIONS = new Proxy({}, { get: (_, name) => () => ran.push(name) });\n"
+        "const S = { dirty: true }, $ = () => ({ innerHTML: '' }), $$ = () => [];\n"
+        f"{source}\n"
+        "const target = {\n"
+        f"  tagName: {json.dumps(tag)}, dataset: {{ action: {json.dumps(action)} }},\n"
+        "  closest(selector) {\n"
+        '    const m = /^(select)?\\[data-action(?:="([^"]+)")?\\]$/.exec(selector);\n'
+        "    if (!m) return null;\n"
+        "    if (m[1] && this.tagName !== 'SELECT') return null;\n"
+        "    return m[2] && m[2] !== this.dataset.action ? null : this;\n"
+        "  },\n"
+        "};\n"
+        f"(listeners[{json.dumps(event)}] || []).forEach((f) => f({{ target, key: '' }}));\n"
+        "console.log(JSON.stringify(ran));\n",
+        encoding="utf-8",
+    )
+    run = subprocess.run([node, str(script)], capture_output=True, text=True, check=True)
+    return json.loads(run.stdout)  # type: ignore[no-any-return]
+
+
+def test_clicking_a_select_does_not_run_its_action(tmp_path: Path) -> None:
+    """plan M82: the click that opens the substation list is not a choice. Running the switch
+    on it redrew the window and shut the list unless the mouse button was held."""
+    assert _actions_run("SELECT", "sub-switch", "click", tmp_path) == []
+
+
+def test_choosing_in_a_select_runs_its_action_once(tmp_path: Path) -> None:
+    # plan M82: the substation switch and Preview's group filter both act on `change`.
+    assert _actions_run("SELECT", "sub-switch", "change", tmp_path) == ["sub-switch"]
+    assert _actions_run("SELECT", "pv-grp", "change", tmp_path) == ["pv-grp"]
+
+
+def test_clicking_a_button_still_runs_its_action(tmp_path: Path) -> None:
+    assert _actions_run("BUTTON", "theme", "click", tmp_path) == ["theme"]
