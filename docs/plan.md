@@ -1441,7 +1441,11 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   (`data/library/`, then `build.py`): each takes the speed and media of the part it replaces; a
   shipped-library test that every `sfp` part declares them. psa-devices 1.18.0, with
   `examples/project.yaml` and `release.yml`. Size S.
-- **M86 — SFP rows on every switch row.** *`parts-network`; Q76.* Point 2. Causes: an L1 row left on
+- **M86 — SFP rows on every switch row.** *`parts-network`; Q76.* **Done**, on Q76's answer (a).
+  `engine/network.automatic_sfp` is the one automatic pick, used by the BOM and the page; a row
+  carries `pin` (the switch the sizing picked) and `sfp_reason`, an SFP row `auto`. Pinning
+  writes the part through the existing endpoint. The pick rule itself is unchanged (Q83).
+  Point 2. Causes: an L1 row left on
   "The sizing picks the switch", which is how every new substation starts, has no SFP rows at
   all, and the L1 switches carry most of the SFPs; when the project does not load or the layout
   fails the rows vanish without a word; the Spare editor opens empty; "Automatic: same make first"
