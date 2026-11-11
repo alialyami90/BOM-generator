@@ -22,7 +22,7 @@
   const LINK = { l2_ports: 'int', l2_speed: 'choice', l2_media: 'choice' };  // the row's link to the L2 switch
   const BRANDS = [['mcb', 'MCB make and series, AC'], ['mcb_dc', 'MCB make and series, DC'], ['terminal_blocks', 'Terminal blocks']];
   const pct = (v) => Math.round(v * 1000) / 10;
-  function spec(key) {  // [path, kind]; keys are n.<field>, s.<spare>, b.<brand>, e.<row>.<field>, l.<row>.<link field>, c.<row> (COM ports), o.<row>.<value>, f.<row>.<speed>.<media>[.spare|.extra]
+  function spec(key) {  // [path, kind]; keys are n.<field>, s.<spare>, b.<brand>, e.<row>.<field>, l.<row>.<link field>, c.<row> (COM ports), o.<row>.<value>, f.<row>.<speed>.<media>[.total|.extra]
     const [kind, a, b, c, d] = key.split('.');
     if (kind === 'n') return [['network', a], NET[a]];
     if (kind === 's') return [['spares', a], SPARES[a][2]];
@@ -34,7 +34,7 @@
     if (kind === 'l') return [['equipment', Number(a), b], LINK[b]];
     if (kind === 'c') return [['equipment', Number(a), 'port_plan', 'serial_ports'], 'int'];
     if (kind === 'o') return [['equipment', Number(a), 'overrides', b], VALUES.find((v) => v[0] === b)[2]];
-    if (kind === 'f' && d) return [['equipment', Number(a), 'sfp', b, c, d], 'int'];  // M49: spare or extra
+    if (kind === 'f' && d) return [['equipment', Number(a), 'sfp', b, c, d], 'int'];  // M49: extra; M87: total
     if (kind === 'f') return [['equipment', Number(a), 'sfp', b, c], 'choice'];
     return null;
   }
@@ -59,14 +59,17 @@
     if (kind === 'o') { const v = b in r.overrides ? r.overrides[b] : r.library ? r.library[b] : null; return v == null ? '' : v; }
     if (kind === 'f') {
       const f = r.sfp.find((x) => x.speed === b && x.media === c); if (!f) return '';
-      if (d === 'spare') return f.spare.override == null ? '' : f.spare.override;  /* empty: the project's spare */
+      if (d === 'total') return f.quantity.override == null ? '' : f.quantity.override;  /* M87: empty: the automatic spare */
       return d === 'extra' ? f.extra : f.choice || '';
     }
     return '';
   }
   let cleared = '';  // what a part change cleared, said once the save is done
+  /* M87: the extra a typed SFP total keeps: the drafted one, which the same save writes in either order; null is the file's */
+  const draftExtra = (path) => { const k = `f.${path[1]}.${path[3]}.${path[4]}.extra`; return k in PF.draft ? Number(PF.draft[k] || 0) : null; };
   function write(path, value) {
     const f = S.project.file, sid = S.sub;
+    if (path[0] === 'equipment' && path[2] === 'sfp' && path[5] === 'total') return Bridge.call('set_sfp_total', f, sid, path[1], path[3], path[4], value, draftExtra(path));
     if (path[1] === 'ied_schedule') return Bridge.call('set_ied_field', f, sid, path[2], path[3], value);
     if (path[1] === 'external_links') return Bridge.call('set_external_link_field', f, sid, path[2], path[3], value);
     if (path[0] === 'equipment' && path[2] === 'overrides') return Bridge.call('set_part_override', f, sid, path[1], path[3], value);
@@ -87,7 +90,8 @@
   }
   const PF = App.draftForm({
     prefix: 'p-', screen: 'parts', file: 'substation.yaml', label: 'Save parts', spec, saved,
-    check: (path, value) => (path[1] === 'ied_schedule' || path[1] === 'external_links' || path[2] === 'sfp' || path[2] === 'cable_manager' || path[2] === 'alarm_on_branch_mcb' ? Promise.resolve(null) : Bridge.call('check_substation_field', S.project.file, S.sub, path, value)),
+    check: (path, value) => (path[2] === 'sfp' && path[5] === 'total' ? Bridge.call('check_sfp_total', S.project.file, S.sub, path[1], path[3], path[4], value, draftExtra(path))
+      : path[1] === 'ied_schedule' || path[1] === 'external_links' || path[2] === 'sfp' || path[2] === 'cable_manager' || path[2] === 'alarm_on_branch_mcb' ? Promise.resolve(null) : Bridge.call('check_substation_field', S.project.file, S.sub, path, value)),
     write,
     done: (page) => {
       if (page && page.parts) sub().set(page); else sub().reload();
@@ -178,21 +182,27 @@
   const autoText = (f) => (f.auto ? `Automatic: ${nameOf(sfpOpt(f.auto))}` : 'Automatic');
   /* M86, Q76 (a): an L1 row left to the sizing shows the SFPs of the switch the sizing picked, read-only;
      pinning that switch to the row makes them the editable rows below, with the same numbers. */
+  /* M87: when one entry's BOM rows differ by cabinet, each cabinet's row with what it prints, read-only */
+  const cabinetRows = (r, f) => (f.agree ? '' : f.rows.map((x) => `<div class="prow-strip prow-sfp" role="group" aria-label="${esc(`${f.speed} ${f.media} SFPs in ${x.cabinet}, ${r.label}`)}">
+      <span class="dv"><span class="dv-label">${esc(x.cabinet)}</span><span class="dv-val">${x.quantity}</span></span><span class="dv-rule">${esc(x.rule)} = ${x.quantity}</span></div>`).join(''));
   function sizedSfpRows(r) {
     if (!r.sfp.length) return '';
     const dirty = PF.dirty(), help = `pp-pinhelp-${r.index}`;
     const rows = r.sfp.map((f) => `<div class="prow-sub"><span class="prow-sub-what">${esc(f.speed)} · ${esc(f.media)} SFP</span><span class="small">${esc(autoText(f))}</span></div>
-      <div class="prow-strip prow-sfp" role="group" aria-label="${esc(`${f.speed} ${f.media} SFPs, ${r.label}`)}">
+      ${f.agree ? `<div class="prow-strip prow-sfp" role="group" aria-label="${esc(`${f.speed} ${f.media} SFPs, ${r.label}`)}">
         <span class="dv" title="From the switch sizing"><span class="dv-label">Links</span><span class="dv-val">${f.used}</span></span>
         <span class="dv"><span class="dv-label">Spare</span><span class="dv-val">${f.spare.value}</span></span>
         <span class="dv" title="${esc(f.rule)}"><span class="dv-label">Each BOM row</span><span class="dv-val">${f.total}</span></span>
         <span class="dv-rule">${esc(f.rule)}. Automatic spare ${esc(f.spare.rule)}.</span>
-      </div>${f.candidates.length ? '' : `<div class="prow-err">${noSfp(f.speed, f.media)}</div>`}`).join('');
+      </div>` : cabinetRows(r, f)}${f.candidates.length ? '' : `<div class="prow-err">${noSfp(f.speed, f.media)}</div>`}`).join('');
+    /* M87: on hand-written panels the BOM takes the files' port plans: the same read-only rows, no pin */
+    if (r.sfp_hand) return `${rows}<div class="prow-sub prow-sub--foot"><span class="muted small">${esc(r.sfp_hand)}</span></div>`;
     return `${rows}<div class="prow-sub prow-sub--foot"><button class="btn btn--secondary btn--sm" data-action="pp-pin" data-i="${r.index}" aria-describedby="${help}" ${dirty ? 'disabled title="Save or discard the changes first"' : ''}>Pin this switch to change its SFPs</button>
       <span class="muted small" id="${help}">The sizing picked ${esc(nameOf(r.pin))}. Pinning writes it to this row: the row then keeps this switch when the IED count changes.</span></div>`;
   }
   function sfpRows(r) {
     if (r.sfp_reason) return `<div class="prow-err"><span class="err small">${icon('warn')}<span>${esc(r.sfp_reason)}</span></span></div>`;
+    if (r.sfp_hand) return sizedSfpRows(r);  /* M87: read-only, from the hand-written panel files */
     if (r.pin) return sizedSfpRows(r);
     return r.sfp.map((f) => {
       const key = `f.${r.index}.${f.speed}.${f.media}`;
@@ -200,22 +210,32 @@
         ${mark(key, select(`p-${key}`, [['', autoText(f)], ...f.candidates.map((c) => [c, partText(sfpOpt(c))])], shown(key)).replace('<select ', `<select aria-label="SFP for ${esc(f.speed)} ${esc(f.media)}, ${esc(r.label)}" `))}</div>${sfpCounts(r, f, key)}${f.candidates.length ? '' : `<div class="prow-err">${noSfp(f.speed, f.media)}</div>`}`;
     }).join('');
   }
-  /* M49: the SFPs on each BOM row of the switch: links (the sizing's), spare and extra (derived values), total. */
+  /* M49: the SFPs on each BOM row of the switch: links (the sizing's), the total and the extra (derived values).
+     M87, Q77 (a): the total is typed; it is stored as the spare it implies, so the spare has no editor of its own. */
   function sfpCounts(r, f, base) {
-    const what = `${f.speed} ${f.media} SFPs, ${r.label}`, sk = `${base}.spare`, xk = `${base}.extra`;
-    const dv = (key, label, auto) => {
+    const what = `${f.speed} ${f.media} SFPs, ${r.label}`, tk = `${base}.total`, xk = `${base}.extra`;
+    const dv = (key, label, auto, o = {}) => {
       const v = shown(key), id = `p-${key}`;
       /* M86: the editor opens on the automatic value, as the switch-count editor does */
       if (UI.editing === key) return App.derived(key, { editing: true, id, label, control: input(id, v === '' ? String(auto) : v, { mono: true, num: true, invalid: !!PF.errors[key] }).replace('class="input', 'class="dv-input input').replace('<input ', `<input data-dv="${key}" aria-label="${label}, ${esc(what)}" `) });
-      return App.derived(key, { label, shown: v === '' ? String(auto) : v, auto: String(auto), overridden: v !== '' && v !== String(auto), changed: key in PF.draft, bad: !!PF.errors[key], edit: 'pp-edit', reset: 'pp-reset' });
+      return App.derived(key, { label, shown: v === '' ? String(auto) : v, auto: String(auto), overridden: v !== '' && (o.always || v !== String(auto)), changed: key in PF.draft, bad: !!PF.errors[key], edit: 'pp-edit', reset: 'pp-reset', ...o.more });
     };
-    const dirty = sk in PF.draft || xk in PF.draft, errs = [sk, xk].map(err).join('');
+    /* a typed total is marked even when it equals the automatic one: it no longer follows the project's spare */
+    const waiting = xk in PF.draft && !(tk in PF.draft), errs = [tk, xk].map(err).join('');
+    /* M87: when the cabinets' rows differ, the total is typed for the row it is computed on, named by its cabinet */
+    const label = f.agree ? 'Each BOM row' : `Row in ${esc(f.on)}`;
+    const total = dv(tk, label, f.quantity.value, { always: true, more: waiting ? { shown: '…' } : {} });
+    const leaves = `the spare is what your total leaves after the ${f.used} links${f.extra || xk in PF.draft ? ' and the extra' : ''}.`;
+    const why = waiting ? 'Save to update the total.'
+      : tk in PF.draft ? (PF.draft[tk] === '' ? 'Save to go back to the automatic total.' : `${f.agree ? 'Each BOM row' : `The row in ${esc(f.on)}`} carries the total you type; ${leaves}`)
+        : !f.agree ? `The rows differ by cabinet: you set the total of the row in ${esc(f.on)}, which has the most links, and the spare it implies is added to every cabinet's row.`
+          : f.quantity.override != null ? `${esc(f.rule)}: ${leaves}`
+            : `${esc(f.quantity.rule)}.`;
     return `<div class="prow-strip prow-sfp" role="group" aria-label="${esc(what)}">
       <span class="dv" title="From the switch sizing"><span class="dv-label">Links</span><span class="dv-val">${f.used}</span></span>
-      ${dv(sk, 'Spare', f.spare.value)}${dv(xk, 'Extra', 0)}
-      <span class="dv" title="${esc(f.rule)}"><span class="dv-label">Each BOM row</span><span class="dv-val">${dirty ? '…' : f.total}</span></span>
-      <span class="dv-rule">${dirty ? 'Save to update the total.' : `${esc(f.rule)}.${r.role === 'l1_switch' ? ` Automatic spare ${esc(f.spare.rule)}.` : ''} Extra SFPs add to the BOM, not to the port budget.`}</span>
-    </div>${errs ? `<div class="prow-err">${errs}</div>` : ''}`;
+      ${total}${dv(xk, 'Extra', 0)}
+      <span class="dv-rule">${why} Extra SFPs add to the BOM, not to the port budget.</span>
+    </div>${errs ? `<div class="prow-err">${errs}</div>` : ''}${cabinetRows(r, f)}`;
   }
   function linkRow(r) {  // M31: how the device reaches the L2 switch, and an RTAC's COM ports
     if (!r.link || !r.part_id) return '';
@@ -529,7 +549,7 @@
   ACTIONS['pp-edit'] = (el) => { keep(() => { UI.editing = el.dataset.key; }); const c = document.getElementById('p-' + el.dataset.key); if (c) { c.focus(); if (c.select) c.select(); } };
   const resetTo = (key) => {
     const [kind, i, f] = key.split('.');
-    PF.set(key, kind === 'f' ? (key.endsWith('.extra') ? '0' : '') : kind === 'n' ? '' : libValue(rowAt(Number(i)), f)); S.dirty = PF.dirty();  /* f: an SFP spare or extra (M49); n: a switch count (M72) */
+    PF.set(key, kind === 'f' ? (key.endsWith('.extra') ? '0' : '') : kind === 'n' ? '' : libValue(rowAt(Number(i)), f)); S.dirty = PF.dirty();  /* f: an SFP total (M87) or extra (M49); n: a switch count (M72) */
   };
   ACTIONS['pp-expand'] = (el) => { const i = +el.dataset.i; keep(() => UI.expanded.add(i)); const b = document.querySelector(`[data-action="pp-edit"][data-key^="o.${i}."]`); if (b) b.focus(); };
   ACTIONS['pp-reset'] = (el) => keep(() => resetTo(el.dataset.key));

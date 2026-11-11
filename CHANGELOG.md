@@ -9,6 +9,13 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Parts: type the SFP quantity of a BOM row (M87). On a pinned L1 or an L2 switch row the total
+  is a derived value with its rule; a typed total is stored as the spare it implies, a total
+  below the links is refused naming them, and Reset returns to the automatic spare. Spare folds
+  under the total; Extra stays. The page counts SFPs from the panels the build uses, so its
+  numbers are the BOM's: when a switch group is split over cabinets it lists each cabinet's row,
+  and on hand-written panels, whose BOM never took an SFP edit made on Parts, the rows are
+  read-only and say so.
 - Parts shows SFP rows on every switch row (M86). An L1 switch left to the sizing shows the SFP
   rows of the switch the sizing picked, read-only, with *Pin this switch to change its SFPs*.
   When the substation does not load or its layout fails, the switch rows say why their SFP rows
@@ -33,6 +40,11 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- A Parts row offers only the controls that change the BOM (M90): no cable manager on a 0 U part
+  (one written in the file still shows, with "none in the BOM"); no A and B box on the L1 and L2
+  rows, where unticking it was always an error; no A and B, panel, rack priority, BOM text or
+  alarm on an annunciator row; and *Alarm on branch MCB trip* follows the row's supply
+  overrides.
 - Restoring a backup, or replacing a project on import, while its folder is in use (the workbook
   open in Excel, a terminal or Explorer window inside it) is refused in words that say what to
   close, and the project is left as it was, without the safety backup the attempt wrote (M95).

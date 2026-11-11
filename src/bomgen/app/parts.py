@@ -19,11 +19,12 @@ from bomgen.checks import duplicate_tag_checks
 from bomgen.engine.errors import EngineError
 from bomgen.engine.layout import CABLE_MANAGED, PRIORITY, LayoutResult, layout_preview, runs
 from bomgen.engine.mcb import has_branch_mcb
-from bomgen.engine.network import automatic_sfp, unserved_links
-from bomgen.engine.rules_text import sfp_rule, sfp_spare_rule
+from bomgen.engine.network import automatic_sfp, port_plan, unserved_links
+from bomgen.engine.rules_text import sfp_rule, sfp_spare_rule, sfp_total_rule
 from bomgen.engine.units import expand_devices
 from bomgen.io import ied_csv
 from bomgen.io.derived import effective_part_id
+from bomgen.io.edit import EditError
 from bomgen.io.errors import InputError
 from bomgen.io.loader import LoadedSubstation
 from bomgen.io.parts_edit import has_l2_link
@@ -31,6 +32,7 @@ from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.store import LibraryStore
 from bomgen.models.library import Category, DeviceType, Library, Media, PortSpeed, PurdueLevel
 from bomgen.models.output import Derived
+from bomgen.models.panel import Panel
 from bomgen.models.project import Project
 from bomgen.models.substation import Equipment, EquipmentRole, Side, Substation
 
@@ -216,7 +218,14 @@ def row_label(entry: Equipment, library: Library) -> str:
     return _label(entry, _category(entry, part))
 
 
-SfpCounts = dict[tuple[str, str], tuple[int, int]]  # (speed, media) -> (links, spare)
+SfpRow = tuple[str, int, int]  # one BOM row of a switch entry: cabinet name, links, spare
+SfpCounts = dict[tuple[str, str], list[SfpRow]]  # (speed, media) -> its BOM rows, panel order
+
+
+def _typed_on(rows: list[SfpRow]) -> SfpRow:
+    """The BOM row a typed SFP total is computed on: the one with the most links, the first
+    of equals (plan M87), so the spare it implies leaves no row short of its links."""
+    return max(rows, key=lambda r: r[1])
 
 
 NOT_LOADED = (
@@ -270,10 +279,41 @@ def _tag_info(
     return generated, duplicates
 
 
+HAND_WRITTEN = (
+    "These cabinets are hand-written: the BOM takes these SFPs from the port plans in the "
+    "panel files, which name the library part, so an SFP choice made here does not reach "
+    "it. Generate the panels on Panels to set them here, or change the panel files."
+)
+NOT_PLACED = "The hand-written panel files do not place this switch, so the BOM has no SFPs for it."
+
+
+def _hand_written(loaded: LoadedSubstation) -> bool:
+    """Whether a build uses the panel files as they are: panels are listed and none was
+    generated, the case where ``engine/layout.with_layout`` leaves them alone (plan M87)."""
+    listed = [p for p in loaded.panels if p.id not in loaded.manual_panel_ids]
+    return bool(listed) and not any(p.generated for p in listed)
+
+
+def _built_panels(loaded: LoadedSubstation, result: LayoutResult) -> tuple[Panel, ...]:
+    """The panels a build of ``loaded`` uses, as ``with_layout`` gives them: the files when
+    they are hand-written, else the layout's with the manual panels after them (before any
+    panel is listed, the layout's: what Generate writes)."""
+    if _hand_written(loaded):
+        return loaded.panels
+    manual = tuple(p for p in loaded.panels if p.id in loaded.manual_panel_ids)
+    return (*result.panels, *manual)
+
+
 def _sfp_needs(loaded: LoadedSubstation, result: LayoutResult) -> dict[str, SfpCounts]:
-    """The (speed, media) pairs each sized switch entry's ports use, from the layout, with
-    the links and automatic spare of the first panel row that hosts it (plan M49); an L1
-    row with no part has those of the switch the sizing picked (plan M86)."""
+    """The (speed, media) pairs each sized switch entry's ports use, with the links and
+    automatic spare of every BOM row that hosts it (plan M49), read from the panels the
+    build uses, as the BOM reads them (plan M87). An L1 row with no part has those of the
+    switch the sizing picked (plan M86); hand-written files place the library part."""
+    hand = _hand_written(loaded)
+    built = [
+        (panel, expand_devices(panel, loaded.library, tagging=loaded.tagging))
+        for panel in _built_panels(loaded, result)
+    ]
     needs: dict[str, SfpCounts] = {}
     for entry in loaded.substation.equipment:
         if entry.role not in SIZED or (
@@ -285,37 +325,77 @@ def _sfp_needs(loaded: LoadedSubstation, result: LayoutResult) -> dict[str, SfpC
             if entry.role is EquipmentRole.L1_SWITCH
             else effective_part_id(entry)
         )
-        for panel in result.panels:
-            plan = panel.port_plans.get(str(key))
-            if plan is None:
-                continue
-            counts: SfpCounts = {}
-            for a in (*plan.uplinks_l3, *plan.uplinks, *plan.downlinks):
-                if a.media is not Media.RJ45:
-                    links, spare = counts.get((a.speed.value, a.media.value), (0, 0))
-                    counts[(a.speed.value, a.media.value)] = (links + a.count, spare + a.spare)
-            needs.setdefault(entry.id, {})
-            for pair, value in counts.items():
-                needs[entry.id].setdefault(pair, value)
+        keys = {key, entry.part_id} if hand else {key}
+        for panel, rows in built:
+            for row in rows:
+                plan = port_plan(panel, row) if row.device.part_id in keys else None
+                if plan is None:
+                    continue
+                counts: dict[tuple[str, str], tuple[int, int]] = {}
+                for a in (*plan.uplinks_l3, *plan.uplinks, *plan.downlinks):
+                    if a.media is not Media.RJ45:
+                        links, spare = counts.get((a.speed.value, a.media.value), (0, 0))
+                        counts[(a.speed.value, a.media.value)] = (links + a.count, spare + a.spare)
+                found = needs.setdefault(entry.id, {})
+                for pair, (links, spare) in counts.items():
+                    found.setdefault(pair, []).append((panel.cabinet_name, links, spare))
     return needs
+
+
+def sfp_links(
+    project_file: Path,
+    substation_id: str,
+    store: LibraryStore,
+    index: int,
+    speed: str,
+    media: str,
+) -> int:
+    """The ``speed`` ``media`` links of the BOM row of switch row ``index`` a typed total is
+    computed on, as its SFP row on the page counts them (plan M87); an ``EditError`` says
+    why there are none."""
+    _substation, _lib, loaded, _project = _source(project_file, substation_id, store)
+    result, reason = _preview(loaded)
+    if loaded is None or result is None:
+        raise EditError(reason or NOT_LOADED)
+    if _hand_written(loaded):
+        raise EditError(HAND_WRITTEN)
+    rows = loaded.substation.equipment
+    if not 0 <= index < len(rows):
+        raise EditError(f"no equipment row {index + 1}")
+    counts = _sfp_needs(loaded, result).get(rows[index].id, {}).get((speed, media))
+    if counts is None:
+        raise EditError(f"Equipment row {index + 1} has no {speed} {media} SFPs to count.")
+    return _typed_on(counts)[1]
 
 
 def _sfp(
     entry: Equipment,
     speed: str,
     media: str,
-    counts: tuple[int, int],
+    counts: list[SfpRow],
     candidates: list[str],
     pick: str | None,
+    *,
+    hand: bool = False,
 ) -> dict[str, Any]:
     """One SFP sub-row of a switch: its part choice, the part the engine takes without
-    one (``pick``, plan M86) and its quantity per BOM row."""
-    choice = next((c for c in entry.sfp if (c.speed.value, c.media.value) == (speed, media)), None)
-    used, auto = counts
+    one (``pick``, plan M86) and its quantity, computed on the BOM row a typed total is
+    computed on, then on each BOM row (plan M87). On ``hand``-written panels the BOM takes
+    none of the entry's choices, so neither does the row (plan M87)."""
+    choices = () if hand else entry.sfp
+    choice = next((c for c in choices if (c.speed.value, c.media.value) == (speed, media)), None)
+    on, used, auto = _typed_on(counts)
     override = choice.spare if choice is not None else None
     extra = choice.extra if choice is not None else 0
     spare = auto if override is None else override
-    rule = sfp_spare_rule(auto, l1=entry.role is EquipmentRole.L1_SWITCH)
+    l1 = entry.role is EquipmentRole.L1_SWITCH
+    rule = sfp_spare_rule(auto, l1=l1)
+    # M87, Q77 (a): the quantity is the value typed; it is stored as the spare it implies
+    quantity = Derived[int](
+        value=used + auto + extra,
+        rule=sfp_total_rule(used, auto, extra, l1=l1),
+        override=None if override is None else used + override + extra,
+    )
     return {
         "speed": speed,
         "media": media,
@@ -326,7 +406,24 @@ def _sfp(
         "spare": Derived[int](value=auto, rule=rule, override=override).model_dump(mode="json"),
         "extra": extra,
         "total": used + spare + extra,
+        "quantity": quantity.model_dump(mode="json"),
         "rule": sfp_rule(used, spare, extra),
+        # M87: the BOM rows that carry these SFPs, each with what it prints; the typed total
+        # is computed on ``on``, and the spare it implies goes on every row
+        "on": on,
+        "agree": len({(n, s) for _cabinet, n, s in counts}) == 1,
+        "rows": [
+            {
+                "cabinet": cabinet,
+                "links": n,
+                "auto_spare": s,
+                "spare": (row_spare := s if override is None else override),
+                "extra": extra,
+                "quantity": n + row_spare + extra,
+                "rule": sfp_rule(n, row_spare, extra),
+            }
+            for cabinet, n, s in counts
+        ],
     }
 
 
@@ -360,10 +457,12 @@ def _row(
     named: dict[str, dict[str, Any]],
     sized_part: DeviceType | None,
     sfp_reason: str | None,
+    hand: bool = False,
 ) -> dict[str, Any]:
     """``named``: each library part as the picker names it; ``sized_part``: the switch the
     sizing picked for an L1 row with no part; ``sfp_reason``: why a switch row has no SFP
-    rows (plan M86). An SFP row names its parts by id; ``options["sfp"]`` names them."""
+    rows (plan M86); ``hand``: the build uses hand-written panel files (plan M87). An SFP
+    row names its parts by id; ``options["sfp"]`` names them."""
     part = library.get(entry.part_id) if library and entry.part_id else None
     category = _category(entry, part)
     default = category in CABLE_MANAGED  # the layout's rule (ADR 0013, amended)
@@ -389,6 +488,7 @@ def _row(
             needs[(speed, media)],
             [d.part_id for d in _parts(library) if _serves(d, speed, media)] if library else [],
             auto(speed, media),
+            hand=hand,
         )
         for speed, media in sorted(needs)
     ]
@@ -426,10 +526,21 @@ def _row(
         ],
         "overrides": entry.overrides.values() if entry.overrides is not None else {},
         "sfp": sfp,
+<<<<<<< HEAD
         # M86, Q76 (a): the sized L1's SFP rows are read-only until its switch is pinned
         "pin": named.get(sized_part.part_id) if sized_part is not None else None,
         "sfp_reason": sfp_reason if entry.role in SIZED else None,
         "bom_text": {k: getattr(entry, k) for k in BOM_TEXT} if racked else None,  # M59
+=======
+        # M86, Q76 (a): the sized L1's SFP rows are read-only until its switch is pinned;
+        # M87: on hand-written panels they are read-only, and pinning would change nothing
+        "pin": named.get(sized_part.part_id) if sized_part is not None and not hand else None,
+        "sfp_reason": None
+        if entry.role not in SIZED
+        else sfp_reason or (NOT_PLACED if hand and not needs else None),
+        "sfp_hand": HAND_WRITTEN if hand and needs and entry.role in SIZED else None,
+        "bom_text": {k: getattr(entry, k) for k in BOM_TEXT},  # M59
+>>>>>>> origin/main
         # M74: a common row may be steered to a panel; a redundant or one-side row follows its LAN
         "placement": {
             "panel_hint": entry.panel_hint,
@@ -495,6 +606,7 @@ def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
         return page | {"parts": None}
     result, sfp_reason = _preview(loaded)
     needs = _sfp_needs(loaded, result) if loaded is not None and result is not None else {}
+    hand = loaded is not None and result is not None and _hand_written(loaded)  # plan M87
     picked = library.get(result.plan.l1_part_id) if library and result else None
     tags, duplicates = _tag_info(loaded, result) if loaded and result else ({}, {})
     items = substation.loose_material.items if substation.loose_material else []
@@ -569,6 +681,7 @@ def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
                     opts,
                     picked if e.role is EquipmentRole.L1_SWITCH and e.part_id is None else None,
                     sfp_reason,
+                    hand,
                 )
                 | {"tags": tags.get(e.id, []), "duplicate": duplicates.get(e.id)}
                 | {"on_list": on_list(e.part_id)}

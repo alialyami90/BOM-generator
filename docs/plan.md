@@ -1454,7 +1454,16 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   on the automatic value; the automatic choice names its part. Since M85 a Cisco or Moxa switch
   picks its own make's low-tier SFP, a commercial-temperature part for some: the pick rule is
   settled here (Q83). Size S.
-- **M87 — A typed SFP quantity.** *`parts-network`; Q77.* Point 2. Cause: M49 lets the engineer set
+- **M87 — A typed SFP quantity.** *`parts-network`; Q77.* **Done**, on Q77's answer (a). A typed
+  total is stored as the spare it implies (`io/parts_edit.set_sfp_total`, endpoints
+  `set_sfp_total` and `check_sfp_total`); Spare folds under the total, Extra stays. Two faults
+  found and fixed on the way: the page counted SFPs from the layout preview, not from the
+  panels the build uses, so on hand-written panels it showed 9 where the BOM prints 27, and
+  no SFP edit made on Parts has ever reached a hand-written BOM (the derived part is never
+  placed there): those rows are now read-only and say so. And one stored spare gives a
+  different total per cabinet when a switch group is split (at 300 IEDs, 100 and 80): the
+  page lists each cabinet's row (Q85). A test compares every row on the page with its BOM
+  line on hand-written, generated and split panels. Point 2. Cause: M49 lets the engineer set
   `spare` and `extra` on top of a computed number; the quantity itself (`screens-parts.js`
   `sfpCounts`) is display only, and on an L2 switch, where the automatic spare is 0, it can only
   go up. Fix: the quantity is the derived value the engineer edits; a typed total is stored as
@@ -1482,7 +1491,13 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   no network link, so neither is in the set; a KVM part that lists a network port (an IP KVM)
   gets the inputs from its ports. Workstation rows are seeded 1G MM because the seeding never
   sets the media (Q79). Size S.
-- **M90 — A Parts row shows only what does something.** *`parts-network`.* Point 6. Four findings:
+- **M90 — A Parts row shows only what does something.** *`parts-network`.* **Done.** Each finding
+  was confirmed by a build before it was fixed, in the API: the cable manager toggle follows
+  the row's height after its own override (`zero_u` marks a written choice on a 0 U part);
+  `offers_ab` says whether a row has the A and B box; an annunciator row's `placement`,
+  `bom_text` and `alarm` are `None`; the alarm toggle is decided on the part with the row's
+  overrides. Left: the Height value still shows on an annunciator row (Q86). Point 6. Four
+  findings:
   the cable manager toggle shows on a 0 U network part (the FGR-60F row says On, the layout adds
   none); an annunciator row offers A and B, Panel, Rack priority, BOM text and the L2 link, none of
   which reach its loose item; the A and B box shows on L1 and L2 rows, where unticking is always

@@ -1364,6 +1364,71 @@ def test_m89_the_ports_tab_offers_an_allocation_only_where_the_page_says() -> No
     assert "row.l2.speed" not in js
 
 
+def test_m87_the_sfp_total_is_the_derived_value_the_engineer_types() -> None:
+    """plan M87 (Ali's v0.5.0 point 2, Q77 (a)): on an editable SFP row the quantity on each
+    BOM row is a derived value: typed, checked and written by the API as the spare it
+    implies, marked when set and reset to automatic; the spare has no editor of its own."""
+    js = PARTS.read_text(encoding="utf-8")
+    counts = js[js.index("function sfpCounts(") : js.index("function linkRow(r)")]
+    assert "const label = f.agree ? 'Each BOM row' : `Row in ${esc(f.on)}`;" in counts
+    assert "dv(tk, label, f.quantity.value, { always: true" in counts
+    assert "${total}${dv(xk, 'Extra', 0)}" in counts
+    assert "'Spare'" not in counts  # folded under the total
+    assert "overridden: v !== '' && (o.always || v !== String(auto))" in counts
+    assert "${esc(f.quantity.rule)}." in counts  # the automatic total with its rule
+    # the saved value is the typed total, empty when the spare is automatic
+    assert "if (d === 'total') return f.quantity.override == null ? '' : f.quantity.override;" in js
+    # the API refuses a total below the links, before Save and on Save
+    assert (
+        "Bridge.call('check_sfp_total', S.project.file, S.sub, path[1], path[3], path[4], "
+        "value, draftExtra(path))" in js
+    )
+    assert (
+        "Bridge.call('set_sfp_total', f, sid, path[1], path[3], path[4], value, "
+        "draftExtra(path))" in js
+    )
+    # reset to automatic clears the total, as the other derived values do
+    assert "PF.set(key, kind === 'f' ? (key.endsWith('.extra') ? '0' : '') :" in js
+    # a sized L1 that is not pinned stays read-only (M86)
+    sized = js[js.index("function sizedSfpRows(r)") : js.index("function sfpRows(r)")]
+    assert "pp-edit" not in sized
+    assert "${f.total}" in sized
+
+
+def test_m87_hand_written_panels_show_their_sfp_rows_read_only_with_why() -> None:
+    """plan M87: on hand-written panels the BOM takes the files' port plans, so the switch
+    rows are the read-only ones, with the API's sentence where the Pin button would be."""
+    js = PARTS.read_text(encoding="utf-8")
+    rows = js[js.index("function sfpRows(r)") : js.index("function sfpCounts(")]
+    assert rows.index("if (r.sfp_hand) return sizedSfpRows(r);") < rows.index(
+        "if (r.pin) return sizedSfpRows(r);"
+    )
+    sized = js[js.index("function sizedSfpRows(r)") : js.index("function sfpRows(r)")]
+    hand = sized.index("if (r.sfp_hand) return")
+    assert '<span class="muted small">${esc(r.sfp_hand)}</span>' in sized[hand:]
+    assert hand < sized.index("Pin this switch to change its SFPs")
+
+
+def test_m87_sfp_rows_that_differ_by_cabinet_show_each_cabinets_row() -> None:
+    """plan M87: when one switch entry's BOM rows differ (an L1 entry spread over two
+    cabinets of a side), each cabinet's row is shown with what it prints, read-only, and the
+    typed total names the row it is set on; when they agree nothing more is drawn."""
+    js = PARTS.read_text(encoding="utf-8")
+    rows = js[js.index("const cabinetRows = ") : js.index("function sizedSfpRows(r)")]
+    assert "(f.agree ? '' : f.rows.map((x) =>" in rows
+    assert '<span class="dv-label">${esc(x.cabinet)}</span>' in rows
+    assert "${esc(x.rule)} = ${x.quantity}" in rows
+    assert "pp-edit" not in rows  # read-only
+    sized = js[js.index("function sizedSfpRows(r)") : js.index("function sfpRows(r)")]
+    assert ": cabinetRows(r, f)}" in sized
+    counts = js[js.index("function sfpCounts(") : js.index("function linkRow(r)")]
+    assert "${cabinetRows(r, f)}" in counts
+    assert (
+        "you set the total of the row in ${esc(f.on)}, which has the most links, and the spare "
+        "it implies is added to every cabinet's row." in counts
+    )
+
+
 def test_m90_a_parts_row_draws_only_the_controls_the_page_offers() -> None:
     """Plan M90: the API decides which controls a row has (``ab``, ``placement``,
     ``bom_text``, ``cable_manager``, ``alarm``); the screen draws only what it is sent
