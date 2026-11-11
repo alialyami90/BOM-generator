@@ -44,10 +44,11 @@ medium for `device-research`.
   app, the install and the real window) and releases.
 - **Ali's Windows PC** (Claude Code CLI): only what needs Excel or a person at the screen:
   *Export PDF… › Use Excel*, Q11 in Excel's Print Preview, the drag-and-drop hand test (ALI-8)
-  and screen checks of the installed app. The released installer is enough for these. On
-  2026-11-10 the PC had Python 3.13 and no `bomgen` install, `node` or `gh`: run
-  `pip install -e ".[dev,app]"` before debugging there, and open and merge PRs from a cloud
-  session unless `gh` is installed.
+  and screen checks of the installed app. The released installer is enough for these. Since
+  2026-11-11 the PC has a virtual environment in `.venv` (Python 3.13, `.[dev,app]`): run the
+  gate as `.venv/Scripts/python -m ruff`, `-m mypy` and `-m pytest`. `gh` is installed and
+  logged in but not on Git Bash's PATH: call `"/c/Program Files/GitHub CLI/gh.exe"`. `node` is
+  not installed, so the `node --check` and prototype steps run in a cloud session.
 
 Sessions share no memory, so these files and `.claude/agents/` are all that carries over between
 them. The project files folder (`/mnt/project-files/…`) was not checked on 2026-11-10; confirm a
@@ -69,7 +70,9 @@ path exists before relying on it.
   either. Don't move golden values without an ADR. Only Ali marks ADRs Accepted. Don't commit `.xlsx`.
   Don't force-push (LESSONS "Branch restart"). Don't bump the version outside a release PR (on main it
   publishes at once). Don't push tags.
-- Next free numbers: ADR 0041, Q74, milestone M82. Handed out for M70–M81 (2026-11-04): ADR 0038 to
+- Next free numbers: ADR 0042, Q82, milestone M96. Handed out for M82–M94 (2026-11-11): ADR 0041
+  to `parts-network` for M88, Q74–Q81 as `plan.md` section 6 lists them. Handed out for M70–M81
+  (2026-11-04): ADR 0038 to
   W4 for M73, ADR 0039 and Q73 to W2 for M78, ADR 0040 to the lead for M77, Q72 to W4 for M72;
   the lead gives out any further number one at a time.
 
@@ -100,8 +103,14 @@ path exists before relying on it.
 11. **Q51** (annunciator mounted in a panel) and **Q55** (categories for the contractor's other
    part types) are open in plan §6. Q54 (power of the -2 SEL computers) was answered 2026-11-01.
 
-**Next work:** v0.5.0 shipped M70–M81 (STATE.md §1). Next are Ali's field tests of v0.5.0 (PDF
-export with Excel, drag and drop) and the open ends in STATE.md §1 "Next work", as Ali orders them.
+12. **Q74 to Q81** (2026-11-11) are open in plan §6, from Ali's six points on v0.5.0. Q75 asks
+   where three of the points were seen and should be answered first: the cause of the
+   substation switch bug (M82) was found by reading and has not been seen on screen. Each of the
+   others has a recommended answer that its milestone assumes until Ali answers.
+
+**Next work:** M82–M94 in `plan.md`, in the order its last paragraph gives, and M95: the 16
+tests that fail on Windows (`plan.md` "M95"), of which the possible app faults come first. Ali's field tests of
+v0.5.0 (PDF export with Excel, drag and drop) and the open ends in STATE.md §1 stay open.
 
 ## 4. When Ali's feedback arrives
 

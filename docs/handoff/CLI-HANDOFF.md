@@ -34,13 +34,13 @@ list owned files instead of finished milestones, and their state is kept here.
 
 | Agent | Former thread | State |
 |---|---|---|
-| Main session (lead) | Lead: Deliver the engineering workflow plan | Owns review, merges, releases, relays and the core modules |
+| Main session (lead) | Lead: Deliver the engineering workflow plan | Owns review, merges, releases, relays and the core modules; next M82, M92 |
 | `issue-outputs` | W2 Issue outputs and revisions | Blocked on Use Excel test; the built-in PDF renderer leaves out the header logo |
-| `library-parts` | W1 Library parts, review and function tags | Done; the Library detail pane does not show tags |
-| `device-research` | New: datasheet research for `data/device-db/` | Not started; first task is a RedBox and a media converter part |
+| `library-parts` | W1 Library parts, review and function tags | Next M84, M85, then M93 after the research; the Library detail pane does not show tags |
+| `device-research` | New: datasheet research for `data/device-db/` | Not started; M93's duplicates and defects, and a RedBox and a media converter part |
 | `panel-detailing` | W3 Panel notes, misc rows and labels | Done; the socket pick list is open |
-| `panel-layout` | New: the layout engine, Panels board and Device preview | ALI-8 hand test pending |
-| `parts-network` | W4 Parts and network | Done; waits on `device-research` for RedBox and media converter parts |
+| `panel-layout` | New: the layout engine, Panels board and Device preview | M94 to confirm; ALI-8 hand test pending |
+| `parts-network` | W4 Parts and network | Next M83, M89, M86, M87, M90, M91, one after another; M88 after ADR 0041 |
 | `setup-design-basis` | W5 Setup and design basis | Done |
 | `ui-design` | New: design in `docs/ui/`, audits and polish | Not started |
 | `bom-workflow-reviewer` | Review BOM workflow for missing user inputs | Done |

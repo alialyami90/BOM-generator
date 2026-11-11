@@ -3,6 +3,22 @@
 A dated log of where the project stood, newest first. Add a new entry at the top whenever work stops;
 keep it short and point at [STATE.md](STATE.md) and [NEXT.md](NEXT.md) for detail.
 
+## 2026-11-11: Ali's six points on v0.5.0 planned as M82–M94; first gate on Windows (Lead)
+
+- **Base:** main `246eecb` (#394). Docs-only PR. No code change.
+- **Done:** Ali's six points (the substation dropdown, the SFP quantity, alternatives in the
+  lists, duplicates, SFPs on monitors and KVMs, other inconsistencies) were traced before they
+  were planned: point 1 by the lead, the others by `parts-network` and `library-parts` as
+  read-only investigations, the first dispatch of the new agents. The lead ran their main
+  claims on a copy of `examples/` with the shipped library; all held. `backlog.md` "v0.6" has
+  the points, `plan.md` "M82–M94" the thirteen milestones with their causes and owners, and
+  plan §6 the questions Q74–Q81.
+- **Found on the way:** the PC now has `.venv` and `gh`, so the gate ran on Windows for the first
+  time: ruff and mypy pass, pytest has 16 failed, 3540 passed, 5 skipped. Planned as M95.
+- **Not done:** no fix is written. Point 1's cause is from reading, not seen on screen (Q75).
+  The double count under M83 and the placement under M94 are suspected, not run.
+- **Next:** M82, then M83 and M89; M95's possible app faults. Ali's answers to Q74–Q81, Q75 first.
+
 ## 2026-11-10: agents and the CLI handoff in the repo, where work runs
 
 - **Base:** main `d980714` (#393). Docs-only PR. No code change since v0.5.0.

@@ -87,6 +87,10 @@ rather than copy it.
   #267 (Settings and Parts crashed with "StopIteration:" on a new, blank substation: `parts_page`
   sized SFPs through `layout_preview`, which needs the switches; it now skips that with no
   equipment). `pyproject.toml` and `bomgen.__version__` are `0.3.1`.
+- **Gate on Windows, `246eecb` (2026-11-11, Ali's PC, Python 3.13):** ruff passes (401 files),
+  mypy passes (288 files), pytest has **16 failed**, 3540 passed, 5 skipped in 5 min 24 s. It was
+  the first run of the suite on Windows; CI runs it on Linux only. The failures are listed and
+  sorted in `plan.md` "M95"; some may be real faults of the app on Windows.
 - **Gate on `628ff1c`:** ruff and format pass (319 files), mypy passes (240 files), pytest has
   2852 passed. The table under "Verification" below is from 2026-10-30.
 - **Audit of 2026-10-30** ([Claude Doc "Repo audit after v0.2.1"](https://claude.ai/artifact/DXyJnufrHguPCCVWgeLGPh)): no code defect; 14
@@ -115,11 +119,15 @@ rather than copy it.
   the UI polish pass from [`docs/ui/polish-v02.md`](../ui/polish-v02.md) (items 1–16, #205–#208) plus
   #194, #198–#201.
 - **Numbers (2026-11-04, after v0.5.0).** ADRs 0001–0027 and 0029–0040 are Accepted and 0028
-  is Rejected. The next free ADR is **0041**, the next free question **Q74** and the next
-  milestone **M82** (M70–M81 are done; Q72 "only above", Q73 "both, built-in by default").
-  Q51 (annunciator) and Q55 (categories for the contractor's other part types) are open.
+  is Rejected. The next free ADR is **0042**, the next free question **Q82** and the next
+  milestone **M96** (M70–M81 are done; Q72 "only above", Q73 "both, built-in by default").
+  M82–M95 are planned (2026-11-11), ADR 0041 is reserved for M88 and Q74–Q81 are open with
+  them. Q51 (annunciator) and Q55 (categories for the contractor's other part types) are open.
 - **Changelog** has a `[0.5.0]` section, and `[Unreleased]` is empty.
-- **Next work:** Ali's field feedback on v0.5.0: try *Use Excel* in PDF export on Windows (NEXT §3), his hand test of drag
+- **Next work:** M82–M94, Ali's six points on v0.5.0 of 2026-11-11 (`plan.md` "M82–M94",
+  `backlog.md` "v0.6"): the substation switch, SFP quantities, the part picker and the Library
+  list, duplicates, L2 link inputs on unnetworked rows. Start with M82, then M83 and M89. Still
+  waiting on Ali: try *Use Excel* in PDF export on Windows (NEXT §3), his hand test of drag
   and drop on Windows (ALI-8), and his answers on the v0.3.4 review list (keyboard nameplate, a
   DC supply-voltage check, Q51, Q55, reviewer mode, Q11/Q23). Open ends the workstreams left:
   psa-devices has no RedBox or media converter part and no nameplate pattern for them, the

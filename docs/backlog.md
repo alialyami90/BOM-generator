@@ -3,6 +3,21 @@
 Ali's feedback after each release, point by point, and the work done for each point. Keep this file
 current: when a point's status or milestone changes, update its row here.
 
+## v0.6: Ali's feedback on v0.5.0
+
+Ali's six points from 2026-11-11, after testing the installed v0.5.0. Each was traced in the code
+before it was planned; the causes, the checks that were run and the open questions are in
+[`plan.md`](plan.md) "M82–M94" and questions Q74 to Q81.
+
+| # | Point (Ali) | Milestone | Status |
+| --- | --- | --- | --- |
+| 1 | "Bug when opening substations dropdown menu." | M82 | Planned. Likely cause found by reading, not yet seen on screen (Q75). |
+| 2 | "I still cant override or select the SFP quantity." | M85, M86, M87, M88 | Planned. Four causes: no SFP rows on an L1 switch left to the sizing; 23 of the 27 SFP parts can never be chosen; the quantity is display-only; no SFP rows on a firewall or EXT switch. |
+| 3 | "In the library you are listing devices along with their alternatives ... it should just show the applicable alts." | M83, M84 | Planned (Q74). The picker lists a whole category for every row: 26 switches on each switch row, 12 of them alternatives of another switch. |
+| 4 | "The library list should remove duplicates. Example SEL-2731-EXT and SEL-2731 are same device." | M84, M93 | Planned (Q75, Q80). No SEL-2731 exists; 7 groups of true duplicates and 12 groups of one item copied per role were found. |
+| 5 | "Monitors and KVMs are showing SFPs that shouldnt be there." | M89 | Planned (Q75, Q78). Every row but the sized switches and the patch panel gets the "Link to the L2 switch" inputs, defaulting to 1G MM fibre. |
+| 6 | "Review part selection for other inconsistencies like this." | M83, M90, M91, M92, M94 | Planned. The review's findings are listed under each milestone. |
+
 ## v0.4: engineer-controlled workflow
 
 Ali's requests from 2026-11-03: a review of the engineering workflow from a SCADA engineer's view
