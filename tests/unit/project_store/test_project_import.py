@@ -89,7 +89,7 @@ def test_import_refuses_an_existing_project_unless_forced(
     workspace: Path, package: Path, store: LibraryStore
 ) -> None:
     import_project(package, workspace=workspace, store=store)
-    (workspace / "jfgp2" / "project.yaml").write_text("edited locally\n")
+    (workspace / "jfgp2" / "project.yaml").write_text("edited locally\n", newline="\n")
 
     with pytest.raises(LibraryPackageError) as caught:
         import_project(package, workspace=workspace, store=store)
@@ -104,7 +104,7 @@ def test_forced_import_backs_up_then_overwrites(
 ) -> None:
     import_project(package, workspace=workspace, store=store)
     project_dir = workspace / "jfgp2"
-    (project_dir / "substations/psa/substation.yaml").write_text("edited locally\n")
+    (project_dir / "substations/psa/substation.yaml").write_text("edited locally\n", newline="\n")
 
     result = import_project(package, workspace=workspace, force=True, store=store, now=NOW)
 
@@ -148,7 +148,7 @@ def test_failed_forced_import_keeps_the_existing_project(
 ) -> None:
     import_project(package, workspace=workspace, store=store)
     project_dir = workspace / "jfgp2"
-    (project_dir / "project.yaml").write_text("edited locally\n")
+    (project_dir / "project.yaml").write_text("edited locally\n", newline="\n")
     before = _tree(workspace)
     real_replace = os.replace
 

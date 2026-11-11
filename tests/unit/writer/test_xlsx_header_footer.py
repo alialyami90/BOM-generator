@@ -64,7 +64,9 @@ def test_raw_header_string_bolds_only_the_first_line(out_path: Path) -> None:
     sheet = SheetModel(name="1", header_footer=bom_header_footer())
     write_workbook(WorkbookModel(sheets=(sheet,)), out_path)
     with zipfile.ZipFile(out_path) as archive:
-        xml = archive.read("xl/worksheets/sheet1.xml").decode()
+        # XlsxWriter writes the part as text, so on Windows its line ends are \r\n; a reader
+        # of the XML sees \n either way.
+        xml = archive.read("xl/worksheets/sheet1.xml").decode().replace("\r\n", "\n")
     centre = '&amp;C&amp;28&amp;"Calibri,Bold"Project\n&amp;11&amp;"Calibri,Regular"Bill of'
     assert centre in xml
     assert "<oddHeader>" in xml
