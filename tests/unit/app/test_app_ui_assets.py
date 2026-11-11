@@ -1124,6 +1124,7 @@ def test_the_part_picker_offers_the_rows_own_choices_by_make_and_model() -> None
     assert "p.parts.rows[+btn.dataset.row].choices" in js
     assert "'Search all parts'" in js
     assert "wide ? all : own" in js
+    assert "wide ? o.level : ''" in js  # the whole list tells two RST-2228 apart by level
     # Add a device: the API gives the role and the parts (a Switch makes an EXT switch)
     assert "opts = c.choices" in js
     assert "ROLE_OF" not in js

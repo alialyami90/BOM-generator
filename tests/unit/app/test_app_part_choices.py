@@ -264,3 +264,15 @@ def test_choices_sharing_a_make_and_model_in_the_shipped_library(
     assert found == SAME_NAME
     # the shared names never share a tier, so the tier line tells each apart
     assert all(len(set(t)) == len(t) for v in found.values() for t in v.values())
+
+
+def test_a_switch_option_says_its_level(project: Path, store: LibraryStore) -> None:
+    # plan M83, Q82: two switches may share a make and model (the two RST-2228); in the whole
+    # category their level tells them apart, not the library id or the ordering code.
+    options = parts(project, store)["options"]
+    level = {o["part_id"]: o["level"] for o in options["network_switch"]}
+
+    assert level["RST2228-L2"] == "L2 switch"
+    assert level["RST2228-L1-24MM"] == "L1 switch"
+    assert level["SEL-2730M-EXT"] == "EXT switch"
+    assert {o["level"] for o in options["firewall"]} == {None}

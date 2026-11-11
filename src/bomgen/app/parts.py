@@ -466,6 +466,10 @@ def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
             "data_quality": records[d.part_id].verified if d.part_id in records else None,
             "on_list": on_list(d.part_id),
             "tier": d.tier,
+            # two switches may share a make and model: the level tells them apart (Q82)
+            "level": f"{d.purdue_level.value} switch"
+            if d.category is Category.NETWORK_SWITCH and d.purdue_level is not None
+            else None,
             "replaces": None
             if replaced is None
             else {"part_id": replaced.part_id, "make": replaced.make, "model": replaced.model},

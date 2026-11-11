@@ -299,6 +299,7 @@ def test_options_carry_what_the_device_picker_shows(project: Path, store: Librar
         "data_quality": None,  # a library file has no device records
         "on_list": True,  # no vendor list (plan M53)
         "tier": None,  # an original (plan M83)
+        "level": "L2 switch",  # a switch says its level
         "replaces": None,
     }
 

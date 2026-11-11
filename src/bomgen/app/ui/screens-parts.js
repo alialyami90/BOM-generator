@@ -207,7 +207,7 @@
   }
   function accessories(p, r) {
     const a = r.accessories; if (!a) return '';
-    const own = a.library.length ? `<div class="prow-sub prow-sub--foot"><span class="muted small">Comes with ${esc(rowPart(p, r))}:${a.library.map((x) => `<span class="mono">${esc(x.part_id)}</span> × ${x.qty}`).join(', ')}. They go to loose material.</span></div>` : '';
+    const own = a.library.length ? `<div class="prow-sub prow-sub--foot"><span class="muted small">Comes with ${esc(rowPart(p, r))}: ${a.library.map((x) => `<span class="mono">${esc(x.part_id)}</span> × ${x.qty}`).join(', ')}. They go to loose material.</span></div>` : '';
     const added = a.added.map((x) => `<div class="prow-sub"><span class="prow-sub-what">Accessory <span class="mono">${esc(x.part_id)}</span></span><span></span>
         <div class="prow-qty"><input class="input input--num input--mono" id="pp-accq-${x.index}" data-acc="${x.index}" value="${esc(x.item.qty)}" aria-label="Quantity of ${esc(x.part_id)}"></div>
         <button class="btn btn--ghost btn--icon btn--sm btn--del" data-action="pp-acc-remove" data-index="${x.index}" aria-label="Remove ${esc(x.part_id)}">${icon('trash')}</button></div>`).join('');
@@ -305,7 +305,7 @@
           : o.all
           ? `<div role="option" id="pk-${i}" data-all="1" aria-selected="false"><span>${wide ? 'Show the parts for this row' : 'Search all parts'}</span><span class="sub">${wide ? `${own.length} for this row.` : `All ${all.length}, not only the ${own.length} for this row.`}</span></div>`
           : `<div role="option" id="pk-${i}" data-v="${esc(o.part_id)}" aria-selected="false"><span>${esc(nameOf(o))}${o.part_id === btn.value ? ` <span class="muted small">current</span>` : ''}</span>
-          <span class="sub">${esc([altLine(o), FMT.supply_type(o.supply_type), o.unit_power_w != null ? `${o.unit_power_w} W` : ''].filter((x) => x && x !== '—').join(' · '))}</span><span class="right">${o.on_list === false ? App.badge('warn', 'Not on the list', 'warn') : ''}${App.verified(o.data_quality) || ''}</span></div>`).join('');
+          <span class="sub">${esc([wide ? o.level : '', altLine(o), FMT.supply_type(o.supply_type), o.unit_power_w != null ? `${o.unit_power_w} W` : ''].filter((x) => x && x !== '—').join(' · '))}</span><span class="right">${o.on_list === false ? App.badge('warn', 'Not on the list', 'warn') : ''}${App.verified(o.data_quality) || ''}</span></div>`).join('');
       hint.innerHTML = `${found.length > shown.length ? `Showing ${shown.length} of ${found.length}. Type to narrow the list. ` : ''}From ${esc(lib.name)} ${esc(lib.version)}. <kbd class="kbd">↑</kbd> <kbd class="kbd">↓</kbd> to move, <kbd class="kbd">Enter</kbd> to pick, <kbd class="kbd">Esc</kbd> to close.`;
       active = 0; markActive();
     };
