@@ -1469,9 +1469,10 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   Ports tab; Q75, Q78, Q79.* **Done on Parts.** `io/parts_edit.has_l2_link` is the rule: a written
   link always; never a sized switch or the patch panel; else the part's category (the seeded
   ones, the I/O chassis, an EXT switch) or a part that lists a network port. A workstation is
-  seeded RJ45. The example's Parts page is unchanged. Still open: Panels › Ports lists every
-  placed device with *Add allocation* (`app/panel_page.py`), and Checks warns only for the
-  seeded categories at 0 ports. Point 5. Cause: `app/parts.py` gives every row but the sized switches
+  seeded RJ45. The example's Parts page is unchanged. **Done on Panels › Ports** too: a port
+  row carries `offered`, and a device with no link and no written plan shows one line instead
+  of *Add allocation* (`app/panel_page.py`); the patch panel is one of them. Still open: Checks
+  warns only for the seeded categories at 0 ports. Point 5. Cause: `app/parts.py` gives every row but the sized switches
   and the patch panel the "Link to the L2 switch" inputs, whatever its category, and the model's
   defaults are 0 ports at 1G MM, so a monitor row reads "0 × 1G MM"; typed ports on it do add SFPs
   to the L2 switch. The M31 design meant the inputs for networked parts only. Panels › Ports
