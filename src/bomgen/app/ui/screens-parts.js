@@ -526,7 +526,7 @@
   function addDevice(p) {
     const dirty = PF.dirty();
     return `<div class="popwrap prow-add"><button class="btn btn--secondary btn--sm" data-action="pp-add" aria-haspopup="menu" aria-expanded="${UI.addOpen}" ${dirty ? 'disabled title="Save or discard the changes first"' : ''}>${icon('plus')}Add a device</button>
-      ${UI.addOpen ? `<div class="menu" role="menu" style="left:0;top:34px">${p.parts.add_categories.map((c) => { const n = c.choices.length; return `<button role="menuitem" data-action="pp-add-cat" data-c="${c.category}" ${n ? '' : `disabled title="The library has no ${esc(c.label)} parts yet."`}>${esc(c.label)}${n ? '' : `<span class="muted small">The library has no ${esc(c.label)} parts yet.</span>`}</button>`; }).join('')}</div>` : ''}</div>`;
+      ${UI.addOpen ? `<div class="menu" role="menu" style="left:0;top:34px">${p.parts.add_categories.map((c, i) => { const n = c.choices.length; return `<button role="menuitem" data-action="pp-add-cat" data-i="${i}" ${n ? '' : `disabled title="The library has no ${esc(c.label)} parts yet."`}>${esc(c.label)}${n ? '' : `<span class="muted small">The library has no ${esc(c.label)} parts yet.</span>`}</button>`; }).join('')}</div>` : ''}</div>`;
   }
 
   /* "Go to the row" from Device preview: #/parts/<device> scrolls to the row and focuses its part. The page
@@ -650,26 +650,27 @@
   };
   ACTIONS['pp-add'] = () => keep(() => { UI.addOpen = !UI.addOpen; UI.menu = -1; });
   /* Add a device: the model takes no row without a part, so the part is picked first. The API gives each
-     category the role of the row it makes and the parts that row offers (a Switch makes an EXT switch). */
+     entry the role of the row it makes and the parts that row offers (a Switch makes an EXT switch); an entry
+     by role (M91) also gives the set-up card's row id, and A and B only where the row offers it. */
   const aName = (label) => {  // "an RTAC", "a KVM", "an I/O rack", "a fibre patch panel"
     const s = label.split(' ').map((w) => (/^[A-Z/]{2,}$/.test(w) ? w : w.toLowerCase())).join(' ');
     return `${/^[aeiou]/.test(s) || /^[AEFHILMNORSX][A-Z/]/.test(s) ? 'an' : 'a'} ${s}`;
   };
   const freeId = (base, taken) => { let id = base, n = 2; while (taken.includes(id)) id = `${base}-${n++}`; return id; };
   ACTIONS['pp-add-cat'] = (el) => {
-    const p = sub().page(), c = p.parts.add_categories.find((x) => x.category === el.dataset.c), opts = c.choices;
+    const p = sub().page(), c = p.parts.add_categories[+el.dataset.i], opts = c.choices;
     UI.addOpen = false;
     App.dialog({ title: `Add ${esc(aName(c.label))}`, body: `<div class="form">
       ${field('Part', `<select class="select" id="pa-part">${opts.map((o) => `<option value="${esc(o.part_id)}">${esc(partText(o))}</option>`).join('')}</select>`, 'From the active library.')}
-      <label class="check"><input type="checkbox" id="pa-red">A and B units (redundant)</label>
+      ${c.ab ? '<label class="check"><input type="checkbox" id="pa-red">A and B units (redundant)</label>' : ''}
       <div id="pa-err" class="err small" role="alert"></div></div>`,
-      actions: `<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="pp-add-do" data-c="${c.category}">Add</button>` });
+      actions: `<button class="btn btn--secondary" data-action="close">Cancel</button><button class="btn btn--primary" data-action="pp-add-do" data-i="${+el.dataset.i}">Add</button>` });
   };
   ACTIONS['pp-add-do'] = (el) => {
-    const p = sub().page(), v = (id) => document.getElementById(id), part = v('pa-part').value;
-    const base = part.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^[^a-z0-9]+|-+$/g, '') || 'device';
-    const row = { id: freeId(base, p.equipment.map((e) => e.id)), part_id: part, role: p.parts.add_categories.find((x) => x.category === el.dataset.c).role };
-    if (v('pa-red').checked) row.redundant = true;
+    const p = sub().page(), c = p.parts.add_categories[+el.dataset.i], v = (id) => document.getElementById(id), part = v('pa-part').value;
+    const base = c.id || part.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^[^a-z0-9]+|-+$/g, '') || 'device';
+    const row = { id: freeId(base, p.equipment.map((e) => e.id)), part_id: part, role: c.role };
+    if (c.ab && v('pa-red').checked) row.redundant = true;
     Bridge.call('add_equipment', S.project.file, S.sub, row, null, true).then(() => { App.closeDialog(); sub().reload(); App.network.reload(); App.devicePreview.reload(); App.render(); toast(`Added ${row.id}`, 'check'); })
       .catch((e) => { v('pa-err').innerHTML = `${icon('error')}<span>${esc(e.message)}</span>`; });
   };

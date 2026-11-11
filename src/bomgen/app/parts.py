@@ -27,7 +27,7 @@ from bomgen.io.derived import effective_part_id
 from bomgen.io.edit import EditError
 from bomgen.io.errors import InputError
 from bomgen.io.loader import LoadedSubstation
-from bomgen.io.parts_edit import has_l2_link
+from bomgen.io.parts_edit import ROLE_IDS, has_l2_link
 from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.store import LibraryStore
 from bomgen.models.library import Category, DeviceType, Library, Media, PortSpeed, PurdueLevel
@@ -99,7 +99,7 @@ DEFAULT_ROWS = (
     EquipmentRole.CONSOLE,
     EquipmentRole.ANNUNCIATOR,
 )
-# the categories "Add a device" offers after the default rows (design §3, plus row)
+# the categories "Add a device" offers after the roles (design §3, plus row; plan M91)
 ADD_CATEGORIES = (
     Category.PATCH_PANEL,
     Category.FIREWALL,
@@ -109,9 +109,7 @@ ADD_CATEGORIES = (
     Category.MEDIA_CONVERTER,
     Category.RTAC,
     Category.IO_CHASSIS,
-    Category.WORKSTATION,
-    Category.KVM,
-    Category.CONSOLE,
+    Category.WORKSTATION,  # a computer with no role: its part's type code
     Category.MONITOR,  # APP-23: the console's screen and keyboard
     Category.PERIPHERAL,
 )
@@ -135,6 +133,10 @@ VALUES = (
     "load_type",
 )
 SIZED = (EquipmentRole.L1_SWITCH, EquipmentRole.L2_SWITCH)
+# "Add a device" offers each default row's role first (plan M91): the role gives a
+# workstation its tag's type code and keeps an annunciator in loose material. Never a
+# sized switch: the model takes exactly one of each.
+ADD_ROLES = tuple(r for r in DEFAULT_ROWS if r not in SIZED)
 
 
 # Add a device makes a row of this role for its category; "other" for the rest
@@ -142,8 +144,6 @@ ADD_ROLE = {
     Category.PATCH_PANEL: EquipmentRole.FOPP,
     Category.FIREWALL: EquipmentRole.FIREWALL,
     Category.NETWORK_SWITCH: EquipmentRole.EXT_SWITCH,
-    Category.KVM: EquipmentRole.KVM,
-    Category.CONSOLE: EquipmentRole.CONSOLE,
     Category.REDBOX: EquipmentRole.REDBOX,
     Category.MEDIA_CONVERTER: EquipmentRole.MEDIA_CONVERTER,
 }
@@ -659,6 +659,7 @@ def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
     def row_category(entry: Equipment) -> Category | None:
         return _category(entry, library.get(entry.part_id) if library and entry.part_id else None)
 
+    has_clock = any(row_category(e) is Category.GPS_CLOCK for e in substation.equipment)
     # SFP: the names of the parts the SFP rows offer (plan M86)
     categories = {*ROLE_CATEGORY.values(), *ADD_CATEGORIES, Category.ACCESSORY, Category.SFP}
     return page | {
@@ -698,12 +699,29 @@ def parts_page(project_file: Path, substation_id: str, store: LibraryStore) -> d
                 }
                 for r in DEFAULT_ROWS
             ],
+            # M91: each role, then each category; "id" is the set-up card's for a role, else
+            # None (the screen names the row by its part)
             "add_categories": [
+                {
+                    "category": ROLE_CATEGORY[r].value,
+                    "label": ROLE_LABEL[r],
+                    "role": r.value,
+                    "id": ROLE_IDS[r],
+                    "choices": choices(r, ROLE_CATEGORY[r], None),
+                    "ab": offers_ab(r),
+                }
+                for r in ADD_ROLES
+                # one time server: its accessories are listed under its row
+                if r is not EquipmentRole.TIME_SERVER or not has_clock
+            ]
+            + [
                 {
                     "category": c.value,
                     "label": CATEGORY_LABEL[c],
                     "role": (role := ADD_ROLE.get(c, EquipmentRole.OTHER)).value,
+                    "id": None,
                     "choices": choices(role, c, None),
+                    "ab": offers_ab(role),
                 }
                 for c in ADD_CATEGORIES
             ],
