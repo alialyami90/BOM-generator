@@ -7,6 +7,14 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- The shipped library's Cisco and Moxa SFP alternatives carry the speed and media of the part
+  they replace (M85), so Parts offers them for a link and a switch can take one; before, 23 of the
+  27 SFP parts could never be chosen. Two single-mode parts listed in the 100M multimode group
+  stay out until they are researched. A Cisco or Moxa switch now picks its own make's SFP
+  automatically. psa-devices 1.18.0.
+
 ### Fixed
 
 - The substation list in the left rail stays open (M82). The click that opened it ran the switch
