@@ -22,9 +22,9 @@ FILES = {
 def make_project(root: Path, project_yaml: str = PROJECT_YAML, **extra: str) -> Path:
     """Create `root` as a project folder and return the path of its `project.yaml`."""
     root.mkdir(parents=True, exist_ok=True)
-    (root / "project.yaml").write_text(project_yaml)
+    (root / "project.yaml").write_text(project_yaml, newline="\n")
     for name, text in {**FILES, **extra}.items():
         path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(text)
+        path.write_text(text, newline="\n")
     return root / "project.yaml"

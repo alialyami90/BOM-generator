@@ -255,7 +255,7 @@ def test_cli_import_csv_refuses_rows_with_problems_unless_told_to_skip_them(
     cells[header.index("voltage_v")] = "abc"
     lines[2] = ",".join(cells)
     lines[3] = lines[3].replace("Hubbell", "Acme").replace("Panduit", "Acme")
-    devices.write_text("\r\n".join(lines) + "\r\n", "utf-8-sig")
+    devices.write_text("\r\n".join(lines) + "\r\n", "utf-8-sig", newline="")
 
     refused = runner.invoke(library_app, ["import-csv", "psa-devices", str(folder)])
     dry = runner.invoke(library_app, ["import-csv", "psa-devices", str(folder), "--dry-run"])
