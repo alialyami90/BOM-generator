@@ -80,6 +80,26 @@ replaced entry "superseded by …".
   while `pip` was still running; both had to work by reading and could run nothing. The lead
   then ran their main claims on a copy of `examples/` (all held). An agent's count from `grep`
   can be off by a comment line (288 "tier" matches, 287 parts): count through the loader.
+- **A round of agents in worktrees (2026-11-11, M82 to M85).** What worked: each agent in its own
+  worktree on a branch it names, told to run `<main checkout>/.venv/Scripts/python.exe` with
+  `PYTHONPATH=src`; the lead reviews the diff, merges main into the branch, adds the changelog
+  entry and the plan status, runs the gate once more and opens the PR. Merge the PRs one at a
+  time: every branch appends to `tests/unit/app/test_app_ui_assets.py`, which conflicts each time
+  (keep both sides, main's first). A finished worktree stays locked: `git worktree unlock`, then
+  `remove`, then delete its two local branches. `ruff check .` in the main checkout also scans
+  `.claude/worktrees/`; it is in `.gitignore` since this round.
+- **Node on the PC without installing it.** VS Code's `Code.exe` runs as node with
+  `ELECTRON_RUN_AS_NODE=1`. A `node.cmd` that calls it, first on PATH, lets `shutil.which("node")`
+  find it, so the node-based UI tests run. It cannot take a multi-line script through `-e`: write
+  the script to a file and run `node <file>` (as `_actions_run` does), and read its output with
+  `encoding="utf-8"`.
+- **The tests can read the libraries installed on the PC.** No fixture points
+  `BOMGEN_LIBRARY_HOME` away from the per-user store, so a test that creates a project without
+  a store sees what is installed (plan M95). Nothing writes there; after a run, look for files
+  under `%LOCALAPPDATA%\bomgen` newer than the run if in doubt.
+- **A backslash in text passed to Python through a shell heredoc** can arrive as an escape:
+  `a\b.yaml` was written to `plan.md` as a backspace character. Search the result for
+  control characters, or build such text with `chr(92)`.
 
 ### PRs and GitHub
 

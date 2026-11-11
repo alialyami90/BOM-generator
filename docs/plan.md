@@ -1381,7 +1381,7 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
 | 5 SFPs on monitors and KVMs | M89 |
 | 6 Other inconsistencies | M83, M90, M91, M92, M94 |
 
-- **M82 — The substation switch opens.** *Lead; Q75.* **Done.** Point 1. The page-wide click handler
+- **M82 — The substation switch opens.** *Lead; Q75.* **Done (#397).** Point 1. The page-wide click handler
   skips a select, and every select that carries an action runs it on `change`; three tests run
   the handlers in node. Still to do by hand: Ali opens the list in the installed app. Cause, by
   reading: the switch in the
@@ -1395,7 +1395,7 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   select runs its action on `change` only. First see it in the installed app, then a test that the
   click handler skips selects. Acceptance: the list opens and stays open on every page; choosing a
   substation switches once. Size S.
-- **M83 — The picker offers the parts that fit the row.** *`parts-network`; Q74.* **Done.**
+- **M83 — The picker offers the parts that fit the row.** *`parts-network`; Q74.* **Done (#399).**
   `parts.row_choices` is the rule; each row, default row and *Add a device* category carries its
   own `choices`, and `options` stays the whole category for *Search all parts*, where a switch
   also says its level. With the shipped library the L1 row offers 9 switches, the L2 row 10 and
@@ -1414,9 +1414,9 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   whether SFPs are counted twice when two rows share one part (suspected in the generated port
   plans, not run); if so it gets its own regression test here. Acceptance: with the shipped
   library the L1 row offers 9 switches, the L2 row 10 and the EXT row 7, none an alternative of
-  another part. The picker and the row name a part by its make and model, with the ordering
-  code where two parts share a model; the library id is not the name (Q82). Size S to M.
-- **M84 — The Library list shows each device once.** *`library-parts`; Q74, Q75.* **Done.** The row
+  another part. The picker and the row name a part by its make and model only; the library id
+  is not the name and no configuration text is added (Q82). Size S to M.
+- **M84 — The Library list shows each device once.** *`library-parts`; Q74, Q75.* **Done (#400).** The row
   logic is `libraryRows` in `screens-library.js`, tested in node on the shipped library;
   `library_store.alternatives.alternative_of` gives each alternative its original. A part with no
   make or no model (7 cables and accessories) is named by its description. Review, Health and the
@@ -1428,10 +1428,9 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   (`RST2228-L2`, `RST2228-L1-24MM`, `SEL-2730M-EXT`, `SEL-3555-GW`, `SEL-3555-RTAC`), and the
   id of 63 of the 94 originals is not their model. Fix: originals by default with "N
   alternatives" that expand; the first column is the make and model, with the role as a label
-  ("EXT switch") and the ordering code, and the id moves to the detail pane (Q82); a filter for
-  all parts. Acceptance: the
+  ("EXT switch"), and the id moves to the detail pane (Q82); a filter for all parts. Acceptance: the
   table opens on 94 rows (381 parts less 287 alternatives). Size S.
-- **M85 — SFP alternatives carry their speed and media.** *`library-parts`.* **Done.** `build.py` gives
+- **M85 — SFP alternatives carry their speed and media.** *`library-parts`.* **Done (#398).** `build.py` gives
   21 of the 23 the port of the part they replace, with the source `assumed`; the two high tiers
   of the 100M MM group are single-mode by the device database and stay without one (M93). The
   example's picks are unchanged; a Cisco or Moxa switch now takes its own make's low-tier SFP
@@ -1448,7 +1447,9 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   fails the rows vanish without a word; the Spare editor opens empty; "Automatic: same make first"
   never names the part. Fix: the sized L1 shows the SFP rows of the switch the sizing picked, with
   *Pin this switch to change its SFPs*; the rows say why they are missing; the Spare editor opens
-  on the automatic value; the automatic choice names its part. Size S.
+  on the automatic value; the automatic choice names its part. Since M85 a Cisco or Moxa switch
+  picks its own make's low-tier SFP, a commercial-temperature part for some: the pick rule is
+  settled here (Q83). Size S.
 - **M87 — A typed SFP quantity.** *`parts-network`; Q77.* Point 2. Cause: M49 lets the engineer set
   `spare` and `extra` on top of a computed number; the quantity itself (`screens-parts.js`
   `sfpCounts`) is display only, and on an L2 switch, where the automatic spare is 0, it can only
@@ -1461,7 +1462,12 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   choice from any derived part. ADR 0041 amends that rule: `sfp` on any row whose generated port
   plan has fibre. Size M. Starts after Ali accepts the ADR.
 - **M89 — The L2 link only on networked rows.** *`parts-network`, with `panel-detailing` for the
-  Ports tab; Q75, Q78, Q79.* Point 5. Cause: `app/parts.py` gives every row but the sized switches
+  Ports tab; Q75, Q78, Q79.* **Done on Parts.** `io/parts_edit.has_l2_link` is the rule: a written
+  link always; never a sized switch or the patch panel; else the part's category (the seeded
+  ones, the I/O chassis, an EXT switch) or a part that lists a network port. A workstation is
+  seeded RJ45. The example's Parts page is unchanged. Still open: Panels › Ports lists every
+  placed device with *Add allocation* (`app/panel_page.py`), and Checks warns only for the
+  seeded categories at 0 ports. Point 5. Cause: `app/parts.py` gives every row but the sized switches
   and the patch panel the "Link to the L2 switch" inputs, whatever its category, and the model's
   defaults are 0 ports at 1G MM, so a monitor row reads "0 × 1G MM"; typed ports on it do add SFPs
   to the L2 switch. The M31 design meant the inputs for networked parts only. Panels › Ports
@@ -1497,6 +1503,14 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   "Siemens" for one family, the `Rtac` tag. `device-research` confirms each from datasheets;
   `library-parts` then marks a true duplicate obsolete with its successor (ADR 0037). Size S plus
   the research.
+- **M96 — One port plan per row.** *`panel-layout`, then `parts-network`.* Found under M83 and
+  confirmed on a copy of `examples/`: the generated port plans are keyed by part id
+  (`engine/layout.py` `_port_plans`), and `engine/network.py` `port_plan()` reads them by tag,
+  else by part id, so two rows that share a part each read the merged plan. An L1 part on the L2
+  row adds 38 SFPs over both panels; an L2 part on the EXT row adds 20. M83's lists no longer
+  lead there, but *Search all parts*, an older project or two `other` rows with one part can.
+  Fix: the plans are keyed per row (its tag), and `network.py` and the page's `_sfp_needs` read
+  them per row; a regression test named after R3. Golden values unchanged. Size M.
 - **M94 — Desk parts stay out of the cabinets.** *`panel-layout`; Q81.* Point 6. Reported by
   reading, to confirm first: a monitor or keyboard (0 U, "on the workstation desk") is placed as a
   0 U unit in a generated PSA cabinet and its row offers a rack priority and a panel. Size S.
@@ -1514,13 +1528,21 @@ Found on 2026-11-11, the first run of the gate on Windows (Ali's PC, Python 3.13
 runs pytest on Linux only, and "Build Windows installer" smoke-tests the frozen app without
 running the tests, so the suite had never run on the one system the app ships for.
 
-- **M95 — Triage the 16 failures, then run pytest on Windows in CI.** *Lead.* Not yet traced; by
-  their messages they fall into three kinds.
+- **M95 — Triage the 16 failures, then run pytest on Windows in CI.** *Lead.* Traced on 2026-11-11
+  (first pass). Faults of the app: restoring or importing over a project stops with a raw
+  `PermissionError` when Windows will not rename the folder, which happens when the command runs
+  from inside it and, likely, when a file in it is open (the workbook in Excel): it should refuse
+  in words (`project_store/importer.py`); the page reports the logo as `assets\company-logo.png`
+  while the file holds the POSIX path (display only). Faults of the tests: no test isolates the
+  per-user stores, so `test_a_taken_folder_gets_a_number` reads the libraries installed on the
+  PC (nothing was written to them: no file there changed); the `a\b.yaml` member, the revision
+  fixture and the raw header are artefacts of `zipfile`, openpyxl and XlsxWriter writing on
+  Windows, with no effect on what the app reads or Excel shows. The first reading by message was:
   - *Could be faults in the app on Windows (trace these first):* the logo path is written to
     `project.yaml` with a backslash, `assets\company-logo.png` (`test_app_project_fields.py`, 2);
     restoring a backup named by a path inside the project folder stops with `PermissionError`
     when `project_store/importer.py` renames the folder (`test_project_backups.py`, 2); a package
-    member named `a.yaml` is not refused as an unsafe path (`test_library_package.py`);
+    member named `a\b.yaml` is not refused as an unsafe path (`test_library_package.py`);
     `test_a_taken_folder_gets_a_number` (`test_lifecycle.py`);
     `test_previous_issue_tables_start_at_the_bom_header` (`test_revision.py`);
     `test_raw_header_string_bolds_only_the_first_line` (`test_xlsx_header_footer.py`).
@@ -2051,7 +2073,11 @@ ADRs 0017, 0024 and 0030). (c) Leave the data as it is and only change the lists
 place them as 0 U units in a PSA cabinet: (a) they stay with the workstation console, out of the
 generated cabinets (recommended). (b) They become loose material. (c) Keep today's placement.
 
-**Q82 — The name a part is shown by** (M83, M84; Ali's v0.5.0 point 4). *Open.* The lists lead with
+**Q82 — The name a part is shown by** (M83, M84; Ali's v0.5.0 point 4). *Answered (Ali,
+2026-11-11): the model only.* "Don't mention two configurations, just mention the model. The
+engineer will input the part number for the specific configuration." So (a) without the
+ordering code: the ids stay as they are, out of sight, and where two parts share a model their
+role or level tells them apart. The lists lead with
 the library id, an internal key that carries the role for five parts (`SEL-2730M-EXT` is the
 SEL-2730M, `RST2228-L2` and `RST2228-L1-24MM` are two configurations of the RST-2228). The BOM
 never prints the id. (a) Show the make and model as the name, the ordering code where two parts
@@ -2059,3 +2085,16 @@ share a model, and the role as a label; keep the ids as they are, out of sight (
 change to the data, the example, the golden values or projects already saved). (b) Also rename
 the five ids to drop the role, which changes `examples/`, the tests that name them and every
 saved project that uses them, and still needs a way to tell the two RST-2228 parts apart.
+
+**Q83 — The SFP a Cisco or Moxa switch picks by itself** (M86; found under M85). *Open.* The rule
+is "the first matching SFP of the switch's make", and since psa-devices 1.18.0 those makes have
+SFPs, so such a switch takes its make's low tier where it took the Ruggedcom part before. Some
+low tiers are commercial-temperature parts (the Moxa ones 0 to 60 °C). (a) Among the switch's
+own make, pick the extended-temperature tier, the mid tier in today's data (recommended: a
+substation cabinet is not an office). (b) Keep the rule; the engineer changes the SFP on Parts.
+(c) Never follow the make: always the group's original.
+
+**Q84 — The name of a part with no make or no model** (M84). *Open.* Seven cables and accessories
+have only a length for a model ("10m"). (a) Their description leads, then the make or model:
+"USB cable for Annunciator 10m" (built in the Library list; recommended). (b) Only what the make
+and model give, even when two rows read the same. (c) Give each a make and model in the data.

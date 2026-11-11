@@ -26,6 +26,7 @@ from bomgen.io import ied_csv
 from bomgen.io.derived import effective_part_id
 from bomgen.io.errors import InputError
 from bomgen.io.loader import LoadedSubstation
+from bomgen.io.parts_edit import has_l2_link
 from bomgen.io.yaml_source import read_yaml
 from bomgen.library_store.store import LibraryStore
 from bomgen.models.library import Category, DeviceType, Library, Media, PortSpeed, PurdueLevel
@@ -416,9 +417,9 @@ def _row(
             "priority": entry.priority,  # M76: the row's rack stack order, or the category's
             "default_priority": PRIORITY.get(category, 4) if category is not None else 4,
         },
-        # M31: the link to the L2 switch (none for the sized switches and the patch panel)
+        # M31: the link to the L2 switch, on the rows that have one (M89)
         "link": None
-        if entry.role in (*SIZED, EquipmentRole.FOPP)
+        if not has_l2_link(entry, part)
         else {
             "l2_ports": entry.l2_ports,
             "l2_speed": entry.l2_speed.value,
