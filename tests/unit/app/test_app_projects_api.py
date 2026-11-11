@@ -1,6 +1,7 @@
 """Project endpoints of the desktop app: Home, Project page, Backup and share (plan M10b)."""
 
 import json
+import os
 import shutil
 from pathlib import Path
 from typing import Any
@@ -333,6 +334,27 @@ def test_restore_a_backup(app: api.Api, example: Path) -> None:
     assert preview["exists"] is True
     assert result["replaced"] is True
     assert not (example.parent / "notes.txt").exists()
+
+
+def test_a_restore_over_a_folder_in_use_is_refused_in_words(
+    app: api.Api, example: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    saved = ok(app.backup_project(str(example)))
+    real_replace = os.replace
+
+    def held(src: str | Path, dst: str | Path) -> None:  # as Windows does for an open workbook
+        if Path(dst).name.startswith(".replaced-"):
+            raise PermissionError(13, "Access is denied", str(src))
+        real_replace(src, dst)
+
+    monkeypatch.setattr(os, "replace", held)
+    envelope = app.restore_backup(saved["path"])
+
+    assert error_kind(envelope) == "invalid_project"
+    message = envelope["error"]["message"]  # type: ignore[index]
+    assert "is in use by another program" in message
+    assert "Access is denied" not in message
+    assert [p.name for p in (example.parent / "Backups").iterdir()] == [Path(saved["path"]).name]
 
 
 def test_restore_review_refuses_a_backup_outside_its_backups_folder(
