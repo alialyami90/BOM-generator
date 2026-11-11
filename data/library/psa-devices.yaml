@@ -6,7 +6,8 @@
 # The shipped psa-devices library: examples/library.yaml plus each original part's
 # datasheet inrush and input voltage range from data/device-db/ (plan Q38), and its make
 # as the device database records it, then the parts and MCB brand sets in
-# data/library/additions.yaml, with its overrides applied.
+# data/library/additions.yaml, with its overrides applied. Each SFP alternative takes the
+# port of the part it replaces (plan M85).
 
 devices:
   # --- Group B: network cabinets (example workbook, 'Panel 1'!B4:H12) -----------------
@@ -3987,14 +3988,20 @@ devices:
     model: GLC-LH-SMD
     ordering_code: GLC-LH-SMD
     description_template: 1000BASE-LX SM SFP (1310nm, 10 Km)
+    ports:
+      - { count: 1, speed: 1G, media: SM, kind: fixed }
     alt_group: SFP-1G-LX-SM
     tier: low
     tags:
       - "Sfp"
+      - "1-port"
     sources:
       height_u:
         kind: datasheet
         ref: "https://au.stockinthechannel.com/Product/Cisco-GLC-LH-SMD-network-transceiver-module-1000-Mbit-s-SFP-1300-nm/8600444"
+      ports:
+        kind: assumed
+        ref: "the port of SFP-1G-LX-SM, the part it replaces"
 
   - part_id: SFP-1G-LX-SM.CISCO-MID
     category: sfp
@@ -4003,14 +4010,20 @@ devices:
     model: GLC-LX-SM-RGD
     ordering_code: GLC-LX-SM-RGD
     description_template: 1000BASE-LX SM SFP (1310nm, 10 Km)
+    ports:
+      - { count: 1, speed: 1G, media: SM, kind: fixed }
     alt_group: SFP-1G-LX-SM
     tier: mid
     tags:
       - "Sfp"
+      - "1-port"
     sources:
       height_u:
         kind: datasheet
         ref: "https://www.pbtech.com/product/NETCIS1002789/Cisco-GLC-LX-SM-RGD-GLC-LX-SM-RGD--1000Mbps-SNGL-M"
+      ports:
+        kind: assumed
+        ref: "the port of SFP-1G-LX-SM, the part it replaces"
 
   - part_id: SFP-1G-LX-SM.CISCO-HIGH
     category: sfp
@@ -4019,14 +4032,20 @@ devices:
     model: GLC-ZX-SM-RGD
     ordering_code: GLC-ZX-SM-RGD
     description_template: 1000BASE-LX SM SFP (1310nm, 10 Km)
+    ports:
+      - { count: 1, speed: 1G, media: SM, kind: fixed }
     alt_group: SFP-1G-LX-SM
     tier: high
     tags:
       - "Sfp"
+      - "1-port"
     sources:
       height_u:
         kind: datasheet
         ref: "https://www.pbtech.com/product/NETCIS1141644/Cisco-GLC-ZX-SM-RGD-1000BASE-ZX-Single-Mode-Rugged"
+      ports:
+        kind: assumed
+        ref: "the port of SFP-1G-LX-SM, the part it replaces"
 
   - part_id: SFP-1G-LX-SM.MOXA-LOW
     category: sfp
@@ -4035,14 +4054,20 @@ devices:
     model: SFP-1GLXLC
     ordering_code: SFP-1GLXLC
     description_template: 1000BASE-LX SM SFP (1310nm, 10 Km)
+    ports:
+      - { count: 1, speed: 1G, media: SM, kind: fixed }
     alt_group: SFP-1G-LX-SM
     tier: low
     tags:
       - "Sfp"
+      - "1-port"
     sources:
       height_u:
         kind: datasheet
         ref: "https://www.moxa.com/en/products/accessories/sfp-modules/gigabit-ethernet-sfp-modules/sfp-1g-series/sfp-1glxlc"
+      ports:
+        kind: assumed
+        ref: "the port of SFP-1G-LX-SM, the part it replaces"
 
   - part_id: SFP-1G-LX-SM.MOXA-MID
     category: sfp
@@ -4051,14 +4076,20 @@ devices:
     model: SFP-1GLXLC-T
     ordering_code: SFP-1GLXLC-T
     description_template: 1000BASE-LX SM SFP (1310nm, 10 Km)
+    ports:
+      - { count: 1, speed: 1G, media: SM, kind: fixed }
     alt_group: SFP-1G-LX-SM
     tier: mid
     tags:
       - "Sfp"
+      - "1-port"
     sources:
       height_u:
         kind: datasheet
         ref: "https://esaitech.com/products/moxa-media-sfp-1glxlc-t-ieee-802-3z-1g-port-gigabit-ethernet-sfp-transceiver-module"
+      ports:
+        kind: assumed
+        ref: "the port of SFP-1G-LX-SM, the part it replaces"
 
   - part_id: SFP-1G-LX-SM.MOXA-HIGH
     category: sfp
@@ -4067,14 +4098,20 @@ devices:
     model: SFP-1GLHLC-T
     ordering_code: SFP-1GLHLC-T
     description_template: 1000BASE-LX SM SFP (1310nm, 10 Km)
+    ports:
+      - { count: 1, speed: 1G, media: SM, kind: fixed }
     alt_group: SFP-1G-LX-SM
     tier: high
     tags:
       - "Sfp"
+      - "1-port"
     sources:
       height_u:
         kind: datasheet
         ref: "https://www.distrelec.ch/en/moxa-lc-single-mode-transceiver-module-full-duplex-half-duplex-1000-mbps-moxa-sfp-1glhlc/p/30519473"
+      ports:
+        kind: assumed
+        ref: "the port of SFP-1G-LX-SM, the part it replaces"
 
   - part_id: SFP-1G-SX-MM.CISCO-LOW
     category: sfp
@@ -4083,14 +4120,20 @@ devices:
     model: GLC-SX-MMD
     ordering_code: GLC-SX-MMD
     description_template: 1000BASE-SX MM SFP (850nm, <500m)
+    ports:
+      - { count: 1, speed: 1G, media: MM, kind: fixed }
     alt_group: SFP-1G-SX-MM
     tier: low
     tags:
       - "Sfp"
+      - "1-port"
     sources:
       height_u:
         kind: datasheet
         ref: "https://eshop.spacecom.cz/detail/Cisco-GLCSXMMD-1000BASESX-SFP/638081"
+      ports:
+        kind: assumed
+        ref: "the port of SFP-1G-SX-MM, the part it replaces"
 
   - part_id: SFP-1G-SX-MM.CISCO-MID
     category: sfp
@@ -4099,14 +4142,20 @@ devices:
     model: SFP-GE-S
     ordering_code: SFP-GE-S
     description_template: 1000BASE-SX MM SFP (850nm, <500m)
+    ports:
+      - { count: 1, speed: 1G, media: MM, kind: fixed }
     alt_group: SFP-1G-SX-MM
     tier: mid
     tags:
       - "Sfp"
+      - "1-port"
     sources:
       height_u:
         kind: datasheet
         ref: "https://www.neweggbusiness.com/cisco-sfp-ge-s/p/9B-2AS-0093-00029"
+      ports:
+        kind: assumed
+        ref: "the port of SFP-1G-SX-MM, the part it replaces"
 
   - part_id: SFP-1G-SX-MM.CISCO-HIGH
     category: sfp
@@ -4115,14 +4164,20 @@ devices:
     model: GLC-SX-MM-RGD
     ordering_code: GLC-SX-MM-RGD
     description_template: 1000BASE-SX MM SFP (850nm, <500m)
+    ports:
+      - { count: 1, speed: 1G, media: MM, kind: fixed }
     alt_group: SFP-1G-SX-MM
     tier: high
     tags:
       - "Sfp"
+      - "1-port"
     sources:
       height_u:
         kind: datasheet
         ref: "https://www.xsnet.com.au/products/cisco-glc-sx-mm-rgd-1g-sfp-1000base-sx-850nm-550m-mmf-lc-rugged-ext-temp"
+      ports:
+        kind: assumed
+        ref: "the port of SFP-1G-SX-MM, the part it replaces"
 
   - part_id: SFP-1G-SX-MM.MOXA-LOW
     category: sfp
@@ -4131,14 +4186,20 @@ devices:
     model: SFP-1GSXLC
     ordering_code: SFP-1GSXLC
     description_template: 1000BASE-SX MM SFP (850nm, <500m)
+    ports:
+      - { count: 1, speed: 1G, media: MM, kind: fixed }
     alt_group: SFP-1G-SX-MM
     tier: low
     tags:
       - "Sfp"
+      - "1-port"
     sources:
       height_u:
         kind: datasheet
         ref: "https://adjditec.com/en/products/sfp-1gsxlc-moxa"
+      ports:
+        kind: assumed
+        ref: "the port of SFP-1G-SX-MM, the part it replaces"
 
   - part_id: SFP-1G-SX-MM.MOXA-MID
     category: sfp
@@ -4147,14 +4208,20 @@ devices:
     model: SFP-1GSXLC-T
     ordering_code: SFP-1GSXLC-T
     description_template: 1000BASE-SX MM SFP (850nm, <500m)
+    ports:
+      - { count: 1, speed: 1G, media: MM, kind: fixed }
     alt_group: SFP-1G-SX-MM
     tier: mid
     tags:
       - "Sfp"
+      - "1-port"
     sources:
       height_u:
         kind: datasheet
         ref: "https://industry-electronics.com/moxa/sfp-1gsxlc-t-1000basesx-0.5-km-printview-678700.htm"
+      ports:
+        kind: assumed
+        ref: "the port of SFP-1G-SX-MM, the part it replaces"
 
   - part_id: SFP-1G-SX-MM.MOXA-HIGH
     category: sfp
@@ -4163,14 +4230,20 @@ devices:
     model: SFP-1GLSXLC-T
     ordering_code: SFP-1GLSXLC-T
     description_template: 1000BASE-SX MM SFP (850nm, <500m)
+    ports:
+      - { count: 1, speed: 1G, media: MM, kind: fixed }
     alt_group: SFP-1G-SX-MM
     tier: high
     tags:
       - "Sfp"
+      - "1-port"
     sources:
       height_u:
         kind: datasheet
         ref: "https://rspsupply.com/p-9563-moxa-sfp-1glsxlc-t-plug-in-sfp-module-lc-multi-5-km.aspx"
+      ports:
+        kind: assumed
+        ref: "the port of SFP-1G-SX-MM, the part it replaces"
 
   - part_id: SFP-100M-FX-MM.CISCO-LOW
     category: sfp
@@ -4179,14 +4252,20 @@ devices:
     model: GLC-FE-100FX
     ordering_code: GLC-FE-100FX
     description_template: 100BASE-FX MM SFP (1310nm, <2km)
+    ports:
+      - { count: 1, speed: 100M, media: MM, kind: fixed }
     alt_group: SFP-100M-FX-MM
     tier: low
     tags:
       - "Sfp"
+      - "1-port"
     sources:
       height_u:
         kind: datasheet
         ref: "https://multitronic.fi/en/products/54396/cisco-100base-fx-sfp-module-for-gigabit-ethernet-ports--1310-nm-wavelength--2-km-over-mmf"
+      ports:
+        kind: assumed
+        ref: "the port of SFP-100M-FX-MM, the part it replaces"
 
   - part_id: SFP-100M-FX-MM.CISCO-MID
     category: sfp
@@ -4195,14 +4274,20 @@ devices:
     model: GLC-FE-100FX-RGD
     ordering_code: GLC-FE-100FX-RGD
     description_template: 100BASE-FX MM SFP (1310nm, <2km)
+    ports:
+      - { count: 1, speed: 100M, media: MM, kind: fixed }
     alt_group: SFP-100M-FX-MM
     tier: mid
     tags:
       - "Sfp"
+      - "1-port"
     sources:
       height_u:
         kind: datasheet
         ref: "https://www.distrelec.ch/en/fibre-optic-transceiver-multi-mode-100mbps-lc-sfp-2km-1300nm-cisco-glc-fe-100fx-rgd/p/30295866"
+      ports:
+        kind: assumed
+        ref: "the port of SFP-100M-FX-MM, the part it replaces"
 
   - part_id: SFP-100M-FX-MM.CISCO-HIGH
     category: sfp
@@ -4227,14 +4312,20 @@ devices:
     model: SFP-1FEMLC-T
     ordering_code: SFP-1FEMLC-T
     description_template: 100BASE-FX MM SFP (1310nm, <2km)
+    ports:
+      - { count: 1, speed: 100M, media: MM, kind: fixed }
     alt_group: SFP-100M-FX-MM
     tier: low
     tags:
       - "Sfp"
+      - "1-port"
     sources:
       height_u:
         kind: datasheet
         ref: "https://moxa.com/en/products/accessories/sfp-modules/fast-ethernet-sfp-modules/sfp-1fe-series/sfp-1femlc-t"
+      ports:
+        kind: assumed
+        ref: "the port of SFP-100M-FX-MM, the part it replaces"
 
   - part_id: SFP-100M-FX-MM.MOXA-HIGH
     category: sfp
@@ -4259,14 +4350,20 @@ devices:
     model: GLC-SX-MMD
     ordering_code: GLC-SX-MMD
     description_template: Industrial SFP (1Gig, MM)
+    ports:
+      - { count: 1, speed: 1G, media: MM, kind: fixed }
     alt_group: FR-TRAN-SX
     tier: low
     tags:
       - "Sfp"
+      - "1-port"
     sources:
       height_u:
         kind: datasheet
         ref: "https://eshop.spacecom.cz/detail/Cisco-GLCSXMMD-1000BASESX-SFP/638081"
+      ports:
+        kind: assumed
+        ref: "the port of FR-TRAN-SX, the part it replaces"
 
   - part_id: FR-TRAN-SX.CISCO-MID
     category: sfp
@@ -4275,14 +4372,20 @@ devices:
     model: SFP-GE-S
     ordering_code: SFP-GE-S
     description_template: Industrial SFP (1Gig, MM)
+    ports:
+      - { count: 1, speed: 1G, media: MM, kind: fixed }
     alt_group: FR-TRAN-SX
     tier: mid
     tags:
       - "Sfp"
+      - "1-port"
     sources:
       height_u:
         kind: datasheet
         ref: "https://www.neweggbusiness.com/cisco-sfp-ge-s/p/9B-2AS-0093-00029"
+      ports:
+        kind: assumed
+        ref: "the port of FR-TRAN-SX, the part it replaces"
 
   - part_id: FR-TRAN-SX.CISCO-HIGH
     category: sfp
@@ -4291,14 +4394,20 @@ devices:
     model: GLC-SX-MM-RGD
     ordering_code: GLC-SX-MM-RGD
     description_template: Industrial SFP (1Gig, MM)
+    ports:
+      - { count: 1, speed: 1G, media: MM, kind: fixed }
     alt_group: FR-TRAN-SX
     tier: high
     tags:
       - "Sfp"
+      - "1-port"
     sources:
       height_u:
         kind: datasheet
         ref: "https://www.xsnet.com.au/products/cisco-glc-sx-mm-rgd-1g-sfp-1000base-sx-850nm-550m-mmf-lc-rugged-ext-temp"
+      ports:
+        kind: assumed
+        ref: "the port of FR-TRAN-SX, the part it replaces"
 
   - part_id: FR-TRAN-SX.MOXA-LOW
     category: sfp
@@ -4307,14 +4416,20 @@ devices:
     model: SFP-1GSXLC
     ordering_code: SFP-1GSXLC
     description_template: Industrial SFP (1Gig, MM)
+    ports:
+      - { count: 1, speed: 1G, media: MM, kind: fixed }
     alt_group: FR-TRAN-SX
     tier: low
     tags:
       - "Sfp"
+      - "1-port"
     sources:
       height_u:
         kind: datasheet
         ref: "https://adjditec.com/en/products/sfp-1gsxlc-moxa"
+      ports:
+        kind: assumed
+        ref: "the port of FR-TRAN-SX, the part it replaces"
 
   - part_id: FR-TRAN-SX.MOXA-MID
     category: sfp
@@ -4323,14 +4438,20 @@ devices:
     model: SFP-1GSXLC-T
     ordering_code: SFP-1GSXLC-T
     description_template: Industrial SFP (1Gig, MM)
+    ports:
+      - { count: 1, speed: 1G, media: MM, kind: fixed }
     alt_group: FR-TRAN-SX
     tier: mid
     tags:
       - "Sfp"
+      - "1-port"
     sources:
       height_u:
         kind: datasheet
         ref: "https://industry-electronics.com/moxa/sfp-1gsxlc-t-1000basesx-0.5-km-printview-678700.htm"
+      ports:
+        kind: assumed
+        ref: "the port of FR-TRAN-SX, the part it replaces"
 
   - part_id: FR-TRAN-SX.MOXA-HIGH
     category: sfp
@@ -4339,14 +4460,20 @@ devices:
     model: SFP-1GLSXLC-T
     ordering_code: SFP-1GLSXLC-T
     description_template: Industrial SFP (1Gig, MM)
+    ports:
+      - { count: 1, speed: 1G, media: MM, kind: fixed }
     alt_group: FR-TRAN-SX
     tier: high
     tags:
       - "Sfp"
+      - "1-port"
     sources:
       height_u:
         kind: datasheet
         ref: "https://rspsupply.com/p-9563-moxa-sfp-1glsxlc-t-plug-in-sfp-module-lc-multi-5-km.aspx"
+      ports:
+        kind: assumed
+        ref: "the port of FR-TRAN-SX, the part it replaces"
 
   - part_id: PL1U12NEBK.STARTECH-COM-LOW
     category: cable_manager

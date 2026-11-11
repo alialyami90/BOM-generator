@@ -4,8 +4,9 @@ The shipped library is examples/library.yaml with each original part's datasheet
 and input voltage range from data/device-db added (plan Q38), and its make as the device
 database records it, followed by the parts and MCB brand sets in
 data/library/additions.yaml, with that file's overrides applied to the example's parts and
-catalogues. The example library leaves them out so the golden values stay those of the
-spec's example workbook.
+catalogues, and each SFP alternative given the port of the part it replaces (plan M85).
+The example library leaves them out so the golden values stay those of the spec's example
+workbook.
 
 Usage, from the repository root: ``python data/library/build.py``. It rewrites
 data/library/psa-devices.yaml; tests/unit/test_shipped_library.py fails while the file
@@ -44,7 +45,8 @@ HEADER = """\
 # The shipped psa-devices library: examples/library.yaml plus each original part's
 # datasheet inrush and input voltage range from data/device-db/ (plan Q38), and its make
 # as the device database records it, then the parts and MCB brand sets in
-# data/library/additions.yaml, with its overrides applied.
+# data/library/additions.yaml, with its overrides applied. Each SFP alternative takes the
+# port of the part it replaces (plan M85).
 """
 OVERRIDE = "override (data/library/additions.yaml)"
 
@@ -52,6 +54,10 @@ OVERRIDE = "override (data/library/additions.yaml)"
 SOURCED = ("unit_power_w", "inrush_a", "height_u", "input_v_max", "ports")
 WORKBOOK = "the spec's example workbook"  # plan Q69
 CONTRACTOR_DELIVERY = "contractor delivery 2026-10-31"
+
+# Plan M85: single-mode parts the device database lists in the 100M multimode group
+# (data/device-db/network.yaml). They take no port until the database settles them.
+OTHER_MEDIA = frozenset({"SFP-100M-FX-MM.CISCO-HIGH", "SFP-100M-FX-MM.MOXA-HIGH"})
 
 
 def datasheets(device_db: Path = DEVICE_DB) -> dict[str, dict[str, Any]]:
@@ -117,6 +123,7 @@ def build(example: str, figures: dict[str, dict[str, Any]], additions: str, foun
     data["devices"].extend(extra["devices"])
     data["catalogue_brands"]["mcb"].extend(extra["catalogue_brands"]["mcb"])
     delivered = {device["part_id"] for device in extra["devices"]}
+    replaced = _give_sfps_their_originals_port(data["devices"])
     for device in data["devices"]:
         set_entry(device, "tags", _tags(device))
         sources = {
@@ -124,6 +131,9 @@ def build(example: str, figures: dict[str, dict[str, Any]], additions: str, foun
             for name in SOURCED
             if device.get(name) not in (None, [])
         }
+        if device["part_id"] in replaced:
+            ref = f"the port of {replaced[device['part_id']]}, the part it replaces"
+            sources["ports"] = {"kind": "assumed", "ref": ref}
         if sources:
             set_entry(device, "sources", CommentedMap((k, _flow(v)) for k, v in sources.items()))
     text = re.sub(r"(\S) +# " + re.escape(OVERRIDE), r"\1  # " + OVERRIDE, dump_text(data))
@@ -132,6 +142,29 @@ def build(example: str, figures: dict[str, dict[str, Any]], additions: str, foun
     while lines and lines[0].startswith("#"):
         lines.pop(0)  # the example's own header describes the example workbook
     return HEADER + "".join(lines)
+
+
+def _give_sfps_their_originals_port(devices: Any) -> dict[str, str]:
+    """Give each SFP alternative without ports the port of the part it replaces, its
+    alt_group's original: an SFP serves a link by its port's speed and media (plan M85).
+    The parts given one, each with its original's part id."""
+    originals = {device["part_id"]: device for device in devices if device.get("tier") is None}
+    replaced: dict[str, str] = {}
+    for device in devices:
+        part_id = device["part_id"]
+        if device["category"] != "sfp" or device.get("tier") is None or device.get("ports"):
+            continue
+        if part_id in OTHER_MEDIA:
+            continue
+        original = originals[device["alt_group"]]
+        ports = CommentedSeq()
+        for group in original["ports"]:
+            node = CommentedMap(group)
+            node.fa.set_flow_style()  # as the original writes its ports
+            ports.append(node)
+        device.insert(list(device).index("description_template") + 1, "ports", ports)
+        replaced[part_id] = original["part_id"]
+    return replaced
 
 
 def _tags(device: Any) -> CommentedSeq:

@@ -1421,7 +1421,11 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   ("EXT switch") and the ordering code, and the id moves to the detail pane (Q82); a filter for
   all parts. Acceptance: the
   table opens on 94 rows (381 parts less 287 alternatives). Size S.
-- **M85 — SFP alternatives carry their speed and media.** *`library-parts`.* Point 2. Cause: the 23
+- **M85 — SFP alternatives carry their speed and media.** *`library-parts`.* **Done.** `build.py` gives
+  21 of the 23 the port of the part they replace, with the source `assumed`; the two high tiers
+  of the 100M MM group are single-mode by the device database and stay without one (M93). The
+  example's picks are unchanged; a Cisco or Moxa switch now takes its own make's low-tier SFP
+  (Q83). psa-devices 1.18.0. Point 2. Cause: the 23
   Cisco and Moxa SFP alternatives have no `ports`, and both the page (`parts.py` `_serves`) and the
   engine (`engine/network.py` `_serves`) match an SFP to a link by its port, so they are never
   offered and never picked; the 1G SM and 100M MM lists hold one part each. Fix in the data
