@@ -71,6 +71,15 @@ replaced entry "superseded by …".
   list literals in tests.
 - A push cancels the previous run, whose `ci-status` then shows failure on the old sha. Check the newest
   run before fixing anything.
+- **Ali's Windows PC (2026-11-11).** The environment is `.venv` in the checkout: call
+  `.venv/Scripts/python -m ruff|mypy|pytest`, never the bare `python`, which has no `bomgen`.
+  `pip install -e ".[dev,app]"` took more than 8 minutes there. `gh` is at
+  `"/c/Program Files/GitHub CLI/gh.exe"`, not on Git Bash's PATH. In Git Bash `pwd -W` gives the
+  Windows path a Python script needs.
+- **Install the environment before dispatching agents.** Two investigation agents were started
+  while `pip` was still running; both had to work by reading and could run nothing. The lead
+  then ran their main claims on a copy of `examples/` (all held). An agent's count from `grep`
+  can be off by a comment line (288 "tier" matches, 287 parts): count through the loader.
 
 ### PRs and GitHub
 

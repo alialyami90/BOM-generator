@@ -1357,6 +1357,158 @@ design basis says) are not milestones.
   gets its category ("Network switch"), a switch's Purdue level ("L2 switch") and its largest port
   group ("24-port"); psa-devices 1.17.0.
 
+### M82–M94 — Ali's feedback on v0.5.0
+
+Ali's six points of 2026-11-11 ([`backlog.md`](backlog.md) "v0.6"). Each was traced to its cause
+before it was planned: point 1 by the lead, points 2, 5 and 6 by `parts-network`, points 3 and 4
+by `library-parts`, all by reading main at `246eecb`. The lead then ran the Parts page on a copy
+of `examples/` with the shipped library (psa-devices 1.17.0) and confirmed: every switch row is
+offered the same 26 switches (10 L2, 9 L1, 7 EXT level; 8 originals); an L1 switch left to the
+sizing has no SFP rows; 23 of the 27 SFP parts have no `ports`; every row except the sized
+switches and the patch panel carries L2 link inputs; the FGR-60F is 0 U and its row shows a cable
+manager; the library has no `kvm` and no `console` part. Not confirmed by running: point 1 on
+screen, the double count under M83 and the placement under M94.
+
+One PR each, test first, golden values unchanged. Each entry names the agent that owns it
+(`CLAUDE.md` "Agents"). A question's recommended answer is the default until Ali answers.
+
+| Point | Milestones |
+| --- | --- |
+| 1 Substations dropdown | M82 |
+| 2 SFP quantity | M85, M86, M87, M88 |
+| 3 Alternatives in the lists | M83, M84 |
+| 4 Duplicates | M84, M93 |
+| 5 SFPs on monitors and KVMs | M89 |
+| 6 Other inconsistencies | M83, M90, M91, M92, M94 |
+
+- **M82 — The substation switch opens.** *Lead; Q75.* Point 1. Cause, by reading: the switch in the
+  rail carries `data-action="sub-switch"`, so the page-wide click handler in `app/ui/ui.js` runs
+  the switch action on the click that opens the list, before anything is chosen. With the current
+  substation that redraws the window, which closes the list; on Home, Project or Library it goes to
+  Panels; with unsaved changes it opens the leave dialog. The wiring dates from M10a (#28) and no
+  test covers it. Preview's group-by select (`screens-preview.js`) is wired the same way. Fix: a
+  select runs its action on `change` only. First see it in the installed app, then a test that the
+  click handler skips selects. Acceptance: the list opens and stays open on every page; choosing a
+  substation switches once. Size S.
+- **M83 — The picker offers the parts that fit the row.** *`parts-network`; Q74.* Points 3 and 6.
+  Cause: `app/parts.py` builds the choices per category, not per row, with no role, level, group or
+  state filter, and the picker (`screens-parts.js` `openPicker`) labels nothing as an alternative.
+  On the L1 row 17 of the 26 offered switches are refused by the loader, which wants an L1 part
+  (`io/references.py`); on the L2 and EXT rows nothing stops a switch of another level, and its tag
+  then takes the wrong level. *Add a device › Switch* always makes an EXT row yet lists every
+  switch. Fix, in the API because it is a rule: each row gets its own list, the role's level for
+  L1, L2 and EXT, the alternatives of the row's current part only, the current part always,
+  obsolete parts left out; each alternative carries its tier and the part it replaces, shown as
+  "Low-tier alternative to RST2228-L2"; *Search all parts* stays as the way out. Check first
+  whether SFPs are counted twice when two rows share one part (suspected in the generated port
+  plans, not run); if so it gets its own regression test here. Acceptance: with the shipped
+  library the L1 row offers 9 switches, the L2 row 10 and the EXT row 7, none an alternative of
+  another part. Size S to M.
+- **M84 — The Library list shows each device once.** *`library-parts`; Q74, Q75.* Points 3 and 4.
+  Cause: the Devices table lists all 381 parts flat and drops `tier` and `alt_group`, which the
+  page already receives; one part reads as two names, its id in one column (`SEL-2730M-EXT`) and
+  its model in the next (`SEL-2730M`). Fix: originals by default with "N alternatives" that
+  expand, the Purdue level shown beside the model, and a filter for all parts. Acceptance: the
+  table opens on 94 rows (381 parts less 287 alternatives). Size S.
+- **M85 — SFP alternatives carry their speed and media.** *`library-parts`.* Point 2. Cause: the 23
+  Cisco and Moxa SFP alternatives have no `ports`, and both the page (`parts.py` `_serves`) and the
+  engine (`engine/network.py` `_serves`) match an SFP to a link by its port, so they are never
+  offered and never picked; the 1G SM and 100M MM lists hold one part each. Fix in the data
+  (`data/library/`, then `build.py`): each takes the speed and media of the part it replaces; a
+  shipped-library test that every `sfp` part declares them. psa-devices 1.18.0, with
+  `examples/project.yaml` and `release.yml`. Size S.
+- **M86 — SFP rows on every switch row.** *`parts-network`; Q76.* Point 2. Causes: an L1 row left on
+  "The sizing picks the switch", which is how every new substation starts, has no SFP rows at
+  all, and the L1 switches carry most of the SFPs; when the project does not load or the layout
+  fails the rows vanish without a word; the Spare editor opens empty; "Automatic: same make first"
+  never names the part. Fix: the sized L1 shows the SFP rows of the switch the sizing picked, with
+  *Pin this switch to change its SFPs*; the rows say why they are missing; the Spare editor opens
+  on the automatic value; the automatic choice names its part. Size S.
+- **M87 — A typed SFP quantity.** *`parts-network`; Q77.* Point 2. Cause: M49 lets the engineer set
+  `spare` and `extra` on top of a computed number; the quantity itself (`screens-parts.js`
+  `sfpCounts`) is display only, and on an L2 switch, where the automatic spare is 0, it can only
+  go up. Fix: the quantity is the derived value the engineer edits; a typed total is stored as
+  the spare it implies, and a total below the links is refused naming the links. Size S.
+- **M88 — SFP part and quantity on a firewall, an EXT switch and any row with fibre ports.**
+  *`parts-network`; ADR 0041.* Point 2. Cause: the model allows `sfp` on the L1 and L2 switches
+  only (`models/substation.py`, ADR 0024), so a firewall's or EXT switch's SFP part is always the
+  automatic one and its count is edited only on Panels › Ports. The engine already reads the
+  choice from any derived part. ADR 0041 amends that rule: `sfp` on any row whose generated port
+  plan has fibre. Size M. Starts after Ali accepts the ADR.
+- **M89 — The L2 link only on networked rows.** *`parts-network`, with `panel-detailing` for the
+  Ports tab; Q75, Q78, Q79.* Point 5. Cause: `app/parts.py` gives every row but the sized switches
+  and the patch panel the "Link to the L2 switch" inputs, whatever its category, and the model's
+  defaults are 0 ports at 1G MM, so a monitor row reads "0 × 1G MM"; typed ports on it do add SFPs
+  to the L2 switch. The M31 design meant the inputs for networked parts only. Panels › Ports
+  likewise lists every placed device with *Add allocation* (`app/panel_page.py`). Fix: one set of
+  categories that have an L2 link, used by the page, Checks and the Ports tab; a row with ports
+  already written keeps its inputs. Workstation rows are seeded 1G MM because the seeding never
+  sets the media (Q79). Size S.
+- **M90 — A Parts row shows only what does something.** *`parts-network`.* Point 6. Four findings:
+  the cable manager toggle shows on a 0 U network part (the FGR-60F row says On, the layout adds
+  none); an annunciator row offers A and B, Panel, Rack priority, BOM text and the L2 link, none of
+  which reach its loose item; the A and B box shows on L1 and L2 rows, where unticking is always
+  an error; *Alarm on branch trip* is decided from the library part, not from the row's supply
+  overrides. Fix each in the API with its test. Size S.
+- **M91 — Add a device offers every role.** *`parts-network`.* Point 6. Cause: *Add a device* has no
+  Annunciator and no Time server, so a removed default row cannot come back; a workstation added
+  through it gets role `other` and loses its OWS, EWS or SRV type code. KVM and Console rows stay
+  empty by Ali's earlier choice (backlog v0.3, point 7). Size S.
+- **M92 — One definition of a network device.** *Lead.* Point 6. Cause: five category sets say
+  what a network device is (`parts.py`, `io/references.py`, `io/parts_edit.py`,
+  `engine/network.py`, `engine/layout.py`) and they are not the same;
+  the two cable-manager sets differ on the firewall, so a firewall in a hand-written panel gets no
+  cable manager where a generated one does. Check the golden values first: if one set would move
+  them, the question goes to Ali before any code. Size S.
+- **M93 — Duplicate parts retired, data defects fixed.** *`device-research`, then `library-parts`;
+  Q80.* Point 4. Found in psa-devices 1.17.0: 7 groups of true duplicates (six `FR-TRAN-SX.*` and
+  `SFP-1G-SX-MM.*` pairs, and `FGR-60F.MOXA-MID` with `-HIGH`); 12 groups where one orderable item
+  is copied per role (the same Moxa or Cisco switch as an L2, L1 and EXT alternative, the same
+  computer as gateway and RTAC), which today's engine needs and M83 and M84 stop showing twice.
+  Defects for research: two alternatives described as a pair with a single module's code, the
+  25 ft and 50 ft antenna cables sharing a code, cable alternatives with no code, "Ruggedcom" and
+  "Siemens" for one family, the `Rtac` tag. `device-research` confirms each from datasheets;
+  `library-parts` then marks a true duplicate obsolete with its successor (ADR 0037). Size S plus
+  the research.
+- **M94 — Desk parts stay out of the cabinets.** *`panel-layout`; Q81.* Point 6. Reported by
+  reading, to confirm first: a monitor or keyboard (0 U, "on the workstation desk") is placed as a
+  0 U unit in a generated PSA cabinet and its row offers a rack priority and a panel. Size S.
+
+**Order.** M82 first (a bug on every page). Then M83 and M89, which answer points 3 and 5 directly,
+with M85 and M84 beside them in `library-parts`. Then M86 and M87, then M90 and M91. M88 waits for
+ADR 0041, M93 for the research and Q80, M92 and M94 for their checks. M83, M86, M87, M89, M90 and
+M91 all change `app/parts.py` and `screens-parts.js`, so they run one after another, not side by
+side.
+
+### M95 — The tests pass on Windows
+
+Found on 2026-11-11, the first run of the gate on Windows (Ali's PC, Python 3.13, a checkout with
+`core.autocrlf=true`): ruff and mypy pass; pytest has **16 failed**, 3540 passed, 5 skipped. CI
+runs pytest on Linux only, and "Build Windows installer" smoke-tests the frozen app without
+running the tests, so the suite had never run on the one system the app ships for.
+
+- **M95 — Triage the 16 failures, then run pytest on Windows in CI.** *Lead.* Not yet traced; by
+  their messages they fall into three kinds.
+  - *Could be faults in the app on Windows (trace these first):* the logo path is written to
+    `project.yaml` with a backslash, `assets\company-logo.png` (`test_app_project_fields.py`, 2);
+    restoring a backup named by a path inside the project folder stops with `PermissionError`
+    when `project_store/importer.py` renames the folder (`test_project_backups.py`, 2); a package
+    member named `a.yaml` is not refused as an unsafe path (`test_library_package.py`);
+    `test_a_taken_folder_gets_a_number` (`test_lifecycle.py`);
+    `test_previous_issue_tables_start_at_the_bom_header` (`test_revision.py`);
+    `test_raw_header_string_bolds_only_the_first_line` (`test_xlsx_header_footer.py`).
+  - *Line endings:* a test writes text and compares bytes, or counts CSV rows, and Windows gives
+    `
+` (`test_library_package.py`, `test_library_cli.py`, `test_project_export.py`,
+    `test_project_import.py` 2, `test_project_rename.py`). Check that no `.bomlib` or `.bomproj`
+    checksum depends on the line endings of the PC that packed it.
+  - *POSIX only:* the file mode kept by an atomic write (`test_round_trip.py`) and two file names
+    that differ only by case (`test_library_package.py`).
+
+  Each real fault gets its own fix with a test; a test that assumes POSIX is rewritten or skipped
+  with its reason. Then a `windows-latest` pytest job joins `ci.yml` and `ci-status`'s `needs`
+  (ADR 0006). Size M.
+
 ## 5. Testing strategy
 
 - **Unit (TDD):** one test per rule, named after it, in `tests/unit/`.
@@ -1817,3 +1969,50 @@ site)?
 built-in by default* (ADR 0039). Drive Excel on the engineer's PC (exact page setup, Windows with
 Excel only), draw the PDF with a built-in renderer (no Excel, works in tests, pages close to
 Excel's; recommended), or both with the built-in renderer as the default?
+
+**Q74 — What the part picker and the Library list show** (M83, M84; Ali's v0.5.0 point 3). *Open.*
+Every row is offered its whole category today: 26 switches on each switch row. (a) The parts of
+the row's role and level, plus the alternatives of the part the row has now, with *Search all
+parts* as the way out, and the Library list showing originals with their alternatives folded
+under them (recommended: an L1 row then offers 9 switches, none of them another switch's
+alternative). (b) Originals only, with a row's alternatives reached through *See alternatives*.
+(c) Everything, grouped under its original and collapsed.
+
+**Q75 — Where three of the v0.5.0 points were seen** (M82, M84, M89). *Open.* The causes were found
+by reading, and three need Ali's screen to be sure. Point 1: what happens when the substation
+list in the left rail is clicked (the list shuts at once, the page jumps to Panels, a dialog
+opens, or something else)? Point 4: where "SEL-2731-EXT and SEL-2731" stood (the Library table,
+one row with id SEL-2730M-EXT beside model SEL-2730M; two rows with one model; the picker on
+Parts)? Point 5: where a monitor or a KVM showed SFPs (the "Link to the L2 switch" line on its
+Parts row; Panels › Ports; the BOM in Preview), and which library holds the KVM part, since the
+shipped one has none?
+
+**Q76 — SFPs of an L1 switch the sizing picks** (M86). *Open.* (a) The row shows the SFP rows of
+the picked switch, and *Pin this switch* makes them editable (recommended: no model change; a
+pinned L1 no longer changes when the IED count does). (b) SFP choices are allowed on an L1 row
+with no part and follow whichever switch the sizing picks (a model change, larger).
+
+**Q77 — A typed SFP quantity** (M87). *Open.* (a) The engineer types the total; it is stored as the
+spare it implies and never goes below the links (recommended: an SFP per link is the least that
+works on site). (b) Keep Spare and Extra, as plain inputs. (c) Allow a total below the links,
+as a risky override with a reason (ADR 0040).
+
+**Q78 — Which rows have a link to the L2 switch** (M89). *Open.* (a) Gateway, firewall, GPS clock,
+RTAC, workstation, RedBox, media converter, EXT switch, I/O chassis and KVM; none for a monitor,
+keyboard, annunciator, console or patch panel (recommended). (b) Only the first seven, the
+categories a new row is seeded for.
+
+**Q79 — The media a new workstation row is linked with** (M89). *Open.* A new operator workstation,
+engineering workstation or DA server row is seeded 1 x 1G MM, so each adds a fibre SFP to the L2
+switch; the M31 design left this for Ali to confirm. (a) RJ45, no SFP (recommended: the library's
+workstations list no fibre port). (b) Keep MM.
+
+**Q80 — Parts that are the same orderable item** (M93). *Open.* (a) Keep the parts that are one
+item copied per role, show each once (M83, M84), and retire the 7 true duplicates with a
+successor once research confirms them (recommended). (b) Merge the role copies into one part
+and move the role's values to the equipment row (a large change with its own ADR; it touches
+ADRs 0017, 0024 and 0030). (c) Leave the data as it is and only change the lists.
+
+**Q81 — Where a monitor and a keyboard go** (M94). *Open, to confirm first.* If the layout does
+place them as 0 U units in a PSA cabinet: (a) they stay with the workstation console, out of the
+generated cabinets (recommended). (b) They become loose material. (c) Keep today's placement.
