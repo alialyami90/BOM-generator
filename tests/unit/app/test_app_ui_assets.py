@@ -1362,3 +1362,26 @@ def test_m89_the_ports_tab_offers_an_allocation_only_where_the_page_says() -> No
     assert "const link = row.l2 || {};" in js
     assert "speed: link.speed || '1G', media: link.media || 'MM'" in js
     assert "row.l2.speed" not in js
+
+
+def test_m90_a_parts_row_draws_only_the_controls_the_page_offers() -> None:
+    """Plan M90: the API decides which controls a row has (``ab``, ``placement``,
+    ``bom_text``, ``cable_manager``, ``alarm``); the screen draws only what it is sent
+    and never decides by role or height itself."""
+    js = PARTS.read_text(encoding="utf-8")
+    row = js[js.index("function partRow(p, r, last)") : js.index("function pickButton(")]
+    assert "${empty || !r.ab ? '' : `<label class=\"check prow-ab\">" in row
+    assert "${r.alarm ? `<label" in row
+    fresh = js[js.index("function freshRow(p, d, j)") : js.index("function setupCard(")]
+    assert '${opts.length && d.ab ? `<label class="check prow-ab">' in fresh
+    place = js[js.index("function placeRow(p, r)") : js.index("function partRow(")]
+    assert "if (!r.part_id || !r.placement) return '';" in place
+    text = js[js.index("function bomText(r)") : js.index("const PRIORITIES")]
+    assert "if (!r.part_id || !r.bom_text) return '';" in text
+    # a choice written on a 0 U part still shows, with what the BOM does with it
+    assert "r.cable_manager.zero_u" in row
+    assert "0 U: none in the BOM" in row
+    assert "This part is 0 U, so the BOM has no cable manager for it." in row
+    # the rules stay in the API
+    assert "'annunciator'" not in js
+    assert "height_u" not in row

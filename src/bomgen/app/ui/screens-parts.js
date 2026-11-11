@@ -241,7 +241,7 @@
   /* M59: purpose, tag, type code, first number and HWIO points the layout copies onto the row; the
      placeholders are what the engine generates. The duplicate-tag check shows on the row. */
   function bomText(r) {
-    if (!r.part_id) return '';
+    if (!r.part_id || !r.bom_text) return '';  /* M90: none of it reaches an annunciator's loose item */
     const k = (f) => `e.${r.index}.${f}`, open = UI.bomText.has(r.index) || BOM_TEXT.some(([f]) => PF.errors[k(f)]);
     const set = BOM_TEXT.filter(([f]) => shown(k(f)) !== '');
     const summary = set.length ? set.map(([f, label]) => `${label} ${shown(k(f))}`).join(' · ') : r.tags[0] || 'As generated';
@@ -253,7 +253,7 @@
      M76: the row's rack priority, the category's when Automatic (spec "Where in the panel"). */
   const PRIORITIES = [['1', '1 Top, with the time server'], ['2', '2 With the network devices'], ['3', '3 With the servers and workstations'], ['4', '4 With the rest']];
   function placeRow(p, r) {
-    if (!r.part_id) return '';
+    if (!r.part_id || !r.placement) return '';  /* M90: an annunciator is loose material, never racked */
     const pk = `e.${r.index}.priority`, auto = PRIORITIES[r.placement.default_priority - 1][1].replace(/^\d /, '');
     const prio = `<span class="prow-sub-what">Rack priority</span>${mark(pk, select(`p-${pk}`, [['', `Automatic: ${auto.toLowerCase()}`], ...PRIORITIES], shown(pk)).replace('<select ', `<select aria-label="Rack priority of ${esc(r.label)}" `))}`;
     const line = `<div class="prow-sub prow-link prow-place">${prio}</div>${err(pk)}`;
@@ -271,9 +271,9 @@
       <div class="prow-top">
         <span class="prow-role">${changed ? '<span class="chg-dot" aria-hidden="true"></span><span class="sr-only">changed, </span>' : ''}${esc(r.label)} <span class="muted small mono">${esc(r.id)}</span></span>
         <span class="sp"></span>
-        ${r.cable_manager ? `<label class="switch prow-cm" title="${r.cable_manager.default ? 'On by default for this part' : 'Off by default for this part'}"><input type="checkbox" id="p-${cm}" ${shown(cm) === 'true' ? 'checked' : ''} data-dirty="1">Cable manager</label>` : ''}
+        ${r.cable_manager ? `<label class="switch prow-cm" title="${r.cable_manager.zero_u ? 'This part is 0 U, so the BOM has no cable manager for it.' : r.cable_manager.default ? 'On by default for this part' : 'Off by default for this part'}"><input type="checkbox" id="p-${cm}" ${shown(cm) === 'true' ? 'checked' : ''} data-dirty="1">Cable manager</label>${r.cable_manager.zero_u ? '<span class="muted small">0 U: none in the BOM</span>' : ''}` : ''}
         ${r.alarm ? `<label class="switch prow-cm" title="The library says ${r.alarm.default ? 'on' : 'off'}. An alarm adds an auxiliary contact on the device's branch MCBs; on an AC branch it is also one HWIO point."><input type="checkbox" id="p-${al}" ${shown(al) === 'true' ? 'checked' : ''} data-dirty="1">Alarm on branch MCB trip</label>` : ''}
-        ${empty ? '' : `<label class="check prow-ab"><input type="checkbox" id="p-${ab}" ${shown(ab) === 'true' ? 'checked' : ''} data-dirty="1"> A and B</label>`}
+        ${empty || !r.ab ? '' : `<label class="check prow-ab"><input type="checkbox" id="p-${ab}" ${shown(ab) === 'true' ? 'checked' : ''} data-dirty="1"> A and B</label>`}
         <div class="prow-menu-wrap"><button class="btn btn--ghost btn--icon btn--sm" data-action="pp-menu" data-i="${r.index}" aria-haspopup="menu" aria-expanded="${UI.menu === r.index}" aria-label="More for ${esc(r.label)}" ${dirty ? 'disabled title="Save or discard the changes first"' : ''}>${icon('dots')}</button>
           ${UI.menu === r.index ? `<div class="menu" role="menu" style="right:0;top:34px"><button role="menuitem" data-action="pp-move" data-i="${r.index}" data-d="-1" ${r.index === 0 ? 'disabled' : ''}>Move up</button><button role="menuitem" data-action="pp-move" data-i="${r.index}" data-d="1" ${last ? 'disabled' : ''}>Move down</button>${fixed ? '' : `<hr><button role="menuitem" class="danger" data-action="pp-remove" data-i="${r.index}">${icon('trash')}Remove</button>`}</div>` : ''}</div>
       </div>
@@ -372,7 +372,7 @@
       : usePicker(opts, own) ? `<div class="prow-partwrap">${pickButton(`pn-part-${j}`, d.category, d.label, d.part_id, picked ? partText(picked) : l1 ? 'The sizing picks the switch' : 'Pick a part', { first: l1, title: picked ? partText(picked) : '', unset: !d.part_id, fresh: j })}</div>`
       : `<select class="select prow-part" id="pn-part-${j}" data-fresh="${j}" aria-label="Part for ${esc(d.label)}">${l1 ? `<option value="" ${!d.part_id ? 'selected' : ''}>The sizing picks the switch</option>` : `<option value="" ${!d.part_id ? 'selected' : ''}>Pick a part</option>`}${own.map((o) => `<option value="${esc(o.part_id)}" ${o.part_id === d.part_id ? 'selected' : ''}>${esc(partText(o))}</option>`).join('')}</select>`;
     return `<div class="prow" role="group" aria-label="${esc(d.label)}"><div class="prow-top"><span class="prow-role">${esc(d.label)}</span><span class="sp"></span>
-        ${opts.length ? `<label class="check prow-ab"><input type="checkbox" data-fresh-ab="${j}" ${d.redundant ? 'checked' : ''}> A and B</label>` : ''}</div>
+        ${opts.length && d.ab ? `<label class="check prow-ab"><input type="checkbox" data-fresh-ab="${j}" ${d.redundant ? 'checked' : ''}> A and B</label>` : ''}</div>
       <div class="prow-fields">${ctl}</div></div>`;
   }
   function setupCard(p, rows) {

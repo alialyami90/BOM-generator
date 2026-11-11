@@ -114,6 +114,7 @@ A milestone with several modules may group them in a subfolder,
 | `test_revision_marks.py` | M79 | rows marked as revised: highlighted on their sheet, the change list before issuing, recorded with the issue and cleared |
 | `app/test_app_part_choices.py` | M83 | the parts a Parts row offers: its role's level for a switch, the alternatives of its own part only, no obsolete part, its current part always, the whole category still searchable, Add a device's switch list, and the choices that share a make and model in the shipped library |
 | `app/test_app_l2_link_rows.py` | M89 | which Parts rows have a link to the L2 switch: none for a monitor, a keyboard or a KVM with no network port; one for a part that lists a network port, the I/O chassis and the EXT switch; a written link always shown |
+| `app/test_app_parts_row_controls.py` | M90 | the controls a Parts row offers: no cable manager on a 0 U part unless one is written, its height override deciding; no A and B box on the L1 and L2 rows; no A and B, panel, rack priority, BOM text or alarm on an annunciator row; the alarm from the row's supply overrides |
 
 `builders.py`, `engine/engine_factories.py`, `project_store/project_builders.py`
 and `writer/writer_helpers.py` hold the small builders those tests share.
