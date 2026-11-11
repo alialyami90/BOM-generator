@@ -1158,3 +1158,21 @@ def test_choosing_in_a_select_runs_its_action_once(tmp_path: Path) -> None:
 
 def test_clicking_a_button_still_runs_its_action(tmp_path: Path) -> None:
     assert _actions_run("BUTTON", "theme", "click", tmp_path) == ["theme"]
+
+
+def test_the_part_picker_offers_the_rows_own_choices_by_make_and_model() -> None:
+    # plan M83, Q74 (a), Q82: the row's own list, named by make and model, Search all parts.
+    js = (UI_DIR / "screens-parts.js").read_text(encoding="utf-8")
+    assert "const nameOf = (o) => [o.make, o.model].filter(Boolean).join(' ') || o.part_id;" in js
+    assert "`${TIER[o.tier]}-tier alternative to ${nameOf(o.replaces)}`" in js
+    assert "${esc(o.part_id)}${o.make" not in js  # the library id is not the name
+    assert '<span class="mono">${esc(o.part_id)}' not in js
+    assert "own = r.choices" in js
+    assert "own = d.choices" in js
+    assert "p.parts.rows[+btn.dataset.row].choices" in js
+    assert "'Search all parts'" in js
+    assert "wide ? all : own" in js
+    assert "wide ? o.level : ''" in js  # the whole list tells two RST-2228 apart by level
+    # Add a device: the API gives the role and the parts (a Switch makes an EXT switch)
+    assert "opts = c.choices" in js
+    assert "ROLE_OF" not in js

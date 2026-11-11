@@ -1395,7 +1395,13 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   select runs its action on `change` only. First see it in the installed app, then a test that the
   click handler skips selects. Acceptance: the list opens and stays open on every page; choosing a
   substation switches once. Size S.
-- **M83 — The picker offers the parts that fit the row.** *`parts-network`; Q74.* Points 3 and 6.
+- **M83 — The picker offers the parts that fit the row.** *`parts-network`; Q74.* **Done.**
+  `parts.row_choices` is the rule; each row, default row and *Add a device* category carries its
+  own `choices`, and `options` stays the whole category for *Search all parts*, where a switch
+  also says its level. With the shipped library the L1 row offers 9 switches, the L2 row 10 and
+  the EXT row 7. The double count below is real (confirmed on a copy of `examples/`: an L1 part
+  on the L2 row adds 38 SFPs over both panels) and is not fixed here: the generated port plans
+  are keyed by part id in `engine/layout.py`. Points 3 and 6.
   Cause: `app/parts.py` builds the choices per category, not per row, with no role, level, group or
   state filter, and the picker (`screens-parts.js` `openPicker`) labels nothing as an alternative.
   On the L1 row 17 of the 26 offered switches are refused by the loader, which wants an L1 part

@@ -112,6 +112,7 @@ A milestone with several modules may group them in a subfolder,
 | `sheets/test_ied_sheet.py` | M80 | the optional IED Schedule sheet: one row per schedule row and port need, side ports as formulas, totals per speed, media and landing |
 | `test_pdf.py` | M78 | PDF export (ADR 0039): the built-in renderer's pages, paper, headers, repeated title rows and hidden columns, chosen sheets, and the Excel script and its refusals |
 | `test_revision_marks.py` | M79 | rows marked as revised: highlighted on their sheet, the change list before issuing, recorded with the issue and cleared |
+| `app/test_app_part_choices.py` | M83 | the parts a Parts row offers: its role's level for a switch, the alternatives of its own part only, no obsolete part, its current part always, the whole category still searchable, Add a device's switch list, and the choices that share a make and model in the shipped library |
 
 `builders.py`, `engine/engine_factories.py`, `project_store/project_builders.py`
 and `writer/writer_helpers.py` hold the small builders those tests share.
