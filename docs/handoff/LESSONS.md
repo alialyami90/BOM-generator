@@ -139,6 +139,12 @@ replaced entry "superseded by …".
   `CHANGELOG.md`, `docs/handoff/` and `docs/plan.md` (`CLAUDE.md` "Agents"). This removes the
   changelog and checkpoint conflicts of the five-workstream rounds. An agent cannot ask Ali or
   another agent anything, so a rule that says "ask Ali on a card" means the lead asks.
+- **Only the project's agents run, one instance each (Ali, 2026-11-12).** A hook
+  (`.claude/hooks/agent_guard.py`) refuses a second running instance of an agent and sends a
+  built-in agent or the Workflow tool to Ali's prompt, for one call (`CLAUDE.md` "Agents"). It
+  cannot stop a message that resumes a finished agent while a new instance of it runs: do not send
+  one. If an agent was stopped and still counts as running, its marker is in the folder the
+  refusal names.
 
 ### Reviewing a PR
 

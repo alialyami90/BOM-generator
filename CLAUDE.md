@@ -179,6 +179,13 @@ The main session is the lead developer and orchestrator; there is no lead agent.
 Each agent file lists what that agent owns. A small change, or work in the lead's own areas,
 needs no agent.
 
+The lead runs only the agents in `.claude/agents/`, and one instance of each at a time;
+different agents may run together. It does not start a built-in agent (Explore, Plan,
+general-purpose, a fork and the like) or the Workflow tool: when one is needed it tells Ali why,
+and Ali allows that one call at the prompt. It adds, renames or removes an agent file only when
+Ali asks. `.claude/hooks/agent_guard.py`, wired in `.claude/settings.json`, enforces the running
+rules.
+
 ### Dispatched agents
 
 Rules for an agent the lead dispatched. Your own file adds the rules of your area.
