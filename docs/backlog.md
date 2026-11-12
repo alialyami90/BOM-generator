@@ -12,11 +12,11 @@ before it was planned; the causes, the checks that were run and the open questio
 | # | Point (Ali) | Milestone | Status |
 | --- | --- | --- | --- |
 | 1 | "Bug when opening substations dropdown menu." | M82 | Done on main (#397). Ali to confirm in the next release. |
-| 2 | "I still cant override or select the SFP quantity." | M85, M86, M87, M88 | M85 done on main (#398, psa-devices 1.18.0); the rest planned. Four causes: no SFP rows on an L1 switch left to the sizing; 23 of the 27 SFP parts can never be chosen; the quantity is display-only; no SFP rows on a firewall or EXT switch. |
+| 2 | "I still cant override or select the SFP quantity." | M85, M86, M87, M88 | M85, M86 and M87 done on main (#398, #403, #408; psa-devices 1.18.0); M88 waits for ADR 0041. Four causes: no SFP rows on an L1 switch left to the sizing; 23 of the 27 SFP parts can never be chosen; the quantity is display-only; no SFP rows on a firewall or EXT switch. |
 | 3 | "In the library you are listing devices along with their alternatives ... it should just show the applicable alts." | M83, M84 | Done on main (#399, #400), on Q74's recommended answer. The picker listed a whole category for every row: 26 switches on each switch row, 12 of them alternatives of another switch. |
 | 4 | "The library list should remove duplicates. Example SEL-2731-EXT and SEL-2731 are same device." | M84, M93 | M84 done on main (#400): a part is named by its make and model, not its id (Q82). M93 planned (Q80). No SEL-2731 exists; 7 groups of true duplicates and 12 groups of one item copied per role were found. |
-| 5 | "Monitors and KVMs are showing SFPs that shouldnt be there." | M89 | Planned (Q75, Q78). Every row but the sized switches and the patch panel gets the "Link to the L2 switch" inputs, defaulting to 1G MM fibre. |
-| 6 | "Review part selection for other inconsistencies like this." | M83, M90, M91, M92, M94, M96 | M83 done on main (#399); the rest planned. The review's findings are listed under each milestone. |
+| 5 | "Monitors and KVMs are showing SFPs that shouldnt be there." | M89 | Done on main (#402 Parts, #404 Panels › Ports). Every row but the sized switches and the patch panel gets the "Link to the L2 switch" inputs, defaulting to 1G MM fibre. |
+| 6 | "Review part selection for other inconsistencies like this." | M83, M90, M91, M92, M94, M96 | M83 and M90 done on main (#399, #409); M91 is PR #411, tested and waiting to merge; M92, M94 and M96 planned. The review's findings are listed under each milestone. |
 
 ## v0.4: engineer-controlled workflow
 

@@ -1441,7 +1441,7 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   (`data/library/`, then `build.py`): each takes the speed and media of the part it replaces; a
   shipped-library test that every `sfp` part declares them. psa-devices 1.18.0, with
   `examples/project.yaml` and `release.yml`. Size S.
-- **M86 — SFP rows on every switch row.** *`parts-network`; Q76.* **Done**, on Q76's answer (a).
+- **M86 — SFP rows on every switch row.** *`parts-network`; Q76.* **Done (#403)**, on Q76's answer (a).
   `engine/network.automatic_sfp` is the one automatic pick, used by the BOM and the page; a row
   carries `pin` (the switch the sizing picked) and `sfp_reason`, an SFP row `auto`. Pinning
   writes the part through the existing endpoint. The pick rule itself is unchanged (Q83).
@@ -1454,7 +1454,7 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   on the automatic value; the automatic choice names its part. Since M85 a Cisco or Moxa switch
   picks its own make's low-tier SFP, a commercial-temperature part for some: the pick rule is
   settled here (Q83). Size S.
-- **M87 — A typed SFP quantity.** *`parts-network`; Q77.* **Done**, on Q77's answer (a). A typed
+- **M87 — A typed SFP quantity.** *`parts-network`; Q77.* **Done (#408)**, on Q77's answer (a). A typed
   total is stored as the spare it implies (`io/parts_edit.set_sfp_total`, endpoints
   `set_sfp_total` and `check_sfp_total`); Spare folds under the total, Extra stays. Two faults
   found and fixed on the way: the page counted SFPs from the layout preview, not from the
@@ -1475,7 +1475,7 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   choice from any derived part. ADR 0041 amends that rule: `sfp` on any row whose generated port
   plan has fibre. Size M. Starts after Ali accepts the ADR.
 - **M89 — The L2 link only on networked rows.** *`parts-network`, with `panel-detailing` for the
-  Ports tab; Q75, Q78, Q79.* **Done on Parts.** `io/parts_edit.has_l2_link` is the rule: a written
+  Ports tab; Q75, Q78, Q79.* **Done (#402, #404).** On Parts: `io/parts_edit.has_l2_link` is the rule: a written
   link always; never a sized switch or the patch panel; else the part's category (the seeded
   ones, the I/O chassis, an EXT switch) or a part that lists a network port. A workstation is
   seeded RJ45. The example's Parts page is unchanged. **Done on Panels › Ports** too: a port
@@ -1491,7 +1491,7 @@ One PR each, test first, golden values unchanged. Each entry names the agent tha
   no network link, so neither is in the set; a KVM part that lists a network port (an IP KVM)
   gets the inputs from its ports. Workstation rows are seeded 1G MM because the seeding never
   sets the media (Q79). Size S.
-- **M90 — A Parts row shows only what does something.** *`parts-network`.* **Done.** Each finding
+- **M90 — A Parts row shows only what does something.** *`parts-network`.* **Done (#409).** Each finding
   was confirmed by a build before it was fixed, in the API: the cable manager toggle follows
   the row's height after its own override (`zero_u` marks a written choice on a 0 U part);
   `offers_ab` says whether a row has the A and B box; an annunciator row's `placement`,
@@ -1548,7 +1548,7 @@ Found on 2026-11-11, the first run of the gate on Windows (Ali's PC, Python 3.13
 runs pytest on Linux only, and "Build Windows installer" smoke-tests the frozen app without
 running the tests, so the suite had never run on the one system the app ships for.
 
-- **M95 — Triage the 16 failures, then run pytest on Windows in CI.** *Lead.* **Tests done:** twelve
+- **M95 — Triage the 16 failures, then run pytest on Windows in CI.** *Lead.* **Done (#405, #406, #407).** Tests: twelve
   of the sixteen were faults of the tests and pass or skip with a reason on Windows; a plugin,
   `tests/per_user_folders.py`, points every test's per-user folders at a temp folder. **App
   faults done** (`setup-design-basis`): replacing a project folder that Windows will not rename
@@ -2158,3 +2158,18 @@ panel row.
 *Add allocation* only to a device with a link to the L2 switch or a written plan, so the fibre
 patch panel no longer gets it. (a) Leave it: it has no link and no SFPs to plan (recommended).
 (b) Offer it again, as an exception for the patch panel.
+
+**Q90 — How many time server rows a substation has** (M91). *Open.* The page's accessory sub-row
+assumes one time server, so *Add a device* offers the role only while no clock row exists; the
+model itself takes any number. (a) One; a redundant clock is the A and B box (recommended,
+built). (b) Offer it always and make the accessory sub-row work per row.
+
+**Q91 — Where a row added back by role goes** (M91). *Open.* *Add a device* appends at the end,
+and the equipment order is the layout's fill order, so a time server added back stacks after the
+other rows until *Move up* is used. (a) At the end, as now (recommended: one simple rule).
+(b) At its default-row position.
+
+**Q92 — The plain Workstation entry in Add a device** (M91). *Open.* It adds a computer with role
+`other`, tagged with the library part's own type code (SRV/OAS/EAS on psa-devices). (a) Keep it,
+for a fourth computer (recommended). (b) Rename it "Other workstation". (c) Remove it, so every
+computer has a role.
