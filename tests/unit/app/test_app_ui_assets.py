@@ -1450,3 +1450,27 @@ def test_m90_a_parts_row_draws_only_the_controls_the_page_offers() -> None:
     # the rules stay in the API
     assert "'annunciator'" not in js
     assert "height_u" not in row
+
+
+def test_m91_add_a_device_draws_the_entries_the_page_offers() -> None:
+    """Plan M91: the API lists Add a device's entries, by role then by category; several
+    share a category (the workstations), so the menu and the dialog name an entry by its
+    place. The row takes the entry's role and, for a role, the set-up card's id; the
+    dialog offers A and B only where the entry does."""
+    js = PARTS.read_text(encoding="utf-8")
+    menu = js[js.index("function addDevice(p)") : js.index("let goRow = null;")]
+    assert "p.parts.add_categories.map((c, i) =>" in menu
+    assert 'data-action="pp-add-cat" data-i="${i}"' in menu
+    assert "${n ? '' : `disabled title=\"The library has no ${esc(c.label)} parts yet.\"`}" in menu
+    add = js[js.index("ACTIONS['pp-add-cat'] = ") : js.index("const looseReply = ")]
+    assert "add_categories.find(" not in add
+    assert "c = p.parts.add_categories[+el.dataset.i]" in add
+    assert (
+        '${c.ab ? \'<label class="check"><input type="checkbox" id="pa-red">'
+        "A and B units (redundant)</label>' : ''}" in add
+    )
+    assert 'data-action="pp-add-do" data-i="${+el.dataset.i}"' in add
+    assert "const base = c.id || part.toLowerCase()" in add
+    assert "role: c.role };" in add
+    assert "if (c.ab && v('pa-red').checked) row.redundant = true;" in add
+    assert "time_server" not in js  # which roles are offered is the API's rule

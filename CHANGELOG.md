@@ -40,6 +40,11 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- *Add a device* on Parts offers each role a new substation starts with (M91): Time server (while
+  there is none), Operator and Engineering workstation, DA server, KVM, Console and Annunciator,
+  then the categories as before. A removed default row can so be added back. An added
+  workstation keeps its role, so its tag reads OWS, EWS or SRV, and an added row is the one the
+  set-up card writes. The dialog offers A and B units only where the row does.
 - A Parts row offers only the controls that change the BOM (M90): no cable manager on a 0 U part
   (one written in the file still shows, with "none in the BOM"); no A and B box on the L1 and L2
   rows, where unticking it was always an error; no A and B, panel, rack priority, BOM text or
